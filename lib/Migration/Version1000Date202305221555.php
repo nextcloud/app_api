@@ -61,8 +61,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 			]);
 
-			$table->setPrimaryKey(['appid', 'configkey']);
-			$table->addIndex(['configkey']);
+			$table->setPrimaryKey(['appid', 'configkey'], 'appconfig_ex_pk');
+			$table->addIndex(['configkey'], 'appconfig_ex_configkey');
 		}
 
 		if (!$schema->hasTable('ex_apps')) {
@@ -100,9 +100,9 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 			]);
 
-			$table->setPrimaryKey(['id']);
-			$table->addIndex(['appid']);
-			$table->addIndex(['name']);
+			$table->setPrimaryKey(['id'], 'ex_apps_id__key');
+			$table->addIndex(['appid'], 'ex_apps_appid__index');
+			$table->addIndex(['name'], 'ex_apps_name__index');
 		}
 
 		if (!$schema->hasTable('preferences_ex')) {
@@ -124,11 +124,9 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true
 			]);
 
-			$table->setPrimaryKey(['userid']);
-			$table->setPrimaryKey(['appid']);
-			$table->setPrimaryKey(['configkey']);
-			$table->addIndex(['appid']);
-			$table->addIndex(['configkey']);
+			$table->setPrimaryKey(['userid', 'appid', 'configkey'], 'preferences_ex_pk');
+			$table->addIndex(['appid'], 'preferences_ex_appid');
+			$table->addIndex(['configkey'], 'preferences_ex_configkey');
 		}
 
 		if (!$schema->hasTable('ex_files_actions_menu')) {
@@ -170,8 +168,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'length' => 64
 			]);
 
-			$table->setPrimaryKey(['appid']);
-			$table->addIndex(['name']);
+			$table->setPrimaryKey(['appid'], 'ex_files_actions_menu_appid');
+			$table->addIndex(['name'], 'ex_files_actions_menu_name');
 		}
 
 		return $schema;
