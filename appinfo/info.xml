@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<info>
+	<id>app_ecosystem_v2</id>
+	<name>App Ecosystem V2</name>
+	<summary>Nextcloud App Ecosystem V2 integration</summary>
+	<description>
+	<![CDATA[Nextcloud App Ecosystem V2 provides a new API for external apps on different programming languages]]>
+	</description>
+	<version>1.0.0</version>
+	<licence>agpl</licence>
+	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
+	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
+	<namespace>AppEcosystemV2</namespace>
+	<documentation>
+		<developer>https://github.com/nextcloud/app_ecosystem_v2</developer>
+	</documentation>
+	<category>integration</category>
+	<website>https://github.com/nextcloud/app_ecosystem_v2</website>
+	<bugs>https://github.com/nextcloud/app_ecosystem_v2/issues</bugs>
+	<repository type="git">https://github.com/nextcloud/app_ecosystem_v2.git</repository>
+	<dependencies>
+		<nextcloud min-version="26" max-version="28"/>
+	</dependencies>
+	<settings>
+		<admin>OCA\AppEcosystemV2\Settings\Admin</admin>
+		<admin-section>OCA\AppEcosystemV2\Settings\AdminSection</admin-section>
+	</settings>
+</info>
