@@ -37,38 +37,38 @@ return [
 		// Ex Apps registration
 		['name' => 'api#registerExternalApp', 'url' => '/api/v1/register-ex-app', 'verb' => 'POST'],
 		['name' => 'api#unregisterExternalApp', 'url' => '/api/v1/unregister-app', 'verb' => 'DELETE'],
-		['name' => 'api#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'GET'],
+		['name' => 'api#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
 
 		// File Actions Menu
-		['name' => 'api#registerFileActionMenu', 'url' => '/api/v1/register-file-action-menu', 'POST'],
+		['name' => 'api#registerFileActionMenu', 'url' => '/api/v1/register-file-action-menu', 'verb' => 'POST'],
 
 		// Notifications
-		['name' => 'api#sendNotification', 'url' => '/api/v1/send-notification', 'POST'],
+		['name' => 'api#sendNotification', 'url' => '/api/v1/send-notification', 'verb' => 'POST'],
 
 		// Unified search
-		['name' => 'api#registerSearchProvider', 'url' => '/api/v1/register-search-provider', 'POST'],
+		['name' => 'api#registerSearchProvider', 'url' => '/api/v1/register-search-provider', 'verb' => 'POST'],
 
 		// Background jobs
-		['name' => 'api#registerBackgroundJob', 'url' => '/api/v1/register-background-job', 'POST'],
+		['name' => 'api#registerBackgroundJob', 'url' => '/api/v1/register-background-job', 'verb' => 'POST'],
 
 		// Storage API (preferences)
-		['name' => 'api#setAppConfigValue', 'url' => '/api/v1/set-app-config-value', 'POST'],
-		['name' => 'api#getAppConfigValue', 'url' => '/api/v1/get-app-config-value', 'GET'],
-		['name' => 'api#setUserConfigValue', 'url' => '/api/v1/set-user-config-value', 'POST'],
-		['name' => 'api#getUserConfigValue', 'url' => '/api/v1/get-user-config-value', 'GET'],
+		['name' => 'api#setAppConfigValue', 'url' => '/api/v1/set-app-config-value', 'verb' => 'POST'],
+		['name' => 'api#getAppConfigValue', 'url' => '/api/v1/get-app-config-value', 'verb' => 'GET'],
+		['name' => 'api#setUserConfigValue', 'url' => '/api/v1/set-user-config-value', 'verb' => 'POST'],
+		['name' => 'api#getUserConfigValue', 'url' => '/api/v1/get-user-config-value', 'verb' => 'GET'],
 
 		// Settings API (admin/user settings registration)
-		['name' => 'api#registerSettingsPage', 'url' => '/api/v1/register-settings-page', 'POST'],
-		['name' => 'api#registerSettingsSection', 'url' => '/api/v1/register-settings-section', 'POST'],
+		['name' => 'api#registerSettingsPage', 'url' => '/api/v1/register-settings-page', 'verb' => 'POST'],
+		['name' => 'api#registerSettingsSection', 'url' => '/api/v1/register-settings-section', 'verb' => 'POST'],
 
 		// Event listeners
-		['name' => 'api#registerEventListener', 'url' => '/api/v1/register-event-listener', 'POST'],
+		['name' => 'api#registerEventListener', 'url' => '/api/v1/register-event-listener', 'verb' => 'POST'],
 
 		// Dashboard widgets
-		['name' => 'api#registerDashboardWidget', 'url' => '/api/v1/register-dashboard-widget', 'POST'],
+		['name' => 'api#registerDashboardWidget', 'url' => '/api/v1/register-dashboard-widget', 'verb' => 'POST'],
 	],
 	'ocs' => [
 		// Logging
-		['name' => 'ocsApi#log', 'url' => '/api/v1/log', 'POST'],
+		['name' => 'ocsApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
 	],
 ];
