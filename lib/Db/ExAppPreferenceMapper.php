@@ -36,29 +36,9 @@ use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-
-class ExAppSettingMapper extends QBMapper {
+class ExAppPreferenceMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'preferences_ex');
-	}
-
-	/**
-	 * @param int $id
-	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
-	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppSetting
-	 */
-	public function find(int $id): Entity {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
-		return $this->findEntity($qb);
 	}
 
 	public function findAll(int $limit = null, int $offset = null): array {

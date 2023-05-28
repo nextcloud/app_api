@@ -35,81 +35,42 @@ use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Class ExApp
+ * Class ExAppConfig
  *
  * @package OCA\AppEcosystemV2\Db
  *
- * @method string getAppId()
- * @method string getVersion()
- * @method string getName()
- * @method string getConfig()
- * @method string getSecret()
- * @method string getStatus()
- * @method string getCreatedTime()
- * @method string getLastResponseTime()
- * @method void setAppId(string $appId)
- * @method void setVersion(string $version)
- * @method void setName(string $name)
- * @method void setConfig(string $config)
- * @method void setSecret(string $secret)
- * @method void setStatus(string $status)
- * @method void setCreatedTime(string $createdTime)
- * @method void setLastResponseTime(string $lastResponseTime)
+ * @method string getAppid()
+ * @method string getConfigkey()
+ * @method string getConfigvalue()
+ * @method void setAppid(string $appId)
+ * @method void setConfigKey(string $configKey)
+ * @method void setConfigValue(string $configValue)
  */
-class ExApp extends Entity implements JsonSerializable {
+class ExAppConfig extends Entity implements JsonSerializable {
 	protected $appid;
-	protected $version;
-	protected $name;
-	protected $config;
-	protected $secret;
-	protected $status;
-	protected $createdTime;
-	protected $lastResponseTime;
+	protected $configkey;
+	protected $configvalue;
 
 	/**
 	 * @param array $params
 	 */
 	public function __construct(array $params = []) {
-		if (isset($params['id'])) {
-			$this->setId($params['id']);
-		}
 		if (isset($params['appid'])) {
-			$this->setAppId($params['appid']);
+			$this->setAppid($params['appid']);
 		}
-		if (isset($params['version'])) {
-			$this->setVersion($params['version']);
+		if (isset($params['configkey'])) {
+			$this->setConfigkey($params['configkey']);
 		}
-		if (isset($params['name'])) {
-			$this->setName($params['name']);
-		}
-		if (isset($params['config'])) {
-			$this->setConfig($params['config']);
-		}
-		if (isset($params['secret'])) {
-			$this->setSecret($params['secret']);
-		}
-		if (isset($params['status'])) {
-			$this->setStatus($params['status']);
-		}
-		if (isset($params['created_time'])) {
-			$this->setCreatedTime($params['created_time']);
-		}
-		if (isset($params['last_response_time'])) {
-			$this->setLastResponseTime($params['last_response_time']);
+		if (isset($params['configvalue'])) {
+			$this->setConfigvalue($params['configvalue']);
 		}
 	}
 
 	public function jsonSerialize(): array {
 		return [
-			'id' => $this->getId(),
-			'app_id' => $this->getAppId(),
-			'version' => $this->getVersion(),
-			'name'=> $this->getName(),
-			'config' => $this->getConfig(),
-			'secret' => $this->getSecret(),
-			'status' => $this->getStatus(),
-			'created_time' => $this->getCreatedTime(),
-			'last_response_time' => $this->getLastResponseTime(),
+			'appid' => $this->getAppid(),
+			'configkey' => $this->getConfigkey(),
+			'configvalue' => $this->getConfigvalue(),
 		];
 	}
 }

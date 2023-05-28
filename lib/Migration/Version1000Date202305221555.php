@@ -68,10 +68,6 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps')) {
 			$table = $schema->createTable('ex_apps');
 
-			$table->addColumn('id', 'integer', [
-				'autoincrement' => true,
-				'notnull' => true,
-			]);
 			$table->addColumn('appid', 'string', [
 				'notnull' => true,
 				'length' => 32
@@ -100,7 +96,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 			]);
 
-			$table->setPrimaryKey(['id'], 'ex_apps_id__key');
+			$table->setPrimaryKey(['appid'], 'ex_apps_id__key');
 			$table->addIndex(['appid'], 'ex_apps_appid__index');
 			$table->addIndex(['name'], 'ex_apps_name__index');
 		}

@@ -31,16 +31,23 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCP\Http\Client\IClient;
-use OCP\Http\Client\IClientService;
-use OCP\IConfig;
+use Psr\Log\LoggerInterface;
 
+use OCP\IConfig;
+use OCP\Http\Client\IClientService;
+use OCP\Http\Client\IClient;
+
+use OCP\AppFramework\Db\Entity;
+use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppMapper;
+use OCP\AppFramework\Db\DoesNotExistException;
 
 class AppEcosystemV2Service {
 	/** @var IConfig */
 	private $config;
+
+	/** @var LoggerInterface */
+	private $logger;
 
 	/** @var IClient */
 	private $client;
@@ -50,14 +57,24 @@ class AppEcosystemV2Service {
 
 	public function __construct(
 		IConfig $config,
+		LoggerInterface $logger,
 		IClientService $clientService,
 		ExAppMapper $exAppMapper,
 	) {
 		$this->config = $config;
+		$this->logger = $logger;
 		$this->client = $clientService->newClient();
 		$this->exAppMapper = $exAppMapper;
 	}
-	
+
+	public function getExApp(string $exAppId): ?Entity {
+		try {
+			return $this->exAppMapper->findByAppId($exAppId);
+		} catch (DoesNotExistException) {
+			return null;
+		}
+	}
+
 	public function detectDefaultExApp() {
 		// TODO: Check default ex app host and port connection and register it if not exists yet
 		$protocol = 'https';
@@ -66,9 +83,10 @@ class AppEcosystemV2Service {
 		$exAppUrl = $protocol . '://' . $host . ':' . $port;
 		$result = $this->checkExAppConnection($exAppUrl);
 		if ($result) {
-			$this->registerExApp([
-				'name' => 'Default Ex App',
+			$this->registerExApp($result['appid'] ?? '', [
 				'appid' => $result['appid'] ?? '',
+				'version' => $result['version'] ?? '',
+				'name' => 'Default Ex App',
 				'config' => [
 					'protocol' => $protocol,
 					'host' => $host,
@@ -100,25 +118,68 @@ class AppEcosystemV2Service {
 		return false;
 	}
 
-	public function registerExApp(array $params) {
-		return $this->exAppMapper->insert(new ExApp([
-			'name' => $params['name'],
-			'appid' => $params['appid'],
-			'config' => $params['config'],
-			'secret' => $params['secret'],
-			'status' => $params['status'],
-			'created_time' => $params['created_time'],
-			'last_response_time' => $params['last_response_time'],
-		]));
+	public function registerExApp(string $appId, array $appData) {
+		try {
+			$exApp = $this->exAppMapper->findByAppId($appId);
+			if ($exApp !== null) {
+				$exApp->setVersion($appData['version']);
+				$exApp->setName($appData['name']);
+				$exApp->setConfig($appData['config']);
+				$exApp->setSecret($appData['secret']); // TODO: Implement secret generation and verification
+				$exApp->setStatus($appData['status']);
+				$exApp->setLastResponseTime(time());
+				try {
+					$exApp = $this->exAppMapper->update($exApp);
+				} catch (\Exception $e) {
+					$this->logger->error('Error while updating ex app: ' . $e->getMessage());
+					return false;
+				}
+			}
+		} catch (DoesNotExistException) {
+			$exApp = new ExApp();
+			$exApp->setAppId($appId);
+			$exApp->setVersion($appData['version']);
+			$exApp->setName($appData['name']);
+			$exApp->setConfig($appData['config']);
+			$exApp->setSecret($appData['secret']); // TODO: Implement secret generation and verification
+			$exApp->setStatus($appData['status']);
+			$exApp->setCreatedTime(time());
+			$exApp->setLastResponseTime(time());
+			try {
+				$exApp = $this->exAppMapper->insert($exApp);
+			} catch (\Exception $e) {
+				$this->logger->error('Error while registering ex app: ' . $e->getMessage());
+				return false;
+			}
+		}
 	}
 
-	public function unregisterExApp(int $id) {
-		$exApp = $this->exAppMapper->find($id);
-		return $exApp->delete();
+	/**
+	 * Unregister ex app
+	 *
+	 * @param string $appId
+	 *
+	 * @return Entity|null
+	 */
+	public function unregisterExApp(string $appId): ?Entity {
+		$exApp = $this->exAppMapper->findByAppId($appId);
+		try {
+			return $this->exAppMapper->delete($exApp);
+		} catch (\Exception $e) {
+			$this->logger->error('Error while unregistering ex app: ' . $e->getMessage());
+			return null;
+		}
 	}
 
-	// getExFilesActions
-	public function getExFilesActions() {
+	/**
+	 * Send status check request to ex app (after verify app registration)
+	 *
+	 * @param string $appId
+	 *
+	 * @return array
+	 */
+	public function getAppStatus(string $appId): array {
 		// TODO
+		return [];
 	}
 }

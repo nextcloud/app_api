@@ -33,42 +33,50 @@ return [
 	'routes' => [
 		// AppEcosystemV2 admin settings
 		['name' => 'config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
-
-		// Ex Apps registration
-		['name' => 'api#registerExternalApp', 'url' => '/api/v1/register-ex-app', 'verb' => 'POST'],
-		['name' => 'api#unregisterExternalApp', 'url' => '/api/v1/unregister-app', 'verb' => 'DELETE'],
-		['name' => 'api#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
-
-		// File Actions Menu
-		['name' => 'api#registerFileActionMenu', 'url' => '/api/v1/register-file-action-menu', 'verb' => 'POST'],
-
-		// Notifications
-		['name' => 'api#sendNotification', 'url' => '/api/v1/send-notification', 'verb' => 'POST'],
-
-		// Unified search
-		['name' => 'api#registerSearchProvider', 'url' => '/api/v1/register-search-provider', 'verb' => 'POST'],
-
-		// Background jobs
-		['name' => 'api#registerBackgroundJob', 'url' => '/api/v1/register-background-job', 'verb' => 'POST'],
-
-		// Storage API (preferences)
-		['name' => 'api#setAppConfigValue', 'url' => '/api/v1/set-app-config-value', 'verb' => 'POST'],
-		['name' => 'api#getAppConfigValue', 'url' => '/api/v1/get-app-config-value', 'verb' => 'GET'],
-		['name' => 'api#setUserConfigValue', 'url' => '/api/v1/set-user-config-value', 'verb' => 'POST'],
-		['name' => 'api#getUserConfigValue', 'url' => '/api/v1/get-user-config-value', 'verb' => 'GET'],
-
-		// Settings API (admin/user settings registration)
-		['name' => 'api#registerSettingsPage', 'url' => '/api/v1/register-settings-page', 'verb' => 'POST'],
-		['name' => 'api#registerSettingsSection', 'url' => '/api/v1/register-settings-section', 'verb' => 'POST'],
-
-		// Event listeners
-		['name' => 'api#registerEventListener', 'url' => '/api/v1/register-event-listener', 'verb' => 'POST'],
-
-		// Dashboard widgets
-		['name' => 'api#registerDashboardWidget', 'url' => '/api/v1/register-dashboard-widget', 'verb' => 'POST'],
 	],
 	'ocs' => [
 		// Logging
 		['name' => 'ocsApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
+
+		// Ex Apps registration
+		['name' => 'ocsApi#registerExternalApp', 'url' => '/api/v1/register-ex-app', 'verb' => 'POST'],
+		['name' => 'ocsApi#unregisterExternalApp', 'url' => '/api/v1/unregister-app', 'verb' => 'DELETE'],
+		['name' => 'ocsApi#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
+
+		// File Actions Menu
+		['name' => 'ocsApi#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
+		['name' => 'ocsApi#unregisterFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'DELETE'],
+		['name' => 'ocsApi#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
+
+		// Notifications
+		['name' => 'ocsApi#sendNotification', 'url' => '/api/v1/send-notification', 'verb' => 'POST'],
+
+		// Unified search
+		['name' => 'ocsApi#registerSearchProvider', 'url' => '/api/v1/register-search-provider', 'verb' => 'POST'],
+
+		// Background jobs
+		['name' => 'ocsApi#registerBackgroundJob', 'url' => '/api/v1/register-background-job', 'verb' => 'POST'],
+
+		// Storage API (preferences)
+		['name' => 'ocsApi#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
+		['name' => 'ocsApi#getAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'GET'],
+		['name' => 'ocsApi#getAppConfigKeys', 'url' => '/api/v1/ex-app/config/keys', 'verb' => 'GET'],
+		['name' => 'ocsApi#deleteAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'DELETE'],
+		['name' => 'ocsApi#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config/all', 'verb' => 'DELETE'],
+		['name' => 'ocsApi#setUserConfigValue', 'url' => '/api/v1/ex-app/config/user', 'verb' => 'POST'],
+		['name' => 'ocsApi#getUserConfigValue', 'url' => '/api/v1/ex-app/config/user', 'verb' => 'GET'],
+		['name' => 'ocsApi#getUserConfigKeys', 'url' => '/api/v1/ex-app/config/user/keys', 'verb' => 'GET'],
+		['name' => 'ocsApi#deleteUserConfigValue', 'url' => '/api/v1/ex-app/config/user', 'verb' => 'DELETE'],
+		['name' => 'ocsApi#deleteUserConfigValues', 'url' => '/api/v1/ex-app/config/user/all', 'verb' => 'DELETE'],
+
+		// Settings API (admin/user settings registration)
+		['name' => 'ocsApi#registerSettingsPage', 'url' => '/api/v1/register-settings-page', 'verb' => 'POST'],
+		['name' => 'ocsApi#registerSettingsSection', 'url' => '/api/v1/register-settings-section', 'verb' => 'POST'],
+
+		// Event listeners
+		['name' => 'ocsApi#registerEventListener', 'url' => '/api/v1/register-event-listener', 'verb' => 'POST'],
+
+		// Dashboard widgets
+		['name' => 'ocsApi#registerDashboardWidget', 'url' => '/api/v1/register-dashboard-widget', 'verb' => 'POST'],
 	],
 ];

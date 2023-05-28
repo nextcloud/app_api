@@ -35,7 +35,7 @@ use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Class ExAppSetting
+ * Class ExAppPreference
  *
  * @package OCA\AppEcosystemV2\Db
  *
@@ -48,7 +48,8 @@ use OCP\AppFramework\Db\Entity;
  * @method void setConfigKey(string $key)
  * @method void setValue(string $value)
  */
-class ExAppSetting extends Entity implements JsonSerializable {
+class ExAppPreference extends Entity implements JsonSerializable {
+	protected $userId;
 	protected $appid;
 	protected $name;
 	protected $value;

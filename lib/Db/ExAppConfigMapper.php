@@ -36,29 +36,9 @@ use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-
-class ExAppMapper extends QBMapper {
+class ExAppConfigMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_apps');
-	}
-
-	/**
-	 * @param int $id
-	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
-	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppSetting
-	 */
-	public function find(int $id): Entity {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
-		return $this->findEntity($qb);
+		parent::__construct($db, 'appconfig_ex');
 	}
 
 	public function findAll(int $limit = null, int $offset = null): array {
@@ -78,7 +58,7 @@ class ExAppMapper extends QBMapper {
 	 *
 	 * @return \OCA\AppEcosystemV2\Db\ExAppSetting
 	 */
-	public function findByAppId(string $appId): Entity {
+	public function findAllByAppId(string $appId): Entity {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
@@ -89,20 +69,52 @@ class ExAppMapper extends QBMapper {
 	}
 
 	/**
-	 * @param string $name
+	 * @param string $appId
+	 * @param string $configKey
 	 *
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
 	 * @return \OCA\AppEcosystemV2\Db\ExAppSetting
 	 */
-	public function findByName(string $name): Entity {
+	public function findByAppConfigKey(string $appId, string $configKey): Entity {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
 			->where(
-				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('configkey', $qb->createNamedParameter($configKey, IQueryBuilder::PARAM_STR))
 			);
 		return $this->findEntity($qb);
+	}
+
+	public function updateAppConfigValue(ExAppConfig $appConfigEx) {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->update($this->tableName)
+			->set('configvalue', $qb->createNamedParameter($appConfigEx->getConfigvalue(), IQueryBuilder::PARAM_STR))
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appConfigEx->getAppid(), IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('configkey', $qb->createNamedParameter($appConfigEx->getConfigkey(), IQueryBuilder::PARAM_STR))
+			)
+		->executeStatement();
+	}
+
+	public function deleteByAppidConfigkey(ExAppConfig $appConfigEx) {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appConfigEx->getAppid(), IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('configkey', $qb->createNamedParameter($appConfigEx->getConfigkey(), IQueryBuilder::PARAM_STR))
+			)
+		->executeStatement();
+	}
+
+	public function deleteAllByAppId(string $appId): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+			)
+		->executeStatement();
 	}
 }

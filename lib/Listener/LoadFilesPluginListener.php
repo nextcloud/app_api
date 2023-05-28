@@ -23,26 +23,25 @@
 namespace OCA\AppEcosystemV2\Listener;
 
 use OCP\Util;
-use OCP\IConfig;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\Services\IInitialState;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
 
 class LoadFilesPluginListener implements IEventListener {
 
 	/** @var IInitialState */
 	private $initialState;
 
-	/** @var AppEcosystemV2Service */
+	/** @var ExFilesActionsMenuService */
 	private $service;
 
 	public function __construct(
 		IInitialState $initialState,
-		AppEcosystemV2Service $service,
+		ExFilesActionsMenuService $service
 	) {
 		$this->initialState = $initialState;
 		$this->service = $service;
@@ -53,12 +52,11 @@ class LoadFilesPluginListener implements IEventListener {
 			return;
 		}
 
-		// TODO: Select registered ex_apps ex_files_actions and attach script with provided data
-		$exFilesActions = $this->service->getExFilesActions();
+		$exFilesActions = $this->service->getRegisteredFileActions();
 		if (!empty($exFilesActions)) {
-			$this->initialState->provideInitialState('ex_files_actions_menu', $exFilesActions);
+			$this->initialState->provideInitialState('ex_files_actions_menu', ['fileActions' => $exFilesActions]);
 			Util::addScript(Application::APP_ID, Application::APP_ID . '-filesplugin');
-			Util::addStyle(Application::APP_ID, 'filesplugin');
+			// Util::addStyle(Application::APP_ID, 'filesplugin');
 		}
 	}
 }

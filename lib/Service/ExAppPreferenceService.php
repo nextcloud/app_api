@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  *
  * Nextcloud - App Ecosystem V2
@@ -26,32 +29,52 @@
  *
  */
 
-namespace OCA\AppEcosystemV2\AppInfo;
+namespace OCA\AppEcosystemV2\Service;
 
-use OCP\AppFramework\App;
-use OCP\AppFramework\Bootstrap\IRegistrationContext;
-use OCP\AppFramework\Bootstrap\IBootContext;
-use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\Http\Client\IClient;
+use OCP\Http\Client\IClientService;
+use OCP\IConfig;
 
-use OCA\AppEcosystemV2\Capabilities;
-use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
-use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
+use OCP\Cache\CappedMemoryCache;
 
-class Application extends App implements IBootstrap {
-	public const APP_ID = 'app_ecosystem_v2';
+class ExAppPreferenceService {
+	/** @var IConfig */
+	private $config;
 
-	public const CACHE_TTL = 3600;
+	/** @var CappedMemoryCache */
+	private $cache;
 
-	public function __construct(array $urlParams = []) {
-		parent::__construct(self::APP_ID, $urlParams);
+	/** @var IClient */
+	private $client;
+
+	/** @var ExAppConfigMapper */
+	private $mapper;
+
+	public function __construct(
+		IConfig $config,
+		CappedMemoryCache $cache,
+		IClientService $clientService,
+		ExAppConfigMapper $mapper
+	) {
+		$this->config = $config;
+		$this->cache = $cache;
+		$this->client = $clientService->newClient();
+		$this->mapper = $mapper;
 	}
 
-	public function register(IRegistrationContext $context): void {
-		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
-		$context->registerCapability(Capabilities::class);
+	public function getAppConfigValue() {
 	}
 
-	public function boot(IBootContext $context): void {
+	public function setAppConfigValue() {
+	}
+
+	public function deleteAppConfigValue() {
+	}
+
+	public function deleteAppConfigValues() {
+	}
+
+	public function getAppConfigKeys() {
 	}
 }
-

@@ -39,7 +39,7 @@ use OCP\AppFramework\Db\Entity;
  *
  * @package OCA\AppEcosystemV2\Db
  *
- * @method string getAppId()
+ * @method string getAppid()
  * @method string getVersion()
  * @method string getName()
  * @method string getConfig()
@@ -47,7 +47,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getStatus()
  * @method string getCreatedTime()
  * @method string getLastResponseTime()
- * @method void setAppId(string $appId)
+ * @method void setAppid(string $appid)
  * @method void setVersion(string $version)
  * @method void setName(string $name)
  * @method void setConfig(string $config)
@@ -70,11 +70,8 @@ class ExApp extends Entity implements JsonSerializable {
 	 * @param array $params
 	 */
 	public function __construct(array $params = []) {
-		if (isset($params['id'])) {
-			$this->setId($params['id']);
-		}
 		if (isset($params['appid'])) {
-			$this->setAppId($params['appid']);
+			$this->setAppid($params['appid']);
 		}
 		if (isset($params['version'])) {
 			$this->setVersion($params['version']);
@@ -102,7 +99,7 @@ class ExApp extends Entity implements JsonSerializable {
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
-			'app_id' => $this->getAppId(),
+			'app_id' => $this->getAppid(),
 			'version' => $this->getVersion(),
 			'name'=> $this->getName(),
 			'config' => $this->getConfig(),

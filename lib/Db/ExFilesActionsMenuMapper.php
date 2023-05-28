@@ -36,9 +36,9 @@ use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
-class ExAppMapper extends QBMapper {
+class ExFilesActionsMenuMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_apps');
+		parent::__construct($db, 'ex_files_actions_menu');
 	}
 
 	public function findAll(int $limit = null, int $offset = null): array {
@@ -84,5 +84,17 @@ class ExAppMapper extends QBMapper {
 				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
 			);
 		return $this->findEntity($qb);
+	}
+
+	public function deleteByAppidName(ExFilesActionsMenu $exFilesActionsMenu) {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('appId', $qb->createNamedParameter($exFilesActionsMenu->getAppid(), IQueryBuilder::PARAM_STR))
+			)
+			->andWhere(
+				$qb->expr()->eq('name', $qb->createNamedParameter($exFilesActionsMenu->getName(), IQueryBuilder::PARAM_STR))
+			)
+			->executeStatement();
 	}
 }
