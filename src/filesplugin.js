@@ -14,23 +14,32 @@ state.fileActions.forEach(fileAction => {
 		mime: fileAction.mime,
 		permissions: Number(fileAction.permissions),
 		order: Number(fileAction.order),
-		icon: fileAction.icon,
+		icon: fileAction.icon !== '' ? generateOcsUrl('/apps/app_ecosystem_v2/api/v1/files/action/icon?url=' + fileAction.icon) : null,
 		iconClass: fileAction.icon_class,
 		actionHandler: (fileName, context) => {
-			console.debug('file', fileName)
-			console.debug('context', context)
+			console.debug('[AppEcosystemV2] file', fileName)
+			console.debug('[AppEcosystemV2] context', context)
+			console.debug('[AppEcosystemV2] fileAction', fileAction)
 			axios.post(generateOcsUrl('/apps/app_ecosystem_v2/api/v1/files/action'), {
 				appId: fileAction.appid,
+				actionName: fileAction.name,
 				actionFile: {
 					fileId: Number(context.$file[0].dataset.id),
 					name: fileName,
 					dir: context.$file[0].dataset.path,
 				},
+				actionHandler: fileAction.action_handler,
 			}).then((response) => {
 				console.debug('response', response)
+				if (response.data.success) {
+					OC.dialogs.info(t(fileAction.appid, 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
+				} else {
+					OC.dialogs.info(t(fileAction.appid, 'Error while sending action request to ExApp'), t(fileAction.appid, fileAction.display_name))
+				}
 				// TODO: Handle defined format of response for next actions (e.g. show notification, open dialog, etc.)
 			}).catch((error) => {
 				console.error('error', error)
+				OC.dialogs.info(t(fileAction.appid, 'Error while sending action request to ExApp'), t(fileAction.appid, fileAction.display_name))
 			})
 		},
 	}

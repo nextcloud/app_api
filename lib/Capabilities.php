@@ -31,7 +31,9 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCP\App\IAppManager;
 use OCP\Capabilities\IPublicCapability;
 use OCP\IConfig;
 
@@ -42,17 +44,23 @@ class Capabilities implements IPublicCapability {
 	/** @var AppEcosystemV2Service */
 	private $service;
 
+	/** @var IAppManager */
+	private $appManager;
+
 	public function __construct(
 		IConfig $config,
 		AppEcosystemV2Service $service,
+		IAppManager $appManager
 	) {
 		$this->config = $config;
 		$this->service = $service;
+		$this->appManager = $appManager;
 	}
 
 	public function getCapabilities(): array {
 		$capabilities = [
 			'nc-log-level' => $this->config->getSystemValue('loglevel', 2),
+			'app-ecosystem-version' => $this->appManager->getAppVersion(Application::APP_ID),
 		];
 		return [
 			'app_ecosystem_v2' => $capabilities,

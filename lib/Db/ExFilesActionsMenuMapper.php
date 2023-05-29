@@ -86,7 +86,34 @@ class ExFilesActionsMenuMapper extends QBMapper {
 		return $this->findEntity($qb);
 	}
 
-	public function deleteByAppidName(ExFilesActionsMenu $exFilesActionsMenu) {
+	/**
+	 * @param ExFilesActionsMenu $exFilesActionsMenu
+	 * 
+	 * @return int Number of updated rows
+	 */
+	public function updateFileActionMenu(ExFilesActionsMenu $exFilesActionsMenu) {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->update($this->tableName)
+			->set('display_name', $qb->createNamedParameter($exFilesActionsMenu->getDisplayName(), IQueryBuilder::PARAM_STR))
+			->set('mime', $qb->createNamedParameter($exFilesActionsMenu->getMime(), IQueryBuilder::PARAM_STR))
+			->set('permissions', $qb->createNamedParameter($exFilesActionsMenu->getPermissions(), IQueryBuilder::PARAM_STR))
+			->set('order', $qb->createNamedParameter($exFilesActionsMenu->getOrder(), IQueryBuilder::PARAM_INT))
+			->set('icon', $qb->createNamedParameter($exFilesActionsMenu->getIcon() ?? '', IQueryBuilder::PARAM_STR))
+			->set('icon_class', $qb->createNamedParameter($exFilesActionsMenu->getIconClass(), IQueryBuilder::PARAM_STR))
+			->set('action_handler', $qb->createNamedParameter($exFilesActionsMenu->getActionHandler(), IQueryBuilder::PARAM_STR))
+			->where(
+				$qb->expr()->eq('appId', $qb->createNamedParameter($exFilesActionsMenu->getAppid(), IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('name', $qb->createNamedParameter($exFilesActionsMenu->getName(), IQueryBuilder::PARAM_STR))
+			)
+			->executeStatement();
+	}
+
+	/**
+	 * @param ExFilesActionsMenu $exFilesActionsMenu
+	 *
+	 * @return int Number of deleted rows
+	 */
+	public function deleteByAppidName(ExFilesActionsMenu $exFilesActionsMenu): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->delete($this->tableName)
 			->where(

@@ -1,0 +1,4 @@
+.icon-app-ecosystem-v2 {
+	background-image: url('../img/app-dark.svg');
+	filter: var(--background-invert-if-dark);
+}

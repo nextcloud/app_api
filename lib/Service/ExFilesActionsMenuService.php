@@ -39,6 +39,10 @@ use OCA\AppEcosystemV2\Db\ExFilesActionsMenu;
 use OCA\AppEcosystemV2\Db\ExFilesActionsMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Http;
+use OCP\Http\Client\IClient;
+use OCP\Http\Client\IClientService;
+use OCP\Http\Client\IResponse;
 
 class ExFilesActionsMenuService {
 	/** @var CappedMemoryCache */
@@ -50,14 +54,24 @@ class ExFilesActionsMenuService {
 	/** @var LoggerInterface */
 	private $logger;
 
+	/** @var IClient */
+	private $client;
+
+	/** @var AppEcosystemV2Service */
+	private $appEcosystemV2Service;
+
 	public function __construct(
 		CappedMemoryCache $cache,
 		ExFilesActionsMenuMapper $mapper,
 		LoggerInterface $logger,
+		IClientService $clientService,
+		AppEcosystemV2Service $appEcosystemV2Service,
 	) {
 		$this->cache = $cache;
 		$this->mapper = $mapper;
 		$this->logger = $logger;
+		$this->client = $clientService->newClient();
+		$this->appEcosystemV2Service = $appEcosystemV2Service;
 	}
 
 	/**
@@ -85,7 +99,10 @@ class ExFilesActionsMenuService {
 			$fileActionMenu->setIcon($params['icon']);
 			$fileActionMenu->setIconClass($params['icon_class']);
 			$fileActionMenu->setActionHandler($params['action_handler']);
-			$this->mapper->update($fileActionMenu);
+			if ($this->mapper->updateFileActionMenu($fileActionMenu) !== 1) {
+				$this->logger->error('Failed to update file action menu ' . $params['name'] . ' for app: ' . $appId);
+				return null;
+			}
 		} else {
 			$fileActionMenu = $this->mapper->insert(new ExFilesActionsMenu([
 				'appid' => $appId,
@@ -144,5 +161,49 @@ class ExFilesActionsMenuService {
 		$fileActions = $this->mapper->findByAppId($appId);
 		$this->cache->set($cacheKey, $fileActions, Application::CACHE_TTL);
 		return $fileActions;
+	}
+
+	public function handleFileAction(string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
+		try {
+			$exFileAction = $this->mapper->findByName($fileActionName);
+		} catch (DoesNotExistException) {
+			$exFileAction = null;
+		}
+		if ($exFileAction !== null) {
+			$handler = $exFileAction->getActionHandler(); // route on ex app
+			$params = [
+				'actionName' => $fileActionName,
+				'actionFile' => [
+					'fileId' => $actionFile['fileId'],
+					'name' => $actionFile['name'],
+					'dir' => $actionFile['dir'],
+				],
+				'actionHandler' => $actionHandler,
+			];
+			$exApp = $this->appEcosystemV2Service->getExApp($appId);
+			if ($exApp !== null) {
+				$result = $this->appEcosystemV2Service->requestToExApp($exApp, $handler, 'POST', $params);
+				if ($result instanceof IResponse) {
+					return $result->getStatusCode() === 200;
+				}
+				if (isset($result['error'])) {
+					$this->logger->error('Failed to handle file action ' . $fileActionName . ' for app: ' . $appId . ' with error: ' . $result['error']);
+					return false;
+				}
+			}
+		}
+		$this->logger->error('Failed to find file action menu ' . $fileActionName . ' for app: ' . $appId);
+		return false;
+	}
+
+	public function loadFileActionIcon(string $url): array {
+		$thumbnailResponse = $this->client->get($url);
+		if ($thumbnailResponse->getStatusCode() === Http::STATUS_OK) {
+			return [
+				'body' => $thumbnailResponse->getBody(),
+				'headers' => $thumbnailResponse->getHeaders(),
+			];
+		}
+		return null;
 	}
 }

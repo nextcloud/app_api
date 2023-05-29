@@ -41,6 +41,7 @@ class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_ecosystem_v2';
 
 	public const CACHE_TTL = 3600;
+	public const ICON_CACHE_TTL = 60 * 60 *24;
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);

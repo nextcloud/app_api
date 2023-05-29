@@ -42,6 +42,7 @@ use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\ExAppConfigService;
 use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
+use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\IL10N;
@@ -211,14 +212,44 @@ class OCSApiController extends OCSController {
 		], Http::STATUS_OK);
 	}
 
-	public function handleFileAction(string $appId, array $actionFile): JSONResponse {
-		// TODO
-		return new JSONResponse([
-			'success' => false,
-			'appId' => $appId,
-			'actionFile' => $actionFile,
-			'error' => 'Not implemented',
-		], Http::STATUS_NOT_IMPLEMENTED);
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string $appId
+	 * @param string $actionName
+	 * @param array $actionFile
+	 *
+	 * @return JSONResponse
+	 */
+	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler): JSONResponse {
+		$result = $this->exFilesActionsMenuService->handleFileAction($appId, $actionName, $actionHandler, $actionFile);
+		return $this->buildResponse(new JSONResponse([
+			'success' => $result,
+			'handleFileActionSent' => $result,
+		], Http::STATUS_OK));
+	}
+
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string $url
+	 *
+	 * @return DataDisplayResponse
+	 */
+	public function loadFileActionIcon(string $url): DataDisplayResponse {
+		$icon = $this->exFilesActionsMenuService->loadFileActionIcon($url);
+		if ($icon !== null && isset($icon['body'], $icon['headers'])) {
+			$response = new DataDisplayResponse(
+				$icon['body'],
+				Http::STATUS_OK,
+				['Content-Type' => $icon['headers']['Content-Type'][0] ?? 'image/svg+xml']
+			);
+			$response->cacheFor(Application::ICON_CACHE_TTL, false, true);
+			return $response;
+		}
+		return new DataDisplayResponse('', 400);
 	}
 
 	/**
@@ -228,15 +259,13 @@ class OCSApiController extends OCSController {
 	 * @param string $appId
 	 * @param string $configKey
 	 * @param string $configValue
-	 *
-	 * @return JSONResponse
 	 */
-	public function setAppConfigValue(string $appId, string $configKey, string $configValue): JSONResponse {
+	public function setAppConfigValue(string $appId, string $configKey, string $configValue, string $format = 'json') {
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
-		return new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $result !== null,
 			'setAppConfigValue' => $result,
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -245,15 +274,16 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param string $appId
 	 * @param string $configKey
+	 * @param string $format
 	 *
 	 * @return JSONResponse
 	 */
-	public function getAppConfigValue(string $appId, string $configKey): JSONResponse {
+	public function getAppConfigValue(string $appId, string $configKey, string $format): JSONResponse {
 		$appConfigEx = $this->exAppConfigService->getAppConfigValue($appId, $configKey);
-		return new JSONResponse([
+		return $this->buildResponse(new JSONResponse([
 			'success' => $appConfigEx !== null,
 			'appConfigEx' => $appConfigEx,
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**

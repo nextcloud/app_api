@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
 use Psr\Log\LoggerInterface;
 
 use OCP\IConfig;
@@ -40,7 +41,9 @@ use OCP\Http\Client\IClient;
 use OCP\AppFramework\Db\Entity;
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppMapper;
+use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\IL10N;
 
 class AppEcosystemV2Service {
 	/** @var IConfig */
@@ -55,16 +58,26 @@ class AppEcosystemV2Service {
 	/** @var ExAppMapper */
 	private $exAppMapper;
 
+	/** @var IL10N */
+	private $l10n;
+
+	/** @var IAppManager */
+	private $appManager;
+
 	public function __construct(
 		IConfig $config,
 		LoggerInterface $logger,
 		IClientService $clientService,
 		ExAppMapper $exAppMapper,
+		IL10N $l10n,
+		IAppManager $appManager,
 	) {
 		$this->config = $config;
 		$this->logger = $logger;
 		$this->client = $clientService->newClient();
 		$this->exAppMapper = $exAppMapper;
+		$this->l10n = $l10n;
+		$this->appManager = $appManager;
 	}
 
 	public function getExApp(string $exAppId): ?Entity {
@@ -181,5 +194,54 @@ class AppEcosystemV2Service {
 	public function getAppStatus(string $appId): array {
 		// TODO
 		return [];
+	}
+
+	public function requestToExApp(ExApp $exApp, string $route, string $method = 'POST', array $params = []) {
+		try {
+			$exAppConfig = $exApp->getConfig();
+			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
+			$options = [
+				'headers' => [
+					// TODO: Add authorization headers
+					'NC-VERSION' => $this->config->getSystemValue('version'),
+					'APP-ECOSYSTEM-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+				],
+			];
+
+			if (count($params) > 0) {
+				if ($method === 'GET') {
+					// manage array parameters
+					$paramsContent = '';
+					foreach ($params as $key => $value) {
+						if (is_array($value)) {
+							foreach ($value as $oneArrayValue) {
+								$paramsContent .= $key . '[]=' . urlencode($oneArrayValue) . '&';
+							}
+							unset($params[$key]);
+						}
+					}
+					$paramsContent .= http_build_query($params);
+
+					$url .= '?' . $paramsContent;
+				} else {
+					$options['body'] = $params;
+				}
+			}
+
+			if ($method === 'GET') {
+				$response = $this->client->get($url, $options);
+			} else if ($method === 'POST') {
+				$response = $this->client->post($url, $options);
+			} else if ($method === 'PUT') {
+				$response = $this->client->put($url, $options);
+			} else if ($method === 'DELETE') {
+				$response = $this->client->delete($url, $options);
+			} else {
+				return ['error' => $this->l10n->t('Bad HTTP method')];
+			}
+			return $response;
+		} catch (\Exception $e) {
+			return ['error' => $e->getMessage()];
+		}
 	}
 }

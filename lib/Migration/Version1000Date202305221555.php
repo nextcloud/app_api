@@ -130,18 +130,19 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 
 			$table->addColumn('appid', 'string', [
 				'notnull' => true,
-				'length' => 32
+				'length' => 32,
 			]);
 			$table->addColumn('name', 'string', [
 				'notnull' => true,
-				'length' => 64
+				'length' => 64,
 			]);
 			$table->addColumn('display_name', 'string', [
 				'notnull' => true,
-				'length' => 64
+				'length' => 64,
 			]);
 			$table->addColumn('mime', 'string', [
 				'notnull' => true,
+				'default' => 'file',
 			]);
 			// https://nextcloud.github.io/nextcloud-files/enums/Permission.html
 			$table->addColumn('permissions', 'string', [
@@ -149,6 +150,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('order', 'integer', [
 				'notnull' => true,
+				'default' => 0,
 			]);
 			$table->addColumn('icon', 'string', [
 				'notnull' => true,
@@ -156,15 +158,15 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('icon_class', 'string', [
 				'notnull' => true,
-				'default' => '',
+				'default' => 'icon-app-ecosystem-v2',
 			]);
 			// Action handler key name, that will sent to exApp for handling
 			$table->addColumn('action_handler', 'string', [
 				'notnull' => true,
-				'length' => 64
+				'length' => 64,
 			]);
 
-			$table->setPrimaryKey(['appid'], 'ex_files_actions_menu_appid');
+			$table->setPrimaryKey(['appid', 'name'], 'ex_files_actions_menu_pk');
 			$table->addIndex(['name'], 'ex_files_actions_menu_name');
 		}
 

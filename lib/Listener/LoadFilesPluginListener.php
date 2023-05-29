@@ -56,7 +56,7 @@ class LoadFilesPluginListener implements IEventListener {
 		if (!empty($exFilesActions)) {
 			$this->initialState->provideInitialState('ex_files_actions_menu', ['fileActions' => $exFilesActions]);
 			Util::addScript(Application::APP_ID, Application::APP_ID . '-filesplugin');
-			// Util::addStyle(Application::APP_ID, 'filesplugin');
+			Util::addStyle(Application::APP_ID, 'filesactions');
 		}
 	}
 }
