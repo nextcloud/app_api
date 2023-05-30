@@ -184,6 +184,14 @@ class AppEcosystemV2Service {
 		}
 	}
 
+	public function enableExApp(ExApp $exApp) {
+		// TODO
+	}
+
+	public function disableExApp(ExApp $exApp) {
+		// TODO
+	}
+
 	/**
 	 * Send status check request to ex app (after verify app registration)
 	 *

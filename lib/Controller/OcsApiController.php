@@ -44,6 +44,7 @@ use OCA\AppEcosystemV2\Service\ExAppConfigService;
 use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\IL10N;
 use OCP\IRequest;
@@ -81,6 +82,9 @@ class OCSApiController extends OCSController {
 		$this->exFilesActionsMenuService = $exFilesActionsMenuService;
 	}
 
+	// TODO: Implement intermediate check for all routes 
+	// (authorization, NC version, ExApp version, AppEcosystemVersion injection, etc.)
+
 	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
@@ -89,14 +93,15 @@ class OCSApiController extends OCSController {
 	 * @param int $level
 	 * @param string $message
 	 *
-	 * @return DataResponse
+	 * @return Response
 	 * @throws OCSBadRequestException
 	 */
 	public function log(
 		string $appId,
 		int $level,
 		string $message,
-	): DataResponse {
+		string $format = 'json',
+	): Response {
 		try {
 			$exApp = $this->service->getExApp($appId);
 			if ($exApp === null) {
@@ -111,7 +116,7 @@ class OCSApiController extends OCSController {
 			$this->logger->log($level, $message, [
 				'app' => $appId,
 			]);
-			return new DataResponse(1, Http::STATUS_OK);
+			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		} catch (\Psr\Log\InvalidArgumentException) {
 			$this->logger->error('Invalid log level: ' . $level, [
 				'app' => $appId,
@@ -127,15 +132,14 @@ class OCSApiController extends OCSController {
 	 * @param string $appId
 	 * @param string $actionId
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function registerExternalApp(string $appId, array $appData): JSONResponse {
-		// TODO
+	public function registerExternalApp(string $appId, array $appData, string $format = 'json'): Response {
 		$result = $this->service->registerExApp($appId, $appData);
-		return new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $result !== null,
 			'registeredExApp' => $result,
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -143,20 +147,20 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param string $appid
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function unregisterExternalApp(string $appid): JSONResponse {
+	public function unregisterExternalApp(string $appid, string $format = 'json'): Response {
 		$deletedExApp = $this->service->unregisterExApp($appid);
 		if ($deletedExApp === null) {
-			return new JSONResponse([
+			return $this->buildResponse(new DataResponse([
 				'success' => false,
 				'error' => $this->l->t('ExApp not found'),
-			], Http::STATUS_NOT_FOUND);
+			], Http::STATUS_NOT_FOUND), $format);
 		}
-		return new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $deletedExApp->getAppid() === $appid,
 			'deletedExApp' => $deletedExApp,
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -165,17 +169,17 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param string $appId
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function getAppStatus(string $appId): JSONResponse {
+	public function getAppStatus(string $appId, string $format = 'json'): Response {
 		$appStatus = $this->service->getAppStatus($appId);
-		return new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $appStatus !== null,
 			'appStatus' => [
 				'appId'=> $appId,
 				'status' => $appStatus,
 			],
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -185,14 +189,14 @@ class OCSApiController extends OCSController {
 	 * @param string $appId
 	 * @param array $fileActionMenuParams
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function registerFileActionMenu(string $appId, array $fileActionMenuParams): JSONResponse {
+	public function registerFileActionMenu(string $appId, array $fileActionMenuParams, string $format = 'json'): Response {
 		$registeredFileActionMenu = $this->exFilesActionsMenuService->registerFileActionMenu($appId, $fileActionMenuParams);
-		return new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $registeredFileActionMenu !== null,
 			'registeredFileActionMenu' => $registeredFileActionMenu,
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -202,14 +206,14 @@ class OCSApiController extends OCSController {
 	 * @param string $appId
 	 * @param string $fileActionMenuName
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName): JSONResponse {
+	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName, string $format = 'json'): Response {
 		$unregisteredFileActionMenu = $this->exFilesActionsMenuService->unregisterFileActionMenu($appId, $fileActionMenuName);
-		return new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $unregisteredFileActionMenu !== null,
 			'unregisteredFileActionMenu' => $unregisteredFileActionMenu,
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -220,14 +224,14 @@ class OCSApiController extends OCSController {
 	 * @param string $actionName
 	 * @param array $actionFile
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler): JSONResponse {
+	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler, string $format = 'json'): Response {
 		$result = $this->exFilesActionsMenuService->handleFileAction($appId, $actionName, $actionHandler, $actionFile);
-		return $this->buildResponse(new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $result,
 			'handleFileActionSent' => $result,
-		], Http::STATUS_OK));
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -259,8 +263,10 @@ class OCSApiController extends OCSController {
 	 * @param string $appId
 	 * @param string $configKey
 	 * @param string $configValue
+	 *
+	 * @return Response
 	 */
-	public function setAppConfigValue(string $appId, string $configKey, string $configValue, string $format = 'json') {
+	public function setAppConfigValue(string $appId, string $configKey, string $configValue, string $format = 'json'): Response {
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
 		return $this->buildResponse(new DataResponse([
 			'success' => $result !== null,
@@ -276,11 +282,11 @@ class OCSApiController extends OCSController {
 	 * @param string $configKey
 	 * @param string $format
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function getAppConfigValue(string $appId, string $configKey, string $format): JSONResponse {
+	public function getAppConfigValue(string $appId, string $configKey, string $format): Response {
 		$appConfigEx = $this->exAppConfigService->getAppConfigValue($appId, $configKey);
-		return $this->buildResponse(new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $appConfigEx !== null,
 			'appConfigEx' => $appConfigEx,
 		], Http::STATUS_OK), $format);
@@ -292,11 +298,11 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param string $appId
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function getAppConfigKeys(string $appId): JSONResponse {
+	public function getAppConfigKeys(string $appId): Response {
 		$appConfigExs = $this->exAppConfigService->getAppConfigKeys($appId);
-		return new JSONResponse([
+		return new DataResponse([
 			'success' => $appConfigExs !== null,
 			'appConfigExs' => $appConfigExs,
 		], Http::STATUS_OK);
@@ -309,15 +315,16 @@ class OCSApiController extends OCSController {
 	 * @param string $appId
 	 * @param string $configKey
 	 * @param string $configValue
+	 * @param string $format
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function deleteAppConfigValue(string $appId, string $configKey): JSONResponse {
+	public function deleteAppConfigValue(string $appId, string $configKey, string $format = 'json'): Response {
 		$result = $this->exAppConfigService->deleteAppConfigValue($appId, $configKey);
-		return new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $result !== null,
 			'deletedAppConfigValue' => $result,
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -325,15 +332,16 @@ class OCSApiController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param string $appId
+	 * @param string $format
 	 *
-	 * @return JSONResponse
+	 * @return Response
 	 */
-	public function deleteAppConfigValues(string $appId): JSONResponse {
+	public function deleteAppConfigValues(string $appId, string $format = 'json'): Response {
 		$result = $this->exAppConfigService->deleteAppConfigValues($appId);
-		return new JSONResponse([
+		return $this->buildResponse(new DataResponse([
 			'success' => $result !== null && $result > 0,
 			'deletedAppConfigValuesCount' => $result,
-		], Http::STATUS_OK);
+		], Http::STATUS_OK), $format);
 	}
 
 	/**
