@@ -63,7 +63,7 @@ class ExAppMapper extends QBMapper {
 		$qb->select('*')
 			->from($this->tableName)
 			->where(
-				$qb->expr()->eq('appId', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
 			);
 		return $this->findEntity($qb);
 	}
@@ -84,5 +84,13 @@ class ExAppMapper extends QBMapper {
 				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
 			);
 		return $this->findEntity($qb);
+	}
+
+	public function deleteExApp(ExApp $exApp): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_INT))
+			)->executeStatement();
 	}
 }

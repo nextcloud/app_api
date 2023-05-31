@@ -39,8 +39,8 @@ return [
 		['name' => 'ocsApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
 
 		// Ex Apps registration
-		['name' => 'ocsApi#registerExternalApp', 'url' => '/api/v1/register-ex-app', 'verb' => 'POST'],
-		['name' => 'ocsApi#unregisterExternalApp', 'url' => '/api/v1/unregister-app', 'verb' => 'DELETE'],
+		['name' => 'ocsApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
+		['name' => 'ocsApi#unregisterExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
 		['name' => 'ocsApi#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
 
 		// File Actions Menu
@@ -58,7 +58,7 @@ return [
 		// Background jobs
 		['name' => 'ocsApi#registerBackgroundJob', 'url' => '/api/v1/register-background-job', 'verb' => 'POST'],
 
-		// Storage API (preferences)
+		// Storage API (appconfig_ex, preferences_ex)
 		['name' => 'ocsApi#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
 		['name' => 'ocsApi#getAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'GET'],
 		['name' => 'ocsApi#getAppConfigKeys', 'url' => '/api/v1/ex-app/config/keys', 'verb' => 'GET'],

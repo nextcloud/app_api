@@ -89,10 +89,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addColumn('status', 'json', [
 				'notnull' => true,
 			]);
-			$table->addColumn('created_time', 'time', [
+			$table->addColumn('created_time', 'bigint', [
 				'notnull' => true,
 			]);
-			$table->addColumn('last_response_time', 'time', [
+			$table->addColumn('last_response_time', 'bigint', [
 				'notnull' => true,
 			]);
 

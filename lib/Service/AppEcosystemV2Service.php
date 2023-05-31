@@ -175,10 +175,15 @@ class AppEcosystemV2Service {
 	 * @return Entity|null
 	 */
 	public function unregisterExApp(string $appId): ?Entity {
-		$exApp = $this->exAppMapper->findByAppId($appId);
 		try {
-			return $this->exAppMapper->delete($exApp);
-		} catch (\Exception $e) {
+			/** @var ExApp $exApp */
+			$exApp = $this->exAppMapper->findByAppId($appId);
+			if ($this->exAppMapper->deleteExApp($exApp) !== 1) {
+				$this->logger->error('Error while unregistering ex app: ' . $appId);
+				return false;
+			}
+			return $exApp;
+		} catch (DoesNotExistException $e) {
 			$this->logger->error('Error while unregistering ex app: ' . $e->getMessage());
 			return null;
 		}
@@ -206,7 +211,7 @@ class AppEcosystemV2Service {
 
 	public function requestToExApp(ExApp $exApp, string $route, string $method = 'POST', array $params = []) {
 		try {
-			$exAppConfig = $exApp->getConfig();
+ 			$exAppConfig = json_decode($exApp->getConfig(), true);
 			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
 			$options = [
 				'headers' => [
@@ -232,7 +237,7 @@ class AppEcosystemV2Service {
 
 					$url .= '?' . $paramsContent;
 				} else {
-					$options['body'] = $params;
+					$options['json'] = $params;
 				}
 			}
 

@@ -108,8 +108,8 @@ class OCSApiController extends OCSController {
 				$this->logger->error('ExApp ' . $appId . ' not found');
 				throw new OCSBadRequestException('ExApp not found');
 			}
-			$exAppConfigEnabled = $this->exAppConfigService->getAppConfigValue($appId, 'enabled', false);
-			if (!$exAppConfigEnabled) {
+			$exAppConfigEnabled = $this->exAppConfigService->getAppConfigValue($appId, 'enabled', 'no');
+			if ($exAppConfigEnabled !== 'yes') {
 				$this->logger->error('ExApp ' . $appId . ' is disabled');
 				throw new OCSBadRequestException('ExApp is disabled');
 			}
@@ -145,12 +145,12 @@ class OCSApiController extends OCSController {
 	/**
 	 * @NoCSRFRequired
 	 *
-	 * @param string $appid
+	 * @param string $appId
 	 *
 	 * @return Response
 	 */
-	public function unregisterExternalApp(string $appid, string $format = 'json'): Response {
-		$deletedExApp = $this->service->unregisterExApp($appid);
+	public function unregisterExternalApp(string $appId, string $format = 'json'): Response {
+		$deletedExApp = $this->service->unregisterExApp($appId);
 		if ($deletedExApp === null) {
 			return $this->buildResponse(new DataResponse([
 				'success' => false,
@@ -158,7 +158,7 @@ class OCSApiController extends OCSController {
 			], Http::STATUS_NOT_FOUND), $format);
 		}
 		return $this->buildResponse(new DataResponse([
-			'success' => $deletedExApp->getAppid() === $appid,
+			'success' => $deletedExApp->getAppid() === $appId,
 			'deletedExApp' => $deletedExApp,
 		], Http::STATUS_OK), $format);
 	}
@@ -262,11 +262,11 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param string $appId
 	 * @param string $configKey
-	 * @param string $configValue
+	 * @param mixed $configValue
 	 *
 	 * @return Response
 	 */
-	public function setAppConfigValue(string $appId, string $configKey, string $configValue, string $format = 'json'): Response {
+	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, string $format = 'json'): Response {
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
 		return $this->buildResponse(new DataResponse([
 			'success' => $result !== null,
