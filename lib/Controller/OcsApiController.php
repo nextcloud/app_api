@@ -238,12 +238,13 @@ class OCSApiController extends OCSController {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 *
-	 * @param string $url
+	 * @param string $appId
+	 * @param string $exFileActionName
 	 *
 	 * @return DataDisplayResponse
 	 */
-	public function loadFileActionIcon(string $url): DataDisplayResponse {
-		$icon = $this->exFilesActionsMenuService->loadFileActionIcon($url);
+	public function loadFileActionIcon(string $appId, string $exFileActionName): DataDisplayResponse {
+		$icon = $this->exFilesActionsMenuService->loadFileActionIcon($appId, $exFileActionName);
 		if ($icon !== null && isset($icon['body'], $icon['headers'])) {
 			$response = new DataDisplayResponse(
 				$icon['body'],

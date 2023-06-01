@@ -56,14 +56,34 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppSetting
+	 * @return \OCA\AppEcosystemV2\Db\ExFilesActionsMenu[]
 	 */
-	public function findByAppId(string $appId): Entity {
+	public function findAllByAppId(string $appId): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
 			->where(
 				$qb->expr()->eq('appId', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+			);
+		return $this->findEntities($qb);
+	}
+
+	/**
+	 * @param string $appId
+	 * @param string $name
+	 *
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 *
+	 * @return \OCA\AppEcosystemV2\Db\ExFilesActionsMenu
+	 */
+	public function findByAppIdName(string $appId, string $name): Entity {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->tableName)
+			->where(
+				$qb->expr()->eq('appId', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR)),
 			);
 		return $this->findEntity($qb);
 	}
@@ -74,7 +94,7 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppSetting
+	 * @return \OCA\AppEcosystemV2\Db\ExFilesActionsMenu
 	 */
 	public function findByName(string $name): Entity {
 		$qb = $this->db->getQueryBuilder();

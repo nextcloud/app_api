@@ -14,7 +14,7 @@ state.fileActions.forEach(fileAction => {
 		mime: fileAction.mime,
 		permissions: Number(fileAction.permissions),
 		order: Number(fileAction.order),
-		icon: fileAction.icon !== '' ? generateOcsUrl('/apps/app_ecosystem_v2/api/v1/files/action/icon?url=' + fileAction.icon) : null,
+		icon: fileAction.icon !== '' ? generateOcsUrl('/apps/app_ecosystem_v2/api/v1/files/action/icon?appId=' + fileAction.appid + '&exFileActionName=' + fileAction.name) : null,
 		iconClass: fileAction.icon_class,
 		actionHandler: (fileName, context) => {
 			console.debug('[AppEcosystemV2] file', fileName)

@@ -85,6 +85,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('secret', 'string', [
 				'notnull' => true,
+				'length' => 128,
 			]);
 			$table->addColumn('status', 'json', [
 				'notnull' => true,
@@ -169,6 +170,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->setPrimaryKey(['appid', 'name'], 'ex_files_actions_menu_pk');
 			$table->addIndex(['name'], 'ex_files_actions_menu_name');
 		}
+
+		// TODO: Add additional table for auth
 
 		return $schema;
 	}

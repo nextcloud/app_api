@@ -158,9 +158,25 @@ class ExFilesActionsMenuService {
 			return $cache;
 		}
 
-		$fileActions = $this->mapper->findByAppId($appId);
+		$fileActions = $this->mapper->findAllByAppId($appId);
 		$this->cache->set($cacheKey, $fileActions, Application::CACHE_TTL);
 		return $fileActions;
+	}
+
+	public function getExAppFileAction(string $exAppId, string $fileActionName): ?ExFilesActionsMenu {
+		$cacheKey = 'ex_app_file_action_' . $exAppId . '_' . $fileActionName;
+		$cache = $this->cache->get($cacheKey);
+		if ($cache !== null) {
+			return $cache;
+		}
+
+		try {
+			$fileAction = $this->mapper->findByAppIdName($exAppId, $fileActionName);
+		} catch (DoesNotExistException) {
+			$fileAction = null;
+		}
+		$this->cache->set($cacheKey, $fileAction, Application::CACHE_TTL);
+		return $fileAction;
 	}
 
 	public function handleFileAction(string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
@@ -196,8 +212,22 @@ class ExFilesActionsMenuService {
 		return false;
 	}
 
-	public function loadFileActionIcon(string $url): array {
-		$thumbnailResponse = $this->client->get($url);
+	/**
+	 * @param string $exAppId
+	 * @param string $fileId
+	 *
+	 * @return array|null
+	 */
+	public function loadFileActionIcon(string $exAppId, string $exFileActionName): ?array {
+		$exFileAction = $this->getExAppFileAction($exAppId, $exFileActionName);
+		if ($exFileAction === null) {
+			return null;
+		}
+		$iconUrl = $exFileAction->getIcon();
+		if (!isset($iconUrl) || $iconUrl === '') {
+			return null;
+		}
+		$thumbnailResponse = $this->client->get($iconUrl);
 		if ($thumbnailResponse->getStatusCode() === Http::STATUS_OK) {
 			return [
 				'body' => $thumbnailResponse->getBody(),
