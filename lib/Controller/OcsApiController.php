@@ -37,17 +37,15 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\ExAppConfigService;
-use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
-use OCP\AppFramework\Http\DataDisplayResponse;
-use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\Response;
-use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\IL10N;
 use OCP\IRequest;
+use OCP\AppFramework\Http\DataDisplayResponse;
+use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\OCS\OCSBadRequestException;
+
+use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
 
 class OCSApiController extends OCSController {
 	/** @var LoggerInterface */
@@ -59,9 +57,6 @@ class OCSApiController extends OCSController {
 	/** @var AppEcosystemV2Service */
 	private $service;
 
-	/** @var ExAppConfigService */
-	private $exAppConfigService;
-
 	/** @var ExFilesActionsMenuService */
 	private $exFilesActionsMenuService;
 
@@ -69,7 +64,6 @@ class OCSApiController extends OCSController {
 		IRequest $request,
 		IL10N $l,
 		AppEcosystemV2Service $service,
-		ExAppConfigService $exAppConfigService,
 		ExFilesActionsMenuService $exFilesActionsMenuService,
 		LoggerInterface $logger
 	) {
@@ -78,7 +72,6 @@ class OCSApiController extends OCSController {
 		$this->logger = $logger;
 		$this->l = $l;
 		$this->service = $service;
-		$this->exAppConfigService = $exAppConfigService;
 		$this->exFilesActionsMenuService = $exFilesActionsMenuService;
 	}
 
@@ -108,8 +101,8 @@ class OCSApiController extends OCSController {
 				$this->logger->error('ExApp ' . $appId . ' not found');
 				throw new OCSBadRequestException('ExApp not found');
 			}
-			$exAppConfigEnabled = $this->exAppConfigService->getAppConfigValue($appId, 'enabled', 'no');
-			if ($exAppConfigEnabled !== 'yes') {
+			$exAppEnabled = $exApp->getEnabled();
+			if ($exAppEnabled !== 1) {
 				$this->logger->error('ExApp ' . $appId . ' is disabled');
 				throw new OCSBadRequestException('ExApp is disabled');
 			}
@@ -183,11 +176,10 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
-	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 *
 	 * @param string $appId
-	 * @param array $fileActionMenuParams
+	 * @param array $fileActionMenuParams [name, display_name, mime, permissions, order, icon, icon_class, action_handler]
 	 *
 	 * @return Response
 	 */
@@ -200,7 +192,6 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
-	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 *
 	 * @param string $appId
@@ -255,182 +246,6 @@ class OCSApiController extends OCSController {
 			return $response;
 		}
 		return new DataDisplayResponse('', 400);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param string $configKey
-	 * @param mixed $configValue
-	 *
-	 * @return Response
-	 */
-	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, string $format = 'json'): Response {
-		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
-		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'setAppConfigValue' => $result,
-		], Http::STATUS_OK), $format);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param string $configKey
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	public function getAppConfigValue(string $appId, string $configKey, string $format): Response {
-		$appConfigEx = $this->exAppConfigService->getAppConfigValue($appId, $configKey);
-		return $this->buildResponse(new DataResponse([
-			'success' => $appConfigEx !== null,
-			'appConfigEx' => $appConfigEx,
-		], Http::STATUS_OK), $format);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 *
-	 * @return Response
-	 */
-	public function getAppConfigKeys(string $appId): Response {
-		$appConfigExs = $this->exAppConfigService->getAppConfigKeys($appId);
-		return new DataResponse([
-			'success' => $appConfigExs !== null,
-			'appConfigExs' => $appConfigExs,
-		], Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param string $configKey
-	 * @param string $configValue
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	public function deleteAppConfigValue(string $appId, string $configKey, string $format = 'json'): Response {
-		$result = $this->exAppConfigService->deleteAppConfigValue($appId, $configKey);
-		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'deletedAppConfigValue' => $result,
-		], Http::STATUS_OK), $format);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	public function deleteAppConfigValues(string $appId, string $format = 'json'): Response {
-		$result = $this->exAppConfigService->deleteAppConfigValues($appId);
-		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null && $result > 0,
-			'deletedAppConfigValuesCount' => $result,
-		], Http::STATUS_OK), $format);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param string $configKey
-	 * @param string $configValue
-	 * 
-	 * @return JSONResponse
-	 */
-	public function setUserConfigValue(string $userId, string $appId, string $configKey, string $configValue): JSONResponse {
-		// TODO
-		return new JSONResponse([
-			'success' => true,
-			'userConfigValue' => [],
-		], Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $userId
-	 * @param string $appId
-	 * @param string $configKey
-	 *
-	 * @return JSONResponse
-	 */
-	public function getUserConfigValue(string $userId, string $appId, string $configKey): JSONResponse {
-		// TODO
-		return new JSONResponse([
-			'success' => true,
-			'userConfigValue' => [],
-		], Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $userId
-	 * @param string $appId
-	 *
-	 * @return JSONResponse
-	 */
-	public function getUserConfigKeys(string $userId, string $appId): JSONResponse {
-		// TODO
-		return new JSONResponse([
-			'success' => true,
-			'userConfigKeys' => [],
-		], Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $userId
-	 * @param string $appId
-	 * @param string $configKey
-	 *
-	 * @return JSONResponse
-	 */
-	public function deleteUserConfigValue(string $userId, string $appId, string $configKey): JSONResponse {
-		// TODO
-		return new JSONResponse([
-			'success' => true,
-			'deletedUserConfigValues' => [],
-		], Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $userId
-	 * @param string $appId
-	 *
-	 * @return JSONResponse
-	 */
-	public function deleteUserConfigValues(string $userId, string $appId): JSONResponse {
-		// TODO
-		return new JSONResponse([
-			'success' => true,
-			'deletedUserConfigValues' => [],
-		], Http::STATUS_OK);
 	}
 
 	/**

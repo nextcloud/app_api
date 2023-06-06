@@ -35,49 +35,53 @@ use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Class ExAppPreference
+ * Class ExAppRequest
  *
  * @package OCA\AppEcosystemV2\Db
  *
- * @method string getUserid()
  * @method string getAppid()
- * @method string getConfigkey()
- * @method string getValue()
- * @method void setUserid(string $userid)
+ * @method string getUserid()
+ * @method string getRequestToken()
+ * @method string getExpireTime()
  * @method void setAppid(string $appid)
- * @method void setConfigkey(string $key)
- * @method void setValue(string $value)
+ * @method void setUserid(string $userid)
+ * @method void setRequestToken(string $requestToken)
+ * @method void setExpireTime(string $expireTime)
  */
-class ExAppPreference extends Entity implements JsonSerializable {
-	protected $userid;
+class ExAppRequest extends Entity implements JsonSerializable {
 	protected $appid;
-	protected $configkey;
-	protected $value;
+	protected $userid;
+	protected $requestToken;
+	protected $expireTime;
 
 	/**
 	 * @param array $params
 	 */
 	public function __construct(array $params = []) {
-		if (isset($params['userid'])) {
-			$this->setUserid($params['userid']);
+		if (isset($params['id'])) {
+			$this->setId($params['id']);
 		}
 		if (isset($params['appid'])) {
 			$this->setAppid($params['appid']);
 		}
-		if (isset($params['configkey'])) {
-			$this->setConfigkey($params['configkey']);
+		if (isset($params['userid'])) {
+			$this->setUserid($params['userid']);
 		}
-		if (isset($params['value'])) {
-			$this->setValue($params['value']);
+		if (isset($params['request_token'])) {
+			$this->setRequestToken($params['request_token']);
+		}
+		if (isset($params['expire_time'])) {
+			$this->setExpireTime($params['expire_time']);
 		}
 	}
 
 	public function jsonSerialize(): array {
 		return [
-			'user_id' => $this->getUserid(),
+			'id' => $this->getId(),
 			'app_id' => $this->getAppid(),
-			'configkey' => $this->getConfigkey(),
-			'value' => $this->getValue(),
+			'user_id' => $this->getUserid(),
+			'request_token' => $this->getRequestToken(),
+			'expire_time' => $this->getExpireTime(),
 		];
 	}
 }

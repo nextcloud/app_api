@@ -34,6 +34,7 @@ namespace OCA\AppEcosystemV2\Db;
 use OCP\AppFramework\Db\Entity;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\IResult;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 class ExAppMapper extends QBMapper {
@@ -56,7 +57,7 @@ class ExAppMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppSetting
+	 * @return \OCA\AppEcosystemV2\Db\ExApp
 	 */
 	public function findByAppId(string $appId): Entity {
 		$qb = $this->db->getQueryBuilder();
@@ -74,7 +75,7 @@ class ExAppMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppSetting
+	 * @return \OCA\AppEcosystemV2\Db\ExApp
 	 */
 	public function findByName(string $name): Entity {
 		$qb = $this->db->getQueryBuilder();
@@ -91,6 +92,30 @@ class ExAppMapper extends QBMapper {
 		return $qb->delete($this->tableName)
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_INT))
+			)->executeStatement();
+	}
+
+	public function findExAppEnabled(string $appId): array {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('enabled')
+			->from($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+			);
+		/** @var IResult */
+		$result = $qb->executeQuery();
+		return [
+			'success' => $result->rowCount() === 1,
+			'enabled' => $result->fetchOne(),
+		];
+	}
+
+	public function updateExAppEnabled(string $appId, bool $enabled): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->update($this->tableName)
+			->set('enabled', $qb->createNamedParameter($enabled, IQueryBuilder::PARAM_INT))
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
 			)->executeStatement();
 	}
 }

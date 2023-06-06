@@ -90,6 +90,11 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addColumn('status', 'json', [
 				'notnull' => true,
 			]);
+			$table->addColumn('enabled', 'smallint', [
+				'notnull' => true,
+				'default' => 0,
+				'length' => 1,
+			]);
 			$table->addColumn('created_time', 'bigint', [
 				'notnull' => true,
 			]);
@@ -171,7 +176,59 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addIndex(['name'], 'ex_files_actions_menu_name');
 		}
 
-		// TODO: Add additional table for auth
+		if (!$schema->hasTable('ex_apps_users')) {
+			$table = $schema->createTable('ex_apps_users');
+
+			$table->addColumn('appid', 'string', [
+				'notnull' => true,
+				'length' => 32,
+			]);
+			$table->addColumn('userid', 'string', [
+				'notnull' => true,
+				'length' => 64,
+				'default' => '',
+			]);
+
+			$table->addIndex(['appid'], 'ex_apps_users_appid');
+			$table->addIndex(['userid'], 'ex_apps_users_userid');
+		}
+
+		if (!$schema->hasTable('ex_apps_api_scopes')) {
+			$table = $schema->createTable('ex_apps_api_scopes');
+
+			$table->addColumn('api_route', 'string', [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('scope_group', 'integer', [
+				'notnull' => true,
+				'default' => 0,
+			]);
+
+			$table->setPrimaryKey(['api_route'], 'ex_apps_api_scopes_pk');
+			$table->addIndex(['scope_group'], 'ex_apps_api_scopes_scope_group');
+		}
+
+		if (!$schema->hasTable('ex_apps_scopes')) {
+			$table = $schema->createTable('ex_apps_scopes');
+
+			$table->addColumn('id', 'integer', [
+				'autoincrement' => true,
+				'notnull' => true,
+			]);
+			$table->addColumn('appid', 'string', [
+				'notnull' => true,
+				'length' => 32,
+			]);
+			$table->addColumn('scope_group', 'string', [
+				'notnull' => true,
+				'length' => 64,
+			]);
+
+			$table->setPrimaryKey(['id'], 'ex_apps_scopes_pk');
+			$table->addIndex(['appid'], 'ex_apps_scopes_appid');
+			$table->addIndex(['scope_group'], 'ex_apps_scopes_scope');
+		}
 
 		return $schema;
 	}

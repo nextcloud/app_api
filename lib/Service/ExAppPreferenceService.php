@@ -31,50 +31,77 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
-use OCP\Http\Client\IClient;
-use OCP\Http\Client\IClientService;
-use OCP\IConfig;
-
-use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
-use OCP\Cache\CappedMemoryCache;
+use OCA\AppEcosystemV2\Db\ExAppPreference;
+use OCA\AppEcosystemV2\Db\ExAppPreferenceMapper;
+use OCP\AppFramework\Db\DoesNotExistException;
+use Psr\Log\LoggerInterface;
 
 class ExAppPreferenceService {
-	/** @var IConfig */
-	private $config;
-
-	/** @var CappedMemoryCache */
-	private $cache;
-
-	/** @var IClient */
-	private $client;
-
-	/** @var ExAppConfigMapper */
+	/** @var ExAppPreferenceMapper */
 	private $mapper;
 
+	/** @var LoggerInterface */
+	private $logger;
+
 	public function __construct(
-		IConfig $config,
-		CappedMemoryCache $cache,
-		IClientService $clientService,
-		ExAppConfigMapper $mapper
+		ExAppPreferenceMapper $mapper,
+		LoggerInterface $logger
 	) {
-		$this->config = $config;
-		$this->cache = $cache;
-		$this->client = $clientService->newClient();
 		$this->mapper = $mapper;
+		$this->logger = $logger;
 	}
 
-	public function getAppConfigValue() {
+	public function setUserConfigValue(string $userId, string $appId, string $configKey, mixed $configValue) {
+		try {
+			/** @var ExAppPreference $exAppPreference */
+			$exAppPreference = $this->mapper->findByUserIdAppIdKey($userId, $appId, $configKey);
+		} catch (DoesNotExistException $e) {
+			$exAppPreference = null;
+		}
+		if ($exAppPreference === null) {
+			try {
+				$exAppPreference = $this->mapper->insert(new ExAppPreference([
+					'user_id' => $userId,
+					'appid' => $appId,
+					'configkey' => $configKey,
+					'value' => $configValue,
+				]));
+				return $exAppPreference;
+			} catch (\Exception $e) {
+				$this->logger->error('Error while inserting new config value: ' . $e->getMessage());
+				return null;
+			}
+		} else {
+			$exAppPreference->setValue($configValue);
+			if ($this->mapper->updateUserConfigValue($exAppPreference) !== 1) {
+				$this->logger->error('Error while updating preferences_ex config value');
+				return null;
+			}
+			return $exAppPreference;
+		}
 	}
 
-	public function setAppConfigValue() {
+	public function getUserConfigValue(string $userId, string $appId, string $configKey): mixed {
+		try {
+			return $this->mapper->findByUserIdAppIdKey($userId, $appId, $configKey);
+		} catch (DoesNotExistException) {
+			return null;
+		}
 	}
 
-	public function deleteAppConfigValue() {
+	public function getUserConfigKeys(string $userId, string $appId): ?array {
+		return $this->mapper->findUserConfigKeys($userId, $appId);
 	}
 
-	public function deleteAppConfigValues() {
+	public function deleteUserConfigValue(string $userId, string $appId, string $configKey): bool {
+		return $this->mapper->deleteUserConfigValue($userId, $appId, $configKey) === 1;
 	}
 
-	public function getAppConfigKeys() {
+	public function deleteUserConfigValues(string $userId, string $appId): ?array {
+		$userConfigValues = $this->getUserConfigKeys($userId, $appId);
+		if ($this->mapper->deleteUserConfigValues($userId, $appId) === 1) {
+			return $userConfigValues;
+		}
+		return null;
 	}
 }

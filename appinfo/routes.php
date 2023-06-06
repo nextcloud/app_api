@@ -49,6 +49,19 @@ return [
 		['name' => 'ocsApi#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
 		['name' => 'ocsApi#loadFileActionIcon', 'url' => '/api/v1/files/action/icon', 'verb' => 'GET'],
 
+		// Storage API (appconfig_ex, preferences_ex)
+		['name' => 'appConfig#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
+		['name' => 'appConfig#getAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'GET'],
+		['name' => 'appConfig#getAppConfigKeys', 'url' => '/api/v1/ex-app/config/keys', 'verb' => 'GET'],
+		['name' => 'appConfig#deleteAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'DELETE'],
+		['name' => 'appConfig#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config/all', 'verb' => 'DELETE'],
+
+		['name' => 'preferences#setUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'POST'],
+		['name' => 'preferences#getUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'GET'],
+		['name' => 'preferences#getUserConfigKeys', 'url' => '/api/v1/ex-app/preference/keys', 'verb' => 'GET'],
+		['name' => 'preferences#deleteUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
+		['name' => 'preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference/all', 'verb' => 'DELETE'],
+
 		// Notifications
 		['name' => 'ocsApi#sendNotification', 'url' => '/api/v1/send-notification', 'verb' => 'POST'],
 
@@ -57,18 +70,6 @@ return [
 
 		// Background jobs
 		['name' => 'ocsApi#registerBackgroundJob', 'url' => '/api/v1/register-background-job', 'verb' => 'POST'],
-
-		// Storage API (appconfig_ex, preferences_ex)
-		['name' => 'ocsApi#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
-		['name' => 'ocsApi#getAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'GET'],
-		['name' => 'ocsApi#getAppConfigKeys', 'url' => '/api/v1/ex-app/config/keys', 'verb' => 'GET'],
-		['name' => 'ocsApi#deleteAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'DELETE'],
-		['name' => 'ocsApi#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config/all', 'verb' => 'DELETE'],
-		['name' => 'ocsApi#setUserConfigValue', 'url' => '/api/v1/ex-app/config/user', 'verb' => 'POST'],
-		['name' => 'ocsApi#getUserConfigValue', 'url' => '/api/v1/ex-app/config/user', 'verb' => 'GET'],
-		['name' => 'ocsApi#getUserConfigKeys', 'url' => '/api/v1/ex-app/config/user/keys', 'verb' => 'GET'],
-		['name' => 'ocsApi#deleteUserConfigValue', 'url' => '/api/v1/ex-app/config/user', 'verb' => 'DELETE'],
-		['name' => 'ocsApi#deleteUserConfigValues', 'url' => '/api/v1/ex-app/config/user/all', 'verb' => 'DELETE'],
 
 		// Settings API (admin/user settings registration)
 		['name' => 'ocsApi#registerSettingsPage', 'url' => '/api/v1/register-settings-page', 'verb' => 'POST'],

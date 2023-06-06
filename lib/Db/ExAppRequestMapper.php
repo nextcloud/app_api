@@ -29,39 +29,40 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Migration;
+namespace OCA\AppEcosystemV2\Db;
 
-use OCP\App\IAppManager;
-use OCP\Migration\IOutput;
-use OCP\Migration\IRepairStep;
+use OCP\AppFramework\Db\Entity;
+use OCP\IDBConnection;
+use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\IResult;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-
-class AppDataInitializationStep implements IRepairStep {
-	/** @var IAppManager */
-	private $appManager;
-
-	/** @var AppEcosystemV2Service */
-	private $service;
-
-	public function __construct(
-		IAppManager $appManager,
-		AppEcosystemV2Service $appEcosystemV2Service,
-	) {
-		$this->appManager = $appManager;
-		$this->service = $appEcosystemV2Service;
+class ExAppRequestMapper extends QBMapper {
+	public function __construct(IDBConnection $db) {
+		parent::__construct($db, 'ex_apps_requests');
 	}
 
-	public function getName(): string {
-		return "Init App Ecosystem V2";
+	public function findAll(int $limit = null, int $offset = null): array {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->tableName)
+			->setMaxResults($limit)
+			->setFirstResult($offset);
+		return $this->findEntities($qb);
 	}
 
-	public function run(IOutput $output) {
-		$output->startProgress(1);
-		// TODO: Detect default external app, verify that it is enabled, verify connection
-		// and update app info
-		$this->service->detectDefaultExApp();
-		$output->finishProgress();
+	/**
+	 * @param string $appId
+	 * @param string $userId
+	 *
+	 * @return ExAppRequest[]
+	 */
+	public function findAllByAppidUserid(string $appId, string $userId): array {
+		$qb = $this->db->getQueryBuilder();
+		return $this->findEntities($qb->select('*')
+			->from($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId)))
+			->andWhere($qb->expr()->eq('userid', $qb->createNamedParameter($userId)))
+		);
 	}
 }

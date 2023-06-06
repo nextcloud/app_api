@@ -45,6 +45,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getConfig()
  * @method string getSecret()
  * @method string getStatus()
+ * @method int getEnabled()
  * @method string getCreatedTime()
  * @method string getLastResponseTime()
  * @method void setAppid(string $appid)
@@ -53,6 +54,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setConfig(string $config)
  * @method void setSecret(string $secret)
  * @method void setStatus(string $status)
+ * @method void setEnabled(int $enabled)
  * @method void setCreatedTime(string $createdTime)
  * @method void setLastResponseTime(string $lastResponseTime)
  */
@@ -63,6 +65,7 @@ class ExApp extends Entity implements JsonSerializable {
 	protected $config;
 	protected $secret;
 	protected $status;
+	protected $enabled;
 	protected $createdTime;
 	protected $lastResponseTime;
 
@@ -88,6 +91,9 @@ class ExApp extends Entity implements JsonSerializable {
 		if (isset($params['status'])) {
 			$this->setStatus($params['status']);
 		}
+		if (isset($params['enabled'])) {
+			$this->setEnabled($params['enabled']);
+		}
 		if (isset($params['created_time'])) {
 			$this->setCreatedTime($params['created_time']);
 		}
@@ -98,13 +104,13 @@ class ExApp extends Entity implements JsonSerializable {
 
 	public function jsonSerialize(): array {
 		return [
-			'id' => $this->getId(),
 			'app_id' => $this->getAppid(),
 			'version' => $this->getVersion(),
 			'name'=> $this->getName(),
 			'config' => $this->getConfig(),
 			'secret' => $this->getSecret(),
 			'status' => $this->getStatus(),
+			'enabled' => $this->getEnabled(),
 			'created_time' => $this->getCreatedTime(),
 			'last_response_time' => $this->getLastResponseTime(),
 		];

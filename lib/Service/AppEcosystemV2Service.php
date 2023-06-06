@@ -88,49 +88,12 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function detectDefaultExApp() {
-		// TODO: Check default ex app host and port connection and register it if not exists yet
-		$protocol = 'https';
-		$host = 'localhost';
-		$port = '8063';
-		$exAppUrl = $protocol . '://' . $host . ':' . $port;
-		$result = $this->checkExAppConnection($exAppUrl);
-		if ($result) {
-			$this->registerExApp($result['appid'] ?? '', [
-				'appid' => $result['appid'] ?? '',
-				'version' => $result['version'] ?? '',
-				'name' => 'Default Ex App',
-				'config' => [
-					'protocol' => $protocol,
-					'host' => $host,
-					'port' => $port,
-				],
-				'secret' => '',
-				'status' => 'active',
-				'created_time' => time(),
-				'last_response_time' => time(),
-			]);
-		}
-		return $result;
-	}
-
-	public function checkExAppConnection(
-		string $exAppUrl,
-		string $exAppToken = '', // TODO: temporal app token to receive valid response from ex app
-		string $exAppSecret = '' // TODO: one-time created secret
-	) {
-		$response = $this->client->post($exAppUrl, [
-			'headers' => [
-				'Authorization' => 'Bearer ' . $exAppToken,
-				'X-App-Secret' => $exAppSecret
-			]
-		]);
-		if ($response->getStatusCode() === 200) {
-			return true;
-		}
-		return false;
-	}
-
+	/**
+	 * Register exApp
+	 * 
+	 * @param string $appId
+	 * @param array $appData [version, name, config, secret, status, enabled]
+	 */
 	public function registerExApp(string $appId, array $appData) {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($appId);
@@ -189,12 +152,33 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function enableExApp(ExApp $exApp) {
-		// TODO
+	/**
+	 * Enable ex app
+	 * 
+	 * @param ExApp $exApp
+	 * 
+	 * @return array|null
+	 */
+	public function enableExApp(ExApp $exApp): ?array {
+		$exAppEnabled = $this->exAppMapper->findExAppEnabled($exApp->getAppid());
+		if ($exAppEnabled['success']) {
+			return $exAppEnabled;
+		}
+		return null;
 	}
 
-	public function disableExApp(ExApp $exApp) {
-		// TODO
+	/**
+	 * Disable ex app
+	 * 
+	 * @param ExApp $exApp
+	 * 
+	 * @return bool
+	 */
+	public function disableExApp(ExApp $exApp): bool {
+		if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) === 1) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -204,20 +188,27 @@ class AppEcosystemV2Service {
 	 *
 	 * @return array
 	 */
-	public function getAppStatus(string $appId): array {
-		// TODO
-		return [];
+	public function getAppStatus(string $appId): ?array {
+		try {
+			$exApp = $this->exAppMapper->findByAppId($appId);
+			return json_decode($exApp->getStatus(), true);
+		} catch (DoesNotExistException) {
+			return null;
+		}
 	}
 
 	public function requestToExApp(ExApp $exApp, string $route, string $method = 'POST', array $params = []) {
 		try {
  			$exAppConfig = json_decode($exApp->getConfig(), true);
 			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
+			// TODO: Add check in ex_apps_requests and secret generation there
 			$options = [
 				'headers' => [
 					// TODO: Add authorization headers
 					'NC-VERSION' => $this->config->getSystemValue('version'),
 					'APP-ECOSYSTEM-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+					'EX-APP-VERSION' => $exApp->getVersion(),
+					'EX-APP-SECRET' => $exApp->getSecret(), // TODO add secret generation
 				],
 			];
 

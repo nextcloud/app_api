@@ -178,10 +178,12 @@ class ExAppConfigService {
 	 */
 	public function getAppConfigKeys(string $appId) {
 		$appConfigExs = $this->mapper->findAllByAppId($appId);
-		$keys = [];
-		foreach ($appConfigExs as $appConfigEx) {
-			$keys[] = $appConfigEx->getConfigKey();
-		}
-		return $keys;
+		$this->logger->error('getAppConfigKeys: ' . json_encode($appConfigExs));
+		return $appConfigExs;
+		// $keys = [];
+		// foreach ($appConfigExs as $appConfigEx) {
+		// 	$keys[] = $appConfigEx->getConfigkey();
+		// }
+		// return $keys;
 	}
 }
