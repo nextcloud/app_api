@@ -60,8 +60,12 @@ class OCSApiController extends OCSController {
 	/** @var ExFilesActionsMenuService */
 	private $exFilesActionsMenuService;
 
+	/** @var string */
+	private $userId;
+
 	public function __construct(
 		IRequest $request,
+		?string $userId,
 		IL10N $l,
 		AppEcosystemV2Service $service,
 		ExFilesActionsMenuService $exFilesActionsMenuService,
@@ -73,6 +77,7 @@ class OCSApiController extends OCSController {
 		$this->l = $l;
 		$this->service = $service;
 		$this->exFilesActionsMenuService = $exFilesActionsMenuService;
+		$this->userId = $userId;
 	}
 
 	// TODO: Implement intermediate check for all routes 
@@ -218,7 +223,7 @@ class OCSApiController extends OCSController {
 	 * @return Response
 	 */
 	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler, string $format = 'json'): Response {
-		$result = $this->exFilesActionsMenuService->handleFileAction($appId, $actionName, $actionHandler, $actionFile);
+		$result = $this->exFilesActionsMenuService->handleFileAction($this->userId, $appId, $actionName, $actionHandler, $actionFile);
 		return $this->buildResponse(new DataResponse([
 			'success' => $result,
 			'handleFileActionSent' => $result,

@@ -179,7 +179,7 @@ class ExFilesActionsMenuService {
 		return $fileAction;
 	}
 
-	public function handleFileAction(string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
+	public function handleFileAction(string $userId, string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
 		try {
 			$exFileAction = $this->mapper->findByName($fileActionName);
 		} catch (DoesNotExistException) {
@@ -189,16 +189,16 @@ class ExFilesActionsMenuService {
 			$handler = $exFileAction->getActionHandler(); // route on ex app
 			$params = [
 				'actionName' => $fileActionName,
+				'actionHandler' => $actionHandler,
 				'actionFile' => [
 					'fileId' => $actionFile['fileId'],
 					'name' => $actionFile['name'],
 					'dir' => $actionFile['dir'],
 				],
-				'actionHandler' => $actionHandler,
 			];
 			$exApp = $this->appEcosystemV2Service->getExApp($appId);
 			if ($exApp !== null) {
-				$result = $this->appEcosystemV2Service->requestToExApp($exApp, $handler, 'POST', $params);
+				$result = $this->appEcosystemV2Service->requestToExApp($userId, $exApp, $handler, 'POST', $params);
 				if ($result instanceof IResponse) {
 					return $result->getStatusCode() === 200;
 				}

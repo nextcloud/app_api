@@ -35,24 +35,18 @@ use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Class ExAppRequest
+ * Class ExAppScope
  *
  * @package OCA\AppEcosystemV2\Db
  *
  * @method string getAppid()
- * @method string getUserid()
- * @method string getRequestToken()
- * @method string getExpireTime()
+ * @method string getScopeGroup()
  * @method void setAppid(string $appid)
- * @method void setUserid(string $userid)
- * @method void setRequestToken(string $requestToken)
- * @method void setExpireTime(string $expireTime)
+ * @method void setScopeGroup(string $scopeGroup)
  */
-class ExAppRequest extends Entity implements JsonSerializable {
+class ExAppScope extends Entity implements JsonSerializable {
 	protected $appid;
-	protected $userid;
-	protected $requestToken;
-	protected $expireTime;
+	protected $scopeGroup;
 
 	/**
 	 * @param array $params
@@ -64,14 +58,8 @@ class ExAppRequest extends Entity implements JsonSerializable {
 		if (isset($params['appid'])) {
 			$this->setAppid($params['appid']);
 		}
-		if (isset($params['userid'])) {
-			$this->setUserid($params['userid']);
-		}
-		if (isset($params['request_token'])) {
-			$this->setRequestToken($params['request_token']);
-		}
-		if (isset($params['expire_time'])) {
-			$this->setExpireTime($params['expire_time']);
+		if (isset($params['scope_group'])) {
+			$this->setScopeGroup($params['scope_group']);
 		}
 	}
 
@@ -79,9 +67,7 @@ class ExAppRequest extends Entity implements JsonSerializable {
 		return [
 			'id' => $this->getId(),
 			'app_id' => $this->getAppid(),
-			'user_id' => $this->getUserid(),
-			'request_token' => $this->getRequestToken(),
-			'expire_time' => $this->getExpireTime(),
+			'scope_group' => $this->getScopeGroup(),
 		];
 	}
 }

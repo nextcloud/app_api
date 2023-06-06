@@ -41,9 +41,13 @@ use OCP\Http\Client\IClient;
 use OCP\AppFramework\Db\Entity;
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppMapper;
+use OCA\AppEcosystemV2\Db\ExAppUser;
+use OCA\AppEcosystemV2\Db\ExAppUserMapper;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\IL10N;
+use OCP\IRequest;
+use OCP\Security\ISecureRandom;
 
 class AppEcosystemV2Service {
 	/** @var IConfig */
@@ -64,6 +68,12 @@ class AppEcosystemV2Service {
 	/** @var IAppManager */
 	private $appManager;
 
+	/** @var ExAppUserMapper */
+	private $exAppUserMapper;
+
+	/** @var ISecureRandom */
+	private $random;
+
 	public function __construct(
 		IConfig $config,
 		LoggerInterface $logger,
@@ -71,6 +81,8 @@ class AppEcosystemV2Service {
 		ExAppMapper $exAppMapper,
 		IL10N $l10n,
 		IAppManager $appManager,
+		ExAppUserMapper $exAppUserMapper,
+		ISecureRandom $random,
 	) {
 		$this->config = $config;
 		$this->logger = $logger;
@@ -78,6 +90,8 @@ class AppEcosystemV2Service {
 		$this->exAppMapper = $exAppMapper;
 		$this->l10n = $l10n;
 		$this->appManager = $appManager;
+		$this->exAppUserMapper = $exAppUserMapper;
+		$this->random = $random;
 	}
 
 	public function getExApp(string $exAppId): ?Entity {
@@ -93,22 +107,26 @@ class AppEcosystemV2Service {
 	 * 
 	 * @param string $appId
 	 * @param array $appData [version, name, config, secret, status, enabled]
+	 *
+	 * @return ExApp|null
 	 */
-	public function registerExApp(string $appId, array $appData) {
+	public function registerExApp(string $appId, array $appData): ?ExApp {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			if ($exApp !== null) {
 				$exApp->setVersion($appData['version']);
 				$exApp->setName($appData['name']);
 				$exApp->setConfig($appData['config']);
-				$exApp->setSecret($appData['secret']); // TODO: Implement secret generation and verification
-				$exApp->setStatus($appData['status']);
+				$secret = $this->random->generate(128); // Temporal random secret
+				$exApp->setSecret($secret);
+				$exApp->setStatus(json_encode(['active' => true]));
 				$exApp->setLastResponseTime(time());
 				try {
 					$exApp = $this->exAppMapper->update($exApp);
+					return $exApp;
 				} catch (\Exception $e) {
 					$this->logger->error('Error while updating ex app: ' . $e->getMessage());
-					return false;
+					return null;
 				}
 			}
 		} catch (DoesNotExistException) {
@@ -117,15 +135,17 @@ class AppEcosystemV2Service {
 			$exApp->setVersion($appData['version']);
 			$exApp->setName($appData['name']);
 			$exApp->setConfig($appData['config']);
-			$exApp->setSecret($appData['secret']); // TODO: Implement secret generation and verification
-			$exApp->setStatus($appData['status']);
+			$secret = $this->random->generate(128); // Temporal random secret
+			$exApp->setSecret($secret);
+			$exApp->setStatus(json_encode(['active' => true]));
 			$exApp->setCreatedTime(time());
 			$exApp->setLastResponseTime(time());
 			try {
 				$exApp = $this->exAppMapper->insert($exApp);
+				return $exApp;
 			} catch (\Exception $e) {
 				$this->logger->error('Error while registering ex app: ' . $e->getMessage());
-				return false;
+				return null;
 			}
 		}
 	}
@@ -197,18 +217,29 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function requestToExApp(ExApp $exApp, string $route, string $method = 'POST', array $params = []) {
+	public function requestToExApp(string $userId, ExApp $exApp, string $route, string $method = 'POST', array $params = []) {
 		try {
  			$exAppConfig = json_decode($exApp->getConfig(), true);
 			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
-			// TODO: Add check in ex_apps_requests and secret generation there
+			// Check in ex_apps_users
+			if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
+				try {
+					$this->exAppUserMapper->insert(new ExAppUser([
+						'appid' => $exApp->getAppid(),
+						'userid' => $userId,
+					]));
+				} catch (\Exception $e) {
+					$this->logger->error('Error while inserting ex app user: ' . $e->getMessage());
+					return ['error' => 'Error while inserting ex app user: ' . $e->getMessage()];
+				}
+			}
 			$options = [
 				'headers' => [
-					// TODO: Add authorization headers
+					'NC-USER-ID' => $userId,
 					'NC-VERSION' => $this->config->getSystemValue('version'),
-					'APP-ECOSYSTEM-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+					'EX-APP-ID' => $exApp->getAppid(),
 					'EX-APP-VERSION' => $exApp->getVersion(),
-					'EX-APP-SECRET' => $exApp->getSecret(), // TODO add secret generation
 				],
 			];
 
@@ -232,6 +263,9 @@ class AppEcosystemV2Service {
 				}
 			}
 
+			$signature = $this->generateRequestSignature($method, $options, $params, $exApp->getSecret());
+			$options['headers']['EA-SIGNATURE'] = $signature;
+
 			if ($method === 'GET') {
 				$response = $this->client->get($url, $options);
 			} else if ($method === 'POST') {
@@ -246,6 +280,89 @@ class AppEcosystemV2Service {
 			return $response;
 		} catch (\Exception $e) {
 			return ['error' => $e->getMessage()];
+		}
+	}
+
+	public function generateRequestSignature(string $method, array $options, array $params = [], string $secret): ?string {
+		$headers = [];
+		if (isset($options['headers']['NC-VERSION'])) {
+			$headers['NC-VERSION'] = $options['headers']['NC-VERSION'];
+		}
+		if (isset($options['headers']['AE-VERSION'])) {
+			$headers['AE-VERSION'] = $options['headers']['AE-VERSION'];
+		}
+		if (isset($options['headers']['EX-APP-ID'])) {
+			$headers['EX-APP-ID'] = $options['headers']['EX-APP-ID'];
+		}
+		if (isset($options['headers']['EX-APP-VERSION'])) {
+			$headers['EX-APP-VERSION'] = $options['headers']['EX-APP-VERSION'];
+		}
+		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
+			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
+		}
+		if ($method === 'GET') {
+			ksort($params);
+			$body = $method . json_encode($params) . json_encode($options['headers']);
+		} else {
+			$queryParams = array_merge($params, $options['json']);
+			ksort($queryParams);
+			ksort($options['headers']);
+			$body = $method . json_encode($queryParams) . json_encode($options['headers']);
+		}
+		return hash_hmac('sha256', $body, $secret);
+	}
+
+	public function validateExAppRequestToNC(IRequest $request): bool {
+		try {
+			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX-APP-ID'));
+			$enabled = $exApp->getEnabled();
+			if (!$enabled) {
+				return false;
+			}
+			$secret = $exApp->getSecret();
+			$exApp->setLastResponseTime(time());
+			try {
+				$this->exAppMapper->updateLastResponseTime($exApp);
+				// TODO: Add check of debug mode for logging each request
+			} catch (\Exception $e) {
+				$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
+			}
+		} catch (DoesNotExistException) {
+			return false;
+		}
+		$method = $request->getMethod();
+		$headers = [
+			'AE-VERSION' => $request->getHeader('AE-VERSION'),
+			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
+			'EX-APP-VERSION' => $request->getHeader('EX-APP-VERSION'),
+			'NC-USER-ID' => $request->getHeader('NC-USER-ID'),
+		];
+		$requestSignature = $request->getHeader('EA-SIGNATURE');
+		$queryParams = $request->getParams();
+		ksort($queryParams);
+		ksort($headers);
+		if ($method === 'GET') {
+			$body = $method . json_encode($queryParams) . json_encode($headers);
+		} else {
+			$body = $method . json_encode($queryParams) . json_encode($headers);
+		}
+		$signature = hash_hmac('sha256', $body, $secret);
+		// TODO: Add scope check
+		$userId = $request->getHeader('NC-USER-ID');
+		if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
+			return false;
+		}
+		return $signature === $requestSignature;
+	}
+
+	private function exAppUserExists(string $appId, string $userId): bool {
+		try {
+			if ($this->exAppUserMapper->findByAppidUserid($appId, $userId) instanceof ExAppUser) {
+				return true;
+			}
+			return false;
+		} catch (DoesNotExistException) {
+			return false;
 		}
 	}
 }

@@ -23,12 +23,12 @@ state.fileActions.forEach(fileAction => {
 			axios.post(generateOcsUrl('/apps/app_ecosystem_v2/api/v1/files/action'), {
 				appId: fileAction.appid,
 				actionName: fileAction.name,
+				actionHandler: fileAction.action_handler,
 				actionFile: {
 					fileId: Number(context.$file[0].dataset.id),
 					name: fileName,
 					dir: context.$file[0].dataset.path,
 				},
-				actionHandler: fileAction.action_handler,
 			}).then((response) => {
 				console.debug('response', response)
 				if (response.data.ocs.data.success) {

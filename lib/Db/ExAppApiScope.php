@@ -31,38 +31,39 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
+use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
-use OCP\IDBConnection;
-use OCP\AppFramework\Db\QBMapper;
-use OCP\DB\IResult;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 
-class ExAppRequestMapper extends QBMapper {
-	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_apps_requests');
-	}
-
-	public function findAll(int $limit = null, int $offset = null): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
-		return $this->findEntities($qb);
-	}
+/**
+ * Class ExAppApiScope
+ *
+ * @package OCA\AppEcosystemV2\Db
+ *
+ * @method string getApiRoute()
+ * @method string getScopeGroup()
+ * @method void setApiRoute(string $apiRoute)
+ * @method void setScopeGroup(string $scopeGroup)
+ */
+class ExAppApiScope extends Entity implements JsonSerializable {
+	protected $apiRoute;
+	protected $scopeGroup;
 
 	/**
-	 * @param string $appId
-	 * @param string $userId
-	 *
-	 * @return ExAppRequest[]
+	 * @param array $params
 	 */
-	public function findAllByAppidUserid(string $appId, string $userId): array {
-		$qb = $this->db->getQueryBuilder();
-		return $this->findEntities($qb->select('*')
-			->from($this->tableName)
-			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId)))
-			->andWhere($qb->expr()->eq('userid', $qb->createNamedParameter($userId)))
-		);
+	public function __construct(array $params = []) {
+		if (isset($params['api_route'])) {
+			$this->setApiRoute($params['api_route']);
+		}
+		if (isset($params['scope_group'])) {
+			$this->setScopeGroup($params['scope_group']);
+		}
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'api_route' => $this->apiRoute,
+			'scope_group' => $this->scopeGroup,
+		];
 	}
 }

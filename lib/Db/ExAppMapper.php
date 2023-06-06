@@ -118,4 +118,13 @@ class ExAppMapper extends QBMapper {
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
 			)->executeStatement();
 	}
+
+	public function updateLastResponseTime(ExApp $exApp): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->update($this->tableName)
+			->set('last_response_time', $qb->createNamedParameter($exApp->getLastResponseTime(), IQueryBuilder::PARAM_INT))
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_STR))
+			)->executeStatement();
+	}
 }
