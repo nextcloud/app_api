@@ -235,11 +235,11 @@ class AppEcosystemV2Service {
 			}
 			$options = [
 				'headers' => [
-					'NC-USER-ID' => $userId,
-					'NC-VERSION' => $this->config->getSystemValue('version'),
-					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
-					'EX-APP-ID' => $exApp->getAppid(),
-					'EX-APP-VERSION' => $exApp->getVersion(),
+					'NC_USER_ID' => $userId,
+					'NC_VERSION' => $this->config->getSystemValue('version'),
+					'AE_VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+					'EX_APP_ID' => $exApp->getAppid(),
+					'EX_APP_VERSION' => $exApp->getVersion(),
 				],
 			];
 
@@ -264,7 +264,7 @@ class AppEcosystemV2Service {
 			}
 
 			$signature = $this->generateRequestSignature($method, $options, $params, $exApp->getSecret());
-			$options['headers']['EA-SIGNATURE'] = $signature;
+			$options['headers']['EA_SIGNATURE'] = $signature;
 
 			if ($method === 'GET') {
 				$response = $this->client->get($url, $options);
@@ -285,36 +285,35 @@ class AppEcosystemV2Service {
 
 	public function generateRequestSignature(string $method, array $options, array $params = [], string $secret): ?string {
 		$headers = [];
-		if (isset($options['headers']['NC-VERSION'])) {
-			$headers['NC-VERSION'] = $options['headers']['NC-VERSION'];
+		if (isset($options['headers']['NC_VERSION'])) {
+			$headers['NC_VERSION'] = $options['headers']['NC_VERSION'];
 		}
-		if (isset($options['headers']['AE-VERSION'])) {
-			$headers['AE-VERSION'] = $options['headers']['AE-VERSION'];
+		if (isset($options['headers']['AE_VERSION'])) {
+			$headers['AE_VERSION'] = $options['headers']['AE_VERSION'];
 		}
-		if (isset($options['headers']['EX-APP-ID'])) {
-			$headers['EX-APP-ID'] = $options['headers']['EX-APP-ID'];
+		if (isset($options['headers']['EX_APP_ID'])) {
+			$headers['EX_APP_ID'] = $options['headers']['EX_APP_ID'];
 		}
-		if (isset($options['headers']['EX-APP-VERSION'])) {
-			$headers['EX-APP-VERSION'] = $options['headers']['EX-APP-VERSION'];
+		if (isset($options['headers']['EX_APP_VERSION'])) {
+			$headers['EX_APP_VERSION'] = $options['headers']['EX_APP_VERSION'];
 		}
-		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
-			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
+		if (isset($options['headers']['NC_USER_ID']) && $options['headers']['NC_USER_ID'] !== '') {
+			$headers['NC_USER_ID'] = $options['headers']['NC_USER_ID'];
 		}
 		if ($method === 'GET') {
-			ksort($params);
-			$body = $method . json_encode($params) . json_encode($options['headers']);
+			$this->sortNestedArrayAssoc($params);
+			$body = $method . json_encode($params, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		} else {
 			$queryParams = array_merge($params, $options['json']);
-			ksort($queryParams);
-			ksort($options['headers']);
-			$body = $method . json_encode($queryParams) . json_encode($options['headers']);
+			$this->sortNestedArrayAssoc($queryParams);
+			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		}
 		return hash_hmac('sha256', $body, $secret);
 	}
 
 	public function validateExAppRequestToNC(IRequest $request): bool {
 		try {
-			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX-APP-ID'));
+			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX_APP_ID'));
 			$enabled = $exApp->getEnabled();
 			if (!$enabled) {
 				return false;
@@ -332,23 +331,22 @@ class AppEcosystemV2Service {
 		}
 		$method = $request->getMethod();
 		$headers = [
-			'AE-VERSION' => $request->getHeader('AE-VERSION'),
-			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
-			'EX-APP-VERSION' => $request->getHeader('EX-APP-VERSION'),
-			'NC-USER-ID' => $request->getHeader('NC-USER-ID'),
+			'AE_VERSION' => $request->getHeader('AE_VERSION'),
+			'EX_APP_ID' => $request->getHeader('EX_APP_ID'),
+			'EX_APP_VERSION' => $request->getHeader('EX_APP_VERSION'),
+			'NC_USER_ID' => $request->getHeader('NC_USER_ID'),
 		];
-		$requestSignature = $request->getHeader('EA-SIGNATURE');
+		$requestSignature = $request->getHeader('EA_SIGNATURE');
 		$queryParams = $request->getParams();
-		ksort($queryParams);
-		ksort($headers);
+		$this->sortNestedArrayAssoc($queryParams);
 		if ($method === 'GET') {
-			$body = $method . json_encode($queryParams) . json_encode($headers);
+			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		} else {
-			$body = $method . json_encode($queryParams) . json_encode($headers);
+			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		}
 		$signature = hash_hmac('sha256', $body, $secret);
 		// TODO: Add scope check
-		$userId = $request->getHeader('NC-USER-ID');
+		$userId = $request->getHeader('NC_USER_ID');
 		if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 			return false;
 		}
@@ -364,5 +362,15 @@ class AppEcosystemV2Service {
 		} catch (DoesNotExistException) {
 			return false;
 		}
+	}
+
+	private function sortNestedArrayAssoc(&$a) {
+		if (is_array($a)) {
+			ksort($a);
+			foreach ($a as $k=>$v) {
+				$a[$k] = $this->sortNestedArrayAssoc($v);
+			}
+		}
+		return $a;
 	}
 }
