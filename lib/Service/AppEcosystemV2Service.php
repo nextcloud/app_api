@@ -47,7 +47,7 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\IL10N;
 use OCP\IRequest;
-use OCP\ISession;
+use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
@@ -332,13 +332,7 @@ class AppEcosystemV2Service {
 				return false;
 			}
 			$secret = $exApp->getSecret();
-			$exApp->setLastResponseTime(time());
-			try {
-				$this->exAppMapper->updateLastResponseTime($exApp);
-				// TODO: Add check of debug mode for logging each request
-			} catch (\Exception $e) {
-				$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
-			}
+			// TODO: Add check of debug mode for logging each request if needed
 		} catch (DoesNotExistException) {
 			return false;
 		}
@@ -351,7 +345,7 @@ class AppEcosystemV2Service {
 		];
 		$requestSignature = $request->getHeader('EA_SIGNATURE');
 		$queryParams = $request->getParams();
-		$this->sortNestedArrayAssoc($queryParams);
+		// $this->sortNestedArrayAssoc($queryParams);
 		if ($method === 'GET') {
 			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		} else {
@@ -366,8 +360,16 @@ class AppEcosystemV2Service {
 		}
 		if ($userId !== '' && $signatureValid) {
 			$activeUser = $this->userManager->get($userId);
-			$this->userSession->setUser($activeUser);
-			return $signatureValid;
+			if ($activeUser !== null) {
+				$this->userSession->setUser($activeUser);
+				$exApp->setLastResponseTime(time());
+				try {
+					$this->exAppMapper->updateLastResponseTime($exApp);
+				} catch (\Exception $e) {
+					$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
+				}
+				return true;
+			}
 		}
 		return false;
 	}

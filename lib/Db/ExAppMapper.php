@@ -55,7 +55,6 @@ class ExAppMapper extends QBMapper {
 	 * @param string $appId
 	 *
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
 	 * @return \OCA\AppEcosystemV2\Db\ExApp
 	 */

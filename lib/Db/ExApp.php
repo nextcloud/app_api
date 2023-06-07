@@ -47,7 +47,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getStatus()
  * @method int getEnabled()
  * @method string getCreatedTime()
- * @method string getLastResponseTime()
+ * @method int getLastResponseTime()
  * @method void setAppid(string $appid)
  * @method void setVersion(string $version)
  * @method void setName(string $name)
@@ -56,7 +56,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setStatus(string $status)
  * @method void setEnabled(int $enabled)
  * @method void setCreatedTime(string $createdTime)
- * @method void setLastResponseTime(string $lastResponseTime)
+ * @method void setLastResponseTime(int $lastResponseTime)
  */
 class ExApp extends Entity implements JsonSerializable {
 	protected $appid;
