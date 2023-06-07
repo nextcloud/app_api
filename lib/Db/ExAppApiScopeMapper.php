@@ -50,20 +50,18 @@ class ExAppApiScopeMapper extends QBMapper {
 	}
 
 	/**
-	 * @param string $appId
-	 * @param string $userId
+	 * @param string $apiRoute
 	 *
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @return ExAppUser[]
+	 * @return ExAppApiScope
 	 */
-	public function findByApiRoute(string $appId, string $userId): Entity {
+	public function findByApiRoute(string $apiRoute): Entity {
 		$qb = $this->db->getQueryBuilder();
 		return $this->findEntity($qb->select('*')
 			->from($this->tableName)
-			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId)))
-			->andWhere($qb->expr()->eq('userid', $qb->createNamedParameter($userId)))
+			->where($qb->expr()->eq('api_scope', $qb->createNamedParameter($apiRoute)))
 		);
 	}
 }

@@ -40,6 +40,8 @@ use OCP\Http\Client\IClient;
 
 use OCP\AppFramework\Db\Entity;
 use OCA\AppEcosystemV2\Db\ExApp;
+use OCA\AppEcosystemV2\Db\ExAppApiScope;
+use OCA\AppEcosystemV2\Db\ExAppApiScopeMapper;
 use OCA\AppEcosystemV2\Db\ExAppMapper;
 use OCA\AppEcosystemV2\Db\ExAppUser;
 use OCA\AppEcosystemV2\Db\ExAppUserMapper;
@@ -82,6 +84,9 @@ class AppEcosystemV2Service {
 	/** @var IUserManager */
 	private $userManager;
 
+	/** @var ExAppApiScopeMapper */
+	private $exAppApiScopeMapper;
+
 	public function __construct(
 		IConfig $config,
 		LoggerInterface $logger,
@@ -90,10 +95,10 @@ class AppEcosystemV2Service {
 		IL10N $l10n,
 		IAppManager $appManager,
 		ExAppUserMapper $exAppUserMapper,
+		ExAppApiScopeMapper $exAppApiScopeMapper,
 		ISecureRandom $random,
 		IUserSession $userSession,
 		IUserManager $userManager,
-		private \Symfony\Component\EventDispatcher\EventDispatcherInterface $legacyDispatcher
 	) {
 		$this->config = $config;
 		$this->logger = $logger;
@@ -105,6 +110,7 @@ class AppEcosystemV2Service {
 		$this->random = $random;
 		$this->userSession = $userSession;
 		$this->userManager = $userManager;
+		$this->exAppApiScopeMapper = $exAppApiScopeMapper;
 	}
 
 	public function getExApp(string $exAppId): ?Entity {
@@ -117,7 +123,7 @@ class AppEcosystemV2Service {
 
 	/**
 	 * Register exApp
-	 * 
+	 *
 	 * @param string $appId
 	 * @param array $appData [version, name, config, secret, status, enabled]
 	 *
@@ -161,6 +167,7 @@ class AppEcosystemV2Service {
 				return null;
 			}
 		}
+		return null;
 	}
 
 	/**
@@ -187,9 +194,9 @@ class AppEcosystemV2Service {
 
 	/**
 	 * Enable ex app
-	 * 
+	 *
 	 * @param ExApp $exApp
-	 * 
+	 *
 	 * @return array|null
 	 */
 	public function enableExApp(ExApp $exApp): ?array {
@@ -202,9 +209,9 @@ class AppEcosystemV2Service {
 
 	/**
 	 * Disable ex app
-	 * 
+	 *
 	 * @param ExApp $exApp
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function disableExApp(ExApp $exApp): bool {
@@ -356,11 +363,24 @@ class AppEcosystemV2Service {
 		}
 		$signature = hash_hmac('sha256', $body, $secret);
 		$signatureValid = $signature === $requestSignature;
-		// TODO: Add scope check
+
 		if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 			return false;
 		}
+
 		if ($signatureValid) {
+			$path = $request->getPathInfo();
+			$apiScope = $this->getExAppApiScope($path);
+
+			// If it's initialization scope group
+			if ($apiScope !== null && $apiScope->getScopeGroup() === 1) {
+				return true;
+			}
+			// If it's another scope group - proceed with default checks
+			if (!$this->passesScopeCheck($exApp, $request)) {
+				return false;
+			}
+
 			if ($userId !== '') {
 				$activeUser = $this->userManager->get($userId);
 				if ($activeUser === null) {
@@ -417,5 +437,22 @@ class AppEcosystemV2Service {
 			unset($params['_route']);
 		}
 		return $params;
+	}
+
+	public function passesScopeCheck(ExApp $exApp, IRequest $request) {
+		// TODO: Implement checks for user scopes
+		return true;
+	}
+
+	public function getExAppApiScope(string $apiRoute): ?ExAppApiScope {
+		try {
+			return $this->exAppApiScopeMapper->findByApiRoute($apiRoute);
+		} catch (DoesNotExistException) {
+			return null;
+		}
+	}
+
+	public function registerInitScopes() {
+		// TODO: Register init scopes
 	}
 }
