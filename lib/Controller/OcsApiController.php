@@ -254,6 +254,22 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
+	 * @param string $appId
+	 * @param string $format
+	 *
+	 * @return Response
+	 */
+	public function getExAppUsers(?string $appId = null, string $format = 'json'): Response {
+		return $this->buildResponse(new DataResponse([
+			'success' => true,
+			'users' => $this->service->getExAppUsers($appId),
+		], Http::STATUS_OK), $format);
+	}
+
+	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */

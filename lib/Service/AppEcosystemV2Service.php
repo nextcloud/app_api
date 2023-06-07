@@ -47,11 +47,9 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\IL10N;
 use OCP\IRequest;
-use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
-use Sabre\HTTP\RequestInterface;
 
 class AppEcosystemV2Service {
 	/** @var IConfig */
@@ -95,6 +93,7 @@ class AppEcosystemV2Service {
 		ISecureRandom $random,
 		IUserSession $userSession,
 		IUserManager $userManager,
+		private \Symfony\Component\EventDispatcher\EventDispatcherInterface $legacyDispatcher
 	) {
 		$this->config = $config;
 		$this->logger = $logger;
@@ -375,17 +374,29 @@ class AppEcosystemV2Service {
 				} catch (\Exception $e) {
 					$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
 				}
+				// TODO: Decide which user to set for session for system (no user) ex apps
+			} else {
+				// Temporal workaround - is it ok?
+				$serviceUser = new \OC\User\User('', null, $this->legacyDispatcher, null, null, null);
+				$this->userSession->setUser($serviceUser);
 			}
-			// TODO: Decide which user to set for session for system (no user) ex apps
 			return true;
 		}
 		$this->logger->error('Invalid signature for ex app: ' . $exApp->getAppid() . ' and user: ' . $userId);
 		return false;
 	}
 
-	private function getExAppUsers(string $appId): ?array {
+	public function getExAppUsers(?string $appId = null): ?array {
 		try {
-			return $this->exAppUserMapper->findAllUsersByAppid($appId);
+			if ($appId !== null) {
+				return $this->exAppUserMapper->findAllUsersByAppid($appId);
+			}
+			$exAppUsers = $this->exAppUserMapper->findAll();
+			$users = [];
+			foreach ($exAppUsers as $exAppUser) {
+				$users[$exAppUser->getAppid()][] = $exAppUser->getUserid();
+			}
+			return $users;
 		} catch (DoesNotExistException) {
 			return null;
 		}
@@ -410,19 +421,5 @@ class AppEcosystemV2Service {
 			}
 		}
 		return $a;
-	}
-
-	public function validateDavRequest(RequestInterface $request) {
-		// TODO
-		$method = $request->getMethod();
-		$queryParams = $request->getQueryParameters();
-		$signature = $request->getHeader('EA_SIGNATURE');
-		$headers = [
-			'AE-VERSION' => $request->getHeader('AE-VERSION'),
-			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
-			'EX-APP-VERSION' => $request->getHeader('EX-APP-VERSION'),
-			'NC-USER-ID' => $request->getHeader('NC-USER-ID'),
-		];
-		// TODO: extract common validation algorithm and use it for both DAV and NC requests
 	}
 }
