@@ -47,6 +47,9 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\IL10N;
 use OCP\IRequest;
+use OCP\ISession;
+use OCP\IUserManager;
+use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
 
 class AppEcosystemV2Service {
@@ -74,6 +77,12 @@ class AppEcosystemV2Service {
 	/** @var ISecureRandom */
 	private $random;
 
+	/** @var IUserSession */
+	private $userSession;
+
+	/** @var IUserManager */
+	private $userManager;
+
 	public function __construct(
 		IConfig $config,
 		LoggerInterface $logger,
@@ -83,6 +92,8 @@ class AppEcosystemV2Service {
 		IAppManager $appManager,
 		ExAppUserMapper $exAppUserMapper,
 		ISecureRandom $random,
+		IUserSession $userSession,
+		IUserManager $userManager,
 	) {
 		$this->config = $config;
 		$this->logger = $logger;
@@ -92,6 +103,8 @@ class AppEcosystemV2Service {
 		$this->appManager = $appManager;
 		$this->exAppUserMapper = $exAppUserMapper;
 		$this->random = $random;
+		$this->userSession = $userSession;
+		$this->userManager = $userManager;
 	}
 
 	public function getExApp(string $exAppId): ?Entity {
@@ -235,11 +248,11 @@ class AppEcosystemV2Service {
 			}
 			$options = [
 				'headers' => [
-					'NC_USER_ID' => $userId,
-					'NC_VERSION' => $this->config->getSystemValue('version'),
-					'AE_VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
-					'EX_APP_ID' => $exApp->getAppid(),
-					'EX_APP_VERSION' => $exApp->getVersion(),
+					'NC-USER-ID' => $userId,
+					'NC-VERSION' => $this->config->getSystemValue('version'),
+					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+					'EX-APP-ID' => $exApp->getAppid(),
+					'EX-APP-VERSION' => $exApp->getVersion(),
 				],
 			];
 
@@ -264,7 +277,7 @@ class AppEcosystemV2Service {
 			}
 
 			$signature = $this->generateRequestSignature($method, $options, $params, $exApp->getSecret());
-			$options['headers']['EA_SIGNATURE'] = $signature;
+			$options['headers']['EA-SIGNATURE'] = $signature;
 
 			if ($method === 'GET') {
 				$response = $this->client->get($url, $options);
@@ -285,20 +298,20 @@ class AppEcosystemV2Service {
 
 	public function generateRequestSignature(string $method, array $options, array $params = [], string $secret): ?string {
 		$headers = [];
-		if (isset($options['headers']['NC_VERSION'])) {
-			$headers['NC_VERSION'] = $options['headers']['NC_VERSION'];
+		if (isset($options['headers']['NC-VERSION'])) {
+			$headers['NC-VERSION'] = $options['headers']['NC-VERSION'];
 		}
-		if (isset($options['headers']['AE_VERSION'])) {
-			$headers['AE_VERSION'] = $options['headers']['AE_VERSION'];
+		if (isset($options['headers']['AE-VERSION'])) {
+			$headers['AE-VERSION'] = $options['headers']['AE-VERSION'];
 		}
-		if (isset($options['headers']['EX_APP_ID'])) {
-			$headers['EX_APP_ID'] = $options['headers']['EX_APP_ID'];
+		if (isset($options['headers']['EX-APP-ID'])) {
+			$headers['EX-APP-ID'] = $options['headers']['EX-APP-ID'];
 		}
-		if (isset($options['headers']['EX_APP_VERSION'])) {
-			$headers['EX_APP_VERSION'] = $options['headers']['EX_APP_VERSION'];
+		if (isset($options['headers']['EX-APP-VERSION'])) {
+			$headers['EX_APP_VERSION'] = $options['headers']['EX-APP-VERSION'];
 		}
-		if (isset($options['headers']['NC_USER_ID']) && $options['headers']['NC_USER_ID'] !== '') {
-			$headers['NC_USER_ID'] = $options['headers']['NC_USER_ID'];
+		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
+			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
 		}
 		if ($method === 'GET') {
 			$this->sortNestedArrayAssoc($params);
@@ -313,7 +326,7 @@ class AppEcosystemV2Service {
 
 	public function validateExAppRequestToNC(IRequest $request): bool {
 		try {
-			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX_APP_ID'));
+			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX-APP-ID'));
 			$enabled = $exApp->getEnabled();
 			if (!$enabled) {
 				return false;
@@ -331,10 +344,10 @@ class AppEcosystemV2Service {
 		}
 		$method = $request->getMethod();
 		$headers = [
-			'AE_VERSION' => $request->getHeader('AE_VERSION'),
-			'EX_APP_ID' => $request->getHeader('EX_APP_ID'),
-			'EX_APP_VERSION' => $request->getHeader('EX_APP_VERSION'),
-			'NC_USER_ID' => $request->getHeader('NC_USER_ID'),
+			'AE-VERSION' => $request->getHeader('AE-VERSION'),
+			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
+			'EX-APP-VERSION' => $request->getHeader('EX-APP-VERSION'),
+			'NC-USER-ID' => $request->getHeader('NC-USER-ID'),
 		];
 		$requestSignature = $request->getHeader('EA_SIGNATURE');
 		$queryParams = $request->getParams();
@@ -345,12 +358,18 @@ class AppEcosystemV2Service {
 			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		}
 		$signature = hash_hmac('sha256', $body, $secret);
+		$signatureValid = $signature === $requestSignature;
 		// TODO: Add scope check
-		$userId = $request->getHeader('NC_USER_ID');
+		$userId = $request->getHeader('NC-USER-ID');
 		if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 			return false;
 		}
-		return $signature === $requestSignature;
+		if ($userId !== '' && $signatureValid) {
+			$activeUser = $this->userManager->get($userId);
+			$this->userSession->setUser($activeUser);
+			return $signatureValid;
+		}
+		return false;
 	}
 
 	private function exAppUserExists(string $appId, string $userId): bool {

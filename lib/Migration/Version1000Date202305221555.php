@@ -179,6 +179,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps_users')) {
 			$table = $schema->createTable('ex_apps_users');
 
+			$table->addColumn('id', 'integer', [
+				'notnull' => true,
+				'autoincrement' => true,
+			]);
 			$table->addColumn('appid', 'string', [
 				'notnull' => true,
 				'length' => 32,
@@ -189,8 +193,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'default' => '',
 			]);
 
+			$table->setPrimaryKey(['id'], 'ex_apps_users_pk');
 			$table->addIndex(['appid'], 'ex_apps_users_appid');
-			$table->addIndex(['userid'], 'ex_apps_users_userid');
 		}
 
 		if (!$schema->hasTable('ex_apps_api_scopes')) {
