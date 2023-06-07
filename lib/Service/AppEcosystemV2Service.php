@@ -276,7 +276,7 @@ class AppEcosystemV2Service {
 				}
 			}
 
-			$signature = $this->generateRequestSignature($method, $options, $params, $exApp->getSecret());
+			$signature = $this->generateRequestSignature($method, $options, $exApp->getSecret(), $params);
 			$options['headers']['EA-SIGNATURE'] = $signature;
 
 			if ($method === 'GET') {
@@ -296,7 +296,7 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function generateRequestSignature(string $method, array $options, array $params = [], string $secret): ?string {
+	public function generateRequestSignature(string $method, array $options, string $secret, array $params = []): ?string {
 		$headers = [];
 		if (isset($options['headers']['NC-VERSION'])) {
 			$headers['NC-VERSION'] = $options['headers']['NC-VERSION'];
@@ -347,7 +347,7 @@ class AppEcosystemV2Service {
 			$headers['NC-USER-ID'] = $userId;
 		}
 		$requestSignature = $request->getHeader('EA_SIGNATURE');
-		$queryParams = $request->getParams();
+		$queryParams = $this->cleanupParams($request->getParams());
 		// $this->sortNestedArrayAssoc($queryParams);
 		if ($method === 'GET') {
 			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
@@ -407,5 +407,15 @@ class AppEcosystemV2Service {
 			}
 		}
 		return $a;
+	}
+
+	/**
+	 * Service function to cleanup params from injected params
+	 */
+	private function cleanupParams(array $params) {
+		if (isset($params['_route'])) {
+			unset($params['_route']);
+		}
+		return $params;
 	}
 }
