@@ -29,35 +29,15 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2;
+namespace OCA\AppEcosystemV2\Attribute;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCP\App\IAppManager;
-use OCP\Capabilities\IPublicCapability;
-use OCP\IConfig;
+use Attribute;
 
-class Capabilities implements IPublicCapability {
-	/** @var IConfig */
-	private $config;
-
-	/** @var IAppManager */
-	private $appManager;
-
-	public function __construct(
-		IConfig $config,
-		IAppManager $appManager
-	) {
-		$this->config = $config;
-		$this->appManager = $appManager;
-	}
-
-	public function getCapabilities(): array {
-		$capabilities = [
-			'nc-log-level' => $this->config->getSystemValue('loglevel', 2),
-			'app-ecosystem-version' => $this->appManager->getAppVersion(Application::APP_ID),
-		];
-		return [
-			'app_ecosystem_v2' => $capabilities,
-		];
-	}
+/**
+ * Attribute for controller methods that requires App Ecosystem V2 authentication.
+ *
+ * @since 27.0.0
+ */
+#[Attribute]
+class AEAuth {
 }

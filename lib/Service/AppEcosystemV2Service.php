@@ -374,32 +374,18 @@ class AppEcosystemV2Service {
 				} catch (\Exception $e) {
 					$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
 				}
-				// TODO: Decide which user to set for session for system (no user) ex apps
-			} else {
-				// Temporal workaround - is it ok?
-				$serviceUser = new \OC\User\User('', null, $this->legacyDispatcher, null, null, null);
-				$this->userSession->setUser($serviceUser);
+				return true;
 			}
-			return true;
+			return false;
 		}
 		$this->logger->error('Invalid signature for ex app: ' . $exApp->getAppid() . ' and user: ' . $userId);
 		return false;
 	}
 
-	public function getExAppUsers(?string $appId = null): ?array {
-		try {
-			if ($appId !== null) {
-				return $this->exAppUserMapper->findAllUsersByAppid($appId);
-			}
-			$exAppUsers = $this->exAppUserMapper->findAll();
-			$users = [];
-			foreach ($exAppUsers as $exAppUser) {
-				$users[$exAppUser->getAppid()][] = $exAppUser->getUserid();
-			}
-			return $users;
-		} catch (DoesNotExistException) {
-			return null;
-		}
+	public function getNCUsersList(): ?array {
+		$users = [];
+		// TODO
+		return $users;
 	}
 
 	private function exAppUserExists(string $appId, string $userId): bool {

@@ -38,13 +38,14 @@ return [
 		// Logging
 		['name' => 'ocsApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
 
+		// ExAppUsers
+		['name' => 'ocsApi#getExAppUsers', 'url' => 'api/v1/users', 'verb' => 'GET'],
+
 		// Ex Apps registration
 		['name' => 'ocsApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
 		['name' => 'ocsApi#unregisterExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
 		['name' => 'ocsApi#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
 
-		// ExAppUsers
-		['name' => 'ocsApi#getExAppUsers', 'url' => 'api/v1/ex-app/users', 'verb' => 'GET'],
 
 		// File Actions Menu
 		['name' => 'ocsApi#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],

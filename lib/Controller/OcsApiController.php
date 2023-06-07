@@ -63,6 +63,9 @@ class OCSApiController extends OCSController {
 	/** @var string */
 	private $userId;
 
+	/** @var IRequest */
+	protected $request;
+
 	public function __construct(
 		IRequest $request,
 		?string $userId,
@@ -73,6 +76,7 @@ class OCSApiController extends OCSController {
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
+		$this->request = $request;
 		$this->logger = $logger;
 		$this->l = $l;
 		$this->service = $service;
@@ -84,10 +88,11 @@ class OCSApiController extends OCSController {
 	// (authorization, NC version, ExApp version, AppEcosystemVersion injection, etc.)
 
 	/**
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * 
-	 * @param string $appId
 	 * @param int $level
 	 * @param string $message
 	 *
@@ -95,12 +100,12 @@ class OCSApiController extends OCSController {
 	 * @throws OCSBadRequestException
 	 */
 	public function log(
-		string $appId,
 		int $level,
 		string $message,
 		string $format = 'json',
 	): Response {
 		try {
+			$appId = $this->request->getHeader('EX-APP-ID');
 			$exApp = $this->service->getExApp($appId);
 			if ($exApp === null) {
 				$this->logger->error('ExApp ' . $appId . ' not found');
@@ -254,6 +259,7 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @AEAuth
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
@@ -265,7 +271,7 @@ class OCSApiController extends OCSController {
 	public function getExAppUsers(?string $appId = null, string $format = 'json'): Response {
 		return $this->buildResponse(new DataResponse([
 			'success' => true,
-			'users' => $this->service->getExAppUsers($appId),
+			'users' => $this->service->getNCUsersList($appId),
 		], Http::STATUS_OK), $format);
 	}
 

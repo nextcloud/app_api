@@ -37,6 +37,7 @@ use OCA\Files\Event\LoadAdditionalScriptsEvent;
 
 use OCA\AppEcosystemV2\Capabilities;
 use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
+use OCA\AppEcosystemV2\Middleware\AEAuthMiddleware;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_ecosystem_v2';
@@ -51,6 +52,7 @@ class Application extends App implements IBootstrap {
 	public function register(IRegistrationContext $context): void {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
+		$context->registerMiddleware(AEAuthMiddleware::class);
 	}
 
 	public function boot(IBootContext $context): void {

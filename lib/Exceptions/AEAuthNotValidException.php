@@ -29,35 +29,15 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2;
+namespace OCA\AppEcosystemV2\Exceptions;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCP\App\IAppManager;
-use OCP\Capabilities\IPublicCapability;
-use OCP\IConfig;
+use OCP\AppFramework\Http;
 
-class Capabilities implements IPublicCapability {
-	/** @var IConfig */
-	private $config;
-
-	/** @var IAppManager */
-	private $appManager;
-
-	public function __construct(
-		IConfig $config,
-		IAppManager $appManager
-	) {
-		$this->config = $config;
-		$this->appManager = $appManager;
-	}
-
-	public function getCapabilities(): array {
-		$capabilities = [
-			'nc-log-level' => $this->config->getSystemValue('loglevel', 2),
-			'app-ecosystem-version' => $this->appManager->getAppVersion(Application::APP_ID),
-		];
-		return [
-			'app_ecosystem_v2' => $capabilities,
-		];
+/**
+ * @package OCA\AppEcosystemV2\Exceptions
+ */
+class AEAuthNotValidException extends \Exception {
+	public function __construct($message = 'AEAuth failed', $code = Http::STATUS_UNAUTHORIZED) {
+		parent::__construct($message, $code);
 	}
 }
