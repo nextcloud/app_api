@@ -37,7 +37,8 @@ use Sabre\DAV\Server;
 use Sabre\DAV\ServerPlugin;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
-use OCA\DAV\Connector\Sabre\Auth;
+
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
 class DavPlugin extends ServerPlugin {
 	/** @var ISession */
@@ -52,14 +53,14 @@ class DavPlugin extends ServerPlugin {
 	/** @var Server */
 	private $server;
 
-	/** @var ExAppAuth */
-	private $exAppAuth;
+	/** @var AppEcosystemV2Service */
+	private $service;
 
-	public function __construct(ISession $session, IConfig $config, array $auth, ExAppAuth $exAppAuth) {
+	public function __construct(ISession $session, IConfig $config, array $auth, AppEcosystemV2Service $service) {
 		$this->session = $session;
 		$this->config = $config;
 		$this->auth = $auth;
-		$this->exAppAuth = $exAppAuth;
+		$this->service = $service;
 	}
 
 	public function initialize(Server $server) {
@@ -69,6 +70,6 @@ class DavPlugin extends ServerPlugin {
 	}
 
 	public function beforeMethod(RequestInterface $request, ResponseInterface $response) {
-		// TODO
+		$this->service->validateDavRequest($request);
 	}
 }

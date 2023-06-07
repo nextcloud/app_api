@@ -51,6 +51,7 @@ use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
+use Sabre\HTTP\RequestInterface;
 
 class AppEcosystemV2Service {
 	/** @var IConfig */
@@ -248,11 +249,11 @@ class AppEcosystemV2Service {
 			}
 			$options = [
 				'headers' => [
-					'NC-USER-ID' => $userId,
 					'NC-VERSION' => $this->config->getSystemValue('version'),
 					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
 					'EX-APP-ID' => $exApp->getAppid(),
 					'EX-APP-VERSION' => $exApp->getVersion(),
+					'NC-USER-ID' => $userId,
 				],
 			];
 
@@ -341,8 +342,11 @@ class AppEcosystemV2Service {
 			'AE-VERSION' => $request->getHeader('AE-VERSION'),
 			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
 			'EX-APP-VERSION' => $request->getHeader('EX-APP-VERSION'),
-			'NC-USER-ID' => $request->getHeader('NC-USER-ID'),
 		];
+		$userId = $request->getHeader('NC-USER-ID');
+		if ($userId !== '') {
+			$headers['NC-USER-ID'] = $userId;
+		}
 		$requestSignature = $request->getHeader('EA_SIGNATURE');
 		$queryParams = $request->getParams();
 		// $this->sortNestedArrayAssoc($queryParams);
@@ -354,13 +358,16 @@ class AppEcosystemV2Service {
 		$signature = hash_hmac('sha256', $body, $secret);
 		$signatureValid = $signature === $requestSignature;
 		// TODO: Add scope check
-		$userId = $request->getHeader('NC-USER-ID');
 		if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 			return false;
 		}
-		if ($userId !== '' && $signatureValid) {
-			$activeUser = $this->userManager->get($userId);
-			if ($activeUser !== null) {
+		if ($signatureValid) {
+			if ($userId !== '') {
+				$activeUser = $this->userManager->get($userId);
+				if ($activeUser === null) {
+					$this->logger->error('Requested user does not exists: ' . $userId);
+					return false;
+				}
 				$this->userSession->setUser($activeUser);
 				$exApp->setLastResponseTime(time());
 				try {
@@ -368,10 +375,20 @@ class AppEcosystemV2Service {
 				} catch (\Exception $e) {
 					$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
 				}
-				return true;
 			}
+			// TODO: Decide which user to set for session for system (no user) ex apps
+			return true;
 		}
+		$this->logger->error('Invalid signature for ex app: ' . $exApp->getAppid() . ' and user: ' . $userId);
 		return false;
+	}
+
+	private function getExAppUsers(string $appId): ?array {
+		try {
+			return $this->exAppUserMapper->findAllUsersByAppid($appId);
+		} catch (DoesNotExistException) {
+			return null;
+		}
 	}
 
 	private function exAppUserExists(string $appId, string $userId): bool {
@@ -393,5 +410,19 @@ class AppEcosystemV2Service {
 			}
 		}
 		return $a;
+	}
+
+	public function validateDavRequest(RequestInterface $request) {
+		// TODO
+		$method = $request->getMethod();
+		$queryParams = $request->getQueryParameters();
+		$signature = $request->getHeader('EA_SIGNATURE');
+		$headers = [
+			'AE-VERSION' => $request->getHeader('AE-VERSION'),
+			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
+			'EX-APP-VERSION' => $request->getHeader('EX-APP-VERSION'),
+			'NC-USER-ID' => $request->getHeader('NC-USER-ID'),
+		];
+		// TODO: extract common validation algorithm and use it for both DAV and NC requests
 	}
 }

@@ -32,10 +32,13 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\SabrePluginEvent;
+
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
 
 use OCA\AppEcosystemV2\Capabilities;
+use OCA\AppEcosystemV2\DavPlugin;
 use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
-use OCA\Files\Event\LoadAdditionalScriptsEvent;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_ecosystem_v2';
@@ -50,6 +53,16 @@ class Application extends App implements IBootstrap {
 	public function register(IRegistrationContext $context): void {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
+		$this->registerDavAuth();
+	}
+
+	public function registerDavAuth() {
+		$container = $this->getContainer();
+
+		$dispatcher = $container->getServer()->getEventDispatcher();
+		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
+			$event->getServer()->addPlugin($container->query(DavPlugin::class));
+		});
 	}
 
 	public function boot(IBootContext $context): void {
