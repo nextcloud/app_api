@@ -40,9 +40,9 @@ use OCP\AppFramework\Db\Entity;
  * @package OCA\AppEcosystemV2\Db
  *
  * @method string getApiRoute()
- * @method string getScopeGroup()
+ * @method int getScopeGroup()
  * @method void setApiRoute(string $apiRoute)
- * @method void setScopeGroup(string $scopeGroup)
+ * @method void setScopeGroup(int $scopeGroup)
  */
 class ExAppApiScope extends Entity implements JsonSerializable {
 	protected $apiRoute;

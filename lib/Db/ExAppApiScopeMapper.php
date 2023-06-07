@@ -61,7 +61,7 @@ class ExAppApiScopeMapper extends QBMapper {
 		$qb = $this->db->getQueryBuilder();
 		return $this->findEntity($qb->select('*')
 			->from($this->tableName)
-			->where($qb->expr()->eq('api_scope', $qb->createNamedParameter($apiRoute)))
+			->where($qb->expr()->eq('api_route', $qb->createNamedParameter($apiRoute)))
 		);
 	}
 }
