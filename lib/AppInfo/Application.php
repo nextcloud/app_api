@@ -31,6 +31,9 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\AppInfo;
 
+use OC_User;
+use OCP\IRequest;
+use OCP\ISession;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -72,6 +75,10 @@ class Application extends App implements IBootstrap {
 		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
 			$event->getServer()->addPlugin($container->query(DavPlugin::class));
 		});
+		OC_User::useBackend(new \OCA\AppEcosystemV2\UserBackend(
+			$container->get(IRequest::class),
+			$container->get(ISession::class),
+		));
 	}
 }
 
