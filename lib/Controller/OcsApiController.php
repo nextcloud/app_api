@@ -84,7 +84,7 @@ class OCSApiController extends OCSController {
 		$this->userId = $userId;
 	}
 
-	// TODO: Implement intermediate check for all routes 
+	// TODO: Implement intermediate check for all routes
 	// (authorization, NC version, ExApp version, AppEcosystemVersion injection, etc.)
 
 	/**
@@ -92,7 +92,7 @@ class OCSApiController extends OCSController {
 	 * @PublicPage
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
-	 * 
+	 *
 	 * @param int $level
 	 * @param string $message
 	 *
@@ -186,6 +186,8 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
 	 * @param string $appId
@@ -202,6 +204,8 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
 	 * @param string $appId
