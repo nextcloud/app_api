@@ -255,7 +255,6 @@ class AppEcosystemV2Service {
 			}
 			$options = [
 				'headers' => [
-					'NC-VERSION' => $this->config->getSystemValue('version'),
 					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
 					'EX-APP-ID' => $exApp->getAppid(),
 					'EX-APP-VERSION' => $exApp->getVersion(),
@@ -305,9 +304,6 @@ class AppEcosystemV2Service {
 
 	public function generateRequestSignature(string $method, array $options, string $secret, array $params = []): ?string {
 		$headers = [];
-		if (isset($options['headers']['NC-VERSION'])) {
-			$headers['NC-VERSION'] = $options['headers']['NC-VERSION'];
-		}
 		if (isset($options['headers']['AE-VERSION'])) {
 			$headers['AE-VERSION'] = $options['headers']['AE-VERSION'];
 		}
@@ -315,19 +311,26 @@ class AppEcosystemV2Service {
 			$headers['EX-APP-ID'] = $options['headers']['EX-APP-ID'];
 		}
 		if (isset($options['headers']['EX-APP-VERSION'])) {
-			$headers['EX_APP_VERSION'] = $options['headers']['EX-APP-VERSION'];
+			$headers['EX-APP-VERSION'] = $options['headers']['EX-APP-VERSION'];
 		}
 		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
 			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
 		}
 		if ($method === 'GET') {
-			$this->sortNestedArrayAssoc($params);
-			$body = $method . json_encode($params, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
+			$queryParams = $params;
 		} else {
 			$queryParams = array_merge($params, $options['json']);
-			$this->sortNestedArrayAssoc($queryParams);
-			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		}
+//		$this->sortNestedArrayAssoc($queryParams);
+		array_walk_recursive(
+			$queryParams,
+			function(&$v) {
+				if (is_numeric($v)) {
+					$v = strval($v);
+				}
+			}
+		);
+		$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		return hash_hmac('sha256', $body, $secret);
 	}
 
