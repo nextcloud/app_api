@@ -125,13 +125,14 @@ class AppEcosystemV2Service {
 	 * Register exApp
 	 *
 	 * @param string $appId
-	 * @param array $appData [version, name, config, secret, status, enabled]
+	 * @param array $appData [version, name, config, enabled]
 	 *
 	 * @return ExApp|null
 	 */
 	public function registerExApp(string $appId, array $appData): ?ExApp {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($appId);
+			// TODO: Decide update fields if already exists or not
 			if ($exApp !== null) {
 				$exApp->setVersion($appData['version']);
 				$exApp->setName($appData['name']);
@@ -150,7 +151,7 @@ class AppEcosystemV2Service {
 			}
 		} catch (DoesNotExistException) {
 			$exApp = new ExApp();
-			$exApp->setAppId($appId);
+			$exApp->setAppid($appId);
 			$exApp->setVersion($appData['version']);
 			$exApp->setName($appData['name']);
 			$exApp->setConfig($appData['config']);
@@ -197,12 +198,11 @@ class AppEcosystemV2Service {
 	 *
 	 * @param ExApp $exApp
 	 *
-	 * @return array|null
+	 * @return bool
 	 */
-	public function enableExApp(ExApp $exApp): ?array {
-		$exAppEnabled = $this->exAppMapper->findExAppEnabled($exApp->getAppid());
-		if ($exAppEnabled['success']) {
-			return $exAppEnabled;
+	public function enableExApp(ExApp $exApp): bool {
+		if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), true) === 1) {
+			return true;
 		}
 		return null;
 	}
@@ -356,7 +356,7 @@ class AppEcosystemV2Service {
 		if ($userId !== '') {
 			$headers['NC-USER-ID'] = $userId;
 		}
-		$requestSignature = $request->getHeader('EA_SIGNATURE');
+		$requestSignature = $request->getHeader('EA-SIGNATURE');
 		$queryParams = $this->cleanupParams($request->getParams());
 		// $this->sortNestedArrayAssoc($queryParams);
 		array_walk_recursive(

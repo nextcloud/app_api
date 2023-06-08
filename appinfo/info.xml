@@ -19,8 +19,15 @@
 	<bugs>https://github.com/nextcloud/app_ecosystem_v2/issues</bugs>
 	<repository type="git">https://github.com/nextcloud/app_ecosystem_v2.git</repository>
 	<dependencies>
-		<nextcloud min-version="26" max-version="28"/>
+		<nextcloud min-version="27" max-version="28"/>
+		<php min-version="8.0"/>
 	</dependencies>
+	<commands>
+		<command>OCA\AppEcosystemV2\Command\RegisterExApp</command>
+		<command>OCA\AppEcosystemV2\Command\UnregisterExApp</command>
+		<command>OCA\AppEcosystemV2\Command\EnableExApp</command>
+		<command>OCA\AppEcosystemV2\Command\DisableExApp</command>
+	</commands>
 	<settings>
 		<admin>OCA\AppEcosystemV2\Settings\Admin</admin>
 		<admin-section>OCA\AppEcosystemV2\Settings\AdminSection</admin-section>
