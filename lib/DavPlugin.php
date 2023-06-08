@@ -68,7 +68,7 @@ class DavPlugin extends ServerPlugin {
 	}
 
 	public function beforeMethod(RequestInterface $request, ResponseInterface $response) {
-		if ($this->service->validateExAppRequestToNC($this->request)) {
+		if ($this->service->validateExAppRequestToNC($this->request, true)) {
 			$this->session->set(Auth::DAV_AUTHENTICATED, Application::APP_ID);
 		}
 	}

@@ -31,8 +31,6 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\AppInfo;
 
-use Psr\Container\ContainerInterface;
-
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -45,9 +43,6 @@ use OCA\AppEcosystemV2\Capabilities;
 use OCA\AppEcosystemV2\DavPlugin;
 use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
 use OCA\AppEcosystemV2\Middleware\AEAuthMiddleware;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCP\IRequest;
-use OCP\ISession;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_ecosystem_v2';
@@ -57,19 +52,14 @@ class Application extends App implements IBootstrap {
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);
+
+		$this->registerDavAuth();
 	}
 
 	public function register(IRegistrationContext $context): void {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
 		$context->registerMiddleware(AEAuthMiddleware::class);
-		$context->registerService(DavPlugin::class, function (ContainerInterface $c) {
-			return new DavPlugin(
-				$c->get(IRequest::class),
-				$c->get(ISession::class),
-				$c->get(AppEcosystemV2Service::class)
-			);
-		});
 	}
 
 	public function boot(IBootContext $context): void {

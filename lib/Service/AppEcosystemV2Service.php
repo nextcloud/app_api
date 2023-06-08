@@ -334,7 +334,7 @@ class AppEcosystemV2Service {
 		return hash_hmac('sha256', $body, $secret);
 	}
 
-	public function validateExAppRequestToNC(IRequest $request): bool {
+	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX-APP-ID'));
 			$enabled = $exApp->getEnabled();
@@ -367,6 +367,9 @@ class AppEcosystemV2Service {
 				}
 			}
 		);
+		if ($isDav) {
+			$method .= $request->getRequestUri();
+		}
 		$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		$signature = hash_hmac('sha256', $body, $secret);
 		$signatureValid = $signature === $requestSignature;
