@@ -356,11 +356,15 @@ class AppEcosystemV2Service {
 		$requestSignature = $request->getHeader('EA_SIGNATURE');
 		$queryParams = $this->cleanupParams($request->getParams());
 		// $this->sortNestedArrayAssoc($queryParams);
-		if ($method === 'GET') {
-			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		} else {
-			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		}
+		array_walk_recursive(
+			$queryParams,
+			function(&$v) {
+				if (is_numeric($v)) {
+					$v = strval($v);
+				}
+			}
+		);
+		$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		$signature = hash_hmac('sha256', $body, $secret);
 		$signatureValid = $signature === $requestSignature;
 
