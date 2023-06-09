@@ -31,9 +31,6 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\AppInfo;
 
-use OC_User;
-use OCP\IRequest;
-use OCP\ISession;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -45,7 +42,9 @@ use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\AppEcosystemV2\Capabilities;
 use OCA\AppEcosystemV2\DavPlugin;
 use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
+use OCA\AppEcosystemV2\Listener\SabrePluginAuthInitListener;
 use OCA\AppEcosystemV2\Middleware\AEAuthMiddleware;
+use OCA\DAV\Events\SabrePluginAuthInitEvent;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_ecosystem_v2';
@@ -63,6 +62,7 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
 		$context->registerMiddleware(AEAuthMiddleware::class);
+		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 	}
 
 	public function boot(IBootContext $context): void {
@@ -75,10 +75,6 @@ class Application extends App implements IBootstrap {
 		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
 			$event->getServer()->addPlugin($container->query(DavPlugin::class));
 		});
-		OC_User::useBackend(new \OCA\AppEcosystemV2\UserBackend(
-			$container->get(IRequest::class),
-			$container->get(ISession::class),
-		));
 	}
 }
 

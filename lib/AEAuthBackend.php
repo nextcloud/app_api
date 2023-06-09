@@ -31,15 +31,14 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCP\ISession;
 use OCP\IRequest;
 use Sabre\DAV\Auth\Backend\BackendInterface;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-
-class UserBackend implements BackendInterface {
+class AEAuthBackend implements BackendInterface {
 	/** @var IRequest */
 	private $request;
 
@@ -55,10 +54,12 @@ class UserBackend implements BackendInterface {
 	}
 
 	public function check(RequestInterface $request, ResponseInterface $response) {
-		if ($this->session->get('user_id') === $this->request->getHeader('EX-APP-ID')) {
-			return [true, Application::APP_ID];
+		$userIdHeader = $this->request->getHeader('NC-USER-ID');
+		if ($this->session->get('user_id') === $userIdHeader) {
+			$authString = 'principals/' . Application::APP_ID . '/' . $this->session->get('user_id');
+			return [true, $authString];
 		}
-		return [false, Application::APP_ID];
+		return [false, 'AEAuth has not passed'];
 	}
 
 	public function challenge(RequestInterface $request, ResponseInterface $response) {
