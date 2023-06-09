@@ -59,6 +59,7 @@ class AEAuthBackend implements BackendInterface {
 			$davAuthenticated = $this->session->get(Auth::DAV_AUTHENTICATED);
 			$userIdHeader = $this->request->getHeader('NC-USER-ID');
 			$sessionUserId = $this->session->get('user_id');
+			// TODO: Add scopes check
 			if ($sessionUserId === $userIdHeader && $davAuthenticated === $sessionUserId) {
 				$authString = 'principals/' . Application::APP_ID . '/' . $this->session->get('user_id');
 				return [true, $authString];

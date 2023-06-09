@@ -54,6 +54,8 @@ use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
 
 class AppEcosystemV2Service {
+	public const SYSTEM_API_SCOPE = 1;
+
 	/** @var IConfig */
 	private $config;
 
@@ -383,7 +385,7 @@ class AppEcosystemV2Service {
 			$apiScope = $this->getExAppApiScope($path);
 
 			// If it's initialization scope group
-			if ($apiScope !== null && $apiScope->getScopeGroup() === 1) {
+			if ($apiScope !== null && $apiScope->getScopeGroup() === self::SYSTEM_API_SCOPE) {
 				return true;
 			}
 			// If it's another scope group - proceed with default checks

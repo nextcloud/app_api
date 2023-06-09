@@ -141,7 +141,7 @@ class ExFilesActionsMenuService {
 			return $cache;
 		}
 
-		$fileActions = $this->mapper->findAll();
+		$fileActions = $this->mapper->findAllEnabled();
 		$this->cache->set($cacheKey, $fileActions, Application::CACHE_TTL);
 		return $fileActions;
 	}

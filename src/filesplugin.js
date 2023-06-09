@@ -31,7 +31,7 @@ state.fileActions.forEach(fileAction => {
 				},
 			}).then((response) => {
 				console.debug('response', response)
-				if (response.data.ocs.data.success) {
+				if (response.data.ocs.meta.statuscode === 200) {
 					OC.dialogs.info(t(fileAction.appid, 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
 				} else {
 					OC.dialogs.info(t(fileAction.appid, 'Error while sending action request to ExApp'), t(fileAction.appid, fileAction.display_name))
