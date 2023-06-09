@@ -54,10 +54,12 @@ class AEAuthBackend implements BackendInterface {
 	}
 
 	public function check(RequestInterface $request, ResponseInterface $response) {
-		$userIdHeader = $this->request->getHeader('NC-USER-ID');
-		if ($this->session->get('user_id') === $userIdHeader) {
-			$authString = 'principals/' . Application::APP_ID . '/' . $this->session->get('user_id');
-			return [true, $authString];
+		if ($this->request->getHeader('EA-SIGNATURE')) {
+			$userIdHeader = $this->request->getHeader('NC-USER-ID');
+			if ($this->session->get('user_id') === $userIdHeader) {
+				$authString = 'principals/' . Application::APP_ID . '/' . $this->session->get('user_id');
+				return [true, $authString];
+			}
 		}
 		return [false, 'AEAuth has not passed'];
 	}
