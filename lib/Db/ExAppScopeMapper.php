@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\Entity;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 
@@ -51,19 +52,19 @@ class ExAppScopeMapper extends QBMapper {
 
 	/**
 	 * @param string $appId
-	 * @param string $userId
+	 * @param string $scopeGroup
 	 *
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @return ExAppUser[]
+	 * @return ExAppScope
 	 */
-	public function findByAppidUserid(string $appId, string $userId): Entity {
+	public function findByAppidScope(string $appId, int $scopeGroup): ?Entity {
 		$qb = $this->db->getQueryBuilder();
 		return $this->findEntity($qb->select('*')
 			->from($this->tableName)
-			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId)))
-			->andWhere($qb->expr()->eq('userid', $qb->createNamedParameter($userId)))
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId), IQueryBuilder::PARAM_STR))
+			->andWhere($qb->expr()->eq('scope_group', $qb->createNamedParameter($scopeGroup), IQueryBuilder::PARAM_INT))
 		);
 	}
 }

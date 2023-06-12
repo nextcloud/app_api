@@ -48,22 +48,11 @@ use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
 
 class OCSApiController extends OCSController {
-	/** @var LoggerInterface */
-	private $logger;
-
-	/** @var IL10N */
-	private $l;
-
-	/** @var AppEcosystemV2Service */
-	private $service;
-
-	/** @var ExFilesActionsMenuService */
-	private $exFilesActionsMenuService;
-
-	/** @var string */
-	private $userId;
-
-	/** @var IRequest */
+	private LoggerInterface $logger;
+	private IL10N $l;
+	private AppEcosystemV2Service $service;
+	private ExFilesActionsMenuService $exFilesActionsMenuService;
+	private ?string $userId;
 	protected $request;
 
 	public function __construct(

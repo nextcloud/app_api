@@ -32,9 +32,12 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Service;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppEcosystemV2\Db\ExAppScope;
+use OCA\AppEcosystemV2\Db\ExAppScopeMapper;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
-use OCP\IConfig;
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IClient;
 
@@ -54,44 +57,22 @@ use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
 
 class AppEcosystemV2Service {
-	public const SYSTEM_API_SCOPE = 1;
+	public const INIT_API_SCOPE = 1;
+	public const SYSTEM_API_SCOPE = 2;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
-
-	/** @var IConfig */
-	private $config;
-
-	/** @var LoggerInterface */
-	private $logger;
-
-	/** @var IClient */
-	private $client;
-
-	/** @var ExAppMapper */
-	private $exAppMapper;
-
-	/** @var IL10N */
-	private $l10n;
-
-	/** @var IAppManager */
-	private $appManager;
-
-	/** @var ExAppUserMapper */
-	private $exAppUserMapper;
-
-	/** @var ISecureRandom */
-	private $random;
-
-	/** @var IUserSession */
-	private $userSession;
-
-	/** @var IUserManager */
-	private $userManager;
-
-	/** @var ExAppApiScopeMapper */
-	private $exAppApiScopeMapper;
+	private LoggerInterface $logger;
+	private IClient $client;
+	private ExAppMapper $exAppMapper;
+	private IL10N $l10n;
+	private IAppManager $appManager;
+	private ExAppUserMapper $exAppUserMapper;
+	private ISecureRandom $random;
+	private IUserSession $userSession;
+	private IUserManager $userManager;
+	private ExAppApiScopeMapper $exAppApiScopeMapper;
+	private ExAppScopeMapper $exAppScopeMapper;
 
 	public function __construct(
-		IConfig $config,
 		LoggerInterface $logger,
 		IClientService $clientService,
 		ExAppMapper $exAppMapper,
@@ -99,11 +80,11 @@ class AppEcosystemV2Service {
 		IAppManager $appManager,
 		ExAppUserMapper $exAppUserMapper,
 		ExAppApiScopeMapper $exAppApiScopeMapper,
+		ExAppScopeMapper $exAppScopeMapper,
 		ISecureRandom $random,
 		IUserSession $userSession,
 		IUserManager $userManager,
 	) {
-		$this->config = $config;
 		$this->logger = $logger;
 		$this->client = $clientService->newClient();
 		$this->exAppMapper = $exAppMapper;
@@ -114,6 +95,7 @@ class AppEcosystemV2Service {
 		$this->userSession = $userSession;
 		$this->userManager = $userManager;
 		$this->exAppApiScopeMapper = $exAppApiScopeMapper;
+		$this->exAppScopeMapper = $exAppScopeMapper;
 	}
 
 	public function getExApp(string $exAppId): ?Entity {
@@ -135,22 +117,18 @@ class AppEcosystemV2Service {
 	public function registerExApp(string $appId, array $appData): ?ExApp {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($appId);
-			// TODO: Decide update fields if already exists or not
-			if ($exApp !== null) {
-				$exApp->setVersion($appData['version']);
-				$exApp->setName($appData['name']);
-				$exApp->setConfig($appData['config']);
-				$secret = $this->random->generate(128); // Temporal random secret
-				$exApp->setSecret($secret);
-				$exApp->setStatus(json_encode(['active' => true]));
-				$exApp->setLastResponseTime(time());
-				try {
-					$exApp = $this->exAppMapper->update($exApp);
-					return $exApp;
-				} catch (\Exception $e) {
-					$this->logger->error('Error while updating ex app: ' . $e->getMessage());
-					return null;
-				}
+			$exApp->setVersion($appData['version']);
+			$exApp->setName($appData['name']);
+			$exApp->setConfig($appData['config']);
+			$secret = $this->random->generate(128); // Temporal random secret
+			$exApp->setSecret($secret);
+			$exApp->setStatus(json_encode(['active' => true]));
+			$exApp->setLastResponseTime(time());
+			try {
+				return $this->exAppMapper->update($exApp);
+			} catch (\Exception $e) {
+				$this->logger->error('Error while updating ex app: ' . $e->getMessage());
+				return null;
 			}
 		} catch (DoesNotExistException) {
 			$exApp = new ExApp();
@@ -164,14 +142,12 @@ class AppEcosystemV2Service {
 			$exApp->setCreatedTime(time());
 			$exApp->setLastResponseTime(time());
 			try {
-				$exApp = $this->exAppMapper->insert($exApp);
-				return $exApp;
+				return $this->exAppMapper->insert($exApp);
 			} catch (\Exception $e) {
 				$this->logger->error('Error while registering ex app: ' . $e->getMessage());
 				return null;
 			}
 		}
-		return null;
 	}
 
 	/**
@@ -387,7 +363,11 @@ class AppEcosystemV2Service {
 		if ($isDav) {
 			$method .= $request->getRequestUri();
 		}
-		$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
+		if (!empty($queryParams)) {
+			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
+		} else {
+			$body = $method . json_encode($headers, JSON_UNESCAPED_SLASHES);
+		}
 		$signature = hash_hmac('sha256', $body, $secret);
 		$signatureValid = $signature === $requestSignature;
 
@@ -399,16 +379,25 @@ class AppEcosystemV2Service {
 			if (!$this->verifyDataHash($dataHash)) {
 				return false;
 			}
-			$path = $request->getPathInfo();
-			$apiScope = $this->getExAppApiScope($path);
+			try {
+				$path = $request->getPathInfo();
+			} catch (\Exception $e) {
+				$this->logger->error('Error getting path info: ' . $e->getMessage());
+				return false;
+			}
+			$apiScope = $this->getApiRouteScope($path);
 
 			// If it's initialization scope group
-			if ($apiScope !== null && $apiScope->getScopeGroup() === self::SYSTEM_API_SCOPE) {
+			if ($apiScope !== null && $apiScope->getScopeGroup() === self::INIT_API_SCOPE) {
 				return true;
 			}
 			// If it's another scope group - proceed with default checks
-			if (!$this->passesScopeCheck($exApp, $request)) {
+			if (!$this->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
 				return false;
+			}
+			// If scope check passed, and it's system scope group - proceed with request
+			if ($apiScope->getScopeGroup() === self::SYSTEM_API_SCOPE) {
+				return true;
 			}
 
 			if ($userId !== '') {
@@ -418,12 +407,7 @@ class AppEcosystemV2Service {
 					return false;
 				}
 				$this->userSession->setUser($activeUser);
-				$exApp->setLastResponseTime(time());
-				try {
-					$this->exAppMapper->updateLastResponseTime($exApp);
-				} catch (\Exception $e) {
-					$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
-				}
+				$this->updateExAppLastResponseTime($exApp);
 				return true;
 			}
 			return false;
@@ -432,10 +416,19 @@ class AppEcosystemV2Service {
 		return false;
 	}
 
+	private function updateExAppLastResponseTime($exApp): void {
+		$exApp->setLastResponseTime(time());
+		try {
+			$this->exAppMapper->updateLastResponseTime($exApp);
+		} catch (\Exception $e) {
+			$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
+		}
+	}
+
 	public function getNCUsersList(): ?array {
-		$users = [];
-		// TODO
-		return $users;
+		return array_map(function (IUser $user) {
+			return $user->getUID();
+		}, $this->userManager->searchDisplayName(''));
 	}
 
 	private function exAppUserExists(string $appId, string $userId): bool {
@@ -444,40 +437,34 @@ class AppEcosystemV2Service {
 				return true;
 			}
 			return false;
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
 			return false;
 		}
 	}
 
-	private function sortNestedArrayAssoc(&$a) {
-		if (is_array($a)) {
-			ksort($a);
-			foreach ($a as $k=>$v) {
-				$a[$k] = $this->sortNestedArrayAssoc($v);
-			}
-		}
-		return $a;
-	}
-
 	/**
-	 * Service function to cleanup params from injected params
+	 * Service function to clean up params from injected params
 	 */
-	private function cleanupParams(array $params) {
+	private function cleanupParams(array $params): array {
 		if (isset($params['_route'])) {
 			unset($params['_route']);
 		}
 		return $params;
 	}
 
-	public function passesScopeCheck(ExApp $exApp, IRequest $request) {
-		// TODO: Implement checks for user scopes
-		return true;
+	public function passesScopeCheck(ExApp $exApp, int $apiScope): bool {
+		try {
+			$exAppScope = $this->exAppScopeMapper->findByAppidScope($exApp->getAppid(), $apiScope);
+			return $exAppScope instanceof ExAppScope;
+		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
+			return false;
+		}
 	}
 
-	public function getExAppApiScope(string $apiRoute): ?ExAppApiScope {
+	public function getApiRouteScope(string $apiRoute): ?ExAppApiScope {
 		try {
 			return $this->exAppApiScopeMapper->findByApiRoute($apiRoute);
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
 			return null;
 		}
 	}

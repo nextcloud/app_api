@@ -48,20 +48,15 @@ use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
 class AEAuthMiddleware extends Middleware {
-	/** @var IControllerMethodReflector */
-	private $reflector;
+	private IControllerMethodReflector $reflector;
 
-	/** @var AppEcosystemV2Service */
-	private $service;
+	private AppEcosystemV2Service $service;
 
-	/** @var IRequest */
-	protected $request;
+	protected IRequest $request;
 
-	/** @var IL10N */
-	private $l;
+	private IL10N $l;
 
-	/** @var LoggerInterface */
-	private $logger;
+	private LoggerInterface $logger;
 
 	public function __construct(
 		IControllerMethodReflector $reflector,
@@ -77,8 +72,7 @@ class AEAuthMiddleware extends Middleware {
 		$this->logger = $logger;
 	}
 
-	public function beforeController(Controller $controller, string $methodName)
-	{
+	public function beforeController(Controller $controller, string $methodName) {
 		/** @var ReflectionMethod */
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
@@ -112,8 +106,7 @@ class AEAuthMiddleware extends Middleware {
 	}
 
 	/**
-	 * If an AEAuthNotValidException is being caught, ajax requests return a JSON error
-	 * response and non ajax requests redirect to the index
+	 * If an AEAuthNotValidException is being caught
 	 *
 	 * @param Controller $controller the controller that is being called
 	 * @param string $methodName the name of the method that will be called on
