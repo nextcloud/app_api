@@ -376,13 +376,13 @@ class AppEcosystemV2Service {
 			}
 		);
 
+		$dataHash = $request->getHeader('AE-DATA-HASH');
+		$headers['AE-DATA-HASH'] = $dataHash;
 		$signTime = $request->getHeader('AE-SIGN-TIME');
 		if (!$this->verifySignTime($signTime)) {
 			return false;
 		}
 		$headers['AE-SIGN-TIME'] = $signTime;
-		$dataHash = $request->getHeader('AE-DATA-HASH');
-		$headers['AE-DATA-HASH'] = $dataHash;
 
 		if ($isDav) {
 			$method .= $request->getRequestUri();
@@ -497,11 +497,11 @@ class AppEcosystemV2Service {
 		$currentTime = time();
 		$diff = $currentTime - $signTime;
 		if ($diff > self::MAX_SIGN_TIME_DIFF) {
-			$this->logger->error('Sign time diff is too big: ' . $diff);
+			$this->logger->error('AE-SIGN-TIME diff is too big: ' . $diff);
 			return false;
 		}
 		if ($diff < 0) {
-			$this->logger->error('Sign time diff is negative: ' . $diff);
+			$this->logger->error('AE-SIGN-TIME diff is negative: ' . $diff);
 			return false;
 		}
 		return true;
