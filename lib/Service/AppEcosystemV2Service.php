@@ -382,9 +382,6 @@ class AppEcosystemV2Service {
 		}
 		$headers['AE-SIGN-TIME'] = $signTime;
 		$dataHash = $request->getHeader('AE-DATA-HASH');
-		if (!$this->verifyDataHash($dataHash)) {
-			return false;
-		}
 		$headers['AE-DATA-HASH'] = $dataHash;
 
 		if ($isDav) {
@@ -399,6 +396,9 @@ class AppEcosystemV2Service {
 		}
 
 		if ($signatureValid) {
+			if (!$this->verifyDataHash($dataHash)) {
+				return false;
+			}
 			$path = $request->getPathInfo();
 			$apiScope = $this->getExAppApiScope($path);
 
@@ -512,6 +512,7 @@ class AppEcosystemV2Service {
 		$stream = fopen('php://input', 'r');
 		hash_update_stream($hashContext, $stream, -1);
 		fclose($stream);
-		return $dataHash === hash_final($hashContext);
+		$phpInputHash = hash_final($hashContext);
+		return $dataHash === $phpInputHash;
 	}
 }

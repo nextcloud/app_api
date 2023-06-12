@@ -21,7 +21,7 @@ and function in the end
 ```php
 protected static function tryAppEcosystemV2Login(OCP\IRequest $request): bool {
 	$appManager = Server::get(OCP\App\IAppManager::class);
-	if (!$request->getHeader('EA-SIGNATURE')) {
+	if (!$request->getHeader('AE-SIGNATURE')) {
 		return false;
 	}
 	if (!$appManager->isAppLoaded('app_ecosystem_v2')) {
