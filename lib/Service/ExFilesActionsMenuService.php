@@ -31,6 +31,8 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use Psr\Log\LoggerInterface;
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCP\Cache\CappedMemoryCache;
@@ -85,11 +87,11 @@ class ExFilesActionsMenuService {
 	public function registerFileActionMenu(string $appId, array $params): ?Entity {
 		try {
 			$fileActionMenu = $this->mapper->findByName($params['name']);
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
 			$fileActionMenu = null;
 		}
 		// If exists - update, else - create
-		if ($fileActionMenu !== null && $fileActionMenu instanceof ExFilesActionsMenu) {
+		if ($fileActionMenu instanceof ExFilesActionsMenu) {
 			$fileActionMenu->setAppid($appId);
 			$fileActionMenu->setName($params['name']);
 			$fileActionMenu->setDisplayName($params['display_name']);
@@ -104,17 +106,22 @@ class ExFilesActionsMenuService {
 				return null;
 			}
 		} else {
-			$fileActionMenu = $this->mapper->insert(new ExFilesActionsMenu([
-				'appid' => $appId,
-				'name' => $params['name'],
-				'display_name' => $params['display_name'],
-				'mime' => $params['mime'],
-				'permissions' => $params['permissions'],
-				'order' => $params['order'],
-				'icon' => $params['icon'],
-				'icon_class' => $params['icon_class'],
-				'action_handler' => $params['action_handler'],
-			]));
+			try {
+				$fileActionMenu = $this->mapper->insert(new ExFilesActionsMenu([
+					'appid' => $appId,
+					'name' => $params['name'],
+					'display_name' => $params['display_name'],
+					'mime' => $params['mime'],
+					'permissions' => $params['permissions'],
+					'order' => $params['order'],
+					'icon' => $params['icon'],
+					'icon_class' => $params['icon_class'],
+					'action_handler' => $params['action_handler'],
+				]));
+			} catch (Exception) {
+				$this->logger->error('Failed to insert file action menu ' . $params['name'] . ' for app: ' . $appId);
+				return null;
+			}
 		}
 		return $fileActionMenu;
 	}
@@ -158,8 +165,14 @@ class ExFilesActionsMenuService {
 			return $cache;
 		}
 
-		$fileActions = $this->mapper->findAllByAppId($appId);
-		$this->cache->set($cacheKey, $fileActions, Application::CACHE_TTL);
+		try {
+			$fileActions = $this->mapper->findAllByAppId($appId);
+		} catch (Exception) {
+			$fileActions = [];
+		}
+		if (count($fileActions) > 0) {
+			$this->cache->set($cacheKey, $fileActions, Application::CACHE_TTL);
+		}
 		return $fileActions;
 	}
 
@@ -172,7 +185,7 @@ class ExFilesActionsMenuService {
 
 		try {
 			$fileAction = $this->mapper->findByAppIdName($exAppId, $fileActionName);
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
 			$fileAction = null;
 		}
 		$this->cache->set($cacheKey, $fileAction, Application::CACHE_TTL);
@@ -182,7 +195,7 @@ class ExFilesActionsMenuService {
 	public function handleFileAction(string $userId, string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
 		try {
 			$exFileAction = $this->mapper->findByName($fileActionName);
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
 			$exFileAction = null;
 		}
 		if ($exFileAction !== null) {
@@ -214,8 +227,7 @@ class ExFilesActionsMenuService {
 
 	/**
 	 * @param string $exAppId
-	 * @param string $fileId
-	 *
+	 * @param string $exFileActionName
 	 * @return array|null
 	 */
 	public function loadFileActionIcon(string $exAppId, string $exFileActionName): ?array {
@@ -227,12 +239,17 @@ class ExFilesActionsMenuService {
 		if (!isset($iconUrl) || $iconUrl === '') {
 			return null;
 		}
-		$thumbnailResponse = $this->client->get($iconUrl);
-		if ($thumbnailResponse->getStatusCode() === Http::STATUS_OK) {
-			return [
-				'body' => $thumbnailResponse->getBody(),
-				'headers' => $thumbnailResponse->getHeaders(),
-			];
+		try {
+			$thumbnailResponse = $this->client->get($iconUrl);
+			if ($thumbnailResponse->getStatusCode() === Http::STATUS_OK) {
+				return [
+					'body' => $thumbnailResponse->getBody(),
+					'headers' => $thumbnailResponse->getHeaders(),
+				];
+			}
+		} catch (\Exception $e) {
+			$this->logger->error('Failed to load file action icon ' . $exFileActionName . ' for app: ' . $exAppId . ' with error: ' . $e->getMessage());
+			return null;
 		}
 		return null;
 	}

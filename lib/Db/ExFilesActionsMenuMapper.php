@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\Entity;
+use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -41,6 +42,9 @@ class ExFilesActionsMenuMapper extends QBMapper {
 		parent::__construct($db, 'ex_files_actions_menu');
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -50,6 +54,9 @@ class ExFilesActionsMenuMapper extends QBMapper {
 		return $this->findEntities($qb);
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function findAllEnabled(): array {
 		$qb = $this->db->getQueryBuilder();
 		$result = $qb->select(
@@ -75,10 +82,8 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	/**
 	 * @param string $appId
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
-	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExFilesActionsMenu[]
+	 * @return ExFilesActionsMenu[]
+	 * @throws Exception
 	 */
 	public function findAllByAppId(string $appId): array {
 		$qb = $this->db->getQueryBuilder();
@@ -94,10 +99,10 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $name
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @return ExFilesActionsMenu
+	 *@throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExFilesActionsMenu
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 */
 	public function findByAppIdName(string $appId, string $name): Entity {
 		$qb = $this->db->getQueryBuilder();
@@ -113,10 +118,10 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	/**
 	 * @param string $name
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @return ExFilesActionsMenu
+	 *@throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExFilesActionsMenu
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
 	 */
 	public function findByName(string $name): Entity {
 		$qb = $this->db->getQueryBuilder();
@@ -130,7 +135,7 @@ class ExFilesActionsMenuMapper extends QBMapper {
 
 	/**
 	 * @param ExFilesActionsMenu $exFilesActionsMenu
-	 * 
+	 *
 	 * @return int Number of updated rows
 	 */
 	public function updateFileActionMenu(ExFilesActionsMenu $exFilesActionsMenu) {

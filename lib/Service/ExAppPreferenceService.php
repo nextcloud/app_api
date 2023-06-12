@@ -36,6 +36,9 @@ use OCA\AppEcosystemV2\Db\ExAppPreferenceMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use Psr\Log\LoggerInterface;
 
+/**
+ * App per-user preferences (preferences_ex)
+ */
 class ExAppPreferenceService {
 	/** @var ExAppPreferenceMapper */
 	private $mapper;

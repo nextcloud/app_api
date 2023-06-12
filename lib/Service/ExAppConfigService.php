@@ -44,7 +44,7 @@ use OCP\AppFramework\Db\Entity;
 use OCP\Cache\CappedMemoryCache;
 
 /**
- * All configurations methods (app_config_ex, preferences_ex)
+ * App configuration (appconfig_ex)
  */
 class ExAppConfigService {
 	/** @var IConfig */
@@ -173,7 +173,7 @@ class ExAppConfigService {
 
 	/**
 	 * @param string $appId
-	 * 
+	 *
 	 * @return Entity[]
 	 */
 	public function getAppConfigKeys(string $appId) {

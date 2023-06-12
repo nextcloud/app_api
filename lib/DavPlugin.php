@@ -68,7 +68,7 @@ class DavPlugin extends ServerPlugin {
 	}
 
 	public function beforeMethod(RequestInterface $request, ResponseInterface $response) {
-		if ($this->request->getHeader('EA-SIGNATURE')) {
+		if ($this->request->getHeader('AE-SIGNATURE')) {
 			if ($this->service->validateExAppRequestToNC($this->request, true)) {
 				$this->session->set(Auth::DAV_AUTHENTICATED, $this->request->getHeader('NC-USER-ID'));
 			}

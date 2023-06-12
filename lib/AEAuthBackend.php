@@ -55,7 +55,7 @@ class AEAuthBackend implements BackendInterface {
 	}
 
 	public function check(RequestInterface $request, ResponseInterface $response) {
-		if ($this->request->getHeader('EA-SIGNATURE')) {
+		if ($this->request->getHeader('AE-SIGNATURE')) {
 			$davAuthenticated = $this->session->get(Auth::DAV_AUTHENTICATED);
 			$userIdHeader = $this->request->getHeader('NC-USER-ID');
 			$sessionUserId = $this->session->get('user_id');

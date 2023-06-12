@@ -92,7 +92,7 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param int $level
 	 * @param string $message
-	 *
+	 * @param string $format
 	 * @return Response
 	 * @throws OCSBadRequestException
 	 */
@@ -118,10 +118,7 @@ class OCSApiController extends OCSController {
 			]);
 			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		} catch (\Psr\Log\InvalidArgumentException) {
-			$this->logger->error('Invalid log level: ' . $level, [
-				'app' => $appId,
-				'level' => $level,
-			]);
+			$this->logger->error('Invalid log level: ' . $level . ' from ' . $appId);
 			throw new OCSBadRequestException('Invalid log level');
 		}
 	}
@@ -130,8 +127,8 @@ class OCSApiController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param string $appId
-	 * @param string $actionId
-	 *
+	 * @param array $appData
+	 * @param string $format
 	 * @return Response
 	 */
 	public function registerExternalApp(string $appId, array $appData, string $format = 'json'): Response {
@@ -146,7 +143,7 @@ class OCSApiController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param string $appId
-	 *
+	 * @param string $format
 	 * @return Response
 	 */
 	public function unregisterExternalApp(string $appId, string $format = 'json'): Response {
@@ -168,7 +165,7 @@ class OCSApiController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param string $appId
-	 *
+	 * @param string $format
 	 * @return Response
 	 */
 	public function getAppStatus(string $appId, string $format = 'json'): Response {
@@ -189,7 +186,7 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param string $appId
 	 * @param array $fileActionMenuParams [name, display_name, mime, permissions, order, icon, icon_class, action_handler]
-	 *
+	 * @param string $format
 	 * @return Response
 	 */
 	public function registerFileActionMenu(string $appId, array $fileActionMenuParams, string $format = 'json'): Response {
@@ -207,7 +204,7 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param string $appId
 	 * @param string $fileActionMenuName
-	 *
+	 * @param string $format
 	 * @return Response
 	 */
 	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName, string $format = 'json'): Response {
@@ -225,7 +222,8 @@ class OCSApiController extends OCSController {
 	 * @param string $appId
 	 * @param string $actionName
 	 * @param array $actionFile
-	 *
+	 * @param string $actionHandler
+	 * @param string $format
 	 * @return Response
 	 */
 	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler, string $format = 'json'): Response {
@@ -264,7 +262,7 @@ class OCSApiController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $appId
+	 * @param string|null $appId
 	 * @param string $format
 	 *
 	 * @return Response

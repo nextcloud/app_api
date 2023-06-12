@@ -55,6 +55,7 @@ use OCP\Security\ISecureRandom;
 
 class AppEcosystemV2Service {
 	public const SYSTEM_API_SCOPE = 1;
+	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
 
 	/** @var IConfig */
 	private $config;
@@ -186,7 +187,7 @@ class AppEcosystemV2Service {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			if ($this->exAppMapper->deleteExApp($exApp) !== 1) {
 				$this->logger->error('Error while unregistering ex app: ' . $appId);
-				return false;
+				return null;
 			}
 			return $exApp;
 		} catch (DoesNotExistException $e) {
@@ -206,7 +207,7 @@ class AppEcosystemV2Service {
 		if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), true) === 1) {
 			return true;
 		}
-		return null;
+		return false;
 	}
 
 	/**
@@ -228,7 +229,7 @@ class AppEcosystemV2Service {
 	 *
 	 * @param string $appId
 	 *
-	 * @return array
+	 * @return array|null
 	 */
 	public function getAppStatus(string $appId): ?array {
 		try {
@@ -284,8 +285,9 @@ class AppEcosystemV2Service {
 				}
 			}
 
+			$options['headers']['AE-SIGN-TIME'] = time();
 			$signature = $this->generateRequestSignature($method, $options, $exApp->getSecret(), $params);
-			$options['headers']['EA-SIGNATURE'] = $signature;
+			$options['headers']['AE-SIGNATURE'] = $signature;
 
 			if ($method === 'GET') {
 				$response = $this->client->get($url, $options);
@@ -318,6 +320,10 @@ class AppEcosystemV2Service {
 		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
 			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
 		}
+		if (isset($options['headers']['AE-SIGN-TIME'])) {
+			$headers['AE-SIGN-TIME'] = $options['headers']['AE-SIGN-TIME'];
+		}
+
 		if ($method === 'GET') {
 			$queryParams = $params;
 		} else {
@@ -358,7 +364,7 @@ class AppEcosystemV2Service {
 		if ($userId !== '') {
 			$headers['NC-USER-ID'] = $userId;
 		}
-		$requestSignature = $request->getHeader('EA-SIGNATURE');
+		$requestSignature = $request->getHeader('AE-SIGNATURE');
 		$queryParams = $this->cleanupParams($request->getParams());
 		// $this->sortNestedArrayAssoc($queryParams);
 		array_walk_recursive(
@@ -369,6 +375,18 @@ class AppEcosystemV2Service {
 				}
 			}
 		);
+
+		$signTime = $request->getHeader('AE-SIGN-TIME');
+		if (!$this->verifySignTime($signTime)) {
+			return false;
+		}
+		$headers['AE-SIGN-TIME'] = $signTime;
+		$dataHash = $request->getHeader('AE-DATA-HASH');
+		if (!$this->verifyDataHash($dataHash)) {
+			return false;
+		}
+		$headers['AE-DATA-HASH'] = $dataHash;
+
 		if ($isDav) {
 			$method .= $request->getRequestUri();
 		}
@@ -466,5 +484,37 @@ class AppEcosystemV2Service {
 
 	public function registerInitScopes() {
 		// TODO: Register init scopes
+	}
+
+	/**
+	 * Verify if sign time is within MAX_SIGN_TIME_DIFF (5 min)
+	 *
+	 * @param string $signTime
+	 * @return bool
+	 */
+	private function verifySignTime(string $signTime): bool {
+		$signTime = intval($signTime);
+		$currentTime = time();
+		$diff = $currentTime - $signTime;
+		if ($diff > self::MAX_SIGN_TIME_DIFF) {
+			$this->logger->error('Sign time diff is too big: ' . $diff);
+			return false;
+		}
+		if ($diff < 0) {
+			$this->logger->error('Sign time diff is negative: ' . $diff);
+			return false;
+		}
+		return true;
+	}
+
+	private function verifyDataHash(string $dataHash): bool {
+		$handle = fopen('php://input', 'r');
+		if ($handle === false) {
+			$this->logger->error('Error while reading php://input data');
+			return false;
+		}
+		$phpInputData = stream_get_contents($handle);
+		$inputDataHash = hash('xxh64', $phpInputData);
+		return $dataHash === $inputDataHash;
 	}
 }
