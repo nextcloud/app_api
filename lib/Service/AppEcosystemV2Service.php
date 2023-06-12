@@ -508,13 +508,10 @@ class AppEcosystemV2Service {
 	}
 
 	private function verifyDataHash(string $dataHash): bool {
-		$handle = fopen('php://input', 'r');
-		if ($handle === false) {
-			$this->logger->error('Error while reading php://input data');
-			return false;
-		}
-		$phpInputData = stream_get_contents($handle);
-		$inputDataHash = hash('xxh64', $phpInputData);
-		return $dataHash === $inputDataHash;
+		$hashContext = hash_init('xxh64');
+		$stream = fopen('php://input', 'r');
+		hash_update_stream($hashContext, $stream, -1);
+		fclose($stream);
+		return $dataHash === hash_final($hashContext);
 	}
 }
