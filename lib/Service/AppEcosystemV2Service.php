@@ -35,6 +35,7 @@ use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExAppScope;
 use OCA\AppEcosystemV2\Db\ExAppScopeMapper;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
@@ -387,8 +388,11 @@ class AppEcosystemV2Service {
 			}
 			$apiScope = $this->getApiRouteScope($path);
 
+			if ($apiScope === null) {
+				return false;
+			}
 			// If it's initialization scope group
-			if ($apiScope !== null && $apiScope->getScopeGroup() === self::INIT_API_SCOPE) {
+			if ($apiScope->getScopeGroup() === self::INIT_API_SCOPE) {
 				return true;
 			}
 			// If it's another scope group - proceed with default checks
@@ -456,7 +460,7 @@ class AppEcosystemV2Service {
 		try {
 			$exAppScope = $this->exAppScopeMapper->findByAppidScope($exApp->getAppid(), $apiScope);
 			return $exAppScope instanceof ExAppScope;
-		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return false;
 		}
 	}

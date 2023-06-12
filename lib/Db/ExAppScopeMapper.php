@@ -31,7 +31,10 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
@@ -41,6 +44,9 @@ class ExAppScopeMapper extends QBMapper {
 		parent::__construct($db, 'ex_apps_scopes');
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -52,12 +58,12 @@ class ExAppScopeMapper extends QBMapper {
 
 	/**
 	 * @param string $appId
-	 * @param string $scopeGroup
+	 * @param int $scopeGroup
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
-	 *
-	 * @return ExAppScope
+	 * @throws DoesNotExistException if not found
+	 * @throws Exception
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @return Entity|null
 	 */
 	public function findByAppidScope(string $appId, int $scopeGroup): ?Entity {
 		$qb = $this->db->getQueryBuilder();
