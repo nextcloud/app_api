@@ -257,10 +257,7 @@ class OCSApiController extends OCSController {
 	 * @return Response
 	 */
 	public function getExAppUsers(?string $appId = null, string $format = 'json'): Response {
-		return $this->buildResponse(new DataResponse([
-			'success' => true,
-			'users' => $this->service->getNCUsersList($appId),
-		], Http::STATUS_OK), $format);
+		return $this->buildResponse(new DataResponse($this->service->getNCUsersList($appId), Http::STATUS_OK), $format);
 	}
 
 	/**
