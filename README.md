@@ -78,21 +78,22 @@ Depending on request method signing body is different:
 
 * `GET`
   * method
-  * query params (if not empty)
+  * uri (with urlencoded query params)
   * headers (`AE-VERSION`, `EX-APP-ID`, `EX-APP-VERSION`, `NC-USER-ID`, `AE-DATA-HASH`, `AE-SIGN-TIME`)
-* `DAV` and others
+* Others
   * method
-  * request uri
+  * uri (with urlencoded query params)
   * headers (`AE-VERSION`, `EX-APP-ID`, `EX-APP-VERSION`, `NC-USER-ID`, `AE-DATA-HASH`, `AE-SIGN-TIME`)
+  * xxh64 hash from request body (post data, json, files, etc)
 
 ### AE-DATA-HASH signature
 
 `AE-DATA-HASH` header must contain a xxh64 hash of the request body. 
-It's calculated even if the request body is empty.
+It's calculated even if the request body is empty (e.g. empty hash: `ef46db3751d8e999`).
 
 ### AppEcosystemV2 scopes
 
-AppEcosystemV2 supports the following scopes:
+AppEcosystemV2 supports the following default scopes:
 
 * `INIT_API_SCOPE` - init scope, used when ExApp is on initialization step and has no user context
 * `SYSTEM_API_SCOPE` - configured for system apps, has no user context

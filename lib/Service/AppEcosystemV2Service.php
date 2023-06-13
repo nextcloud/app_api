@@ -58,6 +58,7 @@ use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
 
 class AppEcosystemV2Service {
+//	TODO: In addition to default constant scopes think about implementing scopes registration mechanism
 	public const INIT_API_SCOPE = 1;
 	public const SYSTEM_API_SCOPE = 2;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
@@ -570,7 +571,6 @@ class AppEcosystemV2Service {
 	private function verifyDataHash(string $dataHash): bool {
 		$hashContext = hash_init('xxh64');
 		$stream = fopen('php://input', 'r');
-//		$streamData = stream_get_contents($stream);
 		hash_update_stream($hashContext, $stream, -1);
 		fclose($stream);
 		$phpInputHash = hash_final($hashContext);
