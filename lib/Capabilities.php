@@ -37,11 +37,8 @@ use OCP\Capabilities\IPublicCapability;
 use OCP\IConfig;
 
 class Capabilities implements IPublicCapability {
-	/** @var IConfig */
-	private $config;
-
-	/** @var IAppManager */
-	private $appManager;
+	private IConfig $config;
+	private IAppManager $appManager;
 
 	public function __construct(
 		IConfig $config,

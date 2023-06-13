@@ -68,7 +68,7 @@ class Application extends App implements IBootstrap {
 	public function boot(IBootContext $context): void {
 	}
 
-	public function registerDavAuth() {
+	public function registerDavAuth(): void {
 		$container = $this->getContainer();
 
 		$dispatcher = $container->getServer()->getEventDispatcher();

@@ -49,13 +49,9 @@ use Psr\Log\LoggerInterface;
 
 class AEAuthMiddleware extends Middleware {
 	private IControllerMethodReflector $reflector;
-
 	private AppEcosystemV2Service $service;
-
 	protected IRequest $request;
-
 	private IL10N $l;
-
 	private LoggerInterface $logger;
 
 	public function __construct(
@@ -73,7 +69,6 @@ class AEAuthMiddleware extends Middleware {
 	}
 
 	public function beforeController(Controller $controller, string $methodName) {
-		/** @var ReflectionMethod */
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
 		$isAEAuth = $this->hasAnnotationOrAttribute($reflectionMethod, 'AEAuth', AEAuth::class);
@@ -117,6 +112,9 @@ class AEAuthMiddleware extends Middleware {
 	 */
 	public function afterException($controller, $methodName, \Exception $exception): Response {
 		if ($exception instanceof AEAuthNotValidException) {
+			$response = new JSONResponse([
+				'message' => $exception->getMessage(),
+			]);
 			if (stripos($this->request->getHeader('Accept'), 'html') === false) {
 				$response = new JSONResponse(
 					['message' => $exception->getMessage()],

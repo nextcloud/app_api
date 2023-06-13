@@ -32,7 +32,6 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Controller;
 
 
-
 use OCP\IRequest;
 use OCP\AppFramework\OCSController;
 use OCP\AppFramework\Http;
@@ -43,8 +42,7 @@ use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Service\ExAppConfigService;
 
 class AppConfigController extends OCSController {
-	/** @var ExAppConfigService */
-	private $exAppConfigService;
+	private ExAppConfigService $exAppConfigService;
 
 	public function __construct(
 		IRequest $request,
@@ -115,7 +113,6 @@ class AppConfigController extends OCSController {
 	 *
 	 * @param string $appId
 	 * @param string $configKey
-	 * @param string $configValue
 	 * @param string $format
 	 *
 	 * @return Response

@@ -36,6 +36,7 @@ use OCA\AppEcosystemV2\Db\ExAppScope;
 use OCA\AppEcosystemV2\Db\ExAppScopeMapper;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
+use OCP\Http\Client\IResponse;
 use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
@@ -217,7 +218,7 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function requestToExApp(string $userId, ExApp $exApp, string $route, string $method = 'POST', array $params = []) {
+	public function requestToExApp(string $userId, ExApp $exApp, string $route, string $method = 'POST', array $params = []): array|IResponse {
 		try {
  			$exAppConfig = json_decode($exApp->getConfig(), true);
 			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
@@ -296,6 +297,10 @@ class AppEcosystemV2Service {
 		}
 		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
 			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
+		}
+		if (isset($options['headers']['AE-DATA-HASH'])) {
+			// TODO: Add data hash calculation
+			$headers['AE-DATA-HASH'] = $options['headers']['AE-DATA-HASH'];
 		}
 		if (isset($options['headers']['AE-SIGN-TIME'])) {
 			$headers['AE-SIGN-TIME'] = $options['headers']['AE-SIGN-TIME'];
@@ -473,8 +478,52 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function registerInitScopes() {
-		// TODO: Register init scopes
+	public function registerInitScopes(): bool {
+		$apiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
+
+		$fileActionsMenuApiScope = new ExAppApiScope([
+			'api_route' =>  $apiV1Prefix . '/files/actions/menu',
+			'scope_group' => self::INIT_API_SCOPE
+		]);
+		$logApiScope = new ExAppApiScope([
+			'api_route' =>  $apiV1Prefix . '/log',
+			'scope_group' => self::INIT_API_SCOPE
+		]);
+		$usersApiScope = new ExAppApiScope([
+			'api_route' =>  $apiV1Prefix . '/users',
+			'scope_group' => self::SYSTEM_API_SCOPE
+		]);
+		$appConfigApiScope = new ExAppApiScope([
+			'api_route' =>  $apiV1Prefix . '/ex-app/config',
+			'scope_group' => self::SYSTEM_API_SCOPE
+		]);
+		$appConfigKeysApiScope = new ExAppApiScope([
+			'api_route' =>  $apiV1Prefix . '/ex-app/config/keys',
+			'scope_group' => self::SYSTEM_API_SCOPE
+		]);
+		$appConfigAllApiScope = new ExAppApiScope([
+			'api_route' =>  $apiV1Prefix . '/ex-app/config/all',
+			'scope_group' => self::SYSTEM_API_SCOPE
+		]);
+
+		$initApiScopes = [
+			$fileActionsMenuApiScope,
+			$logApiScope,
+			$usersApiScope,
+			$appConfigApiScope,
+			$appConfigKeysApiScope,
+			$appConfigAllApiScope
+		];
+
+		try {
+			foreach ($initApiScopes as $apiScope) {
+				$this->exAppApiScopeMapper->insertOrUpdate($apiScope);
+			}
+			return true;
+		} catch (Exception $e) {
+			$this->logger->error('Failed to fill init api scopes: ' . $e->getMessage());
+			return false;
+		}
 	}
 
 	/**

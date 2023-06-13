@@ -40,8 +40,7 @@ use OCP\AppFramework\Http\Response;
 use OCP\IRequest;
 
 class PreferencesController extends OCSController {
-	/** @var ExAppPreferenceService */
-	private $exAppPreferenceService;
+	private ExAppPreferenceService $exAppPreferenceService;
 
 	public function __construct(
 		IRequest $request,
@@ -56,6 +55,7 @@ class PreferencesController extends OCSController {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 *
+	 * @param string $userId
 	 * @param string $appId
 	 * @param string $configKey
 	 * @param mixed $configValue

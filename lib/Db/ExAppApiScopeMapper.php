@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\Entity;
+use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 
@@ -53,7 +54,7 @@ class ExAppApiScopeMapper extends QBMapper {
 	 * @param string $apiRoute
 	 *
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException|Exception if more than one result
 	 *
 	 * @return ExAppApiScope
 	 */
@@ -63,5 +64,46 @@ class ExAppApiScopeMapper extends QBMapper {
 			->from($this->tableName)
 			->where($qb->expr()->eq('api_route', $qb->createNamedParameter($apiRoute)))
 		);
+	}
+
+	public function insert(Entity $entity): Entity {
+		if (!$entity instanceof ExAppApiScope) {
+			throw new \InvalidArgumentException('Wrong type of entity');
+		}
+		$qb = $this->db->getQueryBuilder();
+		$qb->insert($this->tableName)
+			->values([
+				'api_route' => $qb->createNamedParameter($entity->getApiRoute()),
+				'scope_group' => $qb->createNamedParameter($entity->getScopeGroup()),
+			]);
+		if ($qb->executeStatement() === 1) {
+			return $entity;
+		}
+		throw new Exception('Could not insert entity');
+	}
+
+	public function update(Entity $entity): Entity {
+		if (!$entity instanceof ExAppApiScope) {
+			throw new \InvalidArgumentException('Wrong type of entity');
+		}
+		$qb = $this->db->getQueryBuilder();
+		$qb->update($this->tableName)
+			->set('scope_group', $qb->createNamedParameter($entity->getScopeGroup()))
+			->where($qb->expr()->eq('api_route', $qb->createNamedParameter($entity->getApiRoute())));
+		if ($qb->executeStatement() === 1) {
+			return $entity;
+		}
+		throw new Exception('Could not update entity');
+	}
+
+	public function insertOrUpdate(Entity $entity): Entity {
+		try {
+			return $this->insert($entity);
+		} catch (Exception $ex) {
+			if ($ex->getReason() === Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION) {
+				return $this->update($entity);
+			}
+			throw $ex;
+		}
 	}
 }

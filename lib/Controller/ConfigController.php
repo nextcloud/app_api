@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  *
  * Nextcloud - App Ecosystem V2
@@ -36,8 +39,7 @@ use OCP\AppFramework\Controller;
 use OCA\AppEcosystemV2\AppInfo\Application;
 
 class ConfigController extends Controller {
-	/** @var IConfig */
-	private $config;
+	private IConfig $config;
 
 	public function __construct(
 		string $appName,

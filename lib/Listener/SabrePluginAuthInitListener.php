@@ -38,8 +38,7 @@ use OCP\EventDispatcher\IEventListener;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 
 class SabrePluginAuthInitListener implements IEventListener {
-	/** @var AEAuthBackend */
-	private $aeAuth;
+	private AEAuthBackend $aeAuth;
 
 	public function __construct(AEAuthBackend $aeAuth) {
 		$this->aeAuth = $aeAuth;

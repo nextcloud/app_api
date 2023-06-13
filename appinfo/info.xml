@@ -22,6 +22,11 @@
 		<nextcloud min-version="27" max-version="28"/>
 		<php min-version="8.0"/>
 	</dependencies>
+	<repair-steps>
+		<install>
+			<step>OCA\AppEcosystemV2\Migration\DataInitializationStep</step>
+		</install>
+	</repair-steps>
 	<commands>
 		<command>OCA\AppEcosystemV2\Command\RegisterExApp</command>
 		<command>OCA\AppEcosystemV2\Command\UnregisterExApp</command>

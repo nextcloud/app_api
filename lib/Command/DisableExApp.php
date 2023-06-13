@@ -39,7 +39,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
 class DisableExApp extends Command {
-	private $service;
+	private AppEcosystemV2Service $service;
 
 	public function __construct(AppEcosystemV2Service $service) {
 		parent::__construct();

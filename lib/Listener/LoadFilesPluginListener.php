@@ -41,12 +41,8 @@ use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
 
 class LoadFilesPluginListener implements IEventListener {
-
-	/** @var IInitialState */
-	private $initialState;
-
-	/** @var ExFilesActionsMenuService */
-	private $service;
+	private IInitialState $initialState;
+	private ExFilesActionsMenuService $service;
 
 	public function __construct(
 		IInitialState $initialState,

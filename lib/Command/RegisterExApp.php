@@ -39,7 +39,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
 class RegisterExApp extends Command {
-	private $service;
+	private AppEcosystemV2Service $service;
 
 	public function __construct(AppEcosystemV2Service $service) {
 		parent::__construct();
@@ -54,6 +54,7 @@ class RegisterExApp extends Command {
 		$this->addArgument('version', InputArgument::REQUIRED);
 		$this->addArgument('name', InputArgument::REQUIRED);
 		$this->addArgument('config', InputArgument::REQUIRED);
+		$this->addArgument('scope_group', InputArgument::REQUIRED);
 		$this->addArgument('enabled', InputArgument::OPTIONAL);
 	}
 
@@ -62,6 +63,7 @@ class RegisterExApp extends Command {
 		$version = $input->getArgument('version');
 		$name = $input->getArgument('name');
 		$config = $input->getArgument('config');
+		$scopeGroup = $input->getArgument('scope_group');
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln('ExApp ' . $appId . ' already registered.');
 			return 0;
