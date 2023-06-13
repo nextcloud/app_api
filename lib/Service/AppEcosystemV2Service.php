@@ -103,7 +103,7 @@ class AppEcosystemV2Service {
 	public function getExApp(string $exAppId): ?Entity {
 		try {
 			return $this->exAppMapper->findByAppId($exAppId);
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
 	}
@@ -112,7 +112,7 @@ class AppEcosystemV2Service {
 	 * Register exApp
 	 *
 	 * @param string $appId
-	 * @param array $appData [version, name, config, enabled]
+	 * @param array $appData [version, name, config]
 	 *
 	 * @return ExApp|null
 	 */
@@ -132,20 +132,20 @@ class AppEcosystemV2Service {
 				$this->logger->error('Error while updating ex app: ' . $e->getMessage());
 				return null;
 			}
-		} catch (DoesNotExistException) {
-			$exApp = new ExApp();
-			$exApp->setAppid($appId);
-			$exApp->setVersion($appData['version']);
-			$exApp->setName($appData['name']);
-			$exApp->setConfig($appData['config']);
-			$secret = $this->random->generate(128); // Temporal random secret
-			$exApp->setSecret($secret);
-			$exApp->setStatus(json_encode(['active' => true]));
-			$exApp->setCreatedTime(time());
-			$exApp->setLastResponseTime(time());
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			$exApp = new ExApp([
+				'appid' => $appId,
+				'version' => $appData['version'],
+				'name' => $appData['name'],
+				'config' => $appData['config'],
+				'secret' =>  $this->random->generate(128),
+				'status' => json_encode(['active' => true]),
+				'created_time' => time(),
+				'last_response_time' => time(),
+			]);
 			try {
 				return $this->exAppMapper->insert($exApp);
-			} catch (\Exception $e) {
+			} catch (Exception $e) {
 				$this->logger->error('Error while registering ex app: ' . $e->getMessage());
 				return null;
 			}
@@ -157,19 +157,53 @@ class AppEcosystemV2Service {
 	 *
 	 * @param string $appId
 	 *
-	 * @return Entity|null
+	 * @return ExApp|null
 	 */
-	public function unregisterExApp(string $appId): ?Entity {
+	public function unregisterExApp(string $appId): ?ExApp {
 		try {
-			/** @var ExApp $exApp */
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			if ($this->exAppMapper->deleteExApp($exApp) !== 1) {
 				$this->logger->error('Error while unregistering ex app: ' . $appId);
 				return null;
 			}
 			return $exApp;
-		} catch (DoesNotExistException $e) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 			$this->logger->error('Error while unregistering ex app: ' . $e->getMessage());
+			return null;
+		}
+	}
+
+	public function getExAppScopeGroups(ExApp $exApp): array {
+		try {
+			return $this->exAppScopeMapper->findByAppid($exApp->getAppid());
+		} catch (Exception) {
+			return [];
+		}
+	}
+
+	public function setExAppScopeGroup(ExApp $exApp, int $scopeGroup): ?ExAppScope {
+		$appId = $exApp->getAppid();
+		try {
+			return $this->exAppScopeMapper->findByAppidScope($appId, $scopeGroup);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
+			$exAppScope = new ExAppScope([
+				'appid' => $appId,
+				'scope_group' => $scopeGroup,
+			]);
+			try {
+				return $this->exAppScopeMapper->insert($exAppScope);
+			} catch (\Exception $e) {
+				$this->logger->error('Error while setting ex app scope group: ' . $e->getMessage());
+				return null;
+			}
+		}
+	}
+
+	public function removeExAppScopeGroup(ExApp $exApp, int $scopeGroup): ?ExAppScope {
+		try {
+			$exAppScope = $this->exAppScopeMapper->findByAppidScope($exApp->getAppid(), $scopeGroup);
+			return $this->exAppScopeMapper->delete($exAppScope);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
 	}
@@ -182,8 +216,12 @@ class AppEcosystemV2Service {
 	 * @return bool
 	 */
 	public function enableExApp(ExApp $exApp): bool {
-		if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), true) === 1) {
-			return true;
+		try {
+			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), true) === 1) {
+				return true;
+			}
+		} catch (Exception) {
+			return false;
 		}
 		return false;
 	}
@@ -196,8 +234,12 @@ class AppEcosystemV2Service {
 	 * @return bool
 	 */
 	public function disableExApp(ExApp $exApp): bool {
-		if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) === 1) {
-			return true;
+		try {
+			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) === 1) {
+				return true;
+			}
+		} catch (Exception) {
+			return false;
 		}
 		return false;
 	}
@@ -211,9 +253,10 @@ class AppEcosystemV2Service {
 	 */
 	public function getAppStatus(string $appId): ?array {
 		try {
+			// TODO: Send request to ex app, update status and last response time, return status
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			return json_decode($exApp->getStatus(), true);
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
 	}
@@ -473,7 +516,7 @@ class AppEcosystemV2Service {
 	public function getApiRouteScope(string $apiRoute): ?ExAppApiScope {
 		try {
 			return $this->exAppApiScopeMapper->findByApiRoute($apiRoute);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
 	}

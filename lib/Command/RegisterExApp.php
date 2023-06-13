@@ -63,7 +63,6 @@ class RegisterExApp extends Command {
 		$version = $input->getArgument('version');
 		$name = $input->getArgument('name');
 		$config = $input->getArgument('config');
-		$scopeGroup = $input->getArgument('scope_group');
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln('ExApp ' . $appId . ' already registered.');
 			return 0;
@@ -75,13 +74,19 @@ class RegisterExApp extends Command {
 		]);
 		if ($exApp !== null) {
 			$output->writeln('Ex-app successfully registered.');
-			$enabled = $input->getArgument('enabled');
-			if ($enabled === 'true') {
+			$enabled = boolval($input->getArgument('enabled'));
+			if ($enabled) {
 				if ($this->service->enableExApp($exApp)) {
 					$output->writeln('ExApp successfully enabled.');
 				} else {
 					$output->writeln('Failed to enable ex-app.');
 				}
+			}
+			$scopeGroup = intval($input->getArgument('scope_group'));
+			if ($this->service->setExAppScopeGroup($exApp, $scopeGroup)) {
+				$output->writeln('ExApp scope group successfully set.');
+			} else {
+				$output->writeln('Failed to set ex-app scope group.');
 			}
 			return 0;
 		}

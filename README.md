@@ -62,17 +62,17 @@ sequenceDiagram
 
 Each ExApp request to secured with AEAuth must contain the following headers (order is important):
 
-1. `AE-VERSION` - `[required]` version of the AppEcosystemV2
+1. `AE-VERSION` - `[required]` minimal version of the AppEcosystemV2
 2. `EX-APP-ID` - `[required]` id of the ExApp
 3. `EX-APP-VERSION` - `[required]` version of the ExApp
 4. `NC-USER-ID` - `[optional]` the user under which the request is made, can be empty in case of system apps (more deatils in [scopes](#AppEcosystemV2-scopes) section)
-5. `AE-DATA-HASH` - `[required]` hash of the request body (see details in [signature](#AppEcosystemV2-signature) section)
+5. `AE-DATA-HASH` - `[required]` hash of the request body (see details in [signature](#AE-SIGNATURE) section)
 6. `AE-SIGN-TIME` - `[required]` unix timestamp of the request
-7. `AE-SIGNATURE` - `[required]` signature of the request (see details [signature](#AppEcosystemV2-signature) section)
+7. `AE-SIGNATURE` - `[required]` signature of the request (see details [signature](#AE-SIGNATURE) section)
 
-### AppEcosystemV2 signature
+### AE-SIGNATURE
 
-AppEcosystemV2 signature is a HMAC-SHA256 hash of the request signed with the shared secret.
+AppEcosystemV2 signature (AE-SIGNATURE) is a HMAC-SHA256 hash of the request signed with the shared secret.
 
 Depending on request method signing body is different:
 
@@ -108,14 +108,16 @@ sequenceDiagram
 		participant AppEcosystemV2
 	end
 	ExApp->>+Nextcloud: Request to API
+	Nextcloud->>Nextcloud: Check if AE-SIGNATURE header exists
+	Nextcloud-->>ExApp: Reject if AE-SIGNATURE header not exists
+	Nextcloud->>Nextcloud: Check if AppEcosystemV2 enabled
+	Nextcloud-->>ExApp: Reject if AppEcosystemV2 not enabled
 	Nextcloud->>+AppEcosystemV2: Validate request
 	AppEcosystemV2-->>AppEcosystemV2: Check if ExApp exists and enabled
 	AppEcosystemV2-->>Nextcloud: Reject if ExApp not exists or disabled
-	AppEcosystemV2-->>AppEcosystemV2: Get ExApp secret
-	AppEcosystemV2-->>AppEcosystemV2: Check and build headers for signature
 	AppEcosystemV2-->>AppEcosystemV2: Validate AE-SIGN-TIME
 	AppEcosystemV2-->>Nextcloud: Reject if sign time diff > 5 min
-	AppEcosystemV2-->>AppEcosystemV2: Build signing body and generate signature
+	AppEcosystemV2-->>AppEcosystemV2: Generate and validate AE-SIGNATURE
 	AppEcosystemV2-->>Nextcloud: Reject if signature not match
 	AppEcosystemV2-->>AppEcosystemV2: Check if user interacted with ExApp
 	AppEcosystemV2-->>Nextcloud: Reject if user has not interacted with ExApp (attempt to bypass user)
@@ -134,16 +136,3 @@ sequenceDiagram
 ### Admin settings
 
 In Admin section you can configure existing external apps.
-
-## 🛠️ State of maintenance
-
-While there are some things that could be done to further improve this app, the app is currently maintained with **limited effort**. This means:
-
-* The main functionality works for the majority of the use cases
-* We will ensure that the app will continue to work like this for future releases and we will fix bugs that we classify as 'critical'
-* We will not invest further development resources ourselves in advancing the app with new features
-* We do review and enthusiastically welcome community PR's
-
-We would be more than excited if you would like to collaborate with us. We will merge pull requests for new features and fixes. We also would love to welcome co-maintainers.
-
-If you are a customer of Nextcloud and you have a strong business case for any development of this app, we will consider your wishes for our roadmap. Please contact your account manager to talk about the possibilities.

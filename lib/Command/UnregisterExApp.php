@@ -60,8 +60,12 @@ class UnregisterExApp extends Command {
 			$output->writeln('ExApp ' . $appId . ' not found. Failed to unregister.');
 			return 1;
 		}
-		if ($exApp !== null && $exApp !== false && $exApp->getAppId() === $appId) {
+		if ($exApp->getAppid() === $appId) {
 			$output->writeln('ExApp successfully unregistered.');
+			$appScopes = $this->service->getExAppScopeGroups($exApp);
+			foreach ($appScopes as $appScope) {
+				$this->service->removeExAppScopeGroup($exApp, intval($appScope->getScopeGroup()));
+			}
 		}
 		return 0;
 	}

@@ -58,14 +58,28 @@ class ExAppScopeMapper extends QBMapper {
 
 	/**
 	 * @param string $appId
+	 *
+	 * @throws Exception
+	 * @return ExAppScope[]
+	 */
+	public function findByAppid(string $appId): array {
+		$qb = $this->db->getQueryBuilder();
+		return $this->findEntities($qb->select('*')
+			->from($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId), IQueryBuilder::PARAM_STR))
+		);
+	}
+
+	/**
+	 * @param string $appId
 	 * @param int $scopeGroup
 	 *
 	 * @throws DoesNotExistException if not found
 	 * @throws Exception
 	 * @throws MultipleObjectsReturnedException if more than one result
-	 * @return Entity|null
+	 * @return ExAppScope|null
 	 */
-	public function findByAppidScope(string $appId, int $scopeGroup): ?Entity {
+	public function findByAppidScope(string $appId, int $scopeGroup): ?ExAppScope {
 		$qb = $this->db->getQueryBuilder();
 		return $this->findEntity($qb->select('*')
 			->from($this->tableName)

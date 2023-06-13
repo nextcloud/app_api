@@ -31,10 +31,12 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
-use OCP\DB\IResult;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 class ExAppMapper extends QBMapper {
@@ -42,6 +44,9 @@ class ExAppMapper extends QBMapper {
 		parent::__construct($db, 'ex_apps');
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -54,16 +59,18 @@ class ExAppMapper extends QBMapper {
 	/**
 	 * @param string $appId
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+	 * @throws DoesNotExistException if not found
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws Exception
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExApp
+	 * @return ExApp
 	 */
 	public function findByAppId(string $appId): Entity {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
 			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId))
 			);
 		return $this->findEntity($qb);
 	}
@@ -71,10 +78,11 @@ class ExAppMapper extends QBMapper {
 	/**
 	 * @param string $name
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @throws DoesNotExistException if not found
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws Exception
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExApp
+	 * @return ExApp
 	 */
 	public function findByName(string $name): Entity {
 		$qb = $this->db->getQueryBuilder();
@@ -86,14 +94,20 @@ class ExAppMapper extends QBMapper {
 		return $this->findEntity($qb);
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function deleteExApp(ExApp $exApp): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->delete($this->tableName)
 			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_INT))
+				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_STR))
 			)->executeStatement();
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function findExAppEnabled(string $appId): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('enabled')
@@ -101,7 +115,6 @@ class ExAppMapper extends QBMapper {
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
 			);
-		/** @var IResult */
 		$result = $qb->executeQuery();
 		return [
 			'success' => $result->rowCount() === 1,
@@ -109,6 +122,9 @@ class ExAppMapper extends QBMapper {
 		];
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function updateExAppEnabled(string $appId, bool $enabled): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->update($this->tableName)
@@ -118,12 +134,49 @@ class ExAppMapper extends QBMapper {
 			)->executeStatement();
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function updateLastResponseTime(ExApp $exApp): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->update($this->tableName)
 			->set('last_response_time', $qb->createNamedParameter($exApp->getLastResponseTime(), IQueryBuilder::PARAM_INT))
 			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid()))
 			)->executeStatement();
 	}
+
+//	public function insert(Entity $entity): Entity {
+//		if (!$entity instanceof ExApp) {
+//			throw new \InvalidArgumentException('Wrong type of entity');
+//		}
+//		$qb = $this->db->getQueryBuilder();
+//
+//	}
+//
+//	public function insertOrUpdate(Entity $entity): Entity {
+//		if (!$entity instanceof ExApp) {
+//			throw new \InvalidArgumentException('Wrong type of entity');
+//		}
+//	}
+//
+//	public function update(Entity $entity): Entity {
+//		if (!$entity instanceof ExApp) {
+//			throw new \InvalidArgumentException('Wrong type of entity');
+//		}
+//	}
+//
+//	public function delete(Entity $entity): ExApp {
+//		if (!$entity instanceof ExApp) {
+//			throw new \InvalidArgumentException('Wrong type of entity');
+//		}
+//		$qb = $this->db->getQueryBuilder();
+//		$idType = $this->getParameterTypeForProperty($entity, 'appid');
+//		$qb->delete($this->tableName)
+//			->where(
+//				$qb->expr()->eq('appid', $qb->createNamedParameter($entity->getId(), $idType))
+//			);
+//		$qb->executeStatement();
+//		return $entity;
+//	}
 }

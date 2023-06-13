@@ -106,4 +106,18 @@ class ExAppApiScopeMapper extends QBMapper {
 			throw $ex;
 		}
 	}
+
+	public function delete(Entity $entity): ExAppApiScope {
+		if (!$entity instanceof ExAppApiScope) {
+			throw new \InvalidArgumentException('Wrong type of entity');
+		}
+		$qb = $this->db->getQueryBuilder();
+		$idType = $this->getParameterTypeForProperty($entity, 'api_route');
+		$qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('api_route', $qb->createNamedParameter($entity->getId(), $idType))
+			);
+		$qb->executeStatement();
+		return $entity;
+	}
 }
