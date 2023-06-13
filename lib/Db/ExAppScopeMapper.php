@@ -32,7 +32,6 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;

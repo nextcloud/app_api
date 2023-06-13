@@ -52,7 +52,6 @@ use OCA\AppEcosystemV2\Db\ExAppUser;
 use OCA\AppEcosystemV2\Db\ExAppUserMapper;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
@@ -65,7 +64,6 @@ class AppEcosystemV2Service {
 	private LoggerInterface $logger;
 	private IClient $client;
 	private ExAppMapper $exAppMapper;
-	private IL10N $l10n;
 	private IAppManager $appManager;
 	private ExAppUserMapper $exAppUserMapper;
 	private ISecureRandom $random;
@@ -78,7 +76,6 @@ class AppEcosystemV2Service {
 		LoggerInterface $logger,
 		IClientService $clientService,
 		ExAppMapper $exAppMapper,
-		IL10N $l10n,
 		IAppManager $appManager,
 		ExAppUserMapper $exAppUserMapper,
 		ExAppApiScopeMapper $exAppApiScopeMapper,
@@ -90,7 +87,6 @@ class AppEcosystemV2Service {
 		$this->logger = $logger;
 		$this->client = $clientService->newClient();
 		$this->exAppMapper = $exAppMapper;
-		$this->l10n = $l10n;
 		$this->appManager = $appManager;
 		$this->exAppUserMapper = $exAppUserMapper;
 		$this->random = $random;
@@ -185,7 +181,7 @@ class AppEcosystemV2Service {
 		$appId = $exApp->getAppid();
 		try {
 			return $this->exAppScopeMapper->findByAppidScope($appId, $scopeGroup);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$exAppScope = new ExAppScope([
 				'appid' => $appId,
 				'scope_group' => $scopeGroup,
@@ -288,46 +284,54 @@ class AppEcosystemV2Service {
 
 			if (count($params) > 0) {
 				if ($method === 'GET') {
-					// manage array parameters
-					$paramsContent = '';
-					foreach ($params as $key => $value) {
-						if (is_array($value)) {
-							foreach ($value as $oneArrayValue) {
-								$paramsContent .= $key . '[]=' . urlencode($oneArrayValue) . '&';
-							}
-							unset($params[$key]);
-						}
-					}
-					$paramsContent .= http_build_query($params);
-
-					$url .= '?' . $paramsContent;
+					$url .= '?' . $this->getUriEncodedParams($params);
 				} else {
 					$options['json'] = $params;
 				}
 			}
 
+			$options['headers']['AE-DATA-HASH'] = '';
 			$options['headers']['AE-SIGN-TIME'] = time();
-			$signature = $this->generateRequestSignature($method, $options, $exApp->getSecret(), $params);
+			$signature = $this->generateRequestSignature($method, $route, $options, $exApp->getSecret(), $params);
 			$options['headers']['AE-SIGNATURE'] = $signature;
 
-			if ($method === 'GET') {
-				$response = $this->client->get($url, $options);
-			} else if ($method === 'POST') {
-				$response = $this->client->post($url, $options);
-			} else if ($method === 'PUT') {
-				$response = $this->client->put($url, $options);
-			} else if ($method === 'DELETE') {
-				$response = $this->client->delete($url, $options);
-			} else {
-				return ['error' => $this->l10n->t('Bad HTTP method')];
+			switch ($method) {
+				case 'GET':
+					$response = $this->client->get($url, $options);
+					break;
+				case 'POST':
+					$response = $this->client->post($url, $options);
+					break;
+				case 'PUT':
+					$response = $this->client->put($url, $options);
+					break;
+				case 'DELETE':
+					$response = $this->client->delete($url, $options);
+					break;
+				default:
+					return ['error' => 'Bad HTTP method'];
 			}
+//			TODO: Add files support
 			return $response;
 		} catch (\Exception $e) {
 			return ['error' => $e->getMessage()];
 		}
 	}
 
-	public function generateRequestSignature(string $method, array $options, string $secret, array $params = []): ?string {
+	private function getUriEncodedParams(array $params): string {
+		$paramsContent = '';
+		foreach ($params as $key => $value) {
+			if (is_array($value)) {
+				foreach ($value as $oneArrayValue) {
+					$paramsContent .= $key . '[]=' . urlencode($oneArrayValue) . '&';
+				}
+				unset($params[$key]);
+			}
+		}
+		return $paramsContent . http_build_query($params);
+	}
+
+	public function generateRequestSignature(string $method, string $uri, array $options, string $secret, array $params = []): ?string {
 		$headers = [];
 		if (isset($options['headers']['AE-VERSION'])) {
 			$headers['AE-VERSION'] = $options['headers']['AE-VERSION'];
@@ -341,33 +345,32 @@ class AppEcosystemV2Service {
 		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
 			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
 		}
+
+		if ($method === 'GET') {
+			$queryParams = $this->getUriEncodedParams($params);
+			$uri .= '?' . $queryParams;
+			$dataParams = '';
+		} else {
+			$dataParams = json_encode($options['json'], JSON_UNESCAPED_SLASHES);
+		}
+
 		if (isset($options['headers']['AE-DATA-HASH'])) {
-			// TODO: Add data hash calculation
-			$headers['AE-DATA-HASH'] = $options['headers']['AE-DATA-HASH'];
+			$headers['AE-DATA-HASH'] = $this->generateDataHash($dataParams);
 		}
 		if (isset($options['headers']['AE-SIGN-TIME'])) {
 			$headers['AE-SIGN-TIME'] = $options['headers']['AE-SIGN-TIME'];
 		}
-
-		if ($method === 'GET') {
-			$queryParams = $params;
-		} else {
-			$queryParams = array_merge($params, $options['json']);
-		}
-//		$this->sortNestedArrayAssoc($queryParams);
-		array_walk_recursive(
-			$queryParams,
-			function(&$v) {
-				if (is_numeric($v)) {
-					$v = strval($v);
-				}
-			}
-		);
-		$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
+		$body = $method . $uri . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		return hash_hmac('sha256', $body, $secret);
 	}
 
-	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
+	private function generateDataHash(string $data): string {
+		$hashContext = hash_init('xxh64');
+		hash_update($hashContext, $data);
+		return hash_final($hashContext);
+	}
+
+	public function validateExAppRequestToNC(IRequest $request): bool {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX-APP-ID'));
 			$enabled = $exApp->getEnabled();
@@ -376,10 +379,10 @@ class AppEcosystemV2Service {
 			}
 			$secret = $exApp->getSecret();
 			// TODO: Add check of debug mode for logging each request if needed
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return false;
 		}
-		$method = $request->getMethod();
+
 		$headers = [
 			'AE-VERSION' => $request->getHeader('AE-VERSION'),
 			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
@@ -390,17 +393,6 @@ class AppEcosystemV2Service {
 			$headers['NC-USER-ID'] = $userId;
 		}
 		$requestSignature = $request->getHeader('AE-SIGNATURE');
-		$queryParams = $this->cleanupParams($request->getParams());
-		// $this->sortNestedArrayAssoc($queryParams);
-		array_walk_recursive(
-			$queryParams,
-			function(&$v) {
-				if (is_numeric($v)) {
-					$v = strval($v);
-				}
-			}
-		);
-
 		$dataHash = $request->getHeader('AE-DATA-HASH');
 		$headers['AE-DATA-HASH'] = $dataHash;
 		$signTime = $request->getHeader('AE-SIGN-TIME');
@@ -409,14 +401,7 @@ class AppEcosystemV2Service {
 		}
 		$headers['AE-SIGN-TIME'] = $signTime;
 
-		if ($isDav) {
-			$method .= $request->getRequestUri();
-		}
-		if (!empty($queryParams)) {
-			$body = $method . json_encode($queryParams, JSON_UNESCAPED_SLASHES) . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		} else {
-			$body = $method . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		}
+		$body =  $request->getMethod() . $request->getRequestUri() . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		$signature = hash_hmac('sha256', $body, $secret);
 		$signatureValid = $signature === $requestSignature;
 
@@ -436,6 +421,7 @@ class AppEcosystemV2Service {
 			}
 			$apiScope = $this->getApiRouteScope($path);
 
+//			TODO: Re-check scopes logic
 			if ($apiScope === null) {
 				return false;
 			}
@@ -494,16 +480,6 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	/**
-	 * Service function to clean up params from injected params
-	 */
-	private function cleanupParams(array $params): array {
-		if (isset($params['_route'])) {
-			unset($params['_route']);
-		}
-		return $params;
-	}
-
 	public function passesScopeCheck(ExApp $exApp, int $apiScope): bool {
 		try {
 			$exAppScope = $this->exAppScopeMapper->findByAppidScope($exApp->getAppid(), $apiScope);
@@ -522,6 +498,7 @@ class AppEcosystemV2Service {
 	}
 
 	public function registerInitScopes(): bool {
+//		TODO: Rewrite to dynamic initialization
 		$apiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
 
 		$fileActionsMenuApiScope = new ExAppApiScope([
@@ -593,6 +570,7 @@ class AppEcosystemV2Service {
 	private function verifyDataHash(string $dataHash): bool {
 		$hashContext = hash_init('xxh64');
 		$stream = fopen('php://input', 'r');
+//		$streamData = stream_get_contents($stream);
 		hash_update_stream($hashContext, $stream, -1);
 		fclose($stream);
 		$phpInputHash = hash_final($hashContext);
