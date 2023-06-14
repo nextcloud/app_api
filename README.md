@@ -97,6 +97,7 @@ AppEcosystemV2 supports the following default scopes:
 
 * `INIT_API_SCOPE` - init scope, used when ExApp is on initialization step and has no user context
 * `SYSTEM_API_SCOPE` - configured for system apps, has no user context
+* `DAV_API_SCOPE` - scope for dav requests, has user context
 
 ### AppEcosystemV2 validation diagram
 

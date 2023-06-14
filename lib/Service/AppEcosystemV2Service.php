@@ -61,6 +61,7 @@ class AppEcosystemV2Service {
 //	TODO: In addition to default constant scopes think about implementing scopes registration mechanism
 	public const INIT_API_SCOPE = 1;
 	public const SYSTEM_API_SCOPE = 2;
+	public const DAV_API_SCOPE = 3;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
 	private LoggerInterface $logger;
 	private IClient $client;
@@ -293,8 +294,9 @@ class AppEcosystemV2Service {
 
 			$options['headers']['AE-DATA-HASH'] = '';
 			$options['headers']['AE-SIGN-TIME'] = time();
-			$signature = $this->generateRequestSignature($method, $route, $options, $exApp->getSecret(), $params);
+			[$signature, $dataHash] = $this->generateRequestSignature($method, $route, $options, $exApp->getSecret(), $params);
 			$options['headers']['AE-SIGNATURE'] = $signature;
+			$options['headers']['AE-DATA-HASH'] = $dataHash;
 
 			switch ($method) {
 				case 'GET':
@@ -332,7 +334,7 @@ class AppEcosystemV2Service {
 		return $paramsContent . http_build_query($params);
 	}
 
-	public function generateRequestSignature(string $method, string $uri, array $options, string $secret, array $params = []): ?string {
+	public function generateRequestSignature(string $method, string $uri, array $options, string $secret, array $params = []): array {
 		$headers = [];
 		if (isset($options['headers']['AE-VERSION'])) {
 			$headers['AE-VERSION'] = $options['headers']['AE-VERSION'];
@@ -352,17 +354,18 @@ class AppEcosystemV2Service {
 			$uri .= '?' . $queryParams;
 			$dataParams = '';
 		} else {
-			$dataParams = json_encode($options['json'], JSON_UNESCAPED_SLASHES);
+			$dataParams = mb_convert_encoding(json_encode($options['json'], JSON_UNESCAPED_SLASHES), 'utf8');
 		}
 
+		$dataHash = $this->generateDataHash($dataParams);
 		if (isset($options['headers']['AE-DATA-HASH'])) {
-			$headers['AE-DATA-HASH'] = $this->generateDataHash($dataParams);
+			$headers['AE-DATA-HASH'] = $dataHash;
 		}
 		if (isset($options['headers']['AE-SIGN-TIME'])) {
 			$headers['AE-SIGN-TIME'] = $options['headers']['AE-SIGN-TIME'];
 		}
 		$body = $method . $uri . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		return hash_hmac('sha256', $body, $secret);
+		return [hash_hmac('sha256', $body, $secret), $dataHash];
 	}
 
 	private function generateDataHash(string $data): string {
@@ -371,7 +374,7 @@ class AppEcosystemV2Service {
 		return hash_final($hashContext);
 	}
 
-	public function validateExAppRequestToNC(IRequest $request): bool {
+	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX-APP-ID'));
 			$enabled = $exApp->getEnabled();
@@ -414,11 +417,15 @@ class AppEcosystemV2Service {
 			if (!$this->verifyDataHash($dataHash)) {
 				return false;
 			}
-			try {
-				$path = $request->getPathInfo();
-			} catch (\Exception $e) {
-				$this->logger->error('Error getting path info: ' . $e->getMessage());
-				return false;
+			if (!$isDav) {
+				try {
+					$path = $request->getPathInfo();
+				} catch (\Exception $e) {
+					$this->logger->error('Error getting path info: ' . $e->getMessage());
+					return false;
+				}
+			} else {
+				$path = '/dav/';
 			}
 			$apiScope = $this->getApiRouteScope($path);
 
@@ -526,6 +533,10 @@ class AppEcosystemV2Service {
 			'api_route' =>  $apiV1Prefix . '/ex-app/config/all',
 			'scope_group' => self::SYSTEM_API_SCOPE
 		]);
+		$davApiScope = new ExAppApiScope([
+			'api_route' => '/dav/',
+			'scope_group' => self::DAV_API_SCOPE,
+		]);
 
 		$initApiScopes = [
 			$fileActionsMenuApiScope,
@@ -533,7 +544,8 @@ class AppEcosystemV2Service {
 			$usersApiScope,
 			$appConfigApiScope,
 			$appConfigKeysApiScope,
-			$appConfigAllApiScope
+			$appConfigAllApiScope,
+			$davApiScope,
 		];
 
 		try {
