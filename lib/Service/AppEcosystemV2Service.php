@@ -293,7 +293,7 @@ class AppEcosystemV2Service {
 			}
 
 			$options['headers']['AE-DATA-HASH'] = '';
-			$options['headers']['AE-SIGN-TIME'] = time();
+			$options['headers']['AE-SIGN-TIME'] = strval(time());
 			[$signature, $dataHash] = $this->generateRequestSignature($method, $route, $options, $exApp->getSecret(), $params);
 			$options['headers']['AE-SIGNATURE'] = $signature;
 			$options['headers']['AE-DATA-HASH'] = $dataHash;
@@ -354,7 +354,7 @@ class AppEcosystemV2Service {
 			$uri .= '?' . $queryParams;
 			$dataParams = '';
 		} else {
-			$dataParams = mb_convert_encoding(json_encode($options['json'], JSON_UNESCAPED_SLASHES), 'utf8');
+			$dataParams = json_encode($options['json']);
 		}
 
 		$dataHash = $this->generateDataHash($dataParams);
