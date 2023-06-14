@@ -62,7 +62,6 @@ class AppEcosystemV2Service {
 	public const INIT_API_SCOPE = 1;
 	public const SYSTEM_API_SCOPE = 2;
 	public const DAV_API_SCOPE = 3;
-	public const USER_API_SCOPE = 4;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
 	private LoggerInterface $logger;
 	private IClient $client;
@@ -525,7 +524,9 @@ class AppEcosystemV2Service {
 			['api_route' => $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/ex-app/config', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/dav/', 'scope_group' => self::DAV_API_SCOPE],
-			['api_route' =>  '/cloud/users', 'scope_group' => self::USER_API_SCOPE],
+			['api_route' =>  '/cloud/users', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  '/cloud/groups', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  '/cloud/apps', 'scope_group' => self::SYSTEM_API_SCOPE],
 		];
 
 		try {
