@@ -350,8 +350,10 @@ class AppEcosystemV2Service {
 		}
 
 		if ($method === 'GET') {
-			$queryParams = $this->getUriEncodedParams($params);
-			$uri .= '?' . $queryParams;
+			if (!empty($params)) {
+				$queryParams = $this->getUriEncodedParams($params);
+				$uri .= '?' . $queryParams;
+			}
 			$dataParams = '';
 		} else {
 			$dataParams = json_encode($options['json']);
