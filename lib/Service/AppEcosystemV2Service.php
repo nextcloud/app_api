@@ -62,6 +62,7 @@ class AppEcosystemV2Service {
 	public const INIT_API_SCOPE = 1;
 	public const SYSTEM_API_SCOPE = 2;
 	public const DAV_API_SCOPE = 3;
+	public const USER_API_SCOPE = 4;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
 	private LoggerInterface $logger;
 	private IClient $client;
@@ -98,7 +99,7 @@ class AppEcosystemV2Service {
 		$this->exAppScopeMapper = $exAppScopeMapper;
 	}
 
-	public function getExApp(string $exAppId): ?Entity {
+	public function getExApp(string $exAppId): ?ExApp {
 		try {
 			return $this->exAppMapper->findByAppId($exAppId);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
@@ -501,8 +502,15 @@ class AppEcosystemV2Service {
 
 	public function getApiRouteScope(string $apiRoute): ?ExAppApiScope {
 		try {
-			return $this->exAppApiScopeMapper->findByApiRoute($apiRoute);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+//			TODO: Add caching here
+			$apiScopes = $this->exAppApiScopeMapper->findAll();
+			foreach ($apiScopes as $apiScope) {
+				if (str_contains($apiRoute, $apiScope->getApiRoute())) {
+					return $apiScope;
+				}
+			}
+			return null;
+		} catch (Exception) {
 			return null;
 		}
 	}
@@ -511,48 +519,18 @@ class AppEcosystemV2Service {
 //		TODO: Rewrite to dynamic initialization
 		$apiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
 
-		$fileActionsMenuApiScope = new ExAppApiScope([
-			'api_route' =>  $apiV1Prefix . '/files/actions/menu',
-			'scope_group' => self::INIT_API_SCOPE
-		]);
-		$logApiScope = new ExAppApiScope([
-			'api_route' =>  $apiV1Prefix . '/log',
-			'scope_group' => self::INIT_API_SCOPE
-		]);
-		$usersApiScope = new ExAppApiScope([
-			'api_route' =>  $apiV1Prefix . '/users',
-			'scope_group' => self::SYSTEM_API_SCOPE
-		]);
-		$appConfigApiScope = new ExAppApiScope([
-			'api_route' =>  $apiV1Prefix . '/ex-app/config',
-			'scope_group' => self::SYSTEM_API_SCOPE
-		]);
-		$appConfigKeysApiScope = new ExAppApiScope([
-			'api_route' =>  $apiV1Prefix . '/ex-app/config/keys',
-			'scope_group' => self::SYSTEM_API_SCOPE
-		]);
-		$appConfigAllApiScope = new ExAppApiScope([
-			'api_route' =>  $apiV1Prefix . '/ex-app/config/all',
-			'scope_group' => self::SYSTEM_API_SCOPE
-		]);
-		$davApiScope = new ExAppApiScope([
-			'api_route' => '/dav/',
-			'scope_group' => self::DAV_API_SCOPE,
-		]);
-
 		$initApiScopes = [
-			$fileActionsMenuApiScope,
-			$logApiScope,
-			$usersApiScope,
-			$appConfigApiScope,
-			$appConfigKeysApiScope,
-			$appConfigAllApiScope,
-			$davApiScope,
+			['api_route' =>  $apiV1Prefix . '/files/actions/menu', 'scope_group' => self::INIT_API_SCOPE],
+			['api_route' =>  $apiV1Prefix . '/log', 'scope_group' => self::INIT_API_SCOPE],
+			['api_route' => $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  $apiV1Prefix . '/ex-app/config', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  '/dav/', 'scope_group' => self::DAV_API_SCOPE],
+			['api_route' =>  '/ocs/v1.php/cloud/users', 'scope_group' => self::USER_API_SCOPE],
 		];
 
 		try {
 			foreach ($initApiScopes as $apiScope) {
-				$this->exAppApiScopeMapper->insertOrUpdate($apiScope);
+				$this->exAppApiScopeMapper->insertOrUpdate(new ExAppApiScope($apiScope));
 			}
 			return true;
 		} catch (Exception $e) {

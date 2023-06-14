@@ -41,6 +41,9 @@ class ExAppApiScopeMapper extends QBMapper {
 		parent::__construct($db, 'ex_apps_api_scopes');
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -48,22 +51,6 @@ class ExAppApiScopeMapper extends QBMapper {
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 		return $this->findEntities($qb);
-	}
-
-	/**
-	 * @param string $apiRoute
-	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException|Exception if more than one result
-	 *
-	 * @return ExAppApiScope
-	 */
-	public function findByApiRoute(string $apiRoute): Entity {
-		$qb = $this->db->getQueryBuilder();
-		return $this->findEntity($qb->select('*')
-			->from($this->tableName)
-			->where($qb->expr()->eq('api_route', $qb->createNamedParameter($apiRoute)))
-		);
 	}
 
 	public function insert(Entity $entity): Entity {
