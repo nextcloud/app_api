@@ -31,9 +31,8 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
-use OCP\Http\Client\IClient;
-use OCP\Http\Client\IClientService;
-use OCP\IConfig;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use Psr\Log\LoggerInterface;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
@@ -47,31 +46,16 @@ use OCP\Cache\CappedMemoryCache;
  * App configuration (appconfig_ex)
  */
 class ExAppConfigService {
-	/** @var IConfig */
-	private $config;
-
-	/** @var LoggerInterface */
-	private $logger;
-
-	/** @var CappedMemoryCache */
-	private $cache;
-
-	/** @var IClient */
-	private $client;
-
-	/** @var ExAppConfigMapper */
-	private $mapper;
+	private LoggerInterface $logger;
+	private CappedMemoryCache $cache;
+	private ExAppConfigMapper $mapper;
 
 	public function __construct(
-		IConfig $config,
 		CappedMemoryCache $cache,
-		IClientService $clientService,
 		ExAppConfigMapper $mapper,
 		LoggerInterface $logger,
 	) {
-		$this->config = $config;
 		$this->cache = $cache;
-		$this->client = $clientService->newClient();
 		$this->mapper = $mapper;
 		$this->logger = $logger;
 	}
@@ -95,7 +79,7 @@ class ExAppConfigService {
 		try {
 			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
 			$value = $appConfigEx->getConfigvalue();
-		} catch (DoesNotExistException $e) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
 			$value = $default; // TODO: do we need default values?
 		}
 
@@ -108,15 +92,14 @@ class ExAppConfigService {
 	 *
 	 * @param string $appId
 	 * @param string $configKey
-	 * @param mixed $value
-	 *
-	 * @return Entity|null
+	 * @param mixed $configValue
+	 * @return ExAppConfig|null
 	 */
-	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue): ?Entity {
+	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue): ?ExAppConfig {
 		try {
 			/** @var ExAppConfig $appConfigEx */
 			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
-		} catch (DoesNotExistException $e) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$appConfigEx = null;
 		}
 		if ($appConfigEx === null) {
@@ -146,11 +129,14 @@ class ExAppConfigService {
 	 * @param string $appId
 	 * @param string $configKey
 	 *
-	 * @return Entity|null
+	 * @return ExAppConfig|null
 	 */
-	public function deleteAppConfigValue(string $appId, string $configKey): ?Entity {
-		/** @var ExAppConfig $appConfigEx */
-		$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
+	public function deleteAppConfigValue(string $appId, string $configKey): ?ExAppConfig {
+		try {
+			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			$appConfigEx = null;
+		}
 		if ($appConfigEx !== null) {
 			if ($this->mapper->deleteByAppidConfigkey($appConfigEx) !== 1) {
 				$this->logger->error('Error while deleting app_config_ex value');
@@ -167,23 +153,28 @@ class ExAppConfigService {
 	 *
 	 * @return int deleted items count
 	 */
-	public function deleteAppConfigValues(string $appId) {
-		return $this->mapper->deleteAllByAppId($appId);
+	public function deleteAppConfigValues(string $appId): int {
+		try {
+			$exAppConfigs = $this->mapper->findAllByAppId($appId);
+			if ($this->mapper->deleteAllByAppId($appId) === count($exAppConfigs)) {
+				return count($exAppConfigs);
+			}
+		} catch (Exception) {
+			return -1;
+		}
+		return 0;
 	}
 
 	/**
 	 * @param string $appId
 	 *
-	 * @return Entity[]
+	 * @return ExAppConfig[]
 	 */
-	public function getAppConfigKeys(string $appId) {
-		$appConfigExs = $this->mapper->findAllByAppId($appId);
-		$this->logger->error('getAppConfigKeys: ' . json_encode($appConfigExs));
-		return $appConfigExs;
-		// $keys = [];
-		// foreach ($appConfigExs as $appConfigEx) {
-		// 	$keys[] = $appConfigEx->getConfigkey();
-		// }
-		// return $keys;
+	public function getAppConfigKeys(string $appId): array {
+		try {
+			return $this->mapper->findAllByAppId($appId);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+		}
+		return [];
 	}
 }

@@ -31,7 +31,10 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -42,7 +45,8 @@ class ExAppPreferenceMapper extends QBMapper {
 	}
 
 	/**
-	 * @return \OCA\AppEcosystemV2\Db\ExAppPreference[]
+	 * @throws Exception
+	 * @return ExAppPreference[]
 	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
@@ -58,10 +62,11 @@ class ExAppPreferenceMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $configKey
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @throws DoesNotExistException if not found
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws Exception
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppPreference
+	 * @return ExAppPreference
 	 */
 	public function findByUserIdAppIdKey(string $userId, string $appId, string $configKey): Entity {
 		$qb = $this->db->getQueryBuilder();
@@ -75,6 +80,9 @@ class ExAppPreferenceMapper extends QBMapper {
 		return $this->findEntity($qb);
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function updateUserConfigValue(ExAppPreference $exAppPreference): int {
 		$qb = $this->db->getQueryBuilder();
 		$qb->update($this->tableName)
@@ -87,6 +95,9 @@ class ExAppPreferenceMapper extends QBMapper {
 		return $qb->executeStatement();
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function deleteUserConfigValue(string $userId, string $appId, string $configKey): int {
 		$qb = $this->db->getQueryBuilder();
 		$qb->delete($this->tableName)
@@ -98,6 +109,9 @@ class ExAppPreferenceMapper extends QBMapper {
 		return $qb->executeStatement();
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function deleteUserConfigValues(string $userId, string $appId): int {
 		$qb = $this->db->getQueryBuilder();
 		$qb->delete($this->tableName)
@@ -111,7 +125,8 @@ class ExAppPreferenceMapper extends QBMapper {
 	/**
 	 * @param string $userId
 	 * @param string $appId
-	 * 
+	 *
+	 * @throws Exception
 	 * @return array fetched config keys
 	 */
 	public function findUserConfigKeys(string $userId, string $appId): array {

@@ -65,23 +65,34 @@ return [
 		['name' => 'preferences#deleteUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
 		['name' => 'preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference/all', 'verb' => 'DELETE'],
 
+//	TODO: Implement Notifications, SearchProvider, BackgroundJob, SettingsPage, SettingsSection, EventListener, DashboardWidget, Capabilities
+
 		// Notifications
-		['name' => 'ocsApi#sendNotification', 'url' => '/api/v1/send-notification', 'verb' => 'POST'],
+//		['name' => 'notification#sendNotification', 'url' => '/api/v1/notification', 'verb' => 'POST'],
+//		['name' => 'notification#registerNotificationProvider', 'url' => '/api/v1/notification-provider', 'verb' => 'POST'],
+//		['name' => 'notification#unregisterNotificationProvider', 'url' => '/api/v1/notification-provider', 'verb' => 'DELETE'],
 
 		// Unified search
-		['name' => 'ocsApi#registerSearchProvider', 'url' => '/api/v1/register-search-provider', 'verb' => 'POST'],
+//		['name' => 'search#registerSearchProvider', 'url' => '/api/v1/search-provider', 'verb' => 'POST'],
+//		['name' => 'search#unregisterSearchProvider', 'url' => '/api/v1/search-provider', 'verb' => 'DELETE'],
 
 		// Background jobs
-		['name' => 'ocsApi#registerBackgroundJob', 'url' => '/api/v1/register-background-job', 'verb' => 'POST'],
+//		['name' => 'backgroundJobs#registerBackgroundJob', 'url' => '/api/v1/background-job', 'verb' => 'POST'],
+//		['name' => 'backgroundJobs#unregisterBackgroundJob', 'url' => '/api/v1/background-job', 'verb' => 'DELETE'],
 
 		// Settings API (admin/user settings registration)
-		['name' => 'ocsApi#registerSettingsPage', 'url' => '/api/v1/register-settings-page', 'verb' => 'POST'],
-		['name' => 'ocsApi#registerSettingsSection', 'url' => '/api/v1/register-settings-section', 'verb' => 'POST'],
+//		['name' => 'settings#registerSettingsPage', 'url' => '/api/v1/settings/page', 'verb' => 'POST'],
+//		['name' => 'settings#unregisterSettingsPage', 'url' => '/api/v1/settings/page', 'verb' => 'DELETE'],
+//		['name' => 'settings#registerSettingsSection', 'url' => '/api/v1/settings/section', 'verb' => 'POST'],
+//		['name' => 'settings#unregisterSettingsSection', 'url' => '/api/v1/settings/section', 'verb' => 'DELETE'],
 
 		// Event listeners
-		['name' => 'ocsApi#registerEventListener', 'url' => '/api/v1/register-event-listener', 'verb' => 'POST'],
+//		['name' => 'events#registerEventListener', 'url' => '/api/v1/event-listener', 'verb' => 'POST'],
+//		['name' => 'events#registerEventListener', 'url' => '/api/v1/event-listener', 'verb' => 'DELETE'],
 
 		// Dashboard widgets
-		['name' => 'ocsApi#registerDashboardWidget', 'url' => '/api/v1/register-dashboard-widget', 'verb' => 'POST'],
+//		['name' => 'dashboard#registerDashboardWidget', 'url' => '/api/v1/dashboard', 'verb' => 'POST'],
+//		['name' => 'dashboard#unregisterDashboardWidget', 'url' => '/api/v1/dashboard', 'verb' => 'DELETE'],
+//	    ['name' => 'dashboard#loadDashboardWidgetData', 'url' => '/api/v1/dashboard/data', 'verb' => 'GET'], // For dashboard items list
 	],
 ];

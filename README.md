@@ -42,7 +42,7 @@ This authentication is based on a shared secret between Nextcloud and the extern
 
 1. ExApp sends a request to Nextcloud
 2. Nextcloud passes request to AppEcosystemV2
-3. AppEcosystemV2 validates request (see [validation](#AppEcosystemV2-validation) section)
+3. AppEcosystemV2 validates request (see [authentication](#AppEcosystemV2-authentication) section)
 4. Request is accepted/rejected
 
 ```mermaid
@@ -58,7 +58,7 @@ sequenceDiagram
     Nextcloud-->>-ExApp: Response (200/401)
 ```
 
-### AppEcosystemV2 validation
+### AppEcosystemV2 authentication
 
 Each ExApp request to secured with AEAuth must contain the following headers (order is important):
 
@@ -96,10 +96,10 @@ It's calculated even if the request body is empty (e.g. empty hash: `ef46db3751d
 AppEcosystemV2 supports the following default scopes:
 
 * `INIT_API_SCOPE` - init scope, used when ExApp is on initialization step and has no user context
-* `SYSTEM_API_SCOPE` - configured for system apps, has no user context
+* `SYSTEM_API_SCOPE` - configured for system apps, mostly has no user context
 * `DAV_API_SCOPE` - scope for dav requests, has user context
 
-### AppEcosystemV2 validation diagram
+### AppEcosystemV2 authentication diagram
 
 ```mermaid
 sequenceDiagram
@@ -126,7 +126,7 @@ sequenceDiagram
 	AppEcosystemV2-->>AppEcosystemV2: Validate AE-DATA-HASH
 	AppEcosystemV2-->>Nextcloud: Reject if data hash not match
 	AppEcosystemV2-->>AppEcosystemV2: Check API scope
-	Nextcloud-->>AppEcosystemV2: Reject if API scope not match
+	AppEcosystemV2-->>Nextcloud: Reject if API scope not match
 	AppEcosystemV2-->>AppEcosystemV2: Check if user is not empty and active
 	AppEcosystemV2-->>Nextcloud: Set active user
 	AppEcosystemV2->>-Nextcloud: Request accepted/rejected

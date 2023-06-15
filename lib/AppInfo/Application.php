@@ -31,10 +31,12 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\AppInfo;
 
+use OCA\AppEcosystemV2\Profiler\AEDataCollector;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
@@ -45,6 +47,8 @@ use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
 use OCA\AppEcosystemV2\Listener\SabrePluginAuthInitListener;
 use OCA\AppEcosystemV2\Middleware\AEAuthMiddleware;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_ecosystem_v2';
@@ -66,6 +70,12 @@ class Application extends App implements IBootstrap {
 	}
 
 	public function boot(IBootContext $context): void {
+		$server = $context->getServerContainer();
+		try {
+			$profiler = $server->get(IProfiler::class);
+			$profiler->add(new AEDataCollector());
+		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
+		}
 	}
 
 	public function registerDavAuth(): void {

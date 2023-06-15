@@ -31,6 +31,8 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
+use OCA\AppEcosystemV2\Db\ExAppPreference;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\OCSController;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
@@ -38,109 +40,126 @@ use OCA\AppEcosystemV2\Service\ExAppPreferenceService;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\IRequest;
+use OCP\IUserSession;
 
 class PreferencesController extends OCSController {
+	protected $request;
+	private IUserSession $userSession;
 	private ExAppPreferenceService $exAppPreferenceService;
 
 	public function __construct(
 		IRequest $request,
+		IUserSession $userSession,
 		ExAppPreferenceService $exAppPreferenceService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
+		$this->request = $request;
+		$this->userSession = $userSession;
 		$this->exAppPreferenceService = $exAppPreferenceService;
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $userId
-	 * @param string $appId
 	 * @param string $configKey
 	 * @param mixed $configValue
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function setUserConfigValue(string $userId, string $appId, string $configKey, mixed $configValue, string $format = 'json'): Response {
+	public function setUserConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
+		$userId = $this->userSession->getUser()->getUID();
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->setUserConfigValue($userId, $appId, $configKey, $configValue);
+		if ($result instanceof ExAppPreference){
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		}
 		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'userConfigValue' => $result,
-		]), $format);
+			'message' => 'Failed to set user config value',
+		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $userId
-	 * @param string $appId
 	 * @param string $configKey
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function getUserConfigValue(string $userId, string $appId, string $configKey, string $format = 'json'): Response {
+	public function getUserConfigValue(string $configKey, string $format = 'json'): Response {
+		$userId = $this->userSession->getUser()->getUID();
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->getUserConfigValue($userId, $appId, $configKey);
+		if ($result instanceof ExAppPreference){
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		}
 		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'userConfigValue' => $result,
-		]), $format);
+			'message' => 'Failed to get user config value',
+		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $userId
-	 * @param string $appId
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function getUserConfigKeys(string $userId, string $appId, string $format = 'json'): Response {
+	public function getUserConfigKeys(string $format = 'json'): Response {
+		$userId = $this->userSession->getUser()->getUID();
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->getUserConfigKeys($userId, $appId);
-		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'userConfigKeys' => $result,
-		]), $format);
+		return $this->buildResponse(new DataResponse($result), $format);
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $userId
-	 * @param string $appId
 	 * @param string $configKey
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function deleteUserConfigValue(string $userId, string $appId, string $configKey, string $format = 'json'): Response {
+	public function deleteUserConfigValue(string $configKey, string $format = 'json'): Response {
+		$userId = $this->userSession->getUser()->getUID();
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->deleteUserConfigValue($userId, $appId, $configKey);
+		if ($result){
+			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
+		}
 		return $this->buildResponse(new DataResponse([
-			'success' => $result,
-		]), $format);
+			'message' => 'Failed to delete user config value',
+		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $userId
-	 * @param string $appId
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function deleteUserConfigValues(string $userId, string $appId, string $format = 'json'): Response {
+	public function deleteUserConfigValues(string $format = 'json'): Response {
+		$userId = $this->userSession->getUser()->getUID();
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->deleteUserConfigValues($userId, $appId);
+		if ($result){
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		}
 		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'deletedConfigKeys' => $result,
-		]), $format);
+			'message' => 'Failed to delete user config values',
+		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
 	}
 }

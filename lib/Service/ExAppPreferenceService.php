@@ -34,17 +34,17 @@ namespace OCA\AppEcosystemV2\Service;
 use OCA\AppEcosystemV2\Db\ExAppPreference;
 use OCA\AppEcosystemV2\Db\ExAppPreferenceMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use Psr\Log\LoggerInterface;
 
 /**
  * App per-user preferences (preferences_ex)
  */
 class ExAppPreferenceService {
-	/** @var ExAppPreferenceMapper */
-	private $mapper;
+	private ExAppPreferenceMapper $mapper;
 
-	/** @var LoggerInterface */
-	private $logger;
+	private LoggerInterface $logger;
 
 	public function __construct(
 		ExAppPreferenceMapper $mapper,
@@ -58,19 +58,18 @@ class ExAppPreferenceService {
 		try {
 			/** @var ExAppPreference $exAppPreference */
 			$exAppPreference = $this->mapper->findByUserIdAppIdKey($userId, $appId, $configKey);
-		} catch (DoesNotExistException $e) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$exAppPreference = null;
 		}
 		if ($exAppPreference === null) {
 			try {
-				$exAppPreference = $this->mapper->insert(new ExAppPreference([
+				return $this->mapper->insert(new ExAppPreference([
 					'user_id' => $userId,
 					'appid' => $appId,
 					'configkey' => $configKey,
 					'value' => $configValue,
 				]));
-				return $exAppPreference;
-			} catch (\Exception $e) {
+			} catch (Exception $e) {
 				$this->logger->error('Error while inserting new config value: ' . $e->getMessage());
 				return null;
 			}
@@ -84,10 +83,10 @@ class ExAppPreferenceService {
 		}
 	}
 
-	public function getUserConfigValue(string $userId, string $appId, string $configKey): mixed {
+	public function getUserConfigValue(string $userId, string $appId, string $configKey): ?ExAppPreference {
 		try {
 			return $this->mapper->findByUserIdAppIdKey($userId, $appId, $configKey);
-		} catch (DoesNotExistException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
 	}

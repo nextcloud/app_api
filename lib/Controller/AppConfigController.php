@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Controller;
 
 
+use OCA\AppEcosystemV2\Db\ExAppConfig;
 use OCP\IRequest;
 use OCP\AppFramework\OCSController;
 use OCP\AppFramework\Http;
@@ -43,6 +44,7 @@ use OCA\AppEcosystemV2\Service\ExAppConfigService;
 
 class AppConfigController extends OCSController {
 	private ExAppConfigService $exAppConfigService;
+	protected $request;
 
 	public function __construct(
 		IRequest $request,
@@ -50,95 +52,107 @@ class AppConfigController extends OCSController {
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
+		$this->request = $request;
 		$this->exAppConfigService = $exAppConfigService;
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $appId
 	 * @param string $configKey
 	 * @param mixed $configValue
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, string $format = 'json'): Response {
+	public function setAppConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
+		if ($result instanceof ExAppConfig) {
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		}
 		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'setAppConfigValue' => $result,
-		], Http::STATUS_OK), $format);
+			'message' => 'Error setting app config value',
+		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $appId
 	 * @param string $configKey
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function getAppConfigValue(string $appId, string $configKey, string $format = 'json'): Response {
-		$appConfigEx = $this->exAppConfigService->getAppConfigValue($appId, $configKey);
+	public function getAppConfigValue(string $configKey, string $format = 'json'): Response {
+		$appId = $this->request->getHeader('EX-APP-ID');
+		$result = $this->exAppConfigService->getAppConfigValue($appId, $configKey);
+		if ($result instanceof ExAppConfig) {
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		}
 		return $this->buildResponse(new DataResponse([
-			'success' => $appConfigEx !== null,
-			'appConfigEx' => $appConfigEx,
-		], Http::STATUS_OK), $format);
+			'message' => 'Error getting app config value',
+		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $appId
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function getAppConfigKeys(string $appId, string $format = 'json'): Response {
+	public function getAppConfigKeys(string $format = 'json'): Response {
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$appConfigKeys = $this->exAppConfigService->getAppConfigKeys($appId);
-		return $this->buildResponse(new DataResponse([
-			'success' => $appConfigKeys !== null,
-			'appConfigKeys' => $appConfigKeys,
-		], Http::STATUS_OK), $format);
+		return $this->buildResponse(new DataResponse($appConfigKeys, Http::STATUS_OK), $format);
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $appId
 	 * @param string $configKey
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function deleteAppConfigValue(string $appId, string $configKey, string $format = 'json'): Response {
+	public function deleteAppConfigValue(string $configKey, string $format = 'json'): Response {
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->deleteAppConfigValue($appId, $configKey);
+		if ($result instanceof ExAppConfig) {
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		}
 		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'deletedAppConfigValue' => $result,
-		], Http::STATUS_OK), $format);
+			'message' => 'Error deleting app config value',
+		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
 	}
 
 	/**
-	 * @NoAdminRequired
+	 * @AEAuth
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $appId
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function deleteAppConfigValues(string $appId, string $format = 'json'): Response {
+	public function deleteAppConfigValues(string $format = 'json'): Response {
+		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->deleteAppConfigValues($appId);
-		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null && $result > 0,
-			'deletedAppConfigValuesCount' => $result,
-		], Http::STATUS_OK), $format);
+		if ($result !== -1) {
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		} else {
+			return $this->buildResponse(new DataResponse([
+				'message' => 'Error deleting app config values',
+			], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
+		}
 	}
 }

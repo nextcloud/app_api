@@ -37,13 +37,14 @@ use OCA\AppEcosystemV2\Db\ExAppScopeMapper;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\Http\Client\IResponse;
+use OCP\IConfig;
 use OCP\IUser;
+use OCP\Log\ILogFactory;
 use Psr\Log\LoggerInterface;
 
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IClient;
 
-use OCP\AppFramework\Db\Entity;
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppApiScope;
 use OCA\AppEcosystemV2\Db\ExAppApiScopeMapper;
@@ -64,6 +65,8 @@ class AppEcosystemV2Service {
 	public const DAV_API_SCOPE = 3;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
 	private LoggerInterface $logger;
+	private ILogFactory $logFactory;
+	private IConfig $config;
 	private IClient $client;
 	private ExAppMapper $exAppMapper;
 	private IAppManager $appManager;
@@ -76,6 +79,8 @@ class AppEcosystemV2Service {
 
 	public function __construct(
 		LoggerInterface $logger,
+		ILogFactory $logFactory,
+		IConfig $config,
 		IClientService $clientService,
 		ExAppMapper $exAppMapper,
 		IAppManager $appManager,
@@ -87,6 +92,8 @@ class AppEcosystemV2Service {
 		IUserManager $userManager,
 	) {
 		$this->logger = $logger;
+		$this->logFactory = $logFactory;
+		$this->config = $config;
 		$this->client = $clientService->newClient();
 		$this->exAppMapper = $exAppMapper;
 		$this->appManager = $appManager;
@@ -263,6 +270,7 @@ class AppEcosystemV2Service {
 		try {
  			$exAppConfig = json_decode($exApp->getConfig(), true);
 			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
+//			TODO: Add debug logging for NC to ExApp requests
 			// Check in ex_apps_users
 			if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 				try {
@@ -384,7 +392,15 @@ class AppEcosystemV2Service {
 				return false;
 			}
 			$secret = $exApp->getSecret();
-			// TODO: Add check of debug mode for logging each request if needed
+
+			$debug = boolval($request->getHeader('AE-DEBUG'));
+//			$debug = true;
+			if ($debug) {
+				$aeDebugLogger = $this->getCustomLogger('ae_debug.log');
+				$aeDebugLogger->debug('Request from ExApp ' . $exApp->getAppid() . ' to NC: ' . $this->buildRequestInfo($request), [
+					'app' => $exApp->getAppid(),
+				]);
+			}
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return false;
 		}
@@ -568,5 +584,37 @@ class AppEcosystemV2Service {
 		fclose($stream);
 		$phpInputHash = hash_final($hashContext);
 		return $dataHash === $phpInputHash;
+	}
+
+	private function getCustomLogger(string $name): LoggerInterface {
+		$path = $this->config->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/' . $name;
+		return $this->logFactory->getCustomPsrLogger($path);
+	}
+
+	private function buildRequestInfo(IRequest $request): string {
+		$headers = [];
+		$aeHeadersList = [
+			'AE-VERSION',
+			'EX-APP-ID',
+			'EX-APP-VERSION',
+			'NC-USER-ID',
+			'AE-DATA-HASH',
+			'AE-SIGN-TIME',
+			'AE-SIGNATURE',
+		];
+		foreach ($aeHeadersList as $header) {
+			if ($request->getHeader($header) !== '') {
+				$headers[$header] = $request->getHeader($header);
+			}
+		}
+		$requestInfo = [
+			'request' => [
+				'uri' => $request->getRequestUri(),
+				'method' => $request->getMethod(),
+				'headers' => $headers,
+				'params' => $request->getParams(),
+			],
+		];
+		return json_encode($requestInfo);
 	}
 }

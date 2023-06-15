@@ -31,7 +31,10 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -41,6 +44,9 @@ class ExAppConfigMapper extends QBMapper {
 		parent::__construct($db, 'appconfig_ex');
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -53,10 +59,9 @@ class ExAppConfigMapper extends QBMapper {
 	/**
 	 * @param string $appId
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @throws Exception
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppConfig[]
+	 * @return ExAppConfig[]
 	 */
 	public function findAllByAppId(string $appId): array {
 		$qb = $this->db->getQueryBuilder();
@@ -72,10 +77,11 @@ class ExAppConfigMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $configKey
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @throws DoesNotExistException if not found
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws Exception
 	 *
-	 * @return \OCA\AppEcosystemV2\Db\ExAppConfig
+	 * @return ExAppConfig
 	 */
 	public function findByAppConfigKey(string $appId, string $configKey): Entity {
 		$qb = $this->db->getQueryBuilder();
@@ -88,7 +94,10 @@ class ExAppConfigMapper extends QBMapper {
 		return $this->findEntity($qb);
 	}
 
-	public function updateAppConfigValue(ExAppConfig $appConfigEx) {
+	/**
+	 * @throws Exception
+	 */
+	public function updateAppConfigValue(ExAppConfig $appConfigEx): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->update($this->tableName)
 			->set('configvalue', $qb->createNamedParameter($appConfigEx->getConfigvalue(), IQueryBuilder::PARAM_STR))
@@ -99,7 +108,10 @@ class ExAppConfigMapper extends QBMapper {
 		->executeStatement();
 	}
 
-	public function deleteByAppidConfigkey(ExAppConfig $appConfigEx) {
+	/**
+	 * @throws Exception
+	 */
+	public function deleteByAppidConfigkey(ExAppConfig $appConfigEx): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->delete($this->tableName)
 			->where(
@@ -109,6 +121,9 @@ class ExAppConfigMapper extends QBMapper {
 		->executeStatement();
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function deleteAllByAppId(string $appId): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->delete($this->tableName)
