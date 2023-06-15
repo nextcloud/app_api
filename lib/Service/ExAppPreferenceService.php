@@ -64,7 +64,7 @@ class ExAppPreferenceService {
 		if ($exAppPreference === null) {
 			try {
 				return $this->mapper->insert(new ExAppPreference([
-					'user_id' => $userId,
+					'userid' => $userId,
 					'appid' => $appId,
 					'configkey' => $configKey,
 					'value' => $configValue,
