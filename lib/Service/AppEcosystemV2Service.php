@@ -451,33 +451,32 @@ class AppEcosystemV2Service {
 			if ($apiScope === null) {
 				return false;
 			}
-			// If it's initialization scope group
-			if ($apiScope->getScopeGroup() === self::INIT_API_SCOPE) {
-				return true;
-			}
-			// If it's another scope group - proceed with default checks
-			if (!$this->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
-				return false;
-			}
-			// If scope check passed, and it's system scope group - proceed with request
-			if ($apiScope->getScopeGroup() === self::SYSTEM_API_SCOPE) {
-				return true;
-			}
-
-			if ($userId !== '') {
-				$activeUser = $this->userManager->get($userId);
-				if ($activeUser === null) {
-					$this->logger->error('Requested user does not exists: ' . $userId);
+			// If it is not an initialization scope group - check if this endpoint is allowed to be called
+			if ($apiScope->getScopeGroup() !== self::INIT_API_SCOPE) {
+				if (!$this->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
 					return false;
 				}
-				$this->userSession->setUser($activeUser);
-				$this->updateExAppLastResponseTime($exApp);
-				return true;
 			}
-			return false;
+			return $this->finalizeRequestToNC($userId, $exApp);
 		}
 		$this->logger->error('Invalid signature for ex app: ' . $exApp->getAppid() . ' and user: ' . $userId);
 		return false;
+	}
+
+	private function finalizeRequestToNC($userId, $exApp): bool {
+		if ($userId !== '') {
+			$activeUser = $this->userManager->get($userId);
+			if ($activeUser === null) {
+				$this->logger->error('Requested user does not exists: ' . $userId);
+				return false;
+			}
+			$this->userSession->setUser($activeUser);
+		}
+		else {
+			// TODO: undo $this->userSession->setUser($activeUser);
+		}
+		$this->updateExAppLastResponseTime($exApp);
+		return true;
 	}
 
 	private function updateExAppLastResponseTime($exApp): void {
@@ -535,14 +534,15 @@ class AppEcosystemV2Service {
 		$apiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
 
 		$initApiScopes = [
+			['api_route' =>  '/cloud/capabilities', 'scope_group' => self::INIT_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/files/actions/menu', 'scope_group' => self::INIT_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/log', 'scope_group' => self::INIT_API_SCOPE],
 			['api_route' => $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/ex-app/config', 'scope_group' => self::SYSTEM_API_SCOPE],
-			['api_route' =>  '/dav/', 'scope_group' => self::DAV_API_SCOPE],
 			['api_route' =>  '/cloud/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/groups', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/apps', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  '/dav/', 'scope_group' => self::DAV_API_SCOPE],
 		];
 
 		try {
