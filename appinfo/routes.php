@@ -60,10 +60,9 @@ return [
 		['name' => 'appConfig#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config/all', 'verb' => 'DELETE'],
 
 		['name' => 'preferences#setUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'POST'],
-		['name' => 'preferences#getUserConfigValues', 'url' => '/api/v1/ex-app/preference/get-all', 'verb' => 'POST'],
+		['name' => 'preferences#getUserConfigValues', 'url' => '/api/v1/ex-app/preference/get-values', 'verb' => 'POST'],
 		['name' => 'preferences#getUserConfigKeys', 'url' => '/api/v1/ex-app/preference/keys', 'verb' => 'GET'],
-		['name' => 'preferences#deleteUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
-		['name' => 'preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference/all', 'verb' => 'DELETE'],
+		['name' => 'preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
 
 //	TODO: Implement Notifications, SearchProvider, BackgroundJob, SettingsPage, SettingsSection, EventListener, DashboardWidget, Capabilities
 

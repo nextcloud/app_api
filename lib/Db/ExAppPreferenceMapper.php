@@ -119,20 +119,6 @@ class ExAppPreferenceMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function deleteUserConfigValue(string $userId, string $appId, string $configKey): int {
-		$qb = $this->db->getQueryBuilder();
-		$qb->delete($this->tableName)
-			->where(
-				$qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('configkey', $qb->createNamedParameter($configKey, IQueryBuilder::PARAM_STR))
-			);
-		return $qb->executeStatement();
-	}
-
-	/**
-	 * @throws Exception
-	 */
 	public function deleteUserConfigValues(array $configKeys, string $userId, string $appId): int {
 		$qb = $this->db->getQueryBuilder();
 		$qb->delete($this->tableName)

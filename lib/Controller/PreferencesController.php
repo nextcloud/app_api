@@ -120,28 +120,6 @@ class PreferencesController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $configKey
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	public function deleteUserConfigValue(string $configKey, string $format = 'json'): Response {
-		$userId = $this->userSession->getUser()->getUID();
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppPreferenceService->deleteUserConfigValue($userId, $appId, $configKey);
-		if ($result) {
-			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
-		}
-		return $this->buildResponse(new DataResponse([
-			'message' => 'Failed to delete user config value',
-		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
-	}
-
-	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *

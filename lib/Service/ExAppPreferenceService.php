@@ -117,15 +117,6 @@ class ExAppPreferenceService {
 		}
 	}
 
-	public function deleteUserConfigValue(string $userId, string $appId, string $configKey): bool {
-		try {
-			return $this->mapper->deleteUserConfigValue($userId, $appId, $configKey) === 1;
-		} catch (Exception $e) {
-			$this->logger->error('Error while deleting config value: ' . $e->getMessage());
-		}
-		return false;
-	}
-
 	public function deleteUserConfigValues(array $configKeys, string $userId, string $appId): bool {
 		try {
 			return $this->mapper->deleteUserConfigValues($configKeys, $userId, $appId) === count($configKeys);
