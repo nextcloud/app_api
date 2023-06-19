@@ -92,10 +92,10 @@ class PreferencesController extends OCSController {
 	 *
 	 * @return Response
 	 */
-	public function getUserConfigValue(array $configKeys, string $format = 'json'): Response {
+	public function getUserConfigValues(array $configKeys, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppPreferenceService->getUserConfigValue($userId, $appId, $configKeys);
+		$result = $this->exAppPreferenceService->getUserConfigValues($userId, $appId, $configKeys);
 		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 	}
 

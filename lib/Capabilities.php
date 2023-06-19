@@ -33,10 +33,10 @@ namespace OCA\AppEcosystemV2;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCP\App\IAppManager;
-use OCP\Capabilities\IPublicCapability;
+use OCP\Capabilities\ICapability;
 use OCP\IConfig;
 
-class Capabilities implements IPublicCapability {
+class Capabilities implements ICapability {
 	private IConfig $config;
 	private IAppManager $appManager;
 

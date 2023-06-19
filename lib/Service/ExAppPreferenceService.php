@@ -92,7 +92,7 @@ class ExAppPreferenceService {
 	 * @param array $configKeys
 	 * @return ExAppPreference[]|null
 	 */
-	public function getUserConfigValue(string $userId, string $appId, array $configKeys): ?array {
+	public function getUserConfigValues(string $userId, string $appId, array $configKeys): ?array {
 		try {
 			return $this->mapper->findByUserIdAppIdKeys($userId, $appId, $configKeys);
 		} catch (Exception) {
