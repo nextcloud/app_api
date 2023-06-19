@@ -71,7 +71,7 @@ class AppConfigController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
 		if ($result instanceof ExAppConfig) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
 			'message' => 'Error setting app config value',
@@ -92,7 +92,7 @@ class AppConfigController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->getAppConfigValue($appId, $configKey);
 		if ($result instanceof ExAppConfig) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
 			'message' => 'Error getting app config value',
@@ -128,7 +128,7 @@ class AppConfigController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->deleteAppConfigValue($appId, $configKey);
 		if ($result instanceof ExAppConfig) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
 			'message' => 'Error deleting app config value',

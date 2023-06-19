@@ -172,11 +172,13 @@ class ExAppConfigService {
 	/**
 	 * @param string $appId
 	 *
-	 * @return ExAppConfig[]
+	 * @return array
 	 */
 	public function getAppConfigKeys(string $appId): array {
 		try {
-			return $this->mapper->findAllByAppId($appId);
+			return array_map(function (ExAppConfig $appConfigEx) {
+				return $appConfigEx->getConfigkey();
+			}, $this->mapper->findAllByAppId($appId));
 		} catch (Exception) {
 		}
 		return [];
