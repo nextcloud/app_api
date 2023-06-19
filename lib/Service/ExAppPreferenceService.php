@@ -106,16 +106,6 @@ class ExAppPreferenceService {
 		}
 	}
 
-	public function getUserConfigKeys(string $userId, string $appId): ?array {
-		try {
-				return array_map(function ($exAppPreference) {
-					return $exAppPreference['configkey'];
-				}, $this->mapper->findUserConfigKeys($userId, $appId));
-		} catch (Exception) {
-			return null;
-		}
-	}
-
 	public function deleteUserConfigValues(array $configKeys, string $userId, string $appId): int {
 		try {
 			return $this->mapper->deleteUserConfigValues($configKeys, $userId, $appId);

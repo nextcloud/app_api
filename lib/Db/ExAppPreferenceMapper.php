@@ -129,22 +129,4 @@ class ExAppPreferenceMapper extends QBMapper {
 			);
 		return $qb->executeStatement();
 	}
-
-	/**
-	 * @param string $userId
-	 * @param string $appId
-	 *
-	 * @throws Exception
-	 * @return array fetched config keys
-	 */
-	public function findUserConfigKeys(string $userId, string $appId): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('configkey')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
-			);
-		return $qb->executeQuery()->fetchAll();
-	}
 }

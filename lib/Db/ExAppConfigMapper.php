@@ -58,23 +58,6 @@ class ExAppConfigMapper extends QBMapper {
 
 	/**
 	 * @param string $appId
-	 *
-	 * @throws Exception
-	 *
-	 * @return ExAppConfig[]
-	 */
-	public function findAllByAppId(string $appId): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
-			);
-		return $this->findEntities($qb);
-	}
-
-	/**
-	 * @param string $appId
 	 * @param string $configKey
 	 *
 	 * @throws DoesNotExistException if not found
