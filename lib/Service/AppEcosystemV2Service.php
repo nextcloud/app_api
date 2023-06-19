@@ -471,9 +471,8 @@ class AppEcosystemV2Service {
 				return false;
 			}
 			$this->userSession->setUser($activeUser);
-		}
-		else {
-			// TODO: undo $this->userSession->setUser($activeUser);
+		} else {
+			$this->userSession->setUser(null);
 		}
 		$this->updateExAppLastResponseTime($exApp);
 		return true;

@@ -74,7 +74,7 @@ class PreferencesController extends OCSController {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->setUserConfigValue($userId, $appId, $configKey, $configValue);
-		if ($result instanceof ExAppPreference){
+		if ($result instanceof ExAppPreference) {
 			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
@@ -87,21 +87,16 @@ class PreferencesController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $configKey
+	 * @param array $configKeys
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function getUserConfigValue(string $configKey, string $format = 'json'): Response {
+	public function getUserConfigValue(array $configKeys, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppPreferenceService->getUserConfigValue($userId, $appId, $configKey);
-		if ($result instanceof ExAppPreference){
-			return $this->buildResponse(new DataResponse($result->getValue(), Http::STATUS_OK), $format);
-		}
-		return $this->buildResponse(new DataResponse([
-			'message' => 'Failed to get user config value',
-		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
+		$result = $this->exAppPreferenceService->getUserConfigValue($userId, $appId, $configKeys);
+		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -134,7 +129,7 @@ class PreferencesController extends OCSController {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->deleteUserConfigValue($userId, $appId, $configKey);
-		if ($result){
+		if ($result) {
 			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
@@ -147,16 +142,17 @@ class PreferencesController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
+	 * @param array $configKeys
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function deleteUserConfigValues(string $format = 'json'): Response {
+	public function deleteUserConfigValues(array $configKeys, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppPreferenceService->deleteUserConfigValues($userId, $appId);
-		if ($result){
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		$result = $this->exAppPreferenceService->deleteUserConfigValues($configKeys, $userId, $appId);
+		if ($result) {
+			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
 			'message' => 'Failed to delete user config values',

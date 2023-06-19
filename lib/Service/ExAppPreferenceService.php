@@ -43,7 +43,6 @@ use Psr\Log\LoggerInterface;
  */
 class ExAppPreferenceService {
 	private ExAppPreferenceMapper $mapper;
-
 	private LoggerInterface $logger;
 
 	public function __construct(
@@ -56,7 +55,6 @@ class ExAppPreferenceService {
 
 	public function setUserConfigValue(string $userId, string $appId, string $configKey, mixed $configValue) {
 		try {
-			/** @var ExAppPreference $exAppPreference */
 			$exAppPreference = $this->mapper->findByUserIdAppIdKey($userId, $appId, $configKey);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$exAppPreference = null;
@@ -75,35 +73,57 @@ class ExAppPreferenceService {
 			}
 		} else {
 			$exAppPreference->setValue($configValue);
-			if ($this->mapper->updateUserConfigValue($exAppPreference) !== 1) {
-				$this->logger->error('Error while updating preferences_ex config value');
+			try {
+				if ($this->mapper->updateUserConfigValue($exAppPreference) !== 1) {
+					$this->logger->error('Error while updating preferences_ex config value');
+					return null;
+				}
+				return $exAppPreference;
+			} catch (Exception $e) {
+				$this->logger->error('Error while updating config value: ' . $e->getMessage());
 				return null;
 			}
-			return $exAppPreference;
 		}
 	}
 
-	public function getUserConfigValue(string $userId, string $appId, string $configKey): ?ExAppPreference {
+	/**
+	 * @param string $userId
+	 * @param string $appId
+	 * @param array $configKeys
+	 * @return ExAppPreference[]|null
+	 */
+	public function getUserConfigValue(string $userId, string $appId, array $configKeys): ?array {
 		try {
-			return $this->mapper->findByUserIdAppIdKey($userId, $appId, $configKey);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			return $this->mapper->findByUserIdAppIdKeys($userId, $appId, $configKeys);
+		} catch (Exception) {
 			return null;
 		}
 	}
 
 	public function getUserConfigKeys(string $userId, string $appId): ?array {
-		return $this->mapper->findUserConfigKeys($userId, $appId);
+		try {
+			return $this->mapper->findUserConfigKeys($userId, $appId);
+		} catch (Exception $e) {
+			$this->logger->error('Error while getting config keys: ' . $e->getMessage());
+			return null;
+		}
 	}
 
 	public function deleteUserConfigValue(string $userId, string $appId, string $configKey): bool {
-		return $this->mapper->deleteUserConfigValue($userId, $appId, $configKey) === 1;
+		try {
+			return $this->mapper->deleteUserConfigValue($userId, $appId, $configKey) === 1;
+		} catch (Exception $e) {
+			$this->logger->error('Error while deleting config value: ' . $e->getMessage());
+		}
+		return false;
 	}
 
-	public function deleteUserConfigValues(string $userId, string $appId): ?array {
-		$userConfigValues = $this->getUserConfigKeys($userId, $appId);
-		if ($this->mapper->deleteUserConfigValues($userId, $appId) === 1) {
-			return $userConfigValues;
+	public function deleteUserConfigValues(array $configKeys, string $userId, string $appId): bool {
+		try {
+			return $this->mapper->deleteUserConfigValues($configKeys, $userId, $appId) === count($configKeys);
+		} catch (Exception $e) {
+			$this->logger->error('Error while deleting config values: ' . $e->getMessage());
 		}
-		return null;
+		return false;
 	}
 }

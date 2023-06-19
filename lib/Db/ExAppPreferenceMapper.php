@@ -62,13 +62,13 @@ class ExAppPreferenceMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $configKey
 	 *
-	 * @throws DoesNotExistException if not found
-	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws DoesNotExistException
 	 * @throws Exception
+	 * @throws MultipleObjectsReturnedException
 	 *
-	 * @return ExAppPreference
+	 * @return ExAppPreference|null
 	 */
-	public function findByUserIdAppIdKey(string $userId, string $appId, string $configKey): Entity {
+	public function findByUserIdAppIdKey(string $userId, string $appId, string $configKey): ?ExAppPreference {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
@@ -78,6 +78,27 @@ class ExAppPreferenceMapper extends QBMapper {
 				$qb->expr()->eq('configkey', $qb->createNamedParameter($configKey, IQueryBuilder::PARAM_STR))
 			);
 		return $this->findEntity($qb);
+	}
+
+	/**
+	 * @param string $userId
+	 * @param string $appId
+	 * @param array $configKeys
+	 *
+	 * @throws Exception
+	 *
+	 * @return Entity[]
+	 */
+	public function findByUserIdAppIdKeys(string $userId, string $appId, array $configKeys): array {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->tableName)
+			->where(
+				$qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->in('configkey', $qb->createNamedParameter($configKeys, IQueryBuilder::PARAM_STR_ARRAY))
+			);
+		return $this->findEntities($qb);
 	}
 
 	/**
@@ -112,12 +133,13 @@ class ExAppPreferenceMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function deleteUserConfigValues(string $userId, string $appId): int {
+	public function deleteUserConfigValues(array $configKeys, string $userId, string $appId): int {
 		$qb = $this->db->getQueryBuilder();
 		$qb->delete($this->tableName)
 			->where(
 				$qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->in('configkey', $configKeys, IQueryBuilder::PARAM_STR_ARRAY)
 			);
 		return $qb->executeStatement();
 	}

@@ -39,7 +39,6 @@ use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExAppConfig;
 use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Db\Entity;
 use OCP\Cache\CappedMemoryCache;
 
 /**
@@ -65,11 +64,10 @@ class ExAppConfigService {
 	 *
 	 * @param string $appId
 	 * @param string $configKey
-	 * @param mixed $default
 	 *
 	 * @return mixed
 	 */
-	public function getAppConfigValue(string $appId, string $configKey, mixed $default = ''): mixed {
+	public function getAppConfigValue(string $appId, string $configKey): mixed {
 		$cacheKey = $appId . ':' . $configKey;
 		$value = $this->cache->get($cacheKey);
 		if ($value !== null) {
@@ -79,12 +77,11 @@ class ExAppConfigService {
 		try {
 			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
 			$value = $appConfigEx->getConfigvalue();
-		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
-			$value = $default; // TODO: do we need default values?
+			$this->cache->set($cacheKey, $value, Application::CACHE_TTL);
+			return $value;
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			return null;
 		}
-
-		$this->cache->set($cacheKey, $value, Application::CACHE_TTL);
-		return $value;
 	}
 
 	/**
@@ -97,7 +94,6 @@ class ExAppConfigService {
 	 */
 	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue): ?ExAppConfig {
 		try {
-			/** @var ExAppConfig $appConfigEx */
 			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$appConfigEx = null;
@@ -115,8 +111,12 @@ class ExAppConfigService {
 			}
 		} else {
 			$appConfigEx->setConfigvalue($configValue);
-			if ($this->mapper->updateAppConfigValue($appConfigEx) !== 1) {
-				$this->logger->error('Error while updating app_config_ex value');
+			try {
+				if ($this->mapper->updateAppConfigValue($appConfigEx) !== 1) {
+					$this->logger->error('Error while updating app_config_ex value');
+					return null;
+				}
+			} catch (Exception) {
 				return null;
 			}
 		}
@@ -138,8 +138,12 @@ class ExAppConfigService {
 			$appConfigEx = null;
 		}
 		if ($appConfigEx !== null) {
-			if ($this->mapper->deleteByAppidConfigkey($appConfigEx) !== 1) {
-				$this->logger->error('Error while deleting app_config_ex value');
+			try {
+				if ($this->mapper->deleteByAppidConfigkey($appConfigEx) !== 1) {
+					$this->logger->error('Error while deleting app_config_ex value');
+					return null;
+				}
+			} catch (Exception) {
 				return null;
 			}
 		}
@@ -173,7 +177,7 @@ class ExAppConfigService {
 	public function getAppConfigKeys(string $appId): array {
 		try {
 			return $this->mapper->findAllByAppId($appId);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+		} catch (Exception) {
 		}
 		return [];
 	}
