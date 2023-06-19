@@ -82,8 +82,9 @@ class OCSApiController extends OCSController {
 	 * @param int $level
 	 * @param string $message
 	 * @param string $format
-	 * @return Response
+	 *
 	 * @throws OCSBadRequestException
+	 * @return Response
 	 */
 	public function log(
 		int $level,
@@ -107,7 +108,7 @@ class OCSApiController extends OCSController {
 			]);
 			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		} catch (\Psr\Log\InvalidArgumentException) {
-			$this->logger->error('Invalid log level: ' . $level . ' from ' . $appId);
+			$this->logger->error('Invalid log level');
 			throw new OCSBadRequestException('Invalid log level');
 		}
 	}

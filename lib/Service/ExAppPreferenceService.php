@@ -111,18 +111,16 @@ class ExAppPreferenceService {
 				return array_map(function ($exAppPreference) {
 					return $exAppPreference['configkey'];
 				}, $this->mapper->findUserConfigKeys($userId, $appId));
-		} catch (Exception $e) {
-			$this->logger->error('Error while getting config keys: ' . $e->getMessage());
+		} catch (Exception) {
 			return null;
 		}
 	}
 
-	public function deleteUserConfigValues(array $configKeys, string $userId, string $appId): bool {
+	public function deleteUserConfigValues(array $configKeys, string $userId, string $appId): int {
 		try {
-			return $this->mapper->deleteUserConfigValues($configKeys, $userId, $appId) === count($configKeys);
-		} catch (Exception $e) {
-			$this->logger->error('Error while deleting config values: ' . $e->getMessage());
+			return $this->mapper->deleteUserConfigValues($configKeys, $userId, $appId);
+		} catch (Exception) {
+			return -1;
 		}
-		return false;
 	}
 }

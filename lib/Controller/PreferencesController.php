@@ -33,6 +33,7 @@ namespace OCA\AppEcosystemV2\Controller;
 
 use OCA\AppEcosystemV2\Db\ExAppPreference;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
@@ -68,6 +69,7 @@ class PreferencesController extends OCSController {
 	 * @param mixed $configValue
 	 * @param string $format
 	 *
+	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
 	public function setUserConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
@@ -77,9 +79,7 @@ class PreferencesController extends OCSController {
 		if ($result instanceof ExAppPreference) {
 			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
-		return $this->buildResponse(new DataResponse([
-			'message' => 'Failed to set user config value',
-		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
+		throw new OCSBadRequestException('Failed to set user config value');
 	}
 
 	/**
@@ -123,17 +123,16 @@ class PreferencesController extends OCSController {
 	 * @param array $configKeys
 	 * @param string $format
 	 *
+	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
 	public function deleteUserConfigValues(array $configKeys, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->deleteUserConfigValues($configKeys, $userId, $appId);
-		if ($result) {
-			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
+		if ($result !== -1) {
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 		}
-		return $this->buildResponse(new DataResponse([
-			'message' => 'Failed to delete user config values',
-		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
+		throw new OCSBadRequestException('Failed to delete user config values');
 	}
 }

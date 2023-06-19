@@ -60,26 +60,25 @@ class ExAppConfigService {
 	}
 
 	/**
-	 * Get app_config_ex value
+	 * Get app_config_ex values
 	 *
 	 * @param string $appId
-	 * @param string $configKey
+	 * @param array $configKeys
 	 *
-	 * @return mixed
+	 * @return array|null
 	 */
-	public function getAppConfigValue(string $appId, string $configKey): mixed {
-		$cacheKey = $appId . ':' . $configKey;
+	public function getAppConfigValues(string $appId, array $configKeys): ?array {
+		$cacheKey = $appId . ':' . json_encode($configKeys);
 		$value = $this->cache->get($cacheKey);
 		if ($value !== null) {
 			return $value;
 		}
 
 		try {
-			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
-			$value = $appConfigEx->getConfigvalue();
-			$this->cache->set($cacheKey, $value, Application::CACHE_TTL);
-			return $value;
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			$exAppConfigs = $this->mapper->findByAppConfigKeys($appId, $configKeys);
+			$this->cache->set($cacheKey, $exAppConfigs, Application::CACHE_TTL);
+			return $exAppConfigs;
+		} catch (Exception) {
 			return null;
 		}
 	}
@@ -124,18 +123,18 @@ class ExAppConfigService {
 	}
 
 	/**
-	 * Delete all app_config_ex values
+	 * Delete app_config_ex values
 	 *
 	 * @param array $configKeys
 	 * @param string $appId
 	 *
-	 * @return bool
+	 * @return int
 	 */
-	public function deleteAppConfigValues(array $configKeys, string $appId): bool {
+	public function deleteAppConfigValues(array $configKeys, string $appId): int {
 		try {
-			return $this->mapper->deleteByAppidConfigkeys($appId, $configKeys) === count($configKeys);
+			return $this->mapper->deleteByAppidConfigkeys($appId, $configKeys);
 		} catch (Exception) {
-			return false;
+			return -1;
 		}
 	}
 
@@ -146,11 +145,13 @@ class ExAppConfigService {
 	 */
 	public function getAppConfigKeys(string $appId): array {
 		try {
+//			TODO: add caching
+			$exAppConfigs = $this->mapper->findAllByAppId($appId);
 			return array_map(function (ExAppConfig $appConfigEx) {
 				return $appConfigEx->getConfigkey();
-			}, $this->mapper->findAllByAppId($appId));
+			}, $exAppConfigs);
 		} catch (Exception) {
+			return [];
 		}
-		return [];
 	}
 }

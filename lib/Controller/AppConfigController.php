@@ -33,6 +33,7 @@ namespace OCA\AppEcosystemV2\Controller;
 
 
 use OCA\AppEcosystemV2\Db\ExAppConfig;
+use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\IRequest;
 use OCP\AppFramework\OCSController;
 use OCP\AppFramework\Http;
@@ -65,6 +66,7 @@ class AppConfigController extends OCSController {
 	 * @param mixed $configValue
 	 * @param string $format
 	 *
+	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
 	public function setAppConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
@@ -73,9 +75,7 @@ class AppConfigController extends OCSController {
 		if ($result instanceof ExAppConfig) {
 			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
-		return $this->buildResponse(new DataResponse([
-			'message' => 'Error setting app config value',
-		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
+		throw new OCSBadRequestException('Error setting app config value');
 	}
 
 	/**
@@ -83,20 +83,15 @@ class AppConfigController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $configKey
+	 * @param array $configKeys
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function getAppConfigValue(string $configKey, string $format = 'json'): Response {
+	public function getAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppConfigService->getAppConfigValue($appId, $configKey);
-		if ($result instanceof ExAppConfig) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
-		}
-		return $this->buildResponse(new DataResponse([
-			'message' => 'Error getting app config value',
-		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
+		$result = $this->exAppConfigService->getAppConfigValues($appId, $configKeys);
+		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 	}
 
 	/**
@@ -122,16 +117,15 @@ class AppConfigController extends OCSController {
 	 * @param array $configKeys
 	 * @param string $format
 	 *
+	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
 	public function deleteAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->deleteAppConfigValues($configKeys, $appId);
-		if ($result) {
-			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
+		if ($result !== -1) {
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 		}
-		return $this->buildResponse(new DataResponse([
-			'message' => 'Error deleting app config values',
-		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
+		throw new OCSBadRequestException('Error deleting app config values');
 	}
 }
