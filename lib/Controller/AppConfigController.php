@@ -92,7 +92,7 @@ class AppConfigController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->getAppConfigValue($appId, $configKey);
 		if ($result instanceof ExAppConfig) {
-			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
+			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
 			'message' => 'Error getting app config value',
@@ -119,40 +119,19 @@ class AppConfigController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $configKey
+	 * @param array $configKeys
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
-	public function deleteAppConfigValue(string $configKey, string $format = 'json'): Response {
+	public function deleteAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppConfigService->deleteAppConfigValue($appId, $configKey);
-		if ($result instanceof ExAppConfig) {
+		$result = $this->exAppConfigService->deleteAppConfigValues($configKeys, $appId);
+		if ($result) {
 			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
-			'message' => 'Error deleting app config value',
+			'message' => 'Error deleting app config values',
 		], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
-	}
-
-	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	public function deleteAppConfigValues(string $format = 'json'): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppConfigService->deleteAppConfigValues($appId);
-		if ($result !== -1) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
-		} else {
-			return $this->buildResponse(new DataResponse([
-				'message' => 'Error deleting app config values',
-			], Http::STATUS_INTERNAL_SERVER_ERROR), $format);
-		}
 	}
 }

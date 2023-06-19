@@ -538,6 +538,7 @@ class AppEcosystemV2Service {
 			['api_route' =>  $apiV1Prefix . '/log', 'scope_group' => self::INIT_API_SCOPE],
 			['api_route' => $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/ex-app/config', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  $apiV1Prefix . '/ex-app/preference', 'scope_group' => self::INIT_API_SCOPE],
 			['api_route' =>  '/cloud/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/groups', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/apps', 'scope_group' => self::SYSTEM_API_SCOPE],

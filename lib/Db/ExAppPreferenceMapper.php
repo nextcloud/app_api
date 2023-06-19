@@ -125,7 +125,7 @@ class ExAppPreferenceMapper extends QBMapper {
 			->where(
 				$qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)),
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
-				$qb->expr()->in('configkey', $configKeys, IQueryBuilder::PARAM_STR_ARRAY)
+				$qb->expr()->in('configkey', $qb->createNamedParameter($configKeys, IQueryBuilder::PARAM_STR_ARRAY), IQueryBuilder::PARAM_STR)
 			);
 		return $qb->executeStatement();
 	}

@@ -56,8 +56,7 @@ return [
 		['name' => 'appConfig#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
 		['name' => 'appConfig#getAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'GET'],
 		['name' => 'appConfig#getAppConfigKeys', 'url' => '/api/v1/ex-app/config/keys', 'verb' => 'GET'],
-		['name' => 'appConfig#deleteAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'DELETE'],
-		['name' => 'appConfig#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config/all', 'verb' => 'DELETE'],
+		['name' => 'appConfig#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config', 'verb' => 'DELETE'],
 
 		['name' => 'preferences#setUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'POST'],
 		['name' => 'preferences#getUserConfigValues', 'url' => '/api/v1/ex-app/preference/get-values', 'verb' => 'POST'],

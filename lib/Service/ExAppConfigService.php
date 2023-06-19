@@ -124,49 +124,19 @@ class ExAppConfigService {
 	}
 
 	/**
-	 * Delete app_config_ex value
-	 *
-	 * @param string $appId
-	 * @param string $configKey
-	 *
-	 * @return ExAppConfig|null
-	 */
-	public function deleteAppConfigValue(string $appId, string $configKey): ?ExAppConfig {
-		try {
-			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$appConfigEx = null;
-		}
-		if ($appConfigEx !== null) {
-			try {
-				if ($this->mapper->deleteByAppidConfigkey($appConfigEx) !== 1) {
-					$this->logger->error('Error while deleting app_config_ex value');
-					return null;
-				}
-			} catch (Exception) {
-				return null;
-			}
-		}
-		return $appConfigEx;
-	}
-
-	/**
 	 * Delete all app_config_ex values
 	 *
+	 * @param array $configKeys
 	 * @param string $appId
 	 *
-	 * @return int deleted items count
+	 * @return bool
 	 */
-	public function deleteAppConfigValues(string $appId): int {
+	public function deleteAppConfigValues(array $configKeys, string $appId): bool {
 		try {
-			$exAppConfigs = $this->mapper->findAllByAppId($appId);
-			if ($this->mapper->deleteAllByAppId($appId) === count($exAppConfigs)) {
-				return count($exAppConfigs);
-			}
+			return $this->mapper->deleteByAppidConfigkeys($appId, $configKeys) === count($configKeys);
 		} catch (Exception) {
-			return -1;
+			return false;
 		}
-		return 0;
 	}
 
 	/**

@@ -95,6 +95,27 @@ class ExAppConfigMapper extends QBMapper {
 	}
 
 	/**
+	 * @param string $appId
+	 * @param array $configKeys
+	 *
+	 * @throws DoesNotExistException if not found
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws Exception
+	 *
+	 * @return ExAppConfig
+	 */
+	public function findByAppConfigKeys(string $appId, array $configKeys): Entity {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->in('configkey', $qb->createNamedParameter($configKeys, IQueryBuilder::PARAM_STR_ARRAY), IQueryBuilder::PARAM_STR)
+			);
+		return $this->findEntity($qb);
+	}
+
+	/**
 	 * @throws Exception
 	 */
 	public function updateAppConfigValue(ExAppConfig $appConfigEx): int {
@@ -111,12 +132,12 @@ class ExAppConfigMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function deleteByAppidConfigkey(ExAppConfig $appConfigEx): int {
+	public function deleteByAppidConfigkeys(string $appId, array $configKeys): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->delete($this->tableName)
 			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appConfigEx->getAppid(), IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('configkey', $qb->createNamedParameter($appConfigEx->getConfigkey(), IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->in('configkey', $qb->createNamedParameter($configKeys, IQueryBuilder::PARAM_STR_ARRAY), IQueryBuilder::PARAM_STR)
 			)
 		->executeStatement();
 	}
