@@ -99,21 +99,6 @@ class AppConfigController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	public function getAppConfigKeys(string $format = 'json'): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$appConfigKeys = $this->exAppConfigService->getAppConfigKeys($appId);
-		return $this->buildResponse(new DataResponse($appConfigKeys, Http::STATUS_OK), $format);
-	}
-
-	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *

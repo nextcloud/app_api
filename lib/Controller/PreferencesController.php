@@ -104,22 +104,6 @@ class PreferencesController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	public function getUserConfigKeys(string $format = 'json'): Response {
-		$userId = $this->userSession->getUser()->getUID();
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppPreferenceService->getUserConfigKeys($userId, $appId);
-		return $this->buildResponse(new DataResponse($result), $format);
-	}
-
-	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *

@@ -32,7 +32,6 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\IDBConnection;
@@ -107,7 +106,7 @@ class ExAppPreferenceMapper extends QBMapper {
 	public function updateUserConfigValue(ExAppPreference $exAppPreference): int {
 		$qb = $this->db->getQueryBuilder();
 		$qb->update($this->tableName)
-			->set('value', $qb->createNamedParameter($exAppPreference->getValue(), IQueryBuilder::PARAM_STR))
+			->set('configvalue', $qb->createNamedParameter($exAppPreference->getConfigvalue(), IQueryBuilder::PARAM_STR))
 			->where(
 				$qb->expr()->eq('userid', $qb->createNamedParameter($exAppPreference->getUserid(), IQueryBuilder::PARAM_STR)),
 				$qb->expr()->eq('appid', $qb->createNamedParameter($exAppPreference->getAppid(), IQueryBuilder::PARAM_STR)),

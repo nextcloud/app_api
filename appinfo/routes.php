@@ -54,7 +54,7 @@ return [
 
 		// appconfig_ex (app configuration)
 		['name' => 'appConfig#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
-		['name' => 'appConfig#getAppConfigValues', 'url' => '/api/v1/ex-app/config', 'verb' => 'GET'],
+		['name' => 'appConfig#getAppConfigValues', 'url' => '/api/v1/ex-app/config/get-values', 'verb' => 'POST'],
 		['name' => 'appConfig#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config', 'verb' => 'DELETE'],
 
 		// preferences_ex (user-specific configuration)
