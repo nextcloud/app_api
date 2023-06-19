@@ -42,17 +42,17 @@ use OCP\AppFramework\Db\Entity;
  * @method string getUserid()
  * @method string getAppid()
  * @method string getConfigkey()
- * @method string getValue()
+ * @method string getConfigvalue()
  * @method void setUserid(string $userid)
  * @method void setAppid(string $appid)
- * @method void setConfigkey(string $key)
- * @method void setValue(string $value)
+ * @method void setConfigkey(string $configkey)
+ * @method void setConfigvalue(string $configvalue)
  */
 class ExAppPreference extends Entity implements JsonSerializable {
 	protected $userid;
 	protected $appid;
 	protected $configkey;
-	protected $value;
+	protected $configvalue;
 
 	/**
 	 * @param array $params
@@ -67,8 +67,8 @@ class ExAppPreference extends Entity implements JsonSerializable {
 		if (isset($params['configkey'])) {
 			$this->setConfigkey($params['configkey']);
 		}
-		if (isset($params['value'])) {
-			$this->setValue($params['value']);
+		if (isset($params['configvalue'])) {
+			$this->setConfigvalue($params['configvalue']);
 		}
 	}
 
@@ -77,7 +77,7 @@ class ExAppPreference extends Entity implements JsonSerializable {
 			'user_id' => $this->getUserid(),
 			'app_id' => $this->getAppid(),
 			'configkey' => $this->getConfigkey(),
-			'value' => $this->getValue(),
+			'configvalue' => $this->getConfigvalue(),
 		];
 	}
 }

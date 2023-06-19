@@ -65,14 +65,14 @@ class ExAppPreferenceService {
 					'userid' => $userId,
 					'appid' => $appId,
 					'configkey' => $configKey,
-					'value' => $configValue,
+					'configvalue' => $configValue,
 				]));
 			} catch (Exception $e) {
 				$this->logger->error('Error while inserting new config value: ' . $e->getMessage());
 				return null;
 			}
 		} else {
-			$exAppPreference->setValue($configValue);
+			$exAppPreference->setConfigvalue($configValue);
 			try {
 				if ($this->mapper->updateUserConfigValue($exAppPreference) !== 1) {
 					$this->logger->error('Error while updating preferences_ex config value');
@@ -97,8 +97,8 @@ class ExAppPreferenceService {
 //			TODO: add caching
 			return array_map(function (ExAppPreference $exAppPreference) {
 				return [
-					'configKey' => $exAppPreference->getConfigKey(),
-					'configValue' => $exAppPreference->getValue(),
+					'configkey' => $exAppPreference->getConfigKey(),
+					'configvalue' => $exAppPreference->getConfigvalue(),
 				];
 			}, $this->mapper->findByUserIdAppIdKeys($userId, $appId, $configKeys));
 		} catch (Exception) {

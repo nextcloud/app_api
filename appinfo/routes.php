@@ -52,15 +52,14 @@ return [
 		['name' => 'ocsApi#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
 		['name' => 'ocsApi#loadFileActionIcon', 'url' => '/api/v1/files/action/icon', 'verb' => 'GET'],
 
-		// Storage API (appconfig_ex, preferences_ex)
+		// appconfig_ex (app configuration)
 		['name' => 'appConfig#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
-		['name' => 'appConfig#getAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'GET'],
-		['name' => 'appConfig#getAppConfigKeys', 'url' => '/api/v1/ex-app/config/keys', 'verb' => 'GET'],
+		['name' => 'appConfig#getAppConfigValues', 'url' => '/api/v1/ex-app/config', 'verb' => 'GET'],
 		['name' => 'appConfig#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config', 'verb' => 'DELETE'],
 
+		// preferences_ex (user-specific configuration)
 		['name' => 'preferences#setUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'POST'],
 		['name' => 'preferences#getUserConfigValues', 'url' => '/api/v1/ex-app/preference/get-values', 'verb' => 'POST'],
-		['name' => 'preferences#getUserConfigKeys', 'url' => '/api/v1/ex-app/preference/keys', 'verb' => 'GET'],
 		['name' => 'preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
 
 //	TODO: Implement Notifications, SearchProvider, BackgroundJob, SettingsPage, SettingsSection, EventListener, DashboardWidget, Capabilities

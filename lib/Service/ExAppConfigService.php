@@ -75,7 +75,12 @@ class ExAppConfigService {
 		}
 
 		try {
-			$exAppConfigs = $this->mapper->findByAppConfigKeys($appId, $configKeys);
+			$exAppConfigs = array_map(function (ExAppConfig $exAppConfig) {
+				return [
+					'configkey' => $exAppConfig->getConfigkey(),
+					'configvalue' => $exAppConfig->getConfigvalue(),
+				];
+			}, $this->mapper->findByAppConfigKeys($appId, $configKeys));
 			$this->cache->set($cacheKey, $exAppConfigs, Application::CACHE_TTL);
 			return $exAppConfigs;
 		} catch (Exception) {
@@ -135,23 +140,6 @@ class ExAppConfigService {
 			return $this->mapper->deleteByAppidConfigkeys($appId, $configKeys);
 		} catch (Exception) {
 			return -1;
-		}
-	}
-
-	/**
-	 * @param string $appId
-	 *
-	 * @return array
-	 */
-	public function getAppConfigKeys(string $appId): array {
-		try {
-//			TODO: add caching
-			$exAppConfigs = $this->mapper->findAllByAppId($appId);
-			return array_map(function (ExAppConfig $appConfigEx) {
-				return $appConfigEx->getConfigkey();
-			}, $exAppConfigs);
-		} catch (Exception) {
-			return [];
 		}
 	}
 }

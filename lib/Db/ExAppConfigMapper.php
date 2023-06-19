@@ -139,16 +139,4 @@ class ExAppConfigMapper extends QBMapper {
 			)
 		->executeStatement();
 	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function deleteAllByAppId(string $appId): int {
-		$qb = $this->db->getQueryBuilder();
-		return $qb->delete($this->tableName)
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
-			)
-		->executeStatement();
-	}
 }
