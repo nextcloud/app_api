@@ -75,7 +75,7 @@ class PreferencesController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->setUserConfigValue($userId, $appId, $configKey, $configValue);
 		if ($result instanceof ExAppPreference) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 		}
 		return $this->buildResponse(new DataResponse([
 			'message' => 'Failed to set user config value',

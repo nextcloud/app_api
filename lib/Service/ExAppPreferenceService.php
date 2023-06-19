@@ -94,7 +94,13 @@ class ExAppPreferenceService {
 	 */
 	public function getUserConfigValues(string $userId, string $appId, array $configKeys): ?array {
 		try {
-			return $this->mapper->findByUserIdAppIdKeys($userId, $appId, $configKeys);
+//			TODO: add caching
+			return array_map(function (ExAppPreference $exAppPreference) {
+				return [
+					'configKey' => $exAppPreference->getConfigKey(),
+					'configValue' => $exAppPreference->getValue(),
+				];
+			}, $this->mapper->findByUserIdAppIdKeys($userId, $appId, $configKeys));
 		} catch (Exception) {
 			return null;
 		}
@@ -102,7 +108,9 @@ class ExAppPreferenceService {
 
 	public function getUserConfigKeys(string $userId, string $appId): ?array {
 		try {
-			return $this->mapper->findUserConfigKeys($userId, $appId);
+				return array_map(function ($exAppPreference) {
+					return $exAppPreference['configkey'];
+				}, $this->mapper->findUserConfigKeys($userId, $appId));
 		} catch (Exception $e) {
 			$this->logger->error('Error while getting config keys: ' . $e->getMessage());
 			return null;

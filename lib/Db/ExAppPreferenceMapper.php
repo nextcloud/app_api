@@ -87,7 +87,7 @@ class ExAppPreferenceMapper extends QBMapper {
 	 *
 	 * @throws Exception
 	 *
-	 * @return Entity[]
+	 * @return ExAppPreference[]
 	 */
 	public function findByUserIdAppIdKeys(string $userId, string $appId, array $configKeys): array {
 		$qb = $this->db->getQueryBuilder();
