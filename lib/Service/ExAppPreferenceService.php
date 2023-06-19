@@ -97,7 +97,7 @@ class ExAppPreferenceService {
 //			TODO: add caching
 			return array_map(function (ExAppPreference $exAppPreference) {
 				return [
-					'configkey' => $exAppPreference->getConfigKey(),
+					'configkey' => $exAppPreference->getConfigkey(),
 					'configvalue' => $exAppPreference->getConfigvalue(),
 				];
 			}, $this->mapper->findByUserIdAppIdKeys($userId, $appId, $configKeys));
