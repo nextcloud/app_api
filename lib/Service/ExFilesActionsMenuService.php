@@ -33,6 +33,7 @@ namespace OCA\AppEcosystemV2\Service;
 
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
+use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCP\Cache\CappedMemoryCache;
@@ -47,20 +48,12 @@ use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IResponse;
 
 class ExFilesActionsMenuService {
-	/** @var CappedMemoryCache */
-	private $cache;
-
-	/** @var ExFilesActionsMenuMapper */
-	private $mapper;
-
-	/** @var LoggerInterface */
-	private $logger;
-
-	/** @var IClient */
-	private $client;
-
-	/** @var AppEcosystemV2Service */
-	private $appEcosystemV2Service;
+	private CappedMemoryCache $cache;
+	private ExFilesActionsMenuMapper $mapper;
+	private LoggerInterface $logger;
+	private IClient $client;
+	private AppEcosystemV2Service $appEcosystemV2Service;
+	private IRequest $request;
 
 	public function __construct(
 		CappedMemoryCache $cache,
@@ -68,12 +61,14 @@ class ExFilesActionsMenuService {
 		LoggerInterface $logger,
 		IClientService $clientService,
 		AppEcosystemV2Service $appEcosystemV2Service,
+		IRequest $request,
 	) {
 		$this->cache = $cache;
 		$this->mapper = $mapper;
 		$this->logger = $logger;
 		$this->client = $clientService->newClient();
 		$this->appEcosystemV2Service = $appEcosystemV2Service;
+		$this->request = $request;
 	}
 
 	/**
@@ -211,7 +206,7 @@ class ExFilesActionsMenuService {
 			];
 			$exApp = $this->appEcosystemV2Service->getExApp($appId);
 			if ($exApp !== null) {
-				$result = $this->appEcosystemV2Service->requestToExApp($userId, $exApp, $handler, 'POST', $params);
+				$result = $this->appEcosystemV2Service->requestToExApp($this->request, $userId, $exApp, $handler, 'POST', $params);
 				if ($result instanceof IResponse) {
 					return $result->getStatusCode() === 200;
 				}

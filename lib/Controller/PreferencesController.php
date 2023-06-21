@@ -31,8 +31,11 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
+use OCA\AppEcosystemV2\Attribute\AEAuth;
 use OCA\AppEcosystemV2\Db\ExAppPreference;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 
@@ -61,10 +64,6 @@ class PreferencesController extends OCSController {
 	}
 
 	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param string $configKey
 	 * @param mixed $configValue
 	 * @param string $format
@@ -72,6 +71,9 @@ class PreferencesController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
+	#[AEAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function setUserConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
@@ -83,15 +85,14 @@ class PreferencesController extends OCSController {
 	}
 
 	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
+	#[AEAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function getUserConfigValues(array $configKeys, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
@@ -100,16 +101,15 @@ class PreferencesController extends OCSController {
 	}
 
 	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *
 	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
+	#[AEAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function deleteUserConfigValues(array $configKeys, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');

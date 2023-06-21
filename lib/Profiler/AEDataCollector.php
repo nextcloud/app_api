@@ -42,35 +42,26 @@ class AEDataCollector extends AbstractDataCollector {
 	}
 
 	public function collect(Request $request, Response $response, \Throwable $exception = null): void {
-//		TODO: Check needed data and prepare for it frontend side of profiler app
-		if ($request->getHeader('AE-SIGNATURE')) {
-			$headers = [];
-			$aeHeadersList = [
-				'AE-VERSION',
-				'EX-APP-ID',
-				'EX-APP-VERSION',
-				'NC-USER-ID',
-				'AE-DATA-HASH',
-				'AE-SIGN-TIME',
-				'AE-SIGNATURE',
-				'AE-DEBUG',
-			];
-			foreach ($aeHeadersList as $header) {
-				if ($request->getHeader($header) !== '') {
-					$headers[$header] = $request->getHeader($header);
-				}
+//		TODO: Check why DAV requests missing AE headers data
+		$headers = [];
+		$aeHeadersList = [
+			'AE-VERSION',
+			'EX-APP-ID',
+			'EX-APP-VERSION',
+			'NC-USER-ID',
+			'AE-DATA-HASH',
+			'AE-SIGN-TIME',
+			'AE-SIGNATURE',
+			'AE-REQUEST-ID',
+		];
+		foreach ($aeHeadersList as $header) {
+			if ($request->getHeader($header) !== '') {
+				$headers[$header] = $request->getHeader($header);
 			}
+		}
+		if (!empty($headers)) {
 			$this->data = [
-				'request' => [
-					'url' => $request->getRequestUri(),
-					'method' => $request->getMethod(),
-					'headers' => $headers,
-					'params' => $request->getParams(),
-				],
-				'response' => [
-					'headers' => $response->getHeaders(),
-					'statusCode' => $response->getStatus(),
-				],
+				'headers' => $headers,
 			];
 		}
 	}

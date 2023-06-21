@@ -40,11 +40,8 @@ use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
 class AEAuthBackend implements BackendInterface {
-	/** @var IRequest */
-	private $request;
-
-	/** @var ISession */
-	private $session;
+	private IRequest $request;
+	private ISession $session;
 
 	public function __construct(
 		IRequest $request,
@@ -59,7 +56,6 @@ class AEAuthBackend implements BackendInterface {
 			$davAuthenticated = $this->session->get(Auth::DAV_AUTHENTICATED);
 			$userIdHeader = $this->request->getHeader('NC-USER-ID');
 			$sessionUserId = $this->session->get('user_id');
-			// TODO: Add scopes check
 			if ($sessionUserId === $userIdHeader && $davAuthenticated === $sessionUserId) {
 				$authString = 'principals/' . Application::APP_ID . '/' . $this->session->get('user_id');
 				return [true, $authString];

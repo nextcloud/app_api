@@ -76,6 +76,7 @@ class AppEcosystemV2Service {
 	private IUserManager $userManager;
 	private ExAppApiScopeMapper $exAppApiScopeMapper;
 	private ExAppScopeMapper $exAppScopeMapper;
+	private ExAppConfigService $exAppConfigService;
 
 	public function __construct(
 		LoggerInterface $logger,
@@ -90,6 +91,7 @@ class AppEcosystemV2Service {
 		ISecureRandom $random,
 		IUserSession $userSession,
 		IUserManager $userManager,
+		ExAppConfigService $exAppConfigService,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
@@ -103,6 +105,7 @@ class AppEcosystemV2Service {
 		$this->userManager = $userManager;
 		$this->exAppApiScopeMapper = $exAppApiScopeMapper;
 		$this->exAppScopeMapper = $exAppScopeMapper;
+		$this->exAppConfigService = $exAppConfigService;
 	}
 
 	public function getExApp(string $exAppId): ?ExApp {
@@ -266,11 +269,11 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function requestToExApp(string $userId, ExApp $exApp, string $route, string $method = 'POST', array $params = []): array|IResponse {
+	public function requestToExApp(IRequest $request, string $userId, ExApp $exApp, string $route, string $method = 'POST', array $params = []): array|IResponse {
 		try {
  			$exAppConfig = json_decode($exApp->getConfig(), true);
 			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
-//			TODO: Add debug logging for NC to ExApp requests
+			$this->handleExAppDebug($exApp, $request, true);
 			// Check in ex_apps_users
 			if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 				try {
@@ -305,6 +308,7 @@ class AppEcosystemV2Service {
 			[$signature, $dataHash] = $this->generateRequestSignature($method, $route, $options, $exApp->getSecret(), $params);
 			$options['headers']['AE-SIGNATURE'] = $signature;
 			$options['headers']['AE-DATA-HASH'] = $dataHash;
+			$options['headers']['AE-REQUEST-ID'] = $request->getId();
 
 			switch ($method) {
 				case 'GET':
@@ -393,14 +397,7 @@ class AppEcosystemV2Service {
 			}
 			$secret = $exApp->getSecret();
 
-			$debug = boolval($request->getHeader('AE-DEBUG'));
-//			$debug = true;
-			if ($debug) {
-				$aeDebugLogger = $this->getCustomLogger('ae_debug.log');
-				$aeDebugLogger->debug('Request from ExApp ' . $exApp->getAppid() . ' to NC: ' . $this->buildRequestInfo($request), [
-					'app' => $exApp->getAppid(),
-				]);
-			}
+			$this->handleExAppDebug($exApp, $request, false);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return false;
 		}
@@ -591,30 +588,53 @@ class AppEcosystemV2Service {
 		return $this->logFactory->getCustomPsrLogger($path);
 	}
 
-	private function buildRequestInfo(IRequest $request): string {
+	private function buildRequestInfo(IRequest $request): array {
 		$headers = [];
 		$aeHeadersList = [
 			'AE-VERSION',
-			'EX-APP-ID',
 			'EX-APP-VERSION',
-			'NC-USER-ID',
-			'AE-DATA-HASH',
 			'AE-SIGN-TIME',
-			'AE-SIGNATURE',
 		];
 		foreach ($aeHeadersList as $header) {
 			if ($request->getHeader($header) !== '') {
 				$headers[$header] = $request->getHeader($header);
 			}
 		}
-		$requestInfo = [
-			'request' => [
-				'uri' => $request->getRequestUri(),
-				'method' => $request->getMethod(),
-				'headers' => $headers,
-				'params' => $request->getParams(),
-			],
+		return [
+			'headers' => $headers,
+			'params' => $request->getParams(),
 		];
-		return json_encode($requestInfo);
+	}
+
+	private function getExAppDebugSettings(ExApp $exApp): array {
+		$exAppConfigs = $this->exAppConfigService->getAppConfigValues($exApp->getAppid(), ['debug', 'loglevel']);
+		$debug = false;
+		$level = $this->config->getSystemValue('loglevel', 2);
+		foreach ($exAppConfigs as $exAppConfig) {
+			if ($exAppConfig['configkey'] === 'debug') {
+				$debug = boolval($exAppConfig['configvalue']);
+			}
+			if ($exAppConfig['configkey'] === 'loglevel') {
+				$level = intval($exAppConfig['configvalue']);
+			}
+		}
+		return [
+			'debug' => $debug,
+			'level' => $level,
+		];
+	}
+
+	private function handleExAppDebug(ExApp $exApp, IRequest $request, bool $fromNextcloud = true): void {
+		$exAppDebugSettings = $this->getExAppDebugSettings($exApp);
+		if ($exAppDebugSettings['debug']) {
+			$message = $fromNextcloud
+				? '[' . Application::APP_ID . '] Nextcloud --> ' . $exApp->getAppid()
+				: '[' . Application::APP_ID . '] ' . $exApp->getAppid() . ' --> Nextcloud';
+			$aeDebugLogger = $this->getCustomLogger('ae_debug.log');
+			$aeDebugLogger->log($exAppDebugSettings['level'], $message, [
+				'app' => $exApp->getAppid(),
+				'request_info' => $this->buildRequestInfo($request),
+			]);
+		}
 	}
 }

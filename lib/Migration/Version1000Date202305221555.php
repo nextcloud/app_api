@@ -166,7 +166,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'default' => 'icon-app-ecosystem-v2',
 			]);
-			// Action handler key name, that will sent to exApp for handling
+			// Action handler key name, that will be sent to exApp for handling
 			$table->addColumn('action_handler', 'string', [
 				'notnull' => true,
 				'length' => 64,
@@ -199,6 +199,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 
 		if (!$schema->hasTable('ex_apps_api_scopes')) {
 			$table = $schema->createTable('ex_apps_api_scopes');
+//			TODO: Add id primary key
 
 			$table->addColumn('api_route', 'string', [
 				'notnull' => true,

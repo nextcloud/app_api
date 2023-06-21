@@ -73,7 +73,9 @@ class Application extends App implements IBootstrap {
 		$server = $context->getServerContainer();
 		try {
 			$profiler = $server->get(IProfiler::class);
-			$profiler->add(new AEDataCollector());
+			if ($profiler->isEnabled()) {
+				$profiler->add(new AEDataCollector());
+			}
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 	}

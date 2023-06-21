@@ -32,7 +32,10 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Controller;
 
 
+use OCA\AppEcosystemV2\Attribute\AEAuth;
 use OCA\AppEcosystemV2\Db\ExAppConfig;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\IRequest;
 use OCP\AppFramework\OCSController;
@@ -58,10 +61,6 @@ class AppConfigController extends OCSController {
 	}
 
 	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param string $configKey
 	 * @param mixed $configValue
 	 * @param string $format
@@ -69,6 +68,9 @@ class AppConfigController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
+	#[AEAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function setAppConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
@@ -79,15 +81,14 @@ class AppConfigController extends OCSController {
 	}
 
 	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
+	#[AEAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function getAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->getAppConfigValues($appId, $configKeys);
@@ -95,16 +96,15 @@ class AppConfigController extends OCSController {
 	}
 
 	/**
-	 * @AEAuth
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *
 	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
+	#[AEAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function deleteAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->deleteAppConfigValues($configKeys, $appId);
