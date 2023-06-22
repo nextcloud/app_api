@@ -39,5 +39,5 @@ use Attribute;
  * @since 27.0.0
  */
 #[Attribute]
-class AEAuth {
+class AppEcosystemAuth {
 }

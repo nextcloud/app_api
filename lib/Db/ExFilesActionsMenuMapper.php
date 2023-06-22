@@ -31,7 +31,8 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
-use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
@@ -82,8 +83,8 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	/**
 	 * @param string $appId
 	 *
-	 * @return ExFilesActionsMenu[]
 	 * @throws Exception
+	 * @return ExFilesActionsMenu[]
 	 */
 	public function findAllByAppId(string $appId): array {
 		$qb = $this->db->getQueryBuilder();
@@ -99,12 +100,13 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $name
 	 *
-	 * @return ExFilesActionsMenu
-	 *@throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws DoesNotExistException if not found
+	 * @throws Exception
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+	 * @return ExFilesActionsMenu
 	 */
-	public function findByAppIdName(string $appId, string $name): Entity {
+	public function findByAppIdName(string $appId, string $name): ExFilesActionsMenu {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
@@ -118,12 +120,14 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	/**
 	 * @param string $name
 	 *
-	 * @return ExFilesActionsMenu
-	 *@throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws DoesNotExistException|Exception if not found
+	 * @throws Exception
+	 *
+	 * @return ExFilesActionsMenu
 	 */
-	public function findByName(string $name): Entity {
+	public function findByName(string $name): ExFilesActionsMenu {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
@@ -136,9 +140,11 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	/**
 	 * @param ExFilesActionsMenu $exFilesActionsMenu
 	 *
+	 * @throws Exception
+	 *
 	 * @return int Number of updated rows
 	 */
-	public function updateFileActionMenu(ExFilesActionsMenu $exFilesActionsMenu) {
+	public function updateFileActionMenu(ExFilesActionsMenu $exFilesActionsMenu): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->update($this->tableName)
 			->set('display_name', $qb->createNamedParameter($exFilesActionsMenu->getDisplayName(), IQueryBuilder::PARAM_STR))
@@ -157,6 +163,8 @@ class ExFilesActionsMenuMapper extends QBMapper {
 
 	/**
 	 * @param ExFilesActionsMenu $exFilesActionsMenu
+	 *
+	 * @throws Exception
 	 *
 	 * @return int Number of deleted rows
 	 */

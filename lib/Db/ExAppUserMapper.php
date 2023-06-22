@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
-use OCP\AppFramework\Db\Entity;
+use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -41,6 +41,9 @@ class ExAppUserMapper extends QBMapper {
 		parent::__construct($db, 'ex_apps_users');
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -50,33 +53,24 @@ class ExAppUserMapper extends QBMapper {
 		return $this->findEntities($qb);
 	}
 
-	public function findAllUsersByAppid(string $appId, int $limit = null, int $offset = null): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('userid')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
-			)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
-		return $qb->executeQuery()->fetchAll();
-	}
-
 	/**
 	 * @param string $appId
 	 * @param string $userId
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+	 * @throws Exception
 	 *
 	 * @return ExAppUser[]
 	 */
-	public function findByAppidUserid(string $appId, string $userId): Entity {
+	public function findByAppidUserid(string $appId, string $userId): array {
 		$qb = $this->db->getQueryBuilder();
-		return $this->findEntity($qb->select('*')
+		return $this->findEntities($qb->select('*')
 			->from($this->tableName)
-			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)))
-			->andWhere($qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)))
-		);
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)))
+			->orWhere(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('userid', $qb->createNamedParameter('', IQueryBuilder::PARAM_STR))
+			));
 	}
 }

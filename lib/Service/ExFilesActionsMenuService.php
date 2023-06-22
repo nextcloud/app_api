@@ -82,7 +82,7 @@ class ExFilesActionsMenuService {
 	public function registerFileActionMenu(string $appId, array $params): ?Entity {
 		try {
 			$fileActionMenu = $this->mapper->findByName($params['name']);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$fileActionMenu = null;
 		}
 		// If exists - update, else - create
@@ -96,8 +96,12 @@ class ExFilesActionsMenuService {
 			$fileActionMenu->setIcon($params['icon']);
 			$fileActionMenu->setIconClass($params['icon_class']);
 			$fileActionMenu->setActionHandler($params['action_handler']);
-			if ($this->mapper->updateFileActionMenu($fileActionMenu) !== 1) {
-				$this->logger->error('Failed to update file action menu ' . $params['name'] . ' for app: ' . $appId);
+			try {
+				if ($this->mapper->updateFileActionMenu($fileActionMenu) !== 1) {
+					$this->logger->error('Failed to update file action menu ' . $params['name'] . ' for app: ' . $appId);
+					return null;
+				}
+			} catch (Exception) {
 				return null;
 			}
 		} else {
@@ -121,11 +125,19 @@ class ExFilesActionsMenuService {
 		return $fileActionMenu;
 	}
 
-	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName) {
-		/** @var ExFilesActionsMenu $fileActionMenu */
-		$fileActionMenu = $this->mapper->findByName($fileActionMenuName);
+	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName): ?ExFilesActionsMenu {
+		try {
+			$fileActionMenu = $this->mapper->findByName($fileActionMenuName);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			$fileActionMenu = null;
+		}
 		if ($fileActionMenu !== null) {
-			if ($this->mapper->deleteByAppidName($fileActionMenu) !== 1) {
+			try {
+				if ($this->mapper->deleteByAppidName($fileActionMenu) !== 1) {
+					$this->logger->error('Failed to delete file action menu ' . $fileActionMenuName . ' for app: ' . $appId);
+					return null;
+				}
+			} catch (Exception) {
 				$this->logger->error('Failed to delete file action menu ' . $fileActionMenuName . ' for app: ' . $appId);
 				return null;
 			}
@@ -134,18 +146,22 @@ class ExFilesActionsMenuService {
 	}
 
 	/**
-	 * @return ExFilesActionsMenu[]
+	 * @return ExFilesActionsMenu[]|null
 	 */
-	public function getRegisteredFileActions(): array {
+	public function getRegisteredFileActions(): ?array {
 		$cacheKey = 'ex_app_file_actions';
 		$cache = $this->cache->get($cacheKey);
 		if ($cache !== null) {
 			return $cache;
 		}
 
-		$fileActions = $this->mapper->findAllEnabled();
-		$this->cache->set($cacheKey, $fileActions, Application::CACHE_TTL);
-		return $fileActions;
+		try {
+			$fileActions = $this->mapper->findAllEnabled();
+			$this->cache->set($cacheKey, $fileActions, Application::CACHE_TTL);
+			return $fileActions;
+		} catch (Exception) {
+			return null;
+		}
 	}
 
 	/**
@@ -180,17 +196,17 @@ class ExFilesActionsMenuService {
 
 		try {
 			$fileAction = $this->mapper->findByAppIdName($exAppId, $fileActionName);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
+			$this->cache->set($cacheKey, $fileAction, Application::CACHE_TTL);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$fileAction = null;
 		}
-		$this->cache->set($cacheKey, $fileAction, Application::CACHE_TTL);
 		return $fileAction;
 	}
 
 	public function handleFileAction(string $userId, string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
 		try {
 			$exFileAction = $this->mapper->findByName($fileActionName);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$exFileAction = null;
 		}
 		if ($exFileAction !== null) {

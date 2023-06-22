@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
-use OCA\AppEcosystemV2\Attribute\AEAuth;
+use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Db\ExAppPreference;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -71,7 +71,7 @@ class PreferencesController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
-	#[AEAuth]
+	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function setUserConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
@@ -90,7 +90,7 @@ class PreferencesController extends OCSController {
 	 *
 	 * @return Response
 	 */
-	#[AEAuth]
+	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getUserConfigValues(array $configKeys, string $format = 'json'): Response {
@@ -107,7 +107,7 @@ class PreferencesController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
-	#[AEAuth]
+	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function deleteUserConfigValues(array $configKeys, string $format = 'json'): Response {

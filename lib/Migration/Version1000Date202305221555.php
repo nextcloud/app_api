@@ -154,7 +154,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addColumn('permissions', 'string', [
 				'notnull' => true,
 			]);
-			$table->addColumn('order', 'integer', [
+			$table->addColumn('order', 'bigint', [
 				'notnull' => true,
 				'default' => 0,
 			]);
@@ -179,7 +179,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps_users')) {
 			$table = $schema->createTable('ex_apps_users');
 
-			$table->addColumn('id', 'integer', [
+			$table->addColumn('id', 'bigint', [
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
@@ -199,25 +199,29 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 
 		if (!$schema->hasTable('ex_apps_api_scopes')) {
 			$table = $schema->createTable('ex_apps_api_scopes');
-//			TODO: Add id primary key
 
+			$table->addColumn('id', 'bigint', [
+				'notnull' => true,
+				'autoincrement' => true,
+			]);
 			$table->addColumn('api_route', 'string', [
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('scope_group', 'integer', [
+			$table->addColumn('scope_group', 'bigint', [
 				'notnull' => true,
 				'default' => 0,
 			]);
 
-			$table->setPrimaryKey(['api_route'], 'ex_apps_api_scopes_pk');
+			$table->setPrimaryKey(['id'], 'ex_apps_api_scopes_pk');
+			$table->addUniqueIndex(['api_route'], 'ex_apps_api_scopes_routes');
 			$table->addIndex(['scope_group'], 'ex_apps_api_scopes_scope_group');
 		}
 
 		if (!$schema->hasTable('ex_apps_scopes')) {
 			$table = $schema->createTable('ex_apps_scopes');
 
-			$table->addColumn('id', 'integer', [
+			$table->addColumn('id', 'bigint', [
 				'autoincrement' => true,
 				'notnull' => true,
 			]);
@@ -225,14 +229,13 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 32,
 			]);
-			$table->addColumn('scope_group', 'integer', [
+			$table->addColumn('scope_group', 'bigint', [
 				'notnull' => true,
 				'length' => 64,
 			]);
 
 			$table->setPrimaryKey(['id'], 'ex_apps_scopes_pk');
-			$table->addIndex(['appid'], 'ex_apps_scopes_appid');
-			$table->addIndex(['scope_group'], 'ex_apps_scopes_scope');
+			$table->addUniqueIndex(['appid', 'scope_group'], 'ex_apps_scopes_appid');
 		}
 
 		return $schema;

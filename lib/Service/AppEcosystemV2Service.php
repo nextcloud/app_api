@@ -60,7 +60,7 @@ use OCP\Security\ISecureRandom;
 
 class AppEcosystemV2Service {
 //	TODO: In addition to default constant scopes think about implementing scopes registration mechanism
-	public const INIT_API_SCOPE = 1;
+	public const BASIC_API_SCOPE = 1;
 	public const SYSTEM_API_SCOPE = 2;
 	public const DAV_API_SCOPE = 3;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
@@ -424,10 +424,6 @@ class AppEcosystemV2Service {
 		$signature = hash_hmac('sha256', $body, $secret);
 		$signatureValid = $signature === $requestSignature;
 
-		if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
-			return false;
-		}
-
 		if ($signatureValid) {
 			if (!$this->verifyDataHash($dataHash)) {
 				return false;
@@ -444,13 +440,15 @@ class AppEcosystemV2Service {
 			}
 			$apiScope = $this->getApiRouteScope($path);
 
-//			TODO: Re-check scopes logic
 			if ($apiScope === null) {
 				return false;
 			}
 			// If it is not an initialization scope group - check if this endpoint is allowed to be called
-			if ($apiScope->getScopeGroup() !== self::INIT_API_SCOPE) {
+			if ($apiScope->getScopeGroup() !== self::BASIC_API_SCOPE) {
 				if (!$this->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
+					return false;
+				}
+				if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 					return false;
 				}
 			}
@@ -492,11 +490,12 @@ class AppEcosystemV2Service {
 
 	private function exAppUserExists(string $appId, string $userId): bool {
 		try {
-			if ($this->exAppUserMapper->findByAppidUserid($appId, $userId) instanceof ExAppUser) {
+			$exAppUsers = $this->exAppUserMapper->findByAppidUserid($appId, $userId);
+			if (!empty($exAppUsers) && $exAppUsers[0] instanceof ExAppUser) {
 				return true;
 			}
 			return false;
-		} catch (DoesNotExistException|MultipleObjectsReturnedException) {
+		} catch (Exception) {
 			return false;
 		}
 	}
@@ -530,12 +529,12 @@ class AppEcosystemV2Service {
 		$apiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
 
 		$initApiScopes = [
-			['api_route' =>  '/cloud/capabilities', 'scope_group' => self::INIT_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/files/actions/menu', 'scope_group' => self::INIT_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/log', 'scope_group' => self::INIT_API_SCOPE],
+			['api_route' =>  '/cloud/capabilities', 'scope_group' => self::BASIC_API_SCOPE],
+			['api_route' =>  $apiV1Prefix . '/files/actions/menu', 'scope_group' => self::BASIC_API_SCOPE],
+			['api_route' =>  $apiV1Prefix . '/log', 'scope_group' => self::BASIC_API_SCOPE],
 			['api_route' => $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/ex-app/config', 'scope_group' => self::SYSTEM_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/ex-app/preference', 'scope_group' => self::INIT_API_SCOPE],
+			['api_route' =>  $apiV1Prefix . '/ex-app/preference', 'scope_group' => self::BASIC_API_SCOPE],
 			['api_route' =>  '/cloud/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/groups', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/apps', 'scope_group' => self::SYSTEM_API_SCOPE],
@@ -612,7 +611,7 @@ class AppEcosystemV2Service {
 		$level = $this->config->getSystemValue('loglevel', 2);
 		foreach ($exAppConfigs as $exAppConfig) {
 			if ($exAppConfig['configkey'] === 'debug') {
-				$debug = boolval($exAppConfig['configvalue']);
+				$debug = $exAppConfig['configvalue'] === 1;
 			}
 			if ($exAppConfig['configkey'] === 'loglevel') {
 				$level = intval($exAppConfig['configvalue']);

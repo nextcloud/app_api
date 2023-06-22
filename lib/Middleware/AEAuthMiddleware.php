@@ -37,7 +37,7 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Middleware;
 use OCP\AppFramework\Utility\IControllerMethodReflector;
 
-use OCA\AppEcosystemV2\Attribute\AEAuth;
+use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Exceptions\AEAuthNotValidException;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCP\AppFramework\Http;
@@ -71,7 +71,7 @@ class AEAuthMiddleware extends Middleware {
 	public function beforeController(Controller $controller, string $methodName) {
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
-		$isAEAuth = $this->hasAnnotationOrAttribute($reflectionMethod, 'AEAuth', AEAuth::class);
+		$isAEAuth = $this->hasAnnotationOrAttribute($reflectionMethod, 'AEAuth', AppEcosystemAuth::class);
 
 		if ($isAEAuth) {
 			if (!$this->service->validateExAppRequestToNC($this->request)) {

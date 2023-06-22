@@ -89,6 +89,7 @@ class RegisterExApp extends Command {
 				$output->writeln('Failed to set ex-app scope group.');
 			}
 			return 0;
+//			TODO: Add sending of the request to ex-app
 		}
 		$output->writeln('Failed to register ex-app.');
 		return 1;

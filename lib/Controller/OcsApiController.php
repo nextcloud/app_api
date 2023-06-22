@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
-use OCA\AppEcosystemV2\Attribute\AEAuth;
+use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
@@ -85,7 +85,7 @@ class OCSApiController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
-	#[AEAuth]
+	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
@@ -179,7 +179,7 @@ class OCSApiController extends OCSController {
 	 *
 	 * @return Response
 	 */
-	#[AEAuth]
+	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerFileActionMenu(string $appId, array $fileActionMenuParams, string $format = 'json'): Response {
@@ -197,7 +197,7 @@ class OCSApiController extends OCSController {
 	 *
 	 * @return Response
 	 */
-	#[AEAuth]
+	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName, string $format = 'json'): Response {
@@ -254,7 +254,7 @@ class OCSApiController extends OCSController {
 	 *
 	 * @return Response
 	 */
-	#[AEAuth]
+	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getExAppUsers(?string $appId = null, string $format = 'json'): Response {
