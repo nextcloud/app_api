@@ -64,10 +64,12 @@ class AppEcosystemV2Service {
 	public const SYSTEM_API_SCOPE = 2;
 	public const DAV_API_SCOPE = 3;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
+//	TODO: Move to DB with description field for that
 	const SCOPE_GROUPS = [
 		1 => 'BASIC_API_SCOPE',
 		2 => 'SYSTEM_API_SCOPE',
 		3 => 'DAV_API_SCOPE',
+		12 => 'NOTIFICATION_API_SCOPE',
 	];
 	private LoggerInterface $logger;
 	private ILogFactory $logFactory;

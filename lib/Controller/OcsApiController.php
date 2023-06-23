@@ -117,14 +117,15 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @param string $appId
 	 * @param array $appData
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
 	#[NoCSRFRequired]
-	public function registerExternalApp(array $appData, string $format = 'json'): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
+	public function registerExternalApp(string $appId, array $appData, string $format = 'json'): Response {
+//		TODO: Sync logic with OCC command
 		$result = $this->service->registerExApp($appId, $appData);
 		return $this->buildResponse(new DataResponse([
 			'success' => $result !== null,
@@ -133,13 +134,14 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @param string $appId
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
 	#[NoCSRFRequired]
-	public function unregisterExternalApp(string $format = 'json'): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
+	public function unregisterExternalApp(string $appId, string $format = 'json'): Response {
+//		TODO: Sync logic with OCC command
 		$deletedExApp = $this->service->unregisterExApp($appId);
 		if ($deletedExApp === null) {
 			return $this->buildResponse(new DataResponse([
@@ -154,14 +156,14 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @param string $appId
 	 * @param string $format
 	 *
 	 * @return Response
 	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function getAppStatus(string $format = 'json'): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
+	public function getAppStatus(string $appId, string $format = 'json'): Response {
 		$appStatus = $this->service->getAppStatus($appId);
 		return $this->buildResponse(new DataResponse([
 			'success' => $appStatus !== null,
@@ -209,16 +211,17 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @param string $appId
 	 * @param string $actionName
 	 * @param array $actionFile
 	 * @param string $actionHandler
 	 * @param string $format
+	 *
 	 * @return Response
 	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function handleFileAction(string $actionName, array $actionFile, string $actionHandler, string $format = 'json'): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
+	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler, string $format = 'json'): Response {
 		$result = $this->exFilesActionsMenuService->handleFileAction($this->userId, $appId, $actionName, $actionHandler, $actionFile);
 		return $this->buildResponse(new DataResponse([
 			'success' => $result,
@@ -227,14 +230,14 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @param string $appId
 	 * @param string $exFileActionName
 	 *
 	 * @return DataDisplayResponse
 	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function loadFileActionIcon(string $exFileActionName): DataDisplayResponse {
-		$appId = $this->request->getHeader('EX-APP-ID');
+	public function loadFileActionIcon(string $appId, string $exFileActionName): DataDisplayResponse {
 		$icon = $this->exFilesActionsMenuService->loadFileActionIcon($appId, $exFileActionName);
 		if ($icon !== null && isset($icon['body'], $icon['headers'])) {
 			$response = new DataDisplayResponse(
