@@ -78,13 +78,30 @@ class RegisterExApp extends Command {
 			'config' => $config,
 		]);
 		if ($exApp !== null) {
+			// TODO: Remove. Temporal override for testing
+			$exApp->setAppid('nc_py_api');
+			$exApp->setSecret('tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6EX1T8Pi+T5papEolTLxz3fJSPS8ffC4204YmggxPsbJdCkXHWNPHKWS9B+vTj2SIV');
+
 			$output->writeln('ExApp successfully registered.');
 			$enabled = (bool) $input->getOption('enabled');
 			if ($enabled) {
 				if ($this->service->enableExApp($exApp)) {
-					$output->writeln('ExApp successfully enabled.');
+					$exAppEnabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled', 'PUT', ['enabled' => true]);
+					if ($exAppEnabled instanceof IResponse) {
+						$response = json_decode($exAppEnabled->getBody(), true);
+						if (isset($response['error']) && count($response['error']) === 0) {
+							$output->writeln('ExApp successfully enabled.');
+						} else {
+							$output->writeln('Failed to enable ExApp. Error: ' . $response['error']);
+							return 1;
+						}
+					} else if (isset($exAppEnabled['error'])) {
+						$output->writeln('Failed to enable ExApp. Error: ' . $exAppEnabled['error']);
+						return 1;
+					}
 				} else {
-					$output->writeln('Failed to enable ex-app.');
+					$output->writeln('Failed to enable ExApp.');
+					return 1;
 				}
 			}
 
@@ -115,6 +132,9 @@ class RegisterExApp extends Command {
 				return 0;
 			}
 
+			// TODO: Remove. Temporal override for testing
+			$exApp->setAppid($appId);
+
 			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
 			if ($confirmOptionalScopes) {
 				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], false);
@@ -142,9 +162,6 @@ class RegisterExApp extends Command {
 	}
 
 	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp): ?array {
-		// TODO: Remove. Temporal override for testing
-		$exApp->setAppid('nc_py_api');
-		$exApp->setSecret('tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6EX1T8Pi+T5papEolTLxz3fJSPS8ffC4204YmggxPsbJdCkXHWNPHKWS9B+vTj2SIV');
 		$response = $this->service->aeRequestToExApp(null, '', $exApp, '/scopes', 'GET');
 		if (!$response instanceof IResponse && isset($response['error'])) {
 			$output->writeln('Failed to get ex-app scope groups: ' . $response['error']);

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command;
 
+use OCP\Http\Client\IResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,6 +56,22 @@ class UnregisterExApp extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
+		$exApp = $this->service->getExApp($appId);
+		// TODO: Remove. Temporal override for testing
+		$exApp->setAppid('nc_py_api');
+		$exApp->setSecret('tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6EX1T8Pi+T5papEolTLxz3fJSPS8ffC4204YmggxPsbJdCkXHWNPHKWS9B+vTj2SIV');
+		$exAppDisabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled', 'POST', ['enabled' => 1]);
+		if ($exAppDisabled instanceof IResponse) {
+			$response = json_decode($exAppDisabled->getBody(), true);
+			if (isset($response['error']) && count($response['error']) === 0) {
+				$output->writeln('ExApp successfully disabled.');
+			} else {
+				$output->writeln('ExApp ' . $appId . ' not disabled. Failed to unregister.');
+				return 1;
+			}
+		}
+		// TODO: Remove. Temporal override for testing
+		$exApp->setAppid($appId);
 		$exApp = $this->service->unregisterExApp($appId);
 		if ($exApp === null) {
 			$output->writeln('ExApp ' . $appId . ' not found. Failed to unregister.');
