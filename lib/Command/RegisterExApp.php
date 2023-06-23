@@ -89,7 +89,7 @@ class RegisterExApp extends Command {
 					$exAppEnabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled?enabled=1', 'PUT');
 					if ($exAppEnabled instanceof IResponse) {
 						$response = json_decode($exAppEnabled->getBody(), true);
-						if (isset($response['error']) && count($response['error']) === 0) {
+						if (isset($response['error']) && strlen($response['error']) === 0) {
 							$output->writeln('ExApp successfully enabled.');
 						} else {
 							$output->writeln('Failed to enable ExApp. Error: ' . $response['error']);

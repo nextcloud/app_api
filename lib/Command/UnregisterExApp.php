@@ -63,10 +63,10 @@ class UnregisterExApp extends Command {
 		$exAppDisabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled?enabled=1', 'PUT');
 		if ($exAppDisabled instanceof IResponse) {
 			$response = json_decode($exAppDisabled->getBody(), true);
-			if (isset($response['error']) && count($response['error']) === 0) {
+			if (isset($response['error']) && strlen($response['error']) === 0) {
 				$output->writeln('ExApp successfully disabled.');
 			} else {
-				$output->writeln('ExApp ' . $appId . ' not disabled. Failed to unregister.');
+				$output->writeln('ExApp ' . $appId . ' not disabled. Failed to unregister. Error: ' . $response['error']);
 				return 1;
 			}
 		}

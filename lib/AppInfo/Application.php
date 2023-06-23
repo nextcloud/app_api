@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\AppInfo;
 
 use OCA\AppEcosystemV2\Profiler\AEDataCollector;
+use OCA\AppEcosystemV2\PublicCapabilities;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -65,6 +66,7 @@ class Application extends App implements IBootstrap {
 	public function register(IRegistrationContext $context): void {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
+		$context->registerCapability(PublicCapabilities::class);
 		$context->registerMiddleware(AEAuthMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 	}
