@@ -60,7 +60,7 @@ class UnregisterExApp extends Command {
 		// TODO: Remove. Temporal override for testing
 		$exApp->setAppid('nc_py_api');
 		$exApp->setSecret('tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6EX1T8Pi+T5papEolTLxz3fJSPS8ffC4204YmggxPsbJdCkXHWNPHKWS9B+vTj2SIV');
-		$exAppDisabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled', 'POST', ['enabled' => 1]);
+		$exAppDisabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled?enabled=1', 'PUT');
 		if ($exAppDisabled instanceof IResponse) {
 			$response = json_decode($exAppDisabled->getBody(), true);
 			if (isset($response['error']) && count($response['error']) === 0) {
