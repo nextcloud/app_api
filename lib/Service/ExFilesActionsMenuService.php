@@ -222,7 +222,7 @@ class ExFilesActionsMenuService {
 			];
 			$exApp = $this->appEcosystemV2Service->getExApp($appId);
 			if ($exApp !== null) {
-				$result = $this->appEcosystemV2Service->requestToExApp($this->request, $userId, $exApp, $handler, 'POST', $params);
+				$result = $this->appEcosystemV2Service->aeRequestToExApp($this->request, $userId, $exApp, $handler, 'POST', $params);
 				if ($result instanceof IResponse) {
 					return $result->getStatusCode() === 200;
 				}

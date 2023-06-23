@@ -31,12 +31,16 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command;
 
+use OCA\AppEcosystemV2\Db\ExApp;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use Symfony\Component\Console\Question\Question;
 
 class RegisterExApp extends Command {
 	private AppEcosystemV2Service $service;
@@ -54,8 +58,8 @@ class RegisterExApp extends Command {
 		$this->addArgument('version', InputArgument::REQUIRED);
 		$this->addArgument('name', InputArgument::REQUIRED);
 		$this->addArgument('config', InputArgument::REQUIRED);
-		$this->addArgument('scope_group', InputArgument::REQUIRED);
-		$this->addArgument('enabled', InputArgument::OPTIONAL);
+		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ex-app after registration');
+		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -74,7 +78,7 @@ class RegisterExApp extends Command {
 		]);
 		if ($exApp !== null) {
 			$output->writeln('Ex-app successfully registered.');
-			$enabled = boolval($input->getArgument('enabled'));
+			$enabled = (bool) $input->getOption('enabled');
 			if ($enabled) {
 				if ($this->service->enableExApp($exApp)) {
 					$output->writeln('ExApp successfully enabled.');
@@ -82,16 +86,52 @@ class RegisterExApp extends Command {
 					$output->writeln('Failed to enable ex-app.');
 				}
 			}
-			$scopeGroup = intval($input->getArgument('scope_group'));
-			if ($this->service->setExAppScopeGroup($exApp, $scopeGroup)) {
-				$output->writeln('ExApp scope group successfully set.');
-			} else {
-				$output->writeln('Failed to set ex-app scope group.');
+
+			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp);
+			$forceScopes = (bool) $input->getOption('force-scopes');
+			$confirmScopes = true;
+			if (!$forceScopes && $input->isInteractive()) {
+				/** @var QuestionHelper $helper */
+				$helper = $this->getHelper('question');
+
+				$output->writeln('Requested ex-app scopes: ' . implode(', ', $this->service->mapScopeGroupsToNames($requestedExAppScopeGroups)));
+				$question = new Question('Do you want to approve requested ex-app scopes? [y/N] ', 'y');
+				$confirmQuestionRes = $helper->ask($input, $output, $question);
+				$confirmScopes = strtolower($confirmQuestionRes) === 'y';
 			}
+			if (!$confirmScopes) {
+				$output->writeln('Ex-app scopes not approved.');
+				return 0;
+			}
+
+			$registeredScopeGroups = [];
+			foreach ($requestedExAppScopeGroups as $scopeGroup) {
+				if ($this->service->setExAppScopeGroup($exApp, $scopeGroup)) {
+					$registeredScopeGroups[] = $scopeGroup;
+				} else {
+					$output->writeln('Failed to set ex-app scope group: ' . $scopeGroup);
+				}
+			}
+			if (count($registeredScopeGroups) > 0) {
+				$output->writeln('ExApp scope groups successfully set: ' . implode(', ', $this->service->mapScopeGroupsToNames($registeredScopeGroups)));
+			}
+
 			return 0;
-//			TODO: Add sending of the request to ex-app
 		}
 		$output->writeln('Failed to register ex-app.');
 		return 1;
+	}
+
+	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp): ?array {
+		$exApp->setAppid('nc_py_api');
+		$response = $this->service->aeRequestToExApp(null, '', $exApp, '/scopes', 'GET');
+		if (isset($response['error'])) {
+			$output->writeln('Failed to get ex-app scope groups: ' . $response['error']);
+			return null;
+		}
+		if ($response->getStatusCode() === 200) {
+			return json_decode($response->getBody(), true);
+		}
+		return null;
 	}
 }

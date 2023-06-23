@@ -64,6 +64,11 @@ class AppEcosystemV2Service {
 	public const SYSTEM_API_SCOPE = 2;
 	public const DAV_API_SCOPE = 3;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
+	const SCOPE_GROUPS = [
+		1 => 'BASIC_API_SCOPE',
+		2 => 'SYSTEM_API_SCOPE',
+		3 => 'DAV_API_SCOPE',
+	];
 	private LoggerInterface $logger;
 	private ILogFactory $logFactory;
 	private IConfig $config;
@@ -269,11 +274,18 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function requestToExApp(IRequest $request, string $userId, ExApp $exApp, string $route, string $method = 'POST', array $params = []): array|IResponse {
+	public function aeRequestToExApp(
+		?IRequest $request,
+		string $userId,
+		ExApp $exApp,
+		string $route,
+		string $method = 'POST',
+		array $params = []
+	): array|IResponse {
+		$this->handleExAppDebug($exApp, $request, true);
 		try {
- 			$exAppConfig = json_decode($exApp->getConfig(), true);
+			$exAppConfig = json_decode($exApp->getConfig(), true);
 			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
-			$this->handleExAppDebug($exApp, $request, true);
 			// Check in ex_apps_users
 			if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 				try {
@@ -308,7 +320,7 @@ class AppEcosystemV2Service {
 			[$signature, $dataHash] = $this->generateRequestSignature($method, $route, $options, $exApp->getSecret(), $params);
 			$options['headers']['AE-SIGNATURE'] = $signature;
 			$options['headers']['AE-DATA-HASH'] = $dataHash;
-			$options['headers']['AE-REQUEST-ID'] = $request->getId();
+			$options['headers']['AE-REQUEST-ID'] = $request instanceof IRequest ? $request->getId() : 'CLI';
 
 			switch ($method) {
 				case 'GET':
@@ -553,6 +565,21 @@ class AppEcosystemV2Service {
 	}
 
 	/**
+	 * @param int[] $scopeGroups
+	 *
+	 * @return string[]
+	 */
+	public function mapScopeGroupsToNames(array $scopeGroups): array {
+		$scopeNames = [];
+		foreach ($scopeGroups as $scopeGroup) {
+			if (array_key_exists($scopeGroup, self::SCOPE_GROUPS)) {
+				$scopeNames[] = self::SCOPE_GROUPS[$scopeGroup];
+			}
+		}
+		return $scopeNames;
+	}
+
+	/**
 	 * Verify if sign time is within MAX_SIGN_TIME_DIFF (5 min)
 	 *
 	 * @param string $signTime
@@ -623,7 +650,7 @@ class AppEcosystemV2Service {
 		];
 	}
 
-	private function handleExAppDebug(ExApp $exApp, IRequest $request, bool $fromNextcloud = true): void {
+	private function handleExAppDebug(ExApp $exApp, ?IRequest $request, bool $fromNextcloud = true): void {
 		$exAppDebugSettings = $this->getExAppDebugSettings($exApp);
 		if ($exAppDebugSettings['debug']) {
 			$message = $fromNextcloud
@@ -632,7 +659,7 @@ class AppEcosystemV2Service {
 			$aeDebugLogger = $this->getCustomLogger('ae_debug.log');
 			$aeDebugLogger->log($exAppDebugSettings['level'], $message, [
 				'app' => $exApp->getAppid(),
-				'request_info' => $this->buildRequestInfo($request),
+				'request_info' => $request instanceof IRequest ? $this->buildRequestInfo($request) : 'CLI request',
 			]);
 		}
 	}
