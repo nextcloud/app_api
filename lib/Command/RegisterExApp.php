@@ -59,7 +59,7 @@ class RegisterExApp extends Command {
 		$this->addArgument('version', InputArgument::REQUIRED);
 		$this->addArgument('name', InputArgument::REQUIRED);
 		$this->addArgument('config', InputArgument::REQUIRED);
-		$this->addArgument('secret', InputArgument::OPTIONAL, 'Secret for ExApp. If not passed - will be generated');
+		$this->addOption('secret', 's', InputOption::VALUE_OPTIONAL, 'Secret for ExApp. If not passed - will be generated');
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 	}
@@ -69,7 +69,7 @@ class RegisterExApp extends Command {
 		$version = $input->getArgument('version');
 		$name = $input->getArgument('name');
 		$config = $input->getArgument('config');
-		$secret = $input->getArgument('secret');
+		$secret = $input->getOption('secret');
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln('ExApp ' . $appId . ' already registered.');
 			return 0;
