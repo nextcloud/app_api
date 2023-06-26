@@ -386,7 +386,7 @@ class AppEcosystemV2Service {
 			}
 			$dataParams = '';
 		} else {
-			$dataParams = isset($option['json']) ? json_encode($options['json']) : '';
+			$dataParams = isset($options['json']) ? json_encode($options['json']) : '';
 		}
 
 		$dataHash = $this->generateDataHash($dataParams);
