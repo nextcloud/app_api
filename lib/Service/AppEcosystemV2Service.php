@@ -127,7 +127,7 @@ class AppEcosystemV2Service {
 	 * Register exApp
 	 *
 	 * @param string $appId
-	 * @param array $appData [version, name, config]
+	 * @param array $appData [version, name, config, secret]
 	 *
 	 * @return ExApp|null
 	 */
@@ -137,8 +137,12 @@ class AppEcosystemV2Service {
 			$exApp->setVersion($appData['version']);
 			$exApp->setName($appData['name']);
 			$exApp->setConfig($appData['config']);
-			$secret = $this->random->generate(128); // Temporal random secret
-			$exApp->setSecret($secret);
+			if ($appData['secret'] !== '') {
+				$exApp->setSecret($appData['secret']);
+			} else {
+				$secret = $this->random->generate(128); // Temporal random secret
+				$exApp->setSecret($secret);
+			}
 			$exApp->setStatus(json_encode(['active' => true]));
 			$exApp->setLastResponseTime(time());
 			try {
@@ -153,7 +157,7 @@ class AppEcosystemV2Service {
 				'version' => $appData['version'],
 				'name' => $appData['name'],
 				'config' => $appData['config'],
-				'secret' =>  $this->random->generate(128),
+				'secret' =>  $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
 				'status' => json_encode(['active' => true]),
 				'created_time' => time(),
 				'last_response_time' => time(),

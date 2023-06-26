@@ -59,6 +59,7 @@ class RegisterExApp extends Command {
 		$this->addArgument('version', InputArgument::REQUIRED);
 		$this->addArgument('name', InputArgument::REQUIRED);
 		$this->addArgument('config', InputArgument::REQUIRED);
+		$this->addArgument('secret', InputArgument::OPTIONAL, 'Secret for ExApp. If not passed - will be generated');
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 	}
@@ -68,6 +69,7 @@ class RegisterExApp extends Command {
 		$version = $input->getArgument('version');
 		$name = $input->getArgument('name');
 		$config = $input->getArgument('config');
+		$secret = $input->getArgument('secret');
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln('ExApp ' . $appId . ' already registered.');
 			return 0;
@@ -76,13 +78,11 @@ class RegisterExApp extends Command {
 			'version' => $version,
 			'name' => $name,
 			'config' => $config,
+			'secret' => $secret,
 		]);
 		if ($exApp !== null) {
-			// TODO: Remove. Temporal override for testing
-			$exApp->setAppid('nc_py_api');
-			$exApp->setSecret('tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6EX1T8Pi+T5papEolTLxz3fJSPS8ffC4204YmggxPsbJdCkXHWNPHKWS9B+vTj2SIV');
-
 			$output->writeln('ExApp successfully registered.');
+
 			$enabled = (bool) $input->getOption('enabled');
 			if ($enabled) {
 				if ($this->service->enableExApp($exApp)) {
@@ -131,9 +131,6 @@ class RegisterExApp extends Command {
 				$output->writeln('ExApp scopes not approved.');
 				return 0;
 			}
-
-			// TODO: Remove. Temporal override for testing
-			$exApp->setAppid($appId);
 
 			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
 			if ($confirmOptionalScopes) {

@@ -57,10 +57,7 @@ class UnregisterExApp extends Command {
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
-		// TODO: Remove. Temporal override for testing
-		$exApp->setAppid('nc_py_api');
-		$exApp->setSecret('tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6EX1T8Pi+T5papEolTLxz3fJSPS8ffC4204YmggxPsbJdCkXHWNPHKWS9B+vTj2SIV');
-		$exAppDisabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled?enabled=1', 'PUT');
+		$exAppDisabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled?enabled=0', 'PUT');
 		if ($exAppDisabled instanceof IResponse) {
 			$response = json_decode($exAppDisabled->getBody(), true);
 			if (isset($response['error']) && strlen($response['error']) === 0) {
@@ -70,19 +67,18 @@ class UnregisterExApp extends Command {
 				return 1;
 			}
 		}
-		// TODO: Remove. Temporal override for testing
-		$exApp->setAppid($appId);
+
 		$exApp = $this->service->unregisterExApp($appId);
 		if ($exApp === null) {
 			$output->writeln('ExApp ' . $appId . ' not found. Failed to unregister.');
 			return 1;
 		}
 		if ($exApp->getAppid() === $appId) {
-			$output->writeln('ExApp successfully unregistered.');
 			$appScopes = $this->service->getExAppScopeGroups($exApp);
 			foreach ($appScopes as $appScope) {
 				$this->service->removeExAppScopeGroup($exApp, intval($appScope->getScopeGroup()));
 			}
+			$output->writeln('ExApp successfully unregistered.');
 		}
 		return 0;
 	}
