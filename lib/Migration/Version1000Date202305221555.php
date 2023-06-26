@@ -60,6 +60,11 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addColumn('configvalue', 'string', [
 				'notnull' => true,
 			]);
+			$table->addColumn('sensitive', 'smallint', [
+				'notnull' => true,
+				'default' => 0,
+				'length' => 1,
+			]);
 
 			$table->setPrimaryKey(['appid', 'configkey'], 'appconfig_ex_pk');
 			$table->addIndex(['configkey'], 'appconfig_ex_configkey');
@@ -80,12 +85,19 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 255
 			]);
-			$table->addColumn('config', 'json', [
+			$table->addColumn('daemon_config_id', 'bigint', [
+				'default' => 0,
+			]);
+			$table->addColumn('host', 'string', [
+				'notnull' => true,
+				'length' => 255,
+			]);
+			$table->addColumn('port', 'bigint', [
 				'notnull' => true,
 			]);
 			$table->addColumn('secret', 'string', [
 				'notnull' => true,
-				'length' => 128,
+				'length' => 256,
 			]);
 			$table->addColumn('status', 'json', [
 				'notnull' => true,
@@ -105,6 +117,42 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->setPrimaryKey(['appid'], 'ex_apps_id__key');
 			$table->addIndex(['appid'], 'ex_apps_appid__index');
 			$table->addIndex(['name'], 'ex_apps_name__index');
+			$table->addUniqueIndex(['host', 'port'], 'ex_apps_host_port__unique');
+		}
+
+		// Docker daemon or other configurations
+		if (!$schema->hasTable('ex_apps_daemons')) {
+			$table = $schema->createTable('ex_apps_daemons');
+
+			$table->addColumn('id', 'bigint', [
+				'notnull' => true,
+				'autoincrement' => true,
+			]);
+			$table->addColumn('accepts_deploy_id', 'string', [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('display_name', 'string', [
+				'notnull' => true,
+				'length' => 255,
+			]);
+			$table->addColumn('protocol', 'string', [
+				'notnull' => true,
+				'length' => 32,
+			]);
+			$table->addColumn('host', 'string', [
+				'notnull' => true,
+				'length' => 255,
+			]);
+			$table->addColumn('port', 'smallint', [
+				'notnull' => true,
+			]);
+			$table->addColumn('deploy_config', 'json', [
+				'default' => '',
+			]);
+
+			$table->setPrimaryKey(['id'], 'ex_apps_daemons_id__key');
+			$table->addUniqueIndex(['host', 'port'], 'daemons_host_port__unique');
 		}
 
 		if (!$schema->hasTable('preferences_ex')) {

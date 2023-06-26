@@ -32,6 +32,7 @@
 		<command>OCA\AppEcosystemV2\Command\UnregisterExApp</command>
 		<command>OCA\AppEcosystemV2\Command\EnableExApp</command>
 		<command>OCA\AppEcosystemV2\Command\DisableExApp</command>
+		<command>OCA\AppEcosystemV2\Command\ListExAppConfig</command>
 	</commands>
 	<settings>
 		<admin>OCA\AppEcosystemV2\Settings\Admin</admin>

@@ -65,7 +65,7 @@ Each ExApp request to secured with AEAuth must contain the following headers (or
 1. `AE-VERSION` - `[required]` minimal version of the AppEcosystemV2
 2. `EX-APP-ID` - `[required]` id of the ExApp
 3. `EX-APP-VERSION` - `[required]` version of the ExApp
-4. `NC-USER-ID` - `[optional]` the user under which the request is made, can be empty in case of system apps (more deatils in [scopes](#AppEcosystemV2-scopes) section)
+4. `NC-USER-ID` - `[optional]` the user under which the request is made, can be empty in case of system apps (more details in [scopes](#AppEcosystemV2-scopes) section)
 5. `AE-DATA-HASH` - `[required]` hash of the request body (see details in [signature](#AE-SIGNATURE) section)
 6. `AE-SIGN-TIME` - `[required]` unix timestamp of the request
 7. `AE-SIGNATURE` - `[required]` signature of the request (see details [signature](#AE-SIGNATURE) section)

@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command;
 
-use OCP\Http\Client\IResponse;
+use OCA\AppEcosystemV2\Service\ExAppConfigService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -40,63 +40,45 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
-class UnregisterExApp extends Command {
+class ListExAppConfig extends Command {
 	private AppEcosystemV2Service $service;
+	private ExAppConfigService $appConfigService;
 
-	public function __construct(AppEcosystemV2Service $service) {
+	private const SENSITIVE_VALUE = '***REMOVED SENSITIVE VALUE***';
+
+	public function __construct(AppEcosystemV2Service $service, ExAppConfigService $appConfigService) {
 		parent::__construct();
 
 		$this->service = $service;
+		$this->appConfigService = $appConfigService;
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:unregister');
-		$this->setDescription('Unregister external app');
-
+		$this->setName('app_ecosystem_v2:app:config:list');
+		$this->setDescription('List ExApp configs');
 		$this->addArgument('appid', InputArgument::REQUIRED);
 
-		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Unregister only from Nextcloud. Do not send request to external app.');
-
-		$this->addUsage('test_app');
-		$this->addUsage('test_app --silent');
+		$this->addOption('private', null, InputOption::VALUE_NONE, 'Include sensitive ExApp config values like secrets, passwords, etc.');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
-
 		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found. Failed to unregister.');
+			$output->writeln('ExApp ' . $appId . ' not found');
 			return 1;
 		}
-
-		$silent = $input->getOption('silent');
-
-		if ($silent) {
-			$exAppDisabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled?enabled=0', 'PUT');
-			if ($exAppDisabled instanceof IResponse) {
-				$response = json_decode($exAppDisabled->getBody(), true);
-				if (isset($response['error']) && strlen($response['error']) === 0) {
-					$output->writeln('ExApp successfully disabled.');
-				} else {
-					$output->writeln('ExApp ' . $appId . ' not disabled. Failed to unregister. Error: ' . $response['error']);
-					return 1;
-				}
+		if ($exApp->getEnabled()) {
+			$exAppConfigs = $this->appConfigService->getAllAppConfig($exApp->getAppid());
+			$private = $input->getOption('private');
+			$output->writeln('ExApp ' . $exApp->getAppid() . ' configs:');
+			$appConfigs = [];
+			foreach ($exAppConfigs as $exAppConfig) {
+				$appConfigs[$exAppConfig->getAppid()][$exAppConfig->getConfigkey()] = (!$private && $exAppConfig->getSensitive() ? $exAppConfig->getConfigvalue() : self::SENSITIVE_VALUE);
 			}
+			$output->writeln(json_encode($appConfigs, JSON_PRETTY_PRINT));
+			return 0;
 		}
-
-		$exApp = $this->service->unregisterExApp($appId);
-		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found. Failed to unregister.');
-			return 1;
-		}
-		if ($exApp->getAppid() === $appId) {
-			$appScopes = $this->service->getExAppScopeGroups($exApp);
-			foreach ($appScopes as $appScope) {
-				$this->service->removeExAppScopeGroup($exApp, intval($appScope->getScopeGroup()));
-			}
-			$output->writeln('ExApp successfully unregistered.');
-		}
-		return 0;
+		return 1;
 	}
 }

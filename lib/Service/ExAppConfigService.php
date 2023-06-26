@@ -142,4 +142,17 @@ class ExAppConfigService {
 			return -1;
 		}
 	}
+
+	/**
+	 * @param string $appId
+	 *
+	 * @return ExAppConfig[]
+	 */
+	public function getAllAppConfig(string $appId): array {
+		try {
+			return $this->mapper->findAllByAppid($appId);
+		} catch (Exception) {
+			return [];
+		}
+	}
 }

@@ -42,7 +42,9 @@ use OCP\AppFramework\Db\Entity;
  * @method string getAppid()
  * @method string getVersion()
  * @method string getName()
- * @method string getConfig()
+ * @method string getDaemonConfigId()
+ * @method string getHost()
+ * @method string getPort()
  * @method string getSecret()
  * @method string getStatus()
  * @method int getEnabled()
@@ -51,7 +53,9 @@ use OCP\AppFramework\Db\Entity;
  * @method void setAppid(string $appid)
  * @method void setVersion(string $version)
  * @method void setName(string $name)
- * @method void setConfig(string $config)
+ * @method void setDaemonConfigId(string $config)
+ * @method void setHost(string $host)
+ * @method void setPort(string $port)
  * @method void setSecret(string $secret)
  * @method void setStatus(string $status)
  * @method void setEnabled(int $enabled)
@@ -62,7 +66,9 @@ class ExApp extends Entity implements JsonSerializable {
 	protected $appid;
 	protected $version;
 	protected $name;
-	protected $config;
+	protected $daemonConfigId;
+	protected $host;
+	protected $port;
 	protected $secret;
 	protected $status;
 	protected $enabled;
@@ -82,8 +88,14 @@ class ExApp extends Entity implements JsonSerializable {
 		if (isset($params['name'])) {
 			$this->setName($params['name']);
 		}
-		if (isset($params['config'])) {
-			$this->setConfig($params['config']);
+		if (isset($params['daemon_config_id'])) {
+			$this->setDaemonConfigId($params['daemon_config_id']);
+		}
+		if (isset($params['host'])) {
+			$this->setHost($params['host']);
+		}
+		if (isset($params['port'])) {
+			$this->setPort($params['port']);
 		}
 		if (isset($params['secret'])) {
 			$this->setSecret($params['secret']);
@@ -107,7 +119,9 @@ class ExApp extends Entity implements JsonSerializable {
 			'app_id' => $this->getAppid(),
 			'version' => $this->getVersion(),
 			'name'=> $this->getName(),
-			'config' => $this->getConfig(),
+			'daemon_config_id' => $this->getDaemonConfigId(),
+			'host' => $this->getHost(),
+			'port' => $this->getPort(),
 			'secret' => $this->getSecret(),
 			'status' => $this->getStatus(),
 			'enabled' => $this->getEnabled(),

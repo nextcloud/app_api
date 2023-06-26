@@ -42,14 +42,17 @@ use OCP\AppFramework\Db\Entity;
  * @method string getAppid()
  * @method string getConfigkey()
  * @method string getConfigvalue()
+ * @method bool getSensitive()
  * @method void setAppid(string $appId)
  * @method void setConfigKey(string $configKey)
  * @method void setConfigValue(string $configValue)
+ * @method void setSensitive(bool $sensitive)
  */
 class ExAppConfig extends Entity implements JsonSerializable {
 	protected $appid;
 	protected $configkey;
 	protected $configvalue;
+	protected $sensitive;
 
 	/**
 	 * @param array $params
@@ -64,6 +67,9 @@ class ExAppConfig extends Entity implements JsonSerializable {
 		if (isset($params['configvalue'])) {
 			$this->setConfigvalue($params['configvalue']);
 		}
+		if (isset($params['sensitive'])) {
+			$this->setSensitive($params['sensitive']);
+		}
 	}
 
 	public function jsonSerialize(): array {
@@ -71,6 +77,7 @@ class ExAppConfig extends Entity implements JsonSerializable {
 			'appid' => $this->getAppid(),
 			'configkey' => $this->getConfigkey(),
 			'configvalue' => $this->getConfigvalue(),
+			'sensitive' => $this->getSensitive(),
 		];
 	}
 }

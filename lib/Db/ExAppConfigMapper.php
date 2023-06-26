@@ -47,12 +47,11 @@ class ExAppConfigMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function findAll(int $limit = null, int $offset = null): array {
+	public function findAllByAppid(string $appId): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)));
 		return $this->findEntities($qb);
 	}
 

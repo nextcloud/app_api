@@ -127,7 +127,7 @@ class AppEcosystemV2Service {
 	 * Register exApp
 	 *
 	 * @param string $appId
-	 * @param array $appData [version, name, config, secret]
+	 * @param array $appData [version, name, daemon_config_id, host, port, secret]
 	 *
 	 * @return ExApp|null
 	 */
@@ -136,11 +136,13 @@ class AppEcosystemV2Service {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			$exApp->setVersion($appData['version']);
 			$exApp->setName($appData['name']);
-			$exApp->setConfig($appData['config']);
+			$exApp->setDaemonConfigId($appData['daemon_config_id']);
+			$exApp->setHost($appData['host']);
+			$exApp->setPort($appData['port']);
 			if ($appData['secret'] !== '') {
 				$exApp->setSecret($appData['secret']);
 			} else {
-				$secret = $this->random->generate(128); // Temporal random secret
+				$secret = $this->random->generate(128);
 				$exApp->setSecret($secret);
 			}
 			$exApp->setStatus(json_encode(['active' => true]));
@@ -156,7 +158,9 @@ class AppEcosystemV2Service {
 				'appid' => $appId,
 				'version' => $appData['version'],
 				'name' => $appData['name'],
-				'config' => $appData['config'],
+				'daemon_config_id' => $appData['daemon_config_id'],
+				'host' => $appData['host'],
+				'port' => $appData['port'],
 				'secret' =>  $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
 				'status' => json_encode(['active' => true]),
 				'created_time' => time(),
@@ -274,6 +278,12 @@ class AppEcosystemV2Service {
 		try {
 			// TODO: Send request to ex app, update status and last response time, return status
 			$exApp = $this->exAppMapper->findByAppId($appId);
+			$response = $this->aeRequestToExApp(null, '', $exApp, '/status', 'GET');
+			if ($response instanceof IResponse && $response->getStatusCode() === 200) {
+				$status = json_decode($response->getBody(), true);
+				$exApp->setStatus($status);
+				$this->updateExAppLastResponseTime($exApp);
+			}
 			return json_decode($exApp->getStatus(), true);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
@@ -290,8 +300,7 @@ class AppEcosystemV2Service {
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
-			$exAppConfig = json_decode($exApp->getConfig(), true);
-			$url = $exAppConfig['protocol'] . '://' . $exAppConfig['host'] . ':' . $exAppConfig['port'] . $route;
+			$url = $exApp->getHost() . ':' . $exApp->getPort() . $route;
 			// Check in ex_apps_users
 			if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 				try {
@@ -491,7 +500,7 @@ class AppEcosystemV2Service {
 		return true;
 	}
 
-	private function updateExAppLastResponseTime($exApp): void {
+	public function updateExAppLastResponseTime(&$exApp): void {
 		$exApp->setLastResponseTime(time());
 		try {
 			$this->exAppMapper->updateLastResponseTime($exApp);

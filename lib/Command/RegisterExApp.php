@@ -55,31 +55,46 @@ class RegisterExApp extends Command {
 	protected function configure() {
 		$this->setName('app_ecosystem_v2:app:register');
 		$this->setDescription('Register external app');
+
 		$this->addArgument('appid', InputArgument::REQUIRED);
 		$this->addArgument('version', InputArgument::REQUIRED);
 		$this->addArgument('name', InputArgument::REQUIRED);
-		$this->addArgument('config', InputArgument::REQUIRED);
-		$this->addOption('secret', 's', InputOption::VALUE_OPTIONAL, 'Secret for ExApp. If not passed - will be generated');
+
+		$this->addOption('daemon-config-id', null, InputOption::VALUE_REQUIRED, 'Previously configured daemon config id for deployment');
+		$this->addOption('host', null, InputOption::VALUE_REQUIRED);
+		$this->addOption('port', null, InputOption::VALUE_REQUIRED);
+		$this->addOption('secret', 's', InputOption::VALUE_REQUIRED, 'Secret for ExApp. If not passed - will be generated');
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
+
+		$this->addUsage('test_app 1.0.0 "Test app" --host http://host.docker.internal --port 9001 -e');
+		$this->addUsage('test_app 1.0.0 "Test app" --host http://host.docker.internal --port 9001 -e --force-scopes');
+		$this->addUsage('test_app 1.0.0 "Test app" --daemon-config-id 1 --host http://host.docker.internal --port 9001 -e --secret "***secret***" --force-scopes');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$version = $input->getArgument('version');
 		$name = $input->getArgument('name');
-		$config = $input->getArgument('config');
+		$daemonConfigId = $input->getOption('daemon-config-id');
+		$host = $input->getOption('host');
+		$port = $input->getOption('port');
 		$secret = $input->getOption('secret');
+
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln('ExApp ' . $appId . ' already registered.');
 			return 0;
 		}
+
 		$exApp = $this->service->registerExApp($appId, [
 			'version' => $version,
 			'name' => $name,
-			'config' => $config,
+			'daemon_config_id' => (int) $daemonConfigId,
+			'host' => $host,
+			'port' => $port,
 			'secret' => $secret,
 		]);
+
 		if ($exApp !== null) {
 			$output->writeln('ExApp successfully registered.');
 
@@ -95,6 +110,7 @@ class RegisterExApp extends Command {
 							$output->writeln('Failed to enable ExApp. Error: ' . $response['error']);
 							return 1;
 						}
+						$this->service->updateExAppLastResponseTime($exApp);
 					} else if (isset($exAppEnabled['error'])) {
 						$output->writeln('Failed to enable ExApp. Error: ' . $exAppEnabled['error']);
 						return 1;
@@ -109,24 +125,29 @@ class RegisterExApp extends Command {
 			$forceScopes = (bool) $input->getOption('force-scopes');
 			$confirmScopes = $forceScopes;
 			$confirmOptionalScopes = $forceScopes;
+
 			if (!$forceScopes && $input->isInteractive()) {
 				/** @var QuestionHelper $helper */
 				$helper = $this->getHelper('question');
 
 				// Prompt to approve required ExApp scopes
-				$output->writeln('ExApp requested required scopes: ' . implode(', ', $this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['required'])));
+				$output->writeln('ExApp requested required scopes: ' . implode(', ',
+						$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['required'])));
 				$question = new Question('Do you want to approve it? [y/N] ', 'y');
 				$confirmQuestionRes = $helper->ask($input, $output, $question);
 				$confirmScopes = strtolower($confirmQuestionRes) === 'y';
 
 				// Prompt to approve optional ExApp scopes
 				if ($confirmScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-					$output->writeln('ExApp requested optional scopes: ' . implode(', ', $this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['optional'])));
+					$output->writeln('ExApp requested optional scopes: ' . implode(', ',
+							$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['optional'])));
 					$question = new Question('Do you want to approve it? [y/N] ', 'y');
 					$confirmQuestionRes = $helper->ask($input, $output, $question);
 					$confirmOptionalScopes = strtolower($confirmQuestionRes) === 'y';
+//					TODO: Add option to approve only some of optional scopes
 				}
 			}
+
 			if (!$confirmScopes) {
 				$output->writeln('ExApp scopes not approved.');
 				return 0;
@@ -154,17 +175,19 @@ class RegisterExApp extends Command {
 			}
 		}
 		if (count($registeredScopeGroups) > 0) {
-			$output->writeln('ExApp ' . $scopeType . ' scope groups successfully set: ' . implode(', ', $this->service->mapScopeGroupsToNames($registeredScopeGroups)));
+			$output->writeln('ExApp ' . $scopeType . ' scope groups successfully set: ' . implode(', ',
+					$this->service->mapScopeGroupsToNames($registeredScopeGroups)));
 		}
 	}
 
 	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp): ?array {
 		$response = $this->service->aeRequestToExApp(null, '', $exApp, '/scopes', 'GET');
 		if (!$response instanceof IResponse && isset($response['error'])) {
-			$output->writeln('Failed to get ex-app scope groups: ' . $response['error']);
+			$output->writeln('Failed to get ExApp scope groups: ' . $response['error']);
 			return null;
 		}
 		if ($response->getStatusCode() === 200) {
+			$this->service->updateExAppLastResponseTime($exApp);
 			return json_decode($response->getBody(), true);
 		}
 		return null;
