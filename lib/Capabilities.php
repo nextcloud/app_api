@@ -59,7 +59,7 @@ class Capabilities implements ICapability {
 
 	public function getCapabilities(): array {
 		$capabilities = [
-			'loglevel' => $this->config->getSystemValue('loglevel', 2),
+			'loglevel' => intval($this->config->getSystemValue('loglevel', 2)),
 			'version' => $this->appManager->getAppVersion(Application::APP_ID),
 		];
 		$this->attachExAppScopes($capabilities);
