@@ -184,7 +184,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('configvalue', 'json', [
+			$table->addColumn('configvalue', 'string', [
 				'notnull' => true
 			]);
 
