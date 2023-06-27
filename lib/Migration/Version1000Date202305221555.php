@@ -49,6 +49,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('appconfig_ex')) {
 			$table = $schema->createTable('appconfig_ex');
 
+			$table->addColumn('id', 'bigint', [
+				'notnull' => true,
+				'autoincrement' => true,
+			]);
 			$table->addColumn('appid', 'string', [
 				'notnull' => true,
 				'length' => 32
@@ -66,7 +70,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'length' => 1,
 			]);
 
-			$table->setPrimaryKey(['appid', 'configkey'], 'appconfig_ex_pk');
+			$table->setPrimaryKey(['id'], 'appconfig_ex_pk');
+			$table->addUniqueIndex(['appid', 'configkey'], 'appconfig_ex__unique');
 			$table->addIndex(['configkey'], 'appconfig_ex_configkey');
 		}
 
@@ -163,6 +168,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('preferences_ex')) {
 			$table = $schema->createTable('preferences_ex');
 
+			$table->addColumn('id', 'bigint', [
+				'notnull' => true,
+				'autoincrement' => true,
+			]);
 			$table->addColumn('userid', 'string', [
 				'notnull' => true,
 				'length' => 64
@@ -179,8 +188,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true
 			]);
 
-			$table->setPrimaryKey(['userid', 'appid', 'configkey'], 'preferences_ex_pk');
-			$table->addIndex(['appid'], 'preferences_ex_appid');
+			$table->setPrimaryKey(['id'], 'preferences_ex_pk');
+			$table->addUniqueIndex(['userid', 'appid', 'configkey'], 'preferences_ex__unique');
 			$table->addIndex(['configkey'], 'preferences_ex_configkey');
 		}
 
