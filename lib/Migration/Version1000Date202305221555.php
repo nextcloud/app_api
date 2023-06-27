@@ -96,7 +96,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 255,
 			]);
-			$table->addColumn('port', 'int', [
+			$table->addColumn('port', 'smallint', [
 				'notnull' => true,
 			]);
 			$table->addColumn('secret', 'string', [
