@@ -148,7 +148,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 			]);
 			$table->addColumn('deploy_config', 'json', [
-				'default' => '',
+				'default' => '{}',
 			]);
 
 			$table->setPrimaryKey(['id'], 'ex_apps_daemons_id__key');
