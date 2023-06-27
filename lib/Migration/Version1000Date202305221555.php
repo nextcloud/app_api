@@ -73,17 +73,21 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps')) {
 			$table = $schema->createTable('ex_apps');
 
+			$table->addColumn('id', 'bigint', [
+				'notnull' => true,
+				'autoincrement' => true,
+			]);
 			$table->addColumn('appid', 'string', [
 				'notnull' => true,
 				'length' => 32
 			]);
 			$table->addColumn('version', 'string', [
 				'notnull' => true,
-				'length' => 64
+				'length' => 32
 			]);
 			$table->addColumn('name', 'string', [
 				'notnull' => true,
-				'length' => 255
+				'length' => 64
 			]);
 			$table->addColumn('daemon_config_id', 'bigint', [
 				'default' => 0,
@@ -92,7 +96,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 255,
 			]);
-			$table->addColumn('port', 'bigint', [
+			$table->addColumn('port', 'int', [
 				'notnull' => true,
 			]);
 			$table->addColumn('secret', 'string', [
@@ -114,9 +118,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 			]);
 
-			$table->setPrimaryKey(['appid'], 'ex_apps_id__key');
+			$table->setPrimaryKey(['id'], 'ex_apps_pk');
 			$table->addIndex(['appid'], 'ex_apps_appid__index');
 			$table->addIndex(['name'], 'ex_apps_name__index');
+			$table->addUniqueIndex(['appid'], 'ex_apps_id__key');
 			$table->addUniqueIndex(['host', 'port'], 'ex_apps_host_port__unique');
 		}
 
