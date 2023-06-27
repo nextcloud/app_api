@@ -63,12 +63,17 @@ class AppEcosystemV2Service {
 	public const BASIC_API_SCOPE = 1;
 	public const SYSTEM_API_SCOPE = 2;
 	public const DAV_API_SCOPE = 3;
+	public const USER_INFO = 10;
+	public const USER_STATUS = 11;
+	public const NOTIFICATION_API_SCOPE = 12;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
 //	TODO: Move to DB with description field for that
 	const SCOPE_GROUPS = [
 		1 => 'BASIC_API_SCOPE',
 		2 => 'SYSTEM_API_SCOPE',
 		3 => 'DAV_API_SCOPE',
+		10 => 'USER_INFO',
+		11 => 'USER_STATUS',
 		12 => 'NOTIFICATION_API_SCOPE',
 	];
 	private LoggerInterface $logger;
@@ -559,12 +564,13 @@ class AppEcosystemV2Service {
 			['api_route' =>  '/cloud/capabilities', 'scope_group' => self::BASIC_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/files/actions/menu', 'scope_group' => self::BASIC_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/log', 'scope_group' => self::BASIC_API_SCOPE],
-			['api_route' => $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/ex-app/config', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  $apiV1Prefix . '/ex-app/config', 'scope_group' => self::BASIC_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/ex-app/preference', 'scope_group' => self::BASIC_API_SCOPE],
-			['api_route' =>  '/cloud/users', 'scope_group' => self::SYSTEM_API_SCOPE],
-			['api_route' =>  '/cloud/groups', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/apps', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  '/cloud/users', 'scope_group' => self::USER_INFO],
+			['api_route' =>  '/cloud/groups', 'scope_group' => self::USER_INFO],
+			['api_route' =>  '/apps/user_status/api/v1', 'scope_group' => self::USER_STATUS],
 			['api_route' =>  '/dav/', 'scope_group' => self::DAV_API_SCOPE],
 		];
 
