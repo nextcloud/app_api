@@ -102,6 +102,7 @@ class ExAppConfigMapper extends QBMapper {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->update($this->tableName)
 			->set('configvalue', $qb->createNamedParameter($appConfigEx->getConfigvalue(), IQueryBuilder::PARAM_STR))
+			->set('sensitive', $qb->createNamedParameter($appConfigEx->getSensitive(), IQueryBuilder::PARAM_INT))
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appConfigEx->getAppid(), IQueryBuilder::PARAM_STR)),
 				$qb->expr()->eq('configkey', $qb->createNamedParameter($appConfigEx->getConfigkey(), IQueryBuilder::PARAM_STR))

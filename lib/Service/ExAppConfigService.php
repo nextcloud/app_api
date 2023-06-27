@@ -94,9 +94,11 @@ class ExAppConfigService {
 	 * @param string $appId
 	 * @param string $configKey
 	 * @param mixed $configValue
+	 * @param int $sensitive
+	 *
 	 * @return ExAppConfig|null
 	 */
-	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue): ?ExAppConfig {
+	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, int $sensitive = 0): ?ExAppConfig {
 		try {
 			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
@@ -108,6 +110,7 @@ class ExAppConfigService {
 					'appid' => $appId,
 					'configkey' => $configKey,
 					'configvalue' => $configValue,
+					'sensitive' => $sensitive,
 				]));
 			} catch (\Exception $e) {
 				$this->logger->error('Error while inserting app_config_ex value: ' . $e->getMessage());
@@ -115,8 +118,9 @@ class ExAppConfigService {
 			}
 		} else {
 			$appConfigEx->setConfigvalue($configValue);
+			$appConfigEx->setSensitive($sensitive);
 			try {
-				if ($this->mapper->updateAppConfigValue($appConfigEx) !== 1) {
+				if ($this->updateAppConfigValue($appConfigEx) !== 1) {
 					$this->logger->error('Error while updating app_config_ex value');
 					return null;
 				}
@@ -128,7 +132,7 @@ class ExAppConfigService {
 	}
 
 	/**
-	 * Delete app_config_ex values
+	 * Delete appconfig_ex values
 	 *
 	 * @param array $configKeys
 	 * @param string $appId
@@ -153,6 +157,36 @@ class ExAppConfigService {
 			return $this->mapper->findAllByAppid($appId);
 		} catch (Exception) {
 			return [];
+		}
+	}
+
+	/**
+	 * @param string $appId
+	 * @param string $configKey
+	 *
+	 * @return ExAppConfig|null
+	 */
+	public function getAppConfig(mixed $appId, mixed $configKey): ?ExAppConfig {
+		try {
+			return $this->mapper->findByAppConfigKey($appId, $configKey);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			return null;
+		}
+	}
+
+	public function updateAppConfigValue(ExAppConfig $exAppConfig): ?int {
+		try {
+			return $this->mapper->updateAppConfigValue($exAppConfig);
+		} catch (Exception) {
+			return null;
+		}
+	}
+
+	public function deleteAppConfig(ExAppConfig $exAppConfig): ?int {
+		try {
+			return $this->mapper->deleteByAppidConfigkeys($exAppConfig->getAppid(), [$exAppConfig->getConfigkey()]);
+		} catch (Exception) {
+			return null;
 		}
 	}
 }

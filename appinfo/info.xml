@@ -20,7 +20,7 @@
 	<repository type="git">https://github.com/nextcloud/app_ecosystem_v2.git</repository>
 	<dependencies>
 		<nextcloud min-version="27" max-version="28"/>
-		<php min-version="8.0"/>
+		<php min-version="8.1"/>
 	</dependencies>
 	<repair-steps>
 		<install>
@@ -28,11 +28,14 @@
 		</install>
 	</repair-steps>
 	<commands>
-		<command>OCA\AppEcosystemV2\Command\RegisterExApp</command>
-		<command>OCA\AppEcosystemV2\Command\UnregisterExApp</command>
-		<command>OCA\AppEcosystemV2\Command\EnableExApp</command>
-		<command>OCA\AppEcosystemV2\Command\DisableExApp</command>
-		<command>OCA\AppEcosystemV2\Command\ListExAppConfig</command>
+		<command>OCA\AppEcosystemV2\Command\ExApp\Register</command>
+		<command>OCA\AppEcosystemV2\Command\ExApp\Unregister</command>
+		<command>OCA\AppEcosystemV2\Command\ExApp\Enable</command>
+		<command>OCA\AppEcosystemV2\Command\ExApp\Disable</command>
+		<command>OCA\AppEcosystemV2\Command\ExApp\ListExApps</command>
+		<command>OCA\AppEcosystemV2\Command\ExAppConfig\ListConfig</command>
+		<command>OCA\AppEcosystemV2\Command\ExAppConfig\SetConfig</command>
+		<command>OCA\AppEcosystemV2\Command\ExAppConfig\DeleteConfig</command>
 	</commands>
 	<settings>
 		<admin>OCA\AppEcosystemV2\Settings\Admin</admin>

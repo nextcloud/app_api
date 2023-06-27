@@ -29,7 +29,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Command;
+namespace OCA\AppEcosystemV2\Command\ExAppConfig;
 
 use OCA\AppEcosystemV2\Service\ExAppConfigService;
 use Symfony\Component\Console\Command\Command;
@@ -40,7 +40,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
-class ListExAppConfig extends Command {
+class ListConfig extends Command {
 	private AppEcosystemV2Service $service;
 	private ExAppConfigService $appConfigService;
 
@@ -66,7 +66,7 @@ class ListExAppConfig extends Command {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln('ExApp ' . $appId . ' not found');
-			return 1;
+			return Command::FAILURE;
 		}
 		if ($exApp->getEnabled()) {
 			$exAppConfigs = $this->appConfigService->getAllAppConfig($exApp->getAppid());
@@ -77,8 +77,8 @@ class ListExAppConfig extends Command {
 				$appConfigs[$exAppConfig->getAppid()][$exAppConfig->getConfigkey()] = (!$private && $exAppConfig->getSensitive() ? $exAppConfig->getConfigvalue() : self::SENSITIVE_VALUE);
 			}
 			$output->writeln(json_encode($appConfigs, JSON_PRETTY_PRINT));
-			return 0;
+			return Command::SUCCESS;
 		}
-		return 1;
+		return Command::FAILURE;
 	}
 }

@@ -29,7 +29,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Command;
+namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -38,7 +38,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
-class SetExAppConfig extends Command {
+class Disable extends Command {
 	private AppEcosystemV2Service $service;
 
 	public function __construct(AppEcosystemV2Service $service) {
@@ -48,8 +48,8 @@ class SetExAppConfig extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:config:set');
-		$this->setDescription('Set ExApp config');
+		$this->setName('app_ecosystem_v2:app:disable');
+		$this->setDescription('Disable registered external app');
 		$this->addArgument('appid', InputArgument::REQUIRED);
 	}
 
@@ -57,13 +57,20 @@ class SetExAppConfig extends Command {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found');
-			return 1;
+			$output->writeln('ExApp ' . $appId . ' not found. Failed to disable.');
+			return Command::FAILURE;
 		}
-		if ($exApp->getEnabled()) {
-			// TODO
-			return 0;
+		if (!$exApp->getEnabled()) {
+			$output->writeln('ExApp ' . $appId . ' already disabled.');
+			return Command::SUCCESS;
 		}
-		return 1;
+		$exAppDisabled = $this->service->disableExApp($exApp);
+		if ($exAppDisabled) {
+//			TODO: Add disabled request to exApp
+			$output->writeln('ExApp ' . $appId . ' disabled.');
+			return Command::SUCCESS;
+		}
+		$output->writeln('Failed to disable ExApp ' . $appId);
+		return Command::FAILURE;
 	}
 }

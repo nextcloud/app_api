@@ -29,7 +29,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Command;
+namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCP\Http\Client\IResponse;
@@ -41,9 +41,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class RegisterExApp extends Command {
+class Register extends Command {
 	private AppEcosystemV2Service $service;
 
 	public function __construct(AppEcosystemV2Service $service) {
@@ -83,7 +83,7 @@ class RegisterExApp extends Command {
 
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln('ExApp ' . $appId . ' already registered.');
-			return 0;
+			return Command::INVALID;
 		}
 
 		$exApp = $this->service->registerExApp($appId, [
@@ -108,22 +108,24 @@ class RegisterExApp extends Command {
 							$output->writeln('ExApp successfully enabled.');
 						} else {
 							$output->writeln('Failed to enable ExApp. Error: ' . $response['error']);
-							return 1;
+							$this->service->disableExApp($exApp);
+							return Command::FAILURE;
 						}
 						$this->service->updateExAppLastResponseTime($exApp);
 					} else if (isset($exAppEnabled['error'])) {
 						$output->writeln('Failed to enable ExApp. Error: ' . $exAppEnabled['error']);
-						return 1;
+						$this->service->disableExApp($exApp);
+						return Command::FAILURE;
 					}
 				} else {
 					$output->writeln('Failed to enable ExApp.');
-					return 1;
+					return Command::FAILURE;
 				}
 			}
 
 			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp);
 			$forceScopes = (bool) $input->getOption('force-scopes');
-			$confirmScopes = $forceScopes;
+			$confirmRequiredScopes = $forceScopes;
 			$confirmOptionalScopes = $forceScopes;
 
 			if (!$forceScopes && $input->isInteractive()) {
@@ -133,24 +135,21 @@ class RegisterExApp extends Command {
 				// Prompt to approve required ExApp scopes
 				$output->writeln('ExApp requested required scopes: ' . implode(', ',
 						$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['required'])));
-				$question = new Question('Do you want to approve it? [y/N] ', 'y');
-				$confirmQuestionRes = $helper->ask($input, $output, $question);
-				$confirmScopes = strtolower($confirmQuestionRes) === 'y';
+				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
+				$confirmRequiredScopes = $helper->ask($input, $output, $question);
 
 				// Prompt to approve optional ExApp scopes
-				if ($confirmScopes && count($requestedExAppScopeGroups['optional']) > 0) {
+				if ($confirmRequiredScopes && count($requestedExAppScopeGroups['optional']) > 0) {
 					$output->writeln('ExApp requested optional scopes: ' . implode(', ',
 							$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['optional'])));
-					$question = new Question('Do you want to approve it? [y/N] ', 'y');
-					$confirmQuestionRes = $helper->ask($input, $output, $question);
-					$confirmOptionalScopes = strtolower($confirmQuestionRes) === 'y';
-//					TODO: Add option to approve only some of optional scopes
+					$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
+					$confirmOptionalScopes = $helper->ask($input, $output, $question);
 				}
 			}
 
-			if (!$confirmScopes) {
-				$output->writeln('ExApp scopes not approved.');
-				return 0;
+			if (!$confirmRequiredScopes) {
+				$output->writeln('ExApp required scopes not approved.');
+				return Command::SUCCESS;
 			}
 
 			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
@@ -158,10 +157,10 @@ class RegisterExApp extends Command {
 				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], false);
 			}
 
-			return 0;
+			return Command::SUCCESS;
 		}
 		$output->writeln('Failed to register ExApp.');
-		return 1;
+		return Command::FAILURE;
 	}
 
 	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, bool $required = true): void {

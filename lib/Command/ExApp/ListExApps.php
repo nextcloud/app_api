@@ -29,43 +29,40 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Command;
+namespace OCA\AppEcosystemV2\Command\ExApp;
 
+use OCP\DB\Exception;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use OCA\AppEcosystemV2\Db\ExAppMapper;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+class ListExApps extends Command {
+	private ExAppMapper $mapper;
 
-class DisableExApp extends Command {
-	private AppEcosystemV2Service $service;
-
-	public function __construct(AppEcosystemV2Service $service) {
+	public function __construct(ExAppMapper $mapper) {
 		parent::__construct();
 
-		$this->service = $service;
+		$this->mapper = $mapper;
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:disable');
-		$this->setDescription('Disable registered external app');
-		$this->addArgument('appid', InputArgument::REQUIRED);
+		$this->setName('app_ecosystem_v2:app:list');
+		$this->setDescription('List ExApps');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$appId = $input->getArgument('appid');
-		$exApp = $this->service->getExApp($appId);
-		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found. Failed to disable.');
-			return 1;
+		try {
+			$exApps = $this->mapper->findAll();
+			$output->writeln('<info>ExApps:</info>');
+			foreach ($exApps as $exApp) {
+				$enabled = $exApp->getEnabled() ? 'enabled' : 'disabled';
+				$output->writeln($exApp->getAppid() . ' (' . $exApp->getName() . '): ' . $exApp->getVersion() . ' [' . $enabled . ']');
+			}
+		} catch (Exception) {
+			$output->writeln('<error>Failed to get list of ExApps</error>');
+			return Command::FAILURE;
 		}
-		$exAppDisabled = $this->service->disableExApp($exApp);
-		if ($exAppDisabled) {
-			$output->writeln($appId . ' disabled');
-			return 0;
-		}
-		$output->writeln('Failed to disable ' . $appId);
-		return 1;
+		return Command::SUCCESS;
 	}
 }

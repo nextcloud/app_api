@@ -62,8 +62,8 @@ class DeployExApp extends Command {
 		}
 		if ($exApp->getEnabled()) {
 			// TODO
-			return 0;
+			return Command::SUCCESS;
 		}
-		return 1;
+		return Command::FAILURE;
 	}
 }
