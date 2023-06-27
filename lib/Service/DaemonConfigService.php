@@ -31,6 +31,10 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
+use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
 use Psr\Log\LoggerInterface;
 
 use OCP\Cache\CappedMemoryCache;
@@ -55,5 +59,11 @@ class DaemonConfigService {
 		$this->logger = $logger;
 	}
 
-//	TODO
+	public function getDaemonConfig(int $getDaemonConfigId): ?DaemonConfig {
+		try {
+			return $this->mapper->findById($getDaemonConfigId);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			return null;
+		}
+	}
 }

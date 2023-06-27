@@ -41,7 +41,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 
 class DaemonConfigMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'daemons');
+		parent::__construct($db, 'ex_apps_daemons');
 	}
 
 	/**
@@ -54,5 +54,24 @@ class DaemonConfigMapper extends QBMapper {
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 		return $this->findEntities($qb);
+	}
+
+	/**
+	 * @param int $id
+	 *
+	 * @throws DoesNotExistException
+	 * @throws Exception
+	 * @throws MultipleObjectsReturnedException
+	 *
+	 * @return DaemonConfig
+	 */
+	public function findById(int $id): DaemonConfig {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->tableName)
+			->where(
+				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
+			);
+		return $this->findEntity($qb);
 	}
 }

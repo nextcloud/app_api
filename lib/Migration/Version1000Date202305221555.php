@@ -156,6 +156,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('port', 'smallint', [
 				'notnull' => true,
+				'default' => 0, // in case of unix socket
 			]);
 			$table->addColumn('deploy_config', 'json', [
 				'default' => '{}',

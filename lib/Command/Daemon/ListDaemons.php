@@ -29,7 +29,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Command;
+namespace OCA\AppEcosystemV2\Command\Daemon;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -37,31 +37,38 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
-class DeployExApp extends Command {
+class ListDaemons extends Command {
 	private AppEcosystemV2Service $service;
+	private DaemonConfigService $daemonConfigService;
 
-	public function __construct(AppEcosystemV2Service $service) {
+	public function __construct(AppEcosystemV2Service $service, DaemonConfigService $daemonConfigService) {
 		parent::__construct();
 
 		$this->service = $service;
+		$this->daemonConfigService = $daemonConfigService;
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:deploy');
-		$this->setDescription('Deploy external app');
-		$this->addArgument('appid', InputArgument::REQUIRED);
+		$this->setName('app_ecosystem_v2:daemon:list');
+		$this->setDescription('List registered daemons');
+
+
+		$this->addOption('deploy_config', null, InputArgument::REQUIRED, 'Deploy config (e.g. docker network)');
+
+//		TODO: Add usage examples
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
-			$output->writeln('ExApp not found. Failed to enable.');
-			return 1;
+			$output->writeln('ExApp ' . $appId . ' not found.');
+			return Command::FAILURE;
 		}
 		if ($exApp->getEnabled()) {
-			// TODO
+			$daemonConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId());
 			return Command::SUCCESS;
 		}
 		return Command::FAILURE;

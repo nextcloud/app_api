@@ -154,8 +154,8 @@ class AppEcosystemV2Service {
 			$exApp->setLastResponseTime(time());
 			try {
 				return $this->exAppMapper->update($exApp);
-			} catch (\Exception $e) {
-				$this->logger->error('Error while updating ex app: ' . $e->getMessage());
+			} catch (Exception $e) {
+				$this->logger->error('Error while updating ExApp: ' . $e->getMessage());
 				return null;
 			}
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
@@ -174,14 +174,14 @@ class AppEcosystemV2Service {
 			try {
 				return $this->exAppMapper->insert($exApp);
 			} catch (Exception $e) {
-				$this->logger->error('Error while registering ex app: ' . $e->getMessage());
+				$this->logger->error('Error while registering ExApp: ' . $e->getMessage());
 				return null;
 			}
 		}
 	}
 
 	/**
-	 * Unregister ex app
+	 * Unregister ExApp
 	 *
 	 * @param string $appId
 	 *
@@ -191,12 +191,12 @@ class AppEcosystemV2Service {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			if ($this->exAppMapper->deleteExApp($exApp) !== 1) {
-				$this->logger->error('Error while unregistering ex app: ' . $appId);
+				$this->logger->error('Error while unregistering ExApp: ' . $appId);
 				return null;
 			}
 			return $exApp;
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error('Error while unregistering ex app: ' . $e->getMessage());
+			$this->logger->error('Error while unregistering ExApp: ' . $e->getMessage());
 			return null;
 		}
 	}
@@ -221,7 +221,7 @@ class AppEcosystemV2Service {
 			try {
 				return $this->exAppScopeMapper->insert($exAppScope);
 			} catch (\Exception $e) {
-				$this->logger->error('Error while setting ex app scope group: ' . $e->getMessage());
+				$this->logger->error('Error while setting ExApp scope group: ' . $e->getMessage());
 				return null;
 			}
 		}
@@ -237,7 +237,7 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Enable ex app
+	 * Enable ExApp
 	 *
 	 * @param ExApp $exApp
 	 *
@@ -255,7 +255,7 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Disable ex app
+	 * Disable ExApp
 	 *
 	 * @param ExApp $exApp
 	 *
@@ -273,7 +273,7 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Send status check request to ex app (after verify app registration)
+	 * Send status check request to ExApp (after verify app registration)
 	 *
 	 * @param string $appId
 	 *
@@ -281,7 +281,7 @@ class AppEcosystemV2Service {
 	 */
 	public function getAppStatus(string $appId): ?array {
 		try {
-			// TODO: Send request to ex app, update status and last response time, return status
+			// TODO: Send request to ExApp, update status and last response time, return status
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			$response = $this->aeRequestToExApp(null, '', $exApp, '/status', 'GET');
 			if ($response instanceof IResponse && $response->getStatusCode() === 200) {
@@ -314,8 +314,8 @@ class AppEcosystemV2Service {
 						'userid' => $userId,
 					]));
 				} catch (\Exception $e) {
-					$this->logger->error('Error while inserting ex app user: ' . $e->getMessage());
-					return ['error' => 'Error while inserting ex app user: ' . $e->getMessage()];
+					$this->logger->error('Error while inserting ExApp user: ' . $e->getMessage());
+					return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 				}
 			}
 			$options = [
@@ -486,7 +486,7 @@ class AppEcosystemV2Service {
 			}
 			return $this->finalizeRequestToNC($userId, $exApp);
 		}
-		$this->logger->error('Invalid signature for ex app: ' . $exApp->getAppid() . ' and user: ' . $userId);
+		$this->logger->error('Invalid signature for ExApp: ' . $exApp->getAppid() . ' and user: ' . $userId);
 		return false;
 	}
 
@@ -510,7 +510,7 @@ class AppEcosystemV2Service {
 		try {
 			$this->exAppMapper->updateLastResponseTime($exApp);
 		} catch (\Exception $e) {
-			$this->logger->error('Error while updating ex app last response time for ex app: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
+			$this->logger->error('Error while updating ExApp last response time for ExApp: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
 		}
 	}
 

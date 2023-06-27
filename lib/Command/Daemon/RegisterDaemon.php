@@ -29,54 +29,54 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Command\ExAppConfig;
+namespace OCA\AppEcosystemV2\Command\Daemon;
 
-use OCA\AppEcosystemV2\Service\ExAppConfigService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
-class ListConfig extends Command {
+class RegisterDaemon extends Command {
 	private AppEcosystemV2Service $service;
-	private ExAppConfigService $appConfigService;
+	private DaemonConfigService $daemonConfigService;
 
-	private const SENSITIVE_VALUE = '***REMOVED SENSITIVE VALUE***';
-
-	public function __construct(AppEcosystemV2Service $service, ExAppConfigService $appConfigService) {
+	public function __construct(AppEcosystemV2Service $service, DaemonConfigService $daemonConfigService) {
 		parent::__construct();
 
 		$this->service = $service;
-		$this->appConfigService = $appConfigService;
+		$this->daemonConfigService = $daemonConfigService;
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:config:list');
-		$this->setDescription('List ExApp configs');
-		$this->addArgument('appid', InputArgument::REQUIRED);
+		$this->setName('app_ecosystem_v2:daemon:register');
+		$this->setDescription('Register daemon');
 
-		$this->addOption('private', null, InputOption::VALUE_NONE, 'Include sensitive ExApp config values like secrets, passwords, etc.');
+		$this->addArgument('appid', InputArgument::REQUIRED);
+		$this->addArgument('accepts_deploy_id', InputArgument::REQUIRED);
+		$this->addArgument('display_name', InputArgument::REQUIRED);
+		$this->addArgument('protocol', InputArgument::REQUIRED);
+		$this->addArgument('host', InputArgument::REQUIRED);
+		$this->addArgument('port', InputArgument::REQUIRED);
+
+		$this->addOption('deploy_config', null, InputArgument::REQUIRED, 'Deploy config (e.g. docker network)');
+
+//		TODO: Add usage examples
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found');
+			$output->writeln('ExApp ' . $appId . ' not found.');
 			return Command::FAILURE;
 		}
-
-		$exAppConfigs = $this->appConfigService->getAllAppConfig($exApp->getAppid());
-		$private = $input->getOption('private');
-		$output->writeln('ExApp ' . $exApp->getAppid() . ' configs:');
-		$appConfigs = [];
-		foreach ($exAppConfigs as $exAppConfig) {
-			$appConfigs[$exAppConfig->getAppid()][$exAppConfig->getConfigkey()] = (!$private && $exAppConfig->getSensitive() ? $exAppConfig->getConfigvalue() : self::SENSITIVE_VALUE);
+		if ($exApp->getEnabled()) {
+			$daemonConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId());
+			return Command::SUCCESS;
 		}
-		$output->writeln(json_encode($appConfigs, JSON_PRETTY_PRINT));
-		return Command::SUCCESS;
+		return Command::FAILURE;
 	}
 }
