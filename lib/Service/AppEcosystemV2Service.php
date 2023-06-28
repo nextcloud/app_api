@@ -601,9 +601,10 @@ class AppEcosystemV2Service {
 			['api_route' =>  $apiV1Prefix . '/ex-app/preference', 'scope_group' => self::BASIC_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/apps', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  '/apps/provisioning_api/api', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/users', 'scope_group' => self::USER_INFO],
 			['api_route' =>  '/cloud/groups', 'scope_group' => self::USER_INFO],
-			['api_route' =>  '/apps/user_status/api/v1', 'scope_group' => self::USER_STATUS],
+			['api_route' =>  '/apps/user_status/api', 'scope_group' => self::USER_STATUS],
 			['api_route' =>  '/dav/', 'scope_group' => self::DAV_API_SCOPE],
 		];
 
