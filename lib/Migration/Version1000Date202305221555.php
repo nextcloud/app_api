@@ -64,7 +64,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'length' => 64
 			]);
 			$table->addColumn('configvalue', Types::STRING, [
-				'notnull' => true,
+				'notnull' => false,
 			]);
 			$table->addColumn('sensitive', Types::SMALLINT, [
 				'notnull' => true,
@@ -189,7 +189,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'length' => 64,
 			]);
 			$table->addColumn('configvalue', Types::STRING, [
-				'notnull' => true
+				'notnull' => false,
 			]);
 
 			$table->setPrimaryKey(['id']);
