@@ -285,8 +285,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['api_route'], 'ex_apps_api_scopes__api_route');
-			$table->addIndex(['scope_group'], 'ex_apps_api_scopes__scope_group');
+			$table->addUniqueIndex(['api_route'], 'ex_apps_api_scopes__idx');
+			$table->addIndex(['scope_group'], 'ex_apps_api_scopes__idx2');
 		}
 
 		if (!$schema->hasTable('ex_apps_scopes')) {
