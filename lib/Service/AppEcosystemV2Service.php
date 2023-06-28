@@ -425,12 +425,14 @@ class AppEcosystemV2Service {
 			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX-APP-ID'));
 			$enabled = $exApp->getEnabled();
 			if (!$enabled) {
+				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $enabled));
 				return false;
 			}
 			$secret = $exApp->getSecret();
 
 			$this->handleExAppDebug($exApp, $request, false);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			$this->logger->error(sprintf('ExApp with appId %s not found', $request->getHeader('EX-APP-ID')));
 			return false;
 		}
 
@@ -448,6 +450,7 @@ class AppEcosystemV2Service {
 		$headers['AE-DATA-HASH'] = $dataHash;
 		$signTime = $request->getHeader('AE-SIGN-TIME');
 		if (!$this->verifySignTime($signTime)) {
+			$this->logger->error(sprintf('Sign time %s is not valid', $signTime));
 			return false;
 		}
 		$headers['AE-SIGN-TIME'] = $signTime;
@@ -458,6 +461,7 @@ class AppEcosystemV2Service {
 
 		if ($signatureValid) {
 			if (!$this->verifyDataHash($dataHash)) {
+				$this->logger->error(sprintf('Data hash %s is not valid', $dataHash));
 				return false;
 			}
 			if (!$isDav) {
@@ -473,20 +477,23 @@ class AppEcosystemV2Service {
 			$apiScope = $this->getApiRouteScope($path);
 
 			if ($apiScope === null) {
+				$this->logger->error(sprintf('Failed to check apiScope %s', $path));
 				return false;
 			}
 			// If it is not an initialization scope group - check if this endpoint is allowed to be called
 			if ($apiScope->getScopeGroup() !== self::BASIC_API_SCOPE) {
 				if (!$this->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
+					$this->logger->error(sprintf('ExApp %s not passed scope group check %s', $exApp->getAppid(), $path));
 					return false;
 				}
 				if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
+					$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));
 					return false;
 				}
 			}
 			return $this->finalizeRequestToNC($userId, $exApp);
 		}
-		$this->logger->error('Invalid signature for ExApp: ' . $exApp->getAppid() . ' and user: ' . $userId);
+		$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s', $exApp->getAppid(), $userId));
 		return false;
 	}
 
