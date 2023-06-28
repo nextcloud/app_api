@@ -46,34 +46,34 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		if (!$schema->hasTable('appconfig_ex')) {
-			$table = $schema->createTable('appconfig_ex');
-
-			$table->addColumn('id', 'bigint', [
-				'notnull' => true,
-				'autoincrement' => true,
-			]);
-			$table->addColumn('appid', 'string', [
-				'notnull' => true,
-				'length' => 32
-			]);
-			$table->addColumn('configkey', 'string', [
-				'notnull' => true,
-				'length' => 64
-			]);
-			$table->addColumn('configvalue', 'string', [
-				'notnull' => true,
-			]);
-			$table->addColumn('sensitive', 'smallint', [
-				'notnull' => true,
-				'default' => 0,
-				'length' => 1,
-			]);
-
-			$table->setPrimaryKey(['id'], 'appconfig_ex_pk');
-			$table->addUniqueIndex(['appid', 'configkey'], 'appconfig_ex__unique');
-			$table->addIndex(['configkey'], 'appconfig_ex_configkey');
-		}
+//		if (!$schema->hasTable('appconfig_ex')) {
+//			$table = $schema->createTable('appconfig_ex');
+//
+//			$table->addColumn('id', 'bigint', [
+//				'notnull' => true,
+//				'autoincrement' => true,
+//			]);
+//			$table->addColumn('appid', 'string', [
+//				'notnull' => true,
+//				'length' => 32
+//			]);
+//			$table->addColumn('configkey', 'string', [
+//				'notnull' => true,
+//				'length' => 64
+//			]);
+//			$table->addColumn('configvalue', 'string', [
+//				'notnull' => true,
+//			]);
+//			$table->addColumn('sensitive', 'smallint', [
+//				'notnull' => true,
+//				'default' => 0,
+//				'length' => 1,
+//			]);
+//
+//			$table->setPrimaryKey(['id'], 'appconfig_ex_pk');
+//			$table->addUniqueIndex(['appid', 'configkey'], 'appconfig_ex__unique');
+//			$table->addIndex(['configkey'], 'appconfig_ex_configkey');
+//		}
 
 		if (!$schema->hasTable('ex_apps')) {
 			$table = $schema->createTable('ex_apps');
@@ -131,113 +131,113 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		}
 
 		// Docker daemon or other configurations
-		if (!$schema->hasTable('ex_apps_daemons')) {
-			$table = $schema->createTable('ex_apps_daemons');
+//		if (!$schema->hasTable('ex_apps_daemons')) {
+//			$table = $schema->createTable('ex_apps_daemons');
+//
+//			$table->addColumn('id', 'bigint', [
+//				'notnull' => true,
+//				'autoincrement' => true,
+//			]);
+//			$table->addColumn('accepts_deploy_id', 'string', [
+//				'notnull' => true,
+//				'length' => 64,
+//			]);
+//			$table->addColumn('display_name', 'string', [
+//				'notnull' => true,
+//				'length' => 255,
+//			]);
+//			$table->addColumn('protocol', 'string', [
+//				'notnull' => true,
+//				'length' => 32,
+//			]);
+//			$table->addColumn('host', 'string', [
+//				'notnull' => true,
+//				'length' => 255,
+//			]);
+//			$table->addColumn('port', 'smallint', [
+//				'notnull' => true,
+//				'default' => 0, // in case of unix socket
+//			]);
+//			$table->addColumn('deploy_config', 'json', [
+//				'default' => '{}',
+//			]);
+//
+//			$table->setPrimaryKey(['id'], 'ex_apps_daemons_id__key');
+//			$table->addUniqueIndex(['host', 'port'], 'daemons_host_port__unique');
+//		}
 
-			$table->addColumn('id', 'bigint', [
-				'notnull' => true,
-				'autoincrement' => true,
-			]);
-			$table->addColumn('accepts_deploy_id', 'string', [
-				'notnull' => true,
-				'length' => 64,
-			]);
-			$table->addColumn('display_name', 'string', [
-				'notnull' => true,
-				'length' => 255,
-			]);
-			$table->addColumn('protocol', 'string', [
-				'notnull' => true,
-				'length' => 32,
-			]);
-			$table->addColumn('host', 'string', [
-				'notnull' => true,
-				'length' => 255,
-			]);
-			$table->addColumn('port', 'smallint', [
-				'notnull' => true,
-				'default' => 0, // in case of unix socket
-			]);
-			$table->addColumn('deploy_config', 'json', [
-				'default' => '{}',
-			]);
+//		if (!$schema->hasTable('preferences_ex')) {
+//			$table = $schema->createTable('preferences_ex');
+//
+//			$table->addColumn('id', 'bigint', [
+//				'notnull' => true,
+//				'autoincrement' => true,
+//			]);
+//			$table->addColumn('userid', 'string', [
+//				'notnull' => true,
+//				'length' => 64
+//			]);
+//			$table->addColumn('appid', 'string', [
+//				'notnull' => true,
+//				'length' => 32
+//			]);
+//			$table->addColumn('configkey', 'string', [
+//				'notnull' => true,
+//				'length' => 64,
+//			]);
+//			$table->addColumn('configvalue', 'string', [
+//				'notnull' => true
+//			]);
+//
+//			$table->setPrimaryKey(['id'], 'preferences_ex_pk');
+//			$table->addUniqueIndex(['userid', 'appid', 'configkey'], 'preferences_ex__unique');
+//			$table->addIndex(['configkey'], 'preferences_ex_configkey');
+//		}
 
-			$table->setPrimaryKey(['id'], 'ex_apps_daemons_id__key');
-			$table->addUniqueIndex(['host', 'port'], 'daemons_host_port__unique');
-		}
-
-		if (!$schema->hasTable('preferences_ex')) {
-			$table = $schema->createTable('preferences_ex');
-
-			$table->addColumn('id', 'bigint', [
-				'notnull' => true,
-				'autoincrement' => true,
-			]);
-			$table->addColumn('userid', 'string', [
-				'notnull' => true,
-				'length' => 64
-			]);
-			$table->addColumn('appid', 'string', [
-				'notnull' => true,
-				'length' => 32
-			]);
-			$table->addColumn('configkey', 'string', [
-				'notnull' => true,
-				'length' => 64,
-			]);
-			$table->addColumn('configvalue', 'string', [
-				'notnull' => true
-			]);
-
-			$table->setPrimaryKey(['id'], 'preferences_ex_pk');
-			$table->addUniqueIndex(['userid', 'appid', 'configkey'], 'preferences_ex__unique');
-			$table->addIndex(['configkey'], 'preferences_ex_configkey');
-		}
-
-		if (!$schema->hasTable('ex_files_actions_menu')) {
-			$table = $schema->createTable('ex_files_actions_menu');
-
-			$table->addColumn('appid', 'string', [
-				'notnull' => true,
-				'length' => 32,
-			]);
-			$table->addColumn('name', 'string', [
-				'notnull' => true,
-				'length' => 64,
-			]);
-			$table->addColumn('display_name', 'string', [
-				'notnull' => true,
-				'length' => 64,
-			]);
-			$table->addColumn('mime', 'string', [
-				'notnull' => true,
-				'default' => 'file',
-			]);
-			// https://nextcloud.github.io/nextcloud-files/enums/Permission.html
-			$table->addColumn('permissions', 'string', [
-				'notnull' => true,
-			]);
-			$table->addColumn('order', 'bigint', [
-				'notnull' => true,
-				'default' => 0,
-			]);
-			$table->addColumn('icon', 'string', [
-				'notnull' => true,
-				'default' => '',
-			]);
-			$table->addColumn('icon_class', 'string', [
-				'notnull' => true,
-				'default' => 'icon-app-ecosystem-v2',
-			]);
-			// Action handler key name, that will be sent to exApp for handling
-			$table->addColumn('action_handler', 'string', [
-				'notnull' => true,
-				'length' => 64,
-			]);
-
-			$table->setPrimaryKey(['appid', 'name'], 'ex_files_actions_menu_pk');
-			$table->addIndex(['name'], 'ex_files_actions_menu_name');
-		}
+//		if (!$schema->hasTable('ex_files_actions_menu')) {
+//			$table = $schema->createTable('ex_files_actions_menu');
+//
+//			$table->addColumn('appid', 'string', [
+//				'notnull' => true,
+//				'length' => 32,
+//			]);
+//			$table->addColumn('name', 'string', [
+//				'notnull' => true,
+//				'length' => 64,
+//			]);
+//			$table->addColumn('display_name', 'string', [
+//				'notnull' => true,
+//				'length' => 64,
+//			]);
+//			$table->addColumn('mime', 'string', [
+//				'notnull' => true,
+//				'default' => 'file',
+//			]);
+//			// https://nextcloud.github.io/nextcloud-files/enums/Permission.html
+//			$table->addColumn('permissions', 'string', [
+//				'notnull' => true,
+//			]);
+//			$table->addColumn('order', 'bigint', [
+//				'notnull' => true,
+//				'default' => 0,
+//			]);
+//			$table->addColumn('icon', 'string', [
+//				'notnull' => true,
+//				'default' => '',
+//			]);
+//			$table->addColumn('icon_class', 'string', [
+//				'notnull' => true,
+//				'default' => 'icon-app-ecosystem-v2',
+//			]);
+//			// Action handler key name, that will be sent to exApp for handling
+//			$table->addColumn('action_handler', 'string', [
+//				'notnull' => true,
+//				'length' => 64,
+//			]);
+//
+//			$table->setPrimaryKey(['appid', 'name'], 'ex_files_actions_menu_pk');
+//			$table->addIndex(['name'], 'ex_files_actions_menu_name');
+//		}
 
 		if (!$schema->hasTable('ex_apps_users')) {
 			$table = $schema->createTable('ex_apps_users');
