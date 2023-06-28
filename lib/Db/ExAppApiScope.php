@@ -52,6 +52,8 @@ class ExAppApiScope extends Entity implements JsonSerializable {
 	 * @param array $params
 	 */
 	public function __construct(array $params = []) {
+		$this->addType('apiRoute', 'string');
+		$this->addType('scopeGroup', 'int');
 		if (isset($params['api_route'])) {
 			$this->setApiRoute($params['api_route']);
 		}
