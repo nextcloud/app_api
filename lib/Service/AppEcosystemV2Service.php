@@ -553,7 +553,7 @@ class AppEcosystemV2Service {
 //			TODO: Add caching here
 			$apiScopes = $this->exAppApiScopeMapper->findAll();
 			foreach ($apiScopes as $apiScope) {
-				if (str_contains($apiRoute, $apiScope->getApiRoute())) {
+				if (str_starts_with($apiRoute, $apiScope->getApiRoute())) {
 					return $apiScope;
 				}
 			}
