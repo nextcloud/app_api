@@ -52,6 +52,8 @@ class ExAppScope extends Entity implements JsonSerializable {
 	 * @param array $params
 	 */
 	public function __construct(array $params = []) {
+		$this->addType('appid', 'string');
+		$this->addType('scopeGroup', 'string');
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
 		}

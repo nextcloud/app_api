@@ -73,6 +73,15 @@ class ExFilesActionsMenu extends Entity implements JsonSerializable {
 	 * @param array $params
 	 */
 	public function __construct(array $params = []) {
+		$this->addType('appid', 'string');
+		$this->addType('name', 'string');
+		$this->addType('displayName', 'string');
+		$this->addType('mime', 'string');
+		$this->addType('permissions', 'string');
+		$this->addType('order', 'string');
+		$this->addType('icon', 'string');
+		$this->addType('iconClass', 'string');
+		$this->addType('actionHandler', 'string');
 		if (isset($params['appid'])) {
 			$this->setAppid($params['appid']);
 		}

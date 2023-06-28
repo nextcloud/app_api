@@ -47,7 +47,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getPort()
  * @method string getSecret()
  * @method string getStatus()
- * @method int getEnabled()
+ * @method bool getEnabled()
  * @method int getCreatedTime()
  * @method int getLastResponseTime()
  * @method void setAppid(string $appid)
@@ -58,7 +58,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setPort(string $port)
  * @method void setSecret(string $secret)
  * @method void setStatus(string $status)
- * @method void setEnabled(int $enabled)
+ * @method void setEnabled(bool $enabled)
  * @method void setCreatedTime(int $createdTime)
  * @method void setLastResponseTime(int $lastResponseTime)
  */
@@ -79,6 +79,18 @@ class ExApp extends Entity implements JsonSerializable {
 	 * @param array $params
 	 */
 	public function __construct(array $params = []) {
+		$this->addType('appid', 'string');
+		$this->addType('version', 'string');
+		$this->addType('name', 'string');
+		$this->addType('daemonConfigId', 'int');
+		$this->addType('host', 'string');
+		$this->addType('port', 'string');
+		$this->addType('secret', 'string');
+		$this->addType('status', 'string');
+		$this->addType('enabled', 'bool');
+		$this->addType('createdTime', 'int');
+		$this->addType('lastResponseTime', 'int');
+
 		if (isset($params['appid'])) {
 			$this->setAppid($params['appid']);
 		}

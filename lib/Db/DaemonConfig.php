@@ -64,6 +64,13 @@ class DaemonConfig extends Entity implements JsonSerializable {
 	 * @param array $params
 	 */
 	public function __construct(array $params = []) {
+		$this->addType('acceptsDeployId', 'string');
+		$this->addType('displayName', 'string');
+		$this->addType('protocol', 'string');
+		$this->addType('host', 'string');
+		$this->addType('port', 'string');
+		$this->addType('deployConfig', 'json');
+
 		if (isset($params['accepts_deploy_id'])) {
 			$this->setAcceptsDeployId($params['accepts_deploy_id']);
 		}

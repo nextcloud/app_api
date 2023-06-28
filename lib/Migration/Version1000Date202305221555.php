@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Migration;
 
 use OCP\DB\ISchemaWrapper;
+use OCP\DB\Types;
 use OCP\Migration\SimpleMigrationStep;
 use OCP\Migration\IOutput;
 
@@ -40,6 +41,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
 	 * @param array $options
+	 *
 	 * @return null|ISchemaWrapper
 	 */
 	public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options) {
@@ -49,25 +51,24 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('appconfig_ex')) {
 			$table = $schema->createTable('appconfig_ex');
 
-			$table->addColumn('id', 'bigint', [
+			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
-			$table->addColumn('appid', 'string', [
+			$table->addColumn('appid', Types::STRING, [
 				'notnull' => true,
 				'length' => 32
 			]);
-			$table->addColumn('configkey', 'string', [
+			$table->addColumn('configkey', Types::STRING, [
 				'notnull' => true,
 				'length' => 64
 			]);
-			$table->addColumn('configvalue', 'string', [
+			$table->addColumn('configvalue', Types::STRING, [
 				'notnull' => true,
 			]);
-			$table->addColumn('sensitive', 'smallint', [
+			$table->addColumn('sensitive', Types::BOOLEAN, [
 				'notnull' => true,
 				'default' => 0,
-				'length' => 1,
 			]);
 
 			$table->setPrimaryKey(['id']);
@@ -78,50 +79,50 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps')) {
 			$table = $schema->createTable('ex_apps');
 
-			$table->addColumn('id', 'bigint', [
+			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
-			$table->addColumn('appid', 'string', [
+			$table->addColumn('appid', Types::STRING, [
 				'notnull' => true,
 				'length' => 32
 			]);
-			$table->addColumn('version', 'string', [
+			$table->addColumn('version', Types::STRING, [
 				'notnull' => true,
 				'length' => 32
 			]);
-			$table->addColumn('name', 'string', [
+			$table->addColumn('name', Types::STRING, [
 				'notnull' => true,
 				'length' => 64
 			]);
-			$table->addColumn('daemon_config_id', 'bigint', [
+			$table->addColumn('daemon_config_id', Types::BIGINT, [
 				'default' => 0,
 			]);
-			$table->addColumn('host', 'string', [
+			$table->addColumn('host', Types::STRING, [
 				'notnull' => true,
 				'length' => 255,
 			]);
-			$table->addColumn('port', 'smallint', [
+			$table->addColumn('port', Types::SMALLINT, [
 				'notnull' => true,
 				'unsigned' => true,
 			]);
-			$table->addColumn('secret', 'string', [
+			$table->addColumn('secret', Types::STRING, [
 				'notnull' => true,
 				'length' => 256,
 			]);
-			$table->addColumn('status', 'json', [
+			$table->addColumn('status', Types::JSON, [
 				'notnull' => true,
 			]);
-			$table->addColumn('enabled', 'smallint', [
+			$table->addColumn('enabled', Types::SMALLINT, [
 				'notnull' => true,
 				'default' => 0,
 				'length' => 1,
 			]);
-			$table->addColumn('created_time', 'bigint', [
+			$table->addColumn('created_time', Types::BIGINT, [
 				'notnull' => true,
 				'unsigned' => true,
 			]);
-			$table->addColumn('last_response_time', 'bigint', [
+			$table->addColumn('last_response_time', Types::BIGINT, [
 				'notnull' => true,
 				'unsigned' => true,
 			]);
@@ -135,32 +136,32 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps_daemons')) {
 			$table = $schema->createTable('ex_apps_daemons');
 
-			$table->addColumn('id', 'bigint', [
+			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
-			$table->addColumn('accepts_deploy_id', 'string', [
+			$table->addColumn('accepts_deploy_id', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('display_name', 'string', [
+			$table->addColumn('display_name', Types::STRING, [
 				'notnull' => true,
 				'length' => 255,
 			]);
-			$table->addColumn('protocol', 'string', [
+			$table->addColumn('protocol', Types::STRING, [
 				'notnull' => true,
 				'length' => 32,
 			]);
-			$table->addColumn('host', 'string', [
+			$table->addColumn('host', Types::STRING, [
 				'notnull' => true,
 				'length' => 255,
 			]);
-			$table->addColumn('port', 'smallint', [
+			$table->addColumn('port', Types::SMALLINT, [
 				'notnull' => true,
 				'unsigned' => true,
 				'default' => 0, // in case of unix socket
 			]);
-			$table->addColumn('deploy_config', 'json', [
+			$table->addColumn('deploy_config', Types::JSON, [
 				'default' => '{}',
 			]);
 
@@ -171,23 +172,23 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('preferences_ex')) {
 			$table = $schema->createTable('preferences_ex');
 
-			$table->addColumn('id', 'bigint', [
+			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
-			$table->addColumn('userid', 'string', [
+			$table->addColumn('userid', Types::STRING, [
 				'notnull' => true,
 				'length' => 64
 			]);
-			$table->addColumn('appid', 'string', [
+			$table->addColumn('appid', Types::STRING, [
 				'notnull' => true,
 				'length' => 32
 			]);
-			$table->addColumn('configkey', 'string', [
+			$table->addColumn('configkey', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('configvalue', 'string', [
+			$table->addColumn('configvalue', Types::STRING, [
 				'notnull' => true
 			]);
 
@@ -199,44 +200,44 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_files_actions_menu')) {
 			$table = $schema->createTable('ex_files_actions_menu');
 
-			$table->addColumn('id', 'bigint', [
+			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
-			$table->addColumn('appid', 'string', [
+			$table->addColumn('appid', Types::STRING, [
 				'notnull' => true,
 				'length' => 32,
 			]);
-			$table->addColumn('name', 'string', [
+			$table->addColumn('name', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('display_name', 'string', [
+			$table->addColumn('display_name', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('mime', 'string', [
+			$table->addColumn('mime', Types::STRING, [
 				'notnull' => true,
 				'default' => 'file',
 			]);
 			// https://nextcloud.github.io/nextcloud-files/enums/Permission.html
-			$table->addColumn('permissions', 'string', [
+			$table->addColumn('permissions', Types::STRING, [
 				'notnull' => true,
 			]);
-			$table->addColumn('order', 'bigint', [
+			$table->addColumn('order', Types::BIGINT, [
 				'notnull' => true,
 				'default' => 0,
 			]);
-			$table->addColumn('icon', 'string', [
+			$table->addColumn('icon', Types::STRING, [
 				'notnull' => true,
 				'default' => '',
 			]);
-			$table->addColumn('icon_class', 'string', [
+			$table->addColumn('icon_class', Types::STRING, [
 				'notnull' => true,
 				'default' => 'icon-app-ecosystem-v2',
 			]);
 			// Action handler key name, that will be sent to exApp for handling
-			$table->addColumn('action_handler', 'string', [
+			$table->addColumn('action_handler', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
 			]);
@@ -249,15 +250,15 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps_users')) {
 			$table = $schema->createTable('ex_apps_users');
 
-			$table->addColumn('id', 'bigint', [
+			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
-			$table->addColumn('appid', 'string', [
+			$table->addColumn('appid', Types::STRING, [
 				'notnull' => true,
 				'length' => 32,
 			]);
-			$table->addColumn('userid', 'string', [
+			$table->addColumn('userid', Types::STRING, [
 				'notnull' => false,
 				'length' => 64,
 			]);
@@ -270,15 +271,15 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps_api_scopes')) {
 			$table = $schema->createTable('ex_apps_api_scopes');
 
-			$table->addColumn('id', 'bigint', [
+			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
-			$table->addColumn('api_route', 'string', [
+			$table->addColumn('api_route', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('scope_group', 'integer', [
+			$table->addColumn('scope_group', Types::BIGINT, [
 				'notnull' => true,
 				'default' => 0,
 			]);
@@ -291,15 +292,15 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 		if (!$schema->hasTable('ex_apps_scopes')) {
 			$table = $schema->createTable('ex_apps_scopes');
 
-			$table->addColumn('id', 'bigint', [
+			$table->addColumn('id', Types::BIGINT, [
 				'autoincrement' => true,
 				'notnull' => true,
 			]);
-			$table->addColumn('appid', 'string', [
+			$table->addColumn('appid', Types::STRING, [
 				'notnull' => true,
 				'length' => 32,
 			]);
-			$table->addColumn('scope_group', 'integer', [
+			$table->addColumn('scope_group', Types::BIGINT, [
 				'notnull' => true,
 			]);
 
