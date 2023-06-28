@@ -278,7 +278,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('scope_group', 'bigint', [
+			$table->addColumn('scope_group', 'integer', [
 				'notnull' => true,
 				'default' => 0,
 			]);
@@ -299,7 +299,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 32,
 			]);
-			$table->addColumn('scope_group', 'bigint', [
+			$table->addColumn('scope_group', 'integer', [
 				'notnull' => true,
 			]);
 
