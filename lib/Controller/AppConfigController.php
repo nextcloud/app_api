@@ -72,6 +72,9 @@ class AppConfigController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function setAppConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
+		if ($configKey === '') {
+			throw new OCSBadRequestException('Config key cannot be empty');
+		}
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
 		if ($result instanceof ExAppConfig) {
