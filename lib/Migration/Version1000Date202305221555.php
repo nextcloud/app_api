@@ -103,6 +103,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('port', 'smallint', [
 				'notnull' => true,
+				'unsigned' => true,
 			]);
 			$table->addColumn('secret', 'string', [
 				'notnull' => true,
@@ -118,16 +119,16 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('created_time', 'bigint', [
 				'notnull' => true,
+				'unsigned' => true,
 			]);
 			$table->addColumn('last_response_time', 'bigint', [
 				'notnull' => true,
+				'unsigned' => true,
 			]);
 
-			$table->setPrimaryKey(['id'], 'ex_apps_pk');
-			$table->addIndex(['appid'], 'ex_apps_appid__index');
-			$table->addIndex(['name'], 'ex_apps_name__index');
-			$table->addUniqueIndex(['appid'], 'ex_apps_id__key');
-			$table->addUniqueIndex(['host', 'port'], 'ex_apps_host_port__unique');
+			$table->setPrimaryKey(['id']);
+			$table->addUniqueIndex(['appid'], 'appid');
+			$table->addUniqueIndex(['host', 'port'], 'host_port');
 		}
 
 		// Docker daemon or other configurations
@@ -256,8 +257,9 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'default' => '',
 			]);
 
-			$table->setPrimaryKey(['id'], 'ex_apps_users_pk');
-			$table->addIndex(['appid'], 'ex_apps_users_appid');
+			$table->setPrimaryKey(['id']);
+			$table->addIndex(['appid'], 'appid');
+			$table->addIndex(['appid', 'userid'], 'appid_userid');
 		}
 
 		if (!$schema->hasTable('ex_apps_api_scopes')) {
@@ -276,9 +278,9 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'default' => 0,
 			]);
 
-			$table->setPrimaryKey(['id'], 'ex_apps_api_scopes_pk');
-			$table->addUniqueIndex(['api_route'], 'ex_apps_api_scopes_routes');
-			$table->addIndex(['scope_group'], 'ex_apps_api_scopes_scope_group');
+			$table->setPrimaryKey(['id']);
+			$table->addUniqueIndex(['api_route'], 'api_route');
+			$table->addIndex(['scope_group'], 'scope_group');
 		}
 
 		if (!$schema->hasTable('ex_apps_scopes')) {
@@ -294,11 +296,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('scope_group', 'bigint', [
 				'notnull' => true,
-				'length' => 64,
 			]);
 
-			$table->setPrimaryKey(['id'], 'ex_apps_scopes_pk');
-			$table->addUniqueIndex(['appid', 'scope_group'], 'ex_apps_scopes_appid');
+			$table->setPrimaryKey(['id']);
+			$table->addUniqueIndex(['appid', 'scope_group'], 'appid_scope_group');
 		}
 
 		return $schema;
