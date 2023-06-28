@@ -66,7 +66,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addColumn('configvalue', Types::STRING, [
 				'notnull' => true,
 			]);
-			$table->addColumn('sensitive', Types::BOOLEAN, [
+			$table->addColumn('sensitive', Types::SMALLINT, [
 				'notnull' => true,
 				'default' => 0,
 			]);
