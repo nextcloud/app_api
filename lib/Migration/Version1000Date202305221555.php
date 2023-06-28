@@ -258,9 +258,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'length' => 32,
 			]);
 			$table->addColumn('userid', 'string', [
-				'notnull' => true,
+				'notnull' => false,
 				'length' => 64,
-				'default' => '',
 			]);
 
 			$table->setPrimaryKey(['id']);

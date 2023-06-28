@@ -70,7 +70,7 @@ class ExAppUserMapper extends QBMapper {
 				$qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)))
 			->orWhere(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('userid', $qb->createNamedParameter('', IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('userid', $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL))
 			));
 	}
 }
