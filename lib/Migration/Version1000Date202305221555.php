@@ -127,8 +127,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid'], 'appid');
-			$table->addUniqueIndex(['host', 'port'], 'host_port');
+			$table->addUniqueIndex(['appid'], 'appid__idx');
+			$table->addUniqueIndex(['host', 'port'], 'host_port__idx');
 		}
 
 		// Docker daemon or other configurations
@@ -240,27 +240,27 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 //			$table->addIndex(['name'], 'ex_files_actions_menu_name');
 //		}
 
-		if (!$schema->hasTable('ex_apps_users')) {
-			$table = $schema->createTable('ex_apps_users');
-
-			$table->addColumn('id', 'bigint', [
-				'notnull' => true,
-				'autoincrement' => true,
-			]);
-			$table->addColumn('appid', 'string', [
-				'notnull' => true,
-				'length' => 32,
-			]);
-			$table->addColumn('userid', 'string', [
-				'notnull' => true,
-				'length' => 64,
-				'default' => '',
-			]);
-
-			$table->setPrimaryKey(['id']);
-			$table->addIndex(['appid'], 'appid');
-			$table->addIndex(['appid', 'userid'], 'appid_userid');
-		}
+//		if (!$schema->hasTable('ex_apps_users')) {
+//			$table = $schema->createTable('ex_apps_users');
+//
+//			$table->addColumn('id', 'bigint', [
+//				'notnull' => true,
+//				'autoincrement' => true,
+//			]);
+//			$table->addColumn('appid', 'string', [
+//				'notnull' => true,
+//				'length' => 32,
+//			]);
+//			$table->addColumn('userid', 'string', [
+//				'notnull' => true,
+//				'length' => 64,
+//				'default' => '',
+//			]);
+//
+//			$table->setPrimaryKey(['id']);
+//			$table->addIndex(['appid'], 'appid__idx');
+//			$table->addIndex(['appid', 'userid'], 'appid_userid__idx');
+//		}
 
 		if (!$schema->hasTable('ex_apps_api_scopes')) {
 			$table = $schema->createTable('ex_apps_api_scopes');
@@ -279,28 +279,28 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['api_route'], 'api_route');
-			$table->addIndex(['scope_group'], 'scope_group');
+			$table->addUniqueIndex(['api_route'], 'api_route__idx');
+			$table->addIndex(['scope_group'], 'scope_group__idx');
 		}
 
-		if (!$schema->hasTable('ex_apps_scopes')) {
-			$table = $schema->createTable('ex_apps_scopes');
-
-			$table->addColumn('id', 'bigint', [
-				'autoincrement' => true,
-				'notnull' => true,
-			]);
-			$table->addColumn('appid', 'string', [
-				'notnull' => true,
-				'length' => 32,
-			]);
-			$table->addColumn('scope_group', 'bigint', [
-				'notnull' => true,
-			]);
-
-			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'scope_group'], 'appid_scope_group');
-		}
+//		if (!$schema->hasTable('ex_apps_scopes')) {
+//			$table = $schema->createTable('ex_apps_scopes');
+//
+//			$table->addColumn('id', 'bigint', [
+//				'autoincrement' => true,
+//				'notnull' => true,
+//			]);
+//			$table->addColumn('appid', 'string', [
+//				'notnull' => true,
+//				'length' => 32,
+//			]);
+//			$table->addColumn('scope_group', 'bigint', [
+//				'notnull' => true,
+//			]);
+//
+//			$table->setPrimaryKey(['id']);
+//			$table->addUniqueIndex(['appid', 'scope_group'], 'appid_scope_group__idx');
+//		}
 
 		return $schema;
 	}
