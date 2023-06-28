@@ -76,7 +76,7 @@ class Deploy extends Command {
 			return Command::FAILURE;
 		}
 
-		$output->writeln('Deploying ExApp ' . $appId . ' on daemon: ' . $daemonConfig->getDisplayName());
+		$output->writeln(sprintf('Deploying ExApp %s on daemon: %s', $appId, $daemonConfig->getDisplayName()));
 		$result = $this->dockerActions->deployExApp($appId, [
 			'image_src' => $imageSrc,
 			'image_name' => $imageName,
@@ -84,10 +84,10 @@ class Deploy extends Command {
 		], $daemonConfig);
 
 		if (!isset($result['error'])) {
-			$output->writeln('ExApp deployed successfully.');
+			$output->writeln(sprintf('ExApp %s deployed successfully.', $appId));
 			return Command::SUCCESS;
 		} else {
-			$output->writeln('ExApp deployment failed: ' . $result['error']);
+			$output->writeln(sprintf('ExApp %s deployment failed: %s', $appId, $result['error']));
 			return Command::FAILURE;
 		}
 	}

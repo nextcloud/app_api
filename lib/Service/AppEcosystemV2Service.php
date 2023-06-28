@@ -295,9 +295,46 @@ class AppEcosystemV2Service {
 		}
 	}
 
+	public function setupExAppUser(ExApp $exApp, ?string $userId, bool $systemApp = false): bool {
+		if ($systemApp && !$this->exAppUserExists($exApp->getAppid(), $userId)) {
+			try {
+				$this->exAppUserMapper->insert(new ExAppUser([
+					'appid' => $exApp->getAppid(),
+					'userid' => $userId,
+				]));
+			} catch (\Exception $e) {
+				$this->logger->error('Error while inserting ExApp user: ' . $e->getMessage());
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public function aeRequestToExApp(
 		?IRequest $request,
 		string $userId,
+		ExApp $exApp,
+		string $route,
+		string $method = 'POST',
+		array $params = []
+	): array|IResponse {
+		if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
+			try {
+				$this->exAppUserMapper->insert(new ExAppUser([
+					'appid' => $exApp->getAppid(),
+					'userid' => $userId,
+				]));
+			} catch (\Exception $e) {
+				$this->logger->error('Error while inserting ExApp user: ' . $e->getMessage());
+				return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
+			}
+		}
+		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params);
+	}
+
+	public function requestToExApp(
+		?IRequest $request,
+		?string $userId,
 		ExApp $exApp,
 		string $route,
 		string $method = 'POST',
@@ -307,17 +344,6 @@ class AppEcosystemV2Service {
 		try {
 			$url = $exApp->getHost() . ':' . $exApp->getPort() . $route;
 			// Check in ex_apps_users
-			if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
-				try {
-					$this->exAppUserMapper->insert(new ExAppUser([
-						'appid' => $exApp->getAppid(),
-						'userid' => $userId,
-					]));
-				} catch (\Exception $e) {
-					$this->logger->error('Error while inserting ExApp user: ' . $e->getMessage());
-					return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
-				}
-			}
 			$options = [
 				'headers' => [
 					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),

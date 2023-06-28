@@ -65,6 +65,7 @@ class Register extends Command {
 		$this->addOption('port', null, InputOption::VALUE_REQUIRED);
 		$this->addOption('secret', 's', InputOption::VALUE_REQUIRED, 'Secret for ExApp. If not passed - will be generated');
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
+		$this->addOption('system-app', null, InputOption::VALUE_NONE, 'Register as system app');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 
 		$this->addUsage('test_app 1.0.0 "Test app" --host http://host.docker.internal --port 9001 -e');
@@ -82,7 +83,7 @@ class Register extends Command {
 		$secret = $input->getOption('secret');
 
 		if ($this->service->getExApp($appId) !== null) {
-			$output->writeln('ExApp ' . $appId . ' already registered.');
+			$output->writeln(sprintf('ExApp %s already registered.', $appId));
 			return Command::INVALID;
 		}
 
@@ -96,34 +97,38 @@ class Register extends Command {
 		]);
 
 		if ($exApp !== null) {
-			$output->writeln('ExApp successfully registered.');
+			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
+
+			$systemApp = (bool) $input->getOption('system-app');
+			$userId = $systemApp ? '' : null;
+			$this->service->setupExAppUser($exApp, $userId, $systemApp);
 
 			$enabled = (bool) $input->getOption('enabled');
 			if ($enabled) {
 				if ($this->service->enableExApp($exApp)) {
-					$exAppEnabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled?enabled=1', 'PUT');
+					$exAppEnabled = $this->service->requestToExApp(null, $userId, $exApp, '/enabled?enabled=1', 'PUT');
 					if ($exAppEnabled instanceof IResponse) {
 						$response = json_decode($exAppEnabled->getBody(), true);
 						if (isset($response['error']) && strlen($response['error']) === 0) {
-							$output->writeln('ExApp successfully enabled.');
+							$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
 						} else {
-							$output->writeln('Failed to enable ExApp. Error: ' . $response['error']);
+							$output->writeln(sprintf('Failed to enable ExApp %s. Error: %s', $appId, $response['error']));
 							$this->service->disableExApp($exApp);
 							return Command::FAILURE;
 						}
 						$this->service->updateExAppLastResponseTime($exApp);
 					} else if (isset($exAppEnabled['error'])) {
-						$output->writeln('Failed to enable ExApp. Error: ' . $exAppEnabled['error']);
+						$output->writeln(sprintf('Failed to enable ExApp %s. Error: %s', $appId, $exAppEnabled['error']));
 						$this->service->disableExApp($exApp);
 						return Command::FAILURE;
 					}
 				} else {
-					$output->writeln('Failed to enable ExApp.');
+					$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
 					return Command::FAILURE;
 				}
 			}
 
-			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp);
+			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp, $userId);
 			$forceScopes = (bool) $input->getOption('force-scopes');
 			$confirmRequiredScopes = $forceScopes;
 			$confirmOptionalScopes = $forceScopes;
@@ -133,22 +138,22 @@ class Register extends Command {
 				$helper = $this->getHelper('question');
 
 				// Prompt to approve required ExApp scopes
-				$output->writeln('ExApp requested required scopes: ' . implode(', ',
-						$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['required'])));
+				$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ',
+						$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['required']))));
 				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 				$confirmRequiredScopes = $helper->ask($input, $output, $question);
 
 				// Prompt to approve optional ExApp scopes
 				if ($confirmRequiredScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-					$output->writeln('ExApp requested optional scopes: ' . implode(', ',
-							$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['optional'])));
+					$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ',
+							$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['optional']))));
 					$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 					$confirmOptionalScopes = $helper->ask($input, $output, $question);
 				}
 			}
 
 			if (!$confirmRequiredScopes) {
-				$output->writeln('ExApp required scopes not approved.');
+				$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
 				return Command::SUCCESS;
 			}
 
@@ -159,7 +164,7 @@ class Register extends Command {
 
 			return Command::SUCCESS;
 		}
-		$output->writeln('Failed to register ExApp.');
+		$output->writeln(sprintf('Failed to register ExApp %s.', $appId));
 		return Command::FAILURE;
 	}
 
@@ -170,19 +175,19 @@ class Register extends Command {
 			if ($this->service->setExAppScopeGroup($exApp, $scopeGroup)) {
 				$registeredScopeGroups[] = $scopeGroup;
 			} else {
-				$output->writeln('Failed to set ' . $scopeType . ' ExApp scope group: ' . $scopeGroup);
+				$output->writeln(sprintf('Failed to set %s ExApp scope group: %s', $scopeType, $scopeGroup));
 			}
 		}
 		if (count($registeredScopeGroups) > 0) {
-			$output->writeln('ExApp ' . $scopeType . ' scope groups successfully set: ' . implode(', ',
-					$this->service->mapScopeGroupsToNames($registeredScopeGroups)));
+			$output->writeln(sprintf('ExApp %s %s scope groups successfully set: %s', $exApp->getAppid(), $scopeType, implode(', ',
+					$this->service->mapScopeGroupsToNames($registeredScopeGroups))));
 		}
 	}
 
-	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp): ?array {
-		$response = $this->service->aeRequestToExApp(null, '', $exApp, '/scopes', 'GET');
+	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp, ?string $userId): ?array {
+		$response = $this->service->requestToExApp(null, $userId, $exApp, '/scopes', 'GET');
 		if (!$response instanceof IResponse && isset($response['error'])) {
-			$output->writeln('Failed to get ExApp scope groups: ' . $response['error']);
+			$output->writeln(sprintf('Failed to get ExApp %s scope groups: %s', $exApp->getAppid(), $response['error']));
 			return null;
 		}
 		if ($response->getStatusCode() === 200) {
