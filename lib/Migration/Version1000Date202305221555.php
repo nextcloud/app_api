@@ -71,8 +71,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'configkey'], 'appid_configkey__idx');
-			$table->addIndex(['configkey'], 'configkey__idx');
+			$table->addUniqueIndex(['appid', 'configkey'], 'appconfig_ex__idx');
+			$table->addIndex(['configkey'], 'appconfig_ex__configkey');
 		}
 
 		if (!$schema->hasTable('ex_apps')) {
@@ -127,8 +127,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid'], 'appid__idx');
-			$table->addUniqueIndex(['host', 'port'], 'host_port__idx');
+			$table->addUniqueIndex(['appid'], 'ex_apps__appid');
+			$table->addUniqueIndex(['host', 'port'], 'ex_apps__idx');
 		}
 
 		// Docker daemon or other configurations
@@ -165,7 +165,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['host', 'port'], 'host_port__idx');
+			$table->addUniqueIndex(['host', 'port'], 'ex_apps_daemons__idx');
 		}
 
 		if (!$schema->hasTable('preferences_ex')) {
@@ -192,8 +192,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['userid', 'appid', 'configkey'], 'userid_appid_configkey__idx');
-			$table->addIndex(['configkey'], 'configkey__idx');
+			$table->addUniqueIndex(['userid', 'appid', 'configkey'], 'preferences_ex__idx');
+			$table->addIndex(['configkey'], 'preferences_ex__configkey');
 		}
 
 		if (!$schema->hasTable('ex_files_actions_menu')) {
@@ -242,8 +242,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'name'], 'appid_name__idx');
-			$table->addIndex(['name'], 'name__idx');
+			$table->addUniqueIndex(['appid', 'name'], 'ex_files_actions_menu__idx');
+			$table->addIndex(['name'], 'ex_files_actions_menu__name');
 		}
 
 		if (!$schema->hasTable('ex_apps_users')) {
@@ -264,8 +264,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addIndex(['appid'], 'appid__idx');
-			$table->addIndex(['appid', 'userid'], 'appid_userid__idx');
+			$table->addIndex(['appid'], 'ex_apps_users__appid');
+			$table->addIndex(['appid', 'userid'], 'ex_apps_users__idx');
 		}
 
 		if (!$schema->hasTable('ex_apps_api_scopes')) {
@@ -285,8 +285,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['api_route'], 'api_route__idx');
-			$table->addIndex(['scope_group'], 'scope_group__idx');
+			$table->addUniqueIndex(['api_route'], 'ex_apps_api_scopes__api_route');
+			$table->addIndex(['scope_group'], 'ex_apps_api_scopes__scope_group');
 		}
 
 		if (!$schema->hasTable('ex_apps_scopes')) {
@@ -305,7 +305,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'scope_group'], 'appid_scope_group__idx');
+			$table->addUniqueIndex(['appid', 'scope_group'], 'ex_apps_scopes__idx');
 		}
 
 		return $schema;
