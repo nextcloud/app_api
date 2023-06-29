@@ -130,6 +130,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->setPrimaryKey(['id']);
 			$table->addUniqueIndex(['appid'], 'ex_apps__appid');
 			$table->addUniqueIndex(['host', 'port'], 'ex_apps__idx');
+			$table->addUniqueIndex(['daemon_config_id', 'port'], 'ex_apps_c_port__idx');
 		}
 
 		// Docker daemon or other configurations

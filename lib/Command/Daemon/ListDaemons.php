@@ -56,19 +56,22 @@ class ListDaemons extends Command {
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$daemons = $this->daemonConfigService->getRegisteredDaemons();
-		if ($daemons === null) {
+		$daemonConfigs = $this->daemonConfigService->getRegisteredDaemonConfigs();
+		if ($daemonConfigs === null) {
 			$output->writeln('<error>Failed to get list of daemons.</error>');
 			return Command::FAILURE;
 		}
 
-		if (count($daemons) === 0) {
-			$output->writeln('No registered daemons.');
+		if (count($daemonConfigs) === 0) {
+			$output->writeln('No registered daemon configs.');
 			return Command::SUCCESS;
 		}
 
-		$output->writeln('Registered ExApp daemons:');
-		foreach ($daemons as $daemon) {
+		$output->writeln('Registered ExApp daemon configs:');
+		foreach ($daemonConfigs as $daemon) {
+			if (in_array($daemon->getProtocol(), ['unix', 'unix-socket'])) {
+
+			}
 			$output->writeln(sprintf('%s. %s [%s]: %s', $daemon->getId(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getHost() . ':' . $daemon->getPort()));
 		}
 

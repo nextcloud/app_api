@@ -34,49 +34,58 @@ namespace OCA\AppEcosystemV2\Command\Daemon;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
 class RegisterDaemon extends Command {
-	private AppEcosystemV2Service $service;
 	private DaemonConfigService $daemonConfigService;
 
-	public function __construct(AppEcosystemV2Service $service, DaemonConfigService $daemonConfigService) {
+	public function __construct(DaemonConfigService $daemonConfigService) {
 		parent::__construct();
 
-		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 	}
 
 	protected function configure() {
 		$this->setName('app_ecosystem_v2:daemon:register');
-		$this->setDescription('Register daemon');
+		$this->setDescription('Register daemon config for ExApp deployment');
 
-		$this->addArgument('appid', InputArgument::REQUIRED);
-		$this->addArgument('accepts_deploy_id', InputArgument::REQUIRED);
-		$this->addArgument('display_name', InputArgument::REQUIRED);
+		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED);
+		$this->addArgument('display-name', InputArgument::REQUIRED);
 		$this->addArgument('protocol', InputArgument::REQUIRED);
 		$this->addArgument('host', InputArgument::REQUIRED);
 		$this->addArgument('port', InputArgument::REQUIRED);
 
-		$this->addOption('deploy_config', null, InputArgument::REQUIRED, 'Deploy config (e.g. docker network)');
+		$this->addOption('deploy-config', null, InputOption::VALUE_REQUIRED, 'Deploy config (e.g. docker network)');
 
-//		TODO: Add usage examples
+		$this->addUsage('"docker-install" "Docker local" "unix-socket" "var/run/docker.sock" 0 --deploy_config \'{"network": "nextcloud"}\'');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$appId = $input->getArgument('appid');
-		$exApp = $this->service->getExApp($appId);
-		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found.');
+		$acceptsDeployId = $input->getArgument('accepts-deploy-id');
+		$displayName = $input->getArgument('display-name');
+		$protocol = $input->getArgument('protocol');
+		$host = $input->getArgument('host');
+		$port = $input->getArgument('port');
+		$deployConfig = json_decode($input->getOption('deploy-config'), true);
+
+		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
+			'accepts_deploy_id' => $acceptsDeployId,
+			'display_name' => $displayName,
+			'protocol' => $protocol,
+			'host' => $host,
+			'port' => $port,
+			'deploy_config' => $deployConfig,
+		]);
+
+		if ($daemonConfig === null) {
+			$output->writeln('Failed to register daemon.');
 			return Command::FAILURE;
 		}
-		if ($exApp->getEnabled()) {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId());
-			return Command::SUCCESS;
-		}
-		return Command::FAILURE;
+
+		$output->writeln(sprintf('Daemon successfully registered. Daemon config ID: %s', $daemonConfig->getId()));
+		return Command::SUCCESS;
 	}
 }

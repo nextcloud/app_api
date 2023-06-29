@@ -54,29 +54,24 @@ class UnregisterDaemon extends Command {
 		$this->setName('app_ecosystem_v2:daemon:unregister');
 		$this->setDescription('Unregister daemon');
 
-		$this->addArgument('appid', InputArgument::REQUIRED);
-		$this->addArgument('accepts_deploy_id', InputArgument::REQUIRED);
-		$this->addArgument('display_name', InputArgument::REQUIRED);
-		$this->addArgument('protocol', InputArgument::REQUIRED);
-		$this->addArgument('host', InputArgument::REQUIRED);
-		$this->addArgument('port', InputArgument::REQUIRED);
-
-		$this->addOption('deploy_config', null, InputArgument::REQUIRED, 'Deploy config (e.g. docker network)');
-
-//		TODO: Add usage examples
+		$this->addArgument('daemon-config-id', InputArgument::REQUIRED);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$appId = $input->getArgument('appid');
-		$exApp = $this->service->getExApp($appId);
-		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found.');
+		$daemonConfigId = (int) $input->getArgument('daemon-config-id');
+
+		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
+		if ($daemonConfig === null) {
+			$output->writeln('Daemon config not found.');
 			return Command::FAILURE;
 		}
-		if ($exApp->getEnabled()) {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId());
-			return Command::SUCCESS;
+
+		if ($this->daemonConfigService->unregisterDaemonConfig($daemonConfig) === null) {
+			$output->writeln('Failed to unregister daemon config.');
+			return Command::FAILURE;
 		}
-		return Command::FAILURE;
+
+		$output->writeln('Daemon config unregistered.');
+		return Command::SUCCESS;
 	}
 }

@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\Docker\DockerActions;
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,12 +42,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
 class Deploy extends Command {
+	private AppEcosystemV2Service $service;
 	private DaemonConfigService $daemonConfigService;
 	private DockerActions $dockerActions;
 
-	public function __construct(DaemonConfigService $daemonConfigService, DockerActions $dockerActions) {
+	public function __construct(
+		AppEcosystemV2Service $service,
+		DaemonConfigService $daemonConfigService,
+		DockerActions $dockerActions
+	) {
 		parent::__construct();
 
+		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->dockerActions = $dockerActions;
 	}
@@ -56,19 +63,38 @@ class Deploy extends Command {
 		$this->setDescription('Deploy ExApp on configured daemon');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
-		$this->addArgument('daemon_config_id', InputArgument::REQUIRED);
+		$this->addArgument('daemon-config-id', InputArgument::REQUIRED);
 
-		$this->addOption('image-src', null, InputOption::VALUE_REQUIRED, 'Image source');
-		$this->addOption('image-name', null, InputOption::VALUE_REQUIRED, 'Image name');
-		$this->addOption('image-tag', null, InputOption::VALUE_REQUIRED, 'Image tag');
+		$this->addOption('image-name', null, InputOption::VALUE_REQUIRED, 'Docker image name');
+		$this->addOption('image-tag', null, InputOption::VALUE_REQUIRED, 'Docker image tag');
+		$this->addOption('container-name', null, InputOption::VALUE_REQUIRED, 'Docker container name. If not specified, appid will be used as container name.');
+		$this->addOption('container-hostname', null, InputOption::VALUE_REQUIRED, 'Docker container hostname. If not specified, appid will be used as hostname.');
+		$this->addOption('container-port', null, InputOption::VALUE_REQUIRED, 'Docker container port');
+
+		$this->addUsage('test_app 1 --image-src=local --image-name=test_app --image-tag=latest');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
-		$daemonConfigId = (int) $input->getArgument('daemon_config_id');
-		$imageSrc = $input->getOption('image-src');
-		$imageName = $input->getOption('image-name');
-		$imageTag = $input->getOption('image-tag');
+
+		$exApp = $this->service->getExApp($appId);
+		if ($exApp === null) {
+			$output->writeln(sprintf('ExApp %s not found. Failed to deploy.', $appId));
+			return Command::FAILURE;
+		}
+
+		$daemonConfigId = (int) $input->getArgument('daemon-config-id');
+
+		$imageParams = [
+			'image_name' => $input->getOption('image-name'),
+			'image_tag' => $input->getOption('image-tag') ?? 'latest',
+		];
+
+		$containerParams = [
+			'name' => $input->getOption('container-name') ?? $appId,
+			'hostname' => $input->getOption('container-hostname') ?? $appId,
+			'port' => (int) $input->getOption('container-port'),
+		];
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
 		if ($daemonConfig === null) {
@@ -77,17 +103,16 @@ class Deploy extends Command {
 		}
 
 		$output->writeln(sprintf('Deploying ExApp %s on daemon: %s', $appId, $daemonConfig->getDisplayName()));
-		$result = $this->dockerActions->deployExApp($appId, [
-			'image_src' => $imageSrc,
-			'image_name' => $imageName,
-			'image_tag' => $imageTag,
-		], $daemonConfig);
+		[$createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $imageParams, $containerParams);
 
-		if (!isset($result['error'])) {
+		if (!isset($startResult['error']) && isset($createResult['Id'])) {
 			$output->writeln(sprintf('ExApp %s deployed successfully.', $appId));
+			$output->writeln(json_encode($startResult, JSON_PRETTY_PRINT));
+			$containerInfo = $this->dockerActions->inspectContainer($createResult['Id']);
+			$output->writeln(json_encode($containerInfo, JSON_PRETTY_PRINT));
 			return Command::SUCCESS;
 		} else {
-			$output->writeln(sprintf('ExApp %s deployment failed: %s', $appId, $result['error']));
+			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error']));
 			return Command::FAILURE;
 		}
 	}

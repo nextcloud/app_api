@@ -55,25 +55,39 @@ class DockerActions {
 	/**
 	 * Pull image, create and start container
 	 *
-	 * @param string $appId
-	 * @param array $imageParams
 	 * @param DaemonConfig $daemonConfig
+	 * @param array $imageParams
+	 * @param array $containerParams
 	 *
 	 * @return array
 	 */
-	public function deployExApp(string $appId, array $imageParams, DaemonConfig $daemonConfig): array {
+	public function deployExApp(
+		DaemonConfig $daemonConfig,
+		array $imageParams,
+		array $containerParams,
+	): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
 			return ['error' => 'Daemon does not accept docker-install'];
 		}
-		$pullResult = $this->pullContainer($imageParams['image_name']);
+		if (in_array($daemonConfig->getProtocol(), ['unix', 'unix-socket'])) {
+			$this->guzzleClient = new \GuzzleHttp\Client(
+				[
+					'curl' => [
+						CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(), // Set socket path from daemon config
+					],
+				]
+			);
+		}
+		$pullResult = $this->pullContainer($imageParams['image_name'], $imageParams['image_tag']);
 		if (isset($pullResult['error'])) {
 			return $pullResult;
 		}
-		$createResult = $this->createContainer($imageParams['image_name'], ['name' => $appId]);
+		$createResult = $this->createContainer($imageParams['image_name'], $containerParams);
 		if (isset($createResult['error'])) {
 			return $createResult;
 		}
-		return $this->startContainer($createResult['Id']);
+		$startResult = $this->startContainer($createResult['Id']);
+		return [$createResult, $startResult];
 	}
 
 	public function buildApiUrl(string $url): string {
@@ -81,9 +95,13 @@ class DockerActions {
 	}
 
 	public function createContainer(string $imageName, array $params = []): array {
+		$options['json'] = [
+			'Image' => $imageName,
+			'Hostname' => $params['hostname'],
+		];
 		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));
 		try {
-			$response = $this->guzzleClient->post($url, ['json' => ['Image' => $imageName]]);
+			$response = $this->guzzleClient->post($url, $options);
 			return json_decode((string) $response->getBody(), true);
 		} catch (GuzzleException $e) {
 			$this->logger->error('Failed to create container', ['exception' => $e]);
@@ -96,7 +114,7 @@ class DockerActions {
 		$url = $this->buildApiUrl(sprintf('containers/%s/start', $containerId));
 		try {
 			$response = $this->guzzleClient->post($url);
-			return ['success' => $response->getStatusCode() === 200];
+			return ['success' => $response->getStatusCode() === 204];
 		} catch (GuzzleException $e) {
 			$this->logger->error('Failed to start container', ['exception' => $e]);
 			error_log($e->getMessage());
@@ -113,6 +131,18 @@ class DockerActions {
 			$this->logger->error('Failed to pull image', ['exception' => $e]);
 			error_log($e->getMessage());
 			return ['error' => 'Failed to pull image'];
+		}
+	}
+
+	public function inspectContainer(string $containerId): array {
+		$url = $this->buildApiUrl(sprintf('containers/%s/json', $containerId));
+		try {
+			$response = $this->guzzleClient->get($url);
+			return json_decode((string) $response->getBody(), true);
+		} catch (GuzzleException $e) {
+			$this->logger->error('Failed to inspect container', ['exception' => $e]);
+			error_log($e->getMessage());
+			return ['error' => 'Failed to inspect container'];
 		}
 	}
 }

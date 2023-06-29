@@ -59,18 +59,45 @@ class DaemonConfigService {
 		$this->logger = $logger;
 	}
 
-	public function getDaemonConfig(int $getDaemonConfigId): ?DaemonConfig {
+	public function registerDaemonConfig(array $params): ?DaemonConfig {
 		try {
-			return $this->mapper->findById($getDaemonConfigId);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			return $this->mapper->insert(new DaemonConfig([
+				'accepts_deploy_id' => $params['accepts_deploy_id'],
+				'display_name' => $params['display_name'],
+				'protocol' => $params['protocol'],
+				'host' => $params['host'],
+				'port' => $params['port'],
+				'deploy_config' => $params['deploy_config'],
+			]));
+		} catch (Exception $e) {
+			$this->logger->error('Failed to register daemon config. Error: ' . $e->getMessage());
 			return null;
 		}
 	}
 
-	public function getRegisteredDaemons(): ?array {
+	public function unregisterDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
+		try {
+			return $this->mapper->delete($daemonConfig);
+		} catch (Exception $e) {
+			$this->logger->error('Failed to unregister daemon config. Error: ' . $e->getMessage());
+			return null;
+		}
+	}
+
+	public function getDaemonConfig(int $daemonConfigId): ?DaemonConfig {
+		try {
+			return $this->mapper->findById($daemonConfigId);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
+			$this->logger->error('Failed to get daemon config. Error: ' . $e->getMessage());
+			return null;
+		}
+	}
+
+	public function getRegisteredDaemonConfigs(): ?array {
 		try {
 			return $this->mapper->findAll();
-		} catch (Exception) {
+		} catch (Exception $e) {
+			$this->logger->error('Failed to get registered daemon configs. Error: ' . $e->getMessage());
 			return null;
 		}
 	}
