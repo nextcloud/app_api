@@ -78,7 +78,7 @@ class ExAppConfigService {
 			$exAppConfigs = array_map(function (ExAppConfig $exAppConfig) {
 				return [
 					'configkey' => $exAppConfig->getConfigkey(),
-					'configvalue' => $exAppConfig->getConfigvalue(),
+					'configvalue' => $exAppConfig->getConfigvalue() ?? '',
 				];
 			}, $this->mapper->findByAppConfigKeys($appId, $configKeys));
 			$this->cache->set($cacheKey, $exAppConfigs, Application::CACHE_TTL);
@@ -109,7 +109,7 @@ class ExAppConfigService {
 				$appConfigEx = $this->mapper->insert(new ExAppConfig([
 					'appid' => $appId,
 					'configkey' => $configKey,
-					'configvalue' => $configValue,
+					'configvalue' => $configValue ?? '',
 					'sensitive' => $sensitive,
 				]));
 			} catch (\Exception $e) {

@@ -65,16 +65,16 @@ class ListConfig extends Command {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found');
+			$output->writeln(sprintf('ExApp %s not found.', $appId));
 			return Command::FAILURE;
 		}
 
 		$exAppConfigs = $this->appConfigService->getAllAppConfig($exApp->getAppid());
 		$private = $input->getOption('private');
-		$output->writeln('ExApp ' . $exApp->getAppid() . ' configs:');
+		$output->writeln(sprintf('ExApp %s configs:', $exApp->getAppid()));
 		$appConfigs = [];
 		foreach ($exAppConfigs as $exAppConfig) {
-			$appConfigs[$exAppConfig->getAppid()][$exAppConfig->getConfigkey()] = (!$private && $exAppConfig->getSensitive() ? $exAppConfig->getConfigvalue() : self::SENSITIVE_VALUE);
+			$appConfigs[$exAppConfig->getAppid()][$exAppConfig->getConfigkey()] = ($private && !$exAppConfig->getSensitive() ? $exAppConfig->getConfigvalue() : self::SENSITIVE_VALUE);
 		}
 		$output->writeln(json_encode($appConfigs, JSON_PRETTY_PRINT));
 		return Command::SUCCESS;

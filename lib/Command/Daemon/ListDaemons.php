@@ -53,24 +53,25 @@ class ListDaemons extends Command {
 	protected function configure() {
 		$this->setName('app_ecosystem_v2:daemon:list');
 		$this->setDescription('List registered daemons');
-
-
-		$this->addOption('deploy_config', null, InputArgument::REQUIRED, 'Deploy config (e.g. docker network)');
-
-//		TODO: Add usage examples
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$appId = $input->getArgument('appid');
-		$exApp = $this->service->getExApp($appId);
-		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found.');
+		$daemons = $this->daemonConfigService->getRegisteredDaemons();
+		if ($daemons === null) {
+			$output->writeln('<error>Failed to get list of daemons.</error>');
 			return Command::FAILURE;
 		}
-		if ($exApp->getEnabled()) {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId());
+
+		if (count($daemons) === 0) {
+			$output->writeln('No registered daemons.');
 			return Command::SUCCESS;
 		}
-		return Command::FAILURE;
+
+		$output->writeln('Registered ExApp daemons:');
+		foreach ($daemons as $daemon) {
+			$output->writeln(sprintf('%s. %s [%s]: %s', $daemon->getId(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getHost() . ':' . $daemon->getPort()));
+		}
+
+		return Command::SUCCESS;
 	}
 }

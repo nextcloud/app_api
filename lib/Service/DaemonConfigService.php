@@ -66,4 +66,12 @@ class DaemonConfigService {
 			return null;
 		}
 	}
+
+	public function getRegisteredDaemons(): ?array {
+		try {
+			return $this->mapper->findAll();
+		} catch (Exception) {
+			return null;
+		}
+	}
 }

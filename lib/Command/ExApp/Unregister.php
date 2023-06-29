@@ -66,7 +66,7 @@ class Unregister extends Command {
 		$exApp = $this->service->getExApp($appId);
 
 		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found. Failed to unregister.');
+			$output->writeln(sprintf('ExApp %s not found. Failed to unregister.', $appId));
 			return Command::FAILURE;
 		}
 
@@ -79,7 +79,7 @@ class Unregister extends Command {
 				if (isset($response['error']) && strlen($response['error']) === 0) {
 					$output->writeln('ExApp successfully disabled.');
 				} else {
-					$output->writeln('ExApp ' . $appId . ' not disabled. Failed to unregister. Error: ' . $response['error']);
+					$output->writeln(sprintf('ExApp %s not disabled. Failed to unregister. Error: %s', $appId, $response['error']));
 					return Command::FAILURE;
 				}
 			}
@@ -87,7 +87,7 @@ class Unregister extends Command {
 
 		$exApp = $this->service->unregisterExApp($appId);
 		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found. Failed to unregister.');
+			$output->writeln(sprintf('ExApp %s not found. Failed to unregister.', $appId));
 			return Command::FAILURE;
 		}
 		if ($exApp->getAppid() === $appId) {
@@ -95,7 +95,7 @@ class Unregister extends Command {
 			foreach ($appScopes as $appScope) {
 				$this->service->removeExAppScopeGroup($exApp, intval($appScope->getScopeGroup()));
 			}
-			$output->writeln('ExApp successfully unregistered.');
+			$output->writeln(sprintf('ExApp %s successfully unregistered.', $appId));
 		}
 		return Command::SUCCESS;
 	}

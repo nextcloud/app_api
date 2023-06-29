@@ -65,7 +65,7 @@ class ExAppPreferenceService {
 					'userid' => $userId,
 					'appid' => $appId,
 					'configkey' => $configKey,
-					'configvalue' => $configValue,
+					'configvalue' => $configValue ?? '',
 				]));
 			} catch (Exception $e) {
 				$this->logger->error('Error while inserting new config value: ' . $e->getMessage());
@@ -98,7 +98,7 @@ class ExAppPreferenceService {
 			return array_map(function (ExAppPreference $exAppPreference) {
 				return [
 					'configkey' => $exAppPreference->getConfigkey(),
-					'configvalue' => $exAppPreference->getConfigvalue(),
+					'configvalue' => $exAppPreference->getConfigvalue() ?? '',
 				];
 			}, $this->mapper->findByUserIdAppIdKeys($userId, $appId, $configKeys));
 		} catch (Exception) {
