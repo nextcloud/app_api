@@ -66,6 +66,7 @@ class AppEcosystemV2Service {
 	public const USER_INFO = 10;
 	public const USER_STATUS = 11;
 	public const NOTIFICATION_API_SCOPE = 12;
+	public const WEATHER_STATUS = 13;
 	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
 //	TODO: Move to DB with description field for that
 	const SCOPE_GROUPS = [
@@ -601,10 +602,11 @@ class AppEcosystemV2Service {
 			['api_route' =>  $apiV1Prefix . '/ex-app/preference', 'scope_group' => self::BASIC_API_SCOPE],
 			['api_route' =>  $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/apps', 'scope_group' => self::SYSTEM_API_SCOPE],
-			['api_route' =>  '/apps/provisioning_api/api', 'scope_group' => self::SYSTEM_API_SCOPE],
+			['api_route' =>  '/apps/provisioning_api/api/', 'scope_group' => self::SYSTEM_API_SCOPE],
 			['api_route' =>  '/cloud/users', 'scope_group' => self::USER_INFO],
 			['api_route' =>  '/cloud/groups', 'scope_group' => self::USER_INFO],
-			['api_route' =>  '/apps/user_status/api', 'scope_group' => self::USER_STATUS],
+			['api_route' =>  '/apps/user_status/api/', 'scope_group' => self::USER_STATUS],
+			['api_route' =>  '/apps/weather_status/api/', 'scope_group' => self::WEATHER_STATUS],
 			['api_route' =>  '/dav/', 'scope_group' => self::DAV_API_SCOPE],
 		];
 
