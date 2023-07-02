@@ -31,7 +31,8 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
-use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
@@ -53,58 +54,20 @@ class ExAppApiScopeMapper extends QBMapper {
 		return $this->findEntities($qb);
 	}
 
-	public function insert(Entity $entity): Entity {
-		if (!$entity instanceof ExAppApiScope) {
-			throw new \InvalidArgumentException('Wrong type of entity');
-		}
+	/**
+	 * @param string $apiRoute
+	 *
+	 * @throws Exception
+	 * @throws DoesNotExistException
+	 * @throws MultipleObjectsReturnedException
+	 *
+	 * @return ExAppApiScope|null
+	 */
+	public function findByApiRoute(string $apiRoute): ?ExAppApiScope {
 		$qb = $this->db->getQueryBuilder();
-		$qb->insert($this->tableName)
-			->values([
-				'api_route' => $qb->createNamedParameter($entity->getApiRoute()),
-				'scope_group' => $qb->createNamedParameter($entity->getScopeGroup()),
-			]);
-		if ($qb->executeStatement() === 1) {
-			return $entity;
-		}
-		throw new Exception('Could not insert entity');
-	}
-
-	public function update(Entity $entity): Entity {
-		if (!$entity instanceof ExAppApiScope) {
-			throw new \InvalidArgumentException('Wrong type of entity');
-		}
-		$qb = $this->db->getQueryBuilder();
-		$qb->update($this->tableName)
-			->set('scope_group', $qb->createNamedParameter($entity->getScopeGroup()))
-			->where($qb->expr()->eq('api_route', $qb->createNamedParameter($entity->getApiRoute())));
-		if ($qb->executeStatement() === 1) {
-			return $entity;
-		}
-		throw new Exception('Could not update entity');
-	}
-
-	public function insertOrUpdate(Entity $entity): Entity {
-		try {
-			return $this->insert($entity);
-		} catch (Exception $ex) {
-			if ($ex->getReason() === Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION) {
-				return $this->update($entity);
-			}
-			throw $ex;
-		}
-	}
-
-	public function delete(Entity $entity): ExAppApiScope {
-		if (!$entity instanceof ExAppApiScope) {
-			throw new \InvalidArgumentException('Wrong type of entity');
-		}
-		$qb = $this->db->getQueryBuilder();
-		$idType = $this->getParameterTypeForProperty($entity, 'api_route');
-		$qb->delete($this->tableName)
-			->where(
-				$qb->expr()->eq('api_route', $qb->createNamedParameter($entity->getId(), $idType))
-			);
-		$qb->executeStatement();
-		return $entity;
+		$qb->select('*')
+			->from($this->tableName)
+			->where($qb->expr()->eq('api_route', $qb->createNamedParameter($apiRoute)));
+		return $this->findEntity($qb);
 	}
 }

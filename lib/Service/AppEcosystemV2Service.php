@@ -37,6 +37,8 @@ use OCA\AppEcosystemV2\Db\ExAppScopeMapper;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\Http\Client\IResponse;
+use OCP\ICache;
+use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IUser;
 use OCP\Log\ILogFactory;
@@ -46,8 +48,6 @@ use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IClient;
 
 use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Db\ExAppApiScope;
-use OCA\AppEcosystemV2\Db\ExAppApiScopeMapper;
 use OCA\AppEcosystemV2\Db\ExAppMapper;
 use OCA\AppEcosystemV2\Db\ExAppUser;
 use OCA\AppEcosystemV2\Db\ExAppUserMapper;
@@ -59,26 +59,12 @@ use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
 
 class AppEcosystemV2Service {
-//	TODO: In addition to default constant scopes think about implementing scopes registration mechanism
 	public const BASIC_API_SCOPE = 1;
-	public const SYSTEM_API_SCOPE = 2;
-	public const DAV_API_SCOPE = 3;
-	public const USER_INFO = 10;
-	public const USER_STATUS = 11;
-	public const NOTIFICATION_API_SCOPE = 12;
-	public const WEATHER_STATUS = 13;
-	const MAX_SIGN_TIME_DIFF = 60 * 5; // 5 min
-//	TODO: Move to DB with description field for that
-	const SCOPE_GROUPS = [
-		1 => 'BASIC_API_SCOPE',
-		2 => 'SYSTEM_API_SCOPE',
-		3 => 'DAV_API_SCOPE',
-		10 => 'USER_INFO',
-		11 => 'USER_STATUS',
-		12 => 'NOTIFICATION_API_SCOPE',
-	];
+	const MAX_SIGN_TIME_X_MIN_DIFF = 60 * 5;
+
 	private LoggerInterface $logger;
 	private ILogFactory $logFactory;
+	private ICache $cache;
 	private IConfig $config;
 	private IClient $client;
 	private ExAppMapper $exAppMapper;
@@ -87,27 +73,31 @@ class AppEcosystemV2Service {
 	private ISecureRandom $random;
 	private IUserSession $userSession;
 	private IUserManager $userManager;
-	private ExAppApiScopeMapper $exAppApiScopeMapper;
+	private ExAppApiScopeService $exAppApiScopeService;
 	private ExAppScopeMapper $exAppScopeMapper;
 	private ExAppConfigService $exAppConfigService;
+	private DaemonConfigService $daemonConfigService;
 
 	public function __construct(
 		LoggerInterface $logger,
 		ILogFactory $logFactory,
+		ICacheFactory $cacheFactory,
 		IConfig $config,
 		IClientService $clientService,
 		ExAppMapper $exAppMapper,
 		IAppManager $appManager,
 		ExAppUserMapper $exAppUserMapper,
-		ExAppApiScopeMapper $exAppApiScopeMapper,
+		ExAppApiScopeService $exAppApiScopeService,
 		ExAppScopeMapper $exAppScopeMapper,
 		ISecureRandom $random,
 		IUserSession $userSession,
 		IUserManager $userManager,
 		ExAppConfigService $exAppConfigService,
+		DaemonConfigService $daemonConfigService,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
+		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 		$this->config = $config;
 		$this->client = $clientService->newClient();
 		$this->exAppMapper = $exAppMapper;
@@ -116,24 +106,33 @@ class AppEcosystemV2Service {
 		$this->random = $random;
 		$this->userSession = $userSession;
 		$this->userManager = $userManager;
-		$this->exAppApiScopeMapper = $exAppApiScopeMapper;
+		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->exAppScopeMapper = $exAppScopeMapper;
 		$this->exAppConfigService = $exAppConfigService;
+		$this->daemonConfigService = $daemonConfigService;
 	}
 
 	public function getExApp(string $exAppId): ?ExApp {
 		try {
-			return $this->exAppMapper->findByAppId($exAppId);
+			$cacheKey = 'exApp_' . $exAppId;
+//			$cached = $this->cache->get($cacheKey);
+//			if ($cached !== null) {
+//				return $cached instanceof ExApp ? $cached : new ExApp($cached);
+//			}
+
+			$exApp = $this->exAppMapper->findByAppId($exAppId);
+			$this->cache->set($cacheKey, $exApp);
+			return $exApp;
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
 	}
 
 	/**
-	 * Register exApp
+	 * Register ExApp or update if already exists
 	 *
 	 * @param string $appId
-	 * @param array $appData [version, name, daemon_config_id, host, port, secret]
+	 * @param array $appData [version, name, daemon_config_id, port, secret]
 	 *
 	 * @return ExApp|null
 	 */
@@ -143,7 +142,6 @@ class AppEcosystemV2Service {
 			$exApp->setVersion($appData['version']);
 			$exApp->setName($appData['name']);
 			$exApp->setDaemonConfigId($appData['daemon_config_id']);
-			$exApp->setHost($appData['host']);
 			$exApp->setPort($appData['port']);
 			if ($appData['secret'] !== '') {
 				$exApp->setSecret($appData['secret']);
@@ -151,12 +149,12 @@ class AppEcosystemV2Service {
 				$secret = $this->random->generate(128);
 				$exApp->setSecret($secret);
 			}
-			$exApp->setStatus(json_encode(['active' => true]));
+			$exApp->setStatus(json_encode(['active' => true])); // TODO: Add status request to ExApp
 			$exApp->setLastResponseTime(time());
 			try {
 				return $this->exAppMapper->update($exApp);
 			} catch (Exception $e) {
-				$this->logger->error('Error while updating ExApp: ' . $e->getMessage());
+				$this->logger->error(sprintf('Error while updating already registered ExApp: %s', $e->getMessage()));
 				return null;
 			}
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
@@ -165,24 +163,24 @@ class AppEcosystemV2Service {
 				'version' => $appData['version'],
 				'name' => $appData['name'],
 				'daemon_config_id' => $appData['daemon_config_id'],
-				'host' => $appData['host'],
 				'port' => $appData['port'],
 				'secret' =>  $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
-				'status' => json_encode(['active' => true]),
+				'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
 				'created_time' => time(),
 				'last_response_time' => time(),
 			]);
 			try {
 				return $this->exAppMapper->insert($exApp);
 			} catch (Exception $e) {
-				$this->logger->error('Error while registering ExApp: ' . $e->getMessage());
+				$this->logger->error(sprintf('Error while registering ExApp: %s', $e->getMessage()));
 				return null;
 			}
 		}
 	}
 
 	/**
-	 * Unregister ExApp
+	 * Unregister ExApp.
+	 * Removes ExApp from database and cache.
 	 *
 	 * @param string $appId
 	 *
@@ -192,12 +190,13 @@ class AppEcosystemV2Service {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			if ($this->exAppMapper->deleteExApp($exApp) !== 1) {
-				$this->logger->error('Error while unregistering ExApp: ' . $appId);
+				$this->logger->error(sprintf('Error while unregistering ExApp: %s', $appId));
 				return null;
 			}
+			$this->cache->remove('exApp_' . $appId);
 			return $exApp;
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error('Error while unregistering ExApp: ' . $e->getMessage());
+			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()));
 			return null;
 		}
 	}
@@ -222,7 +221,7 @@ class AppEcosystemV2Service {
 			try {
 				return $this->exAppScopeMapper->insert($exAppScope);
 			} catch (\Exception $e) {
-				$this->logger->error('Error while setting ExApp scope group: ' . $e->getMessage());
+				$this->logger->error(sprintf('Error while setting ExApp scope group: %s', $e->getMessage()));
 				return null;
 			}
 		}
@@ -238,7 +237,9 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Enable ExApp
+	 * Enable ExApp. Sends request to ExApp to update enabled state.
+	 * If request fails, ExApp will be disabled.
+	 * Removes ExApp from cache.
 	 *
 	 * @param ExApp $exApp
 	 *
@@ -247,16 +248,37 @@ class AppEcosystemV2Service {
 	public function enableExApp(ExApp $exApp): bool {
 		try {
 			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), true) === 1) {
+				$exAppEnabled = $this->requestToExApp(null, null, $exApp, '/enabled?enabled=1', 'PUT');
+				if ($exAppEnabled instanceof IResponse) {
+					$response = json_decode($exAppEnabled->getBody(), true);
+					if (isset($response['error']) && strlen($response['error']) === 0) {
+						$this->updateExAppLastResponseTime($exApp);
+					} else {
+						$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
+						$this->disableExApp($exApp);
+						return false;
+					}
+				} else if (isset($exAppEnabled['error'])) {
+					$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $exAppEnabled['error']));
+					$this->disableExApp($exApp);
+					return false;
+				}
+
+				$cacheKey = 'exApp_' . $exApp->getAppid();
+				$this->cache->remove($cacheKey);
 				return true;
 			}
-		} catch (Exception) {
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while enabling ExApp: %s', $e->getMessage()));
 			return false;
 		}
 		return false;
 	}
 
 	/**
-	 * Disable ExApp
+	 * Disable ExApp. Sends request to ExApp to update enabled state.
+	 * If request fails, ExApp keep disabled in database.
+	 * Removes ExApp from cache.
 	 *
 	 * @param ExApp $exApp
 	 *
@@ -264,17 +286,30 @@ class AppEcosystemV2Service {
 	 */
 	public function disableExApp(ExApp $exApp): bool {
 		try {
-			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) === 1) {
-				return true;
+			$exAppDisabled = $this->requestToExApp(null, null, $exApp, '/enabled?enabled=0', 'PUT');
+			if ($exAppDisabled instanceof IResponse) {
+				$response = json_decode($exAppDisabled->getBody(), true);
+				if (isset($response['error']) && strlen($response['error']) !== 0) {
+					$this->logger->error(sprintf('Failed to disable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
+				}
+			} else if (isset($exAppDisabled['error'])) {
+				$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $exAppDisabled['error']));
 			}
-		} catch (Exception) {
+			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) !== 1) {
+				return false;
+			}
+			$this->updateExAppLastResponseTime($exApp);
+			$cacheKey = 'exApp_' . $exApp->getAppid();
+			$this->cache->remove($cacheKey);
+			return true;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while disabling ExApp: %s', $e->getMessage()));
 			return false;
 		}
-		return false;
 	}
 
 	/**
-	 * Send status check request to ExApp (after verify app registration)
+	 * Send status check request to ExApp
 	 *
 	 * @param string $appId
 	 *
@@ -282,9 +317,8 @@ class AppEcosystemV2Service {
 	 */
 	public function getAppStatus(string $appId): ?array {
 		try {
-			// TODO: Send request to ExApp, update status and last response time, return status
 			$exApp = $this->exAppMapper->findByAppId($appId);
-			$response = $this->aeRequestToExApp(null, '', $exApp, '/status', 'GET');
+			$response = $this->requestToExApp(null, '', $exApp, '/status', 'GET');
 			if ($response instanceof IResponse && $response->getStatusCode() === 200) {
 				$status = json_decode($response->getBody(), true);
 				$exApp->setStatus($status);
@@ -303,14 +337,26 @@ class AppEcosystemV2Service {
 					'appid' => $exApp->getAppid(),
 					'userid' => $userId,
 				]));
-			} catch (\Exception $e) {
-				$this->logger->error('Error while inserting ExApp user: ' . $e->getMessage());
+			} catch (Exception $e) {
+				$this->logger->error(sprintf('Error while inserting ExApp user: %s', $e->getMessage()));
 				return false;
 			}
 		}
 		return true;
 	}
 
+	/**
+	 * Request to ExApp with AppEcosystem auth headers and ExApp user initialization
+	 *
+	 * @param IRequest|null $request
+	 * @param string $userId
+	 * @param ExApp $exApp
+	 * @param string $route
+	 * @param string $method
+	 * @param array $params
+	 *
+	 * @return array|IResponse
+	 */
 	public function aeRequestToExApp(
 		?IRequest $request,
 		string $userId,
@@ -333,6 +379,18 @@ class AppEcosystemV2Service {
 		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params);
 	}
 
+	/**
+	 * Request to ExApp with AppEcosystem auth headers
+	 *
+	 * @param IRequest|null $request
+	 * @param string|null $userId
+	 * @param ExApp $exApp
+	 * @param string $route
+	 * @param string $method
+	 * @param array $params
+	 *
+	 * @return array|IResponse
+	 */
 	public function requestToExApp(
 		?IRequest $request,
 		?string $userId,
@@ -343,8 +401,8 @@ class AppEcosystemV2Service {
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
-			$url = $exApp->getHost() . ':' . $exApp->getPort() . $route;
-			// Check in ex_apps_users
+			$url = $this->getExAppUrl($exApp) . $route;
+
 			$options = [
 				'headers' => [
 					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
@@ -388,8 +446,26 @@ class AppEcosystemV2Service {
 //			TODO: Add files support
 			return $response;
 		} catch (\Exception $e) {
+			$this->logger->error(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()));
 			return ['error' => $e->getMessage()];
 		}
+	}
+
+	/**
+	 * Get ExApp URL based on ExApp and DeployConfig
+	 * ExApp appid is used as default hostname
+	 *
+	 * @param ExApp $exApp
+	 *
+	 * @return string
+	 */
+	private function getExAppUrl(ExApp $exApp): string {
+		$deployConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId())->getDeployConfig();
+		$host = $exApp->getAppid();
+		if (isset($deployConfig['expose-to-host']) || isset($deployConfig['expose-to-localhost'])) {
+			$host = $deployConfig['host'] ?? $exApp->getAppid();
+		}
+		return $host . ':' . $exApp->getPort();
 	}
 
 	private function getUriEncodedParams(array $params): string {
@@ -405,6 +481,18 @@ class AppEcosystemV2Service {
 		return $paramsContent . http_build_query($params);
 	}
 
+	/**
+	 * Generates request signature and data hash.
+	 * Data hash computed from request body even if it's empty.
+	 *
+	 * @param string $method
+	 * @param string $uri
+	 * @param array $options
+	 * @param string $secret
+	 * @param array $params
+	 *
+	 * @return array
+	 */
 	public function generateRequestSignature(string $method, string $uri, array $options, string $secret, array $params = []): array {
 		$headers = [];
 		if (isset($options['headers']['AE-VERSION'])) {
@@ -447,6 +535,21 @@ class AppEcosystemV2Service {
 		return hash_final($hashContext);
 	}
 
+	/**
+	 * AppEcosystem authentication request validation for Nextcloud:
+	 *  - checks if ExApp exists and is enabled
+	 *  - validates request sign time (if it's complies with set time window)
+	 *  - builds and checks request signature
+	 *  - checks if request data hash is valid
+	 *  - checks ExApp scopes <-> ExApp API copes
+	 *
+	 * More info in docs: https://github.com/cloud-py-api/app_ecosystem_v2#authentication-diagram (temporal url, TODO: update link to docs)
+	 *
+	 * @param IRequest $request
+	 * @param bool $isDav
+	 *
+	 * @return bool
+	 */
 	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
 		try {
 			$exApp = $this->exAppMapper->findByAppId($request->getHeader('EX-APP-ID'));
@@ -495,13 +598,13 @@ class AppEcosystemV2Service {
 				try {
 					$path = $request->getPathInfo();
 				} catch (\Exception $e) {
-					$this->logger->error('Error getting path info: ' . $e->getMessage());
+					$this->logger->error(sprintf('Error getting path info. Error: %s', $e->getMessage()));
 					return false;
 				}
 			} else {
 				$path = '/dav/';
 			}
-			$apiScope = $this->getApiRouteScope($path);
+			$apiScope = $this->exAppApiScopeService->getApiScopeByRoute($path);
 
 			if ($apiScope === null) {
 				$this->logger->error(sprintf('Failed to check apiScope %s', $path));
@@ -524,11 +627,21 @@ class AppEcosystemV2Service {
 		return false;
 	}
 
+	/**
+	 * Final step of AppEcosystem authentication request validation for Nextcloud:
+	 *  - sets active user (null if not a user context)
+	 *  - updates ExApp last response time
+	 *
+	 * @param $userId
+	 * @param $exApp
+	 *
+	 * @return bool
+	 */
 	private function finalizeRequestToNC($userId, $exApp): bool {
 		if ($userId !== '') {
 			$activeUser = $this->userManager->get($userId);
 			if ($activeUser === null) {
-				$this->logger->error('Requested user does not exists: ' . $userId);
+				$this->logger->error(sprintf('Requested user does not exists: %s', $userId));
 				return false;
 			}
 			$this->userSession->setUser($activeUser);
@@ -539,12 +652,42 @@ class AppEcosystemV2Service {
 		return true;
 	}
 
+	/**
+	 * Verify if sign time is within MAX_SIGN_TIME_DIFF (5 min)
+	 *
+	 * @param string $signTime
+	 * @return bool
+	 */
+	private function verifySignTime(string $signTime): bool {
+		$signTime = intval($signTime);
+		$currentTime = time();
+		$diff = $currentTime - $signTime;
+		if ($diff > self::MAX_SIGN_TIME_X_MIN_DIFF) {
+			$this->logger->error(sprintf('AE-SIGN-TIME is too old. Diff: %s', $diff));
+			return false;
+		}
+		if ($diff < 0) {
+			$this->logger->error(sprintf('AE-SIGN-TIME diff is negative: %s', $diff));
+			return false;
+		}
+		return true;
+	}
+
+	private function verifyDataHash(string $dataHash): bool {
+		$hashContext = hash_init('xxh64');
+		$stream = fopen('php://input', 'r');
+		hash_update_stream($hashContext, $stream, -1);
+		fclose($stream);
+		$phpInputHash = hash_final($hashContext);
+		return $dataHash === $phpInputHash;
+	}
+
 	public function updateExAppLastResponseTime(&$exApp): void {
 		$exApp->setLastResponseTime(time());
 		try {
 			$this->exAppMapper->updateLastResponseTime($exApp);
-		} catch (\Exception $e) {
-			$this->logger->error('Error while updating ExApp last response time for ExApp: ' . $exApp->getAppid() . '. Error: ' . $e->getMessage());
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while updating ExApp last response time for ExApp: %s. Error: %s', $exApp->getAppid(), $e->getMessage()));
 		}
 	}
 
@@ -573,97 +716,6 @@ class AppEcosystemV2Service {
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return false;
 		}
-	}
-
-	public function getApiRouteScope(string $apiRoute): ?ExAppApiScope {
-		try {
-//			TODO: Add caching here
-			$apiScopes = $this->exAppApiScopeMapper->findAll();
-			foreach ($apiScopes as $apiScope) {
-				if (str_starts_with($apiRoute, $apiScope->getApiRoute())) {
-					return $apiScope;
-				}
-			}
-			return null;
-		} catch (Exception) {
-			return null;
-		}
-	}
-
-	public function registerInitScopes(): bool {
-//		TODO: Rewrite to dynamic initialization
-		$apiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
-
-		$initApiScopes = [
-			['api_route' =>  '/cloud/capabilities', 'scope_group' => self::BASIC_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/files/actions/menu', 'scope_group' => self::BASIC_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/log', 'scope_group' => self::BASIC_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/ex-app/config', 'scope_group' => self::BASIC_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/ex-app/preference', 'scope_group' => self::BASIC_API_SCOPE],
-			['api_route' =>  $apiV1Prefix . '/users', 'scope_group' => self::SYSTEM_API_SCOPE],
-			['api_route' =>  '/cloud/apps', 'scope_group' => self::SYSTEM_API_SCOPE],
-			['api_route' =>  '/apps/provisioning_api/api/', 'scope_group' => self::SYSTEM_API_SCOPE],
-			['api_route' =>  '/cloud/users', 'scope_group' => self::USER_INFO],
-			['api_route' =>  '/cloud/groups', 'scope_group' => self::USER_INFO],
-			['api_route' =>  '/apps/user_status/api/', 'scope_group' => self::USER_STATUS],
-			['api_route' =>  '/apps/weather_status/api/', 'scope_group' => self::WEATHER_STATUS],
-			['api_route' =>  '/dav/', 'scope_group' => self::DAV_API_SCOPE],
-		];
-
-		try {
-			foreach ($initApiScopes as $apiScope) {
-				$this->exAppApiScopeMapper->insertOrUpdate(new ExAppApiScope($apiScope));
-			}
-			return true;
-		} catch (Exception $e) {
-			$this->logger->error('Failed to fill init api scopes: ' . $e->getMessage());
-			return false;
-		}
-	}
-
-	/**
-	 * @param int[] $scopeGroups
-	 *
-	 * @return string[]
-	 */
-	public function mapScopeGroupsToNames(array $scopeGroups): array {
-		$scopeNames = [];
-		foreach ($scopeGroups as $scopeGroup) {
-			if (array_key_exists($scopeGroup, self::SCOPE_GROUPS)) {
-				$scopeNames[] = self::SCOPE_GROUPS[$scopeGroup];
-			}
-		}
-		return $scopeNames;
-	}
-
-	/**
-	 * Verify if sign time is within MAX_SIGN_TIME_DIFF (5 min)
-	 *
-	 * @param string $signTime
-	 * @return bool
-	 */
-	private function verifySignTime(string $signTime): bool {
-		$signTime = intval($signTime);
-		$currentTime = time();
-		$diff = $currentTime - $signTime;
-		if ($diff > self::MAX_SIGN_TIME_DIFF) {
-			$this->logger->error('AE-SIGN-TIME diff is too big: ' . $diff);
-			return false;
-		}
-		if ($diff < 0) {
-			$this->logger->error('AE-SIGN-TIME diff is negative: ' . $diff);
-			return false;
-		}
-		return true;
-	}
-
-	private function verifyDataHash(string $dataHash): bool {
-		$hashContext = hash_init('xxh64');
-		$stream = fopen('php://input', 'r');
-		hash_update_stream($hashContext, $stream, -1);
-		fclose($stream);
-		$phpInputHash = hash_final($hashContext);
-		return $dataHash === $phpInputHash;
 	}
 
 	private function getCustomLogger(string $name): LoggerInterface {

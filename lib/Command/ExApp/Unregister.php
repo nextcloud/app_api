@@ -31,7 +31,6 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
-use OCP\Http\Client\IResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -63,8 +62,8 @@ class Unregister extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
-		$exApp = $this->service->getExApp($appId);
 
+		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found. Failed to unregister.', $appId));
 			return Command::FAILURE;
@@ -72,22 +71,18 @@ class Unregister extends Command {
 
 		$silent = $input->getOption('silent');
 
-		if ($silent) {
-			$exAppDisabled = $this->service->aeRequestToExApp(null, '', $exApp, '/enabled?enabled=0', 'PUT');
-			if ($exAppDisabled instanceof IResponse) {
-				$response = json_decode($exAppDisabled->getBody(), true);
-				if (isset($response['error']) && strlen($response['error']) === 0) {
-					$output->writeln('ExApp successfully disabled.');
-				} else {
-					$output->writeln(sprintf('ExApp %s not disabled. Failed to unregister. Error: %s', $appId, $response['error']));
-					return Command::FAILURE;
-				}
+		if (!$silent) {
+			if ($this->service->disableExApp($exApp)) {
+				$output->writeln(sprintf('ExApp %s successfully disabled.', $appId));
+			} else {
+				$output->writeln(sprintf('ExApp %s not disabled. Failed to disable.', $appId));
+				return Command::FAILURE;
 			}
 		}
 
 		$exApp = $this->service->unregisterExApp($appId);
 		if ($exApp === null) {
-			$output->writeln(sprintf('ExApp %s not found. Failed to unregister.', $appId));
+			$output->writeln(sprintf('Failed to unregister ExApp %s.', $appId));
 			return Command::FAILURE;
 		}
 		if ($exApp->getAppid() === $appId) {

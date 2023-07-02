@@ -32,9 +32,11 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Controller;
 
 use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
+use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
+use OCP\EventDispatcher\IEventDispatcher;
 use Psr\Log\LoggerInterface;
 
 use OCP\AppFramework\Http;
@@ -56,6 +58,7 @@ class OCSApiController extends OCSController {
 	private IL10N $l;
 	private AppEcosystemV2Service $service;
 	private ExFilesActionsMenuService $exFilesActionsMenuService;
+	private ExAppApiScopeService $exAppApiScopeService;
 	private ?string $userId;
 	protected $request;
 
@@ -65,7 +68,8 @@ class OCSApiController extends OCSController {
 		IL10N $l,
 		AppEcosystemV2Service $service,
 		ExFilesActionsMenuService $exFilesActionsMenuService,
-		LoggerInterface $logger
+		LoggerInterface $logger,
+		ExAppApiScopeService $exAppApiScopeService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -75,6 +79,7 @@ class OCSApiController extends OCSController {
 		$this->service = $service;
 		$this->exFilesActionsMenuService = $exFilesActionsMenuService;
 		$this->userId = $userId;
+		$this->exAppApiScopeService = $exAppApiScopeService;
 	}
 
 	/**
@@ -261,5 +266,25 @@ class OCSApiController extends OCSController {
 	#[NoCSRFRequired]
 	public function getExAppUsers(string $format = 'json'): Response {
 		return $this->buildResponse(new DataResponse($this->service->getNCUsersList(), Http::STATUS_OK), $format);
+	}
+
+	/**
+	 * @param string $apiRoute
+	 * @param int $scopeGroup
+	 * @param string $name
+	 * @param string $format
+	 *
+	 * @throws OCSBadRequestException
+	 * @return Response
+	 */
+	#[AppEcosystemAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function registerApiScope(string $apiRoute, int $scopeGroup, string $name, string $format): Response {
+		$apiScope = $this->exAppApiScopeService->registerApiScope($apiRoute, $scopeGroup, $name);
+		if ($apiScope === null) {
+			throw new OCSBadRequestException('Failed to register API scope');
+		}
+		return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
 	}
 }

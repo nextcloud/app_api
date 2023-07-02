@@ -78,29 +78,29 @@ class Deploy extends Command {
 		$appId = $input->getArgument('appid');
 
 		$exApp = $this->service->getExApp($appId);
-		if ($exApp === null) {
-			$output->writeln(sprintf('ExApp %s not found. Failed to deploy.', $appId));
-			return Command::FAILURE;
+		if ($exApp !== null) {
+			$output->writeln(sprintf('ExApp %s already deployed and registered.', $appId));
+			return Command::INVALID;
 		}
 
 		$daemonConfigId = (int) $input->getArgument('daemon-config-id');
+		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
+		if ($daemonConfig === null) {
+			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigId));
+			return Command::INVALID;
+		}
+		$deployConfig = $daemonConfig->getDeployConfig();
 
 		$imageParams = [
 			'image_name' => $input->getOption('image-name'),
 			'image_tag' => $input->getOption('image-tag') ?? 'latest',
 		];
-
 		$containerParams = [
 			'name' => $input->getOption('container-name') ?? $appId,
 			'hostname' => $input->getOption('container-hostname') ?? $appId,
 			'port' => (int) $input->getOption('container-port'),
+			'net' => $deployConfig['net'] ?? 'host',
 		];
-
-		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
-		if ($daemonConfig === null) {
-			$output->writeln('Daemon config not found.');
-			return Command::FAILURE;
-		}
 
 		$output->writeln(sprintf('Deploying ExApp %s on daemon: %s', $appId, $daemonConfig->getDisplayName()));
 		[$createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $imageParams, $containerParams);

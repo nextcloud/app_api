@@ -54,6 +54,10 @@ class ExAppUser extends Entity implements JsonSerializable {
 	public function __construct(array $params = []) {
 		$this->addType('appid', 'string');
 		$this->addType('userid', 'string');
+
+		if (isset($params['id'])) {
+			$this->setId($params['id']);
+		}
 		if (isset($params['appid'])) {
 			$this->setAppid($params['appid']);
 		}
@@ -64,6 +68,7 @@ class ExAppUser extends Entity implements JsonSerializable {
 
 	public function jsonSerialize(): array {
 		return [
+			'id' => $this->getId(),
 			'app_id' => $this->getAppid(),
 			'user_id' => $this->getUserid(),
 		];

@@ -34,12 +34,12 @@ namespace OCA\AppEcosystemV2\Migration;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 
 class DataInitializationStep implements IRepairStep {
-	private AppEcosystemV2Service $service;
+	private ExAppApiScopeService $service;
 
-	public function __construct(AppEcosystemV2Service $service) {
+	public function __construct(ExAppApiScopeService $service) {
 		$this->service = $service;
 	}
 

@@ -58,9 +58,13 @@ class RegisterDaemon extends Command {
 		$this->addArgument('host', InputArgument::REQUIRED);
 		$this->addArgument('port', InputArgument::REQUIRED);
 
-		$this->addOption('deploy-config', null, InputOption::VALUE_REQUIRED, 'Deploy config (e.g. docker network)');
+		// daemon-config settings
+		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'Docker network name');
+		$this->addOption('expose-to-host', null, InputOption::VALUE_REQUIRED, 'Expose container port to host');
+		$this->addOption('expose-to-localhost', null, InputOption::VALUE_REQUIRED, 'Expose container port to host on local network');
+		$this->addOption('host', null, InputOption::VALUE_REQUIRED, 'Docker daemon host (e.g. host.docker.internal)');
 
-		$this->addUsage('"docker-install" "Docker local" "unix-socket" "var/run/docker.sock" 0 --deploy_config \'{"network": "nextcloud"}\'');
+		$this->addUsage('"docker-install" "Docker local" "unix-socket" "var/run/docker.sock" 0 --net "nextcloud" --expose-to-localhost --host "host.docker.internal"');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -69,7 +73,13 @@ class RegisterDaemon extends Command {
 		$protocol = $input->getArgument('protocol');
 		$host = $input->getArgument('host');
 		$port = $input->getArgument('port');
-		$deployConfig = json_decode($input->getOption('deploy-config'), true);
+
+		$deployConfig = [
+			'net' => $input->getOption('net'),
+			'expose-to-host' => $input->getOption('expose-to-host'), // expose globally
+			'expose-to-localhost' => $input->getOption('expose-to-localhost'), // expose on local network
+			'host' => $input->getOption('host'),
+		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
 			'accepts_deploy_id' => $acceptsDeployId,

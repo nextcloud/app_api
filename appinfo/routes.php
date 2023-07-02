@@ -39,7 +39,7 @@ return [
 		['name' => 'ocsApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
 
 		// ExAppUsers
-		['name' => 'ocsApi#getExAppUsers', 'url' => 'api/v1/users', 'verb' => 'GET'],
+		['name' => 'ocsApi#getExAppUsers', 'url' => '/api/v1/users', 'verb' => 'GET'],
 
 		// Ex Apps registration
 		['name' => 'ocsApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
@@ -61,6 +61,9 @@ return [
 		['name' => 'preferences#setUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'POST'],
 		['name' => 'preferences#getUserConfigValues', 'url' => '/api/v1/ex-app/preference/get-values', 'verb' => 'POST'],
 		['name' => 'preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
+
+		// api_scopes
+		['name' => 'ocsApi#registerApiScope', 'url' => '/api/v1/ex-app/scopes', 'verb' => 'POST'],
 
 //	TODO: Implement Notifications, SearchProvider, BackgroundJob, SettingsPage, SettingsSection, EventListener, DashboardWidget, Capabilities
 

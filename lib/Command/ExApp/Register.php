@@ -32,6 +32,8 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\Db\ExApp;
+use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 use OCP\Http\Client\IResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -45,11 +47,19 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Register extends Command {
 	private AppEcosystemV2Service $service;
+	private DaemonConfigService $daemonConfigService;
+	private ExAppApiScopeService $exAppApiScopeService;
 
-	public function __construct(AppEcosystemV2Service $service) {
+	public function __construct(
+		AppEcosystemV2Service $service,
+		DaemonConfigService $daemonConfigService,
+		ExAppApiScopeService $exAppApiScopeService,
+	) {
 		parent::__construct();
 
 		$this->service = $service;
+		$this->daemonConfigService = $daemonConfigService;
+		$this->exAppApiScopeService = $exAppApiScopeService;
 	}
 
 	protected function configure() {
@@ -61,24 +71,23 @@ class Register extends Command {
 		$this->addArgument('name', InputArgument::REQUIRED);
 
 		$this->addOption('daemon-config-id', null, InputOption::VALUE_REQUIRED, 'Previously configured daemon config id for deployment');
-		$this->addOption('host', null, InputOption::VALUE_REQUIRED);
 		$this->addOption('port', null, InputOption::VALUE_REQUIRED);
 		$this->addOption('secret', 's', InputOption::VALUE_REQUIRED, 'Secret for ExApp. If not passed - will be generated');
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('system-app', null, InputOption::VALUE_NONE, 'Register as system app');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 
-		$this->addUsage('test_app 1.0.0 "Test app" --host http://host.docker.internal --port 9001 -e');
-		$this->addUsage('test_app 1.0.0 "Test app" --host http://host.docker.internal --port 9001 -e --force-scopes');
-		$this->addUsage('test_app 1.0.0 "Test app" --daemon-config-id 1 --host http://host.docker.internal --port 9001 -e --secret "***secret***" --force-scopes');
+		$this->addUsage('test_app 1.0.0 "Test app" 1 --port 9001 -e');
+		$this->addUsage('test_app 1.0.0 "Test app" 1 --port 9001 -e --force-scopes');
+		$this->addUsage('test_app 1.0.0 "Test app" 1 --port 9001 -e --force-scopes --system-app');
+		$this->addUsage('test_app 1.0.0 "Test app" --daemon-config-id 1 --port 9001 -e --secret "***secret***" --force-scopes');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$version = $input->getArgument('version');
 		$name = $input->getArgument('name');
-		$daemonConfigId = $input->getOption('daemon-config-id');
-		$host = $input->getOption('host');
+		$daemonConfigId = (int) $input->getOption('daemon-config-id');
 		$port = $input->getOption('port');
 		$secret = $input->getOption('secret');
 
@@ -87,11 +96,16 @@ class Register extends Command {
 			return Command::INVALID;
 		}
 
+		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
+		if ($daemonConfig === null) {
+			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigId));
+			return Command::INVALID;
+		}
+
 		$exApp = $this->service->registerExApp($appId, [
 			'version' => $version,
 			'name' => $name,
 			'daemon_config_id' => (int) $daemonConfigId,
-			'host' => $host,
 			'port' => $port,
 			'secret' => $secret,
 		]);
@@ -106,22 +120,7 @@ class Register extends Command {
 			$enabled = (bool) $input->getOption('enabled');
 			if ($enabled) {
 				if ($this->service->enableExApp($exApp)) {
-					$exAppEnabled = $this->service->requestToExApp(null, $userId, $exApp, '/enabled?enabled=1', 'PUT');
-					if ($exAppEnabled instanceof IResponse) {
-						$response = json_decode($exAppEnabled->getBody(), true);
-						if (isset($response['error']) && strlen($response['error']) === 0) {
-							$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
-						} else {
-							$output->writeln(sprintf('Failed to enable ExApp %s. Error: %s', $appId, $response['error']));
-							$this->service->disableExApp($exApp);
-							return Command::FAILURE;
-						}
-						$this->service->updateExAppLastResponseTime($exApp);
-					} else if (isset($exAppEnabled['error'])) {
-						$output->writeln(sprintf('Failed to enable ExApp %s. Error: %s', $appId, $exAppEnabled['error']));
-						$this->service->disableExApp($exApp);
-						return Command::FAILURE;
-					}
+					$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
 				} else {
 					$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
 					return Command::FAILURE;
@@ -139,14 +138,14 @@ class Register extends Command {
 
 				// Prompt to approve required ExApp scopes
 				$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ',
-						$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['required']))));
+						$this->exAppApiScopeService->mapScopeGroupsToNames($requestedExAppScopeGroups['required']))));
 				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 				$confirmRequiredScopes = $helper->ask($input, $output, $question);
 
 				// Prompt to approve optional ExApp scopes
 				if ($confirmRequiredScopes && count($requestedExAppScopeGroups['optional']) > 0) {
 					$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ',
-							$this->service->mapScopeGroupsToNames($requestedExAppScopeGroups['optional']))));
+							$this->exAppApiScopeService->mapScopeGroupsToNames($requestedExAppScopeGroups['optional']))));
 					$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 					$confirmOptionalScopes = $helper->ask($input, $output, $question);
 				}
@@ -180,7 +179,7 @@ class Register extends Command {
 		}
 		if (count($registeredScopeGroups) > 0) {
 			$output->writeln(sprintf('ExApp %s %s scope groups successfully set: %s', $exApp->getAppid(), $scopeType, implode(', ',
-					$this->service->mapScopeGroupsToNames($registeredScopeGroups))));
+					$this->exAppApiScopeService->mapScopeGroupsToNames($registeredScopeGroups))));
 		}
 	}
 

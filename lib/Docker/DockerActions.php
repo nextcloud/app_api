@@ -98,6 +98,9 @@ class DockerActions {
 		$options['json'] = [
 			'Image' => $imageName,
 			'Hostname' => $params['hostname'],
+			'HostConfig' => [
+				'NetworkMode' => $params['net']
+			],
 		];
 		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));
 		try {

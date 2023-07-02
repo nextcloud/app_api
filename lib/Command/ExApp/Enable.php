@@ -57,6 +57,7 @@ class Enable extends Command {
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
+
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found. Failed to enable.', $appId));
 			return Command::FAILURE;
@@ -65,13 +66,13 @@ class Enable extends Command {
 			$output->writeln(sprintf('ExApp %s already enabled.', $appId));
 			return Command::SUCCESS;
 		}
-		$exAppEnabled = $this->service->enableExApp($exApp);
-		if ($exAppEnabled) {
-//			TODO: Add enabled request to exApp
-			$output->writeln(sprintf('ExApp %s enabled.', $appId));
+
+		if ($this->service->enableExApp($exApp)) {
+			$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
 			return Command::SUCCESS;
 		}
-		$output->writeln(sprintf('Failed to enable ExApp %s', $appId));
+
+		$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
 		return Command::FAILURE;
 	}
 }

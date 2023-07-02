@@ -63,6 +63,9 @@ class ExAppConfig extends Entity implements JsonSerializable {
 		$this->addType('configvalue', 'string');
 		$this->addType('sensitive', 'int');
 
+		if (isset($params['id'])) {
+			$this->setId($params['id']);
+		}
 		if (isset($params['appid'])) {
 			$this->setAppid($params['appid']);
 		}
@@ -79,6 +82,7 @@ class ExAppConfig extends Entity implements JsonSerializable {
 
 	public function jsonSerialize(): array {
 		return [
+			'id' => $this->getId(),
 			'appid' => $this->getAppid(),
 			'configkey' => $this->getConfigkey(),
 			'configvalue' => $this->getConfigvalue(),

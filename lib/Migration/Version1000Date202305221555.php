@@ -98,10 +98,6 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addColumn('daemon_config_id', Types::BIGINT, [
 				'default' => 0,
 			]);
-			$table->addColumn('host', Types::STRING, [
-				'notnull' => true,
-				'length' => 255,
-			]);
 			$table->addColumn('port', Types::SMALLINT, [
 				'notnull' => true,
 				'unsigned' => true,
@@ -129,7 +125,6 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 
 			$table->setPrimaryKey(['id']);
 			$table->addUniqueIndex(['appid'], 'ex_apps__appid');
-			$table->addUniqueIndex(['host', 'port'], 'ex_apps__idx');
 			$table->addUniqueIndex(['daemon_config_id', 'port'], 'ex_apps_c_port__idx');
 		}
 
@@ -283,6 +278,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addColumn('scope_group', Types::BIGINT, [
 				'notnull' => true,
 				'default' => 0,
+			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
 			]);
 
 			$table->setPrimaryKey(['id']);

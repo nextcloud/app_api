@@ -56,6 +56,7 @@ class Disable extends Command {
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
+
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found. Failed to disable.', $appId));
 			return Command::FAILURE;
@@ -64,12 +65,12 @@ class Disable extends Command {
 			$output->writeln(sprintf('ExApp %s already disabled.', $appId));
 			return Command::SUCCESS;
 		}
-		$exAppDisabled = $this->service->disableExApp($exApp);
-		if ($exAppDisabled) {
-//			TODO: Add disabled request to exApp
-			$output->writeln(sprintf('ExApp %s disabled.', $appId));
+
+		if ($this->service->disableExApp($exApp)) {
+			$output->writeln(sprintf('ExApp %s successfully disabled.', $appId));
 			return Command::SUCCESS;
 		}
+
 		$output->writeln(sprintf('Failed to disable ExApp %s.', $appId));
 		return Command::FAILURE;
 	}

@@ -33,28 +33,29 @@ namespace OCA\AppEcosystemV2\Service;
 
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
+use OCP\ICache;
+use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExAppConfig;
 use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\Cache\CappedMemoryCache;
 
 /**
  * App configuration (appconfig_ex)
  */
 class ExAppConfigService {
 	private LoggerInterface $logger;
-	private CappedMemoryCache $cache;
+	private ICache $cache;
 	private ExAppConfigMapper $mapper;
 
 	public function __construct(
-		CappedMemoryCache $cache,
+		ICacheFactory $cacheFactory,
 		ExAppConfigMapper $mapper,
 		LoggerInterface $logger,
 	) {
-		$this->cache = $cache;
+		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/appconfig_ex');
 		$this->mapper = $mapper;
 		$this->logger = $logger;
 	}
@@ -69,10 +70,10 @@ class ExAppConfigService {
 	 */
 	public function getAppConfigValues(string $appId, array $configKeys): ?array {
 		$cacheKey = $appId . ':' . json_encode($configKeys);
-		$value = $this->cache->get($cacheKey);
-		if ($value !== null) {
-			return $value;
-		}
+//		$cached = $this->cache->get($cacheKey);
+//		if ($value !== null) {
+//			return $cached;
+//		}
 
 		try {
 			$exAppConfigs = array_map(function (ExAppConfig $exAppConfig) {
@@ -174,6 +175,11 @@ class ExAppConfigService {
 		}
 	}
 
+	/**
+	 * @param ExAppConfig $exAppConfig
+	 *
+	 * @return int|null
+	 */
 	public function updateAppConfigValue(ExAppConfig $exAppConfig): ?int {
 		try {
 			return $this->mapper->updateAppConfigValue($exAppConfig);
@@ -182,6 +188,11 @@ class ExAppConfigService {
 		}
 	}
 
+	/**
+	 * @param ExAppConfig $exAppConfig
+	 *
+	 * @return int|null
+	 */
 	public function deleteAppConfig(ExAppConfig $exAppConfig): ?int {
 		try {
 			return $this->mapper->deleteByAppidConfigkeys($exAppConfig->getAppid(), [$exAppConfig->getConfigkey()]);

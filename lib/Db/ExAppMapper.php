@@ -145,38 +145,4 @@ class ExAppMapper extends QBMapper {
 				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid()))
 			)->executeStatement();
 	}
-
-//	public function insert(Entity $entity): Entity {
-//		if (!$entity instanceof ExApp) {
-//			throw new \InvalidArgumentException('Wrong type of entity');
-//		}
-//		$qb = $this->db->getQueryBuilder();
-//
-//	}
-//
-//	public function insertOrUpdate(Entity $entity): Entity {
-//		if (!$entity instanceof ExApp) {
-//			throw new \InvalidArgumentException('Wrong type of entity');
-//		}
-//	}
-//
-//	public function update(Entity $entity): Entity {
-//		if (!$entity instanceof ExApp) {
-//			throw new \InvalidArgumentException('Wrong type of entity');
-//		}
-//	}
-//
-//	public function delete(Entity $entity): ExApp {
-//		if (!$entity instanceof ExApp) {
-//			throw new \InvalidArgumentException('Wrong type of entity');
-//		}
-//		$qb = $this->db->getQueryBuilder();
-//		$idType = $this->getParameterTypeForProperty($entity, 'appid');
-//		$qb->delete($this->tableName)
-//			->where(
-//				$qb->expr()->eq('appid', $qb->createNamedParameter($entity->getId(), $idType))
-//			);
-//		$qb->executeStatement();
-//		return $entity;
-//	}
 }
