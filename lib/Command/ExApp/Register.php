@@ -117,16 +117,6 @@ class Register extends Command {
 			$userId = $systemApp ? '' : null;
 			$this->service->setupExAppUser($exApp, $userId, $systemApp);
 
-			$enabled = (bool) $input->getOption('enabled');
-			if ($enabled) {
-				if ($this->service->enableExApp($exApp)) {
-					$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
-				} else {
-					$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
-					return Command::FAILURE;
-				}
-			}
-
 			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp, $userId);
 			$forceScopes = (bool) $input->getOption('force-scopes');
 			$confirmRequiredScopes = $forceScopes;
@@ -159,6 +149,16 @@ class Register extends Command {
 			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
 			if ($confirmOptionalScopes) {
 				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], false);
+			}
+
+			$enabled = (bool) $input->getOption('enabled');
+			if ($enabled) {
+				if ($this->service->enableExApp($exApp)) {
+					$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
+				} else {
+					$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
+					return Command::FAILURE;
+				}
 			}
 
 			return Command::SUCCESS;
