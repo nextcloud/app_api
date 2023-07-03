@@ -31,8 +31,12 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Docker\DockerActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCP\App\IAppManager;
+use OCP\IURLGenerator;
+use OCP\Security\ISecureRandom;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -45,17 +49,26 @@ class Deploy extends Command {
 	private AppEcosystemV2Service $service;
 	private DaemonConfigService $daemonConfigService;
 	private DockerActions $dockerActions;
+	private IAppManager $appManager;
+	private ISecureRandom $random;
+	private IURLGenerator $urlGenerator;
 
 	public function __construct(
 		AppEcosystemV2Service $service,
 		DaemonConfigService $daemonConfigService,
-		DockerActions $dockerActions
+		DockerActions $dockerActions,
+		IAppManager $appManager,
+		ISecureRandom $random,
+		IURLGenerator $urlGenerator,
 	) {
 		parent::__construct();
 
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->dockerActions = $dockerActions;
+		$this->appManager = $appManager;
+		$this->random = $random;
+		$this->urlGenerator = $urlGenerator;
 	}
 
 	protected function configure() {
@@ -65,17 +78,31 @@ class Deploy extends Command {
 		$this->addArgument('appid', InputArgument::REQUIRED);
 		$this->addArgument('daemon-config-id', InputArgument::REQUIRED);
 
-		$this->addOption('image-name', null, InputOption::VALUE_REQUIRED, 'Docker image name');
-		$this->addOption('image-tag', null, InputOption::VALUE_REQUIRED, 'Docker image tag');
-		$this->addOption('container-name', null, InputOption::VALUE_REQUIRED, 'Docker container name. If not specified, appid will be used as container name.');
-		$this->addOption('container-hostname', null, InputOption::VALUE_REQUIRED, 'Docker container hostname. If not specified, appid will be used as hostname.');
-		$this->addOption('container-port', null, InputOption::VALUE_REQUIRED, 'Docker container port');
+		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
+		$this->addOption('env', 'e', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Docker container environment variables', []);
 
 		$this->addUsage('test_app 1 --image-src=local --image-name=test_app --image-tag=latest');
+		$this->addUsage('php occ app_ecosystem_v2:app:deploy test_app 1 --info-xml /path/to/info.xml');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
+		$pathToInfoXml = $input->getOption('info-xml');
+
+		if ($pathToInfoXml === null) {
+			$output->writeln(sprintf('No info.xml specified for %s', $appId));
+			return Command::INVALID;
+		}
+
+		$infoXml = simplexml_load_file($pathToInfoXml);
+		if ($infoXml === false) {
+			$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
+			return Command::INVALID;
+		}
+		if ($appId !== (string) $infoXml->id) {
+			$output->writeln(sprintf('ExApp appid %s does not match appid in info.xml (%s)', $appId, $infoXml->id));
+			return Command::INVALID;
+		}
 
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp !== null) {
@@ -92,28 +119,75 @@ class Deploy extends Command {
 		$deployConfig = $daemonConfig->getDeployConfig();
 
 		$imageParams = [
-			'image_name' => $input->getOption('image-name'),
-			'image_tag' => $input->getOption('image-tag') ?? 'latest',
+			'image_src' => (string) $infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io',
+			'image_name' => (string) $infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId,
+			'image_tag' => (string) $infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest',
 		];
 		$containerParams = [
-			'name' => $input->getOption('container-name') ?? $appId,
-			'hostname' => $input->getOption('container-hostname') ?? $appId,
-			'port' => (int) $input->getOption('container-port'),
+			'name' => $appId,
+			'hostname' => $appId,
+			'port' => $deployConfig['port'] ?? 9001,
 			'net' => $deployConfig['net'] ?? 'host',
 		];
 
+		$envParams = $input->getOption('env');
+		$envs = $this->buildDeployEnvParams([
+			'appid' => $appId,
+			'version' => (string) $infoXml->version,
+			'host' => $appId,
+			'port' => $containerParams['port'],
+		], $envParams, $deployConfig);
+		$containerParams['env'] = $envs;
+
 		$output->writeln(sprintf('Deploying ExApp %s on daemon: %s', $appId, $daemonConfig->getDisplayName()));
-		[$createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $imageParams, $containerParams);
+		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $imageParams, $containerParams);
+
+		if (isset($pullResult['error'])) {
+			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $pullResult['error']));
+			return Command::FAILURE;
+		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
 			$output->writeln(sprintf('ExApp %s deployed successfully.', $appId));
 			$output->writeln(json_encode($startResult, JSON_PRETTY_PRINT));
 			$containerInfo = $this->dockerActions->inspectContainer($createResult['Id']);
 			$output->writeln(json_encode($containerInfo, JSON_PRETTY_PRINT));
+			$output->writeln(sprintf('ExApp shared secret: %s', $envs[1]));
 			return Command::SUCCESS;
 		} else {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error']));
 			return Command::FAILURE;
 		}
+	}
+
+	private function buildDeployEnvParams(array $params, array $envOptions, array $deployConfig): array {
+		$requiredEnvsNames = [
+			'AE_VERSION',
+			'APP_SECRET',
+			'APP_ID',
+			'APP_VERSION',
+			'APP_HOST',
+			'APP_PORT',
+			'NEXTCLOUD_URL',
+		];
+		$autoEnvs = [
+			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
+			sprintf('APP_SECRET=%s', $this->random->generate(128)),
+			sprintf('APP_ID=%s', $params['appid']),
+			sprintf('APP_VERSION=%s', $params['version']),
+			sprintf('APP_HOST=%s', $params['host']),
+			sprintf('APP_PORT=%s', $params['port']),
+			sprintf('NEXTCLOUD_URL=%s', str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
+		];
+
+		foreach ($envOptions as $envOption) {
+			[$key, $value] = explode('=', $envOption, 2);
+			// Do not overwrite required auto generated envs
+			if (!in_array($key, $requiredEnvsNames, true)) {
+				$autoEnvs[] = sprintf('%s=%s', $key, $value);
+			}
+		}
+
+		return $autoEnvs;
 	}
 }

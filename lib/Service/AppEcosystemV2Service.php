@@ -193,6 +193,7 @@ class AppEcosystemV2Service {
 				$this->logger->error(sprintf('Error while unregistering ExApp: %s', $appId));
 				return null;
 			}
+//			TODO: Remove app scopes, app users, app configs, app preferences
 			$this->cache->remove('exApp_' . $appId);
 			return $exApp;
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {

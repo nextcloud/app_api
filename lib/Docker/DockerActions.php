@@ -46,7 +46,7 @@ class DockerActions {
 		$this->guzzleClient = new \GuzzleHttp\Client(
 			[
 				'curl' => [
-					CURLOPT_UNIX_SOCKET_PATH => '/var/run/docker.sock',
+					CURLOPT_UNIX_SOCKET_PATH => '/var/run/docker.sock', // default docker socket path
 				],
 			]
 		);
@@ -67,40 +67,59 @@ class DockerActions {
 		array $containerParams,
 	): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
-			return ['error' => 'Daemon does not accept docker-install'];
+			return ['error' => 'Only docker-install is supported for now.'];
 		}
-		if (in_array($daemonConfig->getProtocol(), ['unix', 'unix-socket'])) {
+		if ($daemonConfig->getProtocol() === 'unix-socket') {
 			$this->guzzleClient = new \GuzzleHttp\Client(
 				[
 					'curl' => [
-						CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(), // Set socket path from daemon config
+						CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
 					],
 				]
 			);
 		}
-		$pullResult = $this->pullContainer($imageParams['image_name'], $imageParams['image_tag']);
+
+		$pullResult = $this->pullContainer($imageParams);
 		if (isset($pullResult['error'])) {
-			return $pullResult;
+			return [$pullResult];
 		}
-		$createResult = $this->createContainer($imageParams['image_name'], $containerParams);
+
+		$createResult = $this->createContainer($imageParams, $containerParams);
 		if (isset($createResult['error'])) {
-			return $createResult;
+			return [$createResult];
 		}
+
 		$startResult = $this->startContainer($createResult['Id']);
-		return [$createResult, $startResult];
+		return [$pullResult, $createResult, $startResult];
 	}
 
 	public function buildApiUrl(string $url): string {
 		return sprintf('http://localhost/%s/%s', self::DOCKER_API_VERSION, $url);
 	}
 
-	public function createContainer(string $imageName, array $params = []): array {
+	public function buildImageName(array $imageParams): string {
+		return $imageParams['image_src'] . '/' . $imageParams['image_name'] . ':' . $imageParams['image_tag'];
+	}
+
+	public function createContainer(array $imageParams, array $params = []): array {
+		// TODO: Implement dynamic port binding algorithm according to daemon deploy config
 		$options['json'] = [
-			'Image' => $imageName,
+			'Image' => $this->buildImageName($imageParams),
 			'Hostname' => $params['hostname'],
 			'HostConfig' => [
-				'NetworkMode' => $params['net']
+				'NetworkMode' => $params['net'],
+				'PortBindings' => [
+					$params['port'] . '/tcp' => [
+						[
+							'HostPort' => (string) $params['port'],
+						],
+					],
+				],
 			],
+			'ExposedPorts' => [
+				$params['port'] . '/tcp' => null,
+			],
+			'Env' => $params['env'],
 		];
 		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));
 		try {
@@ -125,15 +144,22 @@ class DockerActions {
 		}
 	}
 
-	public function pullContainer(string $imageName, string $imageTag = 'latest'): array {
-		$url = $this->buildApiUrl(sprintf('images/create?fromImage=%s&tag=%s', urlencode($imageName), urlencode($imageTag)));
+	public function pullContainer(array $params): array {
+		$url = $this->buildApiUrl(sprintf('images/create?fromImage=%s', $this->buildImageName($params)));
 		try {
-			$response = $this->guzzleClient->post($url);
+			$xRegistryAuth = json_encode([
+				'https://' . $params['image_src'] => []
+			], JSON_UNESCAPED_SLASHES);
+			$response = $this->guzzleClient->post($url, [
+				'headers' => [
+					'X-Registry-Auth' => base64_encode($xRegistryAuth),
+				],
+			]);
 			return ['success' => $response->getStatusCode() === 200];
 		} catch (GuzzleException $e) {
 			$this->logger->error('Failed to pull image', ['exception' => $e]);
 			error_log($e->getMessage());
-			return ['error' => 'Failed to pull image'];
+			return ['error' => 'Failed to pull image.'];
 		}
 	}
 

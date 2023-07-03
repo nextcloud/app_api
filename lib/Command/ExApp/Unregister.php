@@ -90,8 +90,9 @@ class Unregister extends Command {
 			foreach ($appScopes as $appScope) {
 				$this->service->removeExAppScopeGroup($exApp, intval($appScope->getScopeGroup()));
 			}
-			$output->writeln(sprintf('ExApp %s successfully unregistered.', $appId));
 		}
+
+		$output->writeln(sprintf('ExApp %s successfully unregistered.', $appId));
 		return Command::SUCCESS;
 	}
 }

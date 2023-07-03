@@ -56,12 +56,12 @@ class RegisterDaemon extends Command {
 		$this->addArgument('display-name', InputArgument::REQUIRED);
 		$this->addArgument('protocol', InputArgument::REQUIRED);
 		$this->addArgument('host', InputArgument::REQUIRED);
-		$this->addArgument('port', InputArgument::REQUIRED);
+		$this->addArgument('port', InputArgument::OPTIONAL, 'Port of the daemon, only required for network protocol', 0);
 
 		// daemon-config settings
-		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'Docker network name');
-		$this->addOption('expose', null, InputOption::VALUE_OPTIONAL, 'Expose container port [local, global, null]');
-		$this->addOption('host', null, InputOption::VALUE_REQUIRED, 'Docker daemon host (e.g. host.docker.internal)');
+		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'DeployConfig, docker network name');
+		$this->addOption('expose', null, InputOption::VALUE_OPTIONAL, 'DeployConfig, expose container port [local, global, null]');
+		$this->addOption('host', null, InputOption::VALUE_REQUIRED, 'DeployConfig, docker daemon host (e.g. host.docker.internal)');
 
 		$this->addUsage('"docker-install" "Docker local" "unix-socket" "var/run/docker.sock" 0 --net "nextcloud" --expose local --host "host.docker.internal"');
 	}

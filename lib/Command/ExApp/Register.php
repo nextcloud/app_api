@@ -88,7 +88,7 @@ class Register extends Command {
 		$version = $input->getArgument('version');
 		$name = $input->getArgument('name');
 		$daemonConfigId = (int) $input->getOption('daemon-config-id');
-		$port = $input->getOption('port');
+		$port = (int) $input->getOption('port');
 		$secret = $input->getOption('secret');
 
 		if ($this->service->getExApp($appId) !== null) {
@@ -105,7 +105,7 @@ class Register extends Command {
 		$exApp = $this->service->registerExApp($appId, [
 			'version' => $version,
 			'name' => $name,
-			'daemon_config_id' => (int) $daemonConfigId,
+			'daemon_config_id' => $daemonConfigId,
 			'port' => $port,
 			'secret' => $secret,
 		]);
@@ -118,6 +118,13 @@ class Register extends Command {
 			$this->service->setupExAppUser($exApp, $userId, $systemApp);
 
 			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp, $userId);
+			if ($requestedExAppScopeGroups === null) {
+				$output->writeln(sprintf('Failed to get requested ExApp scopes for %s.', $appId));
+				// Fallback unregistering ExApp
+				$this->service->unregisterExApp($exApp->getAppid());
+				return Command::INVALID;
+			}
+
 			$forceScopes = (bool) $input->getOption('force-scopes');
 			$confirmRequiredScopes = $forceScopes;
 			$confirmOptionalScopes = $forceScopes;
@@ -143,6 +150,8 @@ class Register extends Command {
 
 			if (!$confirmRequiredScopes) {
 				$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
+				// Fallback unregistering ExApp
+				$this->service->unregisterExApp($exApp->getAppid());
 				return Command::SUCCESS;
 			}
 
@@ -157,12 +166,15 @@ class Register extends Command {
 					$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
 				} else {
 					$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
+					// Fallback unregistering ExApp
+					$this->service->unregisterExApp($exApp->getAppid());
 					return Command::FAILURE;
 				}
 			}
 
 			return Command::SUCCESS;
 		}
+
 		$output->writeln(sprintf('Failed to register ExApp %s.', $appId));
 		return Command::FAILURE;
 	}
