@@ -462,7 +462,7 @@ class AppEcosystemV2Service {
 	private function getExAppUrl(ExApp $exApp): string {
 		$deployConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId())->getDeployConfig();
 		$host = $exApp->getAppid();
-		if (isset($deployConfig['expose-to-host']) || isset($deployConfig['expose-to-localhost'])) {
+		if (isset($deployConfig['expose'])) {
 			$host = $deployConfig['host'] ?? $exApp->getAppid();
 		}
 		return $host . ':' . $exApp->getPort();
