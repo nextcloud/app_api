@@ -92,16 +92,18 @@ jobs:
           "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
           ./occ app_ecosystem_v2:app:enable app_python_skeleton
 
-      - name: Save container logs
+      - name: Save container ingo & logs
         if: always()
-        run: docker logs --details app_python_skeleton > container.log
+        run: |
+          docker inspect --format json app_python_skeleton | json_pp > data/container.log
+          docker logs --details app_python_skeleton >> data/container.log
 
       - name: Upload Docker logs
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: nc_host_app_docker_exp_local_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
-          path: container.log
+          path: data/container.log
           if-no-files-found: warn
 
       - name: Upload NC logs
