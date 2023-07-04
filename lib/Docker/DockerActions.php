@@ -37,7 +37,7 @@ use OCA\AppEcosystemV2\Db\DaemonConfig;
 use Psr\Log\LoggerInterface;
 
 class DockerActions {
-	public const DOCKER_API_VERSION = 'v1.43';
+	public const DOCKER_API_VERSION = 'v1.41';
 	private LoggerInterface $logger;
 	private \GuzzleHttp\Client $guzzleClient;
 
