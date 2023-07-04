@@ -125,6 +125,7 @@ class Deploy extends Command {
 			'hostname' => $appId,
 			'port' => $this->getRandomPort(),
 			'net' => $deployConfig['net'] ?? 'bridge',
+			'host_ip' => $this->buildHostIp($deployConfig),
 		];
 
 		$envParams = $input->getOption('env');
@@ -133,7 +134,6 @@ class Deploy extends Command {
 			'version' => (string) $infoXml->version,
 			'host' => isset($deployConfig['expose']) ? '127.0.0.1' : '0.0.0.0',
 			'port' => $containerParams['port'],
-			'host_ip' => $this->buildHostIp($deployConfig),
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
