@@ -132,7 +132,8 @@ class Deploy extends Command {
 		$envs = $this->buildDeployEnvParams([
 			'appid' => $appId,
 			'version' => (string) $infoXml->version,
-			'host' => isset($deployConfig['expose']) ? '127.0.0.1' : '0.0.0.0',
+			'host' => '0.0.0.0',
+//			'host' => isset($deployConfig['expose']) ? '127.0.0.1' : '0.0.0.0',
 			'port' => $containerParams['port'],
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
