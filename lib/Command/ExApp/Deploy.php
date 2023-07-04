@@ -80,9 +80,6 @@ class Deploy extends Command {
 
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('env', 'e', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Docker container environment variables', []);
-
-		$this->addUsage('test_app 1 --image-src=local --image-name=test_app --image-tag=latest');
-		$this->addUsage('php occ app_ecosystem_v2:app:deploy test_app 1 --info-xml /path/to/info.xml');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -139,7 +136,6 @@ class Deploy extends Command {
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
-		$output->writeln(sprintf('Deploying ExApp %s on daemon: %s', $appId, $daemonConfig->getDisplayName()));
 		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $imageParams, $containerParams);
 
 		if (isset($pullResult['error'])) {
@@ -148,14 +144,19 @@ class Deploy extends Command {
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
-			$output->writeln(sprintf('ExApp %s deployed successfully.', $appId));
-			$output->writeln(json_encode($startResult, JSON_PRETTY_PRINT));
-			$containerInfo = $this->dockerActions->inspectContainer($createResult['Id']);
-			$output->writeln(json_encode($containerInfo, JSON_PRETTY_PRINT));
-			$output->writeln(sprintf('ExApp shared secret: %s', $envs[1]));
+			$resultOutput = [
+				'appid' => $appId,
+				'name' => (string) $infoXml->name,
+				'daemon_config_id' => $daemonConfigId,
+				'version' => (string) $infoXml->version,
+				'secret' => explode('=', $envs[1])[1],
+				'host' => explode('=', $envs[4])[1],
+				'port' => explode('=', $envs[5])[1],
+			];
+			$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
 			return Command::SUCCESS;
 		} else {
-			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error']));
+			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
 			return Command::FAILURE;
 		}
 	}

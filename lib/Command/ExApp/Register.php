@@ -66,9 +66,7 @@ class Register extends Command {
 		$this->setName('app_ecosystem_v2:app:register');
 		$this->setDescription('Register external app');
 
-		$this->addArgument('appid', InputArgument::REQUIRED);
-		$this->addArgument('version', InputArgument::REQUIRED);
-		$this->addArgument('name', InputArgument::REQUIRED);
+		$this->addArgument('deploy-json-output', InputArgument::REQUIRED, 'JSON output from deploy command');
 
 		$this->addOption('daemon-config-id', null, InputOption::VALUE_REQUIRED, 'Previously configured daemon config id for deployment');
 		$this->addOption('port', null, InputOption::VALUE_REQUIRED);
@@ -76,20 +74,21 @@ class Register extends Command {
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('system-app', null, InputOption::VALUE_NONE, 'Register as system app');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
-
-		$this->addUsage('test_app 1.0.0 "Test app" 1 --port 9001 -e');
-		$this->addUsage('test_app 1.0.0 "Test app" 1 --port 9001 -e --force-scopes');
-		$this->addUsage('test_app 1.0.0 "Test app" 1 --port 9001 -e --force-scopes --system-app');
-		$this->addUsage('test_app 1.0.0 "Test app" --daemon-config-id 1 --port 9001 -e --secret "***secret***" --force-scopes');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$appId = $input->getArgument('appid');
-		$version = $input->getArgument('version');
-		$name = $input->getArgument('name');
-		$daemonConfigId = (int) $input->getOption('daemon-config-id');
-		$port = (int) $input->getOption('port');
-		$secret = $input->getOption('secret');
+		$deployJsonOutput = json_decode($input->getArgument('deploy-json-output'), true);
+		if ($deployJsonOutput === null) {
+			$output->writeln('Invalid deploy JSON output.');
+			return Command::INVALID;
+		}
+
+		$appId = $deployJsonOutput['appid'];
+		$version = $deployJsonOutput['version'];
+		$name = $deployJsonOutput['name'];
+		$daemonConfigId = (int) ($input->getOption('daemon-config-id') ?? $deployJsonOutput['daemon_config_id']);
+		$port = (int) ($input->getOption('port') ?? $deployJsonOutput['port']);
+		$secret = $input->getOption('secret') ?? $deployJsonOutput['secret'];
 
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln(sprintf('ExApp %s already registered.', $appId));

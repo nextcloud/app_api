@@ -81,12 +81,12 @@ class DockerActions {
 
 		$pullResult = $this->pullContainer($imageParams);
 		if (isset($pullResult['error'])) {
-			return [$pullResult];
+			return [$pullResult, null, null];
 		}
 
 		$createResult = $this->createContainer($imageParams, $containerParams);
 		if (isset($createResult['error'])) {
-			return [$createResult];
+			return [null, $createResult, null];
 		}
 
 		$startResult = $this->startContainer($createResult['Id']);
@@ -103,7 +103,7 @@ class DockerActions {
 
 	public function createContainer(array $imageParams, array $params = []): array {
 		// TODO: Implement dynamic port binding algorithm according to daemon deploy config
-		$options['json'] = [
+		$containerParams = [
 			'Image' => $this->buildImageName($imageParams),
 			'Hostname' => $params['hostname'],
 			'HostConfig' => [
@@ -121,8 +121,10 @@ class DockerActions {
 			],
 			'Env' => $params['env'],
 		];
+
 		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));
 		try {
+			$options['json'] = $containerParams;
 			$response = $this->guzzleClient->post($url, $options);
 			return json_decode((string) $response->getBody(), true);
 		} catch (GuzzleException $e) {
