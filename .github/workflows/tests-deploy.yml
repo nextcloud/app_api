@@ -4,28 +4,22 @@ on:
   pull_request:
     paths:
       - '.github/workflows/tests-deploy.yml'
-      - 'appinfo/**'
-      - 'css/**'
       - 'lib/**'
-      - 'src/**'
   push:
     branches: [main]
     paths:
       - '.github/workflows/tests-deploy.yml'
-      - 'appinfo/**'
-      - 'css/**'
       - 'lib/**'
-      - 'src/**'
   workflow_dispatch:
 
 jobs:
-  nc-host-app-docker:
+  nc-host-app-docker-exp-local:
     runs-on: ubuntu-22.04
-    name: NC In Host • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
+    name: NC In Host(expose=local) • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
     strategy:
       fail-fast: false
       matrix:
-        php-version: [ '8.1', '8.2' ]
+        php-version: [ '8.1' ]
         server-version: [ 'stable27' ]
         include:
           - server-version: "master"
@@ -85,7 +79,7 @@ jobs:
         run: |
           mkdir data
           ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass admin
-          ./occ config:system:set loglevel --value=1
+          ./occ config:system:set loglevel --value=0
           ./occ config:system:set debug --value=true --type=boolean
           ./occ config:system:set allow_local_remote_servers --value true
           ./occ app:enable --force ${{ env.APP_NAME }}
@@ -98,13 +92,21 @@ jobs:
           "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
           ./occ app_ecosystem_v2:app:enable app_python_skeleton
 
+      - name: Save container logs
+        run: docker logs app_python_skeleton >> container.log
+
+      - name: Upload Docker logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_host_app_docker_exp_local_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+          path: container.log
+          if-no-files-found: warn
+
       - name: Upload NC logs
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_log_pgsql_${{ matrix.server-version }}_${{ matrix.php-version }}
+          name: nc_host_app_docker_exp_local_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
-
-#      - name: Hello
-#        run: echo "expose-local, expose-null + net host {each for docker daemon sock/net}"
