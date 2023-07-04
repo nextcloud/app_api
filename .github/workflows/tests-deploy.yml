@@ -9,6 +9,7 @@ on:
       - 'lib/**'
       - 'src/**'
   push:
+    branches: [main]
     paths:
       - '.github/workflows/tests-deploy.yml'
       - 'appinfo/**'
@@ -20,7 +21,7 @@ on:
 jobs:
   nc-host-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Host • ${{ matrix.nextcloud }} • 🐘${{ matrix.php-version }}
+    name: NC In Host • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
     strategy:
       fail-fast: false
       matrix:
