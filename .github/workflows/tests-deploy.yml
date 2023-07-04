@@ -93,7 +93,8 @@ jobs:
           ./occ app_ecosystem_v2:app:enable app_python_skeleton
 
       - name: Save container logs
-        run: docker logs app_python_skeleton >> container.log
+        if: always()
+        run: docker logs --details app_python_skeleton >> container.log
 
       - name: Upload Docker logs
         if: always()
