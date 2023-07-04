@@ -22,9 +22,13 @@ jobs:
     runs-on: ubuntu-22.04
     name: NC In Host • ${{ matrix.nextcloud }} • 🐘${{ matrix.php-version }}
     strategy:
+      fail-fast: false
       matrix:
         php-version: [ '8.1', '8.2' ]
-        server-version: [ '27.0.0', 'master' ]
+        server-version: [ '27.0.0' ]
+        include:
+          - server-version: "master"
+            php-version: "8.2"
 
     services:
       postgres:
@@ -36,7 +40,6 @@ jobs:
           POSTGRES_PASSWORD: rootpassword
           POSTGRES_DB: nextcloud
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
-
 
     steps:
       - name: Set app env
