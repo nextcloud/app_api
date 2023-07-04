@@ -76,6 +76,23 @@ class ExAppMapper extends QBMapper {
 	}
 
 	/**
+	 * @param int $port
+	 *
+	 * @throws Exception
+	 *
+	 * @return array
+	 */
+	public function findByPort(int $port): array {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->tableName)
+			->where(
+				$qb->expr()->eq('port', $qb->createNamedParameter($port))
+			);
+		return $this->findEntities($qb);
+	}
+
+	/**
 	 * @param string $name
 	 *
 	 * @throws DoesNotExistException if not found

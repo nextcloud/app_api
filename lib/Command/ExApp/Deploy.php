@@ -84,8 +84,8 @@ class Deploy extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
-		$pathToInfoXml = $input->getOption('info-xml');
 
+		$pathToInfoXml = $input->getOption('info-xml');
 		if ($pathToInfoXml === null) {
 			$output->writeln(sprintf('No info.xml specified for %s', $appId));
 			return Command::INVALID;
@@ -123,16 +123,17 @@ class Deploy extends Command {
 		$containerParams = [
 			'name' => $appId,
 			'hostname' => $appId,
-			'port' => $deployConfig['port'] ?? 9001,
-			'net' => $deployConfig['net'] ?? 'host',
+			'port' => $this->getRandomPort(),
+			'net' => $deployConfig['net'] ?? 'bridge',
 		];
 
 		$envParams = $input->getOption('env');
 		$envs = $this->buildDeployEnvParams([
 			'appid' => $appId,
 			'version' => (string) $infoXml->version,
-			'host' => $appId,
+			'host' => isset($deployConfig['expose']) ? '127.0.0.1' : '0.0.0.0',
 			'port' => $containerParams['port'],
+			'host_ip' => $this->buildHostIp($deployConfig),
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
@@ -151,6 +152,8 @@ class Deploy extends Command {
 				'version' => (string) $infoXml->version,
 				'secret' => explode('=', $envs[1])[1],
 				'port' => explode('=', $envs[5])[1],
+				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
+				'system_app' => false,
 			];
 			$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
 			return Command::SUCCESS;
@@ -189,5 +192,26 @@ class Deploy extends Command {
 		}
 
 		return $autoEnvs;
+	}
+
+	private function getRandomPort(): int {
+		$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
+		while ($this->service->getExAppsByPort($port) !== []) {
+			$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
+		}
+		return $port;
+	}
+
+	private function buildHostIp(array $deployConfig): ?string {
+		if (!isset($deployConfig['expose'])) {
+			return null;
+		}
+		if ($deployConfig['expose'] === 'global') {
+			return '0.0.0.0';
+		}
+		if ($deployConfig['expose'] === 'local') {
+			return '127.0.0.1';
+		}
+		return null;
 	}
 }

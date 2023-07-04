@@ -87,6 +87,7 @@ class Register extends Command {
 		$version = $deployJsonOutput['version'];
 		$name = $deployJsonOutput['name'];
 		$daemonConfigId = (int) ($input->getOption('daemon-config-id') ?? $deployJsonOutput['daemon_config_id']);
+		$protocol = $deployJsonOutput['protocol'] ?? 'http';
 		$port = (int) ($input->getOption('port') ?? $deployJsonOutput['port']);
 		$secret = $input->getOption('secret') ?? $deployJsonOutput['secret'];
 
@@ -105,6 +106,7 @@ class Register extends Command {
 			'version' => $version,
 			'name' => $name,
 			'daemon_config_id' => $daemonConfigId,
+			'protocol' => $protocol,
 			'port' => $port,
 			'secret' => $secret,
 		]);
@@ -112,7 +114,7 @@ class Register extends Command {
 		if ($exApp !== null) {
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 
-			$systemApp = (bool) $input->getOption('system-app');
+			$systemApp = (bool) ($input->getOption('system-app') ?? $deployJsonOutput['system_app']) ?? false;
 			$userId = $systemApp ? '' : null;
 			$this->service->setupExAppUser($exApp, $userId, $systemApp);
 
@@ -149,7 +151,7 @@ class Register extends Command {
 				}
 			}
 
-			if (!$confirmRequiredScopes) {
+			if (!$confirmRequiredScopes && count($requestedExAppScopeGroups['required']) > 0) {
 				$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
 				// Fallback unregistering ExApp
 				$this->service->unregisterExApp($exApp->getAppid());

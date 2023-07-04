@@ -142,6 +142,7 @@ class AppEcosystemV2Service {
 			$exApp->setVersion($appData['version']);
 			$exApp->setName($appData['name']);
 			$exApp->setDaemonConfigId($appData['daemon_config_id']);
+			$exApp->setProtocol($appData['protocol']);
 			$exApp->setPort($appData['port']);
 			if ($appData['secret'] !== '') {
 				$exApp->setSecret($appData['secret']);
@@ -163,6 +164,7 @@ class AppEcosystemV2Service {
 				'version' => $appData['version'],
 				'name' => $appData['name'],
 				'daemon_config_id' => $appData['daemon_config_id'],
+				'protocol' => $appData['protocol'],
 				'port' => $appData['port'],
 				'secret' =>  $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
 				'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
@@ -199,6 +201,14 @@ class AppEcosystemV2Service {
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()));
 			return null;
+		}
+	}
+
+	public function getExAppsByPort(int $port): array {
+		try {
+			return $this->exAppMapper->findByPort($port);
+		} catch (Exception) {
+			return [];
 		}
 	}
 
@@ -466,7 +476,7 @@ class AppEcosystemV2Service {
 		if (isset($deployConfig['expose'])) {
 			$host = $deployConfig['host'] ?? $exApp->getAppid();
 		}
-		return $host . ':' . $exApp->getPort();
+		return sprintf('%s://%s:%s', $exApp->getProtocol(), $host, $exApp->getPort());
 	}
 
 	private function getUriEncodedParams(array $params): string {
