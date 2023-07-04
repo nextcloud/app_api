@@ -92,10 +92,11 @@ jobs:
 
       - name: Test deploy
         run: |
+          ./occ app_ecosystem_v2:daemon:register docker-install Docker unix-socket /var/run/docker.sock 0 --expose="local"
           echo "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
           ./occ app_ecosystem_v2:app:register \
-          "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)" \
-          -e
+          "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+          ./occ app_ecosystem_v2:app:enable app_python_skeleton
 
       - name: Upload NC logs
         if: always()
