@@ -150,7 +150,6 @@ class Deploy extends Command {
 				'daemon_config_id' => $daemonConfigId,
 				'version' => (string) $infoXml->version,
 				'secret' => explode('=', $envs[1])[1],
-				'host' => explode('=', $envs[4])[1],
 				'port' => explode('=', $envs[5])[1],
 			];
 			$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));

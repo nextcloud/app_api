@@ -84,11 +84,24 @@ options:
 - `info-xml` - `[required]` path to info.xml (see [info.xml schema](#exapp-infoxml-schema)) file (url or local absolute path)
 - `env` - `[required]` environment variables to pass to the docker container (list of required env variables is defined below [deploy env variables](#deploy-env-variables))
 
-This command will generate and return shared `APP_SECRET`, save it to proceed with ExApp registration. 
+Successful deployment will return the following JSON output which is used then in ExApp registration:
+
+```json
+{
+	"appid": "app_python_skeleton",
+	"name":"App Python Skeleton",
+	"daemon_config_id": 1,
+	"version":"1.0.0",
+	"secret":"***generated-secret***",
+	"host":"app_python_skeleton",
+	"port":"9001"
+}
+```
 
 ### Deploy env variables
 
-Deploy env variables are used to configure ExApp. The following env variables are required (can be passed using multiple `--env` options):
+Deploy env variables are used to configure ExApp. 
+The following env variables are required (additional envs can be passed using multiple `--env ENV_NAME=ENV_VAL` options):
 
 - `AE_VERSION` - `[automaticly]` AppEcosystemV2 version
 - `APP_SECRET` - `[automaticly]` generated shared secret used for AppEcosystemV2 Auth
@@ -100,12 +113,10 @@ Deploy env variables are used to configure ExApp. The following env variables ar
 
 ### Example
 
-Let's say we want to deploy ExApp with appid `test_app` and version `1.0.0` on local docker daemon registered in previous step.
+Let's say we want to deploy ExApp with appid `app_python_skeleton` and version `1.0.0` on local docker daemon registered in previous step.
 
 ```
-php occ app_ecosystem_v2:app:deploy test_app 1 --image-name test_app --image-tag 1.0.0 --container-name test_app \
---container-hostname host.docker.internal --container-port 9001 \ 
---env APP_SECRET=***secret*** --env APP_VERSION=1.0.0
+php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
 ```
 
 `APP_SECRET` is required to authenticate ExApp. It must be the same as the one used in ExApp registration step.
@@ -117,14 +128,12 @@ The third step is to register ExApp. This is done using `occ` CLI tool or in App
 ### CLI
 
 ```
-php occ app_ecosystem_v2:app:register [--daemon-config-id DAEMON-CONFIG-ID] [--port PORT] [-s|--secret SECRET] [-e|--enabled] [--system-app] [--force-scopes] [--] <appid> <version> <name>
+app_ecosystem_v2:app:register [--daemon-config-id DAEMON-CONFIG-ID] [--port PORT] [-s|--secret SECRET] [-e|--enabled] [--system-app] [--force-scopes] [--] <deploy-json-output>
 ```
 
 arguments:
 
-- `appid` - `[required]` appid of the ExApp
-- `version` - `[required]` version of the ExApp
-- `name` - `[required]` name of the ExApp (will be displayed in the UI)
+- `deploy-json-output` - `[required]` JSON output from ExApp deployment step
 
 options:
 - `daemon-config-id` - `[required]` daemon config id to use for ExApp deployment
@@ -136,25 +145,24 @@ options:
 
 ### Example
 
-Let's say we want to register ExApp with appid `test_app` and version `1.0.0` on local docker daemon registered in previous step.
+Let's say we want to register ExApp with appid `app_python_skeleton` and version `1.0.0` on local docker daemon registered in previous step.
 
 ```
-php occ app_ecosystem_v2:app:register test_app 1.0.0 "Test App" --daemon-config-id 1 --port 9001 --secret ***secret*** --enabled --system-app --force-scopes
+php occ app_ecosystem_v2:app:register {"appid":"app_python_skeleton","name":"App Python Skeleton","daemon_config_id":1,"version":"1.0.0","secret":"***secret***","host":"app_python_skeleton","port":"9001"} --enabled --system-app --force-scopes
 ```
 
 ## ExApp info.xml Schema
 
-ExApp info.xml ([example repo](https://github.com/bigcat88/PyAppV2-skeleton/)) file is used to describe ExApp.
+ExApp info.xml ([example repo](https://github.com/cloud-py-api/py_app_v2-skeleton)) file is used to describe ExApp.
 It is used to generate ExApp docker container and to register ExApp in Nextcloud.
-It has the same structure as Nextcloud appinfo/info.xml file, but with some additional tags:
+It has the same structure as Nextcloud appinfo/info.xml file, but with some additional fields:
 
 ```xml
 <ex-app>
 	<docker-install>
 		<registry>ghcr.io</registry>
-		<image>cloud-py-api/PyAppV2-skeleton</image>
+		<image>cloud-py-api/py_app_v2-skeleton</image>
 		<image-tag>latest</image-tag>
 	</docker-install>
 </ex-app>
 ```
-	
