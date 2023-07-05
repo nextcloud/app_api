@@ -83,7 +83,7 @@ jobs:
           ./occ config:system:set debug --value=true --type=boolean
           ./occ config:system:set allow_local_remote_servers --value true
           ./occ app:enable --force ${{ env.APP_NAME }}
-          php -S localhost:8080 &
+          php -S localhost &
 
       - name: Test deploy
         run: |
