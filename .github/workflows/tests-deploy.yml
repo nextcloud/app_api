@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  nc-host-app-docker-exp-local:
+  nc-host-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Host(expose=local) • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
+    name: NC In Host • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
     strategy:
       fail-fast: false
       matrix:
@@ -47,7 +47,7 @@ jobs:
           repository: nextcloud/server
           ref: ${{ matrix.server-version }}
 
-      - name: Checkout app
+      - name: Checkout AppEcosystemV2
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}
@@ -87,10 +87,16 @@ jobs:
 
       - name: Test deploy
         run: |
-          ./occ app_ecosystem_v2:daemon:register docker-install Docker unix-socket /var/run/docker.sock 0 --expose="local"
+          ./occ app_ecosystem_v2:daemon:register docker-install Docker unix-socket /var/run/docker.sock http://localhost:8080/index.php
           ./occ app_ecosystem_v2:app:register \
           "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
           ./occ app_ecosystem_v2:app:enable app_python_skeleton
+          ./occ app_ecosystem_v2:app:disable app_python_skeleton
+
+      - name: Check logs
+        run: |
+          fgrep -iq 'Hello from app_python_skeleton :)' data/nextcloud.log
+          fgrep -iq 'Bye bye from app_python_skeleton :(' data/nextcloud.log
 
       - name: Save container ingo & logs
         if: always()
@@ -102,7 +108,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_exp_local_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -110,7 +116,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_exp_local_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -118,10 +124,75 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_exp_local_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
       - name: Setup tmate session
         if: always()
         uses: mxschmitt/action-tmate@v3
+
+#  nc-docker-app-docker:
+#    runs-on: ubuntu-22.04
+#    name: NC In Docker • ${{ env.docker-image }}
+#    env:
+#      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:latest
+#
+#    steps:
+#      - name: Create container
+#        run: |
+#          docker run --name nextcloud --rm -d -p 8080:80 -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
+#          sudo chmod /var/run/docker.sock 766
+#          sleep 120s
+#
+#      - name: Install AppEcosystemV2
+#        run: |
+#          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/app_ecosystem_v2.git
+#          docker exec nextcloud patch -p 1 -i apps/app_ecosystem_v2/base_php.patch
+#          docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
+#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
+#          docker-install Docker unix-socket /var/run/docker.sock http://localhost:8080/index.php --net=bridge
+#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register
+#          "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
+#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+#
+#      - name: Check logs
+#        run: |
+#          docker exec nextcloud sudo -u www-data fgrep -iq 'Hello from app_python_skeleton :)' data/nextcloud.log
+#          docker exec nextcloud sudo -u www-data fgrep -iq 'Bye bye from app_python_skeleton :(' data/nextcloud.log
+#
+#      - name: Save container ingo & logs
+#        if: always()
+#        run: |
+#          docker inspect app_python_skeleton | json_pp > container.json
+#          docker logs app_python_skeleton > container.log 2>&1
+#          docker cp /var/www/html/data/nextcloud.log nextcloud.log
+#
+#      - name: Upload Container info
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_docker_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+#          path: container.json
+#          if-no-files-found: warn
+#
+#      - name: Upload Container logs
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_docker_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+#          path: container.log
+#          if-no-files-found: warn
+#
+#      - name: Upload NC logs
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_docker_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+#          path: nextcloud.log
+#          if-no-files-found: warn
+#
+#      - name: Setup tmate session
+#        if: always()
+#        uses: mxschmitt/action-tmate@v3
