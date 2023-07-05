@@ -83,7 +83,7 @@ jobs:
           ./occ config:system:set debug --value=true --type=boolean
           ./occ config:system:set allow_local_remote_servers --value true
           ./occ app:enable --force ${{ env.APP_NAME }}
-          php -S localhost &
+          php -S localhost 8080 &
 
       - name: Test deploy
         run: |
@@ -122,6 +122,6 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
-      - name: Setup tmate session
-        if: always()
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        if: always()
+#        uses: mxschmitt/action-tmate@v3

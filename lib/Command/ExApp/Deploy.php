@@ -187,7 +187,8 @@ class Deploy extends Command {
 			sprintf('APP_VERSION=%s', $params['version']),
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
-			sprintf('NEXTCLOUD_URL=%s', str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
+//			sprintf('NEXTCLOUD_URL=%s', str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
+			sprintf('NEXTCLOUD_URL=http://host.docker.internal:8080'),
 		];
 
 		foreach ($envOptions as $envOption) {
