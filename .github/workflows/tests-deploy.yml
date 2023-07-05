@@ -95,10 +95,18 @@ jobs:
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect app_python_skeleton | json_pp > container.log
-          docker logs app_python_skeleton >> container.log
+          docker inspect app_python_skeleton | json_pp > container.json
+          docker logs app_python_skeleton > container.log 2>&1
 
-      - name: Upload Docker logs
+      - name: Upload Container info
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_host_app_docker_exp_local_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+          path: container.log
+          if-no-files-found: warn
+
+      - name: Upload Container logs
         if: always()
         uses: actions/upload-artifact@v3
         with:
@@ -114,6 +122,6 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
-      - name: Setup tmate session
-        if: always()
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        if: always()
+#        uses: mxschmitt/action-tmate@v3
