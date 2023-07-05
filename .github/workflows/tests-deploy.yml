@@ -130,7 +130,7 @@ jobs:
 
   nc-docker-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Docker • ${{ env.docker-image }}
+    name: NC In Docker • ${{ docker-image }}
     env:
       docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:latest
 
