@@ -138,7 +138,7 @@ jobs:
       - name: Create container
         run: |
           docker run --name nextcloud --rm -d -p 8080:80 -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
-          sudo 766 chmod /var/run/docker.sock
+          sudo chmod 766 /var/run/docker.sock
           sleep 120s
 
       - name: Install AppEcosystemV2
@@ -169,7 +169,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+          name: nc_docker_app_docker_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -177,7 +177,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+          name: nc_docker_app_docker_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -185,7 +185,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          name: nc_docker_app_docker_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
 
