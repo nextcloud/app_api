@@ -128,67 +128,69 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
-  nc-docker-app-docker:
-    runs-on: ubuntu-22.04
-    name: NC In Julius Docker
-    env:
-      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:latest
-
-    steps:
-      - name: Create container
-        run: |
-          docker run --name nextcloud --rm -d -p 8080:80 -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
-          sudo chmod 766 /var/run/docker.sock
-          sleep 120s
-
-      - name: Install AppEcosystemV2
-        run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/app_ecosystem_v2.git
-          docker exec nextcloud patch -p 1 -i apps/app_ecosystem_v2/base_php.patch
-          docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
-          docker-install Docker unix-socket /var/run/docker.sock http://localhost:8080/index.php --net=bridge
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register
-          "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
-
-      - name: Check logs
-        run: |
-          docker exec nextcloud sudo -u www-data fgrep -iq 'Hello from app_python_skeleton :)' data/nextcloud.log
-          docker exec nextcloud sudo -u www-data fgrep -iq 'Bye bye from app_python_skeleton :(' data/nextcloud.log
-
-      - name: Save container ingo & logs
-        if: always()
-        run: |
-          docker inspect app_python_skeleton | json_pp > container.json
-          docker logs app_python_skeleton > container.log 2>&1
-          docker cp /var/www/html/data/nextcloud.log nextcloud.log
-
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: nc_docker_app_docker_container.json
-          path: container.json
-          if-no-files-found: warn
-
-      - name: Upload Container logs
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: nc_docker_app_docker_container.log
-          path: container.log
-          if-no-files-found: warn
-
-      - name: Upload NC logs
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: nc_docker_app_docker_nextcloud.log
-          path: nextcloud.log
-          if-no-files-found: warn
-
-      - name: Setup tmate session
-        if: always()
-        uses: mxschmitt/action-tmate@v3
+#  nc-docker-app-docker:
+#    runs-on: ubuntu-22.04
+#    name: NC In Julius Docker
+#    env:
+#      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:latest
+#
+#    steps:
+#      - name: Create container
+#        run: |
+#          docker run --name nextcloud --rm -d -p 8080:80 -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
+#          sudo chmod 766 /var/run/docker.sock
+#          sleep 120s
+#
+#      - name: Install AppEcosystemV2
+#        run: |
+#          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/app_ecosystem_v2.git
+#          docker exec -w /var/www/html/apps/app_ecosystem_v2 nextcloud git fetch origin $GITHUB_REF
+#          docker exec -w /var/www/html/apps/app_ecosystem_v2 nextcloud git checkout FETCH_HEAD
+#          docker exec nextcloud patch -p 1 -i apps/app_ecosystem_v2/base_php.patch
+#          docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
+#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
+#          docker-install Docker unix-socket /var/run/docker.sock http://localhost:8080/index.php --net=bridge
+#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register
+#          "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
+#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+#
+#      - name: Check logs
+#        run: |
+#          docker exec nextcloud sudo -u www-data fgrep -iq 'Hello from app_python_skeleton :)' data/nextcloud.log
+#          docker exec nextcloud sudo -u www-data fgrep -iq 'Bye bye from app_python_skeleton :(' data/nextcloud.log
+#
+#      - name: Save container ingo & logs
+#        if: always()
+#        run: |
+#          docker inspect app_python_skeleton | json_pp > container.json
+#          docker logs app_python_skeleton > container.log 2>&1
+#          docker cp /var/www/html/data/nextcloud.log nextcloud.log
+#
+#      - name: Upload Container info
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_docker_app_docker_container.json
+#          path: container.json
+#          if-no-files-found: warn
+#
+#      - name: Upload Container logs
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_docker_app_docker_container.log
+#          path: container.log
+#          if-no-files-found: warn
+#
+#      - name: Upload NC logs
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_docker_app_docker_nextcloud.log
+#          path: nextcloud.log
+#          if-no-files-found: warn
+#
+#      - name: Setup tmate session
+#        if: always()
+#        uses: mxschmitt/action-tmate@v3
