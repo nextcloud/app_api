@@ -37,6 +37,9 @@ jobs:
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
 
     steps:
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Set app env
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
