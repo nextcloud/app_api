@@ -111,29 +111,6 @@ class DockerActions {
 			'Env' => $params['env'],
 		];
 
-		if ($params['host_ip'] !== null) {
-			$portBindings = [
-				$params['port'] . '/tcp' => [
-					[
-						'HostPort' => (string) $params['port'],
-						'HostIp' => $params['host_ip'],
-					],
-				],
-				$params['port'] . '/udp' => [
-					[
-						'HostPort' => (string) $params['port'],
-						'HostIp' => $params['host_ip'],
-					],
-				],
-			];
-			$exposedPorts = [
-				$params['port'] . '/tcp' => null,
-				$params['port'] . '/udp' => null, // in case of HTTP/2 we need to bind UDP port as well
-			];
-			$containerParams['HostConfig']['PortBindings'] = $portBindings;
-			$containerParams['ExposedPorts'] = $exposedPorts;
-		}
-
 		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));
 		try {
 			$options['json'] = $containerParams;

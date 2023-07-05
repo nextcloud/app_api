@@ -44,7 +44,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getName()
  * @method int getDaemonConfigId()
  * @method string getProtocol()
- * @method string getPort()
+ * @method int getPort()
  * @method string getSecret()
  * @method string getStatus()
  * @method int getEnabled()
@@ -55,7 +55,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setName(string $name)
  * @method void setDaemonConfigId(int $config)
  * @method void setProtocol(string $protocol)
- * @method void setPort(string $port)
+ * @method void setPort(int $port)
  * @method void setSecret(string $secret)
  * @method void setStatus(string $status)
  * @method void setEnabled(int $enabled)
@@ -84,7 +84,7 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('name', 'string');
 		$this->addType('daemonConfigId', 'int');
 		$this->addType('protocol', 'string');
-		$this->addType('port', 'string');
+		$this->addType('port', 'int');
 		$this->addType('secret', 'string');
 		$this->addType('status', 'string');
 		$this->addType('enabled', 'int');

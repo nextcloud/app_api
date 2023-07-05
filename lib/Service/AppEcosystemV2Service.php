@@ -412,7 +412,11 @@ class AppEcosystemV2Service {
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
-			$url = $this->getExAppUrl($exApp) . $route;
+			$url = $this->getExAppUrl(
+				$exApp->getAppid(),
+				$exApp->getDaemonConfigId(),
+				$exApp->getProtocol(),
+				$exApp->getPort()) . $route;
 
 			$options = [
 				'headers' => [
@@ -466,17 +470,21 @@ class AppEcosystemV2Service {
 	 * Get ExApp URL based on ExApp and DeployConfig
 	 * ExApp appid is used as default hostname
 	 *
-	 * @param ExApp $exApp
+	 * @param string $appId
+	 * @param int $daemonConfigId
+	 * @param string $protocol
+	 * @param int $port
 	 *
 	 * @return string
 	 */
-	private function getExAppUrl(ExApp $exApp): string {
-		$deployConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId())->getDeployConfig();
-		$host = $exApp->getAppid();
-		if (isset($deployConfig['expose'])) {
-			$host = $deployConfig['host'] ?? $exApp->getAppid();
+	public function getExAppUrl(string $appId, int $daemonConfigId, string $protocol, int $port): string {
+		$deployConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId)->getDeployConfig();
+		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
+			$host = $deployConfig['host'] ?? 'localhost';
+		} else {
+			$host = $appId;
 		}
-		return sprintf('%s://%s:%s', $exApp->getProtocol(), $host, $exApp->getPort());
+		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 
 	private function getUriEncodedParams(array $params): string {

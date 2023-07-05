@@ -32,7 +32,6 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\DaemonConfig;
 use OCA\AppEcosystemV2\Docker\DockerActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCP\App\IAppManager;
@@ -125,16 +124,14 @@ class Deploy extends Command {
 			'name' => $appId,
 			'hostname' => $appId,
 			'port' => $this->getRandomPort(),
-			'net' => $deployConfig['net'] ?? 'bridge',
-			'host_ip' => $this->buildHostIp($deployConfig),
+			'net' => $deployConfig['net'] ?? 'host',
 		];
 
 		$envParams = $input->getOption('env');
 		$envs = $this->buildDeployEnvParams([
 			'appid' => $appId,
 			'version' => (string) $infoXml->version,
-			'host' => '0.0.0.0',
-//			'host' => isset($deployConfig['expose']) ? '127.0.0.1' : '0.0.0.0',
+			'host' => $this->buildExAppHost($deployConfig),
 			'port' => $containerParams['port'],
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
@@ -157,17 +154,16 @@ class Deploy extends Command {
 				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
 				'system_app' => false,
 			];
-			if ($this->heartbeatExApp($resultOutput, $deployConfig)) {
+			if ($this->heartbeatExApp($resultOutput, $daemonConfig->getId())) {
 				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
 				return Command::SUCCESS;
 			}
 
 			$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and initialized correctly.', $appId));
-			return Command::FAILURE;
 		} else {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
-			return Command::FAILURE;
 		}
+		return Command::FAILURE;
 	}
 
 	private function buildDeployEnvParams(array $params, array $envOptions, array $deployConfig): array {
@@ -187,8 +183,7 @@ class Deploy extends Command {
 			sprintf('APP_VERSION=%s', $params['version']),
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
-//			sprintf('NEXTCLOUD_URL=%s', str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
-			sprintf('NEXTCLOUD_URL=http://host.docker.internal:8080'),
+			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
 		foreach ($envOptions as $envOption) {
@@ -202,6 +197,13 @@ class Deploy extends Command {
 		return $autoEnvs;
 	}
 
+	private function buildExAppHost(array $deployConfig): string {
+		if ((isset($deployConfig['net']) && $deployConfig['net'] !== 'host') || isset($deployConfig['host'])) {
+			return '0.0.0.0';
+		}
+		return '127.0.0.1';
+	}
+
 	private function getRandomPort(): int {
 		$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
 		while ($this->service->getExAppsByPort($port) !== []) {
@@ -210,25 +212,17 @@ class Deploy extends Command {
 		return $port;
 	}
 
-	private function buildHostIp(array $deployConfig): ?string {
-		if (!isset($deployConfig['expose'])) {
-			return null;
-		}
-		if ($deployConfig['expose'] === 'global') {
-			return '0.0.0.0';
-		}
-		if ($deployConfig['expose'] === 'local') {
-			return '127.0.0.1';
-		}
-		return null;
-	}
-
-	private function heartbeatExApp(array $resultOutput, array $deployConfig): bool {
+	private function heartbeatExApp(array $resultOutput, int $daemonConfigId): bool {
 		// TODO: Extract to AppEcosystemV2 and make configurable
 		$heartbeatAttempts = 0;
 		$delay = 1;
 		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
-		$heartbeatUrl = $this->getExAppUrl($resultOutput, $deployConfig) . '/heartbeat';
+		$heartbeatUrl = $this->service->getExAppUrl(
+			$resultOutput['appid'],
+			$daemonConfigId,
+			$resultOutput['protocol'],
+			(int) $resultOutput['port'],
+		) . '/heartbeat';
 
 		while ($heartbeatAttempts < $maxHeartbeatAttempts) {
 			$heartbeatAttempts++;
@@ -254,14 +248,5 @@ class Deploy extends Command {
 		}
 
 		return false;
-	}
-
-	private function getExAppUrl(array $deployResult, array $deployConfig): string {
-		$protocol = $deployResult['protocol'] ?? 'http';
-		$host = $deployResult['appid'];
-		if (isset($deployConfig['expose'])) {
-			$host = '127.0.0.1';
-		}
-		return sprintf('%s://%s:%s', $protocol, $host, $deployResult['port']);
 	}
 }
