@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppEcosystemV2\Db\DaemonConfig;
 use OCA\AppEcosystemV2\Docker\DockerActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCP\App\IAppManager;
@@ -156,8 +157,13 @@ class Deploy extends Command {
 				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
 				'system_app' => false,
 			];
-			$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
-			return Command::SUCCESS;
+			if ($this->heartbeatExApp($resultOutput, $deployConfig)) {
+				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
+				return Command::SUCCESS;
+			}
+
+			$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and initialized correctly.', $appId));
+			return Command::FAILURE;
 		} else {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
 			return Command::FAILURE;
@@ -214,5 +220,47 @@ class Deploy extends Command {
 			return '127.0.0.1';
 		}
 		return null;
+	}
+
+	private function heartbeatExApp(array $resultOutput, array $deployConfig): bool {
+		// TODO: Extract to AppEcosystemV2 and make configurable
+		$heartbeatAttempts = 0;
+		$delay = 1;
+		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
+		$heartbeatUrl = $this->getExAppUrl($resultOutput, $deployConfig) . '/heartbeat';
+
+		while ($heartbeatAttempts < $maxHeartbeatAttempts) {
+			$heartbeatAttempts++;
+			$ch = curl_init($heartbeatUrl);
+			$headers = [
+				'Accept: application/json',
+				'Content-Type: application/json',
+			];
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+			$heartbeatResult = curl_exec($ch);
+			$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+			if ($statusCode === 200) {
+				$result = json_decode($heartbeatResult, true);
+				if (isset($result['status']) && $result['status'] === 'ok') {
+					return true;
+				}
+			}
+			sleep($delay);
+		}
+
+		return false;
+	}
+
+	private function getExAppUrl(array $deployResult, array $deployConfig): string {
+		$protocol = $deployResult['protocol'] ?? 'http';
+		$host = $deployResult['appid'];
+		if (isset($deployConfig['expose'])) {
+			$host = '127.0.0.1';
+		}
+		return sprintf('%s://%s:%s', $protocol, $host, $deployResult['port']);
 	}
 }
