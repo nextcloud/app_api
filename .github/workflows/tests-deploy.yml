@@ -122,6 +122,6 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
-#      - name: Setup tmate session
-#        if: always()
-#        uses: mxschmitt/action-tmate@v3
+      - name: Setup tmate session
+        if: always()
+        uses: mxschmitt/action-tmate@v3
