@@ -191,3 +191,7 @@ jobs:
           name: nc_docker_app_docker_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
+
+      - name: Setup tmate session
+        if: always()
+        uses: mxschmitt/action-tmate@v3
