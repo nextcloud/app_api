@@ -137,7 +137,8 @@ jobs:
     steps:
       - name: Create container
         run: |
-          docker run --name nextcloud --rm -d -p 8080:80 -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
+          docker network create master_bridge
+          docker run --net master_bridge --name nextcloud --rm -d -p 8080:80 -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
           sudo chmod 766 /var/run/docker.sock
           sleep 120s
 
@@ -149,7 +150,7 @@ jobs:
           docker exec nextcloud patch -p 1 -i apps/app_ecosystem_v2/base_php.patch
           docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
-          docker-install Docker unix-socket /var/run/docker.sock http://localhost:8080/index.php --net=bridge
+          docker-install Docker unix-socket /var/run/docker.sock http://localhost:8080/index.php --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register
           "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
