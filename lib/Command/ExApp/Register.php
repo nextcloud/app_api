@@ -158,8 +158,10 @@ class Register extends Command {
 				return Command::SUCCESS;
 			}
 
-			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
-			if ($confirmOptionalScopes) {
+			if (count($requestedExAppScopeGroups['required']) > 0) {
+				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
+			}
+			if ($confirmOptionalScopes && count($requestedExAppScopeGroups['optional']) > 0) {
 				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], false);
 			}
 

@@ -642,7 +642,7 @@ class AppEcosystemV2Service {
 			}
 			return $this->finalizeRequestToNC($userId, $exApp);
 		}
-		$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s', $exApp->getAppid(), $userId));
+		$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
 		return false;
 	}
 
