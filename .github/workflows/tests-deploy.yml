@@ -86,8 +86,8 @@ jobs:
 
       - name: Test deploy
         run: |
-          php -S localhost:8080 &
-          ./occ app_ecosystem_v2:daemon:register docker-install Docker unix-socket /var/run/docker.sock http://localhost:8080/index.php
+          php -S 127.0.0.1:8080 &
+          ./occ app_ecosystem_v2:daemon:register docker-install Docker unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_ecosystem_v2:app:register \
           "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
           ./occ app_ecosystem_v2:app:enable app_python_skeleton
