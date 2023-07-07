@@ -84,8 +84,8 @@ class Deploy extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
-		$pathToInfoXml = $input->getOption('info-xml');
 
+		$pathToInfoXml = $input->getOption('info-xml');
 		if ($pathToInfoXml === null) {
 			$output->writeln(sprintf('No info.xml specified for %s', $appId));
 			return Command::INVALID;
@@ -123,7 +123,7 @@ class Deploy extends Command {
 		$containerParams = [
 			'name' => $appId,
 			'hostname' => $appId,
-			'port' => $deployConfig['port'] ?? 9001,
+			'port' => $this->getRandomPort(),
 			'net' => $deployConfig['net'] ?? 'host',
 		];
 
@@ -131,7 +131,7 @@ class Deploy extends Command {
 		$envs = $this->buildDeployEnvParams([
 			'appid' => $appId,
 			'version' => (string) $infoXml->version,
-			'host' => $appId,
+			'host' => $this->buildExAppHost($deployConfig),
 			'port' => $containerParams['port'],
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
@@ -150,14 +150,21 @@ class Deploy extends Command {
 				'daemon_config_id' => $daemonConfigId,
 				'version' => (string) $infoXml->version,
 				'secret' => explode('=', $envs[1])[1],
+				'host' => $this->service->resolveDeployExAppHost($appId, $daemonConfigId),
 				'port' => explode('=', $envs[5])[1],
+				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
+				'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
 			];
-			$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
-			return Command::SUCCESS;
+			if ($this->heartbeatExApp($resultOutput, $daemonConfig->getId())) {
+				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
+				return Command::SUCCESS;
+			}
+
+			$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and initialized correctly.', $appId));
 		} else {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
-			return Command::FAILURE;
 		}
+		return Command::FAILURE;
 	}
 
 	private function buildDeployEnvParams(array $params, array $envOptions, array $deployConfig): array {
@@ -177,7 +184,7 @@ class Deploy extends Command {
 			sprintf('APP_VERSION=%s', $params['version']),
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
-			sprintf('NEXTCLOUD_URL=%s', str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
+			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
 		foreach ($envOptions as $envOption) {
@@ -189,5 +196,57 @@ class Deploy extends Command {
 		}
 
 		return $autoEnvs;
+	}
+
+	private function buildExAppHost(array $deployConfig): string {
+		if ((isset($deployConfig['net']) && $deployConfig['net'] !== 'host') || isset($deployConfig['host'])) {
+			return '0.0.0.0';
+		}
+		return '127.0.0.1';
+	}
+
+	private function getRandomPort(): int {
+		$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
+		while ($this->service->getExAppsByPort($port) !== []) {
+			$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
+		}
+		return $port;
+	}
+
+	private function heartbeatExApp(array $resultOutput, int $daemonConfigId): bool {
+		// TODO: Extract to AppEcosystemV2 and make configurable
+		$heartbeatAttempts = 0;
+		$delay = 1;
+		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
+		$heartbeatUrl = $this->service->getExAppUrl(
+			$resultOutput['protocol'],
+			$resultOutput['host'],
+			(int) $resultOutput['port'],
+		) . '/heartbeat';
+
+		while ($heartbeatAttempts < $maxHeartbeatAttempts) {
+			$heartbeatAttempts++;
+			$ch = curl_init($heartbeatUrl);
+			$headers = [
+				'Accept: application/json',
+				'Content-Type: application/json',
+			];
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+			$heartbeatResult = curl_exec($ch);
+			$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+			if ($statusCode === 200) {
+				$result = json_decode($heartbeatResult, true);
+				if (isset($result['status']) && $result['status'] === 'ok') {
+					return true;
+				}
+			}
+			sleep($delay);
+		}
+
+		return false;
 	}
 }

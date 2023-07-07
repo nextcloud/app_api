@@ -94,7 +94,8 @@ Successful deployment will return the following JSON output which is used then i
 	"version":"1.0.0",
 	"secret":"***generated-secret***",
 	"host":"app_python_skeleton",
-	"port":"9001"
+	"port":"9001",
+	"system_app": false
 }
 ```
 
@@ -119,16 +120,15 @@ Let's say we want to deploy ExApp with appid `app_python_skeleton` and version `
 php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
 ```
 
-`APP_SECRET` is required to authenticate ExApp. It must be the same as the one used in ExApp registration step.
-
 ## ExApp registration
 
 The third step is to register ExApp. This is done using `occ` CLI tool or in AppEcosystemV2 UI (`to be implemented`).
+The register command requires JSON output from ExApp deployment step, so it can be combined into one command (forward output from deploy to register command).
 
 ### CLI
 
 ```
-app_ecosystem_v2:app:register [--daemon-config-id DAEMON-CONFIG-ID] [--port PORT] [-s|--secret SECRET] [-e|--enabled] [--system-app] [--force-scopes] [--] <deploy-json-output>
+app_ecosystem_v2:app:register [-e|--enabled] [--force-scopes] [--] <deploy-json-output>
 ```
 
 arguments:
@@ -136,11 +136,7 @@ arguments:
 - `deploy-json-output` - `[required]` JSON output from ExApp deployment step
 
 options:
-- `daemon-config-id` - `[required]` daemon config id to use for ExApp deployment
-- `port` - `[required]` port ExApp is listening on
-- `secret` - `[required]` secret used to authenticate ExApp
 - `enabled` - `[required]` enable ExApp after registration
-- `system-app` - `[required]` register ExApp as system app (no user context)
 - `force-scopes` - `[required]` force scopes for ExApp (no confirmation prompts)
 
 ### Example
@@ -148,7 +144,13 @@ options:
 Let's say we want to register ExApp with appid `app_python_skeleton` and version `1.0.0` on local docker daemon registered in previous step.
 
 ```
-php occ app_ecosystem_v2:app:register {"appid":"app_python_skeleton","name":"App Python Skeleton","daemon_config_id":1,"version":"1.0.0","secret":"***secret***","host":"app_python_skeleton","port":"9001"} --enabled --system-app --force-scopes
+php occ app_ecosystem_v2:app:register {"appid":"app_python_skeleton","name":"App Python Skeleton","daemon_config_id":1,"version":"1.0.0","secret":"***secret***","host":"app_python_skeleton","port":"9001", "protocol": "http", "system_app": false} --enabled --force-scopes
+```
+
+combined with deploy step:
+
+```
+php occ app_ecosystem_v2:app:register --enabled --force-scopes "$(php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
 ```
 
 ## ExApp info.xml Schema
@@ -164,5 +166,7 @@ It has the same structure as Nextcloud appinfo/info.xml file, but with some addi
 		<image>cloud-py-api/py_app_v2-skeleton</image>
 		<image-tag>latest</image-tag>
 	</docker-install>
+	<protocol>http</protocol>
+	<system>0</system>
 </ex-app>
 ```

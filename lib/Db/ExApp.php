@@ -43,7 +43,9 @@ use OCP\AppFramework\Db\Entity;
  * @method string getVersion()
  * @method string getName()
  * @method int getDaemonConfigId()
- * @method string getPort()
+ * @method string getProtocol()
+ * @method string getHost()
+ * @method int getPort()
  * @method string getSecret()
  * @method string getStatus()
  * @method int getEnabled()
@@ -53,7 +55,9 @@ use OCP\AppFramework\Db\Entity;
  * @method void setVersion(string $version)
  * @method void setName(string $name)
  * @method void setDaemonConfigId(int $config)
- * @method void setPort(string $port)
+ * @method void setProtocol(string $protocol)
+ * @method void setHost(string $host)
+ * @method void setPort(int $port)
  * @method void setSecret(string $secret)
  * @method void setStatus(string $status)
  * @method void setEnabled(int $enabled)
@@ -65,6 +69,8 @@ class ExApp extends Entity implements JsonSerializable {
 	protected $version;
 	protected $name;
 	protected $daemonConfigId;
+	protected $protocol;
+	protected $host;
 	protected $port;
 	protected $secret;
 	protected $status;
@@ -80,7 +86,9 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('version', 'string');
 		$this->addType('name', 'string');
 		$this->addType('daemonConfigId', 'int');
-		$this->addType('port', 'string');
+		$this->addType('protocol', 'string');
+		$this->addType('host', 'string');
+		$this->addType('port', 'int');
 		$this->addType('secret', 'string');
 		$this->addType('status', 'string');
 		$this->addType('enabled', 'int');
@@ -101,6 +109,12 @@ class ExApp extends Entity implements JsonSerializable {
 		}
 		if (isset($params['daemon_config_id'])) {
 			$this->setDaemonConfigId($params['daemon_config_id']);
+		}
+		if (isset($params['protocol'])) {
+			$this->setProtocol($params['protocol']);
+		}
+		if (isset($params['host'])) {
+			$this->setHost($params['host']);
 		}
 		if (isset($params['port'])) {
 			$this->setPort($params['port']);
@@ -129,6 +143,8 @@ class ExApp extends Entity implements JsonSerializable {
 			'version' => $this->getVersion(),
 			'name'=> $this->getName(),
 			'daemon_config_id' => $this->getDaemonConfigId(),
+			'protocol' => $this->getProtocol(),
+			'host' => $this->getHost(),
 			'port' => $this->getPort(),
 			'secret' => $this->getSecret(),
 			'status' => $this->getStatus(),

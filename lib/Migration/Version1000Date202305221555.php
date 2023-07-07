@@ -98,6 +98,14 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addColumn('daemon_config_id', Types::BIGINT, [
 				'default' => 0,
 			]);
+			$table->addColumn('protocol', Types::STRING, [
+				'notnull' => true,
+				'length' => 16,
+			]);
+			$table->addColumn('host', Types::STRING, [
+				'notnull' => true,
+				'length' => 255,
+			]);
 			$table->addColumn('port', Types::SMALLINT, [
 				'notnull' => true,
 				'unsigned' => true,

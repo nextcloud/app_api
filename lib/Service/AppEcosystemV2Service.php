@@ -132,7 +132,7 @@ class AppEcosystemV2Service {
 	 * Register ExApp or update if already exists
 	 *
 	 * @param string $appId
-	 * @param array $appData [version, name, daemon_config_id, port, secret]
+	 * @param array $appData [version, name, daemon_config_id, protocol, host, port, secret]
 	 *
 	 * @return ExApp|null
 	 */
@@ -142,6 +142,8 @@ class AppEcosystemV2Service {
 			$exApp->setVersion($appData['version']);
 			$exApp->setName($appData['name']);
 			$exApp->setDaemonConfigId($appData['daemon_config_id']);
+			$exApp->setProtocol($appData['protocol']);
+			$exApp->setHost($appData['host']);
 			$exApp->setPort($appData['port']);
 			if ($appData['secret'] !== '') {
 				$exApp->setSecret($appData['secret']);
@@ -163,6 +165,8 @@ class AppEcosystemV2Service {
 				'version' => $appData['version'],
 				'name' => $appData['name'],
 				'daemon_config_id' => $appData['daemon_config_id'],
+				'protocol' => $appData['protocol'],
+				'host' => $appData['host'],
 				'port' => $appData['port'],
 				'secret' =>  $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
 				'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
@@ -199,6 +203,14 @@ class AppEcosystemV2Service {
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()));
 			return null;
+		}
+	}
+
+	public function getExAppsByPort(int $port): array {
+		try {
+			return $this->exAppMapper->findByPort($port);
+		} catch (Exception) {
+			return [];
 		}
 	}
 
@@ -402,7 +414,10 @@ class AppEcosystemV2Service {
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
-			$url = $this->getExAppUrl($exApp) . $route;
+			$url = $this->getExAppUrl(
+				$exApp->getProtocol(),
+				$exApp->getHost(),
+				$exApp->getPort()) . $route;
 
 			$options = [
 				'headers' => [
@@ -453,20 +468,30 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Get ExApp URL based on ExApp and DeployConfig
-	 * ExApp appid is used as default hostname
-	 *
-	 * @param ExApp $exApp
+	 * @param string $protocol
+	 * @param string $host
+	 * @param int $port
 	 *
 	 * @return string
 	 */
-	private function getExAppUrl(ExApp $exApp): string {
-		$deployConfig = $this->daemonConfigService->getDaemonConfig($exApp->getDaemonConfigId())->getDeployConfig();
-		$host = $exApp->getAppid();
-		if (isset($deployConfig['expose'])) {
-			$host = $deployConfig['host'] ?? $exApp->getAppid();
+	public function getExAppUrl(string $protocol, string $host, int $port): string {
+		return sprintf('%s://%s:%s', $protocol, $host, $port);
+	}
+
+	/**
+	 * @param string $appId
+	 * @param int $daemonConfigId
+	 *
+	 * @return string
+	 */
+	public function resolveDeployExAppHost(string $appId, int $daemonConfigId): string {
+		$deployConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId)->getDeployConfig();
+		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
+			$host = $deployConfig['host'] ?? 'localhost';
+		} else {
+			$host = $appId;
 		}
-		return $host . ':' . $exApp->getPort();
+		return $host;
 	}
 
 	private function getUriEncodedParams(array $params): string {
@@ -624,7 +649,7 @@ class AppEcosystemV2Service {
 			}
 			return $this->finalizeRequestToNC($userId, $exApp);
 		}
-		$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s', $exApp->getAppid(), $userId));
+		$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
 		return false;
 	}
 

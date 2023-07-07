@@ -68,11 +68,7 @@ class Register extends Command {
 
 		$this->addArgument('deploy-json-output', InputArgument::REQUIRED, 'JSON output from deploy command');
 
-		$this->addOption('daemon-config-id', null, InputOption::VALUE_REQUIRED, 'Previously configured daemon config id for deployment');
-		$this->addOption('port', null, InputOption::VALUE_REQUIRED);
-		$this->addOption('secret', 's', InputOption::VALUE_REQUIRED, 'Secret for ExApp. If not passed - will be generated');
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
-		$this->addOption('system-app', null, InputOption::VALUE_NONE, 'Register as system app');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 	}
 
@@ -86,9 +82,11 @@ class Register extends Command {
 		$appId = $deployJsonOutput['appid'];
 		$version = $deployJsonOutput['version'];
 		$name = $deployJsonOutput['name'];
-		$daemonConfigId = (int) ($input->getOption('daemon-config-id') ?? $deployJsonOutput['daemon_config_id']);
-		$port = (int) ($input->getOption('port') ?? $deployJsonOutput['port']);
-		$secret = $input->getOption('secret') ?? $deployJsonOutput['secret'];
+		$daemonConfigId = (int) $deployJsonOutput['daemon_config_id'];
+		$protocol = $deployJsonOutput['protocol'] ?? 'http';
+		$port = (int) $deployJsonOutput['port'];
+		$host = $deployJsonOutput['host'];
+		$secret = $deployJsonOutput['secret'];
 
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln(sprintf('ExApp %s already registered.', $appId));
@@ -105,6 +103,8 @@ class Register extends Command {
 			'version' => $version,
 			'name' => $name,
 			'daemon_config_id' => $daemonConfigId,
+			'protocol' => $protocol,
+			'host' => $host,
 			'port' => $port,
 			'secret' => $secret,
 		]);
@@ -112,7 +112,7 @@ class Register extends Command {
 		if ($exApp !== null) {
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 
-			$systemApp = (bool) $input->getOption('system-app');
+			$systemApp = (bool) $deployJsonOutput['system_app'] ?? false;
 			$userId = $systemApp ? '' : null;
 			$this->service->setupExAppUser($exApp, $userId, $systemApp);
 
@@ -149,15 +149,17 @@ class Register extends Command {
 				}
 			}
 
-			if (!$confirmRequiredScopes) {
+			if (!$confirmRequiredScopes && count($requestedExAppScopeGroups['required']) > 0) {
 				$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
 				// Fallback unregistering ExApp
 				$this->service->unregisterExApp($exApp->getAppid());
 				return Command::SUCCESS;
 			}
 
-			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
-			if ($confirmOptionalScopes) {
+			if (count($requestedExAppScopeGroups['required']) > 0) {
+				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
+			}
+			if ($confirmOptionalScopes && count($requestedExAppScopeGroups['optional']) > 0) {
 				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], false);
 			}
 

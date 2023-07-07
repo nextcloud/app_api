@@ -37,7 +37,7 @@ use OCA\AppEcosystemV2\Db\DaemonConfig;
 use Psr\Log\LoggerInterface;
 
 class DockerActions {
-	public const DOCKER_API_VERSION = 'v1.43';
+	public const DOCKER_API_VERSION = 'v1.41';
 	private LoggerInterface $logger;
 	private \GuzzleHttp\Client $guzzleClient;
 
@@ -102,25 +102,27 @@ class DockerActions {
 	}
 
 	public function createContainer(array $imageParams, array $params = []): array {
-		// TODO: Implement dynamic port binding algorithm according to daemon deploy config
 		$containerParams = [
 			'Image' => $this->buildImageName($imageParams),
 			'Hostname' => $params['hostname'],
 			'HostConfig' => [
 				'NetworkMode' => $params['net'],
-				'PortBindings' => [
-					$params['port'] . '/tcp' => [
-						[
-							'HostPort' => (string) $params['port'],
-						],
-					],
-				],
-			],
-			'ExposedPorts' => [
-				$params['port'] . '/tcp' => null,
 			],
 			'Env' => $params['env'],
 		];
+
+		if (!in_array($params['net'], ['host', 'bridge'])) {
+			$networkingConfig = [
+				'EndpointsConfig' => [
+					$params['net'] => [
+						'Aliases' => [
+							$params['hostname']
+						],
+					],
+				],
+			];
+			$containerParams['NetworkingConfig'] = $networkingConfig;
+		}
 
 		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));
 		try {
