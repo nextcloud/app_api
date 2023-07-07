@@ -166,7 +166,7 @@ jobs:
         run: |
           docker inspect app_python_skeleton | json_pp > container.json
           docker logs app_python_skeleton > container.log 2>&1
-          docker cp app_python_skeleton:/var/www/html/data/nextcloud.log nextcloud.log
+          docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Upload Container info
         if: always()
@@ -191,7 +191,3 @@ jobs:
           name: nc_docker_app_docker_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
-
-      - name: Setup tmate session
-        if: always()
-        uses: mxschmitt/action-tmate@v3
