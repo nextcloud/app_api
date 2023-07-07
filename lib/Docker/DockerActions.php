@@ -109,6 +109,15 @@ class DockerActions {
 				'NetworkMode' => $params['net'],
 			],
 			'Env' => $params['env'],
+			'NetworkingConfig' => [
+				'EndpointsConfig' => [
+					$params['net'] => [
+						'Aliases' => [
+							$params['hostname']
+						],
+					],
+				],
+			]
 		];
 
 		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));

@@ -479,17 +479,17 @@ class AppEcosystemV2Service {
 	}
 
 	/**
+	 * @param string $appId
 	 * @param int $daemonConfigId
-	 * @param string $dockerHost
 	 *
 	 * @return string
 	 */
-	public function resolveDeployExAppHost(int $daemonConfigId, string $dockerHost): string {
+	public function resolveDeployExAppHost(string $appId, int $daemonConfigId): string {
 		$deployConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId)->getDeployConfig();
 		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
 			$host = $deployConfig['host'] ?? 'localhost';
 		} else {
-			$host = $dockerHost;
+			$host = $appId;
 		}
 		return $host;
 	}

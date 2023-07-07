@@ -144,14 +144,13 @@ class Deploy extends Command {
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
-			$containerInfo = $this->dockerActions->inspectContainer($createResult['Id']);
 			$resultOutput = [
 				'appid' => $appId,
 				'name' => (string) $infoXml->name,
 				'daemon_config_id' => $daemonConfigId,
 				'version' => (string) $infoXml->version,
 				'secret' => explode('=', $envs[1])[1],
-				'host' => $this->service->resolveDeployExAppHost($daemonConfigId, $containerInfo['NetworkSettings']['IPAddress']),
+				'host' => $this->service->resolveDeployExAppHost($appId, $daemonConfigId),
 				'port' => explode('=', $envs[5])[1],
 				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
 				'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,

@@ -86,7 +86,7 @@ class Register extends Command {
 		$protocol = $deployJsonOutput['protocol'] ?? 'http';
 		$port = (int) $deployJsonOutput['port'];
 		$host = $deployJsonOutput['host'];
-		$secret = $input->getOption('secret') ?? $deployJsonOutput['secret'];
+		$secret = $deployJsonOutput['secret'];
 
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln(sprintf('ExApp %s already registered.', $appId));
@@ -112,7 +112,7 @@ class Register extends Command {
 		if ($exApp !== null) {
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 
-			$systemApp = (bool) ($input->getOption('system-app') ?? $deployJsonOutput['system_app']) ?? false;
+			$systemApp = (bool) $deployJsonOutput['system_app'] ?? false;
 			$userId = $systemApp ? '' : null;
 			$this->service->setupExAppUser($exApp, $userId, $systemApp);
 
