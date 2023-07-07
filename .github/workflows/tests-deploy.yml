@@ -166,7 +166,7 @@ jobs:
         run: |
           docker inspect app_python_skeleton | json_pp > container.json
           docker logs app_python_skeleton > container.log 2>&1
-          docker cp /var/www/html/data/nextcloud.log nextcloud.log
+          docker cp app_python_skeleton:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Upload Container info
         if: always()
