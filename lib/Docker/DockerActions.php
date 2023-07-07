@@ -109,7 +109,10 @@ class DockerActions {
 				'NetworkMode' => $params['net'],
 			],
 			'Env' => $params['env'],
-			'NetworkingConfig' => [
+		];
+
+		if (!in_array($params['net'], ['host', 'bridge'])) {
+			$networkingConfig = [
 				'EndpointsConfig' => [
 					$params['net'] => [
 						'Aliases' => [
@@ -117,8 +120,9 @@ class DockerActions {
 						],
 					],
 				],
-			]
-		];
+			];
+			$containerParams['NetworkingConfig'] = $networkingConfig;
+		}
 
 		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));
 		try {
