@@ -68,11 +68,7 @@ class Register extends Command {
 
 		$this->addArgument('deploy-json-output', InputArgument::REQUIRED, 'JSON output from deploy command');
 
-		$this->addOption('daemon-config-id', null, InputOption::VALUE_REQUIRED, 'Previously configured daemon config id for deployment');
-		$this->addOption('port', null, InputOption::VALUE_REQUIRED);
-		$this->addOption('secret', 's', InputOption::VALUE_REQUIRED, 'Secret for ExApp. If not passed - will be generated');
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
-		$this->addOption('system-app', null, InputOption::VALUE_NONE, 'Register as system app');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 	}
 
@@ -86,9 +82,10 @@ class Register extends Command {
 		$appId = $deployJsonOutput['appid'];
 		$version = $deployJsonOutput['version'];
 		$name = $deployJsonOutput['name'];
-		$daemonConfigId = (int) ($input->getOption('daemon-config-id') ?? $deployJsonOutput['daemon_config_id']);
+		$daemonConfigId = (int) $deployJsonOutput['daemon_config_id'];
 		$protocol = $deployJsonOutput['protocol'] ?? 'http';
-		$port = (int) ($input->getOption('port') ?? $deployJsonOutput['port']);
+		$port = (int) $deployJsonOutput['port'];
+		$host = $deployJsonOutput['host'];
 		$secret = $input->getOption('secret') ?? $deployJsonOutput['secret'];
 
 		if ($this->service->getExApp($appId) !== null) {
@@ -107,6 +104,7 @@ class Register extends Command {
 			'name' => $name,
 			'daemon_config_id' => $daemonConfigId,
 			'protocol' => $protocol,
+			'host' => $host,
 			'port' => $port,
 			'secret' => $secret,
 		]);

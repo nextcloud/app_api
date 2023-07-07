@@ -102,6 +102,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 16,
 			]);
+			$table->addColumn('host', Types::STRING, [
+				'notnull' => true,
+				'length' => 255,
+			]);
 			$table->addColumn('port', Types::SMALLINT, [
 				'notnull' => true,
 				'unsigned' => true,

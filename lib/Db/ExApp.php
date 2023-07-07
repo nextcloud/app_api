@@ -44,6 +44,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getName()
  * @method int getDaemonConfigId()
  * @method string getProtocol()
+ * @method string getHost()
  * @method int getPort()
  * @method string getSecret()
  * @method string getStatus()
@@ -55,6 +56,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setName(string $name)
  * @method void setDaemonConfigId(int $config)
  * @method void setProtocol(string $protocol)
+ * @method void setHost(string $host)
  * @method void setPort(int $port)
  * @method void setSecret(string $secret)
  * @method void setStatus(string $status)
@@ -68,6 +70,7 @@ class ExApp extends Entity implements JsonSerializable {
 	protected $name;
 	protected $daemonConfigId;
 	protected $protocol;
+	protected $host;
 	protected $port;
 	protected $secret;
 	protected $status;
@@ -84,6 +87,7 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('name', 'string');
 		$this->addType('daemonConfigId', 'int');
 		$this->addType('protocol', 'string');
+		$this->addType('host', 'string');
 		$this->addType('port', 'int');
 		$this->addType('secret', 'string');
 		$this->addType('status', 'string');
@@ -108,6 +112,9 @@ class ExApp extends Entity implements JsonSerializable {
 		}
 		if (isset($params['protocol'])) {
 			$this->setProtocol($params['protocol']);
+		}
+		if (isset($params['host'])) {
+			$this->setHost($params['host']);
 		}
 		if (isset($params['port'])) {
 			$this->setPort($params['port']);
@@ -137,6 +144,7 @@ class ExApp extends Entity implements JsonSerializable {
 			'name'=> $this->getName(),
 			'daemon_config_id' => $this->getDaemonConfigId(),
 			'protocol' => $this->getProtocol(),
+			'host' => $this->getHost(),
 			'port' => $this->getPort(),
 			'secret' => $this->getSecret(),
 			'status' => $this->getStatus(),

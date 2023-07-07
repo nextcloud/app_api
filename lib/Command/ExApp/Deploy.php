@@ -144,15 +144,17 @@ class Deploy extends Command {
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
+			$containerInfo = $this->dockerActions->inspectContainer($createResult['Id']);
 			$resultOutput = [
 				'appid' => $appId,
 				'name' => (string) $infoXml->name,
 				'daemon_config_id' => $daemonConfigId,
 				'version' => (string) $infoXml->version,
 				'secret' => explode('=', $envs[1])[1],
+				'host' => $this->service->resolveDeployExAppHost($daemonConfigId, $containerInfo['NetworkSettings']['IPAddress']),
 				'port' => explode('=', $envs[5])[1],
 				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
-				'system_app' => false,
+				'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
 			];
 			if ($this->heartbeatExApp($resultOutput, $daemonConfig->getId())) {
 				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
@@ -218,9 +220,8 @@ class Deploy extends Command {
 		$delay = 1;
 		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
 		$heartbeatUrl = $this->service->getExAppUrl(
-			$resultOutput['appid'],
-			$daemonConfigId,
 			$resultOutput['protocol'],
+			$resultOutput['host'],
 			(int) $resultOutput['port'],
 		) . '/heartbeat';
 

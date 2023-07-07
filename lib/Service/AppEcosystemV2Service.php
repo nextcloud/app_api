@@ -132,7 +132,7 @@ class AppEcosystemV2Service {
 	 * Register ExApp or update if already exists
 	 *
 	 * @param string $appId
-	 * @param array $appData [version, name, daemon_config_id, port, secret]
+	 * @param array $appData [version, name, daemon_config_id, protocol, host, port, secret]
 	 *
 	 * @return ExApp|null
 	 */
@@ -143,6 +143,7 @@ class AppEcosystemV2Service {
 			$exApp->setName($appData['name']);
 			$exApp->setDaemonConfigId($appData['daemon_config_id']);
 			$exApp->setProtocol($appData['protocol']);
+			$exApp->setHost($appData['host']);
 			$exApp->setPort($appData['port']);
 			if ($appData['secret'] !== '') {
 				$exApp->setSecret($appData['secret']);
@@ -165,6 +166,7 @@ class AppEcosystemV2Service {
 				'name' => $appData['name'],
 				'daemon_config_id' => $appData['daemon_config_id'],
 				'protocol' => $appData['protocol'],
+				'host' => $appData['host'],
 				'port' => $appData['port'],
 				'secret' =>  $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
 				'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
@@ -413,9 +415,8 @@ class AppEcosystemV2Service {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
 			$url = $this->getExAppUrl(
-				$exApp->getAppid(),
-				$exApp->getDaemonConfigId(),
 				$exApp->getProtocol(),
+				$exApp->getHost(),
 				$exApp->getPort()) . $route;
 
 			$options = [
@@ -467,24 +468,30 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Get ExApp URL based on ExApp and DeployConfig
-	 * ExApp appid is used as default hostname
-	 *
-	 * @param string $appId
-	 * @param int $daemonConfigId
 	 * @param string $protocol
+	 * @param string $host
 	 * @param int $port
 	 *
 	 * @return string
 	 */
-	public function getExAppUrl(string $appId, int $daemonConfigId, string $protocol, int $port): string {
+	public function getExAppUrl(string $protocol, string $host, int $port): string {
+		return sprintf('%s://%s:%s', $protocol, $host, $port);
+	}
+
+	/**
+	 * @param int $daemonConfigId
+	 * @param string $dockerHost
+	 *
+	 * @return string
+	 */
+	public function resolveDeployExAppHost(int $daemonConfigId, string $dockerHost): string {
 		$deployConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId)->getDeployConfig();
 		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
 			$host = $deployConfig['host'] ?? 'localhost';
 		} else {
-			$host = $appId;
+			$host = $dockerHost;
 		}
-		return sprintf('%s://%s:%s', $protocol, $host, $port);
+		return $host;
 	}
 
 	private function getUriEncodedParams(array $params): string {
