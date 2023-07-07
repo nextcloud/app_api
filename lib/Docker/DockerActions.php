@@ -111,7 +111,7 @@ class DockerActions {
 			'Env' => $params['env'],
 		];
 
-		if (!in_array($params['net'], ['host', 'bridge'])) {
+		if ($params['net'] !== 'host') {
 			$networkingConfig = [
 				'EndpointsConfig' => [
 					$params['net'] => [

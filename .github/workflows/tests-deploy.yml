@@ -21,9 +21,9 @@ jobs:
       matrix:
         php-version: [ '8.1' ]
         server-version: [ 'stable27' ]
-        include:
-          - server-version: "master"
-            php-version: "8.2"
+#        include:
+#          - server-version: "master"
+#            php-version: "8.2"
 
     services:
       postgres:
@@ -127,6 +127,10 @@ jobs:
           name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
+
+      - name: Setup tmate session
+        if: always()
+        uses: mxschmitt/action-tmate@v3
 
 #  nc-docker-app-docker:
 #    runs-on: ubuntu-22.04
