@@ -34,6 +34,7 @@ namespace OCA\AppEcosystemV2\Command\ExApp;
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
 use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+use OCP\DB\Exception;
 use OCP\Http\Client\IResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -112,11 +113,17 @@ class Register extends Command {
 		if ($exApp !== null) {
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 
-			$systemApp = (bool) $deployJsonOutput['system_app'] ?? false;
-			$userId = $systemApp ? '' : null;
-			$this->service->setupExAppUser($exApp, $userId, $systemApp);
+			if (filter_var($deployJsonOutput['system_app'], FILTER_VALIDATE_BOOLEAN)) {
+				try {
+					$this->service->setupSystemAppFlag($exApp);
+				}
+				catch (Exception $e) {
+					$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
+					return Command::FAILURE;
+				}
+			}
 
-			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp, $userId);
+			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp);
 			if ($requestedExAppScopeGroups === null) {
 				$output->writeln(sprintf('Failed to get requested ExApp scopes for %s.', $appId));
 				// Fallback unregistering ExApp
@@ -198,8 +205,8 @@ class Register extends Command {
 		}
 	}
 
-	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp, ?string $userId): ?array {
-		$response = $this->service->requestToExApp(null, $userId, $exApp, '/scopes', 'GET');
+	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp): ?array {
+		$response = $this->service->requestToExApp(null, null, $exApp, '/scopes', 'GET');
 		if (!$response instanceof IResponse && isset($response['error'])) {
 			$output->writeln(sprintf('Failed to get ExApp %s scope groups: %s', $exApp->getAppid(), $response['error']));
 			return null;
