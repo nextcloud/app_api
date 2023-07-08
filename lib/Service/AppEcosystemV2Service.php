@@ -343,19 +343,33 @@ class AppEcosystemV2Service {
 		}
 	}
 
-	public function setupExAppUser(ExApp $exApp, ?string $userId, bool $systemApp = false): bool {
-		if ($systemApp && !$this->exAppUserExists($exApp->getAppid(), $userId)) {
-			try {
+	/**
+	 * @param ExApp $exApp
+	 * @param string|null $userId
+	 *
+	 * @throws Exception
+	 */
+	public function setupExAppUser(ExApp $exApp, ?string $userId): void {
+		if (!empty($userId)) {
+			if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
 				$this->exAppUserMapper->insert(new ExAppUser([
 					'appid' => $exApp->getAppid(),
 					'userid' => $userId,
 				]));
-			} catch (Exception $e) {
-				$this->logger->error(sprintf('Error while inserting ExApp user: %s', $e->getMessage()));
-				return false;
 			}
 		}
-		return true;
+	}
+
+	/**
+	 * @param ExApp $exApp
+	 *
+	 * @throws Exception
+	 */
+	public function setupSystemAppFlag(ExApp $exApp): void {
+		$this->exAppUserMapper->insert(new ExAppUser([
+			'appid' => $exApp->getAppid(),
+			'userid' => '',
+		]));
 	}
 
 	/**
@@ -378,16 +392,11 @@ class AppEcosystemV2Service {
 		string $method = 'POST',
 		array $params = []
 	): array|IResponse {
-		if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
-			try {
-				$this->exAppUserMapper->insert(new ExAppUser([
-					'appid' => $exApp->getAppid(),
-					'userid' => $userId,
-				]));
-			} catch (\Exception $e) {
-				$this->logger->error('Error while inserting ExApp user: ' . $e->getMessage());
-				return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
-			}
+		try {
+			$this->setupExAppUser($exApp, $userId);
+		} catch (\Exception $e) {
+			$this->logger->error('Error while inserting ExApp user: ' . $e->getMessage());
+			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 		}
 		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params);
 	}
