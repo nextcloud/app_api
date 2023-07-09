@@ -160,7 +160,7 @@ class Register extends Command {
 				$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
 				// Fallback unregistering ExApp
 				$this->service->unregisterExApp($exApp->getAppid());
-				return Command::SUCCESS;
+				return Command::FAILURE;
 			}
 
 			if (count($requestedExAppScopeGroups['required']) > 0) {
