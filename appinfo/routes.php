@@ -41,6 +41,9 @@ return [
 		// ExAppUsers
 		['name' => 'ocsApi#getExAppUsers', 'url' => '/api/v1/users', 'verb' => 'GET'],
 
+		// ExApps
+		['name' => 'exApp#getExApps', 'url' => '/api/v1/ex-app/all', 'verb' => 'GET'],
+
 		// Ex Apps registration
 		['name' => 'ocsApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
 		['name' => 'ocsApi#unregisterExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],

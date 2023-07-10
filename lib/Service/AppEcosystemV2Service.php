@@ -726,6 +726,32 @@ class AppEcosystemV2Service {
 		}
 	}
 
+	public function getExAppsList(bool $extended = false): array {
+		try {
+			$exApps = $this->exAppMapper->findAll();
+			if ($extended) {
+				$exApps = array_map(function (ExApp $exApp) {
+					return [
+						'id' => $exApp->getAppid(),
+						'name' => $exApp->getName(),
+						'version' => $exApp->getVersion(),
+						'enabled' => $exApp->getEnabled(),
+						'last_response_time' => $exApp->getLastResponseTime(),
+						'system' => $this->exAppUserExists($exApp->getAppid(), ''),
+					];
+				}, $exApps);
+			} else {
+				$exApps = array_map(function (ExApp $exApp) {
+					return $exApp->getAppid();
+				}, $exApps);
+			}
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while getting ExApps list. Error: %s', $e->getMessage()));
+			$exApps = [];
+		}
+		return $exApps;
+	}
+
 	public function getNCUsersList(): ?array {
 		return array_map(function (IUser $user) {
 			return $user->getUID();
