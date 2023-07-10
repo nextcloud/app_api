@@ -1,4 +1,4 @@
-[![Tests - Deplody](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests-deploy.yml/badge.svg)](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests-deploy.yml)
+[![Tests - Deploy](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests-deploy.yml/badge.svg)](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests-deploy.yml)
 [![Docs](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/docs.yml/badge.svg)](https://cloud-py-api.github.io/app_ecosystem_v2/)
 
 # Nextcloud App Ecosystem V2
