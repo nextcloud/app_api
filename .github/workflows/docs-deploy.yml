@@ -1,7 +1,10 @@
 name: Docs deploy
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
+    paths:
+      - '.github/workflows/docs-check.yml'
+      - 'docs/**'
 
 jobs:
   build_push_docs:
