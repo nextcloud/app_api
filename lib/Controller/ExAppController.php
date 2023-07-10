@@ -54,7 +54,6 @@ class ExAppController extends OCSController {
 		$this->service = $service;
 	}
 
-	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function getExApps(bool $extended = false, string $format = 'json'): Response {
 		return $this->buildResponse(new DataResponse($this->service->getExAppsList($extended), Http::STATUS_OK), $format);
