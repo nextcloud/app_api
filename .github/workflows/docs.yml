@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/docs-deploy.yml'
+      - '.github/workflows/docs.yml'
       - 'docs/**'
 
 jobs:
