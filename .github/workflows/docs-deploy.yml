@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/docs-check.yml'
+      - '.github/workflows/docs-deploy.yml'
       - 'docs/**'
 
 jobs:
@@ -38,4 +38,4 @@ jobs:
           git push deploy gh-pages --force
           popd
         env:
-          GITHUB_TOKEN: ${{ secrets.CREATE_DEMO_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_DOCS }}
