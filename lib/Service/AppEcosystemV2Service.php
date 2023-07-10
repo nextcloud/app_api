@@ -732,12 +732,12 @@ class AppEcosystemV2Service {
 			if ($extended) {
 				$exApps = array_map(function (ExApp $exApp) {
 					return [
-						'appid' => $exApp->getAppid(),
+						'id' => $exApp->getAppid(),
 						'name' => $exApp->getName(),
 						'version' => $exApp->getVersion(),
 						'enabled' => $exApp->getEnabled(),
 						'last_response_time' => $exApp->getLastResponseTime(),
-						'is_system_app' => $this->exAppUserExists($exApp->getAppid(), ''),
+						'system' => $this->exAppUserExists($exApp->getAppid(), ''),
 					];
 				}, $exApps);
 			} else {
