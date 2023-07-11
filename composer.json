@@ -1,0 +1,43 @@
+{
+	"name": "nextcloud/app_ecosystem_v2",
+	"description": "Nextcloud App Ecosystem V2 provides a new API for external apps on different programming languages",
+	"type": "project",
+	"license": "AGPL-3.0-or-later",
+	"authors": [
+		{
+			"name": "Andrey Borysenko",
+			"email": "andrey18106x@gmail.com",
+			"homepage": "https://github.com/andrey18106"
+		},
+		{
+			"name": "Alexander Piskun",
+			"email": "bigcat88@icloud.com",
+			"homepage": "https://github.com/bigcat88"
+		}
+	],
+	"require-dev": {
+		"nextcloud/ocp": "dev-master",
+		"roave/security-advisories": "dev-latest"
+	},
+	"scripts": {
+		"lint": "find . -name \\*.php -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
+		"cs:check": "php-cs-fixer fix --dry-run --diff",
+		"cs:fix": "php-cs-fixer fix",
+		"psalm": "psalm.phar --threads=1",
+		"psalm:update-baseline": "psalm.phar --threads=1 --update-baseline",
+		"psalm:update-baseline:force": "psalm.phar --threads=1 --update-baseline --set-baseline=tests/psalm-baseline.xml",
+		"psalm:clear": "psalm.phar --clear-cache && psalm.phar --clear-global-cache",
+		"psalm:fix": "psalm.phar --alter --issues=InvalidReturnType,InvalidNullableReturnType,MissingParamType,InvalidFalsableReturnType",
+		"test:unit": "phpunit -c tests/phpunit.unit.xml --fail-on-warning",
+		"test:unit:coverage": "XDEBUG_MODE=coverage phpunit -c tests/phpunit.unit.xml --fail-on-warning --coverage-html=tests/coverage/php/unit --coverage-clover=tests/coverage/php/unit/clover.xml",
+		"test:integration": "phpunit -c tests/phpunit.integration.xml --fail-on-warning",
+		"test:integration:coverage": "XDEBUG_MODE=coverage phpunit -c tests/phpunit.integration.xml --fail-on-warning --coverage-html=tests/coverage/php/integration --coverage-clover=tests/coverage/php/integration/clover.xml"
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"classmap-authoritative": true,
+		"platform": {
+			"php": "8.1"
+		}
+	}
+}
