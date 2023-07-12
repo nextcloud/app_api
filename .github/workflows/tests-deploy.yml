@@ -83,6 +83,7 @@ jobs:
           ./occ config:system:set debug --value=true --type=boolean
           ./occ config:system:set allow_local_remote_servers --value true
           ./occ app:enable --force ${{ env.APP_NAME }}
+          patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
 
       - name: Test deploy
         run: |
@@ -144,10 +145,10 @@ jobs:
 
       - name: Install AppEcosystemV2
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/app_ecosystem_v2.git
-          docker exec -w /var/www/html/apps/app_ecosystem_v2 nextcloud git fetch origin $GITHUB_REF
-          docker exec -w /var/www/html/apps/app_ecosystem_v2 nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud patch -p 1 -i apps/app_ecosystem_v2/base_php.patch
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
+          docker exec nextcloud patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
           docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
           docker-install Docker unix-socket /var/run/docker.sock http://nextcloud/index.php --net=master_bridge
