@@ -85,8 +85,8 @@ class DockerActions {
 			];
 		} else if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
 			$dockerUrl = $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+			$guzzleParams = $this->setupCerts($guzzleParams, $sslParams);
 		}
-		$guzzleParams = $this->setupCerts($guzzleParams, $sslParams);
 		$this->guzzleClient = new Client($guzzleParams);
 
 		$pullResult = $this->pullContainer($dockerUrl, $imageParams);
