@@ -95,9 +95,8 @@ jobs:
 
       - name: Check logs
         run: |
-          set -e
-          fgrep -iq 'Hello from app_python_skeleton :)' data/nextcloud.log
-          fgrep -iq 'Bye bye from app_python_skeleton :(' data/nextcloud.log
+          fgrep -iq 'Hello from app_python_skeleton :)' data/nextcloud.log || exit 2
+          fgrep -iq 'Bye bye from app_python_skeleton :(' data/nextcloud.log || exit 2
 
       - name: Save container ingo & logs
         if: always()
