@@ -36,17 +36,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
 class UnregisterDaemon extends Command {
-	private AppEcosystemV2Service $service;
 	private DaemonConfigService $daemonConfigService;
 
-	public function __construct(AppEcosystemV2Service $service, DaemonConfigService $daemonConfigService) {
+	public function __construct(DaemonConfigService $daemonConfigService) {
 		parent::__construct();
 
-		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 	}
 

@@ -32,24 +32,28 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Docker;
 
 
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCP\ICertificateManager;
+use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
 class DockerActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	private LoggerInterface $logger;
-	private \GuzzleHttp\Client $guzzleClient;
+	private Client $guzzleClient;
+	private ICertificateManager $certificateManager;
+	private IConfig $config;
 
-	public function __construct(LoggerInterface $logger) {
+	public function __construct(
+		LoggerInterface $logger,
+		IConfig $config,
+		ICertificateManager $certificateManager
+	) {
 		$this->logger = $logger;
-		$this->guzzleClient = new \GuzzleHttp\Client(
-			[
-				'curl' => [
-					CURLOPT_UNIX_SOCKET_PATH => '/var/run/docker.sock', // default docker socket path
-				],
-			]
-		);
+		$this->certificateManager = $certificateManager;
+		$this->config = $config;
 	}
 
 	/**
@@ -58,6 +62,7 @@ class DockerActions {
 	 * @param DaemonConfig $daemonConfig
 	 * @param array $imageParams
 	 * @param array $containerParams
+	 * @param array $sslParams
 	 *
 	 * @return array
 	 */
@@ -65,43 +70,48 @@ class DockerActions {
 		DaemonConfig $daemonConfig,
 		array $imageParams,
 		array $containerParams,
+		array $sslParams,
 	): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
 			return ['error' => 'Only docker-install is supported for now.'];
 		}
+		$dockerUrl = 'http://localhost';
+		$guzzleParams = [];
 		if ($daemonConfig->getProtocol() === 'unix-socket') {
-			$this->guzzleClient = new \GuzzleHttp\Client(
-				[
-					'curl' => [
-						CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
-					],
-				]
-			);
+			$guzzleParams = [
+				'curl' => [
+					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
+				],
+			];
+		} else if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
+			$dockerUrl = $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+			$guzzleParams = $this->setupCerts($guzzleParams, $sslParams);
 		}
+		$this->guzzleClient = new Client($guzzleParams);
 
-		$pullResult = $this->pullContainer($imageParams);
+		$pullResult = $this->pullContainer($dockerUrl, $imageParams);
 		if (isset($pullResult['error'])) {
 			return [$pullResult, null, null];
 		}
 
-		$createResult = $this->createContainer($imageParams, $containerParams);
+		$createResult = $this->createContainer($dockerUrl, $imageParams, $containerParams);
 		if (isset($createResult['error'])) {
 			return [null, $createResult, null];
 		}
 
-		$startResult = $this->startContainer($createResult['Id']);
+		$startResult = $this->startContainer($dockerUrl, $createResult['Id']);
 		return [$pullResult, $createResult, $startResult];
 	}
 
-	public function buildApiUrl(string $url): string {
-		return sprintf('http://localhost/%s/%s', self::DOCKER_API_VERSION, $url);
+	public function buildApiUrl(string $dockerUrl, string $route): string {
+		return sprintf('%s/%s/%s', $dockerUrl, self::DOCKER_API_VERSION, $route);
 	}
 
 	public function buildImageName(array $imageParams): string {
 		return $imageParams['image_src'] . '/' . $imageParams['image_name'] . ':' . $imageParams['image_tag'];
 	}
 
-	public function createContainer(array $imageParams, array $params = []): array {
+	public function createContainer(string $dockerUrl, array $imageParams, array $params = []): array {
 		$containerParams = [
 			'Image' => $this->buildImageName($imageParams),
 			'Hostname' => $params['hostname'],
@@ -124,7 +134,7 @@ class DockerActions {
 			$containerParams['NetworkingConfig'] = $networkingConfig;
 		}
 
-		$url = $this->buildApiUrl(sprintf('containers/create?name=%s', urlencode($params['name'])));
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($params['name'])));
 		try {
 			$options['json'] = $containerParams;
 			$response = $this->guzzleClient->post($url, $options);
@@ -136,8 +146,8 @@ class DockerActions {
 		}
 	}
 
-	public function startContainer(string $containerId): array {
-		$url = $this->buildApiUrl(sprintf('containers/%s/start', $containerId));
+	public function startContainer(string $dockerUrl, string $containerId): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s/start', $containerId));
 		try {
 			$response = $this->guzzleClient->post($url);
 			return ['success' => $response->getStatusCode() === 204];
@@ -148,8 +158,8 @@ class DockerActions {
 		}
 	}
 
-	public function pullContainer(array $params): array {
-		$url = $this->buildApiUrl(sprintf('images/create?fromImage=%s', $this->buildImageName($params)));
+	public function pullContainer(string $dockerUrl, array $params): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', $this->buildImageName($params)));
 		try {
 			$xRegistryAuth = json_encode([
 				'https://' . $params['image_src'] => []
@@ -167,8 +177,8 @@ class DockerActions {
 		}
 	}
 
-	public function inspectContainer(string $containerId): array {
-		$url = $this->buildApiUrl(sprintf('containers/%s/json', $containerId));
+	public function inspectContainer(string $dockerUrl, string $containerId): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s/json', $containerId));
 		try {
 			$response = $this->guzzleClient->get($url);
 			return json_decode((string) $response->getBody(), true);
@@ -177,5 +187,32 @@ class DockerActions {
 			error_log($e->getMessage());
 			return ['error' => 'Failed to inspect container'];
 		}
+	}
+
+	/**
+	 * @param array $guzzleParams
+	 * @param array $sslParams ['ssl_key', 'ssl_password', 'ssl_cert', 'ssl_cert_password']
+	 *
+	 * @return array
+	 */
+	private function setupCerts(array $guzzleParams, array $sslParams): array {
+		if (!$this->config->getSystemValueBool('installed', false)) {
+			$certs =  \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
+		} else {
+			$certs = $this->certificateManager->getAbsoluteBundlePath();
+		}
+
+		$guzzleParams['verify'] = $certs;
+		if (isset($sslParams['ssl_key'])) {
+			$guzzleParams['ssl_key'] = !isset($sslParams['ssl_key_password'])
+				? $sslParams['ssl_key']
+				: [$sslParams['ssl_key'], $sslParams['ssl_key_password']];
+		}
+		if (isset($sslParams['ssl_cert'])) {
+			$guzzleParams['cert'] = !isset($sslParams['ssl_cert_password'])
+				? $sslParams['ssl_cert']
+				: [$sslParams['ssl_cert'], $sslParams['ssl_cert_password']];
+		}
+		return $guzzleParams;
 	}
 }

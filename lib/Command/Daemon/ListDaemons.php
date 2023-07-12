@@ -69,10 +69,7 @@ class ListDaemons extends Command {
 
 		$output->writeln('Registered ExApp daemon configs:');
 		foreach ($daemonConfigs as $daemon) {
-			if (in_array($daemon->getProtocol(), ['unix', 'unix-socket'])) {
-
-			}
-			$output->writeln(sprintf('%s. %s [%s]: %s', $daemon->getId(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getHost() . ':' . $daemon->getPort()));
+			$output->writeln(sprintf('%s. %s [%s]: %s://%s', $daemon->getId(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getProtocol(), $daemon->getHost()));
 		}
 
 		return Command::SUCCESS;

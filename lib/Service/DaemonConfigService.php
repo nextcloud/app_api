@@ -67,7 +67,6 @@ class DaemonConfigService {
 				'display_name' => $params['display_name'],
 				'protocol' => $params['protocol'],
 				'host' => $params['host'],
-				'port' => $params['port'],
 				'deploy_config' => $params['deploy_config'],
 			]));
 			$this->cache->remove('daemon_configs');
