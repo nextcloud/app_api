@@ -252,7 +252,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_container.json
+          name: nc_docker_app_docker_by_port_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -260,7 +260,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_container.log
+          name: nc_docker_app_docker_by_port_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -268,6 +268,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_nextcloud.log
+          name: nc_docker_app_docker_by_port_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
