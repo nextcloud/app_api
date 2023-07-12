@@ -71,7 +71,7 @@ The second step is to deploy ExApp on registered daemon. This is done using `occ
 ### CLI
 
 ```
-app_ecosystem_v2:app:deploy [--info-xml INFO-XML] [-e|--env ENV] [--] <appid> <daemon-config-id>
+app_ecosystem_v2:app:deploy [--info-xml INFO-XML] [--ssl_key SSL_KEY] [--ssl_password SSL_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [-e|--env ENV] [--] <appid> <daemon-config-id>
 ```
 
 arguments:
@@ -82,6 +82,10 @@ arguments:
 options:
 
 - `info-xml` - `[required]` path to info.xml (see [info.xml schema](#exapp-infoxml-schema)) file (url or local absolute path)
+- `ssl_key` - `[optional]` path to SSL key file (local absolute path), may be required in some cases (e.g. remote docker daemon with TLS enabled, see [docker daemon TLS](#docker-daemon-port)
+- `ssl_key_password` - `[optional]` SSL key password
+- `ssl_cert` - `[optional]` path to SSL cert file (local absolute path)
+- `ssl_cert_password` - `[optional]` SSL cert password
 - `env` - `[required]` environment variables to pass to the docker container (list of required env variables is defined below [deploy env variables](#deploy-env-variables))
 
 Successful deployment will return the following JSON output which is used then in ExApp registration:
@@ -95,7 +99,7 @@ Successful deployment will return the following JSON output which is used then i
 	"secret":"***generated-secret***",
 	"host":"app_python_skeleton",
 	"port":"9001",
-	"system_app": false
+	"system_app": true
 }
 ```
 
@@ -119,6 +123,18 @@ Let's say we want to deploy ExApp with appid `app_python_skeleton` and version `
 ```
 php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
 ```
+
+# Docker daemon port
+
+If you want to connect to remote docker daemon with TLS enabled, you need to provide SSL key and cert by provided options.
+Important: before deploy you need to import ca.pem file using occ command:
+
+```
+php occ security:certificates:import /path/to/ca.pem
+```
+
+The daemon must be configured with `protocol=net`, `host=https://dockerapihost`, `port=8443`.
+More info about how to configure daemon will be added soon.
 
 ## ExApp registration
 
