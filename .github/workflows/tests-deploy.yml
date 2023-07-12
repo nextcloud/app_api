@@ -91,8 +91,8 @@ jobs:
           ./occ app_ecosystem_v2:daemon:register docker-install Docker unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_ecosystem_v2:app:register \
           "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
-#          ./occ app_ecosystem_v2:app:enable app_python_skeleton
-#          ./occ app_ecosystem_v2:app:disable app_python_skeleton
+          ./occ app_ecosystem_v2:app:enable app_python_skeleton
+          ./occ app_ecosystem_v2:app:disable app_python_skeleton
 
       - name: Check logs
         run: |
@@ -157,8 +157,8 @@ jobs:
           docker-install Docker unix-socket /var/run/docker.sock http://nextcloud/index.php --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register \
           "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
-#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
-#          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
