@@ -35,6 +35,7 @@ use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Db\ExAppPreference;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 
@@ -71,6 +72,7 @@ class PreferencesController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[PublicPage]
 	#[NoCSRFRequired]
 	public function setUserConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
 		if ($configKey === '') {
@@ -92,6 +94,7 @@ class PreferencesController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getUserConfigValues(array $configKeys, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();
@@ -108,6 +111,7 @@ class PreferencesController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[PublicPage]
 	#[NoCSRFRequired]
 	public function deleteUserConfigValues(array $configKeys, string $format = 'json'): Response {
 		$userId = $this->userSession->getUser()->getUID();

@@ -35,6 +35,7 @@ use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\EventDispatcher\IEventDispatcher;
 use Psr\Log\LoggerInterface;
 
@@ -90,6 +91,7 @@ class OCSApiController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function log(
@@ -184,6 +186,7 @@ class OCSApiController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerFileActionMenu(array $fileActionMenuParams, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
@@ -201,6 +204,7 @@ class OCSApiController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[PublicPage]
 	#[NoCSRFRequired]
 	public function unregisterFileActionMenu(string $fileActionMenuName, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
@@ -258,6 +262,7 @@ class OCSApiController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getExAppUsers(string $format = 'json'): Response {
 		return $this->buildResponse(new DataResponse($this->service->getNCUsersList(), Http::STATUS_OK), $format);
@@ -273,6 +278,7 @@ class OCSApiController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerApiScope(string $apiRoute, int $scopeGroup, string $name, string $format): Response {
 		$apiScope = $this->exAppApiScopeService->registerApiScope($apiRoute, $scopeGroup, $name);
