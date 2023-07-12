@@ -160,17 +160,12 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 255,
 			]);
-			$table->addColumn('port', Types::SMALLINT, [
-				'notnull' => true,
-				'unsigned' => true,
-				'default' => 0, // in case of unix socket
-			]);
 			$table->addColumn('deploy_config', Types::JSON, [
 				'default' => '{}',
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['host', 'port'], 'ex_apps_daemons__idx');
+			$table->addUniqueIndex(['host'], 'ex_apps_daemons__idx');
 		}
 
 		if (!$schema->hasTable('preferences_ex')) {

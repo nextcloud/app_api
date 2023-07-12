@@ -57,7 +57,6 @@ class RegisterDaemon extends Command {
 		$this->addArgument('protocol', InputArgument::REQUIRED);
 		$this->addArgument('host', InputArgument::REQUIRED);
 		$this->addArgument('nextcloud_url', InputArgument::REQUIRED);
-		$this->addArgument('port', InputArgument::OPTIONAL, 'Port of the daemon, only required for network protocol', 0);
 
 		// daemon-config settings
 		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'DeployConfig, docker network name');
@@ -72,7 +71,6 @@ class RegisterDaemon extends Command {
 		$protocol = $input->getArgument('protocol');
 		$host = $input->getArgument('host');
 		$nextcloudUrl = $input->getArgument('nextcloud_url');
-		$port = $input->getArgument('port');
 
 		$deployConfig = [
 			'net' => $input->getOption('net') ?? 'host',
@@ -85,7 +83,6 @@ class RegisterDaemon extends Command {
 			'display_name' => $displayName,
 			'protocol' => $protocol,
 			'host' => $host,
-			'port' => $port,
 			'deploy_config' => $deployConfig,
 		]);
 

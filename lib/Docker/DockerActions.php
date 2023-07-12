@@ -83,8 +83,8 @@ class DockerActions {
 					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
 				],
 			];
-		} else if ($daemonConfig->getProtocol() === 'net') {
-			$dockerUrl = $daemonConfig->getHost() . ':' . $daemonConfig->getPort();
+		} else if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
+			$dockerUrl = $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
 		}
 		$guzzleParams = $this->setupCerts($guzzleParams, $sslParams);
 		$this->guzzleClient = new Client($guzzleParams);

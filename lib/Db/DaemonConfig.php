@@ -86,9 +86,6 @@ class DaemonConfig extends Entity implements JsonSerializable {
 		if (isset($params['host'])) {
 			$this->setHost($params['host']);
 		}
-		if (isset($params['port'])) {
-			$this->setPort($params['port']);
-		}
 		if (isset($params['deploy_config'])) {
 			$this->setDeployConfig($params['deploy_config']);
 		}
@@ -101,7 +98,6 @@ class DaemonConfig extends Entity implements JsonSerializable {
 			'display_name' => $this->getDisplayName(),
 			'protocol' => $this->getProtocol(),
 			'host' => $this->getHost(),
-			'port' => $this->getPort(),
 			'deploy_config' => $this->getDeployConfig(),
 		];
 	}
