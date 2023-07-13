@@ -137,7 +137,7 @@ class DaemonConfigService {
 			$daemonConfig = $this->mapper->findByName($name);
 			$this->cache->set($cacheKey, $daemonConfig, Application::CACHE_TTL);
 			return $daemonConfig;
-		} catch (Exception $e) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 			$this->logger->error('Failed to get daemon config by name. Error: ' . $e->getMessage());
 			return null;
 		}

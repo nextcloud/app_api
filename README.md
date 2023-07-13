@@ -8,6 +8,8 @@ Nextcloud App Ecosystem V2 provides a new API for external apps on different pro
 
 | Currently in a prototyping stage
 
+Docs can be found [here](https://cloud-py-api.github.io/app_ecosystem_v2/).
+
 ## Dev changes to Nextcloud
 
 `base.php` adjustment for authentication of Ex apps ([patch](./base_php.patch)).

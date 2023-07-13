@@ -78,6 +78,7 @@ class RegisterDaemon extends Command {
 			'net' => $input->getOption('net') ?? 'host',
 			'host' => $input->getOption('host'),
 			'nextcloud_url' => $nextcloudUrl,
+			// TODO: Add SSL cert config here
 		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
