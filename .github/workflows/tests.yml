@@ -96,6 +96,9 @@ jobs:
           ./occ app:enable --force ${{ env.APP_NAME }}
           patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
 
+      - name: Run Nextcloud
+        run: php -S 127.0.0.1:8080 &
+
       - name: Checkout NcPyApi
         uses: actions/checkout@v3
         with:
@@ -105,9 +108,6 @@ jobs:
       - name: Install NcPyApi
         working-directory: nc_py_api
         run: python3 -m pip -v install ".[dev]"
-
-      - name: Run Nextcloud
-        run: php -S 127.0.0.1:8080 &
 
       - name: Register NcPyApi
         run: |
