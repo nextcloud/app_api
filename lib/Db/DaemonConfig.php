@@ -40,12 +40,14 @@ use OCP\AppFramework\Db\Entity;
  * @package OCA\AppEcosystemV2\Db
  *
  * @method string getAcceptsDeployId()
+ * @method string getName()
  * @method string getDisplayName()
  * @method string getProtocol()
  * @method string getHost()
  * @method string getPort()
  * @method array getDeployConfig()
  * @method void setAcceptsDeployId(string $acceptsDeployId)
+ * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
  * @method void setProtocol(string $protocol)
  * @method void setHost(string $host)
@@ -53,8 +55,9 @@ use OCP\AppFramework\Db\Entity;
  * @method void setDeployConfig(array $deployConfig)
  */
 class DaemonConfig extends Entity implements JsonSerializable {
-	protected $acceptsDeployId;
+	protected $name;
 	protected $displayName;
+	protected $acceptsDeployId;
 	protected $protocol;
 	protected $host;
 	protected $port;
@@ -65,6 +68,7 @@ class DaemonConfig extends Entity implements JsonSerializable {
 	 */
 	public function __construct(array $params = []) {
 		$this->addType('acceptsDeployId', 'string');
+		$this->addType('name', 'string');
 		$this->addType('displayName', 'string');
 		$this->addType('protocol', 'string');
 		$this->addType('host', 'string');
@@ -76,6 +80,9 @@ class DaemonConfig extends Entity implements JsonSerializable {
 		}
 		if (isset($params['accepts_deploy_id'])) {
 			$this->setAcceptsDeployId($params['accepts_deploy_id']);
+		}
+		if (isset($params['name'])) {
+			$this->setName($params['name']);
 		}
 		if (isset($params['display_name'])) {
 			$this->setDisplayName($params['display_name']);
@@ -95,6 +102,7 @@ class DaemonConfig extends Entity implements JsonSerializable {
 		return [
 			'id' => $this->getId(),
 			'accepts_deploy_id' => $this->getAcceptsDeployId(),
+			'name' => $this->getName(),
 			'display_name' => $this->getDisplayName(),
 			'protocol' => $this->getProtocol(),
 			'host' => $this->getHost(),

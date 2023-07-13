@@ -73,7 +73,7 @@ class DockerActions {
 		array $sslParams,
 	): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
-			return ['error' => 'Only docker-install is supported for now.'];
+			throw new \Exception('Only docker-install is supported for now.');
 		}
 		$dockerUrl = 'http://localhost';
 		$guzzleParams = [];

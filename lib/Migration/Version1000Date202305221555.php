@@ -95,8 +95,9 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 64
 			]);
-			$table->addColumn('daemon_config_id', Types::BIGINT, [
+			$table->addColumn('daemon_config_name', Types::STRING, [
 				'default' => 0,
+				'length' => 64,
 			]);
 			$table->addColumn('protocol', Types::STRING, [
 				'notnull' => true,
@@ -133,7 +134,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 
 			$table->setPrimaryKey(['id']);
 			$table->addUniqueIndex(['appid'], 'ex_apps__appid');
-			$table->addUniqueIndex(['daemon_config_id', 'port'], 'ex_apps_c_port__idx');
+			$table->addUniqueIndex(['host', 'port'], 'ex_apps_c_port__idx');
 		}
 
 		// Docker daemon or other configurations
@@ -144,13 +145,17 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'autoincrement' => true,
 			]);
-			$table->addColumn('accepts_deploy_id', Types::STRING, [
+			$table->addColumn('name', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
 			]);
 			$table->addColumn('display_name', Types::STRING, [
 				'notnull' => true,
 				'length' => 255,
+			]);
+			$table->addColumn('accepts_deploy_id', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
 			]);
 			$table->addColumn('protocol', Types::STRING, [
 				'notnull' => true,
@@ -165,7 +170,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['host'], 'ex_apps_daemons__idx');
+			$table->addUniqueIndex(['name'], 'ex_apps_daemons__name');
 		}
 
 		if (!$schema->hasTable('preferences_ex')) {

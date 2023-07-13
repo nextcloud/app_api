@@ -52,8 +52,9 @@ class RegisterDaemon extends Command {
 		$this->setName('app_ecosystem_v2:daemon:register');
 		$this->setDescription('Register daemon config for ExApp deployment');
 
-		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED);
+		$this->addArgument('name', InputArgument::REQUIRED);
 		$this->addArgument('display-name', InputArgument::REQUIRED);
+		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED);
 		$this->addArgument('protocol', InputArgument::REQUIRED);
 		$this->addArgument('host', InputArgument::REQUIRED);
 		$this->addArgument('nextcloud_url', InputArgument::REQUIRED);
@@ -62,12 +63,13 @@ class RegisterDaemon extends Command {
 		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'DeployConfig, docker network name');
 		$this->addOption('host', null, InputOption::VALUE_REQUIRED, 'DeployConfig, docker daemon host (e.g. host.docker.internal)');
 
-		$this->addUsage('"docker-install" "Docker local" "unix-socket" "/var/run/docker.sock" "http://nextcloud.local" --net "nextcloud" --host "host.docker.internal"');
+		$this->addUsage('local_docker "Docker local" "docker-install" "unix-socket" "/var/run/docker.sock" "http://nextcloud.local" --net "nextcloud" --host "host.docker.internal"');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$acceptsDeployId = $input->getArgument('accepts-deploy-id');
+		$name = $input->getArgument('name');
 		$displayName = $input->getArgument('display-name');
+		$acceptsDeployId = $input->getArgument('accepts-deploy-id');
 		$protocol = $input->getArgument('protocol');
 		$host = $input->getArgument('host');
 		$nextcloudUrl = $input->getArgument('nextcloud_url');
@@ -79,8 +81,9 @@ class RegisterDaemon extends Command {
 		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
-			'accepts_deploy_id' => $acceptsDeployId,
+			'name' => $name,
 			'display_name' => $displayName,
+			'accepts_deploy_id' => $acceptsDeployId,
 			'protocol' => $protocol,
 			'host' => $host,
 			'deploy_config' => $deployConfig,
@@ -91,7 +94,7 @@ class RegisterDaemon extends Command {
 			return 1;
 		}
 
-		$output->writeln(sprintf('Daemon successfully registered. Daemon config ID: %s', $daemonConfig->getId()));
+		$output->writeln('Daemon successfully registered.');
 		return 0;
 	}
 }

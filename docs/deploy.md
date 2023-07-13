@@ -94,7 +94,7 @@ Successful deployment will return the following JSON output which is used then i
 {
 	"appid": "app_python_skeleton",
 	"name":"App Python Skeleton",
-	"daemon_config_id": 1,
+	"daemon_config_name": "local_docker",
 	"version":"1.0.0",
 	"secret":"***generated-secret***",
 	"host":"app_python_skeleton",
@@ -121,7 +121,7 @@ The following env variables are required (additional envs can be passed using mu
 Let's say we want to deploy ExApp with appid `app_python_skeleton` and version `1.0.0` on local docker daemon registered in previous step.
 
 ```
-php occ app_ecosystem_v2:app:deploy app_python_skeleton 1 --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+php occ app_ecosystem_v2:app:deploy app_python_skeleton local_docker --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
 ```
 
 # Docker daemon port
@@ -133,7 +133,7 @@ Important: before deploy you need to import ca.pem file using occ command:
 php occ security:certificates:import /path/to/ca.pem
 ```
 
-The daemon must be configured with `protocol=net`, `host=https://dockerapihost`, `port=8443`.
+The daemon must be configured with `protocol=http|https`, `host=https://dockerapihost`, `port=8443`.
 More info about how to configure daemon will be added soon.
 
 ## ExApp registration
@@ -160,7 +160,7 @@ options:
 Let's say we want to register ExApp with appid `app_python_skeleton` and version `1.0.0` on local docker daemon registered in previous step.
 
 ```
-php occ app_ecosystem_v2:app:register {"appid":"app_python_skeleton","name":"App Python Skeleton","daemon_config_id":1,"version":"1.0.0","secret":"***secret***","host":"app_python_skeleton","port":"9001", "protocol": "http", "system_app": false} --enabled --force-scopes
+php occ app_ecosystem_v2:app:register {"appid":"app_python_skeleton","name":"App Python Skeleton","daemon_config_name": local_docker,"version":"1.0.0","secret":"***secret***","host":"app_python_skeleton","port":"9001", "protocol": "http", "system_app": false} --enabled --force-scopes
 ```
 
 combined with deploy step:

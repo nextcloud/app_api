@@ -74,4 +74,23 @@ class DaemonConfigMapper extends QBMapper {
 			);
 		return $this->findEntity($qb);
 	}
+
+	/**
+	 * @param string $name
+	 *
+	 * @throws DoesNotExistException
+	 * @throws Exception
+	 * @throws MultipleObjectsReturnedException
+	 *
+	 * @return DaemonConfig
+	 */
+	public function findByName(string $name): DaemonConfig {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->tableName)
+			->where(
+				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
+			);
+		return $this->findEntity($qb);
+	}
 }

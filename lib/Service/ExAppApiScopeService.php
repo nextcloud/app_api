@@ -111,8 +111,16 @@ class ExAppApiScopeService {
 			['api_route' =>  '/dav/', 'scope_group' => 3, 'name' => 'DAV'],
 		];
 
+		$registeredApiScopes = $this->getExAppApiScopes();
+		$registeredApiScopesRoutes = [];
+		foreach ($registeredApiScopes as $registeredApiScope) {
+			$registeredApiScopesRoutes[$registeredApiScope->getApiRoute()] = $registeredApiScope->getId();
+		}
 		try {
 			foreach ($initApiScopes as $apiScope) {
+				if (in_array($apiScope['api_route'], array_keys($registeredApiScopesRoutes))) {
+					$apiScope['id'] = $registeredApiScopesRoutes[$apiScope['api_route']];
+				}
 				$this->mapper->insertOrUpdate(new ExAppApiScope($apiScope));
 			}
 			return true;

@@ -63,8 +63,9 @@ class DaemonConfigService {
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
 		try {
 			$daemonConfig = $this->mapper->insert(new DaemonConfig([
-				'accepts_deploy_id' => $params['accepts_deploy_id'],
+				'name' => $params['name'],
 				'display_name' => $params['display_name'],
+				'accepts_deploy_id' => $params['accepts_deploy_id'],
 				'protocol' => $params['protocol'],
 				'host' => $params['host'],
 				'deploy_config' => $params['deploy_config'],
@@ -121,6 +122,23 @@ class DaemonConfigService {
 			return $daemonConfigs;
 		} catch (Exception $e) {
 			$this->logger->error('Failed to get registered daemon configs. Error: ' . $e->getMessage());
+			return null;
+		}
+	}
+
+	public function getDaemonConfigByName(string $name): ?DaemonConfig {
+		try {
+			$cacheKey = 'daemon_config_' . $name;
+//			$cached = $this->cache->get($cacheKey);
+//			if ($cached !== null) {
+//				return $cached instanceof DaemonConfig ? $cached : new DaemonConfig($cached);
+//			}
+
+			$daemonConfig = $this->mapper->findByName($name);
+			$this->cache->set($cacheKey, $daemonConfig, Application::CACHE_TTL);
+			return $daemonConfig;
+		} catch (Exception $e) {
+			$this->logger->error('Failed to get daemon config by name. Error: ' . $e->getMessage());
 			return null;
 		}
 	}
