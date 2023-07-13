@@ -83,6 +83,10 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
 	 * @param int $level
 	 * @param string $message
 	 * @param string $format
@@ -122,6 +126,8 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @NoCSRFRequired
+	 *
 	 * @param string $appId
 	 * @param array $appData
 	 * @param string $format
@@ -139,6 +145,8 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @NoCSRFRequired
+	 *
 	 * @param string $appId
 	 * @param string $format
 	 *
@@ -161,6 +169,9 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
 	 * @param string $appId
 	 * @param string $format
 	 *
@@ -180,6 +191,9 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
 	 * @param array $fileActionMenuParams [name, display_name, mime, permissions, order, icon, icon_class, action_handler]
 	 * @param string $format
 	 *
@@ -198,6 +212,9 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
 	 * @param string $fileActionMenuName
 	 * @param string $format
 	 *
@@ -216,6 +233,9 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 *
 	 * @param string $appId
 	 * @param string $actionName
 	 * @param array $actionFile
@@ -235,6 +255,9 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
 	 * @param string $appId
 	 * @param string $exFileActionName
 	 *
@@ -257,6 +280,9 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
 	 * @param string $format
 	 *
 	 * @return Response
@@ -269,6 +295,9 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
 	 * @param string $apiRoute
 	 * @param int $scopeGroup
 	 * @param string $name

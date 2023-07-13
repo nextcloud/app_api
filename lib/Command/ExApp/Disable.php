@@ -59,19 +59,19 @@ class Disable extends Command {
 
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found. Failed to disable.', $appId));
-			return Command::FAILURE;
+			return 1;
 		}
 		if (!$exApp->getEnabled()) {
 			$output->writeln(sprintf('ExApp %s already disabled.', $appId));
-			return Command::SUCCESS;
+			return 0;
 		}
 
 		if ($this->service->disableExApp($exApp)) {
 			$output->writeln(sprintf('ExApp %s successfully disabled.', $appId));
-			return Command::SUCCESS;
+			return 0;
 		}
 
 		$output->writeln(sprintf('Failed to disable ExApp %s.', $appId));
-		return Command::FAILURE;
+		return 1;
 	}
 }

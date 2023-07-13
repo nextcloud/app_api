@@ -68,7 +68,7 @@ class AEAuthMiddleware extends Middleware {
 		$this->logger = $logger;
 	}
 
-	public function beforeController(Controller $controller, string $methodName) {
+	public function beforeController($controller, $methodName) {
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
 		$isAEAuth = $this->hasAnnotationOrAttribute($reflectionMethod, 'AEAuth', AppEcosystemAuth::class);

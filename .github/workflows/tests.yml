@@ -1,0 +1,136 @@
+name: Tests
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/tests.yml'
+      - 'lib/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tests.yml'
+      - 'lib/**'
+  workflow_dispatch:
+
+jobs:
+  nc-py-api-pgsql:
+    runs-on: ubuntu-22.04
+    name: NC_Py_API • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }} • PgSQL
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: [ '8.1' ]
+        server-version: [ 'stable26', 'stable27' ]
+        include:
+          - server-version: "master"
+            php-version: "8.2"
+    env:
+      NEXTCLOUD_URL: "http://localhost:8080/index.php"
+      APP_ID: "nc_py_api"
+      APP_PORT: 9009
+      APP_VERSION: "1.0.0"
+      APP_SECRET: "tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6E"
+      SKIP_NC_WO_AE: 1
+
+    services:
+      postgres:
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        ports:
+          - 4444:5432/tcp
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: nextcloud
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
+
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: ${{ matrix.server-version }}
+
+      - name: Checkout AppEcosystemV2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
+          coverage: none
+          ini-file: development
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
+            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
+          ./occ config:system:set allow_local_remote_servers --value true
+          ./occ app:enable --force ${{ env.APP_NAME }}
+          patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
+
+      - name: Run Nextcloud
+        run: php -S 127.0.0.1:8080 &
+
+      - name: Checkout NcPyApi
+        uses: actions/checkout@v3
+        with:
+          path: nc_py_api
+          repository: cloud-py-api/nc_py_api
+
+      - name: Install NcPyApi
+        working-directory: nc_py_api
+        run: python3 -m pip -v install ".[dev]"
+
+      - name: Register NcPyApi
+        run: |
+          cd nc_py_api
+          python3 tests/_install.py &
+          echo $! > /tmp/_install.pid
+          cd ..
+          sleep 5s
+          php occ app_ecosystem_v2:daemon:register docker-install Docker unix-socket 0 0
+          php occ app_ecosystem_v2:app:register \
+          "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_id\":1,\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"system_app\":1}" \
+          -e --force-scopes
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Run NC_Py_API tests
+        working-directory: nc_py_api
+        run: python3 -m pytest
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_py_api_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn

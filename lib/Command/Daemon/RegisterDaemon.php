@@ -88,10 +88,10 @@ class RegisterDaemon extends Command {
 
 		if ($daemonConfig === null) {
 			$output->writeln('Failed to register daemon.');
-			return Command::FAILURE;
+			return 1;
 		}
 
 		$output->writeln(sprintf('Daemon successfully registered. Daemon config ID: %s', $daemonConfig->getId()));
-		return Command::SUCCESS;
+		return 0;
 	}
 }

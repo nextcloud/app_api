@@ -59,12 +59,12 @@ class ListDaemons extends Command {
 		$daemonConfigs = $this->daemonConfigService->getRegisteredDaemonConfigs();
 		if ($daemonConfigs === null) {
 			$output->writeln('<error>Failed to get list of daemons.</error>');
-			return Command::FAILURE;
+			return 1;
 		}
 
 		if (count($daemonConfigs) === 0) {
 			$output->writeln('No registered daemon configs.');
-			return Command::SUCCESS;
+			return 0;
 		}
 
 		$output->writeln('Registered ExApp daemon configs:');
@@ -72,6 +72,6 @@ class ListDaemons extends Command {
 			$output->writeln(sprintf('%s. %s [%s]: %s://%s', $daemon->getId(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getProtocol(), $daemon->getHost()));
 		}
 
-		return Command::SUCCESS;
+		return 0;
 	}
 }

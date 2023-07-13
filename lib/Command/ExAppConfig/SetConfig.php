@@ -68,7 +68,7 @@ class SetConfig extends Command {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln('ExApp ' . $appId . ' not found');
-			return Command::FAILURE;
+			return 1;
 		}
 
 		if ($exApp->getEnabled()) {
@@ -81,27 +81,27 @@ class SetConfig extends Command {
 				$exAppConfig = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $value, (int) $sensitive);
 				if ($exAppConfig === null) {
 					$output->writeln('ExApp ' . $appId . ' config ' . $configKey . ' not found');
-					return Command::FAILURE;
+					return 1;
 				}
 			} else {
 				$exAppConfig = $this->exAppConfigService->getAppConfig($appId, $configKey);
 				if ($exAppConfig === null) {
 					$output->writeln('ExApp ' . $appId . ' config ' . $configKey . ' not found');
-					return Command::FAILURE;
+					return 1;
 				}
 				$exAppConfig->setConfigvalue($value);
 				$exAppConfig->setSensitive((int) $sensitive);
 				if ($this->exAppConfigService->updateAppConfigValue($exAppConfig) !== 1) {
 					$output->writeln('ExApp ' . $appId . ' config ' . $configKey . ' not updated');
-					return Command::FAILURE;
+					return 1;
 				}
 			}
 			$sensitiveMsg = $sensitive ? '[sensitive]' : '';
 			$output->writeln('ExApp ' . $appId . ' config ' . $configKey . ' set to ' . $value . ' ' . $sensitiveMsg);
-			return Command::SUCCESS;
+			return 0;
 		}
 
 		$output->writeln('ExApp ' . $appId . ' is disabled');
-		return Command::FAILURE;
+		return 1;
 	}
 }

@@ -92,30 +92,30 @@ class Deploy extends Command {
 		$pathToInfoXml = $input->getOption('info-xml');
 		if ($pathToInfoXml === null) {
 			$output->writeln(sprintf('No info.xml specified for %s', $appId));
-			return Command::INVALID;
+			return 2;
 		}
 
 		$infoXml = simplexml_load_file($pathToInfoXml);
 		if ($infoXml === false) {
 			$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
-			return Command::INVALID;
+			return 2;
 		}
 		if ($appId !== (string) $infoXml->id) {
 			$output->writeln(sprintf('ExApp appid %s does not match appid in info.xml (%s)', $appId, $infoXml->id));
-			return Command::INVALID;
+			return 2;
 		}
 
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp !== null) {
 			$output->writeln(sprintf('ExApp %s already deployed and registered.', $appId));
-			return Command::INVALID;
+			return 2;
 		}
 
 		$daemonConfigId = (int) $input->getArgument('daemon-config-id');
 		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
 		if ($daemonConfig === null) {
 			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigId));
-			return Command::INVALID;
+			return 2;
 		}
 		$deployConfig = $daemonConfig->getDeployConfig();
 
@@ -151,7 +151,7 @@ class Deploy extends Command {
 
 		if (isset($pullResult['error'])) {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $pullResult['error']));
-			return Command::FAILURE;
+			return 1;
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
@@ -168,14 +168,14 @@ class Deploy extends Command {
 			];
 			if ($this->heartbeatExApp($resultOutput, $daemonConfig->getId())) {
 				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
-				return Command::SUCCESS;
+				return 0;
 			}
 
 			$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and initialized correctly.', $appId));
 		} else {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
 		}
-		return Command::FAILURE;
+		return 1;
 	}
 
 	private function buildDeployEnvParams(array $params, array $envOptions, array $deployConfig): array {

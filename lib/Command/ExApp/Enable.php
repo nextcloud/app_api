@@ -60,19 +60,19 @@ class Enable extends Command {
 
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found. Failed to enable.', $appId));
-			return Command::FAILURE;
+			return 1;
 		}
 		if ($exApp->getEnabled()) {
 			$output->writeln(sprintf('ExApp %s already enabled.', $appId));
-			return Command::SUCCESS;
+			return 0;
 		}
 
 		if ($this->service->enableExApp($exApp)) {
 			$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
-			return Command::SUCCESS;
+			return 0;
 		}
 
 		$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
-		return Command::FAILURE;
+		return 1;
 	}
 }
