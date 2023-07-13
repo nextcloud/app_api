@@ -83,7 +83,7 @@ class Register extends Command {
 		$appId = $deployJsonOutput['appid'];
 		$version = $deployJsonOutput['version'];
 		$name = $deployJsonOutput['name'];
-		$daemonConfigId = (int) $deployJsonOutput['daemon_config_id'];
+		$daemonConfigName = $deployJsonOutput['daemon_config_name'];
 		$protocol = $deployJsonOutput['protocol'] ?? 'http';
 		$port = (int) $deployJsonOutput['port'];
 		$host = $deployJsonOutput['host'];
@@ -94,16 +94,16 @@ class Register extends Command {
 			return 2;
 		}
 
-		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
-			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigId));
+			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
 			return 2;
 		}
 
 		$exApp = $this->service->registerExApp($appId, [
 			'version' => $version,
 			'name' => $name,
-			'daemon_config_id' => $daemonConfigId,
+			'daemon_config_name' => $daemonConfigName,
 			'protocol' => $protocol,
 			'host' => $host,
 			'port' => $port,

@@ -71,9 +71,9 @@ class AEAuthMiddleware extends Middleware {
 	public function beforeController($controller, $methodName) {
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
-		$isAEAuth = $this->hasAnnotationOrAttribute($reflectionMethod, 'AEAuth', AppEcosystemAuth::class);
+		$isAppEcosystemAuth = $this->hasAnnotationOrAttribute($reflectionMethod, 'AppEcosystemAuth', AppEcosystemAuth::class);
 
-		if ($isAEAuth) {
+		if ($isAppEcosystemAuth) {
 			if (!$this->service->validateExAppRequestToNC($this->request)) {
 				throw new AEAuthNotValidException($this->l->t('AppEcosystemV2 authentication failed'), Http::STATUS_UNAUTHORIZED);
 			}

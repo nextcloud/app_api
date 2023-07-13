@@ -51,20 +51,25 @@ class UnregisterDaemon extends Command {
 		$this->setName('app_ecosystem_v2:daemon:unregister');
 		$this->setDescription('Unregister daemon');
 
-		$this->addArgument('daemon-config-id', InputArgument::REQUIRED);
+		$this->addArgument('daemon-config-name', InputArgument::REQUIRED);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$daemonConfigId = (int) $input->getArgument('daemon-config-id');
+		$daemonConfigName = $input->getArgument('daemon-config-name');
 
-		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
 			$output->writeln('Daemon config not found.');
 			return 1;
 		}
 
 		if ($this->daemonConfigService->unregisterDaemonConfig($daemonConfig) === null) {
-			$output->writeln('Failed to unregister daemon config.');
+			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
+			return 1;
+		}
+
+		if ($this->daemonConfigService->unregisterDaemonConfig($daemonConfig) === null) {
+			$output->writeln(sprintf('Failed to unregister daemon config %s.', $daemonConfigName));
 			return 1;
 		}
 

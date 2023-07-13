@@ -10,15 +10,12 @@ Nextcloud App Ecosystem V2 provides a new API for external apps on different pro
 
 ## Dev changes to Nextcloud
 
-`base.php` adjustment for authentication of Ex apps.
+`base.php` adjustment for authentication of Ex apps ([patch](./base_php.patch)).
 
 ```php
 protected static function tryAppEcosystemV2Login(OCP\IRequest $request): bool {
 	$appManager = Server::get(OCP\App\IAppManager::class);
 	if (!$request->getHeader('AE-SIGNATURE')) {
-		return false;
-	}
-	if (!$appManager->isAppLoaded('app_ecosystem_v2')) {
 		return false;
 	}
 	if (!$appManager->isInstalled('app_ecosystem_v2')) {

@@ -141,7 +141,7 @@ class AppEcosystemV2Service {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			$exApp->setVersion($appData['version']);
 			$exApp->setName($appData['name']);
-			$exApp->setDaemonConfigId($appData['daemon_config_id']);
+			$exApp->setDaemonConfigName($appData['daemon_config_name']);
 			$exApp->setProtocol($appData['protocol']);
 			$exApp->setHost($appData['host']);
 			$exApp->setPort($appData['port']);
@@ -164,7 +164,7 @@ class AppEcosystemV2Service {
 				'appid' => $appId,
 				'version' => $appData['version'],
 				'name' => $appData['name'],
-				'daemon_config_id' => $appData['daemon_config_id'],
+				'daemon_config_name' => $appData['daemon_config_name'],
 				'protocol' => $appData['protocol'],
 				'host' => $appData['host'],
 				'port' => $appData['port'],
@@ -489,12 +489,11 @@ class AppEcosystemV2Service {
 
 	/**
 	 * @param string $appId
-	 * @param int $daemonConfigId
-	 *
+	 * @param string $daemonConfigName
 	 * @return string
 	 */
-	public function resolveDeployExAppHost(string $appId, int $daemonConfigId): string {
-		$deployConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId)->getDeployConfig();
+	public function resolveDeployExAppHost(string $appId, string $daemonConfigName): string {
+		$deployConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName)->getDeployConfig();
 		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
 			$host = $deployConfig['host'] ?? 'localhost';
 		} else {

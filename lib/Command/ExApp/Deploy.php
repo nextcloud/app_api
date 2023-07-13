@@ -76,7 +76,7 @@ class Deploy extends Command {
 		$this->setDescription('Deploy ExApp on configured daemon');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
-		$this->addArgument('daemon-config-id', InputArgument::REQUIRED);
+		$this->addArgument('daemon-config-name', InputArgument::REQUIRED);
 
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('ssl_key', null, InputOption::VALUE_REQUIRED, 'SSL key for daemon connection (local absolute path)');
@@ -111,10 +111,10 @@ class Deploy extends Command {
 			return 2;
 		}
 
-		$daemonConfigId = (int) $input->getArgument('daemon-config-id');
-		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
+		$daemonConfigName = $input->getArgument('daemon-config-name');
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
-			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigId));
+			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
 			return 2;
 		}
 		$deployConfig = $daemonConfig->getDeployConfig();
@@ -158,10 +158,10 @@ class Deploy extends Command {
 			$resultOutput = [
 				'appid' => $appId,
 				'name' => (string) $infoXml->name,
-				'daemon_config_id' => $daemonConfigId,
+				'daemon_config_name' => $daemonConfigName,
 				'version' => (string) $infoXml->version,
 				'secret' => explode('=', $envs[1])[1],
-				'host' => $this->service->resolveDeployExAppHost($appId, $daemonConfigId),
+				'host' => $this->service->resolveDeployExAppHost($appId, $daemonConfigName),
 				'port' => explode('=', $envs[5])[1],
 				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
 				'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,

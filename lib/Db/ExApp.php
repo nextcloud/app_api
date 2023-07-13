@@ -42,7 +42,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getAppid()
  * @method string getVersion()
  * @method string getName()
- * @method int getDaemonConfigId()
+ * @method string getDaemonConfigName()
  * @method string getProtocol()
  * @method string getHost()
  * @method int getPort()
@@ -54,7 +54,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setAppid(string $appid)
  * @method void setVersion(string $version)
  * @method void setName(string $name)
- * @method void setDaemonConfigId(int $config)
+ * @method void setDaemonConfigName(string $name)
  * @method void setProtocol(string $protocol)
  * @method void setHost(string $host)
  * @method void setPort(int $port)
@@ -68,7 +68,7 @@ class ExApp extends Entity implements JsonSerializable {
 	protected $appid;
 	protected $version;
 	protected $name;
-	protected $daemonConfigId;
+	protected $daemonConfigName;
 	protected $protocol;
 	protected $host;
 	protected $port;
@@ -85,7 +85,7 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('appid', 'string');
 		$this->addType('version', 'string');
 		$this->addType('name', 'string');
-		$this->addType('daemonConfigId', 'int');
+		$this->addType('daemonConfigName', 'string');
 		$this->addType('protocol', 'string');
 		$this->addType('host', 'string');
 		$this->addType('port', 'int');
@@ -107,8 +107,8 @@ class ExApp extends Entity implements JsonSerializable {
 		if (isset($params['name'])) {
 			$this->setName($params['name']);
 		}
-		if (isset($params['daemon_config_id'])) {
-			$this->setDaemonConfigId($params['daemon_config_id']);
+		if (isset($params['daemon_config_name'])) {
+			$this->setDaemonConfigName($params['daemon_config_name']);
 		}
 		if (isset($params['protocol'])) {
 			$this->setProtocol($params['protocol']);
@@ -142,7 +142,7 @@ class ExApp extends Entity implements JsonSerializable {
 			'app_id' => $this->getAppid(),
 			'version' => $this->getVersion(),
 			'name'=> $this->getName(),
-			'daemon_config_id' => $this->getDaemonConfigId(),
+			'daemon_config_name' => $this->getDaemonConfigName(),
 			'protocol' => $this->getProtocol(),
 			'host' => $this->getHost(),
 			'port' => $this->getPort(),
