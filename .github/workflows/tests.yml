@@ -116,7 +116,7 @@ jobs:
           echo $! > /tmp/_install.pid
           cd ..
           sleep 5s
-          app_ecosystem_v2:daemon:register simulate_docker Docker docker-install unix-socket 0 0
+          php occ app_ecosystem_v2:daemon:register simulate_docker Docker docker-install unix-socket 0 0
           php occ app_ecosystem_v2:app:register \
           "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"simulate_docker\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"system_app\":1}" \
           -e --force-scopes
