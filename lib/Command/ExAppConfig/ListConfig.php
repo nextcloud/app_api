@@ -66,7 +66,7 @@ class ListConfig extends Command {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found.', $appId));
-			return Command::FAILURE;
+			return 1;
 		}
 
 		$exAppConfigs = $this->appConfigService->getAllAppConfig($exApp->getAppid());
@@ -77,6 +77,6 @@ class ListConfig extends Command {
 			$appConfigs[$exAppConfig->getAppid()][$exAppConfig->getConfigkey()] = ($private && !$exAppConfig->getSensitive() ? $exAppConfig->getConfigvalue() : self::SENSITIVE_VALUE);
 		}
 		$output->writeln(json_encode($appConfigs, JSON_PRETTY_PRINT));
-		return Command::SUCCESS;
+		return 0;
 	}
 }

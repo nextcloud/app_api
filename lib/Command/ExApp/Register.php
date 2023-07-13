@@ -77,7 +77,7 @@ class Register extends Command {
 		$deployJsonOutput = json_decode($input->getArgument('deploy-json-output'), true);
 		if ($deployJsonOutput === null) {
 			$output->writeln('Invalid deploy JSON output.');
-			return Command::INVALID;
+			return 2;
 		}
 
 		$appId = $deployJsonOutput['appid'];
@@ -91,13 +91,13 @@ class Register extends Command {
 
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln(sprintf('ExApp %s already registered.', $appId));
-			return Command::INVALID;
+			return 2;
 		}
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
 		if ($daemonConfig === null) {
 			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigId));
-			return Command::INVALID;
+			return 2;
 		}
 
 		$exApp = $this->service->registerExApp($appId, [
@@ -119,7 +119,7 @@ class Register extends Command {
 				}
 				catch (Exception $e) {
 					$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
-					return Command::FAILURE;
+					return 1;
 				}
 			}
 
@@ -128,7 +128,7 @@ class Register extends Command {
 				$output->writeln(sprintf('Failed to get requested ExApp scopes for %s.', $appId));
 				// Fallback unregistering ExApp
 				$this->service->unregisterExApp($exApp->getAppid());
-				return Command::INVALID;
+				return 2;
 			}
 
 			$forceScopes = (bool) $input->getOption('force-scopes');
@@ -160,7 +160,7 @@ class Register extends Command {
 				$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
 				// Fallback unregistering ExApp
 				$this->service->unregisterExApp($exApp->getAppid());
-				return Command::FAILURE;
+				return 1;
 			}
 
 			if (count($requestedExAppScopeGroups['required']) > 0) {
@@ -178,15 +178,15 @@ class Register extends Command {
 					$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
 					// Fallback unregistering ExApp
 					$this->service->unregisterExApp($exApp->getAppid());
-					return Command::FAILURE;
+					return 1;
 				}
 			}
 
-			return Command::SUCCESS;
+			return 0;
 		}
 
 		$output->writeln(sprintf('Failed to register ExApp %s.', $appId));
-		return Command::FAILURE;
+		return 1;
 	}
 
 	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, bool $required = true): void {

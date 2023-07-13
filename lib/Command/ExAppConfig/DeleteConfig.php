@@ -63,22 +63,22 @@ class DeleteConfig extends Command {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found.', $appId));
-			return Command::FAILURE;
+			return 1;
 		}
 		if ($exApp->getEnabled()) {
 			$configKey = $input->getArgument('configkey');
 			$exAppConfig = $this->exAppConfigService->getAppConfig($appId, $configKey);
 			if ($exAppConfig === null) {
 				$output->writeln(sprintf('ExApp %s config %s not found.', $appId, $configKey));
-				return Command::FAILURE;
+				return 1;
 			}
 			if ($this->exAppConfigService->deleteAppConfig($exAppConfig) !== 1) {
 				$output->writeln(sprintf('Failed to delete ExApp %s config %s.', $appId, $configKey));
-				return Command::FAILURE;
+				return 1;
 			}
 			$output->writeln(sprintf('ExApp %s config %s deleted.', $appId, $configKey));
-			return Command::SUCCESS;
+			return 0;
 		}
-		return Command::FAILURE;
+		return 1;
 	}
 }

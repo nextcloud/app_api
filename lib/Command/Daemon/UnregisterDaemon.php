@@ -60,15 +60,15 @@ class UnregisterDaemon extends Command {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfig($daemonConfigId);
 		if ($daemonConfig === null) {
 			$output->writeln('Daemon config not found.');
-			return Command::FAILURE;
+			return 1;
 		}
 
 		if ($this->daemonConfigService->unregisterDaemonConfig($daemonConfig) === null) {
 			$output->writeln('Failed to unregister daemon config.');
-			return Command::FAILURE;
+			return 1;
 		}
 
 		$output->writeln('Daemon config unregistered.');
-		return Command::SUCCESS;
+		return 0;
 	}
 }

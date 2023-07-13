@@ -61,8 +61,8 @@ class ListExApps extends Command {
 			}
 		} catch (Exception) {
 			$output->writeln('<error>Failed to get list of ExApps</error>');
-			return Command::FAILURE;
+			return 1;
 		}
-		return Command::SUCCESS;
+		return 0;
 	}
 }

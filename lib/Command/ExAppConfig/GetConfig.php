@@ -66,13 +66,13 @@ class GetConfig extends Command {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp % not found.', $appId));
-			return Command::FAILURE;
+			return 1;
 		}
 
 		$configKey = $input->getArgument('configkey');
 		if ($configKey === null || $configKey === '') {
 			$output->writeln('Config key is required.');
-			return Command::FAILURE;
+			return 1;
 		}
 
 		$exAppConfig = $this->exAppConfigService->getAppConfig($appId, $configKey);
@@ -80,15 +80,15 @@ class GetConfig extends Command {
 		if ($exAppConfig === null) {
 			if (isset($defaultValue)) {
 				$output->writeln($defaultValue);
-				return Command::SUCCESS;
+				return 0;
 			}
 			$output->writeln(sprintf('ExApp %s config %s not found', $appId, $configKey));
-			return Command::FAILURE;
+			return 1;
 		}
 
 		$value = $exAppConfig->getConfigvalue() ?? $defaultValue;
 
 		$output->writeln($value);
-		return Command::SUCCESS;
+		return 0;
 	}
 }
