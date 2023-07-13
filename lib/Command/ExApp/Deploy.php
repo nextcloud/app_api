@@ -140,6 +140,7 @@ class Deploy extends Command {
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
+		// TODO: Move SSL part to DaemonConfig->deployConfig
 		$sslParams = [
 			'ssl_key' => $input->getOption('ssl_key'),
 			'ssl_key_password' => $input->getOption('ssl_key_password'),
