@@ -73,12 +73,14 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}
         run: composer i
 
-      - name: Set up & run Nextcloud
+      - name: Set up Nextcloud
         env:
           DB_PORT: 4444
         run: |
           mkdir data
-          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass admin
+          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
+            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
           ./occ config:system:set loglevel --value=0 --type=integer
           ./occ config:system:set debug --value=true --type=boolean
           ./occ config:system:set allow_local_remote_servers --value true
