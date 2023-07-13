@@ -30,6 +30,7 @@ jobs:
       APP_PORT: 9009
       APP_VERSION: "1.0.0"
       APP_SECRET: "tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6E"
+      SKIP_NC_WO_AE: 1
 
     services:
       postgres:
