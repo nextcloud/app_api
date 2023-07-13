@@ -116,9 +116,9 @@ jobs:
           echo $! > /tmp/_install.pid
           cd ..
           sleep 5s
-          php occ app_ecosystem_v2:daemon:register docker-install Docker unix-socket 0 0
+          php occ app_ecosystem_v2:daemon:register docker-install simulate_docker Docker unix-socket 0 0
           php occ app_ecosystem_v2:app:register \
-          "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_id\":1,\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"system_app\":1}" \
+          "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"simulate_docker\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"system_app\":1}" \
           -e --force-scopes
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null

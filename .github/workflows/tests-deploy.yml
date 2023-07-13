@@ -230,9 +230,9 @@ jobs:
           docker cp docker-remote-api-tls/certs/client/ nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
-          docker_local_sock Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php --net=master_bridge
+          docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register \
-          "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml --ssl_cert /client/cert.pem --ssl_key /client/key.pem)"
+          "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml --ssl_cert /client/cert.pem --ssl_key /client/key.pem)"
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
 
