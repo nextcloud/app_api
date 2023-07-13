@@ -31,7 +31,6 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
-use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\IRequest;
 use OCP\AppFramework\OCSController;
@@ -54,6 +53,14 @@ class ExAppController extends OCSController {
 		$this->service = $service;
 	}
 
+	/**
+	 * @NoCSRFRequired
+	 *
+	 * @param bool $extended
+	 * @param string $format
+	 *
+	 * @return Response
+	 */
 	#[NoCSRFRequired]
 	public function getExApps(bool $extended = false, string $format = 'json'): Response {
 		return $this->buildResponse(new DataResponse($this->service->getExAppsList($extended), Http::STATUS_OK), $format);

@@ -61,6 +61,9 @@ class AppConfigController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
 	 * @param string $configKey
 	 * @param mixed $configValue
 	 * @param string $format
@@ -84,6 +87,9 @@ class AppConfigController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *
@@ -99,6 +105,9 @@ class AppConfigController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
 	 * @param array $configKeys
 	 * @param string $format
 	 *
