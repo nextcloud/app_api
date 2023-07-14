@@ -32,7 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Docker\DockerActions;
+use OCA\AppEcosystemV2\DeployActions\DockerActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCP\App\IAppManager;
 use OCP\IURLGenerator;
@@ -65,7 +65,7 @@ class Deploy extends Command {
 
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
-		$this->dockerActions = $dockerActions;
+		$this->dockerActions = $dockerActions; // TODO: Change to dynamic DeployActions resolving
 		$this->appManager = $appManager;
 		$this->random = $random;
 		$this->urlGenerator = $urlGenerator;
@@ -103,7 +103,7 @@ class Deploy extends Command {
 
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp !== null) {
-			$output->writeln(sprintf('ExApp %s already deployed and registered.', $appId));
+			$output->writeln(sprintf('ExApp %s already registered.', $appId));
 			return 2;
 		}
 
@@ -130,9 +130,12 @@ class Deploy extends Command {
 		$envParams = $input->getOption('env');
 		$envs = $this->buildDeployEnvParams([
 			'appid' => $appId,
+			'name' => (string) $infoXml->name,
 			'version' => (string) $infoXml->version,
+			'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
 			'host' => $this->buildExAppHost($deployConfig),
 			'port' => $containerParams['port'],
+			'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
@@ -144,18 +147,19 @@ class Deploy extends Command {
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
+			// TODO: Remove resultOutput
 			$resultOutput = [
 				'appid' => $appId,
 				'name' => (string) $infoXml->name,
 				'daemon_config_name' => $daemonConfigName,
 				'version' => (string) $infoXml->version,
 				'secret' => explode('=', $envs[1])[1],
-				'host' => $this->service->resolveDeployExAppHost($appId, $daemonConfigName),
-				'port' => explode('=', $envs[5])[1],
+				'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfigName),
+				'port' => explode('=', $envs[7])[1],
 				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
 				'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
 			];
-			if ($this->heartbeatExApp($resultOutput, $daemonConfig->getId())) {
+			if ($this->heartbeatExApp($resultOutput)) {
 				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
 				return 0;
 			}
@@ -168,29 +172,23 @@ class Deploy extends Command {
 	}
 
 	private function buildDeployEnvParams(array $params, array $envOptions, array $deployConfig): array {
-		$requiredEnvsNames = [
-			'AE_VERSION',
-			'APP_SECRET',
-			'APP_ID',
-			'APP_VERSION',
-			'APP_HOST',
-			'APP_PORT',
-			'NEXTCLOUD_URL',
-		];
 		$autoEnvs = [
 			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
 			sprintf('APP_SECRET=%s', $this->random->generate(128)),
 			sprintf('APP_ID=%s', $params['appid']),
+			sprintf('APP_DISPLAY_NAME=%s', $params['name']),
 			sprintf('APP_VERSION=%s', $params['version']),
+			sprintf('APP_PROTOCOL=%s', $params['protocol']),
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
+			sprintf('IS_SYSTEM_APP=%s', $params['system_app']),
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
 		foreach ($envOptions as $envOption) {
 			[$key, $value] = explode('=', $envOption, 2);
 			// Do not overwrite required auto generated envs
-			if (!in_array($key, $requiredEnvsNames, true)) {
+			if (!in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
 				$autoEnvs[] = sprintf('%s=%s', $key, $value);
 			}
 		}
@@ -213,7 +211,7 @@ class Deploy extends Command {
 		return $port;
 	}
 
-	private function heartbeatExApp(array $resultOutput, int $daemonConfigId): bool {
+	private function heartbeatExApp(array $resultOutput): bool {
 		// TODO: Extract to AppEcosystemV2 and make configurable
 		$heartbeatAttempts = 0;
 		$delay = 1;

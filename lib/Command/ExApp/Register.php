@@ -32,6 +32,8 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\Db\ExApp;
+use OCA\AppEcosystemV2\DeployActions\DockerActions;
+use OCA\AppEcosystemV2\DeployActions\ManualActions;
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
 use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 use OCP\DB\Exception;
@@ -50,55 +52,79 @@ class Register extends Command {
 	private AppEcosystemV2Service $service;
 	private DaemonConfigService $daemonConfigService;
 	private ExAppApiScopeService $exAppApiScopeService;
+	private DockerActions $dockerActions;
+	private ManualActions $manualActions;
 
 	public function __construct(
 		AppEcosystemV2Service $service,
 		DaemonConfigService $daemonConfigService,
 		ExAppApiScopeService $exAppApiScopeService,
+		DockerActions $dockerActions,
+		ManualActions $manualActions,
 	) {
 		parent::__construct();
 
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->exAppApiScopeService = $exAppApiScopeService;
+
+		// TODO: Change to dynamic DeployActions resolving
+		$this->dockerActions = $dockerActions;
+		$this->manualActions = $manualActions;
 	}
 
 	protected function configure() {
 		$this->setName('app_ecosystem_v2:app:register');
 		$this->setDescription('Register external app');
 
-		$this->addArgument('deploy-json-output', InputArgument::REQUIRED, 'JSON output from deploy command');
+		$this->addArgument('appid', InputArgument::REQUIRED);
+		$this->addArgument('daemon-config-name', InputArgument::REQUIRED);
 
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
+		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info (url or absolute local path)');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$deployJsonOutput = json_decode($input->getArgument('deploy-json-output'), true);
-		if ($deployJsonOutput === null) {
-			$output->writeln('Invalid deploy JSON output.');
-			return 2;
-		}
-
-		$appId = $deployJsonOutput['appid'];
-		$version = $deployJsonOutput['version'];
-		$name = $deployJsonOutput['name'];
-		$daemonConfigName = $deployJsonOutput['daemon_config_name'];
-		$protocol = $deployJsonOutput['protocol'] ?? 'http';
-		$port = (int) $deployJsonOutput['port'];
-		$host = $deployJsonOutput['host'];
-		$secret = $deployJsonOutput['secret'];
+		$appId = $input->getArgument('appid');
 
 		if ($this->service->getExApp($appId) !== null) {
 			$output->writeln(sprintf('ExApp %s already registered.', $appId));
 			return 2;
 		}
 
+		$daemonConfigName = $input->getArgument('daemon-config-name');
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
 			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
 			return 2;
 		}
+
+		// TODO: Make this dynamic
+		if ($daemonConfig->getAcceptsDeployId() == $this->dockerActions->getAcceptsDeployId()) {
+			$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
+		} else if ($daemonConfig->getAcceptsDeployId() == $this->manualActions->getAcceptsDeployId()) {
+			$exAppJson = $input->getOption('json-info');
+			if ($exAppJson === null) {
+				$output->writeln('ExApp JSON is required for manual deploy.');
+				return 2;
+			}
+
+			$exAppInfo = $this->manualActions->loadExAppInfo($appId, $daemonConfig, [
+				'ex_app_json' => $exAppJson,
+			]);
+		} else {
+			$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfigName, $daemonConfig->getAcceptsDeployId()));
+			return 2;
+		}
+
+		$appId = $exAppInfo['appid'];
+		$version = $exAppInfo['version'];
+		$name = $exAppInfo['name'];
+		$protocol = $exAppInfo['protocol'] ?? 'http';
+		$port = (int) $exAppInfo['port'];
+		$host = $exAppInfo['host'];
+		$secret = $exAppInfo['secret'];
 
 		$exApp = $this->service->registerExApp($appId, [
 			'version' => $version,
@@ -113,7 +139,7 @@ class Register extends Command {
 		if ($exApp !== null) {
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 
-			if (filter_var($deployJsonOutput['system_app'], FILTER_VALIDATE_BOOLEAN)) {
+			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
 				try {
 					$this->service->setupSystemAppFlag($exApp);
 				}

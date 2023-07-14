@@ -47,7 +47,7 @@ use OCP\IL10N;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
-class AEAuthMiddleware extends Middleware {
+class AppEcosystemAuthMiddleware extends Middleware {
 	private IControllerMethodReflector $reflector;
 	private AppEcosystemV2Service $service;
 	protected IRequest $request;

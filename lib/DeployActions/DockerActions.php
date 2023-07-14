@@ -29,18 +29,32 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Docker;
+namespace OCA\AppEcosystemV2\DeployActions;
 
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use OCA\AppEcosystemV2\Db\DaemonConfig;
 use OCP\ICertificateManager;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
-class DockerActions {
+use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppEcosystemV2\Deploy\DeployActions;
+
+class DockerActions extends DeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
+	public const AE_REQUIRED_ENVS = [
+		'AE_VERSION',
+		'APP_SECRET',
+		'APP_ID',
+		'APP_DISPLAY_NAME',
+		'APP_VERSION',
+		'APP_PROTOCOL',
+		'APP_HOST',
+		'APP_PORT',
+		'IS_SYSTEM_APP',
+		'NEXTCLOUD_URL',
+	];
 	private LoggerInterface $logger;
 	private Client $guzzleClient;
 	private ICertificateManager $certificateManager;
@@ -56,36 +70,37 @@ class DockerActions {
 		$this->config = $config;
 	}
 
+	public function getAcceptsDeployId(): string {
+		return 'docker-install';
+	}
+
 	/**
 	 * Pull image, create and start container
 	 *
 	 * @param DaemonConfig $daemonConfig
-	 * @param array $imageParams
-	 * @param array $containerParams
+	 * @param array $params
 	 *
 	 * @return array
 	 */
-	public function deployExApp(
-		DaemonConfig $daemonConfig,
-		array $imageParams,
-		array $containerParams,
-	): array {
+	public function deployExApp(DaemonConfig $daemonConfig, array $params): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
-			throw new \Exception('Only docker-install is supported for now.');
+			return [['error' => 'Only docker-install is supported for now.'], null, null];
 		}
-		$dockerUrl = 'http://localhost';
-		$guzzleParams = [];
-		if ($daemonConfig->getProtocol() === 'unix-socket') {
-			$guzzleParams = [
-				'curl' => [
-					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
-				],
-			];
-		} else if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
-			$dockerUrl = $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
-			$guzzleParams = $this->setupCerts($guzzleParams, $daemonConfig->getDeployConfig());
+
+		if (isset($params['image_params'])) {
+			$imageParams = $params['image_params'];
+		} else {
+			return [['error' => 'Missing image_params.'], null, null];
 		}
-		$this->guzzleClient = new Client($guzzleParams);
+
+		if (isset($params['container_params'])) {
+			$containerParams = $params['container_params'];
+		} else {
+			return [['error' => 'Missing container_params.'], null, null];
+		}
+
+		$dockerUrl = $this->buildDockerUrl($daemonConfig);
+		$this->initGuzzleClient($daemonConfig);
 
 		$pullResult = $this->pullContainer($dockerUrl, $imageParams);
 		if (isset($pullResult['error'])) {
@@ -185,6 +200,76 @@ class DockerActions {
 			error_log($e->getMessage());
 			return ['error' => 'Failed to inspect container'];
 		}
+	}
+
+	/**
+	 * @param string $appId
+	 * @param DaemonConfig $daemonConfig
+	 *
+	 * @return array
+	 */
+	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig): array {
+		$this->initGuzzleClient($daemonConfig);
+		$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $appId);
+		if (isset($containerInfo['error'])) {
+			return ['error' => sprintf('Failed to inspect ExApp %s container: %s', $appId, $containerInfo['error'])];
+		}
+
+		$containerEnvs = (array) $containerInfo['Config']['Env'];
+		$aeEnvs = [];
+		foreach ($containerEnvs as $env) {
+			$envParts = explode('=', $env, 2);
+			if (in_array($envParts[0], array_keys(self::AE_REQUIRED_ENVS))) {
+				$aeEnvs[$envParts[0]] = $envParts[1];
+			}
+		}
+
+		if ($appId !== $aeEnvs['APP_ID']) {
+			return ['error' => sprintf('ExApp appid %s does not match to deployed APP_ID %s.', $appId, $aeEnvs['APP_ID'])];
+		}
+
+		return [
+			'appid' => $aeEnvs['APP_ID'],
+			'name' => $aeEnvs['APP_DISPLAY_NAME'],
+			'version' => $aeEnvs['APP_VERSION'],
+			'secret' => $aeEnvs['APP_SECRET'],
+			'host' => $this->resolveDeployExAppHost($appId, $daemonConfig),
+			'port' => $aeEnvs['APP_PORT'],
+			'protocol' => $aeEnvs['APP_PROTOCOL'],
+			'system_app' => $aeEnvs['IS_SYSTEM_APP'] ?? false,
+		];
+	}
+
+	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig): string {
+		$deployConfig = $daemonConfig->getDeployConfig();
+		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
+			$host = $deployConfig['host'] ?? 'localhost';
+		} else {
+			$host = $appId;
+		}
+		return $host;
+	}
+
+	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
+		$dockerUrl = 'http://localhost';
+		if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
+			$dockerUrl = $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		}
+		return $dockerUrl;
+	}
+
+	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
+		$guzzleParams = [];
+		if ($daemonConfig->getProtocol() === 'unix-socket') {
+			$guzzleParams = [
+				'curl' => [
+					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
+				],
+			];
+		} else if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
+			$guzzleParams = $this->setupCerts($guzzleParams, $daemonConfig->getDeployConfig());
+		}
+		$this->guzzleClient = new Client($guzzleParams);
 	}
 
 	/**

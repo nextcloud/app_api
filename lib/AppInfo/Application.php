@@ -46,7 +46,7 @@ use OCA\AppEcosystemV2\Capabilities;
 use OCA\AppEcosystemV2\DavPlugin;
 use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
 use OCA\AppEcosystemV2\Listener\SabrePluginAuthInitListener;
-use OCA\AppEcosystemV2\Middleware\AEAuthMiddleware;
+use OCA\AppEcosystemV2\Middleware\AppEcosystemAuthMiddleware;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -67,7 +67,7 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
 		$context->registerCapability(PublicCapabilities::class);
-		$context->registerMiddleware(AEAuthMiddleware::class);
+		$context->registerMiddleware(AppEcosystemAuthMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 	}
 
