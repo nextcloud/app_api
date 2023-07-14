@@ -79,10 +79,6 @@ class Deploy extends Command {
 		$this->addArgument('daemon-config-name', InputArgument::REQUIRED);
 
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
-		$this->addOption('ssl_key', null, InputOption::VALUE_REQUIRED, 'SSL key for daemon connection (local absolute path)');
-		$this->addOption('ssl_key_password', null, InputOption::VALUE_REQUIRED, 'SSL key password for daemon connection');
-		$this->addOption('ssl_cert', null, InputOption::VALUE_REQUIRED, 'SSL cert for daemon connection (local absolute path)');
-		$this->addOption('ssl_cert_password', null, InputOption::VALUE_REQUIRED, 'SSL cert password for daemon connection');
 		$this->addOption('env', 'e', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Docker container environment variables', []);
 	}
 
@@ -140,15 +136,7 @@ class Deploy extends Command {
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
-		// TODO: Move SSL part to DaemonConfig->deployConfig
-		$sslParams = [
-			'ssl_key' => $input->getOption('ssl_key'),
-			'ssl_key_password' => $input->getOption('ssl_key_password'),
-			'ssl_cert' => $input->getOption('ssl_cert'),
-			'ssl_cert_password' => $input->getOption('ssl_cert_password'),
-		];
-
-		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $imageParams, $containerParams, $sslParams);
+		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $imageParams, $containerParams);
 
 		if (isset($pullResult['error'])) {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $pullResult['error']));

@@ -24,7 +24,7 @@ This can be done by `occ` CLI command **app_ecosystem_v2:daemon:register**:
 
 .. code-block:: bash
 
-	app_ecosystem_v2:daemon:register <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url> [--net NET] [--host HOST] [--]
+	app_ecosystem_v2:daemon:register <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url> [--net NET] [--host HOST] [--ssl_key SSL_KEY] [--ssl_key_password SSL_KEY_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [--]
 
 Arguments
 *********
@@ -41,6 +41,10 @@ Options
 
 	* `--net [network-name]`  - `[required]` network name to bind docker container to (default: `host`)
 	* `--host HOST` - `[required]` host to expose daemon to (defaults to ExApp appid)
+	* `--ssl_key SSL_KEY` - `[optional]` path to SSL key file (local absolute path)
+	* `--ssl_password SSL_PASSWORD` - `[optional]` SSL key password
+	* `--ssl_cert SSL_CERT` - `[optional]` path to SSL cert file (local absolute path)
+	* `--ssl_cert_password SSL_CERT_PASSWORD` - `[optional]` SSL cert password
 
 Deploy config
 *************
@@ -53,7 +57,11 @@ ExApp container.
 	{
 		"net": "nextcloud",
 		"host": null,
-		"nextcloud_url": "https://nextcloud.local"
+		"nextcloud_url": "https://nextcloud.local",
+		"ssl_key": "/path/to/ssl/key.pem",
+		"ssl_key_password": "ssl_key_password",
+		"ssl_cert": "/path/to/ssl/cert.pem",
+		"ssl_cert_password": "ssl_cert_password"
 	}
 
 
@@ -63,7 +71,10 @@ Deploy config options
 	* `net` - `[required]` network name to bind docker container to (default: `host`)
 	* `host` - `[optional]` in case Docker is on remote host, this should be a hostname of remote machine
 	* `nextcloud_url` - `[required]` Nextcloud URL (e.g. `https://nextcloud.local`)
-
+	* `ssl_key` - `[optional]` path to SSL key file (local absolute path)
+	* `ssl_key_password` - `[optional]` SSL key password
+	* `ssl_cert` - `[optional]` path to SSL cert file (local absolute path)
+	* `ssl_cert_password` - `[optional]` SSL cert password
 
 .. note::
 	Common configurations are tested by CI in our repository, see `workflow on github <https://github.com/cloud-py-api/app_ecosystem_v2/blob/main/.github/workflows/tests-deploy.yml>`_
@@ -86,7 +97,7 @@ This can be done by `occ` CLI command **app_ecosystem_v2:app:deploy**:
 
 .. code-block:: bash
 
-	app_ecosystem_v2:app:deploy <appid> <daemon-config-name> [--info-xml INFO-XML] [--ssl_key SSL_KEY] [--ssl_password SSL_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [-e|--env ENV] [--]
+	app_ecosystem_v2:app:deploy <appid> <daemon-config-name> [--info-xml INFO-XML] [-e|--env ENV] [--]
 
 .. warning::
 	After successful deployment (pull, create and start container), there is a heartbeat check with 1 hour timeout (will be configurable).
@@ -105,10 +116,6 @@ Options
 *******
 
 	* `--info-xml INFO-XML` - `[required]` path to info.xml file (url or local absolute path)
-	* `--ssl_key SSL_KEY` - `[optional]` path to SSL key file (local absolute path)
-	* `--ssl_password SSL_PASSWORD` - `[optional]` SSL key password
-	* `--ssl_cert SSL_CERT` - `[optional]` path to SSL cert file (local absolute path)
-	* `--ssl_cert_password SSL_CERT_PASSWORD` - `[optional]` SSL cert password
 	* `-e|--env ENV` - `[optional]` additional environment variables (e.g. `-e "MY_VAR=123" -e "MY_VAR2=456"`)
 
 Deploy result JSON output
