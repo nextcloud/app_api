@@ -82,7 +82,7 @@ class DockerActions extends DeployActions {
 	 *
 	 * @return array
 	 */
-	public function deployExApp(DaemonConfig $daemonConfig, array $params): array {
+	public function deployExApp(DaemonConfig $daemonConfig, array $params = []): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
 			return [['error' => 'Only docker-install is supported for now.'], null, null];
 		}
@@ -205,10 +205,11 @@ class DockerActions extends DeployActions {
 	/**
 	 * @param string $appId
 	 * @param DaemonConfig $daemonConfig
+	 * @param array $params
 	 *
 	 * @return array
 	 */
-	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig): array {
+	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array {
 		$this->initGuzzleClient($daemonConfig);
 		$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $appId);
 		if (isset($containerInfo['error'])) {
@@ -240,7 +241,7 @@ class DockerActions extends DeployActions {
 		];
 	}
 
-	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig): string {
+	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string {
 		$deployConfig = $daemonConfig->getDeployConfig();
 		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
 			$host = $deployConfig['host'] ?? 'localhost';

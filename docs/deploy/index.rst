@@ -156,13 +156,16 @@ The following env variables are required and built automatically:
 	* `AE_VERSION` - AppEcosystemV2 version
 	* `APP_SECRET` - generated shared secret used for AppEcosystemV2 authentication
 	* `APP_ID` - ExApp appid
+	* `APP_DISPLAY_NAME` - ExApp display name
 	* `APP_VERSION` - ExApp version
+	* `APP_PROTOCOL` - protocol ExApp is listening on (http|https)
 	* `APP_HOST` - host ExApp is listening on
 	* `APP_PORT` - port ExApp is listening on (randomly selected by AppEcosystemV2)
+	* `IS_SYSTEM_APP` - ExApp system app flag (true|false)
 	* `NEXTCLOUD_URL` - Nextcloud URL to connect to
 
 .. note::
-	additional envs can be passed using multiple `--env ENV_NAME=ENV_VAL` options)
+	Additional envs can be passed using multiple `--env ENV_NAME=ENV_VAL` options
 
 Docker daemon remote
 ********************
