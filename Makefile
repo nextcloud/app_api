@@ -110,25 +110,23 @@ dock-port26:
 
 .PHONY: example-deploy
 example-deploy:
-	$(MAKE) example28 example27 example26
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev \
+    		--info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
 
 .PHONY: example28
 example28:
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register \
-		"`docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml`"
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
 
 .PHONY: example27
 example27:
 	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:register \
-		"`docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml`"
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
 	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
 
 .PHONY: example26
 example26:
 	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:register \
-		"`docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml`"
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
 	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
