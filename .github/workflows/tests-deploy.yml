@@ -91,11 +91,13 @@ jobs:
         run: |
           php -S 127.0.0.1:8080 &
           ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
-          /occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
+          ./occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
           ./occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
           ./occ app_ecosystem_v2:app:enable app_python_skeleton
           ./occ app_ecosystem_v2:app:disable app_python_skeleton
+          ./occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          ./occ app_ecosystem_v2:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
@@ -164,6 +166,8 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_local_sock
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -240,6 +244,8 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_by_port
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_by_port
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log

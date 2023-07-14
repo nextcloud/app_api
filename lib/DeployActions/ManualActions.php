@@ -48,7 +48,7 @@ class ManualActions extends DeployActions {
 	}
 
 	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array {
-		$jsonInfo = json_decode(file_get_contents($params['json-info']), true);
+		$jsonInfo = json_decode($params['json-info'], true);
 		return [
 			'appid' => $jsonInfo['appid'],
 			'version' => $jsonInfo['version'],
@@ -61,7 +61,7 @@ class ManualActions extends DeployActions {
 	}
 
 	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string {
-		$jsonInfo = json_decode(file_get_contents($params['json-info']), true);
+		$jsonInfo = json_decode($params['json-info'], true);
 		return $jsonInfo['host'];
 	}
 }

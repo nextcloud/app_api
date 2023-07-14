@@ -82,7 +82,7 @@ class Register extends Command {
 
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
-		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info (url or absolute local path)');
+		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -111,7 +111,7 @@ class Register extends Command {
 			}
 
 			$exAppInfo = $this->manualActions->loadExAppInfo($appId, $daemonConfig, [
-				'ex_app_json' => $exAppJson,
+				'json-info' => $exAppJson,
 			]);
 		} else {
 			$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfigName, $daemonConfig->getAcceptsDeployId()));
