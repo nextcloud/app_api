@@ -9,3 +9,4 @@ node_modules
 .venv
 vendor
 _build
+certs
