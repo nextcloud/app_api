@@ -139,7 +139,10 @@ class Deploy extends Command {
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
-		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $imageParams, $containerParams);
+		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, [
+			'image_params' => $imageParams,
+			'container_params' => $containerParams,
+		]);
 
 		if (isset($pullResult['error'])) {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $pullResult['error']));
