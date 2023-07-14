@@ -63,6 +63,12 @@ class RegisterDaemon extends Command {
 		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'DeployConfig, docker network name');
 		$this->addOption('host', null, InputOption::VALUE_REQUIRED, 'DeployConfig, docker daemon host (e.g. host.docker.internal)');
 
+		// ssl settings
+		$this->addOption('ssl_key', null, InputOption::VALUE_REQUIRED, 'SSL key for daemon connection (local absolute path)');
+		$this->addOption('ssl_key_password', null, InputOption::VALUE_REQUIRED, 'SSL key password for daemon connection');
+		$this->addOption('ssl_cert', null, InputOption::VALUE_REQUIRED, 'SSL cert for daemon connection (local absolute path)');
+		$this->addOption('ssl_cert_password', null, InputOption::VALUE_REQUIRED, 'SSL cert password for daemon connection');
+
 		$this->addUsage('local_docker "Docker local" "docker-install" "unix-socket" "/var/run/docker.sock" "http://nextcloud.local" --net "nextcloud" --host "host.docker.internal"');
 	}
 
@@ -78,7 +84,10 @@ class RegisterDaemon extends Command {
 			'net' => $input->getOption('net') ?? 'host',
 			'host' => $input->getOption('host'),
 			'nextcloud_url' => $nextcloudUrl,
-			// TODO: Add SSL cert config here
+			'ssl_key' => $input->getOption('ssl_key'),
+			'ssl_key_password' => $input->getOption('ssl_key_password'),
+			'ssl_cert' => $input->getOption('ssl_cert'),
+			'ssl_cert_password' => $input->getOption('ssl_cert_password'),
 		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([

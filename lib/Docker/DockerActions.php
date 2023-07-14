@@ -62,7 +62,6 @@ class DockerActions {
 	 * @param DaemonConfig $daemonConfig
 	 * @param array $imageParams
 	 * @param array $containerParams
-	 * @param array $sslParams
 	 *
 	 * @return array
 	 */
@@ -70,7 +69,6 @@ class DockerActions {
 		DaemonConfig $daemonConfig,
 		array $imageParams,
 		array $containerParams,
-		array $sslParams,
 	): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
 			throw new \Exception('Only docker-install is supported for now.');
@@ -85,7 +83,7 @@ class DockerActions {
 			];
 		} else if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
 			$dockerUrl = $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
-			$guzzleParams = $this->setupCerts($guzzleParams, $sslParams);
+			$guzzleParams = $this->setupCerts($guzzleParams, $daemonConfig->getDeployConfig());
 		}
 		$this->guzzleClient = new Client($guzzleParams);
 
@@ -191,11 +189,11 @@ class DockerActions {
 
 	/**
 	 * @param array $guzzleParams
-	 * @param array $sslParams ['ssl_key', 'ssl_password', 'ssl_cert', 'ssl_cert_password']
+	 * @param array $deployConfig
 	 *
 	 * @return array
 	 */
-	private function setupCerts(array $guzzleParams, array $sslParams): array {
+	private function setupCerts(array $guzzleParams, array $deployConfig): array {
 		if (!$this->config->getSystemValueBool('installed', false)) {
 			$certs =  \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
 		} else {
@@ -203,15 +201,15 @@ class DockerActions {
 		}
 
 		$guzzleParams['verify'] = $certs;
-		if (isset($sslParams['ssl_key'])) {
-			$guzzleParams['ssl_key'] = !isset($sslParams['ssl_key_password'])
-				? $sslParams['ssl_key']
-				: [$sslParams['ssl_key'], $sslParams['ssl_key_password']];
+		if (isset($deployConfig['ssl_key'])) {
+			$guzzleParams['ssl_key'] = !isset($deployConfig['ssl_key_password'])
+				? $deployConfig['ssl_key']
+				: [$deployConfig['ssl_key'], $deployConfig['ssl_key_password']];
 		}
-		if (isset($sslParams['ssl_cert'])) {
-			$guzzleParams['cert'] = !isset($sslParams['ssl_cert_password'])
-				? $sslParams['ssl_cert']
-				: [$sslParams['ssl_cert'], $sslParams['ssl_cert_password']];
+		if (isset($deployConfig['ssl_cert'])) {
+			$guzzleParams['cert'] = !isset($deployConfig['ssl_cert_password'])
+				? $deployConfig['ssl_cert']
+				: [$deployConfig['ssl_cert'], $deployConfig['ssl_cert_password']];
 		}
 		return $guzzleParams;
 	}
