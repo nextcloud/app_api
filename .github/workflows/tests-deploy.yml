@@ -91,8 +91,9 @@ jobs:
         run: |
           php -S 127.0.0.1:8080 &
           ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_ecosystem_v2:app:register \
-          "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+          /occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+          ./occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
           ./occ app_ecosystem_v2:app:enable app_python_skeleton
           ./occ app_ecosystem_v2:app:disable app_python_skeleton
 
@@ -158,8 +159,9 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register \
-          "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
 
@@ -233,8 +235,9 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
             --net=master_bridge --ssl_cert /client/cert.pem --ssl_key /client/key.pem
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register \
-          "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_by_port
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
 
