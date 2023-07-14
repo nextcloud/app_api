@@ -157,7 +157,7 @@ class Deploy extends Command {
 				'daemon_config_name' => $daemonConfigName,
 				'version' => (string) $infoXml->version,
 				'secret' => explode('=', $envs[1])[1],
-				'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfigName),
+				'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
 				'port' => explode('=', $envs[7])[1],
 				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
 				'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
