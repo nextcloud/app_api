@@ -220,7 +220,7 @@ class DockerActions extends DeployActions {
 		$aeEnvs = [];
 		foreach ($containerEnvs as $env) {
 			$envParts = explode('=', $env, 2);
-			if (in_array($envParts[0], array_keys(self::AE_REQUIRED_ENVS))) {
+			if (in_array($envParts[0], self::AE_REQUIRED_ENVS)) {
 				$aeEnvs[$envParts[0]] = $envParts[1];
 			}
 		}
