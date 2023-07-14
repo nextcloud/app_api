@@ -57,6 +57,7 @@ class ManualActions extends DeployActions {
 			'port' => $jsonInfo['port'],
 			'host' => $jsonInfo['host'],
 			'secret' => $jsonInfo['secret'],
+			'system_app' => $jsonInfo['system_app'],
 		];
 	}
 
