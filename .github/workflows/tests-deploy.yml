@@ -13,126 +13,126 @@ on:
   workflow_dispatch:
 
 jobs:
-  nc-host-app-docker:
-    runs-on: ubuntu-22.04
-    name: NC In Host • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: [ '8.1' ]
-        server-version: [ 'stable27' ]
-        include:
-          - server-version: "master"
-            php-version: "8.2"
-
-    services:
-      postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
-        ports:
-          - 4444:5432/tcp
-        env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: rootpassword
-          POSTGRES_DB: nextcloud
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
-
-    steps:
-      - name: Set app env
-        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
-      - name: Checkout server
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          submodules: true
-          repository: nextcloud/server
-          ref: ${{ matrix.server-version }}
-
-      - name: Checkout AppEcosystemV2
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          path: apps/${{ env.APP_NAME }}
-
-      - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
-          coverage: none
-          ini-file: development
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check composer file existence
-        id: check_composer
-        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
-        with:
-          files: apps/${{ env.APP_NAME }}/composer.json
-
-      - name: Set up dependencies
-        if: steps.check_composer.outputs.files_exists == 'true'
-        working-directory: apps/${{ env.APP_NAME }}
-        run: composer i
-
-      - name: Set up Nextcloud
-        env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
-            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
-            --admin-user admin --admin-pass admin
-          ./occ config:system:set loglevel --value=0 --type=integer
-          ./occ config:system:set debug --value=true --type=boolean
-          ./occ config:system:set allow_local_remote_servers --value true
-          ./occ app:enable --force ${{ env.APP_NAME }}
-          patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
-
-      - name: Test deploy
-        run: |
-          php -S 127.0.0.1:8080 &
-          ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
-          ./occ app_ecosystem_v2:app:enable app_python_skeleton
-          ./occ app_ecosystem_v2:app:disable app_python_skeleton
-          ./occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
-          ./occ app_ecosystem_v2:daemon:unregister docker_local_sock
-
-      - name: Check logs
-        run: |
-          grep -q 'Hello from app_python_skeleton :)' data/nextcloud.log || error
-          grep -q 'Bye bye from app_python_skeleton :(' data/nextcloud.log || error
-
-      - name: Save container ingo & logs
-        if: always()
-        run: |
-          docker inspect app_python_skeleton | json_pp > container.json
-          docker logs app_python_skeleton > container.log 2>&1
-
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
-          path: container.json
-          if-no-files-found: warn
-
-      - name: Upload Container logs
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
-          path: container.log
-          if-no-files-found: warn
-
-      - name: Upload NC logs
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
-          path: data/nextcloud.log
-          if-no-files-found: warn
+#  nc-host-app-docker:
+#    runs-on: ubuntu-22.04
+#    name: NC In Host • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        php-version: [ '8.1' ]
+#        server-version: [ 'stable27' ]
+#        include:
+#          - server-version: "master"
+#            php-version: "8.2"
+#
+#    services:
+#      postgres:
+#        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+#        ports:
+#          - 4444:5432/tcp
+#        env:
+#          POSTGRES_USER: root
+#          POSTGRES_PASSWORD: rootpassword
+#          POSTGRES_DB: nextcloud
+#        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
+#
+#    steps:
+#      - name: Set app env
+#        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+#
+#      - name: Checkout server
+#        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+#        with:
+#          submodules: true
+#          repository: nextcloud/server
+#          ref: ${{ matrix.server-version }}
+#
+#      - name: Checkout AppEcosystemV2
+#        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+#        with:
+#          path: apps/${{ env.APP_NAME }}
+#
+#      - name: Set up php ${{ matrix.php-versions }}
+#        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+#        with:
+#          php-version: ${{ matrix.php-versions }}
+#          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
+#          coverage: none
+#          ini-file: development
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Check composer file existence
+#        id: check_composer
+#        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
+#        with:
+#          files: apps/${{ env.APP_NAME }}/composer.json
+#
+#      - name: Set up dependencies
+#        if: steps.check_composer.outputs.files_exists == 'true'
+#        working-directory: apps/${{ env.APP_NAME }}
+#        run: composer i
+#
+#      - name: Set up Nextcloud
+#        env:
+#          DB_PORT: 4444
+#        run: |
+#          mkdir data
+#          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
+#            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+#            --admin-user admin --admin-pass admin
+#          ./occ config:system:set loglevel --value=0 --type=integer
+#          ./occ config:system:set debug --value=true --type=boolean
+#          ./occ config:system:set allow_local_remote_servers --value true
+#          ./occ app:enable --force ${{ env.APP_NAME }}
+#          patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
+#
+#      - name: Test deploy
+#        run: |
+#          php -S 127.0.0.1:8080 &
+#          ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
+#          ./occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
+#            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+#          ./occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
+#          ./occ app_ecosystem_v2:app:enable app_python_skeleton
+#          ./occ app_ecosystem_v2:app:disable app_python_skeleton
+#          ./occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+#          ./occ app_ecosystem_v2:daemon:unregister docker_local_sock
+#
+#      - name: Check logs
+#        run: |
+#          grep -q 'Hello from app_python_skeleton :)' data/nextcloud.log || error
+#          grep -q 'Bye bye from app_python_skeleton :(' data/nextcloud.log || error
+#
+#      - name: Save container ingo & logs
+#        if: always()
+#        run: |
+#          docker inspect app_python_skeleton | json_pp > container.json
+#          docker logs app_python_skeleton > container.log 2>&1
+#
+#      - name: Upload Container info
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+#          path: container.json
+#          if-no-files-found: warn
+#
+#      - name: Upload Container logs
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+#          path: container.log
+#          if-no-files-found: warn
+#
+#      - name: Upload NC logs
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+#          path: data/nextcloud.log
+#          if-no-files-found: warn
 
   nc-docker-app-docker:
     runs-on: ubuntu-22.04
@@ -221,11 +221,11 @@ jobs:
         run: |
           docker network create master_bridge
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-          git clone https://github.com/kekru/docker-remote-api-tls.git
-          cd docker-remote-api-tls
-          sed -i "s/abc.127.0.0.1.nip.io/host.docker.internal/g" docker-compose.yml
-          docker-compose up -d
-          sleep 120s
+          docker pull kekru/docker-remote-api-tls:master
+          docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
+            -v ./certs:/data/certs kekru/docker-remote-api-tls:master
+          sleep 25s
 
       - name: Install AppEcosystemV2
         run: |
@@ -234,7 +234,7 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
           docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
-          docker cp docker-remote-api-tls/certs/client/ nextcloud:/
+          docker cp ./certs/client/ nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
@@ -284,3 +284,86 @@ jobs:
           name: nc_docker_app_docker_by_port_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
+
+  nc-docker-app-remote-docker-by-port:
+    runs-on: ubuntu-22.04
+    name: NC In Julius Docker(APP by hostname) • 🐘8.1
+    env:
+      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:latest
+
+    steps:
+      - name: Set app env
+        run: |
+          echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+          echo "APP_HOSTNAME=${hostname}" >> $GITHUB_ENV
+
+      - name: Create containers
+        run: |
+          docker run --net=host --name=nextcloud --rm -d ${{ env.docker-image }}
+          docker pull kekru/docker-remote-api-tls:master
+          docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
+            -v ./certs:/data/certs kekru/docker-remote-api-tls:master
+          sleep 25s
+
+      - name: Install AppEcosystemV2
+        run: |
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
+          docker exec nextcloud patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
+          docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
+          docker cp ./certs/client/ nextcloud:/
+          docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
+            docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
+            --net=host --host=${{ env.APP_HOSTNAME }} --ssl_cert /client/cert.pem --ssl_key /client/key.pem
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_by_port
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_by_port
+
+      - name: Copy NC log to host
+        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
+
+      - name: Check logs
+        run: |
+          grep -q 'Hello from app_python_skeleton :)' nextcloud.log || error
+          grep -q 'Bye bye from app_python_skeleton :(' nextcloud.log || error
+
+      - name: Save container ingo & logs
+        if: always()
+        run: |
+          docker inspect app_python_skeleton | json_pp > container.json
+          docker logs app_python_skeleton > container.log 2>&1
+
+      - name: Upload Container info
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_docker_app_docker_by_port_container.json
+          path: container.json
+          if-no-files-found: warn
+
+      - name: Upload Container logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_docker_app_docker_by_port_container.log
+          path: container.log
+          if-no-files-found: warn
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_docker_app_docker_by_port_nextcloud.log
+          path: nextcloud.log
+          if-no-files-found: warn
+
+      - name: Setup tmate session
+        if: always()
+        uses: mxschmitt/action-tmate@v3

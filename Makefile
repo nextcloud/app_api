@@ -28,10 +28,10 @@ help:
 	@echo "  dock-port26        create docker daemon for Nextcloud 26 (host.docker.internal:8443)"
 	@echo " "
 	@echo " "
-	@echo "  example-deploy     pull Example App to docker"
-	@echo "  example28          register Example App to Nextcloud 28"
-	@echo "  example27          register Example App to Nextcloud 27"
-	@echo "  example26          register Example App to Nextcloud 26"
+	@echo "  example-deploy     deploy Example App to docker"
+	@echo "  example28          register & enable Example App in Nextcloud 28"
+	@echo "  example27          register & enable Example App in Nextcloud 27"
+	@echo "  example26          register & enable Example App in Nextcloud 26"
 
 .PHONY: dock-sock
 dock-sock:
@@ -61,7 +61,6 @@ dock-sock26:
 .PHONY: dock2port
 dock2port:
 	@echo "deploying kekru/docker-remote-api-tls..."
-	docker pull kekru/docker-remote-api-tls:master
 	docker run --name dock_api2port -d -p 6443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
 		--env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
 		-v ./certs:/data/certs kekru/docker-remote-api-tls:master
