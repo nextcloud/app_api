@@ -297,7 +297,7 @@ jobs:
 
       - name: Create containers
         run: |
-          docker run --net=bridge --name=nextcloud --rm -d ${{ env.docker-image }}
+          docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
           docker pull kekru/docker-remote-api-tls:master
           docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
             --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
@@ -314,7 +314,7 @@ jobs:
           docker cp ./certs/client/ nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
-            docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
+            docker_by_port Docker docker-install https host.docker.internal:8443 http://localhost:8080/index.php \
             --net=host --hostname=host.docker.internal --ssl_cert /client/cert.pem --ssl_key /client/key.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
