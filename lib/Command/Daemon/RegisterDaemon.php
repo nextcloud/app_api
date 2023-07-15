@@ -61,7 +61,7 @@ class RegisterDaemon extends Command {
 
 		// daemon-config settings
 		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'DeployConfig, the name of the docker network to attach App to');
-		$this->addOption('host', null, InputOption::VALUE_REQUIRED, 'DeployConfig, hostname to reach App (only when "--net=host")');
+		$this->addOption('hostname', null, InputOption::VALUE_REQUIRED, 'DeployConfig, hostname to reach App (only when "--net=host")');
 
 		// ssl settings
 		$this->addOption('ssl_key', null, InputOption::VALUE_REQUIRED, 'SSL key for daemon connection (local absolute path)');
@@ -82,7 +82,7 @@ class RegisterDaemon extends Command {
 
 		$deployConfig = [
 			'net' => $input->getOption('net') ?? 'host',
-			'host' => $input->getOption('host'),
+			'host' => $input->getOption('hostname'),
 			'nextcloud_url' => $nextcloudUrl,
 			'ssl_key' => $input->getOption('ssl_key'),
 			'ssl_key_password' => $input->getOption('ssl_key_password'),
