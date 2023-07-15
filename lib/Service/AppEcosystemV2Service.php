@@ -487,21 +487,6 @@ class AppEcosystemV2Service {
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 
-	/**
-	 * @param string $appId
-	 * @param string $daemonConfigName
-	 * @return string
-	 */
-	public function resolveDeployExAppHost(string $appId, string $daemonConfigName): string {
-		$deployConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName)->getDeployConfig();
-		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
-			$host = $deployConfig['host'] ?? 'localhost';
-		} else {
-			$host = $appId;
-		}
-		return $host;
-	}
-
 	private function getUriEncodedParams(array $params): string {
 		$paramsContent = '';
 		foreach ($params as $key => $value) {

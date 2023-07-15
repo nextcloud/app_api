@@ -28,10 +28,10 @@ help:
 	@echo "  dock-port26        create docker daemon for Nextcloud 26 (host.docker.internal:8443)"
 	@echo " "
 	@echo " "
-	@echo "  example-deploy     pull Example App to docker"
-	@echo "  example28          register Example App to Nextcloud 28"
-	@echo "  example27          register Example App to Nextcloud 27"
-	@echo "  example26          register Example App to Nextcloud 26"
+	@echo "  example-deploy     deploy Example App to docker"
+	@echo "  example28          register & enable Example App in Nextcloud 28"
+	@echo "  example27          register & enable Example App in Nextcloud 27"
+	@echo "  example26          register & enable Example App in Nextcloud 26"
 
 .PHONY: dock-sock
 dock-sock:
@@ -61,23 +61,22 @@ dock-sock26:
 .PHONY: dock2port
 dock2port:
 	@echo "deploying kekru/docker-remote-api-tls..."
-	docker pull kekru/docker-remote-api-tls:master
 	docker run --name dock_api2port -d -p 6443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
 		--env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
-		-v ./certs:/data/certs kekru/docker-remote-api-tls:master
+		-v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
 	@echo "waiting 20 seconds to finish generating certificates..."
 	sleep 20
 
 .PHONE: dock-certs
 dock-certs:
 	@echo "copying certs to Nextcloud Master"
-	docker cp certs/client/ master-nextcloud-1:/ || echo "Failed copying certs to Nextcloud 'master'"
+	docker cp ./certs/client/ master-nextcloud-1:/ || echo "Failed copying certs to Nextcloud 'master'"
 	docker exec master-nextcloud-1 sudo -u www-data php occ security:certificates:import /client/ca.pem || true
 	@echo "copying certs to Nextcloud 27"
-	docker cp certs/client/ master-stable27-1:/ || echo "Failed copying certs to Nextcloud 27"
+	docker cp ./certs/client/ master-stable27-1:/ || echo "Failed copying certs to Nextcloud 27"
 	docker exec master-stable27-1 sudo -u www-data php occ security:certificates:import /client/ca.pem || true
 	@echo "copying certs to Nextcloud 26"
-	docker cp certs/client/ master-stable26-1:/ || echo "Failed copying certs to Nextcloud 26"
+	docker cp ./certs/client/ master-stable26-1:/ || echo "Failed copying certs to Nextcloud 26"
 	docker exec master-stable26-1 sudo -u www-data php occ security:certificates:import /client/ca.pem || true
 
 .PHONY: dock-port
@@ -110,25 +109,23 @@ dock-port26:
 
 .PHONY: example-deploy
 example-deploy:
-	$(MAKE) example28 example27 example26
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev \
+    		--info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
 
 .PHONY: example28
 example28:
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register \
-		"`docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml`"
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
 
 .PHONY: example27
 example27:
 	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:register \
-		"`docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml`"
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
 	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
 
 .PHONY: example26
 example26:
 	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:register \
-		"`docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml`"
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
 	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton

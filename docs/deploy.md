@@ -1,6 +1,6 @@
 # AppEcosystemV2 - Deployment process
 
-> Draft
+> Outdated: Kept for reference, new version in [docs](https://cloud-py-api.github.io/app_ecosystem_v2/)
 
 
 ## Overview

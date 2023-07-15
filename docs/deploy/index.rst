@@ -136,7 +136,16 @@ Example of deploy result JSON output:
 		"system_app": true
 	}
 
-This JSON output is used in ExApp registration step.
+This JSON structure is used in ExApp registration step for development.
+
+
+Manual install for development
+******************************
+
+For development purposes, you can install ExApp manually.
+There is a `manual-install` Deploy config type, which can be used in case of development.
+For ExApp registration with it you need to provide JSON file with structure described before
+using **app_ecosystem_v2:app:register** `--json-info` option.
 
 Deploy env variables
 ********************
@@ -147,13 +156,16 @@ The following env variables are required and built automatically:
 	* `AE_VERSION` - AppEcosystemV2 version
 	* `APP_SECRET` - generated shared secret used for AppEcosystemV2 authentication
 	* `APP_ID` - ExApp appid
+	* `APP_DISPLAY_NAME` - ExApp display name
 	* `APP_VERSION` - ExApp version
+	* `APP_PROTOCOL` - protocol ExApp is listening on (http|https)
 	* `APP_HOST` - host ExApp is listening on
 	* `APP_PORT` - port ExApp is listening on (randomly selected by AppEcosystemV2)
+	* `IS_SYSTEM_APP` - ExApp system app flag (true|false)
 	* `NEXTCLOUD_URL` - Nextcloud URL to connect to
 
 .. note::
-	additional envs can be passed using multiple `--env ENV_NAME=ENV_VAL` options)
+	Additional envs can be passed using multiple `--env ENV_NAME=ENV_VAL` options
 
 Docker daemon remote
 ********************
@@ -176,26 +188,20 @@ This can be done by `occ` CLI command **app_ecosystem_v2:app:register**:
 
 .. code-block:: bash
 
-	app_ecosystem_v2:app:register <deploy-json-output> [-e|--enabled] [--force-scopes] [--]
+	app_ecosystem_v2:app:register <appid> <daemon-config-name> [-e|--enabled] [--force-scopes] [--]
 
 Arguments
 *********
 
-	* `deploy-json-output` - `[required]` JSON output from deploy step
+	* `appid` - `[required]` unique name of the ExApp (e.g. `app_python_skeleton`, must be the same as in deployed container)
+	* `daemon-config-name` - `[required]` unique name of the daemon (e.g. `docker_local_sock`)
 
 Options
 *******
 
 	* `-e|--enabled` - `[optional]` enable ExApp after registration
 	* `--force-scopes` - `[optional]` force scopes approval
-
-
-This step can be combined with deployment step into one command:
-
-.. code-block:: bash
-
-	sudo -u www-data php occ app_ecosystem_v2:app:register "$(sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)" --enabled --force-scopes
-
+	* `--json-info JSON-INFO` - `[required]` path to JSON file with deploy result (url or local absolute path)
 
 ExApp info.xml schema
 ---------------------

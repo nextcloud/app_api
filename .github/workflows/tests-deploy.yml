@@ -91,10 +91,13 @@ jobs:
         run: |
           php -S 127.0.0.1:8080 &
           ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_ecosystem_v2:app:register \
-          "$(./occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+          ./occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+          ./occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
           ./occ app_ecosystem_v2:app:enable app_python_skeleton
           ./occ app_ecosystem_v2:app:disable app_python_skeleton
+          ./occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          ./occ app_ecosystem_v2:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
@@ -158,10 +161,13 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register \
-          "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_local_sock
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -215,11 +221,11 @@ jobs:
         run: |
           docker network create master_bridge
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-          git clone https://github.com/kekru/docker-remote-api-tls.git
-          cd docker-remote-api-tls
-          sed -i "s/abc.127.0.0.1.nip.io/host.docker.internal/g" docker-compose.yml
-          docker-compose up -d
-          sleep 120s
+          docker pull kekru/docker-remote-api-tls:master
+          docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
+            -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
+          sleep 25s
 
       - name: Install AppEcosystemV2
         run: |
@@ -228,15 +234,18 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
           docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
-          docker cp docker-remote-api-tls/certs/client/ nextcloud:/
+          docker cp ./certs/client/ nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
             --net=master_bridge --ssl_cert /client/cert.pem --ssl_key /client/key.pem
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register \
-          "$(docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml)"
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_by_port
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_by_port
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -273,5 +282,82 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: nc_docker_app_docker_by_port_nextcloud.log
+          path: nextcloud.log
+          if-no-files-found: warn
+
+  nc-docker-app-host-by-hostname:
+    runs-on: ubuntu-22.04
+    name: NC In Julius Docker(APP by hostname) • 🐘8.1
+    env:
+      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:latest
+
+    steps:
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Create containers
+        run: |
+          docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
+          docker pull kekru/docker-remote-api-tls:master
+          docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
+            -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
+          sleep 25s
+
+      - name: Install AppEcosystemV2
+        run: |
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
+          docker exec nextcloud patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
+          docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
+          docker cp ./certs/client/ nextcloud:/
+          docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
+            docker_by_port Docker docker-install https host.docker.internal:8443 http://localhost:8080/index.php \
+            --net=host --hostname=host.docker.internal --ssl_cert /client/cert.pem --ssl_key /client/key.pem
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_by_port
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_by_port
+
+      - name: Copy NC log to host
+        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
+
+      - name: Check logs
+        run: |
+          grep -q 'Hello from app_python_skeleton :)' nextcloud.log || error
+          grep -q 'Bye bye from app_python_skeleton :(' nextcloud.log || error
+
+      - name: Save container ingo & logs
+        if: always()
+        run: |
+          docker inspect app_python_skeleton | json_pp > container.json
+          docker logs app_python_skeleton > container.log 2>&1
+
+      - name: Upload Container info
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_docker_app_host_by_hostname_container.json
+          path: container.json
+          if-no-files-found: warn
+
+      - name: Upload Container logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_docker_app_host_by_hostname_container.log
+          path: container.log
+          if-no-files-found: warn
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_docker_app_host_by_hostname_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
