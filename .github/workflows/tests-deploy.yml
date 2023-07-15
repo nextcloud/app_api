@@ -285,7 +285,7 @@ jobs:
           path: nextcloud.log
           if-no-files-found: warn
 
-  nc-docker-app-remote-docker-by-port:
+  nc-docker-app-host-by-hostname:
     runs-on: ubuntu-22.04
     name: NC In Julius Docker(APP by hostname) • 🐘8.1
     env:
@@ -293,9 +293,7 @@ jobs:
 
     steps:
       - name: Set app env
-        run: |
-          echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-          echo "APP_HOSTNAME=`hostname`" >> $GITHUB_ENV
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
       - name: Create containers
         run: |
@@ -317,7 +315,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
-            --net=host --hostname=${{ env.APP_HOSTNAME }} --ssl_cert /client/cert.pem --ssl_key /client/key.pem
+            --net=host --hostname=host.docker.internal --ssl_cert /client/cert.pem --ssl_key /client/key.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_by_port
