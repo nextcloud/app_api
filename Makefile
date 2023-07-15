@@ -63,20 +63,20 @@ dock2port:
 	@echo "deploying kekru/docker-remote-api-tls..."
 	docker run --name dock_api2port -d -p 6443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
 		--env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
-		-v certs:/data/certs kekru/docker-remote-api-tls:master
+		-v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
 	@echo "waiting 20 seconds to finish generating certificates..."
 	sleep 20
 
 .PHONE: dock-certs
 dock-certs:
 	@echo "copying certs to Nextcloud Master"
-	docker cp certs/client/ master-nextcloud-1:/ || echo "Failed copying certs to Nextcloud 'master'"
+	docker cp ./certs/client/ master-nextcloud-1:/ || echo "Failed copying certs to Nextcloud 'master'"
 	docker exec master-nextcloud-1 sudo -u www-data php occ security:certificates:import /client/ca.pem || true
 	@echo "copying certs to Nextcloud 27"
-	docker cp certs/client/ master-stable27-1:/ || echo "Failed copying certs to Nextcloud 27"
+	docker cp ./certs/client/ master-stable27-1:/ || echo "Failed copying certs to Nextcloud 27"
 	docker exec master-stable27-1 sudo -u www-data php occ security:certificates:import /client/ca.pem || true
 	@echo "copying certs to Nextcloud 26"
-	docker cp certs/client/ master-stable26-1:/ || echo "Failed copying certs to Nextcloud 26"
+	docker cp ./certs/client/ master-stable26-1:/ || echo "Failed copying certs to Nextcloud 26"
 	docker exec master-stable26-1 sudo -u www-data php occ security:certificates:import /client/ca.pem || true
 
 .PHONY: dock-port
