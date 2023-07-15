@@ -63,7 +63,7 @@ dock2port:
 	@echo "deploying kekru/docker-remote-api-tls..."
 	docker run --name dock_api2port -d -p 6443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
 		--env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
-		-v ./certs:/data/certs kekru/docker-remote-api-tls:master
+		-v certs:/data/certs kekru/docker-remote-api-tls:master
 	@echo "waiting 20 seconds to finish generating certificates..."
 	sleep 20
 
