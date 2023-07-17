@@ -31,11 +31,6 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\DeployActions\DockerActions;
-use OCA\AppEcosystemV2\DeployActions\ManualActions;
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 use OCP\DB\Exception;
 use OCP\Http\Client\IResponse;
 use Symfony\Component\Console\Command\Command;
@@ -44,14 +39,23 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+
+use OCA\AppEcosystemV2\Db\ExApp;
+use OCA\AppEcosystemV2\DeployActions\DockerActions;
+use OCA\AppEcosystemV2\DeployActions\ManualActions;
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+use OCA\AppEcosystemV2\Service\ExAppScopesService;
+use OCA\AppEcosystemV2\Service\ExAppUsersService;
 
 class Register extends Command {
 	private AppEcosystemV2Service $service;
 	private DaemonConfigService $daemonConfigService;
 	private ExAppApiScopeService $exAppApiScopeService;
+	private ExAppScopesService $exAppScopesService;
+	private ExAppUsersService $exAppUsersService;
 	private DockerActions $dockerActions;
 	private ManualActions $manualActions;
 
@@ -59,6 +63,8 @@ class Register extends Command {
 		AppEcosystemV2Service $service,
 		DaemonConfigService $daemonConfigService,
 		ExAppApiScopeService $exAppApiScopeService,
+		ExAppScopesService $exAppScopesService,
+		ExAppUsersService $exAppUsersService,
 		DockerActions $dockerActions,
 		ManualActions $manualActions,
 	) {
@@ -67,6 +73,8 @@ class Register extends Command {
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->exAppApiScopeService = $exAppApiScopeService;
+		$this->exAppScopesService = $exAppScopesService;
+		$this->exAppUsersService = $exAppUsersService;
 
 		// TODO: Change to dynamic DeployActions resolving
 		$this->dockerActions = $dockerActions;
@@ -141,7 +149,7 @@ class Register extends Command {
 
 			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
 				try {
-					$this->service->setupSystemAppFlag($exApp);
+					$this->exAppUsersService->setupSystemAppFlag($exApp);
 				}
 				catch (Exception $e) {
 					$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
@@ -219,7 +227,7 @@ class Register extends Command {
 		$scopeType = $required ? 'required' : 'optional';
 		$registeredScopeGroups = [];
 		foreach ($requestedExAppScopeGroups as $scopeGroup) {
-			if ($this->service->setExAppScopeGroup($exApp, $scopeGroup)) {
+			if ($this->exAppScopesService->setExAppScopeGroup($exApp, $scopeGroup)) {
 				$registeredScopeGroups[] = $scopeGroup;
 			} else {
 				$output->writeln(sprintf('Failed to set %s ExApp scope group: %s', $scopeType, $scopeGroup));

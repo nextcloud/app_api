@@ -74,7 +74,7 @@ class ExAppPreferenceService {
 					'configvalue' => $configValue ?? '',
 				]));
 			} catch (Exception $e) {
-				$this->logger->error('Error while inserting new config value: ' . $e->getMessage());
+				$this->logger->error('Error while inserting new config value: ' . $e->getMessage(), ['exception' => $e]);
 				return null;
 			}
 		} else {
@@ -86,7 +86,7 @@ class ExAppPreferenceService {
 				}
 				return $exAppPreference;
 			} catch (Exception $e) {
-				$this->logger->error('Error while updating config value: ' . $e->getMessage());
+				$this->logger->error('Error while updating config value: ' . $e->getMessage(), ['exception' => $e]);
 				return null;
 			}
 		}
@@ -100,11 +100,11 @@ class ExAppPreferenceService {
 	 */
 	public function getUserConfigValues(string $userId, string $appId, array $configKeys): ?array {
 		try {
-			$cacheKey = $userId . $appId . implode('', $configKeys);
-//			$cached = $this->cache->get($cacheKey);
-//			if ($cached !== null) {
-//				return $cached;
-//			}
+			$cacheKey = sprintf('/%s/%s:%s', $userId, $appId, implode('', $configKeys));
+			$cached = $this->cache->get($cacheKey);
+			if ($cached !== null) {
+				return $cached;
+			}
 
 			return array_map(function (ExAppPreference $exAppPreference) {
 				return [

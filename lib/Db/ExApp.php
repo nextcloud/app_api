@@ -139,7 +139,7 @@ class ExApp extends Entity implements JsonSerializable {
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
-			'app_id' => $this->getAppid(),
+			'appid' => $this->getAppid(),
 			'version' => $this->getVersion(),
 			'name'=> $this->getName(),
 			'daemon_config_name' => $this->getDaemonConfigName(),

@@ -69,7 +69,7 @@ class ExAppScope extends Entity implements JsonSerializable {
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
-			'app_id' => $this->getAppid(),
+			'appid' => $this->getAppid(),
 			'scope_group' => $this->getScopeGroup(),
 		];
 	}

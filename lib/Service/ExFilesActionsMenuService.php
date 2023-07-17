@@ -177,7 +177,7 @@ class ExFilesActionsMenuService {
 			$fileAction = $this->mapper->findByAppIdName($appId, $fileActionName);
 			$this->cache->set($cacheKey, $fileAction, Application::CACHE_TTL);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error(sprintf('Failed to get file action %s for app: %s', $fileActionName, $appId));
+			$this->logger->error(sprintf('Failed to get file action %s for app: %s. Error: %s', $fileActionName, $appId, $e->getMessage()), ['exception' => $e]);
 			$fileAction = null;
 		}
 		return $fileAction;
@@ -240,7 +240,7 @@ class ExFilesActionsMenuService {
 				];
 			}
 		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Failed to load file action icon %s for ExApp: %s with error: %s', $exFileActionName, $appId, $e->getMessage()));
+			$this->logger->error(sprintf('Failed to load file action icon %s for ExApp: %s with error: %s', $exFileActionName, $appId, $e->getMessage()), ['exception' => $e]);
 			return null;
 		}
 		return null;

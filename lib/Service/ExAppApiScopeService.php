@@ -43,6 +43,7 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class ExAppApiScopeService {
+	const CACHE_TTL = 60 * 60 * 24 * 7; // 1 week
 	private LoggerInterface $logger;
 	private ExAppApiScopeMapper $mapper;
 	private ICache $cache;
@@ -59,25 +60,35 @@ class ExAppApiScopeService {
 
 	public function getExAppApiScopes(): array {
 		try {
-			return $this->mapper->findAll();
+			$cacheKey = '/all_api_scopes';
+			$cached = $this->cache->get($cacheKey);
+			if ($cached !== null) {
+				return array_map(function ($cachedEntry) {
+					return $cachedEntry instanceof ExAppApiScope ? $cachedEntry : new ExAppApiScope($cachedEntry);
+				}, $cached);
+			}
+
+			$apiScopes = $this->mapper->findAll();
+			$this->cache->set($cacheKey, $apiScopes, self::CACHE_TTL);
+			return $apiScopes;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to get all api scopes. Error: %s', $e->getMessage()));
+			$this->logger->error(sprintf('Failed to get all api scopes. Error: %s', $e->getMessage()), ['exception' => $e]);
 			return [];
 		}
 	}
 
 	public function getApiScopeByRoute(string $apiRoute): ?ExAppApiScope {
 		try {
-			$cacheKey = 'api_scope_' . $apiRoute;
-//			$cached = $this->cache->get($cacheKey);
-//			if ($cached !== null) {
-//				return $cached instanceof ExAppApiScope ? $cached : new ExAppApiScope($cached);
-//			}
+			$cacheKey = '/api_scope_' . $apiRoute;
+			$cached = $this->cache->get($cacheKey);
+			if ($cached !== null) {
+				return $cached instanceof ExAppApiScope ? $cached : new ExAppApiScope($cached);
+			}
 
 			$apiScopes = $this->getExAppApiScopes();
 			foreach ($apiScopes as $apiScope) {
 				if (str_starts_with($apiRoute, $apiScope->getApiRoute())) {
-					$this->cache->set($cacheKey, $apiScope, Application::CACHE_TTL);
+					$this->cache->set($cacheKey, $apiScope, self::CACHE_TTL);
 					return $apiScope;
 				}
 			}
@@ -111,6 +122,7 @@ class ExAppApiScopeService {
 			['api_route' =>  '/dav/', 'scope_group' => 3, 'name' => 'DAV'],
 		];
 
+		$this->cache->clear('/all_api_scopes');
 		$registeredApiScopes = $this->getExAppApiScopes();
 		$registeredApiScopesRoutes = [];
 		foreach ($registeredApiScopes as $registeredApiScope) {
@@ -125,7 +137,7 @@ class ExAppApiScopeService {
 			}
 			return true;
 		} catch (Exception $e) {
-			$this->logger->error('Failed to fill init API scopes: ' . $e->getMessage());
+			$this->logger->error('Failed to fill init API scopes: ' . $e->getMessage(), ['exception' => $e]);
 			return false;
 		}
 	}
@@ -146,9 +158,11 @@ class ExAppApiScopeService {
 				$exAppApiScope = null;
 			}
 			$this->mapper->insertOrUpdate($apiScope);
+			$this->cache->remove('/api_scope_' . $apiRoute);
+			$this->cache->remove('/all_api_scopes');
 			return $apiScope;
 		} catch (Exception $e) {
-			$this->logger->error('Failed to register API scope: ' . $e->getMessage());
+			$this->logger->error('Failed to register API scope: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
 	}

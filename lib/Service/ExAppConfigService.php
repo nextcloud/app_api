@@ -46,6 +46,7 @@ use OCP\AppFramework\Db\DoesNotExistException;
  * App configuration (appconfig_ex)
  */
 class ExAppConfigService {
+	const CACHE_TTL = 60 * 60; // 1 hour
 	private LoggerInterface $logger;
 	private ICache $cache;
 	private ExAppConfigMapper $mapper;
@@ -69,11 +70,11 @@ class ExAppConfigService {
 	 * @return array|null
 	 */
 	public function getAppConfigValues(string $appId, array $configKeys): ?array {
-		$cacheKey = $appId . ':' . json_encode($configKeys);
-//		$cached = $this->cache->get($cacheKey);
-//		if ($value !== null) {
-//			return $cached;
-//		}
+		$cacheKey = sprintf('/%s:%s', $appId, json_encode($configKeys));
+		$cached = $this->cache->get($cacheKey);
+		if ($cached !== null) {
+			return $cached;
+		}
 
 		try {
 			$exAppConfigs = array_map(function (ExAppConfig $exAppConfig) {
@@ -82,7 +83,7 @@ class ExAppConfigService {
 					'configvalue' => $exAppConfig->getConfigvalue() ?? '',
 				];
 			}, $this->mapper->findByAppConfigKeys($appId, $configKeys));
-			$this->cache->set($cacheKey, $exAppConfigs, Application::CACHE_TTL);
+			$this->cache->set($cacheKey, $exAppConfigs, self::CACHE_TTL);
 			return $exAppConfigs;
 		} catch (Exception) {
 			return null;
@@ -101,8 +102,10 @@ class ExAppConfigService {
 	 */
 	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, int $sensitive = 0): ?ExAppConfig {
 		try {
-			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+//			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
+			$appConfigEx = $this->getAppConfig($appId, $configKey);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
+			$this->logger->error('Error while getting app_config_ex value: ' . $e->getMessage(), ['exception' => $e]);
 			$appConfigEx = null;
 		}
 		if ($appConfigEx === null) {
@@ -113,19 +116,17 @@ class ExAppConfigService {
 					'configvalue' => $configValue ?? '',
 					'sensitive' => $sensitive,
 				]));
+				$cacheKey = sprintf('/%s:%s', $appId, $configKey);
+				$this->cache->set($cacheKey, $appConfigEx, self::CACHE_TTL);
 			} catch (\Exception $e) {
-				$this->logger->error('Error while inserting app_config_ex value: ' . $e->getMessage());
+				$this->logger->error('Error while inserting app_config_ex value: ' . $e->getMessage(), ['exception' => $e]);
 				return null;
 			}
 		} else {
 			$appConfigEx->setConfigvalue($configValue);
 			$appConfigEx->setSensitive($sensitive);
-			try {
-				if ($this->updateAppConfigValue($appConfigEx) !== 1) {
-					$this->logger->error('Error while updating app_config_ex value');
-					return null;
-				}
-			} catch (Exception) {
+			if ($this->updateAppConfigValue($appConfigEx) !== 1) {
+				$this->logger->error('Error while updating app_config_ex value');
 				return null;
 			}
 		}
@@ -169,7 +170,15 @@ class ExAppConfigService {
 	 */
 	public function getAppConfig(mixed $appId, mixed $configKey): ?ExAppConfig {
 		try {
-			return $this->mapper->findByAppConfigKey($appId, $configKey);
+			$cacheKey = sprintf('/%s:%s', $appId, $configKey);
+			$cashed= $this->cache->get($cacheKey);
+			if ($cashed !== null) {
+				return $cashed instanceof ExAppConfig ? $cashed : new ExAppConfig($cashed);
+			}
+
+			$exAppConfig = $this->mapper->findByAppConfigKey($appId, $configKey);
+			$this->cache->set($cacheKey, $exAppConfig, self::CACHE_TTL);
+			return $exAppConfig;
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
@@ -182,7 +191,11 @@ class ExAppConfigService {
 	 */
 	public function updateAppConfigValue(ExAppConfig $exAppConfig): ?int {
 		try {
-			return $this->mapper->updateAppConfigValue($exAppConfig);
+			$result = $this->mapper->updateAppConfigValue($exAppConfig);
+			if ($result === 1) {
+				$cacheKey = sprintf('/%s:%s', $exAppConfig->getAppid(), $exAppConfig->getConfigkey());
+				$this->cache->set($cacheKey, $exAppConfig, self::CACHE_TTL);
+			}
 		} catch (Exception) {
 			return null;
 		}

@@ -54,6 +54,16 @@ class ExAppUserMapper extends QBMapper {
 	}
 
 	/**
+	 * @throws Exception
+	 */
+	public function findByAppid(string $appId): array {
+		$qb = $this->db->getQueryBuilder();
+		return $this->findEntities($qb->select('*')
+			->from($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))));
+	}
+
+	/**
 	 * @param string $appId
 	 * @param string $userId
 	 *
@@ -72,5 +82,18 @@ class ExAppUserMapper extends QBMapper {
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
 				$qb->expr()->eq('userid', $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL))
 			));
+	}
+
+	/**
+	 * @param string $appId
+	 *
+	 * @throws Exception
+	 * @return int
+	 */
+	public function deleteByAppid(string $appId): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)))
+			->executeStatement();
 	}
 }

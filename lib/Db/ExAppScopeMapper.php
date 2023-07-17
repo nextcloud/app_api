@@ -86,4 +86,17 @@ class ExAppScopeMapper extends QBMapper {
 			->andWhere($qb->expr()->eq('scope_group', $qb->createNamedParameter($scopeGroup), IQueryBuilder::PARAM_INT))
 		);
 	}
+
+	/**
+	 * @param string $appId
+	 *
+	 * @throws Exception
+	 * @return int
+	 */
+	public function deleteByAppid(string $appId): int {
+		$qb = $this->db->getQueryBuilder();
+		$qb->delete()->from($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId), IQueryBuilder::PARAM_STR));
+		return $qb->executeStatement();
+	}
 }

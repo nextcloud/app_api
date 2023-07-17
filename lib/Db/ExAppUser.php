@@ -69,8 +69,8 @@ class ExAppUser extends Entity implements JsonSerializable {
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
-			'app_id' => $this->getAppid(),
-			'user_id' => $this->getUserid(),
+			'appid' => $this->getAppid(),
+			'userid' => $this->getUserid(),
 		];
 	}
 }
