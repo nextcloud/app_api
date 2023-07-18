@@ -19,8 +19,8 @@
 	<bugs>https://github.com/nextcloud/app_ecosystem_v2/issues</bugs>
 	<repository type="git">https://github.com/nextcloud/app_ecosystem_v2.git</repository>
 	<dependencies>
-		<nextcloud min-version="26" max-version="28"/>
 		<php min-version="8.1"/>
+		<nextcloud min-version="26" max-version="28"/>
 	</dependencies>
 	<repair-steps>
 		<install>

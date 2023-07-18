@@ -661,7 +661,7 @@ class AppEcosystemV2Service {
 						'name' => $exApp->getName(),
 						'version' => $exApp->getVersion(),
 						'enabled' => $exApp->getEnabled(),
-						'last_response_time' => $exApp->getLastResponseTime(),
+						'last_response_time' => $exApp->getLastCheckTime(),
 						'system' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 					];
 				}, $exApps);
