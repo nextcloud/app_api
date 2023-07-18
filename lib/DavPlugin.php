@@ -41,6 +41,9 @@ use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\DAV\Connector\Sabre\Auth;
 use OCP\ISession;
 
+/**
+ * @psalm-suppress UndefinedClass, MissingDependency
+ */
 class DavPlugin extends ServerPlugin {
 	private IRequest $request;
 	private ISession $session;

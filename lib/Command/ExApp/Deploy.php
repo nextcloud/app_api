@@ -116,9 +116,9 @@ class Deploy extends Command {
 		$deployConfig = $daemonConfig->getDeployConfig();
 
 		$imageParams = [
-			'image_src' => (string) $infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io',
-			'image_name' => (string) $infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId,
-			'image_tag' => (string) $infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest',
+			'image_src' => (string) ($infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io'),
+			'image_name' => (string) ($infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId),
+			'image_tag' => (string) ($infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest'),
 		];
 		$containerParams = [
 			'name' => $appId,
@@ -132,10 +132,10 @@ class Deploy extends Command {
 			'appid' => $appId,
 			'name' => (string) $infoXml->name,
 			'version' => (string) $infoXml->version,
-			'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
+			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
 			'host' => $this->buildExAppHost($deployConfig),
 			'port' => $containerParams['port'],
-			'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
+			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
@@ -159,8 +159,8 @@ class Deploy extends Command {
 				'secret' => explode('=', $envs[1])[1],
 				'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
 				'port' => explode('=', $envs[7])[1],
-				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
-				'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
+				'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
+				'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
 			];
 			if ($this->heartbeatExApp($resultOutput)) {
 				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));

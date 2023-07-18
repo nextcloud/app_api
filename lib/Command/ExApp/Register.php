@@ -246,7 +246,7 @@ class Register extends Command {
 			return null;
 		}
 		if ($response->getStatusCode() === 200) {
-			$this->service->updateExAppLastResponseTime($exApp);
+			$this->service->updateExAppLastCheckTime($exApp);
 			return json_decode($response->getBody(), true);
 		}
 		return null;

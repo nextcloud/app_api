@@ -63,6 +63,9 @@ class Application extends App implements IBootstrap {
 		$this->registerDavAuth();
 	}
 
+	/**
+	 * @psalm-suppress UndefinedClass
+	 */
 	public function register(IRegistrationContext $context): void {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);

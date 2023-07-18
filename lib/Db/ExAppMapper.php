@@ -39,6 +39,9 @@ use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
+/**
+ * @template-extends QBMapper<ExApp>
+ */
 class ExAppMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_apps');
@@ -154,10 +157,10 @@ class ExAppMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function updateLastResponseTime(ExApp $exApp): int {
+	public function updateLastCheckTime(ExApp $exApp): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->update($this->tableName)
-			->set('last_response_time', $qb->createNamedParameter($exApp->getLastResponseTime(), IQueryBuilder::PARAM_INT))
+			->set('last_check_time', $qb->createNamedParameter($exApp->getLastCheckTime(), IQueryBuilder::PARAM_INT))
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid()))
 			)->executeStatement();

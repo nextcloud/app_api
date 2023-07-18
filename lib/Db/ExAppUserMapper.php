@@ -36,6 +36,9 @@ use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
+/**
+ * @template-extends QBMapper<ExAppUser>
+ */
 class ExAppUserMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_apps_users');

@@ -40,6 +40,9 @@ use OCP\AppFramework\Services\IInitialState;
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
 
+/**
+ * @template-extends IEventListener<LoadFilesPluginListener>
+ */
 class LoadFilesPluginListener implements IEventListener {
 	private IInitialState $initialState;
 	private ExFilesActionsMenuService $service;

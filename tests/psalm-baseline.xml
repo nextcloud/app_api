@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
+  <file src="lib/AppInfo/Application.php">
+    <InvalidArgument>
+      <code>LoadFilesPluginListener::class</code>
+      <code>SabrePluginAuthInitListener::class</code>
+    </InvalidArgument>
+    <MissingDependency>
+      <code>DavPlugin</code>
+    </MissingDependency>
+  </file>
+  <file src="lib/Listener/LoadFilesPluginListener.php">
+    <ImplementedParamTypeMismatch>
+      <code>$event</code>
+    </ImplementedParamTypeMismatch>
+    <InvalidDocblock>
+      <code>class LoadFilesPluginListener implements IEventListener {</code>
+    </InvalidDocblock>
+    <InvalidTemplateParam>
+      <code>IEventListener</code>
+    </InvalidTemplateParam>
+    <MissingTemplateParam>
+      <code>IEventListener</code>
+    </MissingTemplateParam>
+    <UndefinedClass>
+      <code>LoadAdditionalScriptsEvent</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Listener/SabrePluginAuthInitListener.php">
+    <ImplementedParamTypeMismatch>
+      <code>$event</code>
+    </ImplementedParamTypeMismatch>
+    <InvalidDocblock>
+      <code>class SabrePluginAuthInitListener implements IEventListener {</code>
+    </InvalidDocblock>
+    <InvalidTemplateParam>
+      <code>IEventListener</code>
+    </InvalidTemplateParam>
+    <MissingDependency>
+      <code>AEAuthBackend</code>
+      <code>AEAuthBackend</code>
+    </MissingDependency>
+    <MissingTemplateParam>
+      <code>IEventListener</code>
+    </MissingTemplateParam>
+  </file>
+  <file src="lib/Profiler/AEDataCollector.php">
+    <UndefinedClass>
+      <code>Request</code>
+    </UndefinedClass>
+  </file>
+</files>

@@ -37,6 +37,9 @@ use OCP\DB\Exception;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 
+/**
+ * @template-extends QBMapper<ExAppApiScope>
+ */
 class ExAppApiScopeMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_apps_api_scopes');

@@ -37,6 +37,9 @@ use OCP\EventDispatcher\IEventListener;
 
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 
+/**
+ * @template-extends IEventListener<SabrePluginAuthInitListener>
+ */
 class SabrePluginAuthInitListener implements IEventListener {
 	private AEAuthBackend $aeAuth;
 

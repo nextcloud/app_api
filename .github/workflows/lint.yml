@@ -1,0 +1,143 @@
+name: Lint
+
+on:
+  pull_request:
+    paths:
+      - 'appinfo/*.*'
+      - 'lib/**'
+#      - 'src/**'
+      - 'templates/*.*'
+  push:
+    paths:
+      - 'appinfo/*.*'
+      - 'lib/*.*'
+#      - 'src/*.*'
+      - 'templates/*.*'
+  workflow_dispatch:
+
+jobs:
+  xml-lint:
+    runs-on: ubuntu-latest
+    name: info.xml lint
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download xml appinfo schema
+        run: wget https://raw.githubusercontent.com/nextcloud/appstore/master/nextcloudappstore/api/v1/release/info.xsd
+
+      - name: Lint appinfo/info.xml
+        uses: ChristophWurst/xmllint-action@v1.1
+        with:
+          xml-file: ./appinfo/info.xml
+          xml-schema-file: ./info.xsd
+
+  php-lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ["8.1", "8.2"]
+
+    name: php-lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+
+      - name: Lint
+        run: composer run lint
+
+  php-cs:
+    runs-on: ubuntu-latest
+    name: php-cs
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          coverage: none
+
+      - name: Install dependencies
+        run: composer i
+
+      - name: Lint
+        run: composer run cs:check || ( echo 'Please run `composer run cs:fix` to format your code' && exit 1 )
+
+  php-psalm-analysis:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ["8.1", "8.2"]
+        ocp-version: ['v26.0.3', 'v27.0.0', 'dev-master']
+    name: php-psalm-analysis
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          coverage: none
+
+      - name: Install dependencies
+        run: composer i
+
+      - name: Install nextcloud/ocp
+        run: composer require --dev nextcloud/ocp:${{ matrix.ocp-version }}
+
+      - name: Run coding standards check
+        run: composer run psalm
+
+  php-security-analysis:
+    runs-on: ubuntu-latest
+    name: security analysis
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Psalm
+        uses: docker://vimeo/psalm-github-actions:4.30.0
+        with:
+          security_analysis: true
+          composer_ignore_platform_reqs: false
+          report_file: results.sarif
+
+      - name: Upload Security Analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+
+#  js-eslint:
+#    runs-on: ubuntu-latest
+#    name: eslint
+#
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: ESLint
+#        run: npm run lint
+
+#  stylelint:
+#    runs-on: ubuntu-latest
+#
+#    name: stylelint
+#
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: Lint
+#        run: npm run stylelint

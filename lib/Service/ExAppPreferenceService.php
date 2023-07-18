@@ -96,7 +96,7 @@ class ExAppPreferenceService {
 	 * @param string $userId
 	 * @param string $appId
 	 * @param array $configKeys
-	 * @return ExAppPreference[]|null
+	 * @return array|null
 	 */
 	public function getUserConfigValues(string $userId, string $appId, array $configKeys): ?array {
 		try {

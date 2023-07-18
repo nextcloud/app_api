@@ -65,7 +65,7 @@ class GetConfig extends Command {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
-			$output->writeln(sprintf('ExApp % not found.', $appId));
+			$output->writeln(sprintf('ExApp %s not found.', $appId));
 			return 1;
 		}
 

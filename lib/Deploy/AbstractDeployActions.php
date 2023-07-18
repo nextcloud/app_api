@@ -36,7 +36,7 @@ use OCA\AppEcosystemV2\Db\DaemonConfig;
 /**
  * Base class for AppEcosystemV2 ExApp deploy actions
  */
-abstract class DeployActions {
+abstract class AbstractDeployActions {
 	/**
 	 * Deploy type (action) id name
 	 *

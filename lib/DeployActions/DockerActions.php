@@ -39,9 +39,9 @@ use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
 use OCA\AppEcosystemV2\Db\DaemonConfig;
-use OCA\AppEcosystemV2\Deploy\DeployActions;
+use OCA\AppEcosystemV2\Deploy\AbstractDeployActions;
 
-class DockerActions extends DeployActions {
+class DockerActions extends AbstractDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	public const AE_REQUIRED_ENVS = [
 		'AE_VERSION',

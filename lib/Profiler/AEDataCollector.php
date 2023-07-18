@@ -32,10 +32,14 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Profiler;
 
 use OC\AppFramework\Http\Request;
-use OCA\AppEcosystemV2\AppInfo\Application;
 use OCP\AppFramework\Http\Response;
 use OCP\DataCollector\AbstractDataCollector;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
+
+/**
+ * @psalm-suppress UndefinedClass
+ */
 class AEDataCollector extends AbstractDataCollector {
 	public function getName(): string {
 		return Application::APP_ID;

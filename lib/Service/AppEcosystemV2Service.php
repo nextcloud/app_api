@@ -147,7 +147,7 @@ class AppEcosystemV2Service {
 				$exApp->setSecret($secret);
 			}
 			$exApp->setStatus(json_encode(['active' => true])); // TODO: Add status request to ExApp
-			$exApp->setLastResponseTime(time());
+			$exApp->setLastCheckTime(time());
 			try {
 				$cacheKey = '/exApp_' . $appId;
 				$exApp = $this->exAppMapper->update($exApp);
@@ -169,7 +169,7 @@ class AppEcosystemV2Service {
 				'secret' =>  $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
 				'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
 				'created_time' => time(),
-				'last_response_time' => time(),
+				'last_check_time' => time(),
 			]);
 			try {
 				$cacheKey = '/exApp_' . $appId;
@@ -236,7 +236,7 @@ class AppEcosystemV2Service {
 				if ($exAppEnabled instanceof IResponse) {
 					$response = json_decode($exAppEnabled->getBody(), true);
 					if (isset($response['error']) && strlen($response['error']) === 0) {
-						$this->updateExAppLastResponseTime($exApp);
+						$this->updateExAppLastCheckTime($exApp);
 					} else {
 						$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
 						$this->disableExApp($exApp);
@@ -282,7 +282,7 @@ class AppEcosystemV2Service {
 			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) !== 1) {
 				return false;
 			}
-			$this->updateExAppLastResponseTime($exApp);
+			$this->updateExAppLastCheckTime($exApp);
 			$cacheKey = '/exApp_' . $exApp->getAppid();
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 			return true;
@@ -306,7 +306,7 @@ class AppEcosystemV2Service {
 			if ($response instanceof IResponse && $response->getStatusCode() === 200) {
 				$status = json_decode($response->getBody(), true);
 				$exApp->setStatus($status);
-				$this->updateExAppLastResponseTime($exApp);
+				$this->updateExAppLastCheckTime($exApp);
 			}
 			return json_decode($exApp->getStatus(), true);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
@@ -642,12 +642,12 @@ class AppEcosystemV2Service {
 		return $dataHash === $phpInputHash;
 	}
 
-	public function updateExAppLastResponseTime(&$exApp): void {
-		$exApp->setLastResponseTime(time());
+	public function updateExAppLastCheckTime(ExApp &$exApp): void {
+		$exApp->setLastCheckTime(time());
 		try {
-			$this->exAppMapper->updateLastResponseTime($exApp);
+			$this->exAppMapper->updateLastCheckTime($exApp);
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Error while updating ExApp last response time for ExApp: %s. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Error while updating ExApp last check time for ExApp: %s. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 		}
 	}
 

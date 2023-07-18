@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Migration;
 
+use Closure;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
 use OCP\Migration\SimpleMigrationStep;
@@ -44,7 +45,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 	 *
 	 * @return null|ISchemaWrapper
 	 */
-	public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options) {
+	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options) {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
@@ -127,7 +128,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'unsigned' => true,
 			]);
-			$table->addColumn('last_response_time', Types::BIGINT, [
+			$table->addColumn('last_check_time', Types::BIGINT, [
 				'notnull' => true,
 				'unsigned' => true,
 			]);
