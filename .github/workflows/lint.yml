@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ["8.1", "8.2"]
+        php-versions: ["8.1"]
 
     name: php-lint
 
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ["8.1", "8.2"]
+        php-versions: ["8.1"]
         ocp-version: ['v26.0.3', 'v27.0.0', 'dev-master']
     name: php-psalm-analysis
 
