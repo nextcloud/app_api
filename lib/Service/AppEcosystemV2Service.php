@@ -249,6 +249,7 @@ class AppEcosystemV2Service {
 				}
 
 				$cacheKey = '/exApp_' . $exApp->getAppid();
+				$exApp->setEnabled(1);
 				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 				return true;
 			}
@@ -284,6 +285,7 @@ class AppEcosystemV2Service {
 			}
 			$this->updateExAppLastCheckTime($exApp);
 			$cacheKey = '/exApp_' . $exApp->getAppid();
+			$exApp->setEnabled(0);
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 			return true;
 		} catch (Exception $e) {

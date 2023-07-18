@@ -56,7 +56,7 @@ jobs:
     name: php-cs
     strategy:
       matrix:
-        php-versions: [ "8.1" ]
+        php-versions: ["8.1"]
 
     steps:
       - uses: actions/checkout@v3
