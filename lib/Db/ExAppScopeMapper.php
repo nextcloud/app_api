@@ -98,8 +98,8 @@ class ExAppScopeMapper extends QBMapper {
 	 */
 	public function deleteByAppid(string $appId): int {
 		$qb = $this->db->getQueryBuilder();
-		$qb->delete()->from($this->tableName)
-			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId), IQueryBuilder::PARAM_STR));
-		return $qb->executeStatement();
+		return $qb->delete($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId), IQueryBuilder::PARAM_STR))
+			->executeStatement();
 	}
 }
