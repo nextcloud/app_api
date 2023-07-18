@@ -101,13 +101,7 @@ class ExAppConfigService {
 	 * @return ExAppConfig|null
 	 */
 	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, int $sensitive = 0): ?ExAppConfig {
-		try {
-//			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
-			$appConfigEx = $this->getAppConfig($appId, $configKey);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error('Error while getting app_config_ex value: ' . $e->getMessage(), ['exception' => $e]);
-			$appConfigEx = null;
-		}
+		$appConfigEx = $this->getAppConfig($appId, $configKey);
 		if ($appConfigEx === null) {
 			try {
 				$appConfigEx = $this->mapper->insert(new ExAppConfig([
@@ -196,6 +190,7 @@ class ExAppConfigService {
 				$cacheKey = sprintf('/%s:%s', $exAppConfig->getAppid(), $exAppConfig->getConfigkey());
 				$this->cache->set($cacheKey, $exAppConfig, self::CACHE_TTL);
 			}
+			return $result;
 		} catch (Exception) {
 			return null;
 		}
