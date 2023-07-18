@@ -17,11 +17,12 @@ on:
 
 jobs:
   xml-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: info.xml lint
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Download xml appinfo schema
         run: wget https://raw.githubusercontent.com/nextcloud/appstore/master/nextcloudappstore/api/v1/release/info.xsd
 
@@ -32,16 +33,14 @@ jobs:
           xml-schema-file: ./info.xsd
 
   php-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    name: php-lint
     strategy:
       matrix:
         php-versions: ["8.1"]
 
-    name: php-lint
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2
@@ -53,17 +52,19 @@ jobs:
         run: composer run lint
 
   php-cs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: php-cs
+    strategy:
+      matrix:
+        php-versions: [ "8.1" ]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: ${{ matrix.php-versions }}
           coverage: none
 
       - name: Install dependencies
@@ -73,7 +74,7 @@ jobs:
         run: composer run cs:check || ( echo 'Please run `composer run cs:fix` to format your code' && exit 1 )
 
   php-psalm-analysis:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         php-versions: ["8.1"]
@@ -94,7 +95,7 @@ jobs:
         run: composer run psalm
 
   php-security-analysis:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: security analysis
     steps:
       - uses: actions/checkout@v3
@@ -114,7 +115,7 @@ jobs:
           sarif_file: results.sarif
 
 #  js-eslint:
-#    runs-on: ubuntu-latest
+#    runs-on: ubuntu-22.04
 #    name: eslint
 #
 #    steps:
@@ -126,7 +127,7 @@ jobs:
 #        run: npm run lint
 
 #  stylelint:
-#    runs-on: ubuntu-latest
+#    runs-on: ubuntu-22.04
 #
 #    name: stylelint
 #
