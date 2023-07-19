@@ -364,7 +364,7 @@ jobs:
 
   nc-host-app-docker-redis:
     runs-on: ubuntu-22.04
-    name: NC In Host (Redis) • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
+    name: NC In Host(Redis) • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
     strategy:
       fail-fast: false
       matrix:
@@ -414,7 +414,7 @@ jobs:
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql, redis
           coverage: none
           ini-file: development
         env:
