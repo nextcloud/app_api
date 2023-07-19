@@ -445,9 +445,9 @@ jobs:
           ./occ config:system:set debug --value=true --type=boolean
           ./occ config:system:set allow_local_remote_servers --value true
 
-          ./occ config:system:set memcache.local --value '\\OC\\Memcache\\Redis'
-          ./occ config:system:set memcache.distributed --value '\\OC\\Memcache\\Redis'
-          ./occ config:system:set memcache.locking --value '\\OC\\Memcache\\Redis'
+          ./occ config:system:set memcache.local --value "\\OC\\Memcache\\Redis"
+          ./occ config:system:set memcache.distributed --value "\\OC\\Memcache\\Redis"
+          ./occ config:system:set memcache.locking --value "\\OC\\Memcache\\Redis"
           ./occ config:system:set redis host --value ${{ env.REDIS_HOST }}
           ./occ config:system:set redis port --value ${{ env.REDIS_PORT }}
 
