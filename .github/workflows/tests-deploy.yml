@@ -434,7 +434,7 @@ jobs:
       - name: Set up Nextcloud
         env:
           DB_PORT: 4444
-          REDIS_HOST: redis
+          REDIS_HOST: localhost
           REDIS_PORT: 6379
         run: |
           mkdir data
