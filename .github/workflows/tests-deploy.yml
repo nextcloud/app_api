@@ -391,6 +391,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          --name redis
         ports:
          - 6379:6379
 
