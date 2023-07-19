@@ -20,12 +20,12 @@
 		"roave/security-advisories": "dev-latest",
 		"psalm/phar": "^5.13",
 		"nextcloud/coding-standard": "^1.1",
-		"friendsofphp/php-cs-fixer": "^3.22"
+		"friendsofphp/php-cs-fixer": "3.16"
 	},
 	"scripts": {
 		"lint": "find . -name \\*.php -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
-		"cs:check": "php-cs-fixer fix --dry-run --diff",
-		"cs:fix": "php-cs-fixer fix",
+		"cs:check": "php-cs-fixer fix ./lib --dry-run --diff",
+		"cs:fix": "php-cs-fixer fix ./lib",
 		"psalm": "psalm.phar --threads=1",
 		"psalm:update-baseline": "psalm.phar --threads=1 --update-baseline",
 		"psalm:update-baseline:force": "psalm.phar --threads=1 --update-baseline --set-baseline=tests/psalm-baseline.xml",

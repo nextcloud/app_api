@@ -32,21 +32,21 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Service;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
-use Psr\Log\LoggerInterface;
+use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppEcosystemV2\Db\DaemonConfigMapper;
+
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-
-use OCA\AppEcosystemV2\Db\DaemonConfig;
-use OCA\AppEcosystemV2\Db\DaemonConfigMapper;
+use Psr\Log\LoggerInterface;
 
 /**
  * Daemon configuration (daemons)
  */
 class DaemonConfigService {
-	const CACHE_TTL = 60 * 60 * 2; // 2 hours
+	public const CACHE_TTL = 60 * 60 * 2; // 2 hours
 	private LoggerInterface $logger;
 	private ICache $cache;
 	private DaemonConfigMapper $mapper;
@@ -99,7 +99,7 @@ class DaemonConfigService {
 			$cacheKey = '/daemon_configs';
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
-				return array_map(function($cachedEntry) {
+				return array_map(function ($cachedEntry) {
 					return $cachedEntry instanceof DaemonConfig ? $cachedEntry : new DaemonConfig($cachedEntry);
 				}, $cached);
 			}

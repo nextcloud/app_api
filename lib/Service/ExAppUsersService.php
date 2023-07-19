@@ -31,19 +31,18 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
-
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppUser;
+use OCA\AppEcosystemV2\Db\ExAppUserMapper;
+
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExAppUserMapper;
-
 class ExAppUsersService {
-	const CACHE_TLL = 60 * 60; // 1 hour
+	public const CACHE_TLL = 60 * 60; // 1 hour
 	private LoggerInterface $logger;
 	private ICache $cache;
 	private ExAppUserMapper $mapper;
@@ -92,7 +91,7 @@ class ExAppUsersService {
 			$cacheKey = '/ex_apps_users_' . $exApp->getAppid();
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
-				array_map(function($cashedEntry) {
+				array_map(function ($cashedEntry) {
 					return $cashedEntry instanceof ExAppUser ? $cashedEntry : new ExAppUser($cashedEntry);
 				}, $cached);
 			}
@@ -124,7 +123,7 @@ class ExAppUsersService {
 			$cacheKey = '/ex_apps_users_' . $appId . '_' . $userId;
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
-				$exAppUsers = array_map(function($cashedEntry) {
+				$exAppUsers = array_map(function ($cashedEntry) {
 					return $cashedEntry instanceof ExAppUser ? $cashedEntry : new ExAppUser($cashedEntry);
 				}, $cached);
 				return !empty($exAppUsers) && $exAppUsers[0] instanceof ExAppUser;

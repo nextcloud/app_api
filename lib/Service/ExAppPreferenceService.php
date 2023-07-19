@@ -34,6 +34,7 @@ namespace OCA\AppEcosystemV2\Service;
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExAppPreference;
 use OCA\AppEcosystemV2\Db\ExAppPreferenceMapper;
+
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;

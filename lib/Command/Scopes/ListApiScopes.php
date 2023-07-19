@@ -32,10 +32,10 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\Scopes;
 
 use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
 
 class ListApiScopes extends Command {
 	private ExAppApiScopeService $service;

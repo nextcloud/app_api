@@ -31,14 +31,14 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Listener;
 
-use OCP\Util;
-use OCP\EventDispatcher\Event;
-use OCP\EventDispatcher\IEventListener;
-use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCP\AppFramework\Services\IInitialState;
-
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
+
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCP\AppFramework\Services\IInitialState;
+use OCP\EventDispatcher\Event;
+use OCP\EventDispatcher\IEventListener;
+use OCP\Util;
 
 /**
  * @template-extends IEventListener<LoadFilesPluginListener>

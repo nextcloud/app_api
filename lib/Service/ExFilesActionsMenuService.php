@@ -31,23 +31,22 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppEcosystemV2\Db\ExFilesActionsMenu;
+use OCA\AppEcosystemV2\Db\ExFilesActionsMenuMapper;
+use OCP\AppFramework\Db\DoesNotExistException;
+
+use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Http;
 use OCP\DB\Exception;
+use OCP\Http\Client\IClient;
+use OCP\Http\Client\IClientService;
+use OCP\Http\Client\IResponse;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCP\Cache\CappedMemoryCache;
-
-use OCA\AppEcosystemV2\Db\ExFilesActionsMenu;
-use OCA\AppEcosystemV2\Db\ExFilesActionsMenuMapper;
-use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Db\Entity;
-use OCP\AppFramework\Http;
-use OCP\Http\Client\IClient;
-use OCP\Http\Client\IClientService;
-use OCP\Http\Client\IResponse;
 
 class ExFilesActionsMenuService {
 	private ICache $cache;
@@ -100,7 +99,7 @@ class ExFilesActionsMenuService {
 			$fileActionMenu->setActionHandler($params['action_handler']);
 			try {
 				if ($this->mapper->updateFileActionMenu($fileActionMenu) !== 1) {
-					$this->logger->error(sprintf('Failed to update file action menu %s for app: %s',$params['name'], $appId));
+					$this->logger->error(sprintf('Failed to update file action menu %s for app: %s', $params['name'], $appId));
 					return null;
 				}
 			} catch (Exception) {
@@ -120,7 +119,7 @@ class ExFilesActionsMenuService {
 					'action_handler' => $params['action_handler'],
 				]));
 			} catch (Exception) {
-				$this->logger->error(sprintf('Failed to insert file action menu %s for app: %s', $params['name'],$appId));
+				$this->logger->error(sprintf('Failed to insert file action menu %s for app: %s', $params['name'], $appId));
 				return null;
 			}
 		}
@@ -152,10 +151,10 @@ class ExFilesActionsMenuService {
 	 */
 	public function getRegisteredFileActions(): ?array {
 		$cacheKey = 'ex_files_actions_menus';
-//		$cache = $this->cache->get($cacheKey);
-//		if ($cache !== null) {
-//			return $cache;
-//		}
+		//		$cache = $this->cache->get($cacheKey);
+		//		if ($cache !== null) {
+		//			return $cache;
+		//		}
 
 		try {
 			$fileActions = $this->mapper->findAllEnabled();
@@ -168,10 +167,10 @@ class ExFilesActionsMenuService {
 
 	public function getExAppFileAction(string $appId, string $fileActionName): ?ExFilesActionsMenu {
 		$cacheKey = 'ex_files_actions_menu_' . $appId . '_' . $fileActionName;
-//		$cache = $this->cache->get($cacheKey);
-//		if ($cache !== null) {
-//			return $cache;
-//		}
+		//		$cache = $this->cache->get($cacheKey);
+		//		if ($cache !== null) {
+		//			return $cache;
+		//		}
 
 		try {
 			$fileAction = $this->mapper->findByAppIdName($appId, $fileActionName);

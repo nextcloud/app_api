@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  *
  * Nextcloud - App Ecosystem V2
@@ -29,8 +32,9 @@
 namespace OCA\AppEcosystemV2\Settings;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
-use OCP\IURLGenerator;
+
 use OCP\IL10N;
+use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
 
 class AdminSection implements IIconSection {

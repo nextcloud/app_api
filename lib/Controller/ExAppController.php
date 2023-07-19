@@ -31,15 +31,15 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
-use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\IRequest;
-use OCP\AppFramework\OCSController;
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http\Response;
-
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+
+use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\OCSController;
+use OCP\IRequest;
 
 class ExAppController extends OCSController {
 	private AppEcosystemV2Service $service;

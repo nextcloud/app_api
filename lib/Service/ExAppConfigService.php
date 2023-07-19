@@ -31,22 +31,22 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppEcosystemV2\Db\ExAppConfig;
+use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
+
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExAppConfig;
-use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
-use OCP\AppFramework\Db\DoesNotExistException;
-
 /**
  * App configuration (appconfig_ex)
  */
 class ExAppConfigService {
-	const CACHE_TTL = 60 * 60; // 1 hour
+	public const CACHE_TTL = 60 * 60; // 1 hour
 	private LoggerInterface $logger;
 	private ICache $cache;
 	private ExAppConfigMapper $mapper;
@@ -165,7 +165,7 @@ class ExAppConfigService {
 	public function getAppConfig(mixed $appId, mixed $configKey): ?ExAppConfig {
 		try {
 			$cacheKey = sprintf('/%s:%s', $appId, $configKey);
-			$cashed= $this->cache->get($cacheKey);
+			$cashed = $this->cache->get($cacheKey);
 			if ($cashed !== null) {
 				return $cashed instanceof ExAppConfig ? $cashed : new ExAppConfig($cashed);
 			}

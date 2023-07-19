@@ -31,10 +31,10 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Migration;
 
+use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
-
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 
 class DataInitializationStep implements IRepairStep {
 	private ExAppApiScopeService $service;

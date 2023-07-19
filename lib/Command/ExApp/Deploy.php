@@ -34,6 +34,8 @@ namespace OCA\AppEcosystemV2\Command\ExApp;
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\DeployActions\DockerActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\DaemonConfigService;
+
 use OCP\App\IAppManager;
 use OCP\IURLGenerator;
 use OCP\Security\ISecureRandom;
@@ -42,8 +44,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
 class Deploy extends Command {
 	private AppEcosystemV2Service $service;

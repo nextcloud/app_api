@@ -32,9 +32,10 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
+
 use OCA\DAV\Connector\Sabre\Auth;
-use OCP\ISession;
 use OCP\IRequest;
+use OCP\ISession;
 use Sabre\DAV\Auth\Backend\BackendInterface;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;

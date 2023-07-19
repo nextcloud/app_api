@@ -32,10 +32,11 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Profiler;
 
 use OC\AppFramework\Http\Request;
-use OCP\AppFramework\Http\Response;
-use OCP\DataCollector\AbstractDataCollector;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
+
+use OCP\AppFramework\Http\Response;
+use OCP\DataCollector\AbstractDataCollector;
 
 /**
  * @psalm-suppress UndefinedClass
@@ -46,7 +47,7 @@ class AEDataCollector extends AbstractDataCollector {
 	}
 
 	public function collect(Request $request, Response $response, \Throwable $exception = null): void {
-//		TODO: Check why DAV requests missing AE headers data
+		//		TODO: Check why DAV requests missing AE headers data
 		$headers = [];
 		$aeHeadersList = [
 			'AE-VERSION',

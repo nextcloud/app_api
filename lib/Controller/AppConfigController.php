@@ -31,20 +31,19 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
-
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Db\ExAppConfig;
+use OCA\AppEcosystemV2\Service\ExAppConfigService;
+
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
-use OCP\AppFramework\OCS\OCSBadRequestException;
-use OCP\IRequest;
-use OCP\AppFramework\OCSController;
-use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
-
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\ExAppConfigService;
+use OCP\AppFramework\OCS\OCSBadRequestException;
+use OCP\AppFramework\OCSController;
+use OCP\IRequest;
 
 class AppConfigController extends OCSController {
 	private ExAppConfigService $exAppConfigService;

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  *
  * Nextcloud - App Ecosystem V2
@@ -28,12 +31,12 @@
 
 namespace OCA\AppEcosystemV2\Settings;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
+
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
-
-use OCA\AppEcosystemV2\AppInfo\Application;
 
 class Admin implements ISettings {
 	/** @var IConfig */

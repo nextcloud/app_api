@@ -42,7 +42,7 @@ abstract class AbstractDeployActions {
 	 *
 	 * @return string
 	 */
-	public abstract function getAcceptsDeployId(): string;
+	abstract public function getAcceptsDeployId(): string;
 
 	/**
 	 * Deploy ExApp to the target daemon
@@ -52,7 +52,7 @@ abstract class AbstractDeployActions {
 	 *
 	 * @return mixed
 	 */
-	public abstract function deployExApp(DaemonConfig $daemonConfig, array $params = []): mixed;
+	abstract public function deployExApp(DaemonConfig $daemonConfig, array $params = []): mixed;
 
 	/**
 	 * Load ExApp information from the target daemon.
@@ -63,7 +63,7 @@ abstract class AbstractDeployActions {
 	 *
 	 * @return array required data for ExApp registration
 	 */
-	public abstract function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array;
+	abstract public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array;
 
 	/**
 	 * Resolve ExApp host depending on daemon configuration.
@@ -75,5 +75,5 @@ abstract class AbstractDeployActions {
 	 *
 	 * @return string
 	 */
-	public abstract function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string;
+	abstract public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string;
 }

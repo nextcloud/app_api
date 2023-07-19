@@ -31,6 +31,15 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
+use OCA\AppEcosystemV2\Db\ExApp;
+use OCA\AppEcosystemV2\DeployActions\DockerActions;
+use OCA\AppEcosystemV2\DeployActions\ManualActions;
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+use OCA\AppEcosystemV2\Service\ExAppScopesService;
+use OCA\AppEcosystemV2\Service\ExAppUsersService;
+
 use OCP\DB\Exception;
 use OCP\Http\Client\IResponse;
 use Symfony\Component\Console\Command\Command;
@@ -40,15 +49,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\DeployActions\DockerActions;
-use OCA\AppEcosystemV2\DeployActions\ManualActions;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
-use OCA\AppEcosystemV2\Service\ExAppScopesService;
-use OCA\AppEcosystemV2\Service\ExAppUsersService;
 
 class Register extends Command {
 	private AppEcosystemV2Service $service;
@@ -111,7 +111,7 @@ class Register extends Command {
 		// TODO: Make this dynamic
 		if ($daemonConfig->getAcceptsDeployId() == $this->dockerActions->getAcceptsDeployId()) {
 			$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-		} else if ($daemonConfig->getAcceptsDeployId() == $this->manualActions->getAcceptsDeployId()) {
+		} elseif ($daemonConfig->getAcceptsDeployId() == $this->manualActions->getAcceptsDeployId()) {
 			$exAppJson = $input->getOption('json-info');
 			if ($exAppJson === null) {
 				$output->writeln('ExApp JSON is required for manual deploy.');
@@ -150,8 +150,7 @@ class Register extends Command {
 			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
 				try {
 					$this->exAppUsersService->setupSystemAppFlag($exApp);
-				}
-				catch (Exception $e) {
+				} catch (Exception $e) {
 					$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
 					return 1;
 				}
@@ -184,7 +183,7 @@ class Register extends Command {
 				// Prompt to approve optional ExApp scopes
 				if ($confirmRequiredScopes && count($requestedExAppScopeGroups['optional']) > 0) {
 					$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ',
-							$this->exAppApiScopeService->mapScopeGroupsToNames($requestedExAppScopeGroups['optional']))));
+						$this->exAppApiScopeService->mapScopeGroupsToNames($requestedExAppScopeGroups['optional']))));
 					$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 					$confirmOptionalScopes = $helper->ask($input, $output, $question);
 				}
@@ -235,7 +234,7 @@ class Register extends Command {
 		}
 		if (count($registeredScopeGroups) > 0) {
 			$output->writeln(sprintf('ExApp %s %s scope groups successfully set: %s', $exApp->getAppid(), $scopeType, implode(', ',
-					$this->exAppApiScopeService->mapScopeGroupsToNames($registeredScopeGroups))));
+				$this->exAppApiScopeService->mapScopeGroupsToNames($registeredScopeGroups))));
 		}
 	}
 

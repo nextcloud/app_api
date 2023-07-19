@@ -31,11 +31,11 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
-
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppScope;
 use OCA\AppEcosystemV2\Db\ExAppScopeMapper;
+
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
@@ -44,7 +44,7 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class ExAppScopesService {
-	const CACHE_TTL = 60 * 60; // 1 hour
+	public const CACHE_TTL = 60 * 60; // 1 hour
 	private LoggerInterface $logger;
 	private ExAppScopeMapper $mapper;
 	private ICache $cache;
@@ -64,7 +64,7 @@ class ExAppScopesService {
 			$cacheKey = '/ex_app_scopes_' . $exApp->getAppid();
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
-				return array_map(function($cachedEntry) {
+				return array_map(function ($cachedEntry) {
 					return $cachedEntry instanceof ExAppScope ? $cachedEntry : new ExAppScope($cachedEntry);
 				}, $cached);
 			}

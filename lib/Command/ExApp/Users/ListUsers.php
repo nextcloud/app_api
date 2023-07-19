@@ -33,11 +33,11 @@ namespace OCA\AppEcosystemV2\Command\ExApp\Users;
 
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\ExAppUsersService;
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
 
 class ListUsers extends Command {
 	private AppEcosystemV2Service $service;

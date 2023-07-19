@@ -31,15 +31,15 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\DeployActions;
 
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use OCP\ICertificateManager;
-use OCP\IConfig;
-use Psr\Log\LoggerInterface;
 
 use OCA\AppEcosystemV2\Db\DaemonConfig;
 use OCA\AppEcosystemV2\Deploy\AbstractDeployActions;
+
+use OCP\ICertificateManager;
+use OCP\IConfig;
+use Psr\Log\LoggerInterface;
 
 class DockerActions extends AbstractDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
@@ -285,7 +285,7 @@ class DockerActions extends AbstractDeployActions {
 					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
 				],
 			];
-		} else if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
+		} elseif (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
 			$guzzleParams = $this->setupCerts($guzzleParams, $daemonConfig->getDeployConfig());
 		}
 		$this->guzzleClient = new Client($guzzleParams);
@@ -299,7 +299,7 @@ class DockerActions extends AbstractDeployActions {
 	 */
 	private function setupCerts(array $guzzleParams, array $deployConfig): array {
 		if (!$this->config->getSystemValueBool('installed', false)) {
-			$certs =  \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
+			$certs = \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
 		} else {
 			$certs = $this->certificateManager->getAbsoluteBundlePath();
 		}

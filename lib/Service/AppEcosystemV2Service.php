@@ -32,32 +32,31 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Service;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppEcosystemV2\Db\ExApp;
+use OCA\AppEcosystemV2\Db\ExAppMapper;
+
+use OCP\App\IAppManager;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
+use OCP\Http\Client\IClient;
+use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IResponse;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IConfig;
-use OCP\IUser;
-use OCP\Log\ILogFactory;
-use Psr\Log\LoggerInterface;
-
-use OCP\Http\Client\IClientService;
-use OCP\Http\Client\IClient;
-
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Db\ExAppMapper;
-use OCP\App\IAppManager;
-use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\IRequest;
+use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use OCP\Log\ILogFactory;
 use OCP\Security\ISecureRandom;
+use Psr\Log\LoggerInterface;
 
 class AppEcosystemV2Service {
 	public const BASIC_API_SCOPE = 1;
-	const MAX_SIGN_TIME_X_MIN_DIFF = 60 * 5;
-	const CACHE_TTL = 60 * 60; // 1 hour
+	public const MAX_SIGN_TIME_X_MIN_DIFF = 60 * 5;
+	public const CACHE_TTL = 60 * 60; // 1 hour
 
 	private LoggerInterface $logger;
 	private ILogFactory $logFactory;
@@ -166,7 +165,7 @@ class AppEcosystemV2Service {
 				'protocol' => $appData['protocol'],
 				'host' => $appData['host'],
 				'port' => $appData['port'],
-				'secret' =>  $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
+				'secret' => $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
 				'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
 				'created_time' => time(),
 				'last_check_time' => time(),
@@ -201,7 +200,7 @@ class AppEcosystemV2Service {
 				$this->logger->error(sprintf('Error while unregistering ExApp: %s', $appId));
 				return null;
 			}
-//			TODO: Remove ?app configs, ?app preferences
+			//			TODO: Remove ?app configs, ?app preferences
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
 			$this->cache->remove('/exApp_' . $appId);
@@ -246,7 +245,7 @@ class AppEcosystemV2Service {
 						$this->disableExApp($exApp);
 						return false;
 					}
-				} else if (isset($exAppEnabled['error'])) {
+				} elseif (isset($exAppEnabled['error'])) {
 					$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $exAppEnabled['error']));
 					$this->disableExApp($exApp);
 					return false;
@@ -278,7 +277,7 @@ class AppEcosystemV2Service {
 				if (isset($response['error']) && strlen($response['error']) !== 0) {
 					$this->logger->error(sprintf('Failed to disable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
 				}
-			} else if (isset($exAppDisabled['error'])) {
+			} elseif (isset($exAppDisabled['error'])) {
 				$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $exAppDisabled['error']));
 			}
 			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) !== 1) {
@@ -413,7 +412,7 @@ class AppEcosystemV2Service {
 				default:
 					return ['error' => 'Bad HTTP method'];
 			}
-//			TODO: Add files support
+			//			TODO: Add files support
 			return $response;
 		} catch (\Exception $e) {
 			$this->logger->error(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
@@ -547,7 +546,7 @@ class AppEcosystemV2Service {
 		}
 		$headers['AE-SIGN-TIME'] = $signTime;
 
-		$body =  $request->getMethod() . $request->getRequestUri() . json_encode($headers, JSON_UNESCAPED_SLASHES);
+		$body = $request->getMethod() . $request->getRequestUri() . json_encode($headers, JSON_UNESCAPED_SLASHES);
 		$signature = hash_hmac('sha256', $body, $exApp->getSecret());
 		$signatureValid = $signature === $requestSignature;
 
