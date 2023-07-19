@@ -479,7 +479,7 @@ jobs:
 
       - name: Check redis keys
         run: |
-          redis-cli keys '*app_ecosystem_v2*' || error
+          docker exec redis redis-cli keys '*app_ecosystem_v2*' || error
 
       - name: Upload Container info
         if: always()
