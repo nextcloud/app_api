@@ -150,6 +150,11 @@ class Deploy extends Command {
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
+			if (!$this->dockerActions->healthcheckContainer($createResult['Id'], $daemonConfig)) {
+				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, 'Container healthcheck failed.'));
+				return 1;
+			}
+
 			// TODO: Remove resultOutput
 			$resultOutput = [
 				'appid' => $appId,

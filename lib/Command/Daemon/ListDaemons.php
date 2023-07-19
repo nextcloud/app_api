@@ -69,7 +69,7 @@ class ListDaemons extends Command {
 
 		$output->writeln('Registered ExApp daemon configs:');
 		foreach ($daemonConfigs as $daemon) {
-			$output->writeln(sprintf('%s. %s [%s]: %s://%s', $daemon->getId(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getProtocol(), $daemon->getHost()));
+			$output->writeln(sprintf('%s. %s - %s [%s]: %s://%s', $daemon->getId(), $daemon->getName(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getProtocol(), $daemon->getHost()));
 		}
 
 		return 0;

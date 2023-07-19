@@ -251,6 +251,24 @@ class DockerActions extends AbstractDeployActions {
 		return $host;
 	}
 
+	public function containerStateHealthy(array $containerInfo): bool {
+		return $containerInfo['State']['Health']['Status'] === 'healthy' && $containerInfo['State']['Status'] === 'running';
+	}
+
+	public function healthcheckContainer(string $containerId, DaemonConfig $daemonConfig): bool {
+		$attempts = 0;
+		$totalAttempts = 60; // ~60 seconds for container to initialize
+		while ($attempts < $totalAttempts) {
+			$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $containerId);
+			if ($this->containerStateHealthy($containerInfo)) {
+				return true;
+			}
+			$attempts++;
+			sleep(1);
+		}
+		return false;
+	}
+
 	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
 		$dockerUrl = 'http://localhost';
 		if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {

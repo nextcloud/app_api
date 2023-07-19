@@ -91,6 +91,9 @@ class DaemonConfigService {
 		}
 	}
 
+	/**
+	 * @return DaemonConfig[]|null
+	 */
 	public function getRegisteredDaemonConfigs(): ?array {
 		try {
 			$cacheKey = '/daemon_configs';
