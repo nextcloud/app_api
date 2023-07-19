@@ -232,6 +232,10 @@ class AppEcosystemV2Service {
 	public function enableExApp(ExApp $exApp): bool {
 		try {
 			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), true) === 1) {
+				$cacheKey = '/exApp_' . $exApp->getAppid();
+				$exApp->setEnabled(1);
+				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+
 				$exAppEnabled = $this->requestToExApp(null, null, $exApp, '/enabled?enabled=1', 'PUT');
 				if ($exAppEnabled instanceof IResponse) {
 					$response = json_decode($exAppEnabled->getBody(), true);
@@ -248,9 +252,6 @@ class AppEcosystemV2Service {
 					return false;
 				}
 
-				$cacheKey = '/exApp_' . $exApp->getAppid();
-				$exApp->setEnabled(1);
-				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 				return true;
 			}
 		} catch (Exception $e) {

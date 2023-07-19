@@ -252,7 +252,7 @@ class DockerActions extends AbstractDeployActions {
 	}
 
 	public function containerStateHealthy(array $containerInfo): bool {
-		return $containerInfo['State']['Health']['Status'] === 'healthy' && $containerInfo['State']['Status'] === 'running';
+		return $containerInfo['State']['Status'] === 'running';
 	}
 
 	public function healthcheckContainer(string $containerId, DaemonConfig $daemonConfig): bool {

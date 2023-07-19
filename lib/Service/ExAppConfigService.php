@@ -70,7 +70,7 @@ class ExAppConfigService {
 	 * @return array|null
 	 */
 	public function getAppConfigValues(string $appId, array $configKeys): ?array {
-		$cacheKey = sprintf('/%s:%s', $appId, json_encode($configKeys));
+		$cacheKey = sprintf('/%s:%s', $appId, join(':', array_values($configKeys)));
 		$cached = $this->cache->get($cacheKey);
 		if ($cached !== null) {
 			return $cached;
