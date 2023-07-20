@@ -29,7 +29,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Command\Scopes;
+namespace OCA\AppEcosystemV2\Command\ApiScopes;
 
 use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 

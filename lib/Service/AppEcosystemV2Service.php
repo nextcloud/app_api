@@ -558,6 +558,7 @@ class AppEcosystemV2Service {
 					}
 				} catch (Exception $e) {
 					$this->logger->error(sprintf('Failed to get ExApp %s user %s. Error: %s', $exApp->getAppid(), $userId, $e->getMessage()), ['exception' => $e]);
+					return false;
 				}
 			}
 			return $this->finalizeRequestToNC($userId);
