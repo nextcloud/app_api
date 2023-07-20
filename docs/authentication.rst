@@ -11,7 +11,7 @@ Authentication flow
 
 1. ExApp sends a request to Nextcloud
 2. Nextcloud passes request to AppEcosystemV2
-3. AppEcosystemV2 validates request (see [authentication](#AppEcosystemV2-authentication) section)
+3. AppEcosystemV2 validates request (see `authentication flow in details`_)
 4. Request is accepted/rejected
 
 .. mermaid::
@@ -37,9 +37,9 @@ Each ExApp request to secured API with AppEcosystemAuth must contain the followi
 2. `EX-APP-ID` - id of the ExApp
 3. `EX-APP-VERSION` - version of the ExApp
 4. `NC-USER-ID` - the user under which the request is made, can be empty in case of system apps (more details in [scopes](#AppEcosystemV2-scopes) section)
-5. `AE-DATA-HASH` - hash of the request body (see details in [signature](#AE-SIGNATURE) section)
+5. `AE-DATA-HASH` - hash of the request body (see details in `ae_signature`_ section)
 6. `AE-SIGN-TIME` - unix timestamp of the request
-7. `AE-SIGNATURE` - signature of the request (see details [signature](#AE-SIGNATURE) section)
+7. `AE-SIGNATURE` - signature of the request (see details `ae_signature`_ section)
 
 
 AE_SIGNATURE

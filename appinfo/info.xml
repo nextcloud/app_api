@@ -43,7 +43,7 @@
 		<command>OCA\AppEcosystemV2\Command\Daemon\RegisterDaemon</command>
 		<command>OCA\AppEcosystemV2\Command\Daemon\UnregisterDaemon</command>
 		<command>OCA\AppEcosystemV2\Command\Daemon\ListDaemons</command>
-		<command>OCA\AppEcosystemV2\Command\Scopes\ListApiScopes</command>
+		<command>OCA\AppEcosystemV2\Command\ApiScopes\ListApiScopes</command>
 	</commands>
 	<settings>
 		<admin>OCA\AppEcosystemV2\Settings\Admin</admin>

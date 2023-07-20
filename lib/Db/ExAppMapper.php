@@ -96,25 +96,6 @@ class ExAppMapper extends QBMapper {
 	}
 
 	/**
-	 * @param string $name
-	 *
-	 * @throws DoesNotExistException if not found
-	 * @throws MultipleObjectsReturnedException if more than one result
-	 * @throws Exception
-	 *
-	 * @return ExApp
-	 */
-	public function findByName(string $name): Entity {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
-			);
-		return $this->findEntity($qb);
-	}
-
-	/**
 	 * @throws Exception
 	 */
 	public function deleteExApp(ExApp $exApp): int {
@@ -123,23 +104,6 @@ class ExAppMapper extends QBMapper {
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_STR))
 			)->executeStatement();
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function findExAppEnabled(string $appId): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('enabled')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
-			);
-		$result = $qb->executeQuery();
-		return [
-			'success' => $result->rowCount() === 1,
-			'enabled' => $result->fetchOne(),
-		];
 	}
 
 	/**

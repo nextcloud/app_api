@@ -109,33 +109,32 @@ class ExAppUsersService {
 		try {
 			$result = $this->mapper->deleteByAppid($exApp->getAppid()) !== 0;
 			if ($result) {
-				$this->cache->remove('/ex_apps_users_' . $exApp->getAppid());
+				$this->cache->clear('/ex_apps_users_' . $exApp->getAppid());
 			}
 			return $result;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to remove ex_app_users for appid %s. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to remove ex_app_users for ExApp %s. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return false;
 		}
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function exAppUserExists(string $appId, string $userId): bool {
-		try {
-			$cacheKey = '/ex_apps_users_' . $appId . '_' . $userId;
-			$cached = $this->cache->get($cacheKey);
-			if ($cached !== null) {
-				$exAppUsers = array_map(function ($cashedEntry) {
-					return $cashedEntry instanceof ExAppUser ? $cashedEntry : new ExAppUser($cashedEntry);
-				}, $cached);
-				return !empty($exAppUsers) && $exAppUsers[0] instanceof ExAppUser;
-			}
+		$cacheKey = '/ex_apps_users_' . $appId . '_' . $userId;
+		$cached = $this->cache->get($cacheKey);
+		if ($cached !== null) {
+			$exAppUsers = array_map(function ($cashedEntry) {
+				return $cashedEntry instanceof ExAppUser ? $cashedEntry : new ExAppUser($cashedEntry);
+			}, $cached);
+			return !empty($exAppUsers) && $exAppUsers[0] instanceof ExAppUser;
+		}
 
-			$exAppUsers = $this->mapper->findByAppidUserid($appId, $userId);
-			if (!empty($exAppUsers) && $exAppUsers[0] instanceof ExAppUser) {
-				$this->cache->set($cacheKey, $exAppUsers, self::CACHE_TLL);
-				return true;
-			}
-		} catch (Exception) {
-			return false;
+		$exAppUsers = $this->mapper->findByAppidUserid($appId, $userId);
+		if (!empty($exAppUsers) && $exAppUsers[0] instanceof ExAppUser) {
+			$this->cache->set($cacheKey, $exAppUsers, self::CACHE_TLL);
+			return true;
 		}
 		return false;
 	}

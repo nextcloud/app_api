@@ -31,32 +31,25 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExAppConfig;
 use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
-use OCP\ICache;
-use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 /**
  * App configuration (appconfig_ex)
  */
 class ExAppConfigService {
-	public const CACHE_TTL = 60 * 60; // 1 hour
 	private LoggerInterface $logger;
-	private ICache $cache;
 	private ExAppConfigMapper $mapper;
 
 	public function __construct(
-		ICacheFactory $cacheFactory,
 		ExAppConfigMapper $mapper,
 		LoggerInterface $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/appconfig_ex');
 		$this->mapper = $mapper;
 		$this->logger = $logger;
 	}
@@ -70,21 +63,13 @@ class ExAppConfigService {
 	 * @return array|null
 	 */
 	public function getAppConfigValues(string $appId, array $configKeys): ?array {
-		$cacheKey = sprintf('/%s:%s', $appId, join(':', array_values($configKeys)));
-		$cached = $this->cache->get($cacheKey);
-		if ($cached !== null) {
-			return $cached;
-		}
-
 		try {
-			$exAppConfigs = array_map(function (ExAppConfig $exAppConfig) {
+			return array_map(function (ExAppConfig $exAppConfig) {
 				return [
 					'configkey' => $exAppConfig->getConfigkey(),
 					'configvalue' => $exAppConfig->getConfigvalue() ?? '',
 				];
 			}, $this->mapper->findByAppConfigKeys($appId, $configKeys));
-			$this->cache->set($cacheKey, $exAppConfigs, self::CACHE_TTL);
-			return $exAppConfigs;
 		} catch (Exception) {
 			return null;
 		}
@@ -110,8 +95,6 @@ class ExAppConfigService {
 					'configvalue' => $configValue ?? '',
 					'sensitive' => $sensitive,
 				]));
-				$cacheKey = sprintf('/%s:%s', $appId, $configKey);
-				$this->cache->set($cacheKey, $appConfigEx, self::CACHE_TTL);
 			} catch (\Exception $e) {
 				$this->logger->error('Error while inserting app_config_ex value: ' . $e->getMessage(), ['exception' => $e]);
 				return null;
@@ -164,15 +147,7 @@ class ExAppConfigService {
 	 */
 	public function getAppConfig(mixed $appId, mixed $configKey): ?ExAppConfig {
 		try {
-			$cacheKey = sprintf('/%s:%s', $appId, $configKey);
-			$cashed = $this->cache->get($cacheKey);
-			if ($cashed !== null) {
-				return $cashed instanceof ExAppConfig ? $cashed : new ExAppConfig($cashed);
-			}
-
-			$exAppConfig = $this->mapper->findByAppConfigKey($appId, $configKey);
-			$this->cache->set($cacheKey, $exAppConfig, self::CACHE_TTL);
-			return $exAppConfig;
+			return $this->mapper->findByAppConfigKey($appId, $configKey);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
@@ -185,12 +160,7 @@ class ExAppConfigService {
 	 */
 	public function updateAppConfigValue(ExAppConfig $exAppConfig): ?int {
 		try {
-			$result = $this->mapper->updateAppConfigValue($exAppConfig);
-			if ($result === 1) {
-				$cacheKey = sprintf('/%s:%s', $exAppConfig->getAppid(), $exAppConfig->getConfigkey());
-				$this->cache->set($cacheKey, $exAppConfig, self::CACHE_TTL);
-			}
-			return $result;
+			return $this->mapper->updateAppConfigValue($exAppConfig);
 		} catch (Exception) {
 			return null;
 		}

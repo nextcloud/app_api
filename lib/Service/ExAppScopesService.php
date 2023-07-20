@@ -44,7 +44,6 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class ExAppScopesService {
-	public const CACHE_TTL = 60 * 60; // 1 hour
 	private LoggerInterface $logger;
 	private ExAppScopeMapper $mapper;
 	private ICache $cache;
@@ -70,7 +69,7 @@ class ExAppScopesService {
 			}
 
 			$exAppScopes = $this->mapper->findByAppid($exApp->getAppid());
-			$this->cache->set($cacheKey, $exAppScopes, self::CACHE_TTL);
+			$this->cache->set($cacheKey, $exAppScopes);
 			return $exAppScopes;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to get all api scopes. Error: %s', $e->getMessage()), ['exception' => $e]);
@@ -78,20 +77,21 @@ class ExAppScopesService {
 		}
 	}
 
-	public function setExAppScopeGroup(ExApp $exApp, int $scopeGroup) {
+	public function setExAppScopeGroup(ExApp $exApp, int $scopeGroup): ?ExAppScope {
+		$exAppScope = $this->getByScope($exApp, $scopeGroup);
+		if ($exAppScope instanceof ExAppScope) {
+			return $exAppScope;
+		}
+
+		$exAppScope = new ExAppScope([
+			'appid' => $exApp->getAppid(),
+			'scope_group' => $scopeGroup,
+		]);
 		try {
-			return $this->mapper->findByAppidScope($exApp->getAppid(), $scopeGroup);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$exAppScope = new ExAppScope([
-				'appid' => $exApp->getAppid(),
-				'scope_group' => $scopeGroup,
-			]);
-			try {
-				return $this->mapper->insert($exAppScope);
-			} catch (\Exception $e) {
-				$this->logger->error(sprintf('Error while setting ExApp scope group: %s', $e->getMessage()));
-				return null;
-			}
+			return $this->mapper->insert($exAppScope);
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while setting ExApp scope group: %s', $e->getMessage()), ['exception' => $e]);
+			return null;
 		}
 	}
 
@@ -104,7 +104,7 @@ class ExAppScopesService {
 			}
 
 			$exAppScope = $this->mapper->findByAppidScope($exApp->getAppid(), $apiScope);
-			$this->cache->set($cacheKey, $exAppScope, self::CACHE_TTL);
+			$this->cache->set($cacheKey, $exAppScope);
 			return $exAppScope;
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
@@ -118,8 +118,11 @@ class ExAppScopesService {
 
 	public function removeExAppScopes(ExApp $exApp): bool {
 		try {
-			$result = $this->mapper->deleteByAppid($exApp->getAppid());
-			return $result > 0;
+			$result = $this->mapper->deleteByAppid($exApp->getAppid()) > 0;
+			if ($result) {
+				$this->cache->clear('/ex_app_scopes_' . $exApp->getAppid());
+			}
+			return $result;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to delete all ExApp %s scopes. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return false;

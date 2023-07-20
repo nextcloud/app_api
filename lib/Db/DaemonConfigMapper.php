@@ -59,25 +59,6 @@ class DaemonConfigMapper extends QBMapper {
 	}
 
 	/**
-	 * @param int $id
-	 *
-	 * @throws DoesNotExistException
-	 * @throws Exception
-	 * @throws MultipleObjectsReturnedException
-	 *
-	 * @return DaemonConfig
-	 */
-	public function findById(int $id): DaemonConfig {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
-		return $this->findEntity($qb);
-	}
-
-	/**
 	 * @param string $name
 	 *
 	 * @throws DoesNotExistException

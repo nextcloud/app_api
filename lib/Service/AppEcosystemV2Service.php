@@ -116,10 +116,11 @@ class AppEcosystemV2Service {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			$this->cache->set($cacheKey, $exApp);
 			return $exApp;
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->debug(sprintf('ExApp %s not found.', $appId), ['exception' => $e]);
-			return null;
+		} catch (DoesNotExistException) {
+		} catch (MultipleObjectsReturnedException|Exception $e) {
+			$this->logger->debug(sprintf('Failed to get ExApp %s. Error: %s', $appId, $e->getMessage()), ['exception' => $e]);
 		}
+		return null;
 	}
 
 	/**
@@ -131,54 +132,27 @@ class AppEcosystemV2Service {
 	 * @return ExApp|null
 	 */
 	public function registerExApp(string $appId, array $appData): ?ExApp {
+		$exApp = new ExApp([
+			'appid' => $appId,
+			'version' => $appData['version'],
+			'name' => $appData['name'],
+			'daemon_config_name' => $appData['daemon_config_name'],
+			'protocol' => $appData['protocol'],
+			'host' => $appData['host'],
+			'port' => $appData['port'],
+			'secret' => $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
+			'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
+			'created_time' => time(),
+			'last_check_time' => time(),
+		]);
 		try {
-			$exApp = $this->exAppMapper->findByAppId($appId);
-			$exApp->setVersion($appData['version']);
-			$exApp->setName($appData['name']);
-			$exApp->setDaemonConfigName($appData['daemon_config_name']);
-			$exApp->setProtocol($appData['protocol']);
-			$exApp->setHost($appData['host']);
-			$exApp->setPort($appData['port']);
-			if ($appData['secret'] !== '') {
-				$exApp->setSecret($appData['secret']);
-			} else {
-				$secret = $this->random->generate(128);
-				$exApp->setSecret($secret);
-			}
-			$exApp->setStatus(json_encode(['active' => true])); // TODO: Add status request to ExApp
-			$exApp->setLastCheckTime(time());
-			try {
-				$cacheKey = '/exApp_' . $appId;
-				$exApp = $this->exAppMapper->update($exApp);
-				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
-				return $exApp;
-			} catch (Exception $e) {
-				$this->logger->error(sprintf('Error while updating already registered ExApp: %s', $e->getMessage()));
-				return null;
-			}
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$exApp = new ExApp([
-				'appid' => $appId,
-				'version' => $appData['version'],
-				'name' => $appData['name'],
-				'daemon_config_name' => $appData['daemon_config_name'],
-				'protocol' => $appData['protocol'],
-				'host' => $appData['host'],
-				'port' => $appData['port'],
-				'secret' => $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
-				'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
-				'created_time' => time(),
-				'last_check_time' => time(),
-			]);
-			try {
-				$cacheKey = '/exApp_' . $appId;
-				$exApp = $this->exAppMapper->insert($exApp);
-				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
-				return $exApp;
-			} catch (Exception $e) {
-				$this->logger->error(sprintf('Error while registering ExApp: %s', $e->getMessage()));
-				return null;
-			}
+			$cacheKey = '/exApp_' . $appId;
+			$exApp = $this->exAppMapper->insert($exApp);
+			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+			return $exApp;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appId, $e->getMessage()));
+			return null;
 		}
 	}
 
@@ -200,7 +174,7 @@ class AppEcosystemV2Service {
 				$this->logger->error(sprintf('Error while unregistering ExApp: %s', $appId));
 				return null;
 			}
-			//			TODO: Remove ?app configs, ?app preferences
+			// TODO: Do we need to remove app_config_ex, app_preferences_ex too
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
 			$this->cache->remove('/exApp_' . $appId);
@@ -302,18 +276,18 @@ class AppEcosystemV2Service {
 	 * @return array|null
 	 */
 	public function getAppStatus(string $appId): ?array {
-		try {
-			$exApp = $this->exAppMapper->findByAppId($appId);
-			$response = $this->requestToExApp(null, '', $exApp, '/status', 'GET');
-			if ($response instanceof IResponse && $response->getStatusCode() === 200) {
-				$status = json_decode($response->getBody(), true);
-				$exApp->setStatus($status);
-				$this->updateExAppLastCheckTime($exApp);
-			}
-			return json_decode($exApp->getStatus(), true);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+		$exApp = $this->getExApp($appId);
+		if ($exApp === null) {
 			return null;
 		}
+
+		$response = $this->requestToExApp(null, '', $exApp, '/status', 'GET');
+		if ($response instanceof IResponse && $response->getStatusCode() === 200) {
+			$status = json_decode($response->getBody(), true);
+			$exApp->setStatus($status);
+			$this->updateExAppLastCheckTime($exApp);
+		}
+		return json_decode($exApp->getStatus(), true);
 	}
 
 	/**
@@ -577,9 +551,13 @@ class AppEcosystemV2Service {
 					$this->logger->error(sprintf('ExApp %s not passed scope group check %s', $exApp->getAppid(), $path));
 					return false;
 				}
-				if (!$this->exAppUsersService->exAppUserExists($exApp->getAppid(), $userId)) {
-					$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));
-					return false;
+				try {
+					if (!$this->exAppUsersService->exAppUserExists($exApp->getAppid(), $userId)) {
+						$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));
+						return false;
+					}
+				} catch (Exception $e) {
+					$this->logger->error(sprintf('Failed to get ExApp %s user %s. Error: %s', $exApp->getAppid(), $userId, $e->getMessage()), ['exception' => $e]);
 				}
 			}
 			return $this->finalizeRequestToNC($userId);

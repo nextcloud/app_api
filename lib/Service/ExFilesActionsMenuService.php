@@ -73,7 +73,7 @@ class ExFilesActionsMenuService {
 	}
 
 	/**
-	 * Register file action menu from ex app
+	 * Register file action menu from ExApp
 	 *
 	 * @param string $appId
 	 * @param array $params
@@ -86,79 +86,61 @@ class ExFilesActionsMenuService {
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$fileActionMenu = null;
 		}
-		// If exists - update, else - create
-		if ($fileActionMenu instanceof ExFilesActionsMenu) {
-			$fileActionMenu->setAppid($appId);
-			$fileActionMenu->setName($params['name']);
-			$fileActionMenu->setDisplayName($params['display_name']);
-			$fileActionMenu->setMime($params['mime']);
-			$fileActionMenu->setPermissions($params['permissions']);
-			$fileActionMenu->setOrder($params['order']);
-			$fileActionMenu->setIcon($params['icon']);
-			$fileActionMenu->setIconClass($params['icon_class']);
-			$fileActionMenu->setActionHandler($params['action_handler']);
-			try {
-				if ($this->mapper->updateFileActionMenu($fileActionMenu) !== 1) {
-					$this->logger->error(sprintf('Failed to update file action menu %s for app: %s', $params['name'], $appId));
-					return null;
-				}
-			} catch (Exception) {
-				return null;
+		try {
+			$newFileActionMenu = new ExFilesActionsMenu([
+				'appid' => $appId,
+				'name' => $params['name'],
+				'display_name' => $params['display_name'],
+				'mime' => $params['mime'],
+				'permissions' => $params['permissions'],
+				'order' => $params['order'],
+				'icon' => $params['icon'],
+				'icon_class' => $params['icon_class'],
+				'action_handler' => $params['action_handler'],
+			]);
+			if ($fileActionMenu !== null) {
+				$newFileActionMenu->setId($fileActionMenu->getId());
 			}
-		} else {
-			try {
-				$fileActionMenu = $this->mapper->insert(new ExFilesActionsMenu([
-					'appid' => $appId,
-					'name' => $params['name'],
-					'display_name' => $params['display_name'],
-					'mime' => $params['mime'],
-					'permissions' => $params['permissions'],
-					'order' => $params['order'],
-					'icon' => $params['icon'],
-					'icon_class' => $params['icon_class'],
-					'action_handler' => $params['action_handler'],
-				]));
-			} catch (Exception) {
-				$this->logger->error(sprintf('Failed to insert file action menu %s for app: %s', $params['name'], $appId));
-				return null;
-			}
+			$fileActionMenu = $this->mapper->insertOrUpdate($newFileActionMenu);
+			$cacheKey = '/ex_files_actions_menu_' . $appId . '_' . $params['name'];
+			$this->cache->remove('/ex_files_actions_menus');
+			$this->cache->set($cacheKey, $fileActionMenu);
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to register ExApp %s FileActionMenu %s. Error: %s', $appId, $params['name'], $e->getMessage()), ['exception' => $e]);
+			return null;
 		}
 		return $fileActionMenu;
 	}
 
 	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName): ?ExFilesActionsMenu {
 		try {
-			$fileActionMenu = $this->mapper->findByName($fileActionMenuName);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$fileActionMenu = null;
+			$fileActionMenu = $this->getExAppFileAction($appId, $fileActionMenuName);
+			$this->mapper->delete($fileActionMenu);
+			$this->cache->remove('/ex_files_actions_menu_' . $appId . '_' . $fileActionMenuName);
+			return $fileActionMenu;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to unregister ExApp %s FileActionMenu %s. Error: %s', $appId, $fileActionMenuName, $e->getMessage()), ['exception' => $e]);
+			return null;
 		}
-		if ($fileActionMenu !== null) {
-			try {
-				if ($this->mapper->deleteByAppidName($fileActionMenu) !== 1) {
-					$this->logger->error('Failed to delete file action menu ' . $fileActionMenuName . ' for app: ' . $appId);
-					return null;
-				}
-			} catch (Exception) {
-				$this->logger->error('Failed to delete file action menu ' . $fileActionMenuName . ' for app: ' . $appId);
-				return null;
-			}
-		}
-		return $fileActionMenu;
 	}
 
 	/**
+	 * Get list of registered file actions (only for enabled ExApps)
+	 *
 	 * @return ExFilesActionsMenu[]|null
 	 */
 	public function getRegisteredFileActions(): ?array {
-		$cacheKey = 'ex_files_actions_menus';
-		//		$cache = $this->cache->get($cacheKey);
-		//		if ($cache !== null) {
-		//			return $cache;
-		//		}
-
 		try {
+			$cacheKey = '/ex_files_actions_menus';
+			$cached = $this->cache->get($cacheKey);
+			if ($cached !== null) {
+				return array_map(function ($cacheEntry) {
+					return $cacheEntry instanceof ExFilesActionsMenu ? $cacheEntry : new ExFilesActionsMenu($cacheEntry);
+				}, $cached);
+			}
+
 			$fileActions = $this->mapper->findAllEnabled();
-			$this->cache->set($cacheKey, $fileActions, Application::CACHE_TTL);
+			$this->cache->set($cacheKey, $fileActions);
 			return $fileActions;
 		} catch (Exception) {
 			return null;
@@ -166,28 +148,24 @@ class ExFilesActionsMenuService {
 	}
 
 	public function getExAppFileAction(string $appId, string $fileActionName): ?ExFilesActionsMenu {
-		$cacheKey = 'ex_files_actions_menu_' . $appId . '_' . $fileActionName;
-		//		$cache = $this->cache->get($cacheKey);
-		//		if ($cache !== null) {
-		//			return $cache;
-		//		}
+		$cacheKey = '/ex_files_actions_menu_' . $appId . '_' . $fileActionName;
+		$cache = $this->cache->get($cacheKey);
+		if ($cache !== null) {
+			return $cache;
+		}
 
 		try {
-			$fileAction = $this->mapper->findByAppIdName($appId, $fileActionName);
-			$this->cache->set($cacheKey, $fileAction, Application::CACHE_TTL);
+			$fileAction = $this->mapper->findByAppidName($appId, $fileActionName);
+			$this->cache->set($cacheKey, $fileAction);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error(sprintf('Failed to get file action %s for app: %s. Error: %s', $fileActionName, $appId, $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('ExApp %s FileAction %s not found. Error: %s', $appId, $fileActionName, $e->getMessage()), ['exception' => $e]);
 			$fileAction = null;
 		}
 		return $fileAction;
 	}
 
 	public function handleFileAction(string $userId, string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
-		try {
-			$exFileAction = $this->mapper->findByName($fileActionName);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$exFileAction = null;
-		}
+		$exFileAction = $this->getExAppFileAction($appId, $fileActionName);
 		if ($exFileAction !== null) {
 			$handler = $exFileAction->getActionHandler(); // route on ex app
 			$params = [
@@ -206,12 +184,11 @@ class ExFilesActionsMenuService {
 					return $result->getStatusCode() === 200;
 				}
 				if (isset($result['error'])) {
-					$this->logger->error(sprintf('Failed to handle file action %s for EXApp: %s with error: %s', $fileActionName, $appId, $result['error']));
+					$this->logger->error(sprintf('Failed to handle ExApp %s FileAction %s. Error: %s', $appId, $fileActionName, $result['error']));
 					return false;
 				}
 			}
 		}
-		$this->logger->error(sprintf('Failed to find file action menu %s for ExApp: %s', $fileActionName, $appId));
 		return false;
 	}
 
@@ -239,7 +216,7 @@ class ExFilesActionsMenuService {
 				];
 			}
 		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Failed to load file action icon %s for ExApp: %s with error: %s', $exFileActionName, $appId, $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to load ExApp %s FileAction icon %s. Error: %s', $appId, $exFileActionName, $e->getMessage()), ['exception' => $e]);
 			return null;
 		}
 		return null;

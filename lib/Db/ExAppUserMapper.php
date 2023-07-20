@@ -47,18 +47,6 @@ class ExAppUserMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function findAll(int $limit = null, int $offset = null): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
-		return $this->findEntities($qb);
-	}
-
-	/**
-	 * @throws Exception
-	 */
 	public function findByAppid(string $appId): array {
 		$qb = $this->db->getQueryBuilder();
 		return $this->findEntities($qb->select('*')

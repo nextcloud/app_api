@@ -43,7 +43,6 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class ExAppApiScopeService {
-	public const CACHE_TTL = 60 * 60 * 24 * 7; // 1 week
 	private LoggerInterface $logger;
 	private ExAppApiScopeMapper $mapper;
 	private ICache $cache;
@@ -69,10 +68,10 @@ class ExAppApiScopeService {
 			}
 
 			$apiScopes = $this->mapper->findAll();
-			$this->cache->set($cacheKey, $apiScopes, self::CACHE_TTL);
+			$this->cache->set($cacheKey, $apiScopes);
 			return $apiScopes;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to get all api scopes. Error: %s', $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to get all ApiScopes. Error: %s', $e->getMessage()), ['exception' => $e]);
 			return [];
 		}
 	}
@@ -88,7 +87,7 @@ class ExAppApiScopeService {
 			$apiScopes = $this->getExAppApiScopes();
 			foreach ($apiScopes as $apiScope) {
 				if (str_starts_with($apiRoute, $apiScope->getApiRoute())) {
-					$this->cache->set($cacheKey, $apiScope, self::CACHE_TTL);
+					$this->cache->set($cacheKey, $apiScope);
 					return $apiScope;
 				}
 			}
@@ -133,11 +132,13 @@ class ExAppApiScopeService {
 				if (in_array($apiScope['api_route'], array_keys($registeredApiScopesRoutes))) {
 					$apiScope['id'] = $registeredApiScopesRoutes[$apiScope['api_route']];
 				}
-				$this->mapper->insertOrUpdate(new ExAppApiScope($apiScope));
+				$registeredApiScope = $this->mapper->insertOrUpdate(new ExAppApiScope($apiScope));
+				$cacheKey = '/api_scope_' . $apiScope['api_route'];
+				$this->cache->set($cacheKey, $registeredApiScope);
 			}
 			return true;
 		} catch (Exception $e) {
-			$this->logger->error('Failed to fill init API scopes: ' . $e->getMessage(), ['exception' => $e]);
+			$this->logger->error('Failed to fill init ApiScopes: ' . $e->getMessage(), ['exception' => $e]);
 			return false;
 		}
 	}

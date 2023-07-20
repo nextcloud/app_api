@@ -47,19 +47,6 @@ class ExAppPreferenceMapper extends QBMapper {
 	}
 
 	/**
-	 * @throws Exception
-	 * @return ExAppPreference[]
-	 */
-	public function findAll(int $limit = null, int $offset = null): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
-		return $this->findEntities($qb);
-	}
-
-	/**
 	 * @param string $userId
 	 * @param string $appId
 	 * @param string $configKey
