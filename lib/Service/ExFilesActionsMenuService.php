@@ -114,6 +114,9 @@ class ExFilesActionsMenuService {
 	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName): ?ExFilesActionsMenu {
 		try {
 			$fileActionMenu = $this->getExAppFileAction($appId, $fileActionMenuName);
+			if ($fileActionMenu === null) {
+				return null;
+			}
 			$this->mapper->delete($fileActionMenu);
 			$this->cache->remove('/ex_files_actions_menu_' . $appId . '_' . $fileActionMenuName);
 			return $fileActionMenu;
