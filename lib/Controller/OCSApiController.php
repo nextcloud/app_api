@@ -228,10 +228,7 @@ class OCSApiController extends OCSController {
 				'error' => $this->l->t('FileActionMenu not found.'),
 			], Http::STATUS_NOT_FOUND), $format);
 		}
-		return $this->buildResponse(new DataResponse([
-			'success' => $unregisteredFileActionMenu !== null,
-			'unregisteredFileActionMenu' => $unregisteredFileActionMenu,
-		], Http::STATUS_OK), $format);
+		return $this->buildResponse(new DataResponse($unregisteredFileActionMenu, Http::STATUS_OK), $format);
 	}
 
 	/**
