@@ -91,7 +91,7 @@ class Deploy extends Command {
 			return 2;
 		}
 
-		$infoXml = simplexml_load_file($pathToInfoXml);
+		$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
 		if ($infoXml === false) {
 			$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
 			return 2;
