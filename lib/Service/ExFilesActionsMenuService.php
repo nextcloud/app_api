@@ -36,7 +36,6 @@ use OCA\AppEcosystemV2\Db\ExFilesActionsMenu;
 use OCA\AppEcosystemV2\Db\ExFilesActionsMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 
-use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\DB\Exception;
