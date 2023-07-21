@@ -76,7 +76,7 @@ class ExAppConfigService {
 	}
 
 	/**
-	 * Set app_config_ex value
+	 * Set appconfig_ex value
 	 *
 	 * @param string $appId
 	 * @param string $configKey
@@ -95,15 +95,15 @@ class ExAppConfigService {
 					'configvalue' => $configValue ?? '',
 					'sensitive' => $sensitive,
 				]));
-			} catch (\Exception $e) {
-				$this->logger->error('Error while inserting app_config_ex value: ' . $e->getMessage(), ['exception' => $e]);
+			} catch (Exception $e) {
+				$this->logger->error(sprintf('Failed to insert appconfig_ex value. Error: %s', $e->getMessage()), ['exception' => $e]);
 				return null;
 			}
 		} else {
 			$appConfigEx->setConfigvalue($configValue);
 			$appConfigEx->setSensitive($sensitive);
 			if ($this->updateAppConfigValue($appConfigEx) !== 1) {
-				$this->logger->error('Error while updating app_config_ex value');
+				$this->logger->error(sprintf('Error while updating appconfig_ex %s value.', $configKey));
 				return null;
 			}
 		}

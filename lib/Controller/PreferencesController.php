@@ -106,7 +106,7 @@ class PreferencesController extends OCSController {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->getUserConfigValues($userId, $appId, $configKeys);
-		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		return $this->buildResponse(new DataResponse($result, !empty($result) ? Http::STATUS_OK : Http::STATUS_NOT_FOUND), $format);
 	}
 
 	/**
@@ -126,9 +126,9 @@ class PreferencesController extends OCSController {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->deleteUserConfigValues($configKeys, $userId, $appId);
-		if ($result !== -1) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		if ($result === -1) {
+			throw new OCSBadRequestException('Failed to delete user config values');
 		}
-		throw new OCSBadRequestException('Failed to delete user config values');
+		return $this->buildResponse(new DataResponse($result, $result !== 0 ? Http::STATUS_OK : Http::STATUS_NOT_FOUND), $format);
 	}
 }

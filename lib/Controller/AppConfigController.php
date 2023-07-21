@@ -100,7 +100,7 @@ class AppConfigController extends OCSController {
 	public function getAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->getAppConfigValues($appId, $configKeys);
-		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		return $this->buildResponse(new DataResponse($result, !empty($result) ? Http::STATUS_OK : Http::STATUS_NOT_FOUND), $format);
 	}
 
 	/**
@@ -119,9 +119,9 @@ class AppConfigController extends OCSController {
 	public function deleteAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->deleteAppConfigValues($configKeys, $appId);
-		if ($result !== -1) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		if ($result === -1) {
+			throw new OCSBadRequestException('Error deleting app config values');
 		}
-		throw new OCSBadRequestException('Error deleting app config values');
+		return $this->buildResponse(new DataResponse($result, $result !== 0 ? Http::STATUS_OK : Http::STATUS_NOT_FOUND), $format);
 	}
 }

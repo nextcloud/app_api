@@ -223,6 +223,11 @@ class OCSApiController extends OCSController {
 	public function unregisterFileActionMenu(string $fileActionMenuName, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$unregisteredFileActionMenu = $this->exFilesActionsMenuService->unregisterFileActionMenu($appId, $fileActionMenuName);
+		if ($unregisteredFileActionMenu === null) {
+			return $this->buildResponse(new DataResponse([
+				'error' => $this->l->t('FileActionMenu not found.'),
+			], Http::STATUS_NOT_FOUND), $format);
+		}
 		return $this->buildResponse(new DataResponse([
 			'success' => $unregisteredFileActionMenu !== null,
 			'unregisteredFileActionMenu' => $unregisteredFileActionMenu,
