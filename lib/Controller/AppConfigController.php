@@ -42,6 +42,7 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCS\OCSBadRequestException;
+use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
@@ -111,6 +112,7 @@ class AppConfigController extends OCSController {
 	 * @param string $format
 	 *
 	 * @throws OCSBadRequestException
+	 * @throws OCSNotFoundException
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
@@ -122,6 +124,9 @@ class AppConfigController extends OCSController {
 		if ($result === -1) {
 			throw new OCSBadRequestException('Error deleting app config values');
 		}
-		return $this->buildResponse(new DataResponse($result, $result !== 0 ? Http::STATUS_OK : Http::STATUS_NOT_FOUND), $format);
+		if ($result === 0) {
+			throw new OCSNotFoundException('No appconfig_ex values deleted');
+		}
+		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 	}
 }

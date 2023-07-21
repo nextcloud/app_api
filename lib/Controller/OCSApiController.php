@@ -45,6 +45,7 @@ use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCS\OCSBadRequestException;
+use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
 use OCP\IL10N;
 use OCP\IRequest;
@@ -215,6 +216,7 @@ class OCSApiController extends OCSController {
 	 * @param string $fileActionMenuName
 	 * @param string $format
 	 *
+	 * @throws OCSNotFoundException
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
@@ -224,9 +226,7 @@ class OCSApiController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$unregisteredFileActionMenu = $this->exFilesActionsMenuService->unregisterFileActionMenu($appId, $fileActionMenuName);
 		if ($unregisteredFileActionMenu === null) {
-			return $this->buildResponse(new DataResponse([
-				'error' => $this->l->t('FileActionMenu not found.'),
-			], Http::STATUS_NOT_FOUND), $format);
+			throw new OCSNotFoundException('FileActionMenu not found');
 		}
 		return $this->buildResponse(new DataResponse($unregisteredFileActionMenu, Http::STATUS_OK), $format);
 	}
