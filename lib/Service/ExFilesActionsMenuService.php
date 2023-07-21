@@ -78,9 +78,9 @@ class ExFilesActionsMenuService {
 	 * @param string $appId
 	 * @param array $params
 	 *
-	 * @return Entity|null
+	 * @return ExFilesActionsMenu|null
 	 */
-	public function registerFileActionMenu(string $appId, array $params): ?Entity {
+	public function registerFileActionMenu(string $appId, array $params): ?ExFilesActionsMenu {
 		try {
 			$fileActionMenu = $this->mapper->findByName($params['name']);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
@@ -151,7 +151,7 @@ class ExFilesActionsMenuService {
 		$cacheKey = '/ex_files_actions_menu_' . $appId . '_' . $fileActionName;
 		$cache = $this->cache->get($cacheKey);
 		if ($cache !== null) {
-			return $cache;
+			return $cache instanceof ExFilesActionsMenu ? $cache : new ExFilesActionsMenu($cache);
 		}
 
 		try {
