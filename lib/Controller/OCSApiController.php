@@ -214,21 +214,20 @@ class OCSApiController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param string $fileActionMenuName
-	 * @param string $format
 	 *
 	 * @throws OCSNotFoundException
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function unregisterFileActionMenu(string $fileActionMenuName, string $format = 'json'): Response {
+	public function unregisterFileActionMenu(string $fileActionMenuName): DataResponse {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$unregisteredFileActionMenu = $this->exFilesActionsMenuService->unregisterFileActionMenu($appId, $fileActionMenuName);
 		if ($unregisteredFileActionMenu === null) {
 			throw new OCSNotFoundException('FileActionMenu not found');
 		}
-		return $this->buildResponse(new DataResponse($unregisteredFileActionMenu, Http::STATUS_OK), $format);
+		return new DataResponse();
 	}
 
 	/**
