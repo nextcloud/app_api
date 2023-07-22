@@ -32,13 +32,15 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\DB\Exception;
-use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
+/**
+ * @template-extends QBMapper<DaemonConfig>
+ */
 class DaemonConfigMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_apps_daemons');
@@ -54,25 +56,6 @@ class DaemonConfigMapper extends QBMapper {
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 		return $this->findEntities($qb);
-	}
-
-	/**
-	 * @param int $id
-	 *
-	 * @throws DoesNotExistException
-	 * @throws Exception
-	 * @throws MultipleObjectsReturnedException
-	 *
-	 * @return DaemonConfig
-	 */
-	public function findById(int $id): DaemonConfig {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
-		return $this->findEntity($qb);
 	}
 
 	/**

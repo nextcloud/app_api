@@ -36,24 +36,24 @@ return [
 	],
 	'ocs' => [
 		// Logging
-		['name' => 'ocsApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
+		['name' => 'OCSApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
 
 		// ExAppUsers
-		['name' => 'ocsApi#getExAppUsers', 'url' => '/api/v1/users', 'verb' => 'GET'],
+		['name' => 'OCSApi#getExAppUsers', 'url' => '/api/v1/users', 'verb' => 'GET'],
 
 		// ExApps
 		['name' => 'exApp#getExApps', 'url' => '/api/v1/ex-app/all', 'verb' => 'GET'],
 
 		// Ex Apps registration
-		['name' => 'ocsApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
-		['name' => 'ocsApi#unregisterExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
-		['name' => 'ocsApi#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
+		['name' => 'OCSApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
+		['name' => 'OCSApi#unregisterExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
+		['name' => 'OCSApi#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
 
 		// File Actions Menu
-		['name' => 'ocsApi#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
-		['name' => 'ocsApi#unregisterFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'DELETE'],
-		['name' => 'ocsApi#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
-		['name' => 'ocsApi#loadFileActionIcon', 'url' => '/api/v1/files/action/icon', 'verb' => 'GET'],
+		['name' => 'OCSApi#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
+		['name' => 'OCSApi#unregisterFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'DELETE'],
+		['name' => 'OCSApi#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
+		['name' => 'OCSApi#loadFileActionIcon', 'url' => '/api/v1/files/action/icon', 'verb' => 'GET'],
 
 		// appconfig_ex (app configuration)
 		['name' => 'appConfig#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
@@ -66,7 +66,7 @@ return [
 		['name' => 'preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
 
 		// api_scopes
-		['name' => 'ocsApi#registerApiScope', 'url' => '/api/v1/ex-app/scopes', 'verb' => 'POST'],
+		['name' => 'OCSApi#registerApiScope', 'url' => '/api/v1/ex-app/scopes', 'verb' => 'POST'],
 
 //	TODO: Implement Notifications, SearchProvider, BackgroundJob, SettingsPage, SettingsSection, EventListener, DashboardWidget, Capabilities
 

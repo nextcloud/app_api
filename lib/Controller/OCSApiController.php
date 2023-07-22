@@ -31,27 +31,25 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
+
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
-use OCP\EventDispatcher\IEventDispatcher;
-use Psr\Log\LoggerInterface;
-
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\OCSController;
-
-use OCP\IL10N;
-use OCP\IRequest;
 use OCP\AppFramework\Http\DataDisplayResponse;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCS\OCSBadRequestException;
-
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
+use OCP\AppFramework\OCS\OCSNotFoundException;
+use OCP\AppFramework\OCSController;
+use OCP\IL10N;
+use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 class OCSApiController extends OCSController {
 	private LoggerInterface $logger;
@@ -136,7 +134,7 @@ class OCSApiController extends OCSController {
 	 */
 	#[NoCSRFRequired]
 	public function registerExternalApp(string $appId, array $appData, string $format = 'json'): Response {
-//		TODO: Sync logic with OCC command
+		//		TODO: Sync logic with OCC command
 		$result = $this->service->registerExApp($appId, $appData);
 		return $this->buildResponse(new DataResponse([
 			'success' => $result !== null,
@@ -154,7 +152,7 @@ class OCSApiController extends OCSController {
 	 */
 	#[NoCSRFRequired]
 	public function unregisterExternalApp(string $appId, string $format = 'json'): Response {
-//		TODO: Sync logic with OCC command
+		//		TODO: Sync logic with OCC command
 		$deletedExApp = $this->service->unregisterExApp($appId);
 		if ($deletedExApp === null) {
 			return $this->buildResponse(new DataResponse([
@@ -184,7 +182,7 @@ class OCSApiController extends OCSController {
 		return $this->buildResponse(new DataResponse([
 			'success' => $appStatus !== null,
 			'appStatus' => [
-				'appId'=> $appId,
+				'appId' => $appId,
 				'status' => $appStatus,
 			],
 		], Http::STATUS_OK), $format);
@@ -216,20 +214,20 @@ class OCSApiController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param string $fileActionMenuName
-	 * @param string $format
 	 *
-	 * @return Response
+	 * @throws OCSNotFoundException
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function unregisterFileActionMenu(string $fileActionMenuName, string $format = 'json'): Response {
+	public function unregisterFileActionMenu(string $fileActionMenuName): DataResponse {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$unregisteredFileActionMenu = $this->exFilesActionsMenuService->unregisterFileActionMenu($appId, $fileActionMenuName);
-		return $this->buildResponse(new DataResponse([
-			'success' => $unregisteredFileActionMenu !== null,
-			'unregisteredFileActionMenu' => $unregisteredFileActionMenu,
-		], Http::STATUS_OK), $format);
+		if ($unregisteredFileActionMenu === null) {
+			throw new OCSNotFoundException('FileActionMenu not found');
+		}
+		return new DataResponse();
 	}
 
 	/**

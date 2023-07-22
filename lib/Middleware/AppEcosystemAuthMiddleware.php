@@ -31,21 +31,20 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Middleware;
 
-use ReflectionMethod;
-
-use OCP\AppFramework\Controller;
-use OCP\AppFramework\Middleware;
-use OCP\AppFramework\Utility\IControllerMethodReflector;
-
 use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Exceptions\AEAuthNotValidException;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+
+use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\Middleware;
+use OCP\AppFramework\Utility\IControllerMethodReflector;
 use OCP\IL10N;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
+use ReflectionMethod;
 
 class AppEcosystemAuthMiddleware extends Middleware {
 	private IControllerMethodReflector $reflector;

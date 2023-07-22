@@ -32,11 +32,14 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Listener;
 
 use OCA\AppEcosystemV2\AEAuthBackend;
+
+use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 
-use OCA\DAV\Events\SabrePluginAuthInitEvent;
-
+/**
+ * @template-extends IEventListener<SabrePluginAuthInitListener>
+ */
 class SabrePluginAuthInitListener implements IEventListener {
 	private AEAuthBackend $aeAuth;
 

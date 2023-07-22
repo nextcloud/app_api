@@ -31,31 +31,25 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
-use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\DB\Exception;
-use OCP\ICache;
-use OCP\ICacheFactory;
-use Psr\Log\LoggerInterface;
-
-use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExAppConfig;
 use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
+
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\DB\Exception;
+use Psr\Log\LoggerInterface;
 
 /**
  * App configuration (appconfig_ex)
  */
 class ExAppConfigService {
 	private LoggerInterface $logger;
-	private ICache $cache;
 	private ExAppConfigMapper $mapper;
 
 	public function __construct(
-		ICacheFactory $cacheFactory,
 		ExAppConfigMapper $mapper,
 		LoggerInterface $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/appconfig_ex');
 		$this->mapper = $mapper;
 		$this->logger = $logger;
 	}
@@ -69,28 +63,20 @@ class ExAppConfigService {
 	 * @return array|null
 	 */
 	public function getAppConfigValues(string $appId, array $configKeys): ?array {
-		$cacheKey = $appId . ':' . json_encode($configKeys);
-//		$cached = $this->cache->get($cacheKey);
-//		if ($value !== null) {
-//			return $cached;
-//		}
-
 		try {
-			$exAppConfigs = array_map(function (ExAppConfig $exAppConfig) {
+			return array_map(function (ExAppConfig $exAppConfig) {
 				return [
 					'configkey' => $exAppConfig->getConfigkey(),
 					'configvalue' => $exAppConfig->getConfigvalue() ?? '',
 				];
 			}, $this->mapper->findByAppConfigKeys($appId, $configKeys));
-			$this->cache->set($cacheKey, $exAppConfigs, Application::CACHE_TTL);
-			return $exAppConfigs;
 		} catch (Exception) {
 			return null;
 		}
 	}
 
 	/**
-	 * Set app_config_ex value
+	 * Set appconfig_ex value
 	 *
 	 * @param string $appId
 	 * @param string $configKey
@@ -100,11 +86,7 @@ class ExAppConfigService {
 	 * @return ExAppConfig|null
 	 */
 	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, int $sensitive = 0): ?ExAppConfig {
-		try {
-			$appConfigEx = $this->mapper->findByAppConfigKey($appId, $configKey);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$appConfigEx = null;
-		}
+		$appConfigEx = $this->getAppConfig($appId, $configKey);
 		if ($appConfigEx === null) {
 			try {
 				$appConfigEx = $this->mapper->insert(new ExAppConfig([
@@ -113,19 +95,15 @@ class ExAppConfigService {
 					'configvalue' => $configValue ?? '',
 					'sensitive' => $sensitive,
 				]));
-			} catch (\Exception $e) {
-				$this->logger->error('Error while inserting app_config_ex value: ' . $e->getMessage());
+			} catch (Exception $e) {
+				$this->logger->error(sprintf('Failed to insert appconfig_ex value. Error: %s', $e->getMessage()), ['exception' => $e]);
 				return null;
 			}
 		} else {
 			$appConfigEx->setConfigvalue($configValue);
 			$appConfigEx->setSensitive($sensitive);
-			try {
-				if ($this->updateAppConfigValue($appConfigEx) !== 1) {
-					$this->logger->error('Error while updating app_config_ex value');
-					return null;
-				}
-			} catch (Exception) {
+			if ($this->updateAppConfigValue($appConfigEx) !== 1) {
+				$this->logger->error(sprintf('Error while updating appconfig_ex %s value.', $configKey));
 				return null;
 			}
 		}

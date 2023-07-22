@@ -33,26 +33,17 @@ namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
-use OCP\AppFramework\Db\QBMapper;
 
+/**
+ * @template-extends QBMapper<ExAppScope>
+ */
 class ExAppScopeMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_apps_scopes');
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function findAll(int $limit = null, int $offset = null): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
-		return $this->findEntities($qb);
 	}
 
 	/**
@@ -85,5 +76,18 @@ class ExAppScopeMapper extends QBMapper {
 			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId), IQueryBuilder::PARAM_STR))
 			->andWhere($qb->expr()->eq('scope_group', $qb->createNamedParameter($scopeGroup), IQueryBuilder::PARAM_INT))
 		);
+	}
+
+	/**
+	 * @param string $appId
+	 *
+	 * @throws Exception
+	 * @return int
+	 */
+	public function deleteByAppid(string $appId): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId), IQueryBuilder::PARAM_STR))
+			->executeStatement();
 	}
 }

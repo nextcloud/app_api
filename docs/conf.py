@@ -15,7 +15,9 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_inline_tabs",
     "sphinx_issues",
-    "sphinx_rtd_theme"]
+    "sphinx_rtd_theme",
+	"sphinxcontrib.mermaid",
+]
 
 # General information about the project.
 project = "AppEcosystemV2"

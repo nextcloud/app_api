@@ -31,18 +31,19 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Db\ExAppPreference;
+use OCA\AppEcosystemV2\Service\ExAppPreferenceService;
+
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
-use OCP\AppFramework\OCS\OCSBadRequestException;
-use OCP\AppFramework\OCSController;
-
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\ExAppPreferenceService;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\OCS\OCSBadRequestException;
+use OCP\AppFramework\OCS\OCSNotFoundException;
+use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 use OCP\IUserSession;
 
@@ -106,7 +107,7 @@ class PreferencesController extends OCSController {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->getUserConfigValues($userId, $appId, $configKeys);
-		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		return $this->buildResponse(new DataResponse($result, !empty($result) ? Http::STATUS_OK : Http::STATUS_NOT_FOUND), $format);
 	}
 
 	/**
@@ -126,9 +127,12 @@ class PreferencesController extends OCSController {
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->deleteUserConfigValues($configKeys, $userId, $appId);
-		if ($result !== -1) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		if ($result === -1) {
+			throw new OCSBadRequestException('Failed to delete user config values');
 		}
-		throw new OCSBadRequestException('Failed to delete user config values');
+		if ($result === 0) {
+			throw new OCSNotFoundException('No preferences_ex values deleted');
+		}
+		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 	}
 }

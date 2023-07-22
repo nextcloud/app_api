@@ -31,13 +31,13 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
 class Unregister extends Command {
 	private AppEcosystemV2Service $service;
@@ -84,12 +84,6 @@ class Unregister extends Command {
 		if ($exApp === null) {
 			$output->writeln(sprintf('Failed to unregister ExApp %s.', $appId));
 			return 1;
-		}
-		if ($exApp->getAppid() === $appId) {
-			$appScopes = $this->service->getExAppScopeGroups($exApp);
-			foreach ($appScopes as $appScope) {
-				$this->service->removeExAppScopeGroup($exApp, intval($appScope->getScopeGroup()));
-			}
 		}
 
 		$output->writeln(sprintf('ExApp %s successfully unregistered.', $appId));

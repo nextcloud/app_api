@@ -31,14 +31,12 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExAppPreference;
 use OCA\AppEcosystemV2\Db\ExAppPreferenceMapper;
+
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
-use OCP\ICache;
-use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -47,16 +45,13 @@ use Psr\Log\LoggerInterface;
 class ExAppPreferenceService {
 	private ExAppPreferenceMapper $mapper;
 	private LoggerInterface $logger;
-	private ICache $cache;
 
 	public function __construct(
 		ExAppPreferenceMapper $mapper,
 		LoggerInterface $logger,
-		ICacheFactory $cacheFactory,
 	) {
 		$this->mapper = $mapper;
 		$this->logger = $logger;
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/preferences_ex');
 	}
 
 	public function setUserConfigValue(string $userId, string $appId, string $configKey, mixed $configValue) {
@@ -74,7 +69,7 @@ class ExAppPreferenceService {
 					'configvalue' => $configValue ?? '',
 				]));
 			} catch (Exception $e) {
-				$this->logger->error('Error while inserting new config value: ' . $e->getMessage());
+				$this->logger->error('Error while inserting new config value: ' . $e->getMessage(), ['exception' => $e]);
 				return null;
 			}
 		} else {
@@ -86,7 +81,7 @@ class ExAppPreferenceService {
 				}
 				return $exAppPreference;
 			} catch (Exception $e) {
-				$this->logger->error('Error while updating config value: ' . $e->getMessage());
+				$this->logger->error('Error while updating config value: ' . $e->getMessage(), ['exception' => $e]);
 				return null;
 			}
 		}
@@ -96,16 +91,10 @@ class ExAppPreferenceService {
 	 * @param string $userId
 	 * @param string $appId
 	 * @param array $configKeys
-	 * @return ExAppPreference[]|null
+	 * @return array|null
 	 */
 	public function getUserConfigValues(string $userId, string $appId, array $configKeys): ?array {
 		try {
-			$cacheKey = $userId . $appId . implode('', $configKeys);
-//			$cached = $this->cache->get($cacheKey);
-//			if ($cached !== null) {
-//				return $cached;
-//			}
-
 			return array_map(function (ExAppPreference $exAppPreference) {
 				return [
 					'configkey' => $exAppPreference->getConfigkey(),

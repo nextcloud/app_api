@@ -34,11 +34,14 @@ namespace OCA\AppEcosystemV2\Db;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\DB\Exception;
-use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
+/**
+ * @template-extends QBMapper<ExApp>
+ */
 class ExAppMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_apps');
@@ -93,25 +96,6 @@ class ExAppMapper extends QBMapper {
 	}
 
 	/**
-	 * @param string $name
-	 *
-	 * @throws DoesNotExistException if not found
-	 * @throws MultipleObjectsReturnedException if more than one result
-	 * @throws Exception
-	 *
-	 * @return ExApp
-	 */
-	public function findByName(string $name): Entity {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
-			);
-		return $this->findEntity($qb);
-	}
-
-	/**
 	 * @throws Exception
 	 */
 	public function deleteExApp(ExApp $exApp): int {
@@ -120,23 +104,6 @@ class ExAppMapper extends QBMapper {
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_STR))
 			)->executeStatement();
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function findExAppEnabled(string $appId): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('enabled')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
-			);
-		$result = $qb->executeQuery();
-		return [
-			'success' => $result->rowCount() === 1,
-			'enabled' => $result->fetchOne(),
-		];
 	}
 
 	/**
@@ -154,10 +121,10 @@ class ExAppMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function updateLastResponseTime(ExApp $exApp): int {
+	public function updateLastCheckTime(ExApp $exApp): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->update($this->tableName)
-			->set('last_response_time', $qb->createNamedParameter($exApp->getLastResponseTime(), IQueryBuilder::PARAM_INT))
+			->set('last_check_time', $qb->createNamedParameter($exApp->getLastCheckTime(), IQueryBuilder::PARAM_INT))
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid()))
 			)->executeStatement();

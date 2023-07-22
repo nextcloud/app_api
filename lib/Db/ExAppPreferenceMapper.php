@@ -33,27 +33,17 @@ namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\DB\Exception;
-use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
+/**
+ * @template-extends QBMapper<ExAppPreference>
+ */
 class ExAppPreferenceMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'preferences_ex');
-	}
-
-	/**
-	 * @throws Exception
-	 * @return ExAppPreference[]
-	 */
-	public function findAll(int $limit = null, int $offset = null): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
-		return $this->findEntities($qb);
 	}
 
 	/**

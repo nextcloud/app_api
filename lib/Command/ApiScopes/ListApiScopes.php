@@ -29,40 +29,39 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppEcosystemV2\Command\ApiScopes;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http\Response;
-use OCP\AppFramework\OCSController;
-use OCP\IRequest;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class ExAppController extends OCSController {
-	private AppEcosystemV2Service $service;
+class ListApiScopes extends Command {
+	private ExAppApiScopeService $service;
 
-	public function __construct(
-		IRequest $request,
-		AppEcosystemV2Service $service,
-	) {
-		parent::__construct(Application::APP_ID, $request);
+	public function __construct(ExAppApiScopeService $service) {
+		parent::__construct();
 
 		$this->service = $service;
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 *
-	 * @param bool $extended
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	#[NoCSRFRequired]
-	public function getExApps(bool $extended = false, string $format = 'json'): Response {
-		return $this->buildResponse(new DataResponse($this->service->getExAppsList($extended), Http::STATUS_OK), $format);
+	protected function configure() {
+		$this->setName('app_ecosystem_v2:scopes:list');
+		$this->setDescription('List registered API scopes');
+	}
+
+	protected function execute(InputInterface $input, OutputInterface $output): int {
+		$scopes = $this->service->getExAppApiScopes();
+		if (empty($scopes)) {
+			$output->writeln('No API scopes registered');
+			return 0;
+		}
+
+		$output->writeln('Registered API scopes:');
+		foreach ($scopes as $scope) {
+			$output->writeln(sprintf('  %s. %s [%s]', $scope->getScopeGroup(), $scope->getApiRoute(), $scope->getName()));
+		}
+		return 0;
 	}
 }

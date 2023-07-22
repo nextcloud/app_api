@@ -31,16 +31,19 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2;
 
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+
+use OCA\DAV\Connector\Sabre\Auth;
+use OCP\IRequest;
+use OCP\ISession;
 use Sabre\DAV\Server;
 use Sabre\DAV\ServerPlugin;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
-use OCP\IRequest;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\DAV\Connector\Sabre\Auth;
-use OCP\ISession;
-
+/**
+ * @psalm-suppress UndefinedClass, MissingDependency
+ */
 class DavPlugin extends ServerPlugin {
 	private IRequest $request;
 	private ISession $session;

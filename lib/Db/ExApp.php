@@ -50,7 +50,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getStatus()
  * @method int getEnabled()
  * @method int getCreatedTime()
- * @method int getLastResponseTime()
+ * @method int getLastCheckTime()
  * @method void setAppid(string $appid)
  * @method void setVersion(string $version)
  * @method void setName(string $name)
@@ -62,7 +62,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setStatus(string $status)
  * @method void setEnabled(int $enabled)
  * @method void setCreatedTime(int $createdTime)
- * @method void setLastResponseTime(int $lastResponseTime)
+ * @method void setLastCheckTime(int $lastCheckTime)
  */
 class ExApp extends Entity implements JsonSerializable {
 	protected $appid;
@@ -76,7 +76,7 @@ class ExApp extends Entity implements JsonSerializable {
 	protected $status;
 	protected $enabled;
 	protected $createdTime;
-	protected $lastResponseTime;
+	protected $lastCheckTime;
 
 	/**
 	 * @param array $params
@@ -93,7 +93,7 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('status', 'string');
 		$this->addType('enabled', 'int');
 		$this->addType('createdTime', 'int');
-		$this->addType('lastResponseTime', 'int');
+		$this->addType('lastCheckTime', 'int');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
@@ -131,17 +131,17 @@ class ExApp extends Entity implements JsonSerializable {
 		if (isset($params['created_time'])) {
 			$this->setCreatedTime($params['created_time']);
 		}
-		if (isset($params['last_response_time'])) {
-			$this->setLastResponseTime($params['last_response_time']);
+		if (isset($params['last_check_time'])) {
+			$this->setLastCheckTime($params['last_check_time']);
 		}
 	}
 
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
-			'app_id' => $this->getAppid(),
+			'appid' => $this->getAppid(),
 			'version' => $this->getVersion(),
-			'name'=> $this->getName(),
+			'name' => $this->getName(),
 			'daemon_config_name' => $this->getDaemonConfigName(),
 			'protocol' => $this->getProtocol(),
 			'host' => $this->getHost(),
@@ -150,7 +150,7 @@ class ExApp extends Entity implements JsonSerializable {
 			'status' => $this->getStatus(),
 			'enabled' => $this->getEnabled(),
 			'created_time' => $this->getCreatedTime(),
-			'last_response_time' => $this->getLastResponseTime(),
+			'last_check_time' => $this->getLastCheckTime(),
 		];
 	}
 }

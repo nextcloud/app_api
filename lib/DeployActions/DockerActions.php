@@ -31,17 +31,17 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\DeployActions;
 
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+
+use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppEcosystemV2\Deploy\AbstractDeployActions;
+
 use OCP\ICertificateManager;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
-use OCA\AppEcosystemV2\Db\DaemonConfig;
-use OCA\AppEcosystemV2\Deploy\DeployActions;
-
-class DockerActions extends DeployActions {
+class DockerActions extends AbstractDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	public const AE_REQUIRED_ENVS = [
 		'AE_VERSION',
@@ -251,6 +251,24 @@ class DockerActions extends DeployActions {
 		return $host;
 	}
 
+	public function containerStateHealthy(array $containerInfo): bool {
+		return $containerInfo['State']['Status'] === 'running';
+	}
+
+	public function healthcheckContainer(string $containerId, DaemonConfig $daemonConfig): bool {
+		$attempts = 0;
+		$totalAttempts = 60; // ~60 seconds for container to initialize
+		while ($attempts < $totalAttempts) {
+			$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $containerId);
+			if ($this->containerStateHealthy($containerInfo)) {
+				return true;
+			}
+			$attempts++;
+			sleep(1);
+		}
+		return false;
+	}
+
 	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
 		$dockerUrl = 'http://localhost';
 		if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
@@ -267,7 +285,7 @@ class DockerActions extends DeployActions {
 					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
 				],
 			];
-		} else if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
+		} elseif (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
 			$guzzleParams = $this->setupCerts($guzzleParams, $daemonConfig->getDeployConfig());
 		}
 		$this->guzzleClient = new Client($guzzleParams);
@@ -281,7 +299,7 @@ class DockerActions extends DeployActions {
 	 */
 	private function setupCerts(array $guzzleParams, array $deployConfig): array {
 		if (!$this->config->getSystemValueBool('installed', false)) {
-			$certs =  \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
+			$certs = \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
 		} else {
 			$certs = $this->certificateManager->getAbsoluteBundlePath();
 		}

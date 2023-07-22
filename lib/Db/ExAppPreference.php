@@ -84,7 +84,7 @@ class ExAppPreference extends Entity implements JsonSerializable {
 		return [
 			'id' => $this->getId(),
 			'user_id' => $this->getUserid(),
-			'app_id' => $this->getAppid(),
+			'appid' => $this->getAppid(),
 			'configkey' => $this->getConfigkey(),
 			'configvalue' => $this->getConfigvalue(),
 		];

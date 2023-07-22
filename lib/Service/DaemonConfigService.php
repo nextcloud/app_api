@@ -32,20 +32,21 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Service;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
-use Psr\Log\LoggerInterface;
+use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppEcosystemV2\Db\DaemonConfigMapper;
+
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-
-use OCA\AppEcosystemV2\Db\DaemonConfig;
-use OCA\AppEcosystemV2\Db\DaemonConfigMapper;
+use Psr\Log\LoggerInterface;
 
 /**
  * Daemon configuration (daemons)
  */
 class DaemonConfigService {
+	public const CACHE_TTL = 60 * 60 * 2; // 2 hours
 	private LoggerInterface $logger;
 	private ICache $cache;
 	private DaemonConfigMapper $mapper;
@@ -70,10 +71,10 @@ class DaemonConfigService {
 				'host' => $params['host'],
 				'deploy_config' => $params['deploy_config'],
 			]));
-			$this->cache->remove('daemon_configs');
+			$this->cache->remove('/daemon_configs');
 			return $daemonConfig;
 		} catch (Exception $e) {
-			$this->logger->error('Failed to register daemon config. Error: ' . $e->getMessage());
+			$this->logger->error('Failed to register daemon config. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
 	}
@@ -81,64 +82,50 @@ class DaemonConfigService {
 	public function unregisterDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
 		try {
 			$daemonConfig = $this->mapper->delete($daemonConfig);
-			$this->cache->remove('daemon_configs');
-			$this->cache->remove('daemon_config_' . $daemonConfig->getId());
+			$this->cache->remove('/daemon_configs');
+			$this->cache->remove('/daemon_config_' . $daemonConfig->getName());
 			return $daemonConfig;
 		} catch (Exception $e) {
-			$this->logger->error('Failed to unregister daemon config. Error: ' . $e->getMessage());
+			$this->logger->error('Failed to unregister daemon config. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
 	}
 
-	public function getDaemonConfig(int $daemonConfigId): ?DaemonConfig {
-		try {
-			$cacheKey = 'daemon_config_' . $daemonConfigId;
-//			$cached = $this->cache->get($cacheKey);
-//			if ($cached !== null) {
-//				return $cached instanceof DaemonConfig ? $cached : new DaemonConfig($cached);
-//			}
-
-			$daemonConfig = $this->mapper->findById($daemonConfigId);
-			$this->cache->set($cacheKey, $daemonConfig, Application::CACHE_TTL);
-			return $daemonConfig;
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error('Failed to get daemon config. Error: ' . $e->getMessage());
-			return null;
-		}
-	}
-
+	/**
+	 * @return DaemonConfig[]|null
+	 */
 	public function getRegisteredDaemonConfigs(): ?array {
 		try {
-			$cacheKey = 'daemon_configs';
+			$cacheKey = '/daemon_configs';
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
-				return array_map(function($cachedEntry) {
+				return array_map(function ($cachedEntry) {
 					return $cachedEntry instanceof DaemonConfig ? $cachedEntry : new DaemonConfig($cachedEntry);
 				}, $cached);
 			}
 
 			$daemonConfigs = $this->mapper->findAll();
-			$this->cache->set($cacheKey, $daemonConfigs);
+			$this->cache->set($cacheKey, $daemonConfigs, self::CACHE_TTL);
 			return $daemonConfigs;
 		} catch (Exception $e) {
-			$this->logger->error('Failed to get registered daemon configs. Error: ' . $e->getMessage());
+			$this->logger->error('Failed to get registered daemon configs. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
 	}
 
 	public function getDaemonConfigByName(string $name): ?DaemonConfig {
 		try {
-			$cacheKey = 'daemon_config_' . $name;
-//			$cached = $this->cache->get($cacheKey);
-//			if ($cached !== null) {
-//				return $cached instanceof DaemonConfig ? $cached : new DaemonConfig($cached);
-//			}
+			$cacheKey = '/daemon_config_' . $name;
+			$cached = $this->cache->get($cacheKey);
+			if ($cached !== null) {
+				return $cached instanceof DaemonConfig ? $cached : new DaemonConfig($cached);
+			}
 
 			$daemonConfig = $this->mapper->findByName($name);
-			$this->cache->set($cacheKey, $daemonConfig, Application::CACHE_TTL);
+			$this->cache->set($cacheKey, $daemonConfig, self::CACHE_TTL);
 			return $daemonConfig;
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error('Failed to get daemon config by name. Error: ' . $e->getMessage());
+			$this->logger->error('Failed to get daemon config by name. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
 	}

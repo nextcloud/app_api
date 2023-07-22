@@ -31,11 +31,14 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Db;
 
-use OCP\DB\Exception;
-use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
+/**
+ * @template-extends QBMapper<ExAppUser>
+ */
 class ExAppUserMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_apps_users');
@@ -44,13 +47,11 @@ class ExAppUserMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function findAll(int $limit = null, int $offset = null): array {
+	public function findByAppid(string $appId): array {
 		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
+		return $this->findEntities($qb->select('*')
 			->from($this->tableName)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
-		return $this->findEntities($qb);
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))));
 	}
 
 	/**
@@ -72,5 +73,18 @@ class ExAppUserMapper extends QBMapper {
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
 				$qb->expr()->eq('userid', $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL))
 			));
+	}
+
+	/**
+	 * @param string $appId
+	 *
+	 * @throws Exception
+	 * @return int
+	 */
+	public function deleteByAppid(string $appId): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)))
+			->executeStatement();
 	}
 }

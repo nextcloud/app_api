@@ -31,12 +31,12 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
+
+use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\IConfig;
 use OCP\IRequest;
-use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Controller;
-
-use OCA\AppEcosystemV2\AppInfo\Application;
 
 class ConfigController extends Controller {
 	private IConfig $config;

@@ -33,26 +33,17 @@ namespace OCA\AppEcosystemV2\Db;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\DB\Exception;
-use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
+/**
+ * @template-extends QBMapper<ExFilesActionsMenu>
+ */
 class ExFilesActionsMenuMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_files_actions_menu');
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function findAll(int $limit = null, int $offset = null): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->setMaxResults($limit)
-			->setFirstResult($offset);
-		return $this->findEntities($qb);
 	}
 
 	/**
@@ -82,22 +73,6 @@ class ExFilesActionsMenuMapper extends QBMapper {
 
 	/**
 	 * @param string $appId
-	 *
-	 * @throws Exception
-	 * @return ExFilesActionsMenu[]
-	 */
-	public function findAllByAppId(string $appId): array {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('appId', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
-			);
-		return $this->findEntities($qb);
-	}
-
-	/**
-	 * @param string $appId
 	 * @param string $name
 	 *
 	 * @throws MultipleObjectsReturnedException if more than one result
@@ -106,12 +81,12 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	 *
 	 * @return ExFilesActionsMenu
 	 */
-	public function findByAppIdName(string $appId, string $name): ExFilesActionsMenu {
+	public function findByAppidName(string $appId, string $name): ExFilesActionsMenu {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
 			->where(
-				$qb->expr()->eq('appId', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
 				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR)),
 			);
 		return $this->findEntity($qb);
@@ -135,48 +110,5 @@ class ExFilesActionsMenuMapper extends QBMapper {
 				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
 			);
 		return $this->findEntity($qb);
-	}
-
-	/**
-	 * @param ExFilesActionsMenu $exFilesActionsMenu
-	 *
-	 * @throws Exception
-	 *
-	 * @return int Number of updated rows
-	 */
-	public function updateFileActionMenu(ExFilesActionsMenu $exFilesActionsMenu): int {
-		$qb = $this->db->getQueryBuilder();
-		return $qb->update($this->tableName)
-			->set('display_name', $qb->createNamedParameter($exFilesActionsMenu->getDisplayName(), IQueryBuilder::PARAM_STR))
-			->set('mime', $qb->createNamedParameter($exFilesActionsMenu->getMime(), IQueryBuilder::PARAM_STR))
-			->set('permissions', $qb->createNamedParameter($exFilesActionsMenu->getPermissions(), IQueryBuilder::PARAM_STR))
-			->set('order', $qb->createNamedParameter($exFilesActionsMenu->getOrder(), IQueryBuilder::PARAM_INT))
-			->set('icon', $qb->createNamedParameter($exFilesActionsMenu->getIcon() ?? '', IQueryBuilder::PARAM_STR))
-			->set('icon_class', $qb->createNamedParameter($exFilesActionsMenu->getIconClass(), IQueryBuilder::PARAM_STR))
-			->set('action_handler', $qb->createNamedParameter($exFilesActionsMenu->getActionHandler(), IQueryBuilder::PARAM_STR))
-			->where(
-				$qb->expr()->eq('appId', $qb->createNamedParameter($exFilesActionsMenu->getAppid(), IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('name', $qb->createNamedParameter($exFilesActionsMenu->getName(), IQueryBuilder::PARAM_STR))
-			)
-			->executeStatement();
-	}
-
-	/**
-	 * @param ExFilesActionsMenu $exFilesActionsMenu
-	 *
-	 * @throws Exception
-	 *
-	 * @return int Number of deleted rows
-	 */
-	public function deleteByAppidName(ExFilesActionsMenu $exFilesActionsMenu): int {
-		$qb = $this->db->getQueryBuilder();
-		return $qb->delete($this->tableName)
-			->where(
-				$qb->expr()->eq('appId', $qb->createNamedParameter($exFilesActionsMenu->getAppid(), IQueryBuilder::PARAM_STR))
-			)
-			->andWhere(
-				$qb->expr()->eq('name', $qb->createNamedParameter($exFilesActionsMenu->getName(), IQueryBuilder::PARAM_STR))
-			)
-			->executeStatement();
 	}
 }

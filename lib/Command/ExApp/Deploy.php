@@ -34,6 +34,8 @@ namespace OCA\AppEcosystemV2\Command\ExApp;
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\DeployActions\DockerActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppEcosystemV2\Service\DaemonConfigService;
+
 use OCP\App\IAppManager;
 use OCP\IURLGenerator;
 use OCP\Security\ISecureRandom;
@@ -42,8 +44,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
 class Deploy extends Command {
 	private AppEcosystemV2Service $service;
@@ -91,7 +91,7 @@ class Deploy extends Command {
 			return 2;
 		}
 
-		$infoXml = simplexml_load_file($pathToInfoXml);
+		$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
 		if ($infoXml === false) {
 			$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
 			return 2;
@@ -116,9 +116,9 @@ class Deploy extends Command {
 		$deployConfig = $daemonConfig->getDeployConfig();
 
 		$imageParams = [
-			'image_src' => (string) $infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io',
-			'image_name' => (string) $infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId,
-			'image_tag' => (string) $infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest',
+			'image_src' => (string) ($infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io'),
+			'image_name' => (string) ($infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId),
+			'image_tag' => (string) ($infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest'),
 		];
 		$containerParams = [
 			'name' => $appId,
@@ -132,10 +132,10 @@ class Deploy extends Command {
 			'appid' => $appId,
 			'name' => (string) $infoXml->name,
 			'version' => (string) $infoXml->version,
-			'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
+			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
 			'host' => $this->buildExAppHost($deployConfig),
 			'port' => $containerParams['port'],
-			'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
+			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
 		], $envParams, $deployConfig);
 		$containerParams['env'] = $envs;
 
@@ -150,6 +150,11 @@ class Deploy extends Command {
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
+			if (!$this->dockerActions->healthcheckContainer($createResult['Id'], $daemonConfig)) {
+				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, 'Container healthcheck failed.'));
+				return 1;
+			}
+
 			// TODO: Remove resultOutput
 			$resultOutput = [
 				'appid' => $appId,
@@ -159,8 +164,8 @@ class Deploy extends Command {
 				'secret' => explode('=', $envs[1])[1],
 				'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
 				'port' => explode('=', $envs[7])[1],
-				'protocol' => (string) $infoXml->xpath('ex-app/protocol')[0] ?? 'http',
-				'system_app' => (bool) $infoXml->xpath('ex-app/system')[0] ?? false,
+				'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
+				'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
 			];
 			if ($this->heartbeatExApp($resultOutput)) {
 				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));

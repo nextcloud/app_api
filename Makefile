@@ -55,7 +55,7 @@ dock-sock27:
 dock-sock26:
 	@echo "creating daemon for nextcloud 'stable26' container"
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_dev || true
-	docker exec master-stable6-1 sudo -u www-data php occ app_ecosystem_v2:daemon:register \
+	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:daemon:register \
 		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://stable26/index.php --net=master_default
 
 .PHONY: dock2port

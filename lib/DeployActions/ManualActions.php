@@ -32,12 +32,12 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\DeployActions;
 
 use OCA\AppEcosystemV2\Db\DaemonConfig;
-use OCA\AppEcosystemV2\Deploy\DeployActions;
+use OCA\AppEcosystemV2\Deploy\AbstractDeployActions;
 
 /**
  * Manual deploy actions for development.
  */
-class ManualActions extends DeployActions {
+class ManualActions extends AbstractDeployActions {
 	public function getAcceptsDeployId(): string {
 		return 'manual-install';
 	}

@@ -31,20 +31,20 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
-
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Db\ExAppConfig;
+use OCA\AppEcosystemV2\Service\ExAppConfigService;
+
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
-use OCP\AppFramework\OCS\OCSBadRequestException;
-use OCP\IRequest;
-use OCP\AppFramework\OCSController;
-use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
-
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\ExAppConfigService;
+use OCP\AppFramework\OCS\OCSBadRequestException;
+use OCP\AppFramework\OCS\OCSNotFoundException;
+use OCP\AppFramework\OCSController;
+use OCP\IRequest;
 
 class AppConfigController extends OCSController {
 	private ExAppConfigService $exAppConfigService;
@@ -101,7 +101,7 @@ class AppConfigController extends OCSController {
 	public function getAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->getAppConfigValues($appId, $configKeys);
-		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		return $this->buildResponse(new DataResponse($result, !empty($result) ? Http::STATUS_OK : Http::STATUS_NOT_FOUND), $format);
 	}
 
 	/**
@@ -112,6 +112,7 @@ class AppConfigController extends OCSController {
 	 * @param string $format
 	 *
 	 * @throws OCSBadRequestException
+	 * @throws OCSNotFoundException
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
@@ -120,9 +121,12 @@ class AppConfigController extends OCSController {
 	public function deleteAppConfigValues(array $configKeys, string $format = 'json'): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->deleteAppConfigValues($configKeys, $appId);
-		if ($result !== -1) {
-			return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		if ($result === -1) {
+			throw new OCSBadRequestException('Error deleting app config values');
 		}
-		throw new OCSBadRequestException('Error deleting app config values');
+		if ($result === 0) {
+			throw new OCSNotFoundException('No appconfig_ex values deleted');
+		}
+		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
 	}
 }

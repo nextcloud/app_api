@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
+
 use OCP\App\IAppManager;
 use OCP\Capabilities\IPublicCapability;
 
