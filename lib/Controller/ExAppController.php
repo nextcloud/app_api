@@ -37,7 +37,6 @@ use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
