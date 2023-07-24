@@ -40,3 +40,34 @@ and actually forwarded to the container:
 		...
 		- /var/run/docker.sock:/var/run/docker.sock
 		...
+
+
+Dev changes to Nextcloud server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The only changes to Nextcloud server are in ``base.php`` file.
+Until these changes not implemented in server, they can be applied by patch (``base_php.patch`` in project root directory).
+
+.. code-block:: php
+
+	if (self::tryAppEcosystemV2Login($request)) {
+		return true;
+	}
+
+
+And down below ``tryAppEcosystemV2Login`` method is added:
+
+.. code-block:: php
+
+	protected static function tryAppEcosystemV2Login(OCP\IRequest $request): bool {
+		$appManager = Server::get(OCP\App\IAppManager::class);
+		if (!$request->getHeader('AE-SIGNATURE')) {
+			return false;
+		}
+		if (!$appManager->isInstalled('app_ecosystem_v2')) {
+			return false;
+		}
+		$appEcosystemV2Service = Server::get(OCA\AppEcosystemV2\Service\AppEcosystemV2Service::class);
+		return $appEcosystemV2Service->validateExAppRequestToNC($request);
+	}
+

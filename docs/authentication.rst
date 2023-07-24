@@ -115,3 +115,8 @@ Authentication flow in details
 		Nextcloud->>-ExApp: Response (200/401)
 
 
+AppEcosystemAuth
+^^^^^^^^^^^^^^^^
+
+AppEcosystemV2 provides ``AppEcosystemAuth`` attribute with a middleware to validate requests from ExApps.
+In PHP API controllers you can use it as attribute or annotation (for NC26).
