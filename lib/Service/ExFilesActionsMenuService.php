@@ -48,6 +48,7 @@ use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
 class ExFilesActionsMenuService {
+	public const ICON_CACHE_TTL = 60 * 60 * 24; // 1 day
 	private ICache $cache;
 	private ExFilesActionsMenuMapper $mapper;
 	private LoggerInterface $logger;

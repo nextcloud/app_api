@@ -37,7 +37,6 @@ use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
@@ -57,12 +56,11 @@ class ExAppController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param bool $extended
-	 * @param string $format
 	 *
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[NoCSRFRequired]
-	public function getExApps(bool $extended = false, string $format = 'json'): Response {
-		return $this->buildResponse(new DataResponse($this->service->getExAppsList($extended), Http::STATUS_OK), $format);
+	public function getExApps(bool $extended = false): DataResponse {
+		return new DataResponse($this->service->getExAppsList($extended), Http::STATUS_OK);
 	}
 }
