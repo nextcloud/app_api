@@ -118,6 +118,7 @@ class ExAppApiScopeService {
 			['api_route' => '/apps/user_status/api/', 'scope_group' => 11, 'name' => 'USER_STATUS'],
 			['api_route' => '/apps/notifications/api/', 'scope_group' => 12, 'name' => 'NOTIFICATIONS'],
 			['api_route' => '/apps/weather_status/api/', 'scope_group' => 13, 'name' => 'WEATHER_STATUS'],
+			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 14, 'name' => 'FILES_SHARING'],
 			['api_route' => '/dav/', 'scope_group' => 3, 'name' => 'DAV'],
 		];
 
