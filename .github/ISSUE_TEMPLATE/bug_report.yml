@@ -7,7 +7,7 @@ body:
   attributes:
     value: >
       #### Before submitting a bug, please make sure the issue hasn't been already
-      addressed by searching through [the past issues](https://github.com/bigcat88/pillow_heif/issues).
+      addressed by searching through [the past issues](https://github.com/cloud-py-api/app_ecosystem_v2/issues).
 - type: textarea
   attributes:
     label: Describe the bug
@@ -49,14 +49,11 @@ body:
     required: true
 - type: textarea
   attributes:
-    label: Versions
-    render: shell
+    label: Setup configuration
     description: |
-      Please run the following and paste the output below(python, os, cpu, pillow_heif and libheif version and codecs).
-      ```python
-      import platform, sys, pillow_heif
-      print(sys.version, platform.platform(), pillow_heif.__version__, pillow_heif.libheif_info(), sep='\n')
-      ```
+      Paste or describe the configuration setting, including software versions, to help diagnose the problem more quickly.
+    placeholder: >
+      Example: app_ecosystem_v2 = 1.0.0, nextcloud = 28.0.4, etc.
   validations:
     required: true
 - type: markdown
