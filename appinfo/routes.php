@@ -44,10 +44,10 @@ return [
 		// ExApps
 		['name' => 'exApp#getExApps', 'url' => '/api/v1/ex-app/all', 'verb' => 'GET'],
 
-		// Ex Apps registration
-		['name' => 'OCSApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
-		['name' => 'OCSApi#unregisterExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
-		['name' => 'OCSApi#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
+		// Ex Apps registration (for Admin GUI, not implemented yet)
+//		['name' => 'OCSApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
+//		['name' => 'OCSApi#unregisterExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
+//		['name' => 'OCSApi#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
 
 		// File Actions Menu
 		['name' => 'OCSApi#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
@@ -71,7 +71,7 @@ return [
 //	TODO: Implement Notifications, SearchProvider, BackgroundJob, SettingsPage, SettingsSection, EventListener, DashboardWidget, Capabilities
 
 		// Notifications
-//		['name' => 'notification#sendNotification', 'url' => '/api/v1/notification', 'verb' => 'POST'],
+		['name' => 'notifications#sendNotification', 'url' => '/api/v1/notification', 'verb' => 'POST'],
 //		['name' => 'notification#registerNotificationProvider', 'url' => '/api/v1/notification-provider', 'verb' => 'POST'],
 //		['name' => 'notification#unregisterNotificationProvider', 'url' => '/api/v1/notification-provider', 'verb' => 'DELETE'],
 

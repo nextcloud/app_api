@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Discussions
+    url: https://github.com/cloud-py-api/app_ecosystem_v2/discussions/new
+    about: Ask questions and discuss
+  - name: Blank issue
+    url: https://github.com/cloud-py-api/app_ecosystem_v2/issues/new
+    about: Please note that Github Discussions should be used in most cases instead

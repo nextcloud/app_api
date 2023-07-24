@@ -4,67 +4,31 @@
 
 # Nextcloud App Ecosystem V2
 
-Nextcloud App Ecosystem V2 provides a new API for external apps on different programming languages
+Nextcloud AppEcosystemV2 provides an API over existing Nextcloud APIs for external apps (ExApp) 
+on different programming languages.
+It also brings out a new way to develop apps for Nextcloud with separate security layer ([AppEcosystemAuth](https://cloud-py-api.github.io/app_ecosystem_v2/authentication.html)),
+that supports scopes.
 
-| Currently in a prototyping stage
+| For now there is only one official [Python library](https://github.com/cloud-py-api/nc_py_api).
 
-Docs can be found [here](https://cloud-py-api.github.io/app_ecosystem_v2/).
+## Documentation
 
-## Dev changes to Nextcloud
+Documentation can be found [here](https://cloud-py-api.github.io/app_ecosystem_v2/).
 
-`base.php` adjustment for authentication of Ex apps ([patch](./base_php.patch)).
+## ExApps list
 
-```php
-protected static function tryAppEcosystemV2Login(OCP\IRequest $request): bool {
-	$appManager = Server::get(OCP\App\IAppManager::class);
-	if (!$request->getHeader('AE-SIGNATURE')) {
-		return false;
-	}
-	if (!$appManager->isInstalled('app_ecosystem_v2')) {
-		return false;
-	}
-	$appEcosystemV2Service = Server::get(OCA\AppEcosystemV2\Service\AppEcosystemV2Service::class);
-	return $appEcosystemV2Service->validateExAppRequestToNC($request);
-}
+Here is a list of the Nextcloud ExApps, using AppEcosystemV2.
 
-```
-`base.php - handleLogin`
+| Name                | Language | Type     | Description                                 | Link                                                          |
+|---------------------|----------|----------|---------------------------------------------|---------------------------------------------------------------|
+| nc_py_api           | Python   | library  | Python library for Nextcloud AppEcosystemV2 | [GitHub](https://github.com/cloud-py-api/nc_py_api)           |	
+| app_python_skeleton | Python   | skeleton | Skeleton for Python ExApp                   | [GitHub](https://github.com/cloud-py-api/app_python_skeleton) |
 
-```php
-if (self::tryAppEcosystemV2Login($request)) {
-	return true;
-}
-```
+### Support
 
-## Authentication diagram
+We appreciate any support for this project:
 
-AppEcosystemV2 adds separate authentication for external apps. 
-This authentication is based on a shared secret between Nextcloud and the external app.
-
-### Overview of the authentication process
-
-1. ExApp sends a request to Nextcloud
-2. Nextcloud passes request to AppEcosystemV2
-3. AppEcosystemV2 validates request
-4. Request is accepted/rejected
-
-```mermaid
-sequenceDiagram
-    participant ExApp
-    box Nextcloud
-		participant Nextcloud
-		participant AppEcosystemV2
-	end
-    ExApp->>+Nextcloud: Request to API
-    Nextcloud->>+AppEcosystemV2: Validate request
-    AppEcosystemV2-->>-Nextcloud: Request accepted/rejected
-    Nextcloud-->>-ExApp: Response (200/401)
-```
-
-More details in [docs](https://cloud-py-api.github.io/app_ecosystem_v2/authentication.html)
-
-## 🔧 Configuration
-
-### Admin settings
-
-In Admin section you can configure existing external apps.
+- ⭐ Star our work on GitHub (it helps us a lot)
+- ❗ Create an Issue or feature request (bring to us an excellent idea)
+- 💁 Resolve an Issue and create a Pull Request (contribute to this project)
+- 🧑‍💻 Develop your own ExApp and share it to world (it will be listed above)
