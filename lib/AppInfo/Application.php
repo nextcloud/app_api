@@ -9,6 +9,7 @@ use OCA\AppEcosystemV2\DavPlugin;
 use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
 use OCA\AppEcosystemV2\Listener\SabrePluginAuthInitListener;
 use OCA\AppEcosystemV2\Middleware\AppEcosystemAuthMiddleware;
+use OCA\AppEcosystemV2\Notifications\ExAppNotifier;
 use OCA\AppEcosystemV2\Profiler\AEDataCollector;
 use OCA\AppEcosystemV2\PublicCapabilities;
 
@@ -42,6 +43,7 @@ class Application extends App implements IBootstrap {
 		$context->registerCapability(PublicCapabilities::class);
 		$context->registerMiddleware(AppEcosystemAuthMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
+		$context->registerNotifierService(ExAppNotifier::class);
 	}
 
 	public function boot(IBootContext $context): void {
