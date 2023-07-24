@@ -33,13 +33,13 @@ Authentication headers
 
 Each ExApp request to secured API with AppEcosystemAuth must contain the following headers (order is important):
 
-1. `AE-VERSION` - minimal version of the AppEcosystemV2
-2. `EX-APP-ID` - id of the ExApp
-3. `EX-APP-VERSION` - version of the ExApp
-4. `NC-USER-ID` - the user under which the request is made, can be empty in case of system apps (more details in [scopes](#AppEcosystemV2-scopes) section)
-5. `AE-DATA-HASH` - hash of the request body (see details in `ae_signature`_ section)
-6. `AE-SIGN-TIME` - unix timestamp of the request
-7. `AE-SIGNATURE` - signature of the request (see details `ae_signature`_ section)
+1. ``AE-VERSION`` - minimal version of the AppEcosystemV2
+2. ``EX-APP-ID``- id of the ExApp
+3. ``EX-APP-VERSION`` - version of the ExApp
+4. ``NC-USER-ID`` - the user under which the request is made, can be empty in case of system apps (more details in [scopes](#AppEcosystemV2-scopes) section)
+5. ``AE-DATA-HASH`` - hash of the request body (see details in `ae_signature`_ section)
+6. ``AE-SIGN-TIME`` - unix timestamp of the request
+7. ``AE-SIGNATURE`` - signature of the request (see details `ae_signature`_ section)
 
 
 AE_SIGNATURE
@@ -51,14 +51,14 @@ The signature is calculated from the following data:
 
 * method
 * uri (with urlencoded query parameters)
-* headers (`AE-VERSION`, `EX-APP-ID`, `EX-APP-VERSION`, `NC-USER-ID`, `AE-DATA-HASH`, `AE-SIGN-TIME`)
+* headers (``AE-VERSION``, ``EX-APP-ID``, ``EX-APP-VERSION``, ``NC-USER-ID``, ``AE-DATA-HASH``, ``AE-SIGN-TIME``)
 * xxh64 hash from request body (post data, json, files, etc.)
 
 AE_DATA_HASH
 ************
 
-`AE-DATA-HASH` header must contain a xxh64 hash of the request body.
-It's calculated even if the request body is empty (e.g. empty hash: `ef46db3751d8e999`).
+``AE-DATA-HASH`` header must contain a xxh64 hash of the request body.
+It's calculated even if the request body is empty (e.g. empty hash: ``ef46db3751d8e999``).
 
 
 ExApp scopes
@@ -67,15 +67,16 @@ ExApp scopes
 AppEcosystemV2 will support extensible scopes (with interfaces to register own ones).
 Currently, the following scopes are available:
 
-* `BASIC`
-* `SYSTEM`
-* `USER_INFO`
-* `USER_STATUS`
-* `NOTIFICATIONS`
-* `WEATHER_STATUS`
-* `DAV`
+* ``BASIC``
+* ``SYSTEM``
+* ``USER_INFO``
+* ``USER_STATUS``
+* ``NOTIFICATIONS``
+* ``WEATHER_STATUS``
+* ``FILES_SHARING``
+* ``DAV``
 
-There is a CLI command to list registered scopes: `occ app_ecosystem_v2:scopes:list`.
+There is a CLI command to list registered scopes: ``occ app_ecosystem_v2:scopes:list``.
 
 Authentication flow in details
 ******************************
