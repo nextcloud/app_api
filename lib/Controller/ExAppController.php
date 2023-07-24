@@ -57,12 +57,11 @@ class ExAppController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param bool $extended
-	 * @param string $format
 	 *
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[NoCSRFRequired]
-	public function getExApps(bool $extended = false, string $format = 'json'): Response {
-		return $this->buildResponse(new DataResponse($this->service->getExAppsList($extended), Http::STATUS_OK), $format);
+	public function getExApps(bool $extended = false): DataResponse {
+		return new DataResponse($this->service->getExAppsList($extended), Http::STATUS_OK);
 	}
 }

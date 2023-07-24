@@ -87,20 +87,15 @@ class OCSApiController extends OCSController {
 	 *
 	 * @param int $level
 	 * @param string $message
-	 * @param string $format
 	 *
 	 * @throws OCSBadRequestException
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function log(
-		int $level,
-		string $message,
-		string $format = 'json',
-	): Response {
+	public function log(int $level, string $message): DataResponse {
 		try {
 			$appId = $this->request->getHeader('EX-APP-ID');
 			$exApp = $this->service->getExApp($appId);
@@ -116,7 +111,7 @@ class OCSApiController extends OCSController {
 			$this->logger->log($level, $message, [
 				'app' => $appId,
 			]);
-			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
+			return new DataResponse();
 		} catch (\Psr\Log\InvalidArgumentException) {
 			$this->logger->error('Invalid log level');
 			throw new OCSBadRequestException('Invalid log level');
@@ -124,89 +119,23 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param array $appData
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	#[NoCSRFRequired]
-	public function registerExternalApp(string $appId, array $appData, string $format = 'json'): Response {
-		//		TODO: Sync logic with OCC command
-		$result = $this->service->registerExApp($appId, $appData);
-		return $this->buildResponse(new DataResponse([
-			'success' => $result !== null,
-			'registeredExApp' => $result,
-		], Http::STATUS_OK), $format);
-	}
-
-	/**
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	#[NoCSRFRequired]
-	public function unregisterExternalApp(string $appId, string $format = 'json'): Response {
-		//		TODO: Sync logic with OCC command
-		$deletedExApp = $this->service->unregisterExApp($appId);
-		if ($deletedExApp === null) {
-			return $this->buildResponse(new DataResponse([
-				'success' => false,
-				'error' => $this->l->t('ExApp not found'),
-			], Http::STATUS_NOT_FOUND), $format);
-		}
-		return $this->buildResponse(new DataResponse([
-			'success' => $deletedExApp->getAppid() === $appId,
-			'deletedExApp' => $deletedExApp,
-		], Http::STATUS_OK), $format);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function getAppStatus(string $appId, string $format = 'json'): Response {
-		$appStatus = $this->service->getAppStatus($appId);
-		return $this->buildResponse(new DataResponse([
-			'success' => $appStatus !== null,
-			'appStatus' => [
-				'appId' => $appId,
-				'status' => $appStatus,
-			],
-		], Http::STATUS_OK), $format);
-	}
-
-	/**
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
 	 * @param array $fileActionMenuParams [name, display_name, mime, permissions, order, icon, icon_class, action_handler]
-	 * @param string $format
 	 *
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function registerFileActionMenu(array $fileActionMenuParams, string $format = 'json'): Response {
+	public function registerFileActionMenu(array $fileActionMenuParams): DataResponse {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$registeredFileActionMenu = $this->exFilesActionsMenuService->registerFileActionMenu($appId, $fileActionMenuParams);
-		return $this->buildResponse(new DataResponse([
+		return new DataResponse([
 			'success' => $registeredFileActionMenu !== null,
 			'registeredFileActionMenu' => $registeredFileActionMenu,
-		], Http::STATUS_OK), $format);
+		], Http::STATUS_OK);
 	}
 
 	/**
@@ -238,18 +167,17 @@ class OCSApiController extends OCSController {
 	 * @param string $actionName
 	 * @param array $actionFile
 	 * @param string $actionHandler
-	 * @param string $format
 	 *
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler, string $format = 'json'): Response {
+	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler): DataResponse {
 		$result = $this->exFilesActionsMenuService->handleFileAction($this->userId, $appId, $actionName, $actionHandler, $actionFile);
-		return $this->buildResponse(new DataResponse([
+		return new DataResponse([
 			'success' => $result,
 			'handleFileActionSent' => $result,
-		], Http::STATUS_OK), $format);
+		], Http::STATUS_OK);
 	}
 
 	/**
@@ -271,7 +199,7 @@ class OCSApiController extends OCSController {
 				Http::STATUS_OK,
 				['Content-Type' => $icon['headers']['Content-Type'][0] ?? 'image/svg+xml']
 			);
-			$response->cacheFor(Application::ICON_CACHE_TTL, false, true);
+			$response->cacheFor(ExFilesActionsMenuService::ICON_CACHE_TTL, false, true);
 			return $response;
 		}
 		return new DataDisplayResponse('', 400);
@@ -281,15 +209,13 @@ class OCSApiController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $format
-	 *
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function getExAppUsers(string $format = 'json'): Response {
-		return $this->buildResponse(new DataResponse($this->service->getNCUsersList(), Http::STATUS_OK), $format);
+	public function getExAppUsers(): DataResponse {
+		return new DataResponse($this->service->getNCUsersList(), Http::STATUS_OK);
 	}
 
 	/**
@@ -299,19 +225,18 @@ class OCSApiController extends OCSController {
 	 * @param string $apiRoute
 	 * @param int $scopeGroup
 	 * @param string $name
-	 * @param string $format
 	 *
 	 * @throws OCSBadRequestException
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function registerApiScope(string $apiRoute, int $scopeGroup, string $name, string $format): Response {
+	public function registerApiScope(string $apiRoute, int $scopeGroup, string $name): DataResponse {
 		$apiScope = $this->exAppApiScopeService->registerApiScope($apiRoute, $scopeGroup, $name);
 		if ($apiScope === null) {
 			throw new OCSBadRequestException('Failed to register API scope');
 		}
-		return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
+		return new DataResponse(1, Http::STATUS_OK);
 	}
 }

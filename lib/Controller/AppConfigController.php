@@ -66,22 +66,21 @@ class AppConfigController extends OCSController {
 	 *
 	 * @param string $configKey
 	 * @param mixed $configValue
-	 * @param string $format
 	 *
 	 * @throws OCSBadRequestException
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function setAppConfigValue(string $configKey, mixed $configValue, string $format = 'json'): Response {
+	public function setAppConfigValue(string $configKey, mixed $configValue): DataResponse {
 		if ($configKey === '') {
 			throw new OCSBadRequestException('Config key cannot be empty');
 		}
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
 		if ($result instanceof ExAppConfig) {
-			return $this->buildResponse(new DataResponse(1, Http::STATUS_OK), $format);
+			return new DataResponse(1, Http::STATUS_OK);
 		}
 		throw new OCSBadRequestException('Error setting app config value');
 	}
@@ -91,17 +90,16 @@ class AppConfigController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param array $configKeys
-	 * @param string $format
 	 *
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function getAppConfigValues(array $configKeys, string $format = 'json'): Response {
+	public function getAppConfigValues(array $configKeys): DataResponse {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->getAppConfigValues($appId, $configKeys);
-		return $this->buildResponse(new DataResponse($result, !empty($result) ? Http::STATUS_OK : Http::STATUS_NOT_FOUND), $format);
+		return new DataResponse($result, Http::STATUS_OK);
 	}
 
 	/**
@@ -109,16 +107,15 @@ class AppConfigController extends OCSController {
 	 * @NoCSRFRequired
 	 *
 	 * @param array $configKeys
-	 * @param string $format
 	 *
 	 * @throws OCSBadRequestException
 	 * @throws OCSNotFoundException
-	 * @return Response
+	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function deleteAppConfigValues(array $configKeys, string $format = 'json'): Response {
+	public function deleteAppConfigValues(array $configKeys): DataResponse {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->deleteAppConfigValues($configKeys, $appId);
 		if ($result === -1) {
@@ -127,6 +124,6 @@ class AppConfigController extends OCSController {
 		if ($result === 0) {
 			throw new OCSNotFoundException('No appconfig_ex values deleted');
 		}
-		return $this->buildResponse(new DataResponse($result, Http::STATUS_OK), $format);
+		return new DataResponse($result, Http::STATUS_OK);
 	}
 }
