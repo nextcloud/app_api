@@ -14,15 +14,6 @@ class ExNotificationsManager {
 		$this->manager = $manager;
 	}
 
-	public function getNotifications(ExApp $exApp): array {
-		return [];
-	}
-
-	public function getUserNotifications(ExApp $exApp, string $userId): array {
-		// TODO
-		return [];
-	}
-
 	/**
 	 * Create a notification for ExApp and notify the user
 	 *
@@ -43,10 +34,5 @@ class ExNotificationsManager {
 		// TODO: Define dynamic way for other options (e.g. notification actions)
 		$this->manager->notify($notification);
 		return $notification;
-	}
-
-	public function removeNotifications(ExApp $exApp, ?string $userId = null): int {
-		// TODO
-		return -1;
 	}
 }
