@@ -13,7 +13,7 @@ AppEcosystemV2 ExApps deployment process in short consists of 3 steps:
 
 
 DaemonConfig registration
---------------------------
+-------------------------
 
 The first step is to register DaemonConfig, where your ExApps will be deployed.
 Before that you will need to configure your Docker socket to be accessible by Nextcloud instance and webserver user.
@@ -50,7 +50,7 @@ Options
 	* ``--ssl_cert_password SSL_CERT_PASSWORD`` - ``[optional]`` SSL cert password
 
 DeployConfig
-*************
+************
 
 DeployConfig is a set of additional options in Daemon config, which are used in deployment algorithms to configure
 ExApp container.
@@ -69,7 +69,7 @@ ExApp container.
 
 
 DeployConfig options
-"""""""""""""""""""""
+""""""""""""""""""""
 
 	* ``net`` **[required]** - network name to bind docker container to (default: ``host``)
 	* ``host`` *[optional]* - in case Docker is on remote host, this should be a hostname of remote machine
