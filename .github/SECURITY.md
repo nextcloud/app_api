@@ -2,14 +2,26 @@
 
 ## Supported Versions
 
-
-| Version | Supported          |
-|---------|--------------------|
-| 1.0.0+  | :white_check_mark: |
-| <1.0.0  | :x:                |
-
+Only the latest non beta release version of `app_ecosystem_v2` are currently being supported with security updates.
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities by email to one of the maintainers, with Subject containing `app_ecosystem_v2` substring.
-If there was no reply in 24 hours, then create an Issue, without technical details, to inform about previously sent mail.
+Security is very important to us. If you have discovered a security issue with Nextcloud,
+please read our responsible disclosure guidelines and contact us at [hackerone.com/nextcloud](https://hackerone.com/nextcloud).
+Your report should include:
+
+- Product version
+- A vulnerability description
+- Reproduction steps
+
+If in scope of the project a member of the security team will confirm the vulnerability, determine its impact, and develop a fix.
+Otherwise, the team will contact the maintainer and make sure the issue gets fixed.
+The fix will be applied to the main branch, tested, and packaged in the next security release.
+The vulnerability will be publicly announced after the release.
+
+Finally, your name will be added to the [hall of fame](https://hackerone.com/nextcloud/thanks)
+as a thank you from the entire Nextcloud community.
+
+Note our [threat model](https://nextcloud.com/security/threat-model) to know what is expected behavior.
+
+Please visit https://nextcloud.com/security/ for further information about security.
