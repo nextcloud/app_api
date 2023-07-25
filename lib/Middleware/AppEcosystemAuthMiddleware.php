@@ -25,7 +25,7 @@ class AppEcosystemAuthMiddleware extends Middleware {
 	private LoggerInterface $logger;
 
 	public function __construct(
-	AppEcosystemV2Service $service,
+		AppEcosystemV2Service $service,
 		IRequest $request,
 		IL10N $l,
 		LoggerInterface $logger,
