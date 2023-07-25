@@ -13,27 +13,23 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Middleware;
-use OCP\AppFramework\Utility\IControllerMethodReflector;
 use OCP\IL10N;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 use ReflectionMethod;
 
 class AppEcosystemAuthMiddleware extends Middleware {
-	private IControllerMethodReflector $reflector;
 	private AppEcosystemV2Service $service;
 	protected IRequest $request;
 	private IL10N $l;
 	private LoggerInterface $logger;
 
 	public function __construct(
-		IControllerMethodReflector $reflector,
 		AppEcosystemV2Service $service,
 		IRequest $request,
 		IL10N $l,
 		LoggerInterface $logger,
 	) {
-		$this->reflector = $reflector;
 		$this->service = $service;
 		$this->request = $request;
 		$this->l = $l;
@@ -43,33 +39,13 @@ class AppEcosystemAuthMiddleware extends Middleware {
 	public function beforeController($controller, $methodName) {
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
-		$isAppEcosystemAuth = $this->hasAnnotationOrAttribute($reflectionMethod, 'AppEcosystemAuth', AppEcosystemAuth::class);
+		$isAppEcosystemAuth = !empty($reflectionMethod->getAttributes(AppEcosystemAuth::class));
 
 		if ($isAppEcosystemAuth) {
 			if (!$this->service->validateExAppRequestToNC($this->request)) {
 				throw new AEAuthNotValidException($this->l->t('AppEcosystemV2 authentication failed'), Http::STATUS_UNAUTHORIZED);
 			}
 		}
-	}
-
-	/**
-	 * @template T
-	 *
-	 * @param ReflectionMethod $reflectionMethod
-	 * @param string $annotationName
-	 * @param class-string<T> $attributeClass
-	 * @return boolean
-	 */
-	protected function hasAnnotationOrAttribute(ReflectionMethod $reflectionMethod, string $annotationName, string $attributeClass): bool {
-		if (!empty($reflectionMethod->getAttributes($attributeClass))) {
-			return true;
-		}
-
-		if ($this->reflector->hasAnnotation($annotationName)) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**

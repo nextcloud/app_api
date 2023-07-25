@@ -32,7 +32,7 @@ class SetConfig extends Command {
 		$this->addArgument('configkey', InputArgument::REQUIRED);
 
 		$this->addOption('value', null, InputOption::VALUE_REQUIRED);
-		$this->addOption('sensitive', null, InputOption::VALUE_NONE, 'Sensitive config value');
+		$this->addOption('sensitive', null, InputOption::VALUE_OPTIONAL, 'Sensitive config value', null);
 		$this->addOption('update-only', null, InputOption::VALUE_NONE, 'Only update config, if not exists - do not create');
 	}
 
@@ -40,41 +40,45 @@ class SetConfig extends Command {
 		$appId = $input->getArgument('appid');
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
-			$output->writeln('ExApp ' . $appId . ' not found');
+			$output->writeln(sprintf('ExApp %s not found', $appId));
 			return 1;
 		}
 
-		if ($exApp->getEnabled()) {
-			$configKey = $input->getArgument('configkey');
-			$value = $input->getOption('value');
-			$sensitive = $input->getOption('sensitive');
-			$updateOnly = $input->getOption('update-only');
+		$configKey = $input->getArgument('configkey');
+		$value = $input->getOption('value');
+		$isSensitive = $input->getOption('sensitive');
+		$sensitive = (int) filter_var($isSensitive, FILTER_VALIDATE_BOOLEAN);
+		$updateOnly = $input->getOption('update-only');
 
-			if (!$updateOnly) {
-				$exAppConfig = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $value, (int) $sensitive);
-				if ($exAppConfig === null) {
-					$output->writeln('ExApp ' . $appId . ' config ' . $configKey . ' not found');
-					return 1;
-				}
-			} else {
-				$exAppConfig = $this->exAppConfigService->getAppConfig($appId, $configKey);
-				if ($exAppConfig === null) {
-					$output->writeln('ExApp ' . $appId . ' config ' . $configKey . ' not found');
-					return 1;
-				}
-				$exAppConfig->setConfigvalue($value);
-				$exAppConfig->setSensitive((int) $sensitive);
-				if ($this->exAppConfigService->updateAppConfigValue($exAppConfig) !== 1) {
-					$output->writeln('ExApp ' . $appId . ' config ' . $configKey . ' not updated');
-					return 1;
-				}
+		$exAppConfig = $this->exAppConfigService->getAppConfig($appId, $configKey);
+		if (!$updateOnly) {
+			if ($exAppConfig !== null) {
+				$output->writeln(sprintf('ExApp %s config %s already exists. Use --update-only flag.', $appId, $configKey));
+				return 1;
 			}
-			$sensitiveMsg = $sensitive ? '[sensitive]' : '';
-			$output->writeln('ExApp ' . $appId . ' config ' . $configKey . ' set to ' . $value . ' ' . $sensitiveMsg);
-			return 0;
+
+			$exAppConfig = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $value, $sensitive);
+			if ($exAppConfig === null) {
+				$output->writeln(sprintf('ExApp %s config %s not found', $appId, $configKey));
+				return 1;
+			}
+		} else {
+			if ($exAppConfig === null) {
+				$output->writeln(sprintf('ExApp %s config %s not found', $appId, $configKey));
+				return 1;
+			}
+			$exAppConfig->setConfigvalue($value);
+			if ($isSensitive !== null) {
+				$exAppConfig->setSensitive($sensitive);
+			}
+			if ($this->exAppConfigService->updateAppConfigValue($exAppConfig) === null) {
+				$output->writeln(sprintf('ExApp %s config %s not updated', $appId, $configKey));
+				return 1;
+			}
 		}
 
-		$output->writeln('ExApp ' . $appId . ' is disabled');
-		return 1;
+		$sensitiveMsg = $exAppConfig->getSensitive() === 1 ? '[sensitive]' : '';
+		$output->writeln(sprintf('ExApp %s config %s set to %s %s', $appId, $configKey, $value, $sensitiveMsg));
+		return 0;
 	}
 }

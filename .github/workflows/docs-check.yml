@@ -1,9 +1,6 @@
 name: Docs check
 on:
   pull_request:
-    paths:
-      - '.github/workflows/docs-check.yml'
-      - 'docs/**'
 
 permissions:
   contents: read
