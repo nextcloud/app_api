@@ -1,0 +1,25 @@
+name: Lint
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'appinfo/*.*'
+      - 'lib/**'
+#      - 'src/**'
+      - 'templates/*.*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  lint-success:
+    permissions:
+      contents: none
+    runs-on: ubuntu-22.04
+    name: Lint-OK
+    steps:
+      - run: echo "No Lint required"
