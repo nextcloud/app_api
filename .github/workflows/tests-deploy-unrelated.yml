@@ -1,0 +1,24 @@
+name: Tests - Deploy
+
+on:
+  pull_request:
+    paths-ignore:
+      - '.github/workflows/tests-deploy.yml'
+      - 'lib/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-deploy-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  tests-deploy-success:
+    permissions:
+      contents: none
+    runs-on: ubuntu-22.04
+    needs: [nc-py-api-pgsql]
+    name: Tests-Deploy-OK
+    steps:
+      - run: echo "No Tests-Deploy required"

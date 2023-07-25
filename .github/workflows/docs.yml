@@ -6,6 +6,9 @@ on:
       - '.github/workflows/docs.yml'
       - 'docs/**'
 
+permissions:
+  contents: read
+
 jobs:
   build_push_docs:
     runs-on: ubuntu-latest

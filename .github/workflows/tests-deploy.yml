@@ -12,6 +12,13 @@ on:
       - 'lib/**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-deploy-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   nc-host-app-docker:
     runs-on: ubuntu-22.04
@@ -505,3 +512,13 @@ jobs:
           name: nc_host_app_docker_redis_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
+
+  tests-deploy-uccess:
+    permissions:
+      contents: none
+    runs-on: ubuntu-22.04
+    needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-app-docker-by-port,
+            nc-docker-app-host-by-hostname, nc-host-app-docker-redis]
+    name: Tests-Deploy-OK
+    steps:
+      - run: echo "Tests-Deploy passed successfully"

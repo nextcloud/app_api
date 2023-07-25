@@ -15,6 +15,13 @@ on:
       - 'templates/*.*'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   xml-lint:
     runs-on: ubuntu-22.04
@@ -138,3 +145,12 @@ jobs:
 #
 #      - name: Lint
 #        run: npm run stylelint
+
+  lint-success:
+    permissions:
+      contents: none
+    runs-on: ubuntu-22.04
+    needs: [xml-lint, php-lint, php-cs, php-psalm-analysis, php-security-analysis]
+    name: Lint-OK
+    steps:
+      - run: echo "Lint passed successfully"
