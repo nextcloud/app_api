@@ -2,6 +2,10 @@
 Deployment
 ==========
 
+.. toctree::
+
+	deploy-configs.rst
+
 Overview
 --------
 
