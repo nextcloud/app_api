@@ -18,7 +18,6 @@ jobs:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [nc-py-api-pgsql]
     name: Tests-Deploy-OK
     steps:
       - run: echo "No Tests-Deploy required"
