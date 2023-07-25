@@ -74,21 +74,6 @@ class ExAppConfigMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function updateAppConfigValue(ExAppConfig $appConfigEx): int {
-		$qb = $this->db->getQueryBuilder();
-		return $qb->update($this->tableName)
-			->set('configvalue', $qb->createNamedParameter($appConfigEx->getConfigvalue(), IQueryBuilder::PARAM_STR))
-			->set('sensitive', $qb->createNamedParameter($appConfigEx->getSensitive(), IQueryBuilder::PARAM_INT))
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appConfigEx->getAppid(), IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('configkey', $qb->createNamedParameter($appConfigEx->getConfigkey(), IQueryBuilder::PARAM_STR))
-			)
-		->executeStatement();
-	}
-
-	/**
-	 * @throws Exception
-	 */
 	public function deleteByAppidConfigkeys(string $appId, array $configKeys): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->delete($this->tableName)

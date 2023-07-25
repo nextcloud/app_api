@@ -54,11 +54,11 @@ class ExAppConfigService {
 	 * @param string $appId
 	 * @param string $configKey
 	 * @param mixed $configValue
-	 * @param int $sensitive
+	 * @param int|null $sensitive
 	 *
 	 * @return ExAppConfig|null
 	 */
-	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, int $sensitive = 0): ?ExAppConfig {
+	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, ?int $sensitive = null): ?ExAppConfig {
 		$appConfigEx = $this->getAppConfig($appId, $configKey);
 		if ($appConfigEx === null) {
 			try {
@@ -66,7 +66,7 @@ class ExAppConfigService {
 					'appid' => $appId,
 					'configkey' => $configKey,
 					'configvalue' => $configValue ?? '',
-					'sensitive' => $sensitive,
+					'sensitive' => $sensitive ?? 0,
 				]));
 			} catch (Exception $e) {
 				$this->logger->error(sprintf('Failed to insert appconfig_ex value. Error: %s', $e->getMessage()), ['exception' => $e]);
@@ -74,8 +74,10 @@ class ExAppConfigService {
 			}
 		} else {
 			$appConfigEx->setConfigvalue($configValue);
-			$appConfigEx->setSensitive($sensitive);
-			if ($this->updateAppConfigValue($appConfigEx) !== 1) {
+			if ($sensitive !== null) {
+				$appConfigEx->setSensitive($sensitive);
+			}
+			if ($this->updateAppConfigValue($appConfigEx) === null) {
 				$this->logger->error(sprintf('Error while updating appconfig_ex %s value.', $configKey));
 				return null;
 			}
@@ -129,11 +131,11 @@ class ExAppConfigService {
 	/**
 	 * @param ExAppConfig $exAppConfig
 	 *
-	 * @return int|null
+	 * @return ExAppConfig|null
 	 */
-	public function updateAppConfigValue(ExAppConfig $exAppConfig): ?int {
+	public function updateAppConfigValue(ExAppConfig $exAppConfig): ?ExAppConfig {
 		try {
-			return $this->mapper->updateAppConfigValue($exAppConfig);
+			return $this->mapper->update($exAppConfig);
 		} catch (Exception) {
 			return null;
 		}
