@@ -2,26 +2,26 @@
 Docker deployment configurations
 ================================
 
-There are several ExApp daemon configurations:
+There are several Daemon configurations:
 
 	* Nextcloud in host and Daemon (Docker) in the same host (by socket or port)
 	* Nextcloud in host and Daemon (Docker) on remote host (by port)
 	* Nextcloud in container (Docker) and Daemon (Docker) in the same host (by socket or port)
 	* Nextcloud in container (Docker) and Daemon (Docker) is in container (Docker in Docker) - by socket or port
 
-Detailed information and pictures are listed below.
+For each configuration using socket make sure that Nextcloud webserver user has enough permissions to access it.
+In case of remote remote access to Daemon, make sure that it configured with ssl_key, ssl_cert and ca.cert is imported to Nextcloud.
 
-
-Nextcloud in host and Daemon (Docker) in the same host
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nextcloud in host and Daemon in the same host
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The simplest configuration is when Nextcloud is installed in host and ExApp daemon (Docker) is in the same host.
 
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, stroke: #364c53, stroke-width: 1px, background: url(https://www.docker.com/wp-content/uploads/2022/01/Docker-Logo-White-RGB_Horizontal-730x189-1.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, stroke: #045987, stroke-width: 1px, background: url(https://nextcloud.com/wp-content/uploads/2023/02/logo_nextcloud_white.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
+		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
 		Host
@@ -45,17 +45,19 @@ The simplest configuration is when Nextcloud is installed in host and ExApp daem
 		class ExApp2 python
 		class ExApp3 python
 
-In this case, the ExApp daemon (Docker) is connected to the Nextcloud by socket ``/var/run/docker.sock``.
-Make sure that Nextcloud webserver user has enough permissions to access the socket.
+In this case, the ExApp daemon (Docker) can be connected to the Nextcloud by socket ``/var/run/docker.sock``.
 
-Nextcloud in host and Daemon (Docker) on remote host
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nextcloud in host and Daemon on remote host
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Distributed configuration is when Nextcloud is installed in host and ExApp daemon (Docker) is on remote host.
+Benefit: no performance impact on Nextcloud host.
 
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, stroke: #364c53, stroke-width: 1px, background: url(https://www.docker.com/wp-content/uploads/2022/01/Docker-Logo-White-RGB_Horizontal-730x189-1.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, stroke: #045987, stroke-width: 1px, background: url(https://nextcloud.com/wp-content/uploads/2023/02/logo_nextcloud_white.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
+		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
 		Direction LR
@@ -85,14 +87,15 @@ Nextcloud in host and Daemon (Docker) on remote host
 		class ExApp3 python
 
 
-Nextcloud in container (Docker) and Daemon (Docker) in the same host
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Nextcloud in container and Daemon in the same host
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, stroke: #364c53, stroke-width: 1px, background: url(https://www.docker.com/wp-content/uploads/2022/01/Docker-Logo-White-RGB_Horizontal-730x189-1.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, stroke: #045987, stroke-width: 1px, background: url(https://nextcloud.com/wp-content/uploads/2023/02/logo_nextcloud_white.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
+		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
 		Host
@@ -101,7 +104,7 @@ Nextcloud in container (Docker) and Daemon (Docker) in the same host
 			Daemon --> Containers
 
 			state Containers {
-				Nextcloud
+				[*] --> Nextcloud : /var/run/docker.sock
 				--
 				ExApp1
 				--
@@ -116,13 +119,14 @@ Nextcloud in container (Docker) and Daemon (Docker) in the same host
 		class ExApp3 python
 
 
-Nextcloud in container (Docker) and Daemon (Docker) is in container (Docker in Docker)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nextcloud in container and Daemon is in container (Docker in Docker)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, stroke: #364c53, stroke-width: 1px, background: url(https://www.docker.com/wp-content/uploads/2022/01/Docker-Logo-White-RGB_Horizontal-730x189-1.png) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
+		classDef docker2 fill: #1f97ee, color: transparent, font-size: 20px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
 		classDef nextcloud fill: #006aa3, color: white, stroke: #045987, stroke-width: 1px
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
@@ -132,7 +136,7 @@ Nextcloud in container (Docker) and Daemon (Docker) is in container (Docker in D
 			Daemon --> Containers
 
 			state Containers {
-				[*] --> Nextcloud
+				[*] --> Nextcloud : /var/run/docker.sock
 
 				state Nextcloud {
 					Daemon2 --> Containers2
@@ -150,7 +154,9 @@ Nextcloud in container (Docker) and Daemon (Docker) is in container (Docker in D
 
 		class Nextcloud nextcloud
 		class Daemon docker
-		class Daemon2 docker
+		class Daemon2 docker2
 		class ExApp1 python
 		class ExApp2 python
 		class ExApp3 python
+
+In this case, Nextcloud is installed in container and second separate Daemon (Docker) is in Nextcloud container.
