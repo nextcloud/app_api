@@ -20,7 +20,7 @@ The simplest configuration is when Nextcloud is installed in host and ExApp daem
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
 		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
@@ -56,7 +56,7 @@ Benefit: no performance impact on Nextcloud host.
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
 		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
@@ -94,7 +94,7 @@ Nextcloud in container and Daemon in the same host
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
 		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
@@ -125,8 +125,8 @@ Nextcloud in container and Daemon is in container (Docker in Docker)
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
-		classDef docker2 fill: #1f97ee, color: transparent, font-size: 20px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
+		classDef docker2 fill: #1f97ee, color: transparent, font-size: 20px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
 		classDef nextcloud fill: #006aa3, color: white, stroke: #045987, stroke-width: 1px
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
