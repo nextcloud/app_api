@@ -2,14 +2,8 @@ name: Tests - Deploy
 
 on:
   pull_request:
-    paths:
-      - '.github/workflows/tests-deploy.yml'
-      - 'lib/**'
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/tests-deploy.yml'
-      - 'lib/**'
   workflow_dispatch:
 
 permissions:

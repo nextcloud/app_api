@@ -2,17 +2,8 @@ name: Lint
 
 on:
   pull_request:
-    paths:
-      - 'appinfo/*.*'
-      - 'lib/**'
-#      - 'src/**'
-      - 'templates/*.*'
   push:
-    paths:
-      - 'appinfo/*.*'
-      - 'lib/*.*'
-#      - 'src/*.*'
-      - 'templates/*.*'
+    branches: [main]
   workflow_dispatch:
 
 permissions:
