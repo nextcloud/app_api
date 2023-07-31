@@ -38,7 +38,7 @@ class Deploy extends Command {
 
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
-		$this->dockerActions = $dockerActions; // TODO: Change to dynamic DeployActions resolving
+		$this->dockerActions = $dockerActions;
 		$this->appManager = $appManager;
 		$this->random = $random;
 		$this->urlGenerator = $urlGenerator;

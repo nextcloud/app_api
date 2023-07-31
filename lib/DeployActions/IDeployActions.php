@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Deploy;
+namespace OCA\AppEcosystemV2\DeployActions;
 
 use OCA\AppEcosystemV2\Db\DaemonConfig;
 
 /**
- * Base class for AppEcosystemV2 ExApp deploy actions
+ * Base interface for AppEcosystemV2 ExApp deploy actions
  */
-abstract class AbstractDeployActions {
+interface IDeployActions {
 	/**
 	 * Deploy type (action) id name
 	 *
 	 * @return string
 	 */
-	abstract public function getAcceptsDeployId(): string;
+	public function getAcceptsDeployId(): string;
 
 	/**
 	 * Deploy ExApp to the target daemon
@@ -25,7 +25,7 @@ abstract class AbstractDeployActions {
 	 *
 	 * @return mixed
 	 */
-	abstract public function deployExApp(DaemonConfig $daemonConfig, array $params = []): mixed;
+	public function deployExApp(DaemonConfig $daemonConfig, array $params = []): mixed;
 
 	/**
 	 * Load ExApp information from the target daemon.
@@ -36,7 +36,7 @@ abstract class AbstractDeployActions {
 	 *
 	 * @return array required data for ExApp registration
 	 */
-	abstract public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array;
+	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array;
 
 	/**
 	 * Resolve ExApp host depending on daemon configuration.
@@ -48,5 +48,5 @@ abstract class AbstractDeployActions {
 	 *
 	 * @return string
 	 */
-	abstract public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string;
+	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string;
 }
