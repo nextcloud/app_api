@@ -45,7 +45,9 @@ class ExAppNotifier implements INotifier {
 		}
 
 		$subjectParameters = $notification->getSubjectParameters();
-		$notification->setLink($subjectParameters['link']);
+		if (isset($subjectParameters['link'])) {
+			$notification->setLink($subjectParameters['link']);
+		}
 		$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 
 		if (isset($subjectParameters['rich_subject']) && isset($subjectParameters['rich_subject_params'])) {
