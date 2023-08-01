@@ -46,7 +46,7 @@ class NotificationsController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$userId = $this->request->getHeader('NC-USER-ID');
 		$notification = $this->exNotificationsManager->sendNotification($appId, $userId, $params);
-		return new DataResponse($notification, Http::STATUS_OK);
+		return new DataResponse($this->notificationToArray($notification), Http::STATUS_OK);
 	}
 
 	private function notificationToArray(INotification $notification): array {
