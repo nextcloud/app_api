@@ -150,7 +150,11 @@ class ExFilesActionsMenuService {
 				'actionFile' => [
 					'fileId' => $actionFile['fileId'],
 					'name' => $actionFile['name'],
-					'dir' => $actionFile['dir'],
+					'directory' => $actionFile['directory'],
+					'etag' => $actionFile['etag'],
+					'mime' => $actionFile['mime'],
+					'favorite' => $actionFile['favorite'] ?? "false",
+					'permissions' => $actionFile['permissions']
 				],
 			];
 			$exApp = $this->appEcosystemV2Service->getExApp($appId);

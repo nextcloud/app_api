@@ -20,14 +20,19 @@ state.fileActions.forEach(fileAction => {
 			console.debug('[AppEcosystemV2] file', fileName)
 			console.debug('[AppEcosystemV2] context', context)
 			console.debug('[AppEcosystemV2] fileAction', fileAction)
+			const file = context.$file[0]
 			axios.post(generateOcsUrl('/apps/app_ecosystem_v2/api/v1/files/action'), {
 				appId: fileAction.appid,
 				actionName: fileAction.name,
 				actionHandler: fileAction.action_handler,
 				actionFile: {
-					fileId: Number(context.$file[0].dataset.id),
+					fileId: Number(file.dataset.id),
 					name: fileName,
-					dir: context.$file[0].dataset.path,
+					directory: file.dataset.path,
+					etag: file.dataset.etag,
+					mime: file.dataset.mime,
+					favorite: file.dataset?.favorite,
+					permissions: file.dataset.permissions,
 				},
 			}).then((response) => {
 				console.debug('response', response)
