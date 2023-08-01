@@ -15,6 +15,7 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
+use OCP\Notification\INotification;
 
 class NotificationsController extends OCSController {
 	private ExNotificationsManager $exNotificationsManager;
@@ -46,5 +47,19 @@ class NotificationsController extends OCSController {
 		$userId = $this->request->getHeader('NC-USER-ID');
 		$notification = $this->exNotificationsManager->sendNotification($appId, $userId, $params);
 		return new DataResponse($notification, Http::STATUS_OK);
+	}
+
+	private function notificationToArray(INotification $notification): array {
+		return [
+			'app' => $notification->getApp(),
+			'user' => $notification->getUser(),
+			'datetime' => $notification->getDateTime()->format('c'),
+			'object_type' => $notification->getObjectType(),
+			'object_id' => $notification->getObjectId(),
+			'subject' => $notification->getParsedSubject(),
+			'message' => $notification->getParsedMessage(),
+			'link' => $notification->getLink(),
+			'icon' => $notification->getIcon(),
+		];
 	}
 }
