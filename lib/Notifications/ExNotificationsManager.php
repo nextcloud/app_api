@@ -31,21 +31,7 @@ class ExNotificationsManager {
 			->setDateTime(new \DateTime())
 			->setObject($params['object'], $params['object_id'])
 			->setSubject($params['subject'], $params['subject_params']);
-		if (isset($params['actions'])) {
-			$notification = $this->buildNotificationActions($notification, $params['actions']);
-		}
 		$this->manager->notify($notification);
-		return $notification;
-	}
-
-	public function buildNotificationActions(INotification $notification, array $actions): INotification {
-		foreach ($actions as $actionParams) {
-			$action = $notification->createAction();
-			$action->setLabel($actionParams['label']);
-			$action->setLink($actionParams['link'], $actionParams['method']);
-			$action->setPrimary(filter_var($actionParams['primary'], FILTER_VALIDATE_BOOLEAN));
-			$notification->addAction($action);
-		}
 		return $notification;
 	}
 }
