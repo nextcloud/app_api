@@ -30,7 +30,7 @@ class ExNotificationsManager {
 			->setUser($userId)
 			->setDateTime(new \DateTime())
 			->setObject($params['object'], $params['object_id'])
-			->setSubject($params['subject'], $params['subject_params']);
+			->setSubject($params['subject_type'], $params['subject_params']);
 		$this->manager->notify($notification);
 		return $notification;
 	}
