@@ -234,7 +234,7 @@ jobs:
           docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
             --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
             -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
-          sleep 25s
+          sleep 30s
 
       - name: Install AppEcosystemV2
         run: |
@@ -311,7 +311,7 @@ jobs:
           docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
             --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
             -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
-          sleep 25s
+          sleep 30s
 
       - name: Install AppEcosystemV2
         run: |
