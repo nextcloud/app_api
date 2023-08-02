@@ -52,7 +52,7 @@ class AppConfigController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue, $sensitive);
 		if ($result instanceof ExAppConfig) {
-			return new DataResponse(1, Http::STATUS_OK);
+			return new DataResponse($result, Http::STATUS_OK);
 		}
 		throw new OCSBadRequestException('Error setting app config value');
 	}
