@@ -448,6 +448,7 @@ class AppEcosystemV2Service {
 	/**
 	 * AppEcosystem authentication request validation for Nextcloud:
 	 *  - checks if ExApp exists and is enabled
+	 *  - checks if ExApp version changed and updates it in database
 	 *  - validates request sign time (if it's complies with set time window)
 	 *  - builds and checks request signature
 	 *  - checks if request data hash is valid
@@ -464,6 +465,10 @@ class AppEcosystemV2Service {
 		$exApp = $this->getExApp($request->getHeader('EX-APP-ID'));
 		if ($exApp === null) {
 			$this->logger->error(sprintf('ExApp with appId %s not found.', $request->getHeader('EX-APP-ID')));
+			return false;
+		}
+
+		if (!$this->handleExAppVersionChange($request, $exApp)) {
 			return false;
 		}
 
@@ -603,6 +608,36 @@ class AppEcosystemV2Service {
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while updating ExApp last check time for ExApp: %s. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 		}
+	}
+
+	public function updateExAppVersion(ExApp $exApp): bool {
+		try {
+			return $this->exAppMapper->updateExAppVersion($exApp) === 1;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to update ExApp %s version to %s', $exApp->getAppid(), $exApp->getVersion()), ['exception' => $e]);
+			return false;
+		}
+	}
+
+	/**
+	 * Check if ExApp version changed and update it in database
+	 *
+	 * @param IRequest $request
+	 * @param ExApp $exApp
+	 *
+	 * @return bool
+	 */
+	public function handleExAppVersionChange(IRequest $request, ExApp &$exApp): bool {
+		$requestExAppVersion = $request->getHeader('EX-APP-VERSION');
+		$versionValid = $exApp->getVersion() === $requestExAppVersion;
+		if (!$versionValid) {
+			// Update ExApp version
+			$exApp->setVersion($requestExAppVersion);
+			if (!$this->updateExAppVersion($exApp)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public function getExAppsList(bool $extended = false): array {
