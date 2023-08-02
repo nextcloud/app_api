@@ -38,19 +38,19 @@ class AppConfigController extends OCSController {
 	 *
 	 * @param string $configKey
 	 * @param mixed $configValue
-	 *
+	 * @param int|null $sensitive
 	 * @throws OCSBadRequestException
 	 * @return DataResponse
 	 */
 	#[AppEcosystemAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function setAppConfigValue(string $configKey, mixed $configValue): DataResponse {
+	public function setAppConfigValue(string $configKey, mixed $configValue, ?int $sensitive = null): DataResponse {
 		if ($configKey === '') {
 			throw new OCSBadRequestException('Config key cannot be empty');
 		}
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue);
+		$result = $this->exAppConfigService->setAppConfigValue($appId, $configKey, $configValue, $sensitive);
 		if ($result instanceof ExAppConfig) {
 			return new DataResponse(1, Http::STATUS_OK);
 		}
