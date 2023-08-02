@@ -12,3 +12,4 @@ Welcome to the amazing docs that we will write for AppEcosystemV2!
 	development/index.rst
 	deploy/index.rst
 	authentication
+	api/index.rst

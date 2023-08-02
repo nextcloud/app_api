@@ -8,13 +8,12 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
 use OCA\AppEcosystemV2\Db\DaemonConfig;
-use OCA\AppEcosystemV2\Deploy\AbstractDeployActions;
 
 use OCP\ICertificateManager;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
-class DockerActions extends AbstractDeployActions {
+class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	public const AE_REQUIRED_ENVS = [
 		'AE_VERSION',
