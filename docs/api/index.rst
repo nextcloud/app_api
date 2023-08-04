@@ -4,7 +4,7 @@ AppEcosystemV2 APIs
 
 
 .. toctree::
-	:maxdepth: 1
+	:maxdepth: 2
 
 	fileactionsmenu
 	notifications
