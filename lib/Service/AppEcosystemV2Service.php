@@ -23,6 +23,7 @@ use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Log\ILogFactory;
+use OCP\Security\Bruteforce\IThrottler;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 
@@ -34,6 +35,7 @@ class AppEcosystemV2Service {
 	private LoggerInterface $logger;
 	private ILogFactory $logFactory;
 	private ICache $cache;
+	private IThrottler $throttler;
 	private IConfig $config;
 	private IClient $client;
 	private ExAppMapper $exAppMapper;
@@ -50,6 +52,7 @@ class AppEcosystemV2Service {
 		LoggerInterface      $logger,
 		ILogFactory          $logFactory,
 		ICacheFactory        $cacheFactory,
+		IThrottler           $throttler,
 		IConfig              $config,
 		IClientService       $clientService,
 		ExAppMapper          $exAppMapper,
@@ -65,6 +68,7 @@ class AppEcosystemV2Service {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
+		$this->throttler = $throttler;
 		$this->config = $config;
 		$this->client = $clientService->newClient();
 		$this->exAppMapper = $exAppMapper;
@@ -461,6 +465,8 @@ class AppEcosystemV2Service {
 	 * @return bool
 	 */
 	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
+		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
+
 		$exApp = $this->getExApp($request->getHeader('EX-APP-ID'));
 		if ($exApp === null) {
 			$this->logger->error(sprintf('ExApp with appId %s not found.', $request->getHeader('EX-APP-ID')));
@@ -489,6 +495,7 @@ class AppEcosystemV2Service {
 		$signTime = $request->getHeader('AE-SIGN-TIME');
 		if (!$this->verifySignTime($signTime)) {
 			$this->logger->error(sprintf('Sign time %s is not valid', $signTime));
+			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress());
 			return false;
 		}
 		$headers['AE-SIGN-TIME'] = $signTime;
@@ -500,6 +507,7 @@ class AppEcosystemV2Service {
 		if ($signatureValid) {
 			if (!$this->verifyDataHash($dataHash)) {
 				$this->logger->error(sprintf('Data hash %s is not valid', $dataHash));
+				$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress());
 				return false;
 			}
 			if (!$isDav) {
@@ -534,9 +542,10 @@ class AppEcosystemV2Service {
 					return false;
 				}
 			}
-			return $this->finalizeRequestToNC($userId);
+			return $this->finalizeRequestToNC($userId, $request);
 		} else {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
+			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress());
 		}
 
 		$this->logger->error(sprintf('ExApp %s request to NC validation failed.', $exApp->getAppid()));
@@ -548,11 +557,12 @@ class AppEcosystemV2Service {
 	 *  - sets active user (null if not a user context)
 	 *  - updates ExApp last response time
 	 *
-	 * @param $userId
+	 * @param string $userId
+	 * @param IRequest $request
 	 *
 	 * @return bool
 	 */
-	private function finalizeRequestToNC($userId): bool {
+	private function finalizeRequestToNC(string $userId, IRequest $request): bool {
 		if ($userId !== '') {
 			$activeUser = $this->userManager->get($userId);
 			if ($activeUser === null) {
@@ -563,6 +573,7 @@ class AppEcosystemV2Service {
 		} else {
 			$this->userSession->setUser(null);
 		}
+		$this->throttler->resetDelayForIP($request->getRemoteAddress());
 		return true;
 	}
 
