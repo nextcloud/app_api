@@ -19,6 +19,7 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
 
@@ -60,7 +61,7 @@ class Application extends App implements IBootstrap {
 	public function registerDavAuth(): void {
 		$container = $this->getContainer();
 
-		$dispatcher = $container->getServer()->getEventDispatcher();
+		$dispatcher = $container->query(IEventDispatcher::class);
 		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
 			$event->getServer()->addPlugin($container->query(DavPlugin::class));
 		});
