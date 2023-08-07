@@ -495,7 +495,6 @@ class AppEcosystemV2Service {
 		$signTime = $request->getHeader('AE-SIGN-TIME');
 		if (!$this->verifySignTime($signTime)) {
 			$this->logger->error(sprintf('Sign time %s is not valid', $signTime));
-			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress());
 			return false;
 		}
 		$headers['AE-SIGN-TIME'] = $signTime;
