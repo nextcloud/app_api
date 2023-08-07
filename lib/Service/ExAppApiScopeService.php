@@ -152,8 +152,8 @@ class ExAppApiScopeService {
 		$apiScopes = array_filter($this->getExAppApiScopes(), function (ExAppApiScope $apiScope) use ($scopeGroups) {
 			return in_array($apiScope->getScopeGroup(), $scopeGroups);
 		});
-		return array_map(function (ExAppApiScope $apiScope) {
+		return array_unique(array_map(function (ExAppApiScope $apiScope) {
 			return $apiScope->getName();
-		}, $apiScopes);
+		}, $apiScopes));
 	}
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command\ExApp\Scopes;
 
+use OCA\AppEcosystemV2\Db\ExAppScope;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 use OCA\AppEcosystemV2\Service\ExAppScopesService;
@@ -52,7 +53,9 @@ class ListScopes extends Command {
 		}
 
 		$output->writeln(sprintf('ExApp %s scopes:', $exApp->getAppid()));
-		$mappedScopes = array_unique($this->exAppApiScopeService->mapScopeGroupsToNames($scopes));
+		$mappedScopes = array_unique($this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $scope) {
+			return intval($scope->getScopeGroup());
+		}, $scopes)));
 		$output->writeln(join(', ', $mappedScopes));
 		return 0;
 	}
