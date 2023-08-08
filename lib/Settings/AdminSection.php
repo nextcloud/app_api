@@ -29,7 +29,7 @@ class AdminSection implements IIconSection {
 	 * @inheritDoc
 	 */
 	public function getID(): string {
-		return 'app-ecosystem-v2';
+		return 'app_ecosystem_v2';
 	}
 
 	/**
