@@ -104,5 +104,5 @@ Examples
 
 Here is a list of simple example ExApps based on FileActionsMenu:
 
-* `video_to_gif <https://github.com/cloud-py-api/nc_py_api/tree/main/examples/to_gif>`_ - ExApp based on FileActionsMenu to convert videos to gif in place
+* `video_to_gif <https://github.com/cloud-py-api/nc_py_api/tree/main/examples/as_app/to_gif>`_ - ExApp based on FileActionsMenu to convert videos to gif in place
 * `upscaler_demo <https://github.com/cloud-py-api/upscaler_demo.git>`_ - ExApp based on FileActionsMenu to upscale image in place
