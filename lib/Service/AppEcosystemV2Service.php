@@ -465,19 +465,19 @@ class AppEcosystemV2Service {
 	 * @return bool
 	 */
 	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
+		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
+
 		$exApp = $this->getExApp($request->getHeader('EX-APP-ID'));
 		if ($exApp === null) {
 			$this->logger->error(sprintf('ExApp with appId %s not found.', $request->getHeader('EX-APP-ID')));
+			// Protection for guessing installed ExApps list
+			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
+				'appid' => $request->getHeader('EX-APP-ID'),
+				'userid' => $request->getHeader('NC-USER-ID'),
+			]);
 			return false;
 		}
 
-		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
-
-		$enabled = $exApp->getEnabled();
-		if (!$enabled) {
-			$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $enabled));
-			return false;
-		}
 		$this->handleExAppDebug($exApp, $request, false);
 
 		$headers = [
@@ -504,12 +504,12 @@ class AppEcosystemV2Service {
 		$signatureValid = $signature === $requestSignature;
 
 		if ($signatureValid) {
+			if (!$exApp->getEnabled()) {
+				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $exApp->getEnabled()));
+				return false;
+			}
 			if (!$this->verifyDataHash($dataHash)) {
 				$this->logger->error(sprintf('Data hash %s is not valid', $dataHash));
-				$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
-					'appid' => $request->getHeader('EX-APP-ID'),
-					'userid' => $request->getHeader('NC-USER-ID'),
-				]);
 				return false;
 			}
 			if (!$isDav) {
