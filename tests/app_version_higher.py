@@ -11,7 +11,7 @@ if __name__ == "__main__":
     nc_application = NextcloudApp(user="admin")
     assert nc_application.users.get_details()  # OCS call works
     assert not nc_application.users.notifications.get_all()  # there are no notifications
-    nc_application._session.cfg.app_version = "99.0.0"  # change ExApp version
+    nc_application._session.adapter.headers.update({"EX-APP-VERSION": "99.0.0"})  # change ExApp version
     with pytest.raises(NextcloudException) as exc_info:
         nc_application.users.get_details()  # this call should be rejected by AppEcosystem
     assert exc_info.value.status_code == 401
