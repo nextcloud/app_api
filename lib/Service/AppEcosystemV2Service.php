@@ -465,13 +465,13 @@ class AppEcosystemV2Service {
 	 * @return bool
 	 */
 	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
-		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
-
 		$exApp = $this->getExApp($request->getHeader('EX-APP-ID'));
 		if ($exApp === null) {
 			$this->logger->error(sprintf('ExApp with appId %s not found.', $request->getHeader('EX-APP-ID')));
 			return false;
 		}
+
+		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
 
 		$enabled = $exApp->getEnabled();
 		if (!$enabled) {
@@ -506,7 +506,10 @@ class AppEcosystemV2Service {
 		if ($signatureValid) {
 			if (!$this->verifyDataHash($dataHash)) {
 				$this->logger->error(sprintf('Data hash %s is not valid', $dataHash));
-				$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress());
+				$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
+					'appid' => $request->getHeader('EX-APP-ID'),
+					'userid' => $request->getHeader('NC-USER-ID'),
+				]);
 				return false;
 			}
 			if (!$isDav) {
@@ -544,7 +547,10 @@ class AppEcosystemV2Service {
 			return $this->finalizeRequestToNC($userId, $request);
 		} else {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
-			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress());
+			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
+				'appid' => $request->getHeader('EX-APP-ID'),
+				'userid' => $request->getHeader('NC-USER-ID'),
+			]);
 		}
 
 		$this->logger->error(sprintf('ExApp %s request to NC validation failed.', $exApp->getAppid()));
@@ -572,7 +578,10 @@ class AppEcosystemV2Service {
 		} else {
 			$this->userSession->setUser(null);
 		}
-		$this->throttler->resetDelayForIP($request->getRemoteAddress());
+		$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
+			'appid' => $request->getHeader('EX-APP-ID'),
+			'userid' => $userId,
+		]);
 		return true;
 	}
 
