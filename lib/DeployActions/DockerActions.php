@@ -97,11 +97,17 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function createContainer(string $dockerUrl, array $imageParams, array $params = []): array {
+		$createVolumeResult = $this->createVolume($dockerUrl, $params['hostname']);
+		if (isset($createVolumeResult['error'])) {
+			return $createVolumeResult;
+		}
+
 		$containerParams = [
 			'Image' => $this->buildImageName($imageParams),
 			'Hostname' => $params['hostname'],
 			'HostConfig' => [
 				'NetworkMode' => $params['net'],
+				'Mounts' => $this->buildDefaultExAppVolume($params['hostname']),
 			],
 			'Env' => $params['env'],
 		];
@@ -117,6 +123,10 @@ class DockerActions implements IDeployActions {
 				],
 			];
 			$containerParams['NetworkingConfig'] = $networkingConfig;
+		}
+
+		if (isset($params['devices'])) {
+			$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams($params['devices']);
 		}
 
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($params['name'])));
@@ -172,6 +182,28 @@ class DockerActions implements IDeployActions {
 			error_log($e->getMessage());
 			return ['error' => 'Failed to inspect container'];
 		}
+	}
+
+	public function createVolume(string $dockerUrl, string $volume): array {
+		$url = $this->buildApiUrl($dockerUrl, 'volumes/create');
+		try {
+			$options['json'] = [
+				'name' => $volume . '_data',
+			];
+			$response = $this->guzzleClient->post($url, $options);
+			$result = json_decode((string) $response->getBody(), true);
+			if ($response->getStatusCode() === 201) {
+				return $result;
+			}
+			if ($response->getStatusCode() === 500) {
+				error_log($result['message']);
+				return ['error' => $result['message']];
+			}
+		} catch (GuzzleException $e) {
+			$this->logger->error('Failed to create volume', ['exception' => $e]);
+			error_log($e->getMessage());
+		}
+		return ['error' => 'Failed to create volume'];
 	}
 
 	/**
@@ -288,5 +320,29 @@ class DockerActions implements IDeployActions {
 				: [$deployConfig['ssl_cert'], $deployConfig['ssl_cert_password']];
 		}
 		return $guzzleParams;
+	}
+
+	private function buildDevicesParams(array $devices): array {
+		return array_map(function (string $device) {
+			return ["PathOnHost" => $device, "PathInContainer" => $device, "CgroupPermissions" => "rwm"];
+		}, $devices);
+	}
+
+	/**
+	 * Build default volume for ExApp.
+	 * For now only one volume created per ExApp.
+	 *
+	 * @param string $appId
+	 * @return array
+	 */
+	private function buildDefaultExAppVolume(string $appId): array {
+		return [
+			[
+				'Type' => 'volume',
+				'Source' => $appId . '_data',
+				'Target' => '/' . $appId . '_data',
+				'ReadOnly' => false
+			],
+		];
 	}
 }
