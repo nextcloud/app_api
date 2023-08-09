@@ -42,7 +42,7 @@ return [
 		['name' => 'OCSApi#getExAppUsers', 'url' => '/api/v1/users', 'verb' => 'GET'],
 
 		// ExApps
-		['name' => 'exApp#getExApps', 'url' => '/api/v1/ex-app/all', 'verb' => 'GET'],
+		['name' => 'exApp#getExApps', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
 
 		// Ex Apps registration (for Admin GUI, not implemented yet)
 //		['name' => 'OCSApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],

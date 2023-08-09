@@ -198,7 +198,6 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'default' => 'file',
 			]);
-			// https://nextcloud.github.io/nextcloud-files/enums/Permission.html
 			$table->addColumn('permissions', Types::STRING, [
 				'notnull' => true,
 			]);
