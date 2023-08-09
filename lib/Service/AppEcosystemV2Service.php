@@ -620,7 +620,7 @@ class AppEcosystemV2Service {
 					'id' => $exApp->getAppid(),
 					'name' => $exApp->getName(),
 					'version' => $exApp->getVersion(),
-					'enabled' => $exApp->getEnabled(),
+					'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
 					'last_check_time' => $exApp->getLastCheckTime(),
 					'system' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 				];
