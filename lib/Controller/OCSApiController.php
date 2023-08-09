@@ -19,13 +19,11 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
-use OCP\IL10N;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
 class OCSApiController extends OCSController {
 	private LoggerInterface $logger;
-	private IL10N $l;
 	private AppEcosystemV2Service $service;
 	private ExFilesActionsMenuService $exFilesActionsMenuService;
 	private ExAppApiScopeService $exAppApiScopeService;
@@ -35,7 +33,6 @@ class OCSApiController extends OCSController {
 	public function __construct(
 		IRequest $request,
 		?string $userId,
-		IL10N $l,
 		AppEcosystemV2Service $service,
 		ExFilesActionsMenuService $exFilesActionsMenuService,
 		LoggerInterface $logger,
@@ -45,7 +42,6 @@ class OCSApiController extends OCSController {
 
 		$this->request = $request;
 		$this->logger = $logger;
-		$this->l = $l;
 		$this->service = $service;
 		$this->exFilesActionsMenuService = $exFilesActionsMenuService;
 		$this->userId = $userId;
