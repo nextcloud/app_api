@@ -509,11 +509,11 @@ class AppEcosystemV2Service {
 		$signatureValid = $signature === $requestSignature;
 
 		if ($signatureValid) {
-			if (!$this->handleExAppVersionChange($request, $exApp)) {
-				return false;
-			}
 			if (!$exApp->getEnabled()) {
 				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $exApp->getEnabled()));
+				return false;
+			}
+			if (!$this->handleExAppVersionChange($request, $exApp)) {
 				return false;
 			}
 			if (!$this->verifyDataHash($dataHash)) {
