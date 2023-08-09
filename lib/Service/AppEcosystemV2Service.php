@@ -664,25 +664,27 @@ class AppEcosystemV2Service {
 		return true;
 	}
 
-	public function getExAppsList(bool $extended = false): array {
+
+	public function getExAppsList(string $list = 'enabled'): array {
 		try {
 			$exApps = $this->exAppMapper->findAll();
-			if ($extended) {
-				$exApps = array_map(function (ExApp $exApp) {
-					return [
-						'id' => $exApp->getAppid(),
-						'name' => $exApp->getName(),
-						'version' => $exApp->getVersion(),
-						'enabled' => $exApp->getEnabled(),
-						'last_check_time' => $exApp->getLastCheckTime(),
-						'system' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-					];
-				}, $exApps);
-			} else {
-				$exApps = array_map(function (ExApp $exApp) {
-					return $exApp->getAppid();
-				}, $exApps);
+
+			if ($list === 'enabled') {
+				$exApps = array_filter($exApps, function (ExApp $exApp) {
+					return $exApp->getEnabled() === 1;
+				});
 			}
+
+			$exApps = array_map(function (ExApp $exApp) {
+				return [
+					'id' => $exApp->getAppid(),
+					'name' => $exApp->getName(),
+					'version' => $exApp->getVersion(),
+					'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
+					'last_check_time' => $exApp->getLastCheckTime(),
+					'system' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
+				];
+			}, $exApps);
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while getting ExApps list. Error: %s', $e->getMessage()), ['exception' => $e]);
 			$exApps = [];
