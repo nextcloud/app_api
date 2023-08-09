@@ -669,9 +669,9 @@ class AppEcosystemV2Service {
 			$exApps = $this->exAppMapper->findAll();
 
 			if ($list === 'enabled') {
-				$exApps = array_filter($exApps, function (ExApp $exApp) {
+				$exApps = array_values(array_filter($exApps, function (ExApp $exApp) {
 					return $exApp->getEnabled() === 1;
-				});
+				}));
 			}
 
 			$exApps = array_map(function (ExApp $exApp) {
