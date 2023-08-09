@@ -8,6 +8,7 @@ use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppMapper;
 
+use OCA\AppEcosystemV2\Notifications\ExNotificationsManager;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -45,22 +46,24 @@ class AppEcosystemV2Service {
 	private ExAppUsersService $exAppUsersService;
 	private ExAppScopesService $exAppScopesService;
 	private ExAppConfigService $exAppConfigService;
+	private ExNotificationsManager $exNotificationsManager;
 
 	public function __construct(
-		LoggerInterface      $logger,
-		ILogFactory          $logFactory,
-		ICacheFactory        $cacheFactory,
-		IConfig              $config,
-		IClientService       $clientService,
-		ExAppMapper          $exAppMapper,
-		IAppManager          $appManager,
-		ExAppUsersService    $exAppUserService,
+		LoggerInterface $logger,
+		ILogFactory $logFactory,
+		ICacheFactory $cacheFactory,
+		IConfig $config,
+		IClientService $clientService,
+		ExAppMapper $exAppMapper,
+		IAppManager $appManager,
+		ExAppUsersService $exAppUserService,
 		ExAppApiScopeService $exAppApiScopeService,
-		ExAppScopesService   $exAppScopesService,
-		ISecureRandom        $random,
-		IUserSession         $userSession,
-		IUserManager         $userManager,
-		ExAppConfigService   $exAppConfigService,
+		ExAppScopesService $exAppScopesService,
+		ISecureRandom $random,
+		IUserSession $userSession,
+		IUserManager $userManager,
+		ExAppConfigService $exAppConfigService,
+		ExNotificationsManager $exNotificationsManager,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
@@ -76,6 +79,7 @@ class AppEcosystemV2Service {
 		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->exAppScopesService = $exAppScopesService;
 		$this->exAppConfigService = $exAppConfigService;
+		$this->exNotificationsManager = $exNotificationsManager;
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -448,6 +452,7 @@ class AppEcosystemV2Service {
 	/**
 	 * AppEcosystem authentication request validation for Nextcloud:
 	 *  - checks if ExApp exists and is enabled
+	 *  - checks if ExApp version changed and updates it in database
 	 *  - validates request sign time (if it's complies with set time window)
 	 *  - builds and checks request signature
 	 *  - checks if request data hash is valid
@@ -498,6 +503,9 @@ class AppEcosystemV2Service {
 		$signatureValid = $signature === $requestSignature;
 
 		if ($signatureValid) {
+			if (!$this->handleExAppVersionChange($request, $exApp)) {
+				return false;
+			}
 			if (!$this->verifyDataHash($dataHash)) {
 				$this->logger->error(sprintf('Data hash %s is not valid', $dataHash));
 				return false;
@@ -605,14 +613,65 @@ class AppEcosystemV2Service {
 		}
 	}
 
+	public function updateExAppVersion(ExApp $exApp): bool {
+		try {
+			return $this->exAppMapper->updateExAppVersion($exApp) === 1;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to update ExApp %s version to %s', $exApp->getAppid(), $exApp->getVersion()), ['exception' => $e]);
+			return false;
+		}
+	}
+
+	/**
+	 * Check if ExApp version changed and update it in database.
+	 * Immediately disable ExApp and send notifications to the administrators (users of admins group).
+	 * This handling only intentional case of manual ExApp update
+	 * so the administrator must re-enable ExApp in UI or CLI after that.
+	 *
+	 * Ref: https://github.com/cloud-py-api/app_ecosystem_v2/pull/29
+	 * TODO: Add link to docs with warning and mark as not-recommended
+	 *
+	 * @param IRequest $request
+	 * @param ExApp $exApp
+	 *
+	 * @return bool
+	 */
+	public function handleExAppVersionChange(IRequest $request, ExApp &$exApp): bool {
+		$requestExAppVersion = $request->getHeader('EX-APP-VERSION');
+		$versionValid = $exApp->getVersion() === $requestExAppVersion;
+		if (!$versionValid) {
+			// Update ExApp version
+			$oldVersion = $exApp->getVersion();
+			$exApp->setVersion($requestExAppVersion);
+			if (!$this->updateExAppVersion($exApp)) {
+				return false;
+			}
+			if ($this->disableExApp($exApp)) {
+				$this->exNotificationsManager->sendAdminsNotification($exApp->getAppid(), [
+					'object' => 'ex_app_update',
+					'object_id' => $exApp->getAppid(),
+					'subject_type' => 'ex_app_version_update',
+					'subject_params' => [
+						'rich_subject' => 'ExApp updated, action required!',
+						'rich_subject_params' => [],
+						'rich_message' => sprintf('ExApp %s disabled due to update from %s to %s. Manual re-enable required.', $exApp->getAppid(), $oldVersion, $exApp->getVersion()),
+						'rich_message_params' => [],
+					],
+				]);
+			}
+			return false;
+		}
+		return true;
+	}
+
 	public function getExAppsList(string $list = 'enabled'): array {
 		try {
 			$exApps = $this->exAppMapper->findAll();
 
 			if ($list === 'enabled') {
-				$exApps = array_filter($exApps, function (ExApp $exApp) {
+				$exApps = array_values(array_filter($exApps, function (ExApp $exApp) {
 					return $exApp->getEnabled() === 1;
-				});
+				}));
 			}
 
 			$exApps = array_map(function (ExApp $exApp) {
