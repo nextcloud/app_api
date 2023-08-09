@@ -12,3 +12,4 @@ AppEcosystemV2 brings out the following terms frequently used in the code:
 * ``AppEcosystemAuth`` - AppEcosystemV2 authentication
 * ``ExAppScope`` - granted to ExApp scope group of access to API routes
 * ``ExAppApiScope`` - pre-defined scope group of access to list of API routes
+* ``FileActionsMenu`` - entry in files actions menu (context menu)
