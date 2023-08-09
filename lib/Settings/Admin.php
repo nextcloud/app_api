@@ -38,7 +38,7 @@ class Admin implements ISettings {
 	}
 
 	public function getSection(): string {
-		return 'app-ecosystem-v2';
+		return Application::APP_ID;
 	}
 
 	public function getPriority(): int {

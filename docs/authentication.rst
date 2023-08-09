@@ -99,6 +99,7 @@ Authentication flow in details
 		Nextcloud->>+AppEcosystemV2: Validate request
 		AppEcosystemV2-->>AppEcosystemV2: Check if ExApp exists and enabled
 		AppEcosystemV2-->>Nextcloud: Reject if ExApp not exists or disabled
+		AppEcosystemV2-->>AppEcosystemV2: Check if ExApp version changed
 		AppEcosystemV2-->>AppEcosystemV2: Validate AE-SIGN-TIME
 		AppEcosystemV2-->>Nextcloud: Reject if sign time diff > 5 min
 		AppEcosystemV2-->>AppEcosystemV2: Generate and validate AE-SIGNATURE

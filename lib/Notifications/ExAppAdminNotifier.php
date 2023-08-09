@@ -11,7 +11,7 @@ use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
 use OCP\Notification\INotifier;
 
-class ExAppNotifier implements INotifier {
+class ExAppAdminNotifier implements INotifier {
 	private IFactory $factory;
 	private IURLGenerator $url;
 	private AppEcosystemV2Service $service;
@@ -31,24 +31,23 @@ class ExAppNotifier implements INotifier {
 	}
 
 	public function getName(): string {
-		return $this->factory->get(Application::APP_ID)->t('AppEcosystemV2 ExApp notifier');
+		return $this->factory->get(Application::APP_ID)->t('AppEcosystemV2 ExApp version update notifier');
 	}
 
 	public function prepare(INotification $notification, string $languageCode): INotification {
 		$exApp = $this->service->getExApp($notification->getApp());
-		if ($exApp === null) {
+		// TODO: Think about another possible admin ExApp notifications, make them unified
+		// TODO: Think about ExApp rich objects
+		if ($exApp === null || $notification->getSubject() !== 'ex_app_version_update') {
 			throw new \InvalidArgumentException();
 		}
-		if ($notification->getSubject() === 'ex_app_version_update' && $exApp->getEnabled()) {
+		if ($exApp->getEnabled()) {
 			throw new \InvalidArgumentException('ExApp is probably already re-enabled');
-		} elseif (!$exApp->getEnabled()) { // Only enabled ExApps can render notifications
-			throw new \InvalidArgumentException('ExApp is disabled');
 		}
 
 		$parameters = $notification->getSubjectParameters();
-		if (isset($parameters['link']) && $parameters['link'] !== '') {
-			$notification->setLink($parameters['link']);
-		}
+
+		$notification->setLink($this->url->getAbsoluteURL('/index.php/settings/admin/app_ecosystem_v2'));
 		$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 
 		if (isset($parameters['rich_subject']) && isset($parameters['rich_subject_params'])) {
