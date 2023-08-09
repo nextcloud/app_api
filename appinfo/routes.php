@@ -10,6 +10,7 @@ return [
 		// ExApps actions
 		['name' => 'exApp#registerExApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
 		['name' => 'exApp#unregisterExApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
+		['name' => 'exApp#updateExApp', 'url' => '/api/v1/ex-app/{appId}/update', 'verb' => 'POST'],
 	],
 	'ocs' => [
 		// Logging
@@ -21,9 +22,7 @@ return [
 		['name' => 'OCSExApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
 
 		// ExApps actions
-		['name' => 'OCSExApp#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
 		['name' => 'OCSExApp#setExAppEnabled', 'url' => '/api/v1/ex-app/{appId}/enabled', 'verb' => 'PUT'],
-		['name' => 'OCSExApp#updateExApp', 'url' => '/api/v1/ex-app/{appId}/update', 'verb' => 'POST'],
 
 		// File Actions Menu
 		['name' => 'ExFileActionsMenu#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
