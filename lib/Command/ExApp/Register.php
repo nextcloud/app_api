@@ -48,8 +48,6 @@ class Register extends Command {
 		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->exAppScopesService = $exAppScopesService;
 		$this->exAppUsersService = $exAppUsersService;
-
-		// TODO: Change to dynamic DeployActions resolving
 		$this->dockerActions = $dockerActions;
 		$this->manualActions = $manualActions;
 	}
@@ -81,10 +79,9 @@ class Register extends Command {
 			return 2;
 		}
 
-		// TODO: Make this dynamic
-		if ($daemonConfig->getAcceptsDeployId() == $this->dockerActions->getAcceptsDeployId()) {
+		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-		} elseif ($daemonConfig->getAcceptsDeployId() == $this->manualActions->getAcceptsDeployId()) {
+		} elseif ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
 			$exAppJson = $input->getOption('json-info');
 			if ($exAppJson === null) {
 				$output->writeln('ExApp JSON is required for manual deploy.');
