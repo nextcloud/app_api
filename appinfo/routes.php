@@ -18,12 +18,12 @@ return [
 		['name' => 'OCSApi#getNCUsersList', 'url' => '/api/v1/users', 'verb' => 'GET'],
 
 		// ExApps
-		['name' => 'exApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
+		['name' => 'OCSExApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
 
 		// ExApps actions
-		['name' => 'OCSexApp#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
-		['name' => 'OCSexApp#setExAppEnabled', 'url' => '/api/v1/ex-app/{appId}/enabled', 'verb' => 'PUT'],
-		['name' => 'OCSexApp#updateExApp', 'url' => '/api/v1/ex-app/{appId}/update', 'verb' => 'POST'],
+		['name' => 'OCSExApp#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
+		['name' => 'OCSExApp#setExAppEnabled', 'url' => '/api/v1/ex-app/{appId}/enabled', 'verb' => 'PUT'],
+		['name' => 'OCSExApp#updateExApp', 'url' => '/api/v1/ex-app/{appId}/update', 'verb' => 'POST'],
 
 		// File Actions Menu
 		['name' => 'ExFileActionsMenu#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
