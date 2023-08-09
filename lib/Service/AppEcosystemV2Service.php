@@ -664,7 +664,6 @@ class AppEcosystemV2Service {
 		return true;
 	}
 
-
 	public function getExAppsList(string $list = 'enabled'): array {
 		try {
 			$exApps = $this->exAppMapper->findAll();
