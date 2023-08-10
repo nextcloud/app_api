@@ -2,58 +2,33 @@
 
 declare(strict_types=1);
 
-/**
- *
- * Nextcloud - App Ecosystem V2
- *
- * @copyright Copyright (c) 2023 Andrey Borysenko <andrey18106x@gmail.com>
- *
- * @copyright Copyright (c) 2023 Alexander Piskun <bigcat88@icloud.com>
- *
- * @author 2023 Andrey Borysenko <andrey18106x@gmail.com>
- *
- * @license AGPL-3.0-or-later
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
-
 return [
 	'routes' => [
 		// AppEcosystemV2 admin settings
 		['name' => 'config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
+
+		// ExApps actions
+		['name' => 'exApp#registerExApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
+		['name' => 'exApp#unregisterExApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
+		['name' => 'exApp#updateExApp', 'url' => '/api/v1/ex-app/{appId}/update', 'verb' => 'POST'],
 	],
 	'ocs' => [
 		// Logging
 		['name' => 'OCSApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
 
-		// ExAppUsers
-		['name' => 'OCSApi#getExAppUsers', 'url' => '/api/v1/users', 'verb' => 'GET'],
+		['name' => 'OCSApi#getNCUsersList', 'url' => '/api/v1/users', 'verb' => 'GET'],
 
 		// ExApps
-		['name' => 'exApp#getExApps', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
+		['name' => 'OCSExApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
 
-		// Ex Apps registration (for Admin GUI, not implemented yet)
-//		['name' => 'OCSApi#registerExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
-//		['name' => 'OCSApi#unregisterExternalApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
-//		['name' => 'OCSApi#getAppStatus', 'url' => '/api/v1/ex-app/{appId}/status', 'verb' => 'GET'],
+		// ExApps actions
+		['name' => 'OCSExApp#setExAppEnabled', 'url' => '/api/v1/ex-app/{appId}/enabled', 'verb' => 'PUT'],
 
 		// File Actions Menu
-		['name' => 'OCSApi#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
-		['name' => 'OCSApi#unregisterFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'DELETE'],
-		['name' => 'OCSApi#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
-		['name' => 'OCSApi#loadFileActionIcon', 'url' => '/api/v1/files/action/icon', 'verb' => 'GET'],
+		['name' => 'ExFileActionsMenu#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
+		['name' => 'ExFileActionsMenu#unregisterFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'DELETE'],
+		['name' => 'ExFileActionsMenu#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
+		['name' => 'ExFileActionsMenu#loadFileActionIcon', 'url' => '/api/v1/files/action/icon', 'verb' => 'GET'],
 
 		// appconfig_ex (app configuration)
 		['name' => 'appConfig#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
@@ -65,37 +40,7 @@ return [
 		['name' => 'preferences#getUserConfigValues', 'url' => '/api/v1/ex-app/preference/get-values', 'verb' => 'POST'],
 		['name' => 'preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
 
-		// api_scopes
-		['name' => 'OCSApi#registerApiScope', 'url' => '/api/v1/ex-app/scopes', 'verb' => 'POST'],
-
-//	TODO: Implement Notifications, SearchProvider, BackgroundJob, SettingsPage, SettingsSection, EventListener, DashboardWidget, Capabilities
-
 		// Notifications
 		['name' => 'notifications#sendNotification', 'url' => '/api/v1/notification', 'verb' => 'POST'],
-//		['name' => 'notification#registerNotificationProvider', 'url' => '/api/v1/notification-provider', 'verb' => 'POST'],
-//		['name' => 'notification#unregisterNotificationProvider', 'url' => '/api/v1/notification-provider', 'verb' => 'DELETE'],
-
-		// Unified search
-//		['name' => 'search#registerSearchProvider', 'url' => '/api/v1/search-provider', 'verb' => 'POST'],
-//		['name' => 'search#unregisterSearchProvider', 'url' => '/api/v1/search-provider', 'verb' => 'DELETE'],
-
-		// Background jobs
-//		['name' => 'backgroundJobs#registerBackgroundJob', 'url' => '/api/v1/background-job', 'verb' => 'POST'],
-//		['name' => 'backgroundJobs#unregisterBackgroundJob', 'url' => '/api/v1/background-job', 'verb' => 'DELETE'],
-
-		// Settings API (admin/user settings registration)
-//		['name' => 'settings#registerSettingsPage', 'url' => '/api/v1/settings/page', 'verb' => 'POST'],
-//		['name' => 'settings#unregisterSettingsPage', 'url' => '/api/v1/settings/page', 'verb' => 'DELETE'],
-//		['name' => 'settings#registerSettingsSection', 'url' => '/api/v1/settings/section', 'verb' => 'POST'],
-//		['name' => 'settings#unregisterSettingsSection', 'url' => '/api/v1/settings/section', 'verb' => 'DELETE'],
-
-		// Event listeners
-//		['name' => 'events#registerEventListener', 'url' => '/api/v1/event-listener', 'verb' => 'POST'],
-//		['name' => 'events#registerEventListener', 'url' => '/api/v1/event-listener', 'verb' => 'DELETE'],
-
-		// Dashboard widgets
-//		['name' => 'dashboard#registerDashboardWidget', 'url' => '/api/v1/dashboard', 'verb' => 'POST'],
-//		['name' => 'dashboard#unregisterDashboardWidget', 'url' => '/api/v1/dashboard', 'verb' => 'DELETE'],
-//	    ['name' => 'dashboard#loadDashboardWidgetData', 'url' => '/api/v1/dashboard/data', 'verb' => 'GET'], // For dashboard items list
 	],
 ];
