@@ -168,7 +168,6 @@ jobs:
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
           docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php \
@@ -244,7 +243,6 @@ jobs:
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
           docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
           docker cp ./certs/client/ nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
@@ -321,7 +319,6 @@ jobs:
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
           docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
           docker cp ./certs/client/ nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
