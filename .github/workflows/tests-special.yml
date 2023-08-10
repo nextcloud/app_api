@@ -135,7 +135,7 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
-  tests-success:
+  tests-special-success:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
