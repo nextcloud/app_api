@@ -94,7 +94,10 @@ jobs:
           ./occ config:system:set allow_local_remote_servers --value true
           ./occ app:enable notifications
           ./occ app:enable --force ${{ env.APP_NAME }}
-          patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
+
+      - name: Patch base.php
+        if: ${{ !startsWith(matrix.server-version, 'master') }}
+        run: patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
 
       - name: Test deploy
         run: |
@@ -462,7 +465,10 @@ jobs:
           ./occ config:system:set redis port --value ${{ env.REDIS_PORT }}
 
           ./occ app:enable --force ${{ env.APP_NAME }}
-          patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
+
+      - name: Patch base.php
+        if: ${{ !startsWith(matrix.server-version, 'master') }}
+        run: patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
 
       - name: Test deploy
         run: |
