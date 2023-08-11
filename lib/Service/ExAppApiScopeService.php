@@ -95,6 +95,7 @@ class ExAppApiScopeService {
 			['api_route' => '/apps/weather_status/api/', 'scope_group' => 13, 'name' => 'WEATHER_STATUS'],
 			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 14, 'name' => 'FILES_SHARING'],
 			['api_route' => '/dav/', 'scope_group' => 3, 'name' => 'DAV'],
+			['api_route' => '/apps/files/ajax/', 'scope_group' => 3, 'name' => 'DAV'],
 		];
 
 		$this->cache->clear('/all_api_scopes');
