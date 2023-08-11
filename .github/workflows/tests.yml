@@ -105,7 +105,7 @@ jobs:
           ./occ app:enable --force ${{ env.APP_NAME }}
 
       - name: Patch base.php
-        if: ${{ !startsWith(matrix.server-version, 'master') }}
+        if: ${{ startsWith(matrix.server-version, 'stable26') }}
         run: patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
 
       - name: Run Nextcloud

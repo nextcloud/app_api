@@ -95,10 +95,6 @@ jobs:
           ./occ app:enable notifications
           ./occ app:enable --force ${{ env.APP_NAME }}
 
-      - name: Patch base.php
-        if: ${{ !startsWith(matrix.server-version, 'master') }}
-        run: patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
-
       - name: Test deploy
         run: |
           php -S 127.0.0.1:8080 &
@@ -462,10 +458,6 @@ jobs:
           ./occ config:system:set redis port --value ${{ env.REDIS_PORT }}
 
           ./occ app:enable --force ${{ env.APP_NAME }}
-
-      - name: Patch base.php
-        if: ${{ !startsWith(matrix.server-version, 'master') }}
-        run: patch -p 1 -i apps/${{ env.APP_NAME }}/base_php.patch
 
       - name: Test deploy
         run: |
