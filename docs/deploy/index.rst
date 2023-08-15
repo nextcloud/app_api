@@ -229,6 +229,14 @@ It has the same structure as Nextcloud appinfo/info.xml file, but with some addi
 			<image>cloud-py-api/py_app_v2-skeleton</image>
 			<image-tag>latest</image-tag>
 		</docker-install>
+		<scopes>
+			<required>
+				<value>2</value>
+			</required>
+			<optional>
+				<value>32</value>
+			</optional>
+		</scopes>
 		<protocol>http</protocol>
 		<system>0</system>
 	</ex-app>
