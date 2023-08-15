@@ -96,6 +96,14 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, null, null];
 		}
 
+		$containerInfo = $this->inspectContainer($dockerUrl, $params['container_params']['name']);
+		if (isset($containerInfo['Id'])) {
+			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $containerInfo['Id']);
+			if (isset($stopResult['error']) || isset($removeResult['error'])) {
+				return [$pullResult, $stopResult, $removeResult];
+			}
+		}
+
 		$createResult = $this->createContainer($dockerUrl, $imageParams, $containerParams);
 		if (isset($createResult['error'])) {
 			return [null, $createResult, null];
@@ -261,12 +269,10 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, null, null, null, null];
 		}
 
-		$stopResult = $this->stopContainer($dockerUrl, $params['prev_container_id']);
+		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $params['prev_container_id']);
 		if (isset($stopResult['error'])) {
 			return [$pullResult, $stopResult, null, null, null];
 		}
-
-		$removeResult = $this->removeContainer($dockerUrl, $params['prev_container_id']);
 		if (isset($removeResult['error'])) {
 			return [$pullResult, $stopResult, $removeResult, null, null];
 		}
@@ -278,6 +284,16 @@ class DockerActions implements IDeployActions {
 
 		$startResult = $this->startContainer($dockerUrl, $createResult['Id']);
 		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
+	}
+
+	private function removePrevExAppContainer(string $dockerUrl, string $containerId): array {
+		$stopResult = $this->stopContainer($dockerUrl, $containerId);
+		if (isset($stopResult['error'])) {
+			return [$stopResult, null];
+		}
+
+		$removeResult = $this->removeContainer($dockerUrl, $containerId);
+		return [$stopResult, $removeResult];
 	}
 
 	public function buildDeployParams(DaemonConfig $daemonConfig, \SimpleXMLElement $infoXml, array $params = []): array {
