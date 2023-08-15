@@ -45,8 +45,8 @@ and actually forwarded to the container:
 Dev changes to Nextcloud server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The only changes to Nextcloud server are in ``base.php`` file.
-Until these changes not implemented in server, they can be applied by patch (``base_php.patch`` in project root directory).
+The only changes to Nextcloud server are in ``base.php`` file,
+required only for Nextcloud 26, as **Nextcloud 27.1+** already comes with these changes.
 
 .. code-block:: php
 
@@ -71,3 +71,4 @@ And down below ``tryAppEcosystemV2Login`` method is added:
 		return $appEcosystemV2Service->validateExAppRequestToNC($request);
 	}
 
+.. note:: Patch itself are in the project root directory with ``base_php.patch`` name.

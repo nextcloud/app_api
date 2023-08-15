@@ -82,20 +82,20 @@ class ExAppApiScopeService {
 			['api_route' => $aeApiV1Prefix . '/users', 'scope_group' => 2, 'name' => 'SYSTEM'],
 			['api_route' => $aeApiV1Prefix . '/ex-app/all', 'scope_group' => 2, 'name' => 'SYSTEM'],
 			['api_route' => $aeApiV1Prefix . '/ex-app/enabled', 'scope_group' => 2, 'name' => 'SYSTEM'],
-			['api_route' => $aeApiV1Prefix . '/notification', 'scope_group' => 12, 'name' => 'NOTIFICATIONS'],
+			['api_route' => $aeApiV1Prefix . '/notification', 'scope_group' => 32, 'name' => 'NOTIFICATIONS'],
 
 			// Cloud scopes
 			['api_route' => '/cloud/capabilities', 'scope_group' => 1, 'name' => 'BASIC'],
 			['api_route' => '/cloud/apps', 'scope_group' => 2, 'name' => 'SYSTEM'],
 			['api_route' => '/apps/provisioning_api/api/', 'scope_group' => 2, 'name' => 'SYSTEM'],
-			['api_route' => '/cloud/users', 'scope_group' => 10, 'name' => 'USER_INFO'],
-			['api_route' => '/cloud/groups', 'scope_group' => 10, 'name' => 'USER_INFO'],
-			['api_route' => '/apps/user_status/api/', 'scope_group' => 11, 'name' => 'USER_STATUS'],
-			['api_route' => '/apps/notifications/api/', 'scope_group' => 12, 'name' => 'NOTIFICATIONS'],
-			['api_route' => '/apps/weather_status/api/', 'scope_group' => 13, 'name' => 'WEATHER_STATUS'],
-			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 14, 'name' => 'FILES_SHARING'],
-			['api_route' => '/dav/', 'scope_group' => 3, 'name' => 'DAV'],
-			['api_route' => '/apps/files/ajax/', 'scope_group' => 3, 'name' => 'DAV'],
+			['api_route' => '/dav/', 'scope_group' => 10, 'name' => 'DAV'],
+			['api_route' => '/apps/files/ajax/', 'scope_group' => 10, 'name' => 'DAV'],
+			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 11, 'name' => 'FILES_SHARING'],
+			['api_route' => '/cloud/users', 'scope_group' => 30, 'name' => 'USER_INFO'],
+			['api_route' => '/cloud/groups', 'scope_group' => 30, 'name' => 'USER_INFO'],
+			['api_route' => '/apps/user_status/api/', 'scope_group' => 31, 'name' => 'USER_STATUS'],
+			['api_route' => '/apps/notifications/api/', 'scope_group' => 32, 'name' => 'NOTIFICATIONS'],
+			['api_route' => '/apps/weather_status/api/', 'scope_group' => 33, 'name' => 'WEATHER_STATUS'],
 		];
 
 		$this->cache->clear('/all_api_scopes');
