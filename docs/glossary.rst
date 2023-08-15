@@ -1,6 +1,6 @@
-===========
-Definitions
-===========
+========
+Glossary
+========
 
 AppEcosystemV2 brings out the following terms frequently used in the code:
 
