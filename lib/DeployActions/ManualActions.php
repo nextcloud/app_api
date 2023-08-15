@@ -19,6 +19,21 @@ class ManualActions implements IDeployActions {
 		return null;
 	}
 
+	public function updateExApp(DaemonConfig $daemonConfig, array $params = []): mixed {
+		// Not implemented. Update is done manually.
+		return null;
+	}
+
+	public function buildDeployParams(DaemonConfig $daemonConfig, $infoXml, array $params = []): mixed {
+		// Not implemented. Deploy is done manually.
+		return null;
+	}
+
+	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
+		// Not implemented. Deploy is done manually.
+		return [];
+	}
+
 	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array {
 		$jsonInfo = json_decode($params['json-info'], true);
 		return [

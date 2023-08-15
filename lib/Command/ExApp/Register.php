@@ -14,7 +14,6 @@ use OCA\AppEcosystemV2\Service\ExAppScopesService;
 use OCA\AppEcosystemV2\Service\ExAppUsersService;
 
 use OCP\DB\Exception;
-use OCP\Http\Client\IResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -126,9 +125,9 @@ class Register extends Command {
 				}
 			}
 
-			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp);
-			if ($requestedExAppScopeGroups === null) {
-				$output->writeln(sprintf('Failed to get requested ExApp scopes for %s.', $appId));
+			$requestedExAppScopeGroups = $exAppInfo['scopes'] ?? $this->service->getExAppRequestedScopes($exApp);
+			if (isset($requestedExAppScopeGroups['error'])) {
+				$output->writeln($requestedExAppScopeGroups['error']);
 				// Fallback unregistering ExApp
 				$this->service->unregisterExApp($exApp->getAppid());
 				return 2;
@@ -206,18 +205,5 @@ class Register extends Command {
 			$output->writeln(sprintf('ExApp %s %s scope groups successfully set: %s', $exApp->getAppid(), $scopeType, implode(', ',
 				$this->exAppApiScopeService->mapScopeGroupsToNames($registeredScopeGroups))));
 		}
-	}
-
-	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp): ?array {
-		$response = $this->service->requestToExApp(null, null, $exApp, '/scopes', 'GET');
-		if (!$response instanceof IResponse && isset($response['error'])) {
-			$output->writeln(sprintf('Failed to get ExApp %s scope groups: %s', $exApp->getAppid(), $response['error']));
-			return null;
-		}
-		if ($response->getStatusCode() === 200) {
-			$this->service->updateExAppLastCheckTime($exApp);
-			return json_decode($response->getBody(), true);
-		}
-		return null;
 	}
 }

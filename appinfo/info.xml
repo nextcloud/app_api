@@ -31,6 +31,7 @@
 		<command>OCA\AppEcosystemV2\Command\ExApp\Deploy</command>
 		<command>OCA\AppEcosystemV2\Command\ExApp\Register</command>
 		<command>OCA\AppEcosystemV2\Command\ExApp\Unregister</command>
+		<command>OCA\AppEcosystemV2\Command\ExApp\Update</command>
 		<command>OCA\AppEcosystemV2\Command\ExApp\Enable</command>
 		<command>OCA\AppEcosystemV2\Command\ExApp\Disable</command>
 		<command>OCA\AppEcosystemV2\Command\ExApp\ListExApps</command>

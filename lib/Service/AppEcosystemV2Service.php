@@ -95,7 +95,7 @@ class AppEcosystemV2Service {
 			}
 
 			$exApp = $this->exAppMapper->findByAppId($appId);
-			$this->cache->set($cacheKey, $exApp);
+			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 			return $exApp;
 		} catch (DoesNotExistException) {
 		} catch (MultipleObjectsReturnedException|Exception $e) {
@@ -174,6 +174,14 @@ class AppEcosystemV2Service {
 		}
 	}
 
+	public function getExAppRandomPort(): int {
+		$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
+		while ($this->getExAppsByPort($port) !== []) {
+			$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
+		}
+		return $port;
+	}
+
 	/**
 	 * Enable ExApp. Sends request to ExApp to update enabled state.
 	 * If request fails, ExApp will be disabled.
@@ -250,6 +258,30 @@ class AppEcosystemV2Service {
 	}
 
 	/**
+	 * Update ExApp info (version and name changes after update)
+	 *
+	 * @param ExApp $exApp
+	 * @param array $exAppInfo
+	 *
+	 * @return bool
+	 */
+	public function updateExAppInfo(ExApp $exApp, array $exAppInfo): bool {
+		$cacheKey = '/exApp_' . $exApp->getAppid();
+
+		$exApp->setVersion($exAppInfo['version']);
+		if (!$this->updateExAppVersion($exApp)) {
+			return false;
+		}
+		$exApp->setName($exAppInfo['name']);
+		if (!$this->updateExAppName($exApp)) {
+			return false;
+		}
+
+		$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+		return true;
+	}
+
+	/**
 	 * Send status check request to ExApp
 	 *
 	 * @param string $appId
@@ -269,6 +301,63 @@ class AppEcosystemV2Service {
 			$this->updateExAppLastCheckTime($exApp);
 		}
 		return json_decode($exApp->getStatus(), true);
+	}
+
+	public function heartbeatExApp(array $params): bool {
+		$heartbeatAttempts = 0;
+		$delay = 1;
+		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
+		$heartbeatUrl = $this->getExAppUrl(
+			$params['protocol'],
+			$params['host'],
+			(int) $params['port'],
+		) . '/heartbeat';
+
+		while ($heartbeatAttempts < $maxHeartbeatAttempts) {
+			$heartbeatAttempts++;
+			$ch = curl_init($heartbeatUrl);
+			$headers = [
+				'Accept: application/json',
+				'Content-Type: application/json',
+			];
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+			$heartbeatResult = curl_exec($ch);
+			$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+			if ($statusCode === 200) {
+				$result = json_decode($heartbeatResult, true);
+				if (isset($result['status']) && $result['status'] === 'ok') {
+					return true;
+				}
+			}
+			sleep($delay);
+		}
+
+		return false;
+	}
+
+	public function getExAppRequestedScopes(ExApp $exApp, ?\SimpleXMLElement $infoXml = null): ?array {
+		// TODO: Add download of info.xml from AppStore if not passed
+
+		$scopes = $infoXml->xpath('ex-app/scopes');
+		if ($scopes !== false) {
+			$scopes = (array) $scopes[0];
+			$required = array_map(function (string $scopeGroup) {
+				return intval($scopeGroup);
+			}, (array) $scopes['required']);
+			$optional = array_map(function (string $scopeGroup) {
+				return intval($scopeGroup);
+			}, (array) $scopes['optional']);
+			return [
+				'required' => $required,
+				'optional' => $optional,
+			];
+		}
+
+		return ['error' => 'Failed to get ExApp requested scopes.'];
 	}
 
 	/**
@@ -384,6 +473,13 @@ class AppEcosystemV2Service {
 	 */
 	public function getExAppUrl(string $protocol, string $host, int $port): string {
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
+	}
+
+	public function buildExAppHost(array $deployConfig): string {
+		if ((isset($deployConfig['net']) && $deployConfig['net'] !== 'host') || isset($deployConfig['host'])) {
+			return '0.0.0.0';
+		}
+		return '127.0.0.1';
 	}
 
 	private function getUriEncodedParams(array $params): string {
@@ -637,6 +733,15 @@ class AppEcosystemV2Service {
 			return $this->exAppMapper->updateExAppVersion($exApp) === 1;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to update ExApp %s version to %s', $exApp->getAppid(), $exApp->getVersion()), ['exception' => $e]);
+			return false;
+		}
+	}
+
+	public function updateExAppName(ExApp $exApp): bool {
+		try {
+			return $this->exAppMapper->updateExAppName($exApp) === 1;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to update ExApp %s name to %s', $exApp->getAppid(), $exApp->getName()), ['exception' => $e]);
 			return false;
 		}
 	}

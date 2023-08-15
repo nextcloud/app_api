@@ -7,10 +7,15 @@ namespace OCA\AppEcosystemV2\DeployActions;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\DaemonConfig;
 
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
+use OCP\IURLGenerator;
+use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 
 class DockerActions implements IDeployActions {
@@ -31,15 +36,27 @@ class DockerActions implements IDeployActions {
 	private Client $guzzleClient;
 	private ICertificateManager $certificateManager;
 	private IConfig $config;
+	private IAppManager $appManager;
+	private ISecureRandom $random;
+	private IURLGenerator $urlGenerator;
+	private AppEcosystemV2Service $service;
 
 	public function __construct(
 		LoggerInterface $logger,
 		IConfig $config,
-		ICertificateManager $certificateManager
+		ICertificateManager $certificateManager,
+		IAppManager $appManager,
+		ISecureRandom $random,
+		IURLGenerator $urlGenerator,
+		AppEcosystemV2Service $service,
 	) {
 		$this->logger = $logger;
 		$this->certificateManager = $certificateManager;
 		$this->config = $config;
+		$this->appManager = $appManager;
+		$this->random = $random;
+		$this->urlGenerator = $urlGenerator;
+		$this->service = $service;
 	}
 
 	public function getAcceptsDeployId(): string {
@@ -153,6 +170,30 @@ class DockerActions implements IDeployActions {
 		}
 	}
 
+	public function stopContainer(string $dockerUrl, string $containerId): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s/stop', $containerId));
+		try {
+			$response = $this->guzzleClient->post($url);
+			return ['success' => $response->getStatusCode() === 204];
+		} catch (GuzzleException $e) {
+			$this->logger->error('Failed to stop container', ['exception' => $e]);
+			error_log($e->getMessage());
+			return ['error' => 'Failed to stop container'];
+		}
+	}
+
+	public function removeContainer(string $dockerUrl, string $containerId): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s', $containerId));
+		try {
+			$response = $this->guzzleClient->delete($url);
+			return ['success' => $response->getStatusCode() === 204];
+		} catch (GuzzleException $e) {
+			$this->logger->error('Failed to stop container', ['exception' => $e]);
+			error_log($e->getMessage());
+			return ['error' => 'Failed to stop container'];
+		}
+	}
+
 	public function pullContainer(string $dockerUrl, array $params): array {
 		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', $this->buildImageName($params)));
 		try {
@@ -204,6 +245,124 @@ class DockerActions implements IDeployActions {
 			error_log($e->getMessage());
 		}
 		return ['error' => 'Failed to create volume'];
+	}
+
+	/**
+	 * @param DaemonConfig $daemonConfig
+	 * @param array $params Deploy params (image_params, container_params)
+	 *
+	 * @return array
+	 */
+	public function updateExApp(DaemonConfig $daemonConfig, array $params = []): array {
+		$dockerUrl = $this->buildDockerUrl($daemonConfig);
+
+		$pullResult = $this->pullContainer($dockerUrl, $params['image_params']);
+		if (isset($pullResult['error'])) {
+			return [$pullResult, null, null, null, null];
+		}
+
+		$stopResult = $this->stopContainer($dockerUrl, $params['prev_container_id']);
+		if (isset($stopResult['error'])) {
+			return [$pullResult, $stopResult, null, null, null];
+		}
+
+		$removeResult = $this->removeContainer($dockerUrl, $params['prev_container_id']);
+		if (isset($removeResult['error'])) {
+			return [$pullResult, $stopResult, $removeResult, null, null];
+		}
+
+		$createResult = $this->createContainer($dockerUrl, $params['image_params'], $params['container_params']);
+		if (isset($createResult['error'])) {
+			return [$pullResult, $stopResult, $removeResult, $createResult, null];
+		}
+
+		$startResult = $this->startContainer($dockerUrl, $createResult['Id']);
+		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
+	}
+
+	public function buildDeployParams(DaemonConfig $daemonConfig, \SimpleXMLElement $infoXml, array $params = []): array {
+		$appId = (string) $infoXml->id;
+		$deployConfig = $daemonConfig->getDeployConfig();
+
+		// If update process
+		if (isset($params['container_info'])) {
+			$containerInfo = $params['container_info'];
+			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
+			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
+			// Preserve previous devices or use from params (if any)
+			$devices = array_map(function (array $device) {
+				return $device['PathOnHost'];
+			}, (array) $containerInfo['HostConfig']['Devices']) ?? $deployConfig['gpus'];
+		} else {
+			$port = $this->service->getExAppRandomPort();
+			$devices = $deployConfig['gpus'];
+		}
+
+		$imageParams = [
+			'image_src' => (string) ($infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io'),
+			'image_name' => (string) ($infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId),
+			'image_tag' => (string) ($infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest'),
+		];
+
+		$envs = $this->buildDeployEnvs([
+			'appid' => $appId,
+			'name' => (string) $infoXml->name,
+			'version' => (string) $infoXml->version,
+			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
+			'host' => $this->service->buildExAppHost($deployConfig),
+			'port' => $port,
+			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
+		], $params['env_options'] ?? [], $deployConfig);
+
+		$containerParams = [
+			'name' => $appId,
+			'hostname' => $appId,
+			'port' => $port,
+			'net' => $deployConfig['net'] ?? 'host',
+			'env' => $envs,
+			'devices' => $devices,
+		];
+
+		return [
+			'image_params' => $imageParams,
+			'container_params' => $containerParams,
+		];
+	}
+
+	private function extractDeployEnvs(array $envs): array {
+		$deployEnvs = [];
+		foreach ($envs as $env) {
+			[$key, $value] = explode('=', $env, 2);
+			if (in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
+				$deployEnvs[$key] = $value;
+			}
+		}
+		return $deployEnvs;
+	}
+
+	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
+		$autoEnvs = [
+			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
+			sprintf('APP_SECRET=%s', $this->random->generate(128)),
+			sprintf('APP_ID=%s', $params['appid']),
+			sprintf('APP_DISPLAY_NAME=%s', $params['name']),
+			sprintf('APP_VERSION=%s', $params['version']),
+			sprintf('APP_PROTOCOL=%s', $params['protocol']),
+			sprintf('APP_HOST=%s', $params['host']),
+			sprintf('APP_PORT=%s', $params['port']),
+			sprintf('IS_SYSTEM_APP=%s', $params['system_app']),
+			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
+		];
+
+		foreach ($envOptions as $envOption) {
+			[$key, $value] = explode('=', $envOption, 2);
+			// Do not overwrite required auto generated envs
+			if (!in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
+				$autoEnvs[] = sprintf('%s=%s', $key, $value);
+			}
+		}
+
+		return $autoEnvs;
 	}
 
 	/**

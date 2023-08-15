@@ -101,4 +101,47 @@ class ExAppScopesService {
 			return false;
 		}
 	}
+
+	public function removeExAppScope(ExApp $exApp, int $apiScope): bool {
+		$exAppScope = $this->getByScope($exApp, $apiScope);
+		if ($exAppScope === null) {
+			return false;
+		}
+
+		try {
+			return $this->mapper->delete($exAppScope) instanceof ExAppScope;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to delete ExApp %s scope %s', $exApp->getAppid(), $apiScope), ['exception' => $e]);
+			return false;
+		}
+	}
+
+	/**
+	 * Update ExApp scopes (setup new, remove old)
+	 *
+	 * @param ExApp $exApp
+	 * @param array $newExAppScopes
+	 *
+	 * @return bool
+	 */
+	public function updateExAppScopes(ExApp $exApp, array $newExAppScopes): bool {
+		$currentExAppScopes = $this->getExAppScopes($exApp);
+		$newScopes = array_values(array_diff($newExAppScopes, $currentExAppScopes));
+		$removedScopes = array_values(array_diff($currentExAppScopes, $newExAppScopes));
+
+		foreach ($newScopes as $newScope) {
+			if ($this->setExAppScopeGroup($exApp, $newScope) === null) {
+				return false;
+			}
+		}
+
+		foreach ($removedScopes as $removedScope) {
+			if ($this->removeExAppScope($exApp, $removedScope) === null) {
+				return false;
+			}
+		}
+
+		$this->cache->clear('/ex_app_scopes_' . $exApp->getAppid());
+		return true;
+	}
 }
