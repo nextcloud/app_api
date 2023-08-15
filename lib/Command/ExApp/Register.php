@@ -60,6 +60,7 @@ class Register extends Command {
 
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
+		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info');
 	}
 
@@ -123,7 +124,13 @@ class Register extends Command {
 				}
 			}
 
-			$requestedExAppScopeGroups = $exAppInfo['scopes'] ?? $this->service->getExAppRequestedScopes($exApp);
+			$pathToInfoXml = $input->getOption('info-xml');
+			$infoXml = null;
+			if ($pathToInfoXml !== null) {
+				$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
+			}
+
+			$requestedExAppScopeGroups = $exAppInfo['scopes'] ?? $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppJson ?? []);
 			if (isset($requestedExAppScopeGroups['error'])) {
 				$output->writeln($requestedExAppScopeGroups['error']);
 				// Fallback unregistering ExApp
