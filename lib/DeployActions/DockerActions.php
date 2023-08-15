@@ -292,7 +292,7 @@ class DockerActions implements IDeployActions {
 			// Preserve previous devices or use from params (if any)
 			$devices = array_map(function (array $device) {
 				return $device['PathOnHost'];
-			}, (array) $containerInfo['HostConfig']['Devices']) ?? $deployConfig['gpus'];
+			}, (array) $containerInfo['HostConfig']['Devices']);
 		} else {
 			$port = $this->service->getExAppRandomPort();
 			$devices = $deployConfig['gpus'];

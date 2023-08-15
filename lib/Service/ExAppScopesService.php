@@ -136,7 +136,7 @@ class ExAppScopesService {
 		}
 
 		foreach ($removedScopes as $removedScope) {
-			if ($this->removeExAppScope($exApp, $removedScope) === null) {
+			if (!$this->removeExAppScope($exApp, $removedScope)) {
 				return false;
 			}
 		}
