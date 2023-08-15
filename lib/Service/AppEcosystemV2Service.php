@@ -339,22 +339,26 @@ class AppEcosystemV2Service {
 		return false;
 	}
 
-	public function getExAppRequestedScopes(ExApp $exApp, ?\SimpleXMLElement $infoXml = null): ?array {
+	public function getExAppRequestedScopes(ExApp $exApp, ?\SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
 		// TODO: Add download of info.xml from AppStore if not passed
 
-		$scopes = $infoXml->xpath('ex-app/scopes');
-		if ($scopes !== false) {
-			$scopes = (array) $scopes[0];
-			$required = array_map(function (string $scopeGroup) {
-				return intval($scopeGroup);
-			}, (array) $scopes['required']);
-			$optional = array_map(function (string $scopeGroup) {
-				return intval($scopeGroup);
-			}, (array) $scopes['optional']);
-			return [
-				'required' => $required,
-				'optional' => $optional,
-			];
+		if (isset($infoXml)) {
+			$scopes = $infoXml->xpath('ex-app/scopes');
+			if ($scopes !== false) {
+				$scopes = (array) $scopes[0];
+				$required = array_map(function (string $scopeGroup) {
+					return intval($scopeGroup);
+				}, (array) $scopes['required']);
+				$optional = array_map(function (string $scopeGroup) {
+					return intval($scopeGroup);
+				}, (array) $scopes['optional']);
+				return [
+					'required' => $required,
+					'optional' => $optional,
+				];
+			}
+		} elseif (isset($jsonInfo['scopes'])) {
+			return $jsonInfo['scopes'];
 		}
 
 		return ['error' => 'Failed to get ExApp requested scopes.'];

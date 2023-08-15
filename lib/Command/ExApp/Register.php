@@ -114,8 +114,6 @@ class Register extends Command {
 		]);
 
 		if ($exApp !== null) {
-			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
-
 			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
 				try {
 					$this->exAppUsersService->setupSystemAppFlag($exApp);
@@ -172,6 +170,8 @@ class Register extends Command {
 				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], false);
 			}
 
+			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
+
 			$enabled = (bool) $input->getOption('enabled');
 			if ($enabled) {
 				if ($this->service->enableExApp($exApp)) {
@@ -183,7 +183,6 @@ class Register extends Command {
 					return 1;
 				}
 			}
-
 			return 0;
 		}
 
