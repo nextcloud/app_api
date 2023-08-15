@@ -171,10 +171,10 @@ class Register extends Command {
 			}
 
 			if (count($requestedExAppScopeGroups['required']) > 0) {
-				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
+				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required'], 'required');
 			}
 			if ($confirmOptionalScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], false);
+				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], 'optional');
 			}
 
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
@@ -197,8 +197,7 @@ class Register extends Command {
 		return 1;
 	}
 
-	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, bool $required = true): void {
-		$scopeType = $required ? 'required' : 'optional';
+	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, string $scopeType): void {
 		$registeredScopeGroups = [];
 		foreach ($requestedExAppScopeGroups as $scopeGroup) {
 			if ($this->exAppScopesService->setExAppScopeGroup($exApp, $scopeGroup)) {
