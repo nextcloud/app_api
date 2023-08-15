@@ -130,7 +130,7 @@ class Register extends Command {
 				$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
 			}
 
-			$requestedExAppScopeGroups = $exAppInfo['scopes'] ?? $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppJson ?? []);
+			$requestedExAppScopeGroups = $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
 			if (isset($requestedExAppScopeGroups['error'])) {
 				$output->writeln($requestedExAppScopeGroups['error']);
 				// Fallback unregistering ExApp

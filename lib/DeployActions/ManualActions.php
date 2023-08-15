@@ -45,6 +45,7 @@ class ManualActions implements IDeployActions {
 			'host' => $jsonInfo['host'],
 			'secret' => $jsonInfo['secret'],
 			'system_app' => $jsonInfo['system_app'],
+			'scopes' => $jsonInfo['scopes'],
 		];
 	}
 
