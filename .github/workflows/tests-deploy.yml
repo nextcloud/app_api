@@ -101,7 +101,8 @@ jobs:
           ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:register skeleton docker_local_sock
+          ./occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_ecosystem_v2:app:enable skeleton
           ./occ app_ecosystem_v2:app:disable skeleton
           ./occ app_ecosystem_v2:app:unregister skeleton --silent
@@ -170,7 +171,8 @@ jobs:
             --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_local_sock
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
@@ -247,7 +249,8 @@ jobs:
             --net=master_bridge --ssl_cert /client/cert.pem --ssl_key /client/key.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_by_port
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
@@ -323,7 +326,8 @@ jobs:
             --net=host --hostname=host.docker.internal --ssl_cert /client/cert.pem --ssl_key /client/key.pem
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_by_port
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
@@ -465,7 +469,8 @@ jobs:
           ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:register skeleton docker_local_sock
+          ./occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_ecosystem_v2:app:enable skeleton
           ./occ app_ecosystem_v2:app:disable skeleton
           ./occ app_ecosystem_v2:app:unregister skeleton --silent
