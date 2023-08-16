@@ -157,7 +157,11 @@ class ExFilesActionsMenuService {
 					'mtime' => $actionFile['mtime'],
 					'contentLength' => $actionFile['contentLength'],
 					'favorite' => $actionFile['favorite'] ?? "false",
-					'permissions' => $actionFile['permissions']
+					'permissions' => $actionFile['permissions'],
+					'shareTypes' => $actionFile['shareTypes'] ?? null,
+					'shareAttributes' => $actionFile['shareAttributes'],
+					'sharePermissions' => $actionFile['sharePermissions'],
+					'userId' => $userId,
 				],
 			];
 			$exApp = $this->appEcosystemV2Service->getExApp($appId);

@@ -36,6 +36,9 @@ state.fileActions.forEach(fileAction => {
 					fileType: file.dataset.type,
 					contentLength: file.dataset.size,
 					mtime: file.dataset.mtime,
+					shareTypes: file.dataset?.shareTypes,
+					shareAttributes: file.dataset.shareAttributes,
+					sharePermissions: file.dataset.sharePermissions,
 				},
 			}).then((response) => {
 				console.debug('response', response)
