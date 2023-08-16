@@ -35,6 +35,7 @@ state.fileActions.forEach(fileAction => {
 					permissions: file.dataset.permissions,
 					fileType: file.dataset.type,
 					contentLength: file.dataset.size,
+					mtime: file.dataset.mtime,
 				},
 			}).then((response) => {
 				console.debug('response', response)

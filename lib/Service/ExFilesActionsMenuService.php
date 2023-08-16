@@ -154,6 +154,7 @@ class ExFilesActionsMenuService {
 					'etag' => $actionFile['etag'],
 					'mime' => $actionFile['mime'],
 					'fileType' => $actionFile['fileType'],
+					'mtime' => $actionFile['mtime'],
 					'contentLength' => $actionFile['contentLength'],
 					'favorite' => $actionFile['favorite'] ?? "false",
 					'permissions' => $actionFile['permissions']
