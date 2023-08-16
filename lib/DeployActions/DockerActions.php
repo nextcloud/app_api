@@ -305,6 +305,7 @@ class DockerActions implements IDeployActions {
 			$containerInfo = $params['container_info'];
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
 			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
+			$secret = $oldEnvs['APP_SECRET'];
 			// Preserve previous devices or use from params (if any)
 			$devices = array_map(function (array $device) {
 				return $device['PathOnHost'];
@@ -328,6 +329,7 @@ class DockerActions implements IDeployActions {
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $port,
 			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
+			'secret' => $secret ?? $this->random->generate(128),
 		], $params['env_options'] ?? [], $deployConfig);
 
 		$containerParams = [
@@ -359,7 +361,7 @@ class DockerActions implements IDeployActions {
 	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
 		$autoEnvs = [
 			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
-			sprintf('APP_SECRET=%s', $this->random->generate(128)),
+			sprintf('APP_SECRET=%s', $params['secret']),
 			sprintf('APP_ID=%s', $params['appid']),
 			sprintf('APP_DISPLAY_NAME=%s', $params['name']),
 			sprintf('APP_VERSION=%s', $params['version']),

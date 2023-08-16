@@ -121,9 +121,9 @@ class ExAppMapper extends QBMapper {
 	public function updateExAppName(ExApp $exApp): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->update($this->tableName)
-			->set('name', $qb->createNamedParameter($exApp->getVersion(), IQueryBuilder::PARAM_STR))
+			->set('name', $qb->createNamedParameter($exApp->getName(), IQueryBuilder::PARAM_STR))
 			->where(
-				$qb->expr()->eq('name', $qb->createNamedParameter($exApp->getName()))
+				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid()))
 			)->executeStatement();
 	}
 }

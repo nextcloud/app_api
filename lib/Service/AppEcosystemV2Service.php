@@ -159,6 +159,7 @@ class AppEcosystemV2Service {
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
 			$this->cache->remove('/exApp_' . $appId);
+			// TODO: Do we need to remove ExApp container
 			return $exApp;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()), ['exception' => $e]);
@@ -353,8 +354,8 @@ class AppEcosystemV2Service {
 					return intval($scopeGroup);
 				}, (array) $scopes['optional']);
 				return [
-					'required' => $required,
-					'optional' => $optional,
+					'required' => array_values($required),
+					'optional' => array_values($optional),
 				];
 			}
 		} elseif (isset($jsonInfo['scopes'])) {
