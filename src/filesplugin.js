@@ -34,7 +34,7 @@ state.fileActions.forEach(fileAction => {
 					favorite: file.dataset?.favorite,
 					permissions: file.dataset.permissions,
 					fileType: file.dataset.type,
-					contentLength: file.dataset.size,
+					size: file.dataset.size,
 					mtime: file.dataset.mtime,
 				},
 			}).then((response) => {
