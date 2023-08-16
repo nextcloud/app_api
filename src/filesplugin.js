@@ -33,6 +33,8 @@ state.fileActions.forEach(fileAction => {
 					mime: file.dataset.mime,
 					favorite: file.dataset?.favorite,
 					permissions: file.dataset.permissions,
+					fileType: file.dataset.type,
+					contentLength: file.dataset.size,
 				},
 			}).then((response) => {
 				console.debug('response', response)
