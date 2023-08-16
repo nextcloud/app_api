@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\DeployActions\DockerActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
-use OCP\App\IAppManager;
-use OCP\IURLGenerator;
-use OCP\Security\ISecureRandom;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,26 +18,17 @@ class Deploy extends Command {
 	private AppEcosystemV2Service $service;
 	private DaemonConfigService $daemonConfigService;
 	private DockerActions $dockerActions;
-	private IAppManager $appManager;
-	private ISecureRandom $random;
-	private IURLGenerator $urlGenerator;
 
 	public function __construct(
 		AppEcosystemV2Service $service,
 		DaemonConfigService $daemonConfigService,
 		DockerActions $dockerActions,
-		IAppManager $appManager,
-		ISecureRandom $random,
-		IURLGenerator $urlGenerator,
 	) {
 		parent::__construct();
 
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->dockerActions = $dockerActions;
-		$this->appManager = $appManager;
-		$this->random = $random;
-		$this->urlGenerator = $urlGenerator;
 	}
 
 	protected function configure() {
@@ -86,36 +73,14 @@ class Deploy extends Command {
 			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
 			return 2;
 		}
-		$deployConfig = $daemonConfig->getDeployConfig();
-
-		$imageParams = [
-			'image_src' => (string) ($infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io'),
-			'image_name' => (string) ($infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId),
-			'image_tag' => (string) ($infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest'),
-		];
-		$containerParams = [
-			'name' => $appId,
-			'hostname' => $appId,
-			'port' => $this->getRandomPort(),
-			'net' => $deployConfig['net'] ?? 'host',
-		];
 
 		$envParams = $input->getOption('env');
-		$envs = $this->buildDeployEnvParams([
-			'appid' => $appId,
-			'name' => (string) $infoXml->name,
-			'version' => (string) $infoXml->version,
-			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
-			'host' => $this->buildExAppHost($deployConfig),
-			'port' => $containerParams['port'],
-			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
-		], $envParams, $deployConfig);
-		$containerParams['env'] = $envs;
 
-		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, [
-			'image_params' => $imageParams,
-			'container_params' => $containerParams,
+		$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
+			'env_options' => $envParams,
 		]);
+
+		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $deployParams);
 
 		if (isset($pullResult['error'])) {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $pullResult['error']));
@@ -134,13 +99,14 @@ class Deploy extends Command {
 				'name' => (string) $infoXml->name,
 				'daemon_config_name' => $daemonConfigName,
 				'version' => (string) $infoXml->version,
-				'secret' => explode('=', $envs[1])[1],
+				'secret' => explode('=', $deployParams['container_params']['env'][1])[1],
 				'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
-				'port' => explode('=', $envs[7])[1],
+				'port' => explode('=', $deployParams['container_params']['env'][7])[1],
 				'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
 				'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
 			];
-			if ($this->heartbeatExApp($resultOutput)) {
+
+			if ($this->service->heartbeatExApp($resultOutput)) {
 				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
 				return 0;
 			}
@@ -150,82 +116,5 @@ class Deploy extends Command {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
 		}
 		return 1;
-	}
-
-	private function buildDeployEnvParams(array $params, array $envOptions, array $deployConfig): array {
-		$autoEnvs = [
-			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
-			sprintf('APP_SECRET=%s', $this->random->generate(128)),
-			sprintf('APP_ID=%s', $params['appid']),
-			sprintf('APP_DISPLAY_NAME=%s', $params['name']),
-			sprintf('APP_VERSION=%s', $params['version']),
-			sprintf('APP_PROTOCOL=%s', $params['protocol']),
-			sprintf('APP_HOST=%s', $params['host']),
-			sprintf('APP_PORT=%s', $params['port']),
-			sprintf('IS_SYSTEM_APP=%s', $params['system_app']),
-			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
-		];
-
-		foreach ($envOptions as $envOption) {
-			[$key, $value] = explode('=', $envOption, 2);
-			// Do not overwrite required auto generated envs
-			if (!in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
-				$autoEnvs[] = sprintf('%s=%s', $key, $value);
-			}
-		}
-
-		return $autoEnvs;
-	}
-
-	private function buildExAppHost(array $deployConfig): string {
-		if ((isset($deployConfig['net']) && $deployConfig['net'] !== 'host') || isset($deployConfig['host'])) {
-			return '0.0.0.0';
-		}
-		return '127.0.0.1';
-	}
-
-	private function getRandomPort(): int {
-		$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
-		while ($this->service->getExAppsByPort($port) !== []) {
-			$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
-		}
-		return $port;
-	}
-
-	private function heartbeatExApp(array $resultOutput): bool {
-		// TODO: Extract to AppEcosystemV2 and make configurable
-		$heartbeatAttempts = 0;
-		$delay = 1;
-		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
-		$heartbeatUrl = $this->service->getExAppUrl(
-			$resultOutput['protocol'],
-			$resultOutput['host'],
-			(int) $resultOutput['port'],
-		) . '/heartbeat';
-
-		while ($heartbeatAttempts < $maxHeartbeatAttempts) {
-			$heartbeatAttempts++;
-			$ch = curl_init($heartbeatUrl);
-			$headers = [
-				'Accept: application/json',
-				'Content-Type: application/json',
-			];
-			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-			$heartbeatResult = curl_exec($ch);
-			$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			curl_close($ch);
-			if ($statusCode === 200) {
-				$result = json_decode($heartbeatResult, true);
-				if (isset($result['status']) && $result['status'] === 'ok') {
-					return true;
-				}
-			}
-			sleep($delay);
-		}
-
-		return false;
 	}
 }

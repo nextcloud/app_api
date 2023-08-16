@@ -14,7 +14,6 @@ use OCA\AppEcosystemV2\Service\ExAppScopesService;
 use OCA\AppEcosystemV2\Service\ExAppUsersService;
 
 use OCP\DB\Exception;
-use OCP\Http\Client\IResponse;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -61,6 +60,7 @@ class Register extends Command {
 
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
+		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info');
 	}
 
@@ -115,8 +115,6 @@ class Register extends Command {
 		]);
 
 		if ($exApp !== null) {
-			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
-
 			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
 				try {
 					$this->exAppUsersService->setupSystemAppFlag($exApp);
@@ -126,9 +124,15 @@ class Register extends Command {
 				}
 			}
 
-			$requestedExAppScopeGroups = $this->getRequestedExAppScopeGroups($output, $exApp);
-			if ($requestedExAppScopeGroups === null) {
-				$output->writeln(sprintf('Failed to get requested ExApp scopes for %s.', $appId));
+			$pathToInfoXml = $input->getOption('info-xml');
+			$infoXml = null;
+			if ($pathToInfoXml !== null) {
+				$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
+			}
+
+			$requestedExAppScopeGroups = $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
+			if (isset($requestedExAppScopeGroups['error'])) {
+				$output->writeln($requestedExAppScopeGroups['error']);
 				// Fallback unregistering ExApp
 				$this->service->unregisterExApp($exApp->getAppid());
 				return 2;
@@ -167,10 +171,10 @@ class Register extends Command {
 			}
 
 			if (count($requestedExAppScopeGroups['required']) > 0) {
-				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required']);
+				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required'], 'required');
 			}
 			if ($confirmOptionalScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], false);
+				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], 'optional');
 			}
 
 			$enabled = (bool) $input->getOption('enabled');
@@ -185,6 +189,7 @@ class Register extends Command {
 				}
 			}
 
+			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 			return 0;
 		}
 
@@ -192,8 +197,7 @@ class Register extends Command {
 		return 1;
 	}
 
-	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, bool $required = true): void {
-		$scopeType = $required ? 'required' : 'optional';
+	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, string $scopeType): void {
 		$registeredScopeGroups = [];
 		foreach ($requestedExAppScopeGroups as $scopeGroup) {
 			if ($this->exAppScopesService->setExAppScopeGroup($exApp, $scopeGroup)) {
@@ -206,18 +210,5 @@ class Register extends Command {
 			$output->writeln(sprintf('ExApp %s %s scope groups successfully set: %s', $exApp->getAppid(), $scopeType, implode(', ',
 				$this->exAppApiScopeService->mapScopeGroupsToNames($registeredScopeGroups))));
 		}
-	}
-
-	private function getRequestedExAppScopeGroups(OutputInterface $output, ExApp $exApp): ?array {
-		$response = $this->service->requestToExApp(null, null, $exApp, '/scopes', 'GET');
-		if (!$response instanceof IResponse && isset($response['error'])) {
-			$output->writeln(sprintf('Failed to get ExApp %s scope groups: %s', $exApp->getAppid(), $response['error']));
-			return null;
-		}
-		if ($response->getStatusCode() === 200) {
-			$this->service->updateExAppLastCheckTime($exApp);
-			return json_decode($response->getBody(), true);
-		}
-		return null;
 	}
 }

@@ -13,7 +13,7 @@ use OCP\AppFramework\Db\Entity;
  * @package OCA\AppEcosystemV2\Db
  *
  * @method string getAppid()
- * @method string getScopeGroup()
+ * @method int getScopeGroup()
  * @method void setAppid(string $appid)
  * @method void setScopeGroup(string $scopeGroup)
  */
@@ -26,7 +26,7 @@ class ExAppScope extends Entity implements JsonSerializable {
 	 */
 	public function __construct(array $params = []) {
 		$this->addType('appid', 'string');
-		$this->addType('scopeGroup', 'string');
+		$this->addType('scopeGroup', 'int');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);

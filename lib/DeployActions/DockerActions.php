@@ -7,10 +7,15 @@ namespace OCA\AppEcosystemV2\DeployActions;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
+use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Db\DaemonConfig;
 
+use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
+use OCP\IURLGenerator;
+use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 
 class DockerActions implements IDeployActions {
@@ -31,15 +36,27 @@ class DockerActions implements IDeployActions {
 	private Client $guzzleClient;
 	private ICertificateManager $certificateManager;
 	private IConfig $config;
+	private IAppManager $appManager;
+	private ISecureRandom $random;
+	private IURLGenerator $urlGenerator;
+	private AppEcosystemV2Service $service;
 
 	public function __construct(
 		LoggerInterface $logger,
 		IConfig $config,
-		ICertificateManager $certificateManager
+		ICertificateManager $certificateManager,
+		IAppManager $appManager,
+		ISecureRandom $random,
+		IURLGenerator $urlGenerator,
+		AppEcosystemV2Service $service,
 	) {
 		$this->logger = $logger;
 		$this->certificateManager = $certificateManager;
 		$this->config = $config;
+		$this->appManager = $appManager;
+		$this->random = $random;
+		$this->urlGenerator = $urlGenerator;
+		$this->service = $service;
 	}
 
 	public function getAcceptsDeployId(): string {
@@ -79,6 +96,14 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, null, null];
 		}
 
+		$containerInfo = $this->inspectContainer($dockerUrl, $params['container_params']['name']);
+		if (isset($containerInfo['Id'])) {
+			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $containerInfo['Id']);
+			if (isset($stopResult['error']) || isset($removeResult['error'])) {
+				return [$pullResult, $stopResult, $removeResult];
+			}
+		}
+
 		$createResult = $this->createContainer($dockerUrl, $imageParams, $containerParams);
 		if (isset($createResult['error'])) {
 			return [null, $createResult, null];
@@ -97,11 +122,17 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function createContainer(string $dockerUrl, array $imageParams, array $params = []): array {
+		$createVolumeResult = $this->createVolume($dockerUrl, $params['hostname']);
+		if (isset($createVolumeResult['error'])) {
+			return $createVolumeResult;
+		}
+
 		$containerParams = [
 			'Image' => $this->buildImageName($imageParams),
 			'Hostname' => $params['hostname'],
 			'HostConfig' => [
 				'NetworkMode' => $params['net'],
+				'Mounts' => $this->buildDefaultExAppVolume($params['hostname']),
 			],
 			'Env' => $params['env'],
 		];
@@ -117,6 +148,10 @@ class DockerActions implements IDeployActions {
 				],
 			];
 			$containerParams['NetworkingConfig'] = $networkingConfig;
+		}
+
+		if (isset($params['devices'])) {
+			$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams($params['devices']);
 		}
 
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($params['name'])));
@@ -140,6 +175,30 @@ class DockerActions implements IDeployActions {
 			$this->logger->error('Failed to start container', ['exception' => $e]);
 			error_log($e->getMessage());
 			return ['error' => 'Failed to start container'];
+		}
+	}
+
+	public function stopContainer(string $dockerUrl, string $containerId): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s/stop', $containerId));
+		try {
+			$response = $this->guzzleClient->post($url);
+			return ['success' => $response->getStatusCode() === 204];
+		} catch (GuzzleException $e) {
+			$this->logger->error('Failed to stop container', ['exception' => $e]);
+			error_log($e->getMessage());
+			return ['error' => 'Failed to stop container'];
+		}
+	}
+
+	public function removeContainer(string $dockerUrl, string $containerId): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s', $containerId));
+		try {
+			$response = $this->guzzleClient->delete($url);
+			return ['success' => $response->getStatusCode() === 204];
+		} catch (GuzzleException $e) {
+			$this->logger->error('Failed to stop container', ['exception' => $e]);
+			error_log($e->getMessage());
+			return ['error' => 'Failed to stop container'];
 		}
 	}
 
@@ -172,6 +231,154 @@ class DockerActions implements IDeployActions {
 			error_log($e->getMessage());
 			return ['error' => 'Failed to inspect container'];
 		}
+	}
+
+	public function createVolume(string $dockerUrl, string $volume): array {
+		$url = $this->buildApiUrl($dockerUrl, 'volumes/create');
+		try {
+			$options['json'] = [
+				'name' => $volume . '_data',
+			];
+			$response = $this->guzzleClient->post($url, $options);
+			$result = json_decode((string) $response->getBody(), true);
+			if ($response->getStatusCode() === 201) {
+				return $result;
+			}
+			if ($response->getStatusCode() === 500) {
+				error_log($result['message']);
+				return ['error' => $result['message']];
+			}
+		} catch (GuzzleException $e) {
+			$this->logger->error('Failed to create volume', ['exception' => $e]);
+			error_log($e->getMessage());
+		}
+		return ['error' => 'Failed to create volume'];
+	}
+
+	/**
+	 * @param DaemonConfig $daemonConfig
+	 * @param array $params Deploy params (image_params, container_params)
+	 *
+	 * @return array
+	 */
+	public function updateExApp(DaemonConfig $daemonConfig, array $params = []): array {
+		$dockerUrl = $this->buildDockerUrl($daemonConfig);
+
+		$pullResult = $this->pullContainer($dockerUrl, $params['image_params']);
+		if (isset($pullResult['error'])) {
+			return [$pullResult, null, null, null, null];
+		}
+
+		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $params['prev_container_id']);
+		if (isset($stopResult['error'])) {
+			return [$pullResult, $stopResult, null, null, null];
+		}
+		if (isset($removeResult['error'])) {
+			return [$pullResult, $stopResult, $removeResult, null, null];
+		}
+
+		$createResult = $this->createContainer($dockerUrl, $params['image_params'], $params['container_params']);
+		if (isset($createResult['error'])) {
+			return [$pullResult, $stopResult, $removeResult, $createResult, null];
+		}
+
+		$startResult = $this->startContainer($dockerUrl, $createResult['Id']);
+		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
+	}
+
+	private function removePrevExAppContainer(string $dockerUrl, string $containerId): array {
+		$stopResult = $this->stopContainer($dockerUrl, $containerId);
+		if (isset($stopResult['error'])) {
+			return [$stopResult, null];
+		}
+
+		$removeResult = $this->removeContainer($dockerUrl, $containerId);
+		return [$stopResult, $removeResult];
+	}
+
+	public function buildDeployParams(DaemonConfig $daemonConfig, \SimpleXMLElement $infoXml, array $params = []): array {
+		$appId = (string) $infoXml->id;
+		$deployConfig = $daemonConfig->getDeployConfig();
+
+		// If update process
+		if (isset($params['container_info'])) {
+			$containerInfo = $params['container_info'];
+			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
+			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
+			// Preserve previous devices or use from params (if any)
+			$devices = array_map(function (array $device) {
+				return $device['PathOnHost'];
+			}, (array) $containerInfo['HostConfig']['Devices']);
+		} else {
+			$port = $this->service->getExAppRandomPort();
+			$devices = $deployConfig['gpus'];
+		}
+
+		$imageParams = [
+			'image_src' => (string) ($infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io'),
+			'image_name' => (string) ($infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId),
+			'image_tag' => (string) ($infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest'),
+		];
+
+		$envs = $this->buildDeployEnvs([
+			'appid' => $appId,
+			'name' => (string) $infoXml->name,
+			'version' => (string) $infoXml->version,
+			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
+			'host' => $this->service->buildExAppHost($deployConfig),
+			'port' => $port,
+			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
+		], $params['env_options'] ?? [], $deployConfig);
+
+		$containerParams = [
+			'name' => $appId,
+			'hostname' => $appId,
+			'port' => $port,
+			'net' => $deployConfig['net'] ?? 'host',
+			'env' => $envs,
+			'devices' => $devices,
+		];
+
+		return [
+			'image_params' => $imageParams,
+			'container_params' => $containerParams,
+		];
+	}
+
+	private function extractDeployEnvs(array $envs): array {
+		$deployEnvs = [];
+		foreach ($envs as $env) {
+			[$key, $value] = explode('=', $env, 2);
+			if (in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
+				$deployEnvs[$key] = $value;
+			}
+		}
+		return $deployEnvs;
+	}
+
+	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
+		$autoEnvs = [
+			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
+			sprintf('APP_SECRET=%s', $this->random->generate(128)),
+			sprintf('APP_ID=%s', $params['appid']),
+			sprintf('APP_DISPLAY_NAME=%s', $params['name']),
+			sprintf('APP_VERSION=%s', $params['version']),
+			sprintf('APP_PROTOCOL=%s', $params['protocol']),
+			sprintf('APP_HOST=%s', $params['host']),
+			sprintf('APP_PORT=%s', $params['port']),
+			sprintf('IS_SYSTEM_APP=%s', $params['system_app']),
+			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
+		];
+
+		foreach ($envOptions as $envOption) {
+			[$key, $value] = explode('=', $envOption, 2);
+			// Do not overwrite required auto generated envs
+			if (!in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
+				$autoEnvs[] = sprintf('%s=%s', $key, $value);
+			}
+		}
+
+		return $autoEnvs;
 	}
 
 	/**
@@ -288,5 +495,29 @@ class DockerActions implements IDeployActions {
 				: [$deployConfig['ssl_cert'], $deployConfig['ssl_cert_password']];
 		}
 		return $guzzleParams;
+	}
+
+	private function buildDevicesParams(array $devices): array {
+		return array_map(function (string $device) {
+			return ["PathOnHost" => $device, "PathInContainer" => $device, "CgroupPermissions" => "rwm"];
+		}, $devices);
+	}
+
+	/**
+	 * Build default volume for ExApp.
+	 * For now only one volume created per ExApp.
+	 *
+	 * @param string $appId
+	 * @return array
+	 */
+	private function buildDefaultExAppVolume(string $appId): array {
+		return [
+			[
+				'Type' => 'volume',
+				'Source' => $appId . '_data',
+				'Target' => '/' . $appId . '_data',
+				'ReadOnly' => false
+			],
+		];
 	}
 }

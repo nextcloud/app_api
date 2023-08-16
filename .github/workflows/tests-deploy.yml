@@ -99,24 +99,25 @@ jobs:
         run: |
           php -S 127.0.0.1:8080 &
           ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
-          ./occ app_ecosystem_v2:app:enable app_python_skeleton
-          ./occ app_ecosystem_v2:app:disable app_python_skeleton
-          ./occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          ./occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          ./occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          ./occ app_ecosystem_v2:app:enable skeleton
+          ./occ app_ecosystem_v2:app:disable skeleton
+          ./occ app_ecosystem_v2:app:unregister skeleton --silent
           ./occ app_ecosystem_v2:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
-          grep -q 'Hello from app_python_skeleton :)' data/nextcloud.log || error
-          grep -q 'Bye bye from app_python_skeleton :(' data/nextcloud.log || error
+          grep -q 'Hello from skeleton :)' data/nextcloud.log || error
+          grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
 
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect app_python_skeleton | json_pp > container.json
-          docker logs app_python_skeleton > container.log 2>&1
+          docker inspect skeleton | json_pp > container.json
+          docker logs skeleton > container.log 2>&1
 
       - name: Upload Container info
         if: always()
@@ -168,12 +169,13 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_local_sock
 
       - name: Copy NC log to host
@@ -181,14 +183,14 @@ jobs:
 
       - name: Check logs
         run: |
-          grep -q 'Hello from app_python_skeleton :)' nextcloud.log || error
-          grep -q 'Bye bye from app_python_skeleton :(' nextcloud.log || error
+          grep -q 'Hello from skeleton :)' nextcloud.log || error
+          grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect app_python_skeleton | json_pp > container.json
-          docker logs app_python_skeleton > container.log 2>&1
+          docker inspect skeleton | json_pp > container.json
+          docker logs skeleton > container.log 2>&1
 
       - name: Upload Container info
         if: always()
@@ -245,12 +247,13 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
             --net=master_bridge --ssl_cert /client/cert.pem --ssl_key /client/key.pem
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_by_port
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_by_port
 
       - name: Copy NC log to host
@@ -258,14 +261,14 @@ jobs:
 
       - name: Check logs
         run: |
-          grep -q 'Hello from app_python_skeleton :)' nextcloud.log || error
-          grep -q 'Bye bye from app_python_skeleton :(' nextcloud.log || error
+          grep -q 'Hello from skeleton :)' nextcloud.log || error
+          grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect app_python_skeleton | json_pp > container.json
-          docker logs app_python_skeleton > container.log 2>&1
+          docker inspect skeleton | json_pp > container.json
+          docker logs skeleton > container.log 2>&1
 
       - name: Upload Container info
         if: always()
@@ -321,12 +324,13 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://localhost:8080/index.php \
             --net=host --hostname=host.docker.internal --ssl_cert /client/cert.pem --ssl_key /client/key.pem
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_by_port \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_by_port
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable app_python_skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_by_port \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
           docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_by_port
 
       - name: Copy NC log to host
@@ -334,14 +338,14 @@ jobs:
 
       - name: Check logs
         run: |
-          grep -q 'Hello from app_python_skeleton :)' nextcloud.log || error
-          grep -q 'Bye bye from app_python_skeleton :(' nextcloud.log || error
+          grep -q 'Hello from skeleton :)' nextcloud.log || error
+          grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect app_python_skeleton | json_pp > container.json
-          docker logs app_python_skeleton > container.log 2>&1
+          docker inspect skeleton | json_pp > container.json
+          docker logs skeleton > container.log 2>&1
 
       - name: Upload Container info
         if: always()
@@ -463,24 +467,25 @@ jobs:
         run: |
           php -S 127.0.0.1:8080 &
           ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_ecosystem_v2:app:deploy app_python_skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:register app_python_skeleton docker_local_sock
-          ./occ app_ecosystem_v2:app:enable app_python_skeleton
-          ./occ app_ecosystem_v2:app:disable app_python_skeleton
-          ./occ app_ecosystem_v2:app:unregister app_python_skeleton --silent
+          ./occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          ./occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          ./occ app_ecosystem_v2:app:enable skeleton
+          ./occ app_ecosystem_v2:app:disable skeleton
+          ./occ app_ecosystem_v2:app:unregister skeleton --silent
           ./occ app_ecosystem_v2:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
-          grep -q 'Hello from app_python_skeleton :)' data/nextcloud.log || error
-          grep -q 'Bye bye from app_python_skeleton :(' data/nextcloud.log || error
+          grep -q 'Hello from skeleton :)' data/nextcloud.log || error
+          grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
 
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect app_python_skeleton | json_pp > container.json
-          docker logs app_python_skeleton > container.log 2>&1
+          docker inspect skeleton | json_pp > container.json
+          docker logs skeleton > container.log 2>&1
 
       - name: Check redis keys
         run: |
@@ -510,7 +515,7 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
-  tests-deploy-uccess:
+  tests-deploy-success:
     permissions:
       contents: none
     runs-on: ubuntu-22.04

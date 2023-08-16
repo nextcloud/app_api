@@ -45,7 +45,7 @@ class Enable extends Command {
 			return 0;
 		}
 
-		// TODO: Add scopes updates and approval as in registering
+		// TODO: Add scopes check (from info.xml) and approval if needed
 
 		$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
 		return 1;
