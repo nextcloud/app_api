@@ -154,8 +154,8 @@ class ExFilesActionsMenuService {
 					'etag' => $actionFile['etag'],
 					'mime' => $actionFile['mime'],
 					'fileType' => $actionFile['fileType'],
-					'mtime' => $actionFile['mtime'],
-					'size' => $actionFile['size'],
+					'mtime' => $actionFile['mtime'] / 1000, // convert ms to s
+					'size' => intval($actionFile['size']),
 					'favorite' => $actionFile['favorite'] ?? "false",
 					'permissions' => $actionFile['permissions'],
 					'shareOwner' => $actionFile['shareOwner'] ?? null,
