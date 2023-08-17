@@ -37,8 +37,10 @@ state.fileActions.forEach(fileAction => {
 					size: file.dataset.size,
 					mtime: file.dataset.mtime,
 					shareTypes: file.dataset?.shareTypes,
-					shareAttributes: file.dataset.shareAttributes,
-					sharePermissions: file.dataset.sharePermissions,
+					shareAttributes: file.dataset?.shareAttributes,
+					sharePermissions: file.dataset?.sharePermissions,
+					shareOwner: file.dataset?.shareOwner,
+					shareOwnerId: file.dataset?.shareOwnerId,
 				},
 			}).then((response) => {
 				console.debug('response', response)
