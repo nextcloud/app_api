@@ -123,6 +123,10 @@ class Update extends Command {
 
 			$this->dockerActions->initGuzzleClient($daemonConfig); // Required init
 			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $appId);
+			if (isset($containerInfo['error'])) {
+				$output->writeln(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
+				return 1;
+			}
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
 				'container_info' => $containerInfo,
 			]);
