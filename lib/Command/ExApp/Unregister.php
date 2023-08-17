@@ -38,7 +38,8 @@ class Unregister extends Command {
 		$this->addArgument('appid', InputArgument::REQUIRED);
 
 		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Unregister only from Nextcloud. Do not send request to external app.');
-		$this->addOption('rm', null, InputOption::VALUE_NONE, 'Remove ExApp container');
+		$this->addOption('rm-container', null, InputOption::VALUE_NONE, 'Remove ExApp container');
+		$this->addOption('rm-data', null, InputOption::VALUE_NONE, 'Remove ExApp data (volume)');
 
 		$this->addUsage('test_app');
 		$this->addUsage('test_app --silent');
@@ -71,7 +72,7 @@ class Unregister extends Command {
 			return 1;
 		}
 
-		$rmContainer = $input->getOption('rm');
+		$rmContainer = $input->getOption('rm-container');
 		if ($rmContainer) {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 			if ($daemonConfig === null) {
@@ -84,9 +85,12 @@ class Unregister extends Command {
 				if (isset($stopResult['error']) || isset($removeResult['error'])) {
 					$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
 				} else {
-					$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $appId . '_data');
-					if (isset($removeVolumeResult['error'])) {
-						$output->writeln(sprintf('Failed to remove ExApp %s volume %s', $appId, $appId . '_data'));
+					$rmData = $input->getOption('rm-data');
+					if ($rmData) {
+						$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $appId . '_data');
+						if (isset($removeVolumeResult['error'])) {
+							$output->writeln(sprintf('Failed to remove ExApp %s volume %s', $appId, $appId . '_data'));
+						}
 					}
 					$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
 				}
