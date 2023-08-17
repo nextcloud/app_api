@@ -158,11 +158,11 @@ class ExFilesActionsMenuService {
 					'size' => $actionFile['size'],
 					'favorite' => $actionFile['favorite'] ?? "false",
 					'permissions' => $actionFile['permissions'],
-					'shareOwner' => $actionFile['shareOwner'],
+					'shareOwner' => $actionFile['shareOwner'] ?? null,
 					'shareOwnerId' => $actionFile['shareOwnerId'] ?? null,
 					'shareTypes' => $actionFile['shareTypes'] ?? null,
 					'shareAttributes' => $actionFile['shareAttributes'] ?? null,
-					'sharePermissions' => intval($actionFile['sharePermissions']) ?? null,
+					'sharePermissions' => $actionFile['sharePermissions'] ?? null,
 					'userId' => $userId,
 				],
 			];
