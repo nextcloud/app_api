@@ -3,6 +3,7 @@
 .PHONY: docs
 .PHONY: html
 docs html:
+	rm -rf docs/_build
 	$(MAKE) -C docs html
 
 .PHONY: help
@@ -109,23 +110,23 @@ dock-port26:
 
 .PHONY: example-deploy
 example-deploy:
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy app_python_skeleton docker_dev \
-    		--info-xml https://raw.githubusercontent.com/cloud-py-api/py_app_v2-skeleton/main/appinfo/info.xml
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_dev \
+    		--info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
 
 .PHONY: example28
 example28:
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent || true
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_dev
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
 
 .PHONY: example27
 example27:
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
+	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent || true
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_dev
+	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
 
 .PHONY: example26
 example26:
-	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister app_python_skeleton --silent || true
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register app_python_skeleton docker_dev
-	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:enable app_python_skeleton
+	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent || true
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_dev
+	docker exec master-stable26-1 sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
