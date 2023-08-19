@@ -63,8 +63,14 @@ The following data is sent to ExApp FileActionsMenu handler from the context of 
 			"directory": "/relative/to/user/path/to/directory",
 			"etag": "file_etag",
 			"mime": "file_full_mime",
+			"fileType": "dir/file",
+			"size": "integer",
 			"favorite": "nc_favorite_flag",
 			"permissions": "file_permissions_for_owner",
+			"mtime": "last modify time(integer)",
+			"userId": "string",
+			"shareOwner": "optional, str",
+			"shareOwnerId": "optional, str",
 		}
 	}
 
