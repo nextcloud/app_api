@@ -1,16 +1,32 @@
-============================
 AppEcosystemV2 documentation
 ============================
 
-Welcome to the amazing docs that we will write for AppEcosystemV2!
+The AppEcosystem is a project introduced by Nextcloud to revolutionize the process of application development within the Nextcloud ecosystem.
 
+Overview
+========
+
+The main tasks of the ecosystem are:
+
+	* Providing a reliable and fast method for authenticating applications
+	* Supporting various application deployment options
+	* Offering a clear and straightforward application administration interface
+	* Ensuring a reliable implementation of all the necessary missing APIs for applications
+	* Supplying clear, understandable documentation and support on how to implement libraries in other programming languages for writing next-gen applications for NextCloud
+
+If you have any questions or corrections regarding the documentation,
+we would be glad to address them in discussions, incorporate corrections through pull requests,
+and handle complex problems through issues.
+
+==================
 
 .. toctree::
-	:maxdepth: 2
+   :maxdepth: 1
 
-	api-scopes.rst
-	glossary.rst
-	development/index.rst
-	deploy/index.rst
-	authentication
-	api/index.rst
+   Installation
+   DeployConfigurations
+   CreationOfDeployDaemon
+   ManagingExternalApplications
+   Concepts
+   tech_details/index.rst
+   DevSetup

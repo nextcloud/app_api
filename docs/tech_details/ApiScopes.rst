@@ -1,4 +1,3 @@
-==========
 Api Scopes
 ==========
 
@@ -29,3 +28,5 @@ The following API groups are currently supported:
 
 These groups are identified numerically, as opposed to using names. As time progresses,
 the list will steadily expand, comprehensively encompassing all potential APIs provided by Nextcloud.
+
+There is a CLI command to list registered scopes: ``occ app_ecosystem_v2:scopes:list``.

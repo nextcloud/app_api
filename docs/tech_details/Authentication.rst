@@ -1,10 +1,9 @@
-==============
 Authentication
 ==============
 
-AppEcosystemV2 adds separate authentication for external apps.
-This authentication is based on a shared secret between Nextcloud and the external app.
+AppEcosystemV2 introduces a distinct method of authentication for external apps.
 
+This authentication relies on a shared secret between Nextcloud and the external app, which generates a unique signature for each request.
 
 Authentication flow
 ^^^^^^^^^^^^^^^^^^^
@@ -34,11 +33,11 @@ Authentication headers
 Each ExApp request to secured API with AppEcosystemAuth must contain the following headers (order is important):
 
 1. ``AE-VERSION`` - minimal version of the AppEcosystemV2
-2. ``EX-APP-ID``- id of the ExApp
+2. ``EX-APP-ID``- ID of the ExApp
 3. ``EX-APP-VERSION`` - version of the ExApp
 4. ``NC-USER-ID`` - the user under which the request is made, can be empty in case of system apps (more details in [scopes](#AppEcosystemV2-scopes) section)
 5. ``AE-DATA-HASH`` - hash of the request body (see details in `ae_signature`_ section)
-6. ``AE-SIGN-TIME`` - unix timestamp of the request
+6. ``AE-SIGN-TIME`` - Unix timestamp of the request
 7. ``AE-SIGNATURE`` - signature of the request (see details `ae_signature`_ section)
 
 
@@ -60,23 +59,6 @@ AE_DATA_HASH
 ``AE-DATA-HASH`` header must contain a xxh64 hash of the request body.
 It's calculated even if the request body is empty (e.g. empty hash: ``ef46db3751d8e999``).
 
-
-ExApp scopes
-************
-
-AppEcosystemV2 will support extensible scopes (with interfaces to register own ones).
-Currently, the following scopes are available:
-
-* ``BASIC``
-* ``SYSTEM``
-* ``USER_INFO``
-* ``USER_STATUS``
-* ``NOTIFICATIONS``
-* ``WEATHER_STATUS``
-* ``FILES_SHARING``
-* ``DAV``
-
-There is a CLI command to list registered scopes: ``occ app_ecosystem_v2:scopes:list``.
 
 Authentication flow in details
 ******************************
@@ -119,5 +101,5 @@ Authentication flow in details
 AppEcosystemAuth
 ^^^^^^^^^^^^^^^^
 
-AppEcosystemV2 provides ``AppEcosystemAuth`` attribute with a middleware to validate requests from ExApps.
-In PHP API controllers you can use it as attribute or annotation (for NC26).
+AppEcosystemV2 provides ``AppEcosystemAuth`` attribute with middleware to validate requests from ExApps.
+In PHP API controllers you can use it as an attribute or annotation (for NC26).

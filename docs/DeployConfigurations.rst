@@ -1,21 +1,30 @@
-================================
-Docker deployment configurations
-================================
+.. _deploy-configs:
 
-There are several Daemon configurations:
+Deployment configurations
+=========================
 
-	* Nextcloud in host and Daemon (Docker) in the same host (by socket or port)
-	* Nextcloud in host and Daemon (Docker) on remote host (by port)
-	* Nextcloud in container (Docker) and Daemon (Docker) in the same host (by socket or port)
-	* Nextcloud in container (Docker) and Daemon (Docker) is in container (Docker in Docker) - by socket or port
+Currently, only one kind of application deployment is supported:
+	* **Docker Deploy Daemon**
 
-For each configuration using socket make sure that Nextcloud webserver user has enough permissions to access it.
-In case of remote remote access to Daemon, make sure that it configured with ssl_key, ssl_cert and ca.cert is imported to Nextcloud.
+Docker Deploy Daemon
+--------------------
 
-Nextcloud in host and Daemon in the same host
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Provides the deployment of applications as Docker containers.
 
-The simplest configuration is when Nextcloud is installed in host and ExApp daemon (Docker) is in the same host.
+There are several Docker Daemon Deploy configurations:
+
+	* Nextcloud and Docker on the **same host** (via socket or port)
+	* Nextcloud on the host and Docker on a **remote** host (via port)
+	* Nextcloud and **ExApps** in the **same Docker** (via socket or port)
+	* Nextcloud in a Docker and **ExApps** in the **child Docker** (DiD) (via socket)
+
+For each configuration that uses a socket, please ensure that the Nextcloud webserver user has sufficient permissions to access it.
+In the case of remote access to the Daemon, make certain that it's configured with **ssl_key**, **ssl_cert**, and **ca.cert**, and that the latter is imported into Nextcloud.
+
+NC & Docker on the Same-Host
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The simplest configuration is when Nextcloud is installed on the host and Docker is on the same host and applications are deployed to it.
 
 .. mermaid::
 
@@ -45,12 +54,13 @@ The simplest configuration is when Nextcloud is installed in host and ExApp daem
 		class ExApp2 python
 		class ExApp3 python
 
-In this case, the ExApp daemon (Docker) can be connected to the Nextcloud by socket ``/var/run/docker.sock``.
+Suggested way to communicate with Docker: via ``socket``.
 
-Nextcloud in host and Daemon on remote host
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Docker on a remote host
+^^^^^^^^^^^^^^^^^^^^^^^
 
-Distributed configuration is when Nextcloud is installed in host and ExApp daemon (Docker) is on remote host.
+Distributed configuration occurs when Nextcloud is installed on one host and Docker is located on a remote host, resulting in the deployment of applications on the remote host.
+
 Benefit: no performance impact on Nextcloud host.
 
 .. mermaid::
@@ -86,10 +96,12 @@ Benefit: no performance impact on Nextcloud host.
 		class ExApp2 python
 		class ExApp3 python
 
+In this case, the AppEcosystem (Nextcloud) uses ``port`` to interact with Docker.
 
+NC & ExApps in the same Docker
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Nextcloud in container and Daemon in the same host
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Applications are deployed in the same docker where Nextcloud resides.
 
 .. mermaid::
 
@@ -118,9 +130,12 @@ Nextcloud in container and Daemon in the same host
 		class ExApp2 python
 		class ExApp3 python
 
+Suggested way to communicate with Docker: via ``socket``.
 
-Nextcloud in container and Daemon is in container (Docker in Docker)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NC in Docker and ExApps in child Docker (Docker in Docker)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, Nextcloud is installed within a container, and a separate Daemon (Docker) is also contained within the Nextcloud container.
 
 .. mermaid::
 
@@ -159,4 +174,4 @@ Nextcloud in container and Daemon is in container (Docker in Docker)
 		class ExApp2 python
 		class ExApp3 python
 
-In this case, Nextcloud is installed in container and second separate Daemon (Docker) is in Nextcloud container.
+In this case, the AppEcosystem (Nextcloud) uses ``socket`` to interact with Docker.
