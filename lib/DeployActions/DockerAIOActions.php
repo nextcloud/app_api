@@ -328,10 +328,10 @@ class DockerAIOActions implements IDockerActions {
 	 */
 	public function getAIOMasterToken(): ?string {
 		$aioToken = getenv('AIO_TOKEN');
-		if ($aioToken !== '') {
-			return $aioToken;
+		if (!$aioToken) {
+			return null;
 		}
-		return null;
+		return $aioToken;
 	}
 
 	/**
