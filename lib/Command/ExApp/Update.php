@@ -79,14 +79,20 @@ class Update extends Command {
 			$output->writeln(sprintf('ExApp %s not found.', $appId));
 			return 1;
 		}
-		if (!$exApp->getEnabled()) {
-			$output->writeln(sprintf('ExApp %s already disabled.', $appId));
-			return 1;
-		}
 
 		$newVersion = (string) $infoXml->version;
 		if ($exApp->getVersion() === $newVersion) {
-			$output->writeln(sprintf('ExApp %s already on %s version', $appId, $newVersion));
+			$output->writeln(sprintf('ExApp %s already updated (%s)', $appId, $newVersion));
+			return 2;
+		}
+
+		if ($exApp->getEnabled()) {
+			if (!$this->service->disableExApp($exApp)) {
+				$output->writeln(sprintf('Failed to disable ExApp %s.', $appId));
+				return 1;
+			} else {
+				$output->writeln(sprintf('ExApp %s disabled.', $appId));
+			}
 		}
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
@@ -117,6 +123,10 @@ class Update extends Command {
 
 			$this->dockerActions->initGuzzleClient($daemonConfig); // Required init
 			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $appId);
+			if (isset($containerInfo['error'])) {
+				$output->writeln(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
+				return 1;
+			}
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
 				'container_info' => $containerInfo,
 			]);
@@ -196,7 +206,7 @@ class Update extends Command {
 			}
 		}
 
-		if (!$confirmRequiredScopes && count($newExAppScopes['required']) > 0) {
+		if (!$confirmRequiredScopes && count($requiredScopes) > 0) {
 			$output->writeln(sprintf('ExApp %s required scopes not approved. Failed to finish ExApp update.', $appId));
 			return 1;
 		}

@@ -125,7 +125,9 @@ class ExAppScopesService {
 	 * @return bool
 	 */
 	public function updateExAppScopes(ExApp $exApp, array $newExAppScopes): bool {
-		$currentExAppScopes = $this->getExAppScopes($exApp);
+		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
+			return $exAppScope->getScopeGroup();
+		}, $this->getExAppScopes($exApp));
 		$newScopes = array_values(array_diff($newExAppScopes, $currentExAppScopes));
 		$removedScopes = array_values(array_diff($currentExAppScopes, $newExAppScopes));
 

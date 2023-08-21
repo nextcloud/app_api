@@ -93,25 +93,19 @@ class Deploy extends Command {
 				return 1;
 			}
 
-			// TODO: Remove resultOutput
-			$resultOutput = [
-				'appid' => $appId,
-				'name' => (string) $infoXml->name,
-				'daemon_config_name' => $daemonConfigName,
-				'version' => (string) $infoXml->version,
-				'secret' => explode('=', $deployParams['container_params']['env'][1])[1],
+			$exAppUrlParams = [
+				'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
 				'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
 				'port' => explode('=', $deployParams['container_params']['env'][7])[1],
-				'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
-				'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
 			];
 
-			if ($this->service->heartbeatExApp($resultOutput)) {
-				$output->writeln(json_encode($resultOutput, JSON_UNESCAPED_SLASHES));
+			if (!$this->service->heartbeatExApp($exAppUrlParams)) {
+				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and initialized correctly.', $appId));
 				return 0;
 			}
 
-			$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and initialized correctly.', $appId));
+			$output->writeln(sprintf('ExApp %s deployed successfully', $appId));
+			return 0;
 		} else {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
 		}

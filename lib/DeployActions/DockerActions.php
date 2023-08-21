@@ -122,7 +122,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function createContainer(string $dockerUrl, array $imageParams, array $params = []): array {
-		$createVolumeResult = $this->createVolume($dockerUrl, $params['hostname']);
+		$createVolumeResult = $this->createVolume($dockerUrl, $params['name'] . '_data');
 		if (isset($createVolumeResult['error'])) {
 			return $createVolumeResult;
 		}
@@ -227,9 +227,9 @@ class DockerActions implements IDeployActions {
 			$response = $this->guzzleClient->get($url);
 			return json_decode((string) $response->getBody(), true);
 		} catch (GuzzleException $e) {
-			$this->logger->error('Failed to inspect container', ['exception' => $e]);
-			error_log($e->getMessage());
-			return ['error' => 'Failed to inspect container'];
+			//$this->logger->error('Failed to inspect container', ['exception' => $e]);
+			//error_log($e->getMessage());
+			return ['error' => $e->getMessage(), 'exception' => $e];
 		}
 	}
 
@@ -237,7 +237,7 @@ class DockerActions implements IDeployActions {
 		$url = $this->buildApiUrl($dockerUrl, 'volumes/create');
 		try {
 			$options['json'] = [
-				'name' => $volume . '_data',
+				'name' => $volume,
 			];
 			$response = $this->guzzleClient->post($url, $options);
 			$result = json_decode((string) $response->getBody(), true);
@@ -253,6 +253,35 @@ class DockerActions implements IDeployActions {
 			error_log($e->getMessage());
 		}
 		return ['error' => 'Failed to create volume'];
+	}
+
+	public function removeVolume(string $dockerUrl, string $volume): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('volumes/%s', $volume));
+		try {
+			$options['json'] = [
+				'name' => $volume,
+			];
+			$response = $this->guzzleClient->delete($url, $options);
+			if ($response->getStatusCode() === 204) {
+				return ['success' => true];
+			}
+			if ($response->getStatusCode() === 404) {
+				error_log('Volume not found.');
+				return ['error' => 'Volume not found.'];
+			}
+			if ($response->getStatusCode() === 409) {
+				error_log('Volume is in use.');
+				return ['error' => 'Volume is in use.'];
+			}
+			if ($response->getStatusCode() === 500) {
+				error_log('Something went wrong.');
+				return ['error' => 'Something went wrong.'];
+			}
+		} catch (GuzzleException $e) {
+			$this->logger->error('Failed to create volume', ['exception' => $e]);
+			error_log($e->getMessage());
+		}
+		return ['error' => 'Failed to remove volume'];
 	}
 
 	/**
@@ -286,7 +315,7 @@ class DockerActions implements IDeployActions {
 		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
 	}
 
-	private function removePrevExAppContainer(string $dockerUrl, string $containerId): array {
+	public function removePrevExAppContainer(string $dockerUrl, string $containerId): array {
 		$stopResult = $this->stopContainer($dockerUrl, $containerId);
 		if (isset($stopResult['error'])) {
 			return [$stopResult, null];
@@ -305,6 +334,7 @@ class DockerActions implements IDeployActions {
 			$containerInfo = $params['container_info'];
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
 			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
+			$secret = $oldEnvs['APP_SECRET'];
 			// Preserve previous devices or use from params (if any)
 			$devices = array_map(function (array $device) {
 				return $device['PathOnHost'];
@@ -328,6 +358,7 @@ class DockerActions implements IDeployActions {
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $port,
 			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
+			'secret' => $secret ?? $this->random->generate(128),
 		], $params['env_options'] ?? [], $deployConfig);
 
 		$containerParams = [
@@ -359,7 +390,7 @@ class DockerActions implements IDeployActions {
 	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
 		$autoEnvs = [
 			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
-			sprintf('APP_SECRET=%s', $this->random->generate(128)),
+			sprintf('APP_SECRET=%s', $params['secret']),
 			sprintf('APP_ID=%s', $params['appid']),
 			sprintf('APP_DISPLAY_NAME=%s', $params['name']),
 			sprintf('APP_VERSION=%s', $params['version']),
