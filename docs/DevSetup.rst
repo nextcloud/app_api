@@ -22,7 +22,7 @@ Then, build NPM and JS with :command:`shell`::
 
 	npm ci && npm run build
 
-AAfter this, you can enable it from the directory where the ``occ`` command resides, with :command:`shell`::
+After this, you can enable it from the directory where the ``occ`` command resides, with :command:`shell`::
 
 	./occ app:enable --force app_ecosystem_v2
 
@@ -30,7 +30,7 @@ AAfter this, you can enable it from the directory where the ``occ`` command resi
 Patching Nextcloud 26
 """""""""""""""""""""
 
-Although only NextCloud since version 27.1 is officially supported, installation on NextCloud version 26 is possible.
+Although only Nextcloud since version 27.1 is officially supported, installation on Nextcloud version 26 is possible.
 If you are not using NextCloud version 26, you can skip this section.
 
 The only changes to Nextcloud server are in ``base.php`` file, required only for **Nextcloud 26**.
