@@ -18,7 +18,7 @@ use OCP\IURLGenerator;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 
-class DockerActions implements IDeployActions {
+class DockerActions implements IDockerActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	public const AE_REQUIRED_ENVS = [
 		'AE_VERSION',
@@ -72,8 +72,8 @@ class DockerActions implements IDeployActions {
 	 * @return array
 	 */
 	public function deployExApp(DaemonConfig $daemonConfig, array $params = []): array {
-		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
-			return [['error' => 'Only docker-install is supported for now.'], null, null];
+		if ($daemonConfig->getAcceptsDeployId() !== $this->getAcceptsDeployId()) {
+			return [['error' => sprintf('Wrong accepts-deploy-id (%s)', $daemonConfig->getAcceptsDeployId())], null, null];
 		}
 
 		if (isset($params['image_params'])) {
@@ -227,8 +227,6 @@ class DockerActions implements IDeployActions {
 			$response = $this->guzzleClient->get($url);
 			return json_decode((string) $response->getBody(), true);
 		} catch (GuzzleException $e) {
-			//$this->logger->error('Failed to inspect container', ['exception' => $e]);
-			//error_log($e->getMessage());
 			return ['error' => $e->getMessage(), 'exception' => $e];
 		}
 	}
@@ -380,7 +378,7 @@ class DockerActions implements IDeployActions {
 		$deployEnvs = [];
 		foreach ($envs as $env) {
 			[$key, $value] = explode('=', $env, 2);
-			if (in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
+			if (in_array($key, self::AE_REQUIRED_ENVS, true)) {
 				$deployEnvs[$key] = $value;
 			}
 		}
@@ -467,7 +465,7 @@ class DockerActions implements IDeployActions {
 
 	public function healthcheckContainer(string $containerId, DaemonConfig $daemonConfig): bool {
 		$attempts = 0;
-		$totalAttempts = 60; // ~60 seconds for container to initialize
+		$totalAttempts = 60; // ~60 seconds for container to initialize TODO: make configurable healthcheck time
 		while ($attempts < $totalAttempts) {
 			$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $containerId);
 			if ($this->containerStateHealthy($containerInfo)) {

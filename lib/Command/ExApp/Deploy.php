@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\DeployActions\DockerActions;
+use OCA\AppEcosystemV2\DeployActions\DockerAIOActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
 
@@ -18,17 +19,20 @@ class Deploy extends Command {
 	private AppEcosystemV2Service $service;
 	private DaemonConfigService $daemonConfigService;
 	private DockerActions $dockerActions;
+	private DockerAIOActions $dockerAIOActions;
 
 	public function __construct(
 		AppEcosystemV2Service $service,
 		DaemonConfigService $daemonConfigService,
 		DockerActions $dockerActions,
+		DockerAIOActions $dockerAIOActions,
 	) {
 		parent::__construct();
 
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->dockerActions = $dockerActions;
+		$this->dockerAIOActions = $dockerAIOActions;
 	}
 
 	protected function configure() {
@@ -74,13 +78,23 @@ class Deploy extends Command {
 			return 2;
 		}
 
-		$envParams = $input->getOption('env');
+		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {
+			$output->writeln('For "manual-install" deployId update is done manually. Only registration required.');
+			return 1;
+		}
 
-		$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
-			'env_options' => $envParams,
+		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$deployActions = $this->dockerActions;
+		} elseif ($daemonConfig->getAcceptsDeployId() === $this->dockerAIOActions->getAcceptsDeployId()) {
+			$deployActions = $this->dockerAIOActions;
+		} else {
+			$output->writeln(sprintf('Unsupported DaemonConfig type (accepts-deploy-id): %s', $daemonConfig->getAcceptsDeployId()));
+			return 1;
+		}
+		$deployParams = $deployActions->buildDeployParams($daemonConfig, $infoXml, [
+			'env_options' => $input->getOption('env'),
 		]);
-
-		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $deployParams);
+		[$pullResult, $createResult, $startResult] = $deployActions->deployExApp($daemonConfig, $deployParams);
 
 		if (isset($pullResult['error'])) {
 			$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $pullResult['error']));
@@ -88,14 +102,14 @@ class Deploy extends Command {
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
-			if (!$this->dockerActions->healthcheckContainer($createResult['Id'], $daemonConfig)) {
+			if (!$deployActions->healthcheckContainer($createResult['Id'], $daemonConfig)) {
 				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, 'Container healthcheck failed.'));
 				return 1;
 			}
 
 			$exAppUrlParams = [
 				'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
-				'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
+				'host' => $deployActions->resolveDeployExAppHost($appId, $daemonConfig),
 				'port' => explode('=', $deployParams['container_params']['env'][7])[1],
 			];
 

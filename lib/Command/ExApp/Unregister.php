@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\DeployActions\DockerActions;
+use OCA\AppEcosystemV2\DeployActions\DockerAIOActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
@@ -18,17 +19,20 @@ class Unregister extends Command {
 	private AppEcosystemV2Service $service;
 	private DockerActions $dockerActions;
 	private DaemonConfigService $daemonConfigService;
+	private DockerAIOActions $dockerAIOActions;
 
 	public function __construct(
 		AppEcosystemV2Service $service,
 		DaemonConfigService $daemonConfigService,
 		DockerActions $dockerActions,
+		DockerAIOActions $dockerAIOActions,
 	) {
 		parent::__construct();
 
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->dockerActions = $dockerActions;
+		$this->dockerAIOActions = $dockerAIOActions;
 	}
 
 	protected function configure() {
@@ -43,7 +47,8 @@ class Unregister extends Command {
 
 		$this->addUsage('test_app');
 		$this->addUsage('test_app --silent');
-		$this->addUsage('test_app --rm');
+		$this->addUsage('test_app --rm-container');
+		$this->addUsage('test_app --rm-container --rm-data');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -80,20 +85,25 @@ class Unregister extends Command {
 				return 1;
 			}
 			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-				$this->dockerActions->initGuzzleClient($daemonConfig);
-				[$stopResult, $removeResult] = $this->dockerActions->removePrevExAppContainer($this->dockerActions->buildDockerUrl($daemonConfig), $appId);
-				if (isset($stopResult['error']) || isset($removeResult['error'])) {
-					$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
-				} else {
-					$rmData = $input->getOption('rm-data');
-					if ($rmData) {
-						$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $appId . '_data');
-						if (isset($removeVolumeResult['error'])) {
-							$output->writeln(sprintf('Failed to remove ExApp %s volume %s', $appId, $appId . '_data'));
-						}
+				$deployActions = $this->dockerActions;
+			} elseif ($daemonConfig->getAcceptsDeployId() === $this->dockerAIOActions->getAcceptsDeployId()) {
+				$deployActions = $this->dockerAIOActions;
+			} else {
+				return 1;
+			}
+			$deployActions->initGuzzleClient($daemonConfig);
+			[$stopResult, $removeResult] = $deployActions->removePrevExAppContainer($deployActions->buildDockerUrl($daemonConfig), $appId);
+			if (isset($stopResult['error']) || isset($removeResult['error'])) {
+				$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
+			} else {
+				$rmData = $input->getOption('rm-data');
+				if ($rmData) {
+					$removeVolumeResult = $deployActions->removeVolume($deployActions->buildDockerUrl($daemonConfig), $appId . '_data');
+					if (isset($removeVolumeResult['error'])) {
+						$output->writeln(sprintf('Failed to remove ExApp %s volume %s', $appId, $appId . '_data'));
 					}
-					$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
 				}
+				$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
 			}
 		}
 

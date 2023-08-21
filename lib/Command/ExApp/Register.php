@@ -6,6 +6,7 @@ namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\DeployActions\DockerActions;
+use OCA\AppEcosystemV2\DeployActions\DockerAIOActions;
 use OCA\AppEcosystemV2\DeployActions\ManualActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
@@ -30,6 +31,7 @@ class Register extends Command {
 	private ExAppUsersService $exAppUsersService;
 	private DockerActions $dockerActions;
 	private ManualActions $manualActions;
+	private DockerAIOActions $dockerAIOActions;
 
 	public function __construct(
 		AppEcosystemV2Service $service,
@@ -37,8 +39,9 @@ class Register extends Command {
 		ExAppApiScopeService $exAppApiScopeService,
 		ExAppScopesService $exAppScopesService,
 		ExAppUsersService $exAppUsersService,
-		DockerActions $dockerActions,
 		ManualActions $manualActions,
+		DockerActions $dockerActions,
+		DockerAIOActions $dockerAIOActions,
 	) {
 		parent::__construct();
 
@@ -47,8 +50,9 @@ class Register extends Command {
 		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->exAppScopesService = $exAppScopesService;
 		$this->exAppUsersService = $exAppUsersService;
-		$this->dockerActions = $dockerActions;
 		$this->manualActions = $manualActions;
+		$this->dockerActions = $dockerActions;
+		$this->dockerAIOActions = $dockerAIOActions;
 	}
 
 	protected function configure() {
@@ -81,6 +85,8 @@ class Register extends Command {
 
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
+		} elseif ($daemonConfig->getAcceptsDeployId() === $this->dockerAIOActions->getAcceptsDeployId()) {
+			$exAppInfo = $this->dockerAIOActions->loadExAppInfo($appId, $daemonConfig);
 		} elseif ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
 			$exAppJson = $input->getOption('json-info');
 			if ($exAppJson === null) {

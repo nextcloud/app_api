@@ -6,6 +6,7 @@ namespace OCA\AppEcosystemV2\Command\ExApp;
 
 use OCA\AppEcosystemV2\Db\ExAppScope;
 use OCA\AppEcosystemV2\DeployActions\DockerActions;
+use OCA\AppEcosystemV2\DeployActions\DockerAIOActions;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 
 use OCA\AppEcosystemV2\Service\DaemonConfigService;
@@ -25,6 +26,7 @@ class Update extends Command {
 	private DockerActions $dockerActions;
 	private ExAppScopesService $exAppScopeService;
 	private ExAppApiScopeService $exAppApiScopeService;
+	private DockerAIOActions $dockerAIOActions;
 
 	public function __construct(
 		AppEcosystemV2Service $service,
@@ -32,6 +34,7 @@ class Update extends Command {
 		ExAppApiScopeService $exAppApiScopeService,
 		DaemonConfigService $daemonConfigService,
 		DockerActions $dockerActions,
+		DockerAIOActions $dockerAIOActions,
 	) {
 		parent::__construct();
 
@@ -40,6 +43,7 @@ class Update extends Command {
 		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->dockerActions = $dockerActions;
+		$this->dockerAIOActions = $dockerAIOActions;
 	}
 
 	protected function configure() {
@@ -102,70 +106,76 @@ class Update extends Command {
 		}
 
 		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {
-			$output->writeln('For "manual-install" deployId update is done manually');
+			$output->writeln('For "manual-install" deployId update is done manually. Re-register ExApp again to update');
 			return 2;
 		}
 
-		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-			$forceApproval = $input->getOption('force-update');
-			$approveUpdate = $forceApproval;
-			if (!$forceApproval && $input->isInteractive()) {
-				/** @var QuestionHelper $helper */
-				$helper = $this->getHelper('question');
-				$question = new ConfirmationQuestion('Current ExApp version will be removed (persistent storage preserved). Continue? [y/N] ', false);
-				$approveUpdate = $helper->ask($input, $output, $question);
-			}
-
-			if (!$approveUpdate) {
-				$output->writeln(sprintf('ExApp %s update canceled', $appId));
-				return 0;
-			}
-
-			$this->dockerActions->initGuzzleClient($daemonConfig); // Required init
-			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $appId);
-			if (isset($containerInfo['error'])) {
-				$output->writeln(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
-				return 1;
-			}
-			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
-				'container_info' => $containerInfo,
-			]);
-			$deployParams['prev_container_id'] = $containerInfo['Id'];
-			[$pullResult, $stopResult, $removeResult, $createResult, $startResult] = $this->dockerActions->updateExApp($daemonConfig, $deployParams);
-
-			if (isset($pullResult['error'])) {
-				$output->writeln(sprintf('ExApp %s update failed. Error: %s', $appId, $pullResult['error']));
-				return 1;
-			}
-
-			if (isset($stopResult['error']) || isset($removeResult['error'])) {
-				$output->writeln(sprintf('Failed to remove old ExApp %s container (id: %s). Error: %s', $appId, $containerInfo['Id'], $stopResult['error'] ?? $removeResult['error'] ?? null));
-				return 1;
-			}
-
-			if (!isset($startResult['error']) && isset($createResult['Id'])) {
-				if (!$this->dockerActions->healthcheckContainer($createResult['Id'], $daemonConfig)) {
-					$output->writeln(sprintf('ExApp %s update failed. Error: %s', $appId, 'Container healthcheck failed.'));
-					return 1;
-				}
-
-				$exAppUrlParams = [
-					'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
-					'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
-					'port' => $deployParams['container_params']['port'],
-				];
-
-				if (!$this->service->heartbeatExApp($exAppUrlParams)) {
-					$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and configured correctly to be reachable by Nextcloud.', $appId));
-					return 1;
-				}
-
-				$output->writeln(sprintf('ExApp %s container successfully updated.', $appId));
-			}
+		$forceApproval = $input->getOption('force-update');
+		$approveUpdate = $forceApproval;
+		if (!$forceApproval && $input->isInteractive()) {
+			/** @var QuestionHelper $helper */
+			$helper = $this->getHelper('question');
+			$question = new ConfirmationQuestion('Current ExApp version will be removed (persistent storage preserved). Continue? [y/N] ', false);
+			$approveUpdate = $helper->ask($input, $output, $question);
 		}
-		// TODO: Add AIO update DeployActions
 
-		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
+		if (!$approveUpdate) {
+			$output->writeln(sprintf('ExApp %s update canceled', $appId));
+			return 0;
+		}
+
+		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$deployActions = $this->dockerActions;
+		} elseif ($daemonConfig->getAcceptsDeployId() === $this->dockerAIOActions->getAcceptsDeployId()) {
+			$deployActions = $this->dockerAIOActions;
+		} else {
+			$output->writeln(sprintf('Unsupported DaemonConfig type (accepts-deploy-id): %s', $daemonConfig->getAcceptsDeployId()));
+			return 1;
+		}
+
+		$deployActions->initGuzzleClient($daemonConfig); // Required init
+		$containerInfo = $deployActions->inspectContainer($deployActions->buildDockerUrl($daemonConfig), $appId);
+		if (isset($containerInfo['error'])) {
+			$output->writeln(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
+			return 1;
+		}
+		$deployParams = $deployActions->buildDeployParams($daemonConfig, $infoXml, [
+			'container_info' => $containerInfo,
+		]);
+		$deployParams['prev_container_id'] = $containerInfo['Id'];
+		[$pullResult, $stopResult, $removeResult, $createResult, $startResult] = $deployActions->updateExApp($daemonConfig, $deployParams);
+
+		if (isset($pullResult['error'])) {
+			$output->writeln(sprintf('ExApp %s update failed. Error: %s', $appId, $pullResult['error']));
+			return 1;
+		}
+
+		if (isset($stopResult['error']) || isset($removeResult['error'])) {
+			$output->writeln(sprintf('Failed to remove old ExApp %s container (id: %s). Error: %s', $appId, $containerInfo['Id'], $stopResult['error'] ?? $removeResult['error'] ?? null));
+			return 1;
+		}
+
+		if (!isset($startResult['error']) && isset($createResult['Id'])) {
+			if (!$deployActions->healthcheckContainer($createResult['Id'], $daemonConfig)) {
+				$output->writeln(sprintf('ExApp %s update failed. Error: %s', $appId, 'Container healthcheck failed.'));
+				return 1;
+			}
+
+			$exAppUrlParams = [
+				'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
+				'host' => $deployActions->resolveDeployExAppHost($appId, $daemonConfig),
+				'port' => $deployParams['container_params']['port'],
+			];
+
+			if (!$this->service->heartbeatExApp($exAppUrlParams)) {
+				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and configured correctly to be reachable by Nextcloud.', $appId));
+				return 1;
+			}
+
+			$output->writeln(sprintf('ExApp %s container successfully updated.', $appId));
+		}
+
+		$exAppInfo = $deployActions->loadExAppInfo($appId, $daemonConfig);
 		if (!$this->service->updateExAppInfo($exApp, $exAppInfo)) {
 			$output->writeln(sprintf('Failed to update ExApp %s info', $appId));
 			return 1;
