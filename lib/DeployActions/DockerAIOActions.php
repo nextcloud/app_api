@@ -24,10 +24,10 @@ use OCP\Security\ISecureRandom;
  */
 class DockerAIOActions implements IDockerActions {
 	// default master container hostname within Docker namespace and fixed port
-	const MASTER_CONTAINER_HOST = 'https://nextcloud-aio-mastercontainer:8080';
-	const AIO_DAEMON_CONFIG_NAME = 'docker_aio';
-	const AIO_DOCKER_API = 'api/docker/app_ecosystem_v2';
-	const AIO_NEXTCLOUD_CONTAINER = 'nextcloud-aio-nextcloud';
+	public const MASTER_CONTAINER_HOST = 'https://nextcloud-aio-mastercontainer:8080';
+	public const AIO_DAEMON_CONFIG_NAME = 'docker_aio';
+	public const AIO_DOCKER_API = 'api/docker/app_ecosystem_v2';
+	public const AIO_NEXTCLOUD_CONTAINER = 'nextcloud-aio-nextcloud';
 	private IConfig $config;
 	private DaemonConfigService $daemonConfigService;
 	private IURLGenerator $urlGenerator;

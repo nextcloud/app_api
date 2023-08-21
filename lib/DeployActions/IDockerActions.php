@@ -2,7 +2,6 @@
 
 namespace OCA\AppEcosystemV2\DeployActions;
 
-
 use OCA\AppEcosystemV2\Db\DaemonConfig;
 
 /**
