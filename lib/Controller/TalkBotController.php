@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Controller;
 
-
 use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
