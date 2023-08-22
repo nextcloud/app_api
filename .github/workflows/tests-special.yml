@@ -117,7 +117,7 @@ jobs:
           sleep 5s
           php occ app_ecosystem_v2:daemon:register manual_install "Manual Install" manual-install 0 0 0
           php occ app_ecosystem_v2:app:register nc_py_api manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[2, 10, 11],\"optional\":[30, 31, 32, 33]},\"protocol\":\"http\",\"system_app\":1}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[SYSTEM, FILES, FILES_SHARING],\"optional\":[USER_INFO, USER_STATUS, NOTIFICATIONS, WEATHER_STATUS, TALK]},\"protocol\":\"http\",\"system_app\":1}" \
             -e --force-scopes
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
