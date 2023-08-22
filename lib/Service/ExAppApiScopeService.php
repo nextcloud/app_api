@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Service;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppApiScope;
 use OCA\AppEcosystemV2\Db\ExAppApiScopeMapper;
 
@@ -157,6 +158,15 @@ class ExAppApiScopeService {
 		}));
 		return array_unique(array_map(function (ExAppApiScope $apiScope) {
 			return $apiScope->getName();
+		}, $apiScopes));
+	}
+
+	public function mapScopeNamesToNumbers(array $scopeNames): array {
+		$apiScopes = array_values(array_filter($this->getExAppApiScopes(), function (ExAppApiScope $apiScope) use ($scopeNames) {
+			return in_array($apiScope->getName(), $scopeNames);
+		}));
+		return array_unique(array_map(function (ExAppApiScope $apiScope) {
+			return $apiScope->getScopeGroup();
 		}, $apiScopes));
 	}
 }
