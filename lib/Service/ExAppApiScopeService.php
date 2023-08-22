@@ -88,8 +88,8 @@ class ExAppApiScopeService {
 			['api_route' => '/cloud/capabilities', 'scope_group' => 1, 'name' => 'BASIC'],
 			['api_route' => '/cloud/apps', 'scope_group' => 2, 'name' => 'SYSTEM'],
 			['api_route' => '/apps/provisioning_api/api/', 'scope_group' => 2, 'name' => 'SYSTEM'],
-			['api_route' => '/dav/', 'scope_group' => 10, 'name' => 'DAV'],
-			['api_route' => '/apps/files/ajax/', 'scope_group' => 10, 'name' => 'DAV'],
+			['api_route' => '/dav/', 'scope_group' => 10, 'name' => 'FILES'],
+			['api_route' => '/apps/files/ajax/', 'scope_group' => 10, 'name' => 'FILES'],
 			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 11, 'name' => 'FILES_SHARING'],
 			['api_route' => '/cloud/users', 'scope_group' => 30, 'name' => 'USER_INFO'],
 			['api_route' => '/cloud/groups', 'scope_group' => 30, 'name' => 'USER_INFO'],
@@ -157,6 +157,15 @@ class ExAppApiScopeService {
 		}));
 		return array_unique(array_map(function (ExAppApiScope $apiScope) {
 			return $apiScope->getName();
+		}, $apiScopes));
+	}
+
+	public function mapScopeNamesToNumbers(array $scopeNames): array {
+		$apiScopes = array_values(array_filter($this->getExAppApiScopes(), function (ExAppApiScope $apiScope) use ($scopeNames) {
+			return in_array($apiScope->getName(), $scopeNames);
+		}));
+		return array_unique(array_map(function (ExAppApiScope $apiScope) {
+			return $apiScope->getScopeGroup();
 		}, $apiScopes));
 	}
 }

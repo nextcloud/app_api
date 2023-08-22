@@ -348,10 +348,10 @@ class AppEcosystemV2Service {
 			if ($scopes !== false) {
 				$scopes = (array) $scopes[0];
 				$required = array_map(function (string $scopeGroup) {
-					return intval($scopeGroup);
+					return $scopeGroup;
 				}, (array) $scopes['required']->value);
 				$optional = array_map(function (string $scopeGroup) {
-					return intval($scopeGroup);
+					return $scopeGroup;
 				}, (array) $scopes['optional']->value);
 				return [
 					'required' => array_values($required),

@@ -148,16 +148,16 @@ class Register extends Command {
 
 				// Prompt to approve required ExApp scopes
 				if (count($requestedExAppScopeGroups['required']) > 0) {
-					$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ',
-						$this->exAppApiScopeService->mapScopeGroupsToNames($requestedExAppScopeGroups['required']))));
+					$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups['required'])));
 					$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 					$confirmRequiredScopes = $helper->ask($input, $output, $question);
+				} else {
+					$confirmRequiredScopes = true;
 				}
 
 				// Prompt to approve optional ExApp scopes
 				if ($confirmRequiredScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-					$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ',
-						$this->exAppApiScopeService->mapScopeGroupsToNames($requestedExAppScopeGroups['optional']))));
+					$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups['optional'])));
 					$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 					$confirmOptionalScopes = $helper->ask($input, $output, $question);
 				}
@@ -199,7 +199,7 @@ class Register extends Command {
 
 	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, string $scopeType): void {
 		$registeredScopeGroups = [];
-		foreach ($requestedExAppScopeGroups as $scopeGroup) {
+		foreach ($this->exAppApiScopeService->mapScopeNamesToNumbers($requestedExAppScopeGroups) as $scopeGroup) {
 			if ($this->exAppScopesService->setExAppScopeGroup($exApp, $scopeGroup)) {
 				$registeredScopeGroups[] = $scopeGroup;
 			} else {
