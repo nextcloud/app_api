@@ -83,6 +83,7 @@ class ExAppApiScopeService {
 			['api_route' => $aeApiV1Prefix . '/ex-app/all', 'scope_group' => 2, 'name' => 'SYSTEM'],
 			['api_route' => $aeApiV1Prefix . '/ex-app/enabled', 'scope_group' => 2, 'name' => 'SYSTEM'],
 			['api_route' => $aeApiV1Prefix . '/notification', 'scope_group' => 32, 'name' => 'NOTIFICATIONS'],
+			['api_route' => $aeApiV1Prefix . '/talk_bot', 'scope_group' => 60, 'name' => 'TALK_BOT'],
 
 			// Cloud scopes
 			['api_route' => '/cloud/capabilities', 'scope_group' => 1, 'name' => 'BASIC'],

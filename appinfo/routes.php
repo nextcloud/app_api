@@ -42,5 +42,9 @@ return [
 
 		// Notifications
 		['name' => 'notifications#sendNotification', 'url' => '/api/v1/notification', 'verb' => 'POST'],
+
+		// Talk bots
+		['name' => 'talkBot#registerExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'POST'],
+		//['name' => 'talkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot/{id}', 'verb' => 'DELETE'],
 	],
 ];
