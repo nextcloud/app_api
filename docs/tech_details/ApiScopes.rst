@@ -25,8 +25,9 @@ The following API groups are currently supported:
 * ``31`` USER_STATUS
 * ``32`` NOTIFICATIONS
 * ``33`` WEATHER_STATUS
+* ``50`` TALK
 
-These groups are identified numerically, as opposed to using names. As time progresses,
+These groups are identified using names. As time progresses,
 the list will steadily expand, comprehensively encompassing all potential APIs provided by Nextcloud.
 
 There is a CLI command to list registered scopes: ``occ app_ecosystem_v2:scopes:list``.
