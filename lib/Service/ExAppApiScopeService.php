@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\AppEcosystemV2\Service;
 
 use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\AppEcosystemV2\Db\ExAppApiScope;
 use OCA\AppEcosystemV2\Db\ExAppApiScopeMapper;
 
