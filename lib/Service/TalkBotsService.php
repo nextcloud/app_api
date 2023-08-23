@@ -44,7 +44,7 @@ class TalkBotsService {
 		}
 
 		$url = $this->service->getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
-		$id = sha1($url);
+		$id = sha1($exApp->getAppid() . '_' . $route);
 
 		$exAppConfig = $this->exAppConfigService->getAppConfig($exApp->getAppid(), $id);
 		if ($exAppConfig === null) {
