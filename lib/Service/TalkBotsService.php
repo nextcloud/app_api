@@ -50,8 +50,7 @@ class TalkBotsService {
 		if ($exAppConfig === null) {
 			$secret = $this->random->generate(64, ISecureRandom::CHAR_HUMAN_READABLE);
 		} else {
-			$botConfig = json_decode($exAppConfig->getConfigvalue(), true);
-			$secret = $botConfig['secret']; // Do not regenerate already registered bot secret
+			$secret = $exAppConfig->getConfigvalue(); // Do not regenerate already registered bot secret
 		}
 
 		$event = new BotInstallEvent(
@@ -63,9 +62,7 @@ class TalkBotsService {
 
 		$this->dispatcher->dispatchTyped($event);
 
-		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), $id, json_encode([
-			'secret' => $secret
-		]));
+		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), $id, $secret);
 
 		return [
 			'id' => $id,
