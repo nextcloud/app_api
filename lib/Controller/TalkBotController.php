@@ -8,6 +8,8 @@ use OCA\AppEcosystemV2\AppInfo\Application;
 use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
 use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCA\AppEcosystemV2\Service\TalkBotsService;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCS\OCSBadRequestException;
@@ -33,6 +35,7 @@ class TalkBotController extends OCSController {
 
 	/**
 	 * @NoCSRFRequired
+	 * @PublicPage
 	 *
 	 * @param string $name bot display name
 	 * @param string $route ExApp route to post messages
@@ -42,6 +45,8 @@ class TalkBotController extends OCSController {
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
+	#[NoCSRFRequired]
+	#[PublicPage]
 	public function registerExAppTalkBot(string $name, string $route, string $description): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$exApp = $this->service->getExApp($appId);

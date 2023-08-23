@@ -264,6 +264,10 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 64,
 			]);
+			$table->addColumn('user_check', Types::SMALLINT, [
+				'notnull' => true,
+				'default' => 1,
+			]);
 
 			$table->setPrimaryKey(['id']);
 			$table->addUniqueIndex(['api_route'], 'ex_apps_api_scopes__idx');
