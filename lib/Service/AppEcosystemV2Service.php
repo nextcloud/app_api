@@ -365,6 +365,14 @@ class AppEcosystemV2Service {
 		return ['error' => 'Failed to get ExApp requested scopes.'];
 	}
 
+	private function initGuzzleClient(): void {
+
+	}
+
+	private function setupCerts(): array {
+		return [];
+	}
+
 	/**
 	 * Request to ExApp with AppEcosystem auth headers and ExApp user initialization
 	 *
@@ -427,6 +435,9 @@ class AppEcosystemV2Service {
 					'EX-APP-ID' => $exApp->getAppid(),
 					'EX-APP-VERSION' => $exApp->getVersion(),
 					'NC-USER-ID' => $userId,
+				],
+				'nextcloud' => [
+					'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 				],
 			];
 
