@@ -15,14 +15,17 @@ use OCP\AppFramework\Db\Entity;
  * @method string getApiRoute()
  * @method int getScopeGroup()
  * @method string getName()
+ * @method int getUserCheck()
  * @method void setApiRoute(string $apiRoute)
  * @method void setScopeGroup(int $scopeGroup)
  * @method void setName(string $name)
+ * @method void setUserCheck(int $userCheck)
  */
 class ExAppApiScope extends Entity implements JsonSerializable {
 	protected $apiRoute;
 	protected $scopeGroup;
 	protected $name;
+	protected $userCheck;
 
 	/**
 	 * @param array $params
@@ -31,6 +34,7 @@ class ExAppApiScope extends Entity implements JsonSerializable {
 		$this->addType('apiRoute', 'string');
 		$this->addType('scopeGroup', 'int');
 		$this->addType('name', 'string');
+		$this->addType('userCheck', 'int');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
@@ -44,14 +48,18 @@ class ExAppApiScope extends Entity implements JsonSerializable {
 		if (isset($params['name'])) {
 			$this->setName($params['name']);
 		}
+		if (isset($params['user_check'])) {
+			$this->setUserCheck($params['user_check']);
+		}
 	}
 
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
-			'api_route' => $this->apiRoute,
-			'scope_group' => $this->scopeGroup,
-			'name' => $this->name,
+			'api_route' => $this->getApiRoute(),
+			'scope_group' => $this->getScopeGroup(),
+			'name' => $this->getName(),
+			'user_check' => $this->getUserCheck(),
 		];
 	}
 }

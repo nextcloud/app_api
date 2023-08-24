@@ -637,12 +637,15 @@ class AppEcosystemV2Service {
 				$this->logger->error(sprintf('Failed to check apiScope %s', $path));
 				return false;
 			}
-			// If it is not an initialization scope group - check if this endpoint is allowed to be called
+			// BASIC ApiScope is granted to all ExApps (all Api routes with BASIC scope group).
 			if ($apiScope->getScopeGroup() !== self::BASIC_API_SCOPE) {
 				if (!$this->exAppScopesService->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
 					$this->logger->error(sprintf('ExApp %s not passed scope group check %s', $exApp->getAppid(), $path));
 					return false;
 				}
+			}
+			// For APIs that not assuming work under user context we do not check ExApp users
+			if ($apiScope->getUserCheck()) {
 				try {
 					if (!$this->exAppUsersService->exAppUserExists($exApp->getAppid(), $userId)) {
 						$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));
