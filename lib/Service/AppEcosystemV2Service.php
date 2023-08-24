@@ -365,14 +365,6 @@ class AppEcosystemV2Service {
 		return ['error' => 'Failed to get ExApp requested scopes.'];
 	}
 
-	private function initGuzzleClient(): void {
-
-	}
-
-	private function setupCerts(): array {
-		return [];
-	}
-
 	/**
 	 * Request to ExApp with AppEcosystem auth headers and ExApp user initialization
 	 *
