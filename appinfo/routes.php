@@ -46,5 +46,11 @@ return [
 		// Talk bots
 		['name' => 'talkBot#registerExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'POST'],
 		//['name' => 'talkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot/{id}', 'verb' => 'DELETE'],
+
+		// SpeechToText
+		['name' => 'speechToText#registerProvider', 'url' => '/api/v1/speech_to_text', 'verb' => 'POST'],
+
+		// TextProcessing
+		['name' => 'textProcessing#registerProvider', 'url' => '/api/v1/text_processing', 'verb' => 'POST'],
 	],
 ];

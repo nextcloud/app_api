@@ -293,6 +293,33 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addUniqueIndex(['appid', 'scope_group'], 'ex_apps_scopes__idx');
 		}
 
+		if (!$schema->hasTable('ex_apps_text_processing')) {
+			$table = $schema->createTable('ex_apps_text_processing');
+
+			$table->addColumn('id', Types::BIGINT, [
+				'autoincrement' => true,
+				'notnull' => true,
+			]);
+			$table->addColumn('appid', Types::STRING, [
+				'notnull' => true,
+				'length' => 32,
+			]);
+		}
+		// TODO: Add required field for both TextProcessingProvider and SpeechToText
+
+		if (!$schema->hasTable('ex_apps_speech_to_text')) {
+			$table = $schema->createTable('ex_apps_speech_to_text');
+
+			$table->addColumn('id', Types::BIGINT, [
+				'autoincrement' => true,
+				'notnull' => true,
+			]);
+			$table->addColumn('appid', Types::STRING, [
+				'notnull' => true,
+				'length' => 32,
+			]);
+		}
+
 		return $schema;
 	}
 }

@@ -14,6 +14,8 @@ use OCA\AppEcosystemV2\Notifications\ExAppNotifier;
 use OCA\AppEcosystemV2\Profiler\AEDataCollector;
 use OCA\AppEcosystemV2\PublicCapabilities;
 
+use OCA\AppEcosystemV2\SpeechToText\SpeechToTextProvider;
+use OCA\AppEcosystemV2\TextProcessing\TextProcessingProvider;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -47,6 +49,9 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
+
+		$context->registerTextProcessingProvider(TextProcessingProvider::class);
+		$context->registerSpeechToTextProvider(SpeechToTextProvider::class);
 	}
 
 	public function boot(IBootContext $context): void {
