@@ -17,6 +17,7 @@ use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IResponse;
 use OCP\ICache;
 use OCP\ICacheFactory;
+use OCP\IConfig;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
@@ -28,6 +29,7 @@ class ExFilesActionsMenuService {
 	private IClient $client;
 	private AppEcosystemV2Service $appEcosystemV2Service;
 	private IRequest $request;
+	private IConfig $config;
 
 	public function __construct(
 		ICacheFactory $cacheFactory,
@@ -36,6 +38,7 @@ class ExFilesActionsMenuService {
 		IClientService $clientService,
 		AppEcosystemV2Service $appEcosystemV2Service,
 		IRequest $request,
+		IConfig $config,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
 		$this->mapper = $mapper;
@@ -43,6 +46,7 @@ class ExFilesActionsMenuService {
 		$this->client = $clientService->newClient();
 		$this->appEcosystemV2Service = $appEcosystemV2Service;
 		$this->request = $request;
+		$this->config = $config;
 	}
 
 	/**
@@ -164,6 +168,7 @@ class ExFilesActionsMenuService {
 					'shareAttributes' => $actionFile['shareAttributes'] ?? null,
 					'sharePermissions' => $actionFile['sharePermissions'] ?? null,
 					'userId' => $userId,
+					'instanceId' => $this->config->getSystemValue('instanceid', null),
 				],
 			];
 			$exApp = $this->appEcosystemV2Service->getExApp($appId);
