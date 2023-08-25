@@ -59,15 +59,23 @@ class TalkBotController extends OCSController {
 
 	/**
 	 * @NoCSRFRequired
+	 * @PublicPage
 	 *
-	 * @param string $id
+	 * @param string $route
+	 *
+	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
-	public function unregisterExAppTalkBot(string $id): Response {
+	#[NoCSRFRequired]
+	#[PublicPage]
+	public function unregisterExAppTalkBot(string $route): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$exApp = $this->service->getExApp($appId);
-		$botUnregistered = $this->talkBotsService->unregisterExAppBot($exApp, $id);
+		$botUnregistered = $this->talkBotsService->unregisterExAppBot($exApp, $route);
+		if ($botUnregistered === null) {
+			throw new OCSBadRequestException('Talk bots could not be unregistered');
+		}
 		return new DataResponse($botUnregistered);
 	}
 }
