@@ -8,3 +8,4 @@ AppEcosystemV2 APIs
 
 	fileactionsmenu
 	notifications
+	talkbots

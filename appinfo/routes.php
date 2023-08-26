@@ -45,6 +45,6 @@ return [
 
 		// Talk bots
 		['name' => 'talkBot#registerExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'POST'],
-		//['name' => 'talkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot/{id}', 'verb' => 'DELETE'],
+		['name' => 'talkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'DELETE'],
 	],
 ];
