@@ -13,6 +13,7 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCS\OCSBadRequestException;
+use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
@@ -63,7 +64,7 @@ class TalkBotController extends OCSController {
 	 *
 	 * @param string $route
 	 *
-	 * @throws OCSBadRequestException
+	 * @throws OCSNotFoundException
 	 * @return Response
 	 */
 	#[AppEcosystemAuth]
@@ -74,7 +75,7 @@ class TalkBotController extends OCSController {
 		$exApp = $this->service->getExApp($appId);
 		$botUnregistered = $this->talkBotsService->unregisterExAppBot($exApp, $route);
 		if ($botUnregistered === null) {
-			throw new OCSBadRequestException('Talk bots could not be unregistered');
+			throw new OCSNotFoundException('Talk bots could not be unregistered');
 		}
 		return new DataResponse($botUnregistered);
 	}
