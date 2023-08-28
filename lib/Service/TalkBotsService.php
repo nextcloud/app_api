@@ -6,6 +6,7 @@ namespace OCA\AppEcosystemV2\Service;
 
 use OCA\AppEcosystemV2\Db\ExApp;
 use OCA\Talk\Events\BotInstallEvent;
+use OCA\Talk\Events\BotUninstallEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Security\ISecureRandom;
 
@@ -27,15 +28,21 @@ class TalkBotsService {
 		$this->random = $random;
 	}
 
-	/**
-	 * @param ExApp $exApp
-	 * @param string $id
-	 *
-	 * @return bool
-	 */
-	public function unregisterExAppBot(ExApp $exApp, string $id): bool {
-		// TODO: Not possible to unregister for now
-		return false;
+	public function unregisterExAppBot(ExApp $exApp, string $route): ?bool {
+		if (!class_exists(BotUninstallEvent::class)) {
+			return null;
+		}
+
+		[$id, $url, $secret] = $this->getExAppTalkBotConfig($exApp, $route);
+
+		$event = new BotUninstallEvent($secret, $url);
+		$this->dispatcher->dispatchTyped($event);
+
+		if ($this->exAppConfigService->deleteAppConfigValues([$id], $exApp->getAppid()) !== 1) {
+			return null;
+		}
+
+		return true;
 	}
 
 	public function registerExAppBot(ExApp $exApp, string $name, string $route, string $description): ?array {
@@ -43,6 +50,25 @@ class TalkBotsService {
 			return null;
 		}
 
+		[$id, $url, $secret] = $this->getExAppTalkBotConfig($exApp, $route);
+
+		$event = new BotInstallEvent(
+			$name,
+			$secret,
+			$url,
+			$description,
+		);
+		$this->dispatcher->dispatchTyped($event);
+
+		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), $id, $secret);
+
+		return [
+			'id' => $id,
+			'secret' => $secret,
+		];
+	}
+
+	private function getExAppTalkBotConfig(ExApp $exApp, string $route): array {
 		$url = $this->service->getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
 		$id = sha1($exApp->getAppid() . '_' . $route);
 
@@ -52,21 +78,6 @@ class TalkBotsService {
 		} else {
 			$secret = $exAppConfig->getConfigvalue(); // Do not regenerate already registered bot secret
 		}
-
-		$event = new BotInstallEvent(
-			$name,
-			$secret,
-			$url,
-			$description,
-		);
-
-		$this->dispatcher->dispatchTyped($event);
-
-		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), $id, $secret);
-
-		return [
-			'id' => $id,
-			'secret' => $secret,
-		];
+		return [$id, $url, $secret];
 	}
 }

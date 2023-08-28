@@ -428,6 +428,9 @@ class AppEcosystemV2Service {
 					'EX-APP-VERSION' => $exApp->getVersion(),
 					'NC-USER-ID' => $userId,
 				],
+				'nextcloud' => [
+					'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
+				],
 			];
 
 			if (count($params) > 0) {
