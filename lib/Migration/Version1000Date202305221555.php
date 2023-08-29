@@ -293,6 +293,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			$table->addUniqueIndex(['appid', 'scope_group'], 'ex_apps_scopes__idx');
 		}
 
+		// Speech-To-Text and Text-processing APIs tables
 		if (!$schema->hasTable('ex_apps_text_processing')) {
 			$table = $schema->createTable('ex_apps_text_processing');
 
@@ -304,8 +305,59 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 32,
 			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('display_name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('description', Types::STRING, [
+				'notnull' => true,
+				'length' => 128,
+			]);
+			// ExApp route to forward the action
+			$table->addColumn('action_handler_route', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('action_type', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+
+			$table->setPrimaryKey(['id'], 'ex_apps_text_processing_id');
+			$table->addUniqueIndex(['appid', 'name'], 'text_processing_appid_name');
 		}
-		// TODO: Add required field for both TextProcessingProvider and SpeechToText
+
+		if (!$schema->hasTable('ex_apps_tp_task_types')) {
+			$table = $schema->createTable('ex_apps_tp_task_types');
+
+			$table->addColumn('id', Types::BIGINT, [
+				'autoincrement' => true,
+				'notnull' => true,
+			]);
+			$table->addColumn('appid', Types::STRING, [
+				'notnull' => true,
+				'length' => 32,
+			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('display_name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('description', Types::STRING, [
+				'notnull' => true,
+				'length' => 128,
+			]);
+
+			$table->setPrimaryKey(['id'], 'ex_apps_task_types_id');
+			$table->addUniqueIndex(['name'], 'speech_to_text_types_name');
+		}
 
 		if (!$schema->hasTable('ex_apps_speech_to_text')) {
 			$table = $schema->createTable('ex_apps_speech_to_text');
@@ -318,6 +370,22 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 32,
 			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('display_name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			// ExApp route to forward the action
+			$table->addColumn('action_handler_route', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+
+			$table->setPrimaryKey(['id'], 'ex_apps_speech_to_text_id');
+			$table->addUniqueIndex(['appid', 'name'], 'speech_to_text_appid_name');
 		}
 
 		return $schema;

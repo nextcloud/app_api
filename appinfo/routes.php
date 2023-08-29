@@ -47,10 +47,13 @@ return [
 		['name' => 'talkBot#registerExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'POST'],
 		['name' => 'talkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'DELETE'],
 
-		// SpeechToText
+		// Speech-To-Text
 		['name' => 'speechToText#registerProvider', 'url' => '/api/v1/speech_to_text', 'verb' => 'POST'],
+		['name' => 'speechToText#unregisterProvider', 'url' => '/api/v1/speech_to_text', 'verb' => 'DELETE'],
 
-		// TextProcessing
+		// Text-Processing
 		['name' => 'textProcessing#registerProvider', 'url' => '/api/v1/text_processing', 'verb' => 'POST'],
+		['name' => 'textProcessing#unregisterProvider', 'url' => '/api/v1/text_processing', 'verb' => 'DELETE'],
+		['name' => 'textProcessing#registerProvider', 'url' => '/api/v1/text_processing/task_type', 'verb' => 'POST'],
 	],
 ];

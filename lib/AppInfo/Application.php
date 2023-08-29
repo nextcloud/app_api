@@ -14,8 +14,8 @@ use OCA\AppEcosystemV2\Notifications\ExAppNotifier;
 use OCA\AppEcosystemV2\Profiler\AEDataCollector;
 use OCA\AppEcosystemV2\PublicCapabilities;
 
-use OCA\AppEcosystemV2\SpeechToText\SpeechToTextProvider;
-use OCA\AppEcosystemV2\TextProcessing\TextProcessingProvider;
+use OCA\AppEcosystemV2\Service\SpeechToTextService;
+use OCA\AppEcosystemV2\Service\TextProcessingService;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -50,8 +50,18 @@ class Application extends App implements IBootstrap {
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 
-		$context->registerTextProcessingProvider(TextProcessingProvider::class);
-		$context->registerSpeechToTextProvider(SpeechToTextProvider::class);
+		// Dynamic anonymous providers registration
+		$container = $this->getContainer();
+		try {
+			/** @var TextProcessingService $textProcessingService */
+			$textProcessingService = $container->get(TextProcessingService::class);
+			$textProcessingService->registerExAppTextProcessingProviders($container, $context);
+
+			/** @var SpeechToTextService $speechToTextService */
+			$speechToTextService = $container->get(SpeechToTextService::class);
+			$speechToTextService->registerExAppSpeechToTextProviders($container, $context);
+		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
+		}
 	}
 
 	public function boot(IBootContext $context): void {
@@ -68,9 +78,12 @@ class Application extends App implements IBootstrap {
 	public function registerDavAuth(): void {
 		$container = $this->getContainer();
 
-		$dispatcher = $container->query(IEventDispatcher::class);
-		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
-			$event->getServer()->addPlugin($container->query(DavPlugin::class));
-		});
+		try {
+			$dispatcher = $container->get(IEventDispatcher::class);
+			$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
+				$event->getServer()->addPlugin($container->get(DavPlugin::class));
+			});
+		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
+		}
 	}
 }
