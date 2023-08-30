@@ -32,7 +32,7 @@ class DockerActions implements IDeployActions {
 		'IS_SYSTEM_APP',
 		'NEXTCLOUD_URL',
 	];
-	const EX_APP_CONTAINER_PREFIX = 'nc_app_';
+	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	private LoggerInterface $logger;
 	private Client $guzzleClient;
 	private ICertificateManager $certificateManager;
