@@ -32,6 +32,7 @@ class DockerActions implements IDeployActions {
 		'IS_SYSTEM_APP',
 		'NEXTCLOUD_URL',
 	];
+	const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	private LoggerInterface $logger;
 	private Client $guzzleClient;
 	private ICertificateManager $certificateManager;
@@ -96,7 +97,7 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, null, null];
 		}
 
-		$containerInfo = $this->inspectContainer($dockerUrl, $params['container_params']['name']);
+		$containerInfo = $this->inspectContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($containerInfo['Id'])) {
 			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $containerInfo['Id']);
 			if (isset($stopResult['error']) || isset($removeResult['error'])) {
@@ -109,7 +110,7 @@ class DockerActions implements IDeployActions {
 			return [null, $createResult, null];
 		}
 
-		$startResult = $this->startContainer($dockerUrl, $createResult['Id']);
+		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		return [$pullResult, $createResult, $startResult];
 	}
 
@@ -122,7 +123,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function createContainer(string $dockerUrl, array $imageParams, array $params = []): array {
-		$createVolumeResult = $this->createVolume($dockerUrl, $params['name'] . '_data');
+		$createVolumeResult = $this->createVolume($dockerUrl, $this->buildExAppVolumeName($params['name']));
 		if (isset($createVolumeResult['error'])) {
 			return $createVolumeResult;
 		}
@@ -131,6 +132,7 @@ class DockerActions implements IDeployActions {
 			'Image' => $this->buildImageName($imageParams),
 			'Hostname' => $params['hostname'],
 			'HostConfig' => [
+				'Privileged' => false,
 				'NetworkMode' => $params['net'],
 				'Mounts' => $this->buildDefaultExAppVolume($params['hostname']),
 			],
@@ -154,7 +156,7 @@ class DockerActions implements IDeployActions {
 			$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams($params['devices']);
 		}
 
-		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($params['name'])));
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
 		try {
 			$options['json'] = $containerParams;
 			$response = $this->guzzleClient->post($url, $options);
@@ -227,8 +229,6 @@ class DockerActions implements IDeployActions {
 			$response = $this->guzzleClient->get($url);
 			return json_decode((string) $response->getBody(), true);
 		} catch (GuzzleException $e) {
-			//$this->logger->error('Failed to inspect container', ['exception' => $e]);
-			//error_log($e->getMessage());
 			return ['error' => $e->getMessage(), 'exception' => $e];
 		}
 	}
@@ -298,7 +298,7 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, null, null, null, null];
 		}
 
-		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $params['prev_container_id']);
+		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($stopResult['error'])) {
 			return [$pullResult, $stopResult, null, null, null];
 		}
@@ -311,7 +311,7 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, $stopResult, $removeResult, $createResult, null];
 		}
 
-		$startResult = $this->startContainer($dockerUrl, $createResult['Id']);
+		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
 	}
 
@@ -421,7 +421,7 @@ class DockerActions implements IDeployActions {
 	 */
 	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array {
 		$this->initGuzzleClient($daemonConfig);
-		$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $appId);
+		$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $this->buildExAppContainerName($appId));
 		if (isset($containerInfo['error'])) {
 			return ['error' => sprintf('Failed to inspect ExApp %s container: %s', $appId, $containerInfo['error'])];
 		}
@@ -545,10 +545,25 @@ class DockerActions implements IDeployActions {
 		return [
 			[
 				'Type' => 'volume',
-				'Source' => $appId . '_data',
-				'Target' => '/' . $appId . '_data',
+				'Source' => $this->buildExAppVolumeName($appId),
+				'Target' => '/' . $this->buildExAppVolumeName($appId),
 				'ReadOnly' => false
 			],
 		];
+	}
+
+	/**
+	 * Build ExApp container name (prefix + appid)
+	 *
+	 * @param string $appId
+	 *
+	 * @return string
+	 */
+	public function buildExAppContainerName(string $appId): string {
+		return self::EX_APP_CONTAINER_PREFIX . $appId;
+	}
+
+	public function buildExAppVolumeName(string $appId): string {
+		return self::EX_APP_CONTAINER_PREFIX . $appId . '_data';
 	}
 }

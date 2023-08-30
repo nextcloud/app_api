@@ -130,7 +130,6 @@ class Update extends Command {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
 				'container_info' => $containerInfo,
 			]);
-			$deployParams['prev_container_id'] = $containerInfo['Id'];
 			[$pullResult, $stopResult, $removeResult, $createResult, $startResult] = $this->dockerActions->updateExApp($daemonConfig, $deployParams);
 
 			if (isset($pullResult['error'])) {
