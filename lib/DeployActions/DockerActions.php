@@ -132,7 +132,6 @@ class DockerActions implements IDeployActions {
 			'Image' => $this->buildImageName($imageParams),
 			'Hostname' => $params['hostname'],
 			'HostConfig' => [
-				'Privileged' => false,
 				'NetworkMode' => $params['net'],
 				'Mounts' => $this->buildDefaultExAppVolume($params['hostname']),
 			],
