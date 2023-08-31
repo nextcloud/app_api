@@ -27,7 +27,7 @@ The response data is a JSON array of ExApp objects with the following attributes
 	{
 		"id": "appid of the ExApp",
 		"name": "name of the ExApp",
-		"version" "version of the ExApp",
+		"version": "version of the ExApp",
 		"enabled": "true/false flag",
 		"last_check_time": "timestamp of last successful Nextcloud->ExApp connection check",
 		"system": "true/false flag indicating system ExApp",

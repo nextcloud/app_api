@@ -27,7 +27,7 @@ Response data
 *************
 
 On success ExAppPreference object is returned.
-If config value is not set - null is returned.
+If config value is not set - ``null`` is returned.
 
 
 Get user config values
@@ -65,4 +65,4 @@ Delete config values for **current authenticated user**.
 Response
 ********
 
-On success, number of deleted config values is returned.
+Returns the number of configuration values removed.

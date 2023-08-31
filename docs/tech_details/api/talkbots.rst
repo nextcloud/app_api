@@ -26,7 +26,7 @@ Request data
 Unregister ExApp Talk bot (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To unregister ExApp Talk bot you will have to pass route on which registered Talk bot.
+To unregister the ExApp Talk bot, you will have to pass the route where the Talk bot is registered.
 
 OCS endpoint: ``DELETE /apps/app_ecosystem_v2/api/v1/talk_bot``
 

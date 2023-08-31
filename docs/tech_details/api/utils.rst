@@ -4,10 +4,6 @@ Miscellaneous OCS APIs
 
 There are some system utils APIs required for ExApps internal logic.
 
-.. note::
-
-	AppEcosystemAuth is required for all AppEcosystemV2 OCS APIs.
-
 
 Get list of NC users
 ^^^^^^^^^^^^^^^^^^^^

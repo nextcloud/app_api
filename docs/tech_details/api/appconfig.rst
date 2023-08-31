@@ -2,7 +2,7 @@
 AppConfig
 =========
 
-ExApp AppConfig API is similar to the standard Nextcloud appconfig API.
+ExApp AppConfig API is similar to the standard Nextcloud **appconfig** API.
 
 Set app config value
 ^^^^^^^^^^^^^^^^^^^^
@@ -99,4 +99,4 @@ Request data
 Response
 ********
 
-On success, number of deleted config values is returned.
+Returns the number of configuration values removed.
