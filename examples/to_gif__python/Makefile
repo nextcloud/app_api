@@ -11,8 +11,9 @@ help:
 	@echo "  "
 	@echo "  deploy            deploy example to registered 'docker_dev'"
 	@echo "  "
-	@echo "  run28             install ToGif for Nextcloud 28"
 	@echo "  run27             install ToGif for Nextcloud 27"
+	@echo "  "
+	@echo "  manual_register27 perform registration of running 'to_gif' into the 'manual_install' deploy daemon."
 
 .PHONY: build-push
 build-push:
@@ -21,13 +22,7 @@ build-push:
 
 .PHONY: deploy
 deploy:
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy to_gif docker_dev \
-		--info-xml https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/examples/to_gif__python/appinfo/info.xml
-
-.PHONY: run28
-run28:
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister to_gif --silent || true
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_ecosystem_v2:app:register to_gif docker_dev -e --force-scopes \
+	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy to_gif docker_dev \
 		--info-xml https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/examples/to_gif__python/appinfo/info.xml
 
 .PHONY: run27

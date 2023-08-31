@@ -1,4 +1,4 @@
-"""Simplest example of files_dropdown_menu, notification without using framework."""
+"""Simplest example of files_dropdown_menu, notification without using the framework."""
 
 import asyncio
 import datetime
@@ -50,8 +50,7 @@ class UiFileActionHandlerInfo(BaseModel):
 
 
 def random_string(size: int) -> str:
-    letters = ascii_lowercase + ascii_uppercase + digits
-    return "".join(choice(letters) for _ in range(size))
+    return "".join(choice(ascii_lowercase + ascii_uppercase + digits) for _ in range(size))
 
 
 def sign_request(method: str, url_params: str, headers: dict, data: typing.Optional[bytes], user="") -> None:
@@ -120,7 +119,7 @@ def sign_check(request: Request) -> None:
         raise ValueError(f"Invalid AE-DATA-HASH:{data_hash.hexdigest()} !={headers['AE-DATA-HASH']}")
 
 
-def make_ocs_call(
+def ocs_call(
     method: str,
     path: str,
     params: typing.Optional[dict] = None,
@@ -144,14 +143,26 @@ def make_ocs_call(
         params=params,
         content=data_bytes,
         headers=headers,
-        cookies={"XDEBUG_SESSION": "PHPSTORM"},
+    )
+
+
+def dav_call(method: str, path: str, data: typing.Optional[typing.Union[str, bytes]] = None, **kwargs):
+    headers = kwargs.pop("headers", {})
+    data_bytes = None
+    if data is not None:
+        data_bytes = data.encode("UTF-8") if isinstance(data, str) else data
+    path = quote("/remote.php/dav" + path)
+    sign_request(method, path, headers, data_bytes, kwargs.get("user", ""))
+    return httpx.request(
+        method,
+        url=os.environ["NEXTCLOUD_URL"] + path,
+        content=data_bytes,
+        headers=headers,
     )
 
 
 def nc_log(log_lvl: int, content: str):
-    make_ocs_call(
-        "POST", "/ocs/v1.php/apps/app_ecosystem_v2/api/v1/log", json_data={"level": log_lvl, "message": content}
-    )
+    ocs_call("POST", "/ocs/v1.php/apps/app_ecosystem_v2/api/v1/log", json_data={"level": log_lvl, "message": content})
 
 
 def create_notification(user_id: str, subject: str, message: str):
@@ -168,18 +179,27 @@ def create_notification(user_id: str, subject: str, message: str):
             },
         }
     }
-    make_ocs_call(
+    ocs_call(
         method="POST", path=f"/ocs/v1.php/apps/app_ecosystem_v2/api/v1/notification", json_data=params, user=user_id
     )
 
 
 def convert_video_to_gif(input_file: UiActionFileInfo, user_id: str):
-    dav_get_file_path = f"/files/{user_id}/{input_file.directory}/{input_file.name}"
+    # save_path = path.splitext(input_file.user_path)[0] + ".gif"
+    if input_file.directory == "/":
+        dav_get_file_path = f"/files/{user_id}/{input_file.name}"
+    else:
+        dav_get_file_path = f"/files/{user_id}{input_file.directory}/{input_file.name}"
     dav_save_file_path = os.path.splitext(dav_get_file_path)[0] + ".gif"
-    nc_log(2, f"Processing:{input_file.user_path} -> {dav_save_file_path}")
+    # ===========================================================
+    nc_log(2, f"Processing:{input_file.name}")
     try:
         with tempfile.NamedTemporaryFile(mode="w+b") as tmp_in:
-            # nc.files.download2stream(input_file, tmp_in)  # to-do
+            # nc.files.download2stream(input_file, tmp_in)
+            # to simplify an example, we download to memory as one piece, instead of implementing stream
+            r = dav_call("GET", dav_get_file_path, user=user_id)
+            tmp_in.write(r.content)
+            # ============================================
             nc_log(2, "File downloaded")
             tmp_in.flush()
             cap = cv2.VideoCapture(tmp_in.name)
@@ -208,7 +228,11 @@ def convert_video_to_gif(input_file: UiActionFileInfo, user_id: str):
                 imageio.mimsave(tmp_out.name, image_lst)
                 optimize(tmp_out.name)
                 nc_log(2, "GIF is ready")
-                # nc.files.upload_stream(save_path, tmp_out)  # to-do
+                # nc.files.upload_stream(save_path, tmp_out)
+                # to simplify an example, we upload as one piece, instead of implementing chunked stream upload
+                tmp_out.seek(0)
+                dav_call("PUT", dav_save_file_path, data=tmp_out.read(), user=user_id)
+                # ==========================================
                 nc_log(2, "Result uploaded")
                 create_notification(
                     user_id,
@@ -216,12 +240,12 @@ def convert_video_to_gif(input_file: UiActionFileInfo, user_id: str):
                     f"{os.path.splitext(input_file.name)[0] + '.gif'} is waiting for you!",
                 )
     except Exception as e:
-        nc_log(3, str(e))
+        nc_log(3, "ExApp exception:" + str(e))
         create_notification(user_id, "Error occurred", "Error information was written to log file")
 
 
 @APP.post("/video_to_gif")
-async def video_to_gif(
+def video_to_gif(
     file: UiFileActionHandlerInfo,
     request: Request,
     background_tasks: BackgroundTasks,
@@ -248,7 +272,7 @@ def enabled_callback(
         print(f"enabled={enabled}")
         if enabled:
             # nc.ui.files_dropdown_menu.register("to_gif", "TO GIF", "/video_to_gif", mime="video")
-            a = make_ocs_call(
+            ocs_call(
                 "POST",
                 "/ocs/v1.php/apps/app_ecosystem_v2/api/v1/files/actions/menu",
                 json_data={
@@ -266,7 +290,7 @@ def enabled_callback(
             )
         else:
             # nc.ui.files_dropdown_menu.unregister("to_gif")
-            a = make_ocs_call(
+            ocs_call(
                 "DELETE",
                 "/ocs/v1.php/apps/app_ecosystem_v2/api/v1/files/actions/menu",
                 json_data={"fileActionMenuName": "to_gif"},
