@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppEcosystemV2\Migration;
 
+use OCA\AppEcosystemV2\DeployActions\AIODockerActions;
 use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
 
 use OCP\Migration\IOutput;
@@ -11,9 +12,14 @@ use OCP\Migration\IRepairStep;
 
 class DataInitializationStep implements IRepairStep {
 	private ExAppApiScopeService $service;
+	private AIODockerActions $AIODockerActions;
 
-	public function __construct(ExAppApiScopeService $service) {
+	public function __construct(
+		ExAppApiScopeService $service,
+		AIODockerActions $AIODockerActions
+	) {
 		$this->service = $service;
+		$this->AIODockerActions = $AIODockerActions;
 	}
 
 	public function getName(): string {
@@ -25,6 +31,14 @@ class DataInitializationStep implements IRepairStep {
 			$output->info('Successfully initialized data for App Ecosystem V2');
 		} else {
 			$output->warning('Failed to initialize data for App Ecosystem V2');
+		}
+
+		// If in AIO - automatically register default DaemonConfig
+		if ($this->AIODockerActions->isAIO()) {
+			$output->info('AIO installation detected. Registering default daemon');
+			if ($this->AIODockerActions->registerAIODaemonConfig() !== null) {
+				$output->info('AIO DaemonConfig successfully registered');
+			}
 		}
 	}
 }
