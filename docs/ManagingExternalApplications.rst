@@ -32,14 +32,14 @@ The deploy command is the first ExApp installation step.
 Arguments
 *********
 
-	* ``appid`` - unique name of the ExApp (e.g. ``app_python_skeleton``, must be the same as in ``info.xml``)
-	* ``daemon-config-name`` - unique name of the daemon (e.g. ``docker_local_sock``)
+    * ``appid`` - unique name of the ExApp (e.g. ``app_python_skeleton``, must be the same as in ``info.xml``)
+    * ``daemon-config-name`` - unique name of the daemon (e.g. ``docker_local_sock``)
 
 Options
 *******
 
-	* ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
-	* ``-e|--env ENV`` *[optional]* - additional environment variables (e.g. ``-e "MY_VAR=123" -e "MY_VAR2=456"``)
+    * ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
+    * ``-e|--env ENV`` *[optional]* - additional environment variables (e.g. ``-e "MY_VAR=123" -e "MY_VAR2=456"``)
 
 Register
 --------
@@ -51,16 +51,16 @@ The register command is the second ExApp installation step.
 Arguments
 *********
 
-	* ``appid`` - unique name of the ExApp (e.g. ``app_python_skeleton``, must be the same as in deployed container)
-	* ``daemon-config-name`` - unique name of the daemon (e.g. ``docker_local_sock``)
+    * ``appid`` - unique name of the ExApp (e.g. ``app_python_skeleton``, must be the same as in deployed container)
+    * ``daemon-config-name`` - unique name of the daemon (e.g. ``docker_local_sock``)
 
 Options
 *******
 
-	* ``-e|--enabled`` *[optional]* - enable ExApp after registration
-	* ``--force-scopes`` *[optional]* - force scopes approval
-	* ``--json-info JSON-INFO`` **[optional]** - ExApp deploy JSON info (json string)
-    * ``--info-xml INFO-XML`` **[optional]** - path to info.xml file (url or local absolute path)
+    * ``-e|--enabled`` *[optional]* - enable ExApp after registration
+    * ``--force-scopes`` *[optional]* - force scopes approval
+    * ``--json-info JSON-INFO`` **[optional]** - ExApp deploy JSON info (json string)
+    * ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
 
 
 Unregister
