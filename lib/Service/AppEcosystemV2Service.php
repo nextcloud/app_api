@@ -314,22 +314,27 @@ class AppEcosystemV2Service {
 			(int) $params['port'],
 		) . '/heartbeat';
 
+		$options = [
+			'headers' => [
+				'Accept' => 'application/json',
+				'Content-Type' => 'application/json',
+			],
+			'nextcloud' => [
+				'allow_local_address' => true,
+			],
+		];
+
 		while ($heartbeatAttempts < $maxHeartbeatAttempts) {
 			$heartbeatAttempts++;
-			$ch = curl_init($heartbeatUrl);
-			$headers = [
-				'Accept: application/json',
-				'Content-Type: application/json',
-			];
-			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-			$heartbeatResult = curl_exec($ch);
-			$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			curl_close($ch);
+			try {
+				$heartbeatResult = $this->client->get($heartbeatUrl, $options);
+			} catch (\Exception) {
+				sleep($delay);
+				continue;
+			}
+			$statusCode = $heartbeatResult->getStatusCode();
 			if ($statusCode === 200) {
-				$result = json_decode($heartbeatResult, true);
+				$result = json_decode($heartbeatResult->getBody(), true);
 				if (isset($result['status']) && $result['status'] === 'ok') {
 					return true;
 				}

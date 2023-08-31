@@ -17,6 +17,8 @@ OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/files/actions/menu``
 Params
 ******
 
+Complete list of params (including optional):
+
 .. code-block:: json
 
 	{
@@ -31,6 +33,14 @@ Params
 	}
 
 
+Optional params
+***************
+
+	* `permissions` - File permissions required to display action menu, default: **31** (all permissions)
+	* `order` - Order in file actions menu, default: **0**
+	* `icon` - Url to icon, default: **null**
+	* `icon_class` - Icon class instead of `icon`, default: **icon-app-ecosystem-v2**
+
 Unregister
 ^^^^^^^^^^
 
@@ -39,6 +49,7 @@ OCS endpoint: ``DELETE /apps/app_ecosystem_v2/api/v1/files/actions/menu``
 Params
 ******
 
+To unregister FileActionsMenu, you just need to provide name of registered FileActionsMenu:
 
 .. code-block:: json
 
@@ -64,13 +75,17 @@ The following data is sent to ExApp FileActionsMenu handler from the context of 
 			"etag": "file_etag",
 			"mime": "file_full_mime",
 			"fileType": "dir/file",
+			"mtime": "last modify time(integer)",
 			"size": "integer",
 			"favorite": "nc_favorite_flag",
 			"permissions": "file_permissions_for_owner",
-			"mtime": "last modify time(integer)",
-			"userId": "string",
 			"shareOwner": "optional, str",
 			"shareOwnerId": "optional, str",
+			"shareTypes": "optional, int",
+			"shareAttributes": "optional, int",
+			"sharePermissions": "optional, int",
+			"userId": "string",
+			"instanceId": "string",
 		}
 	}
 

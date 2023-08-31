@@ -37,12 +37,13 @@ Arguments
 	* ``protocol`` - protocol used to connect to the daemon (``unix-socket``, ``http`` or ``https``)
 	* ``host`` - host of the daemon (e.g. ``/var/run/docker.sock`` for ``unix-socket`` protocol or ``host:port`` for ``http(s)`` protocol)
 	* ``nextcloud_url`` - Nextcloud URL, Daemon config required option (e.g. ``https://nextcloud.local``)
+	* ``--gpu`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``/dev/dri``)
 
 Options
 *******
 
 	* ``--net [network-name]``  - ``[required]`` network name to bind docker container to (default: ``host``)
-	* ``--host HOST`` - ``[required]`` host to expose daemon to (defaults to ExApp appid)
+	* ``--hostname HOST`` - ``[required]`` host to expose daemon to (defaults to ExApp appid)
 	* ``--ssl_key SSL_KEY`` - ``[optional]`` path to SSL key file (local absolute path)
 	* ``--ssl_password SSL_PASSWORD`` - ``[optional]`` SSL key password
 	* ``--ssl_cert SSL_CERT`` - ``[optional]`` path to SSL cert file (local absolute path)
@@ -63,7 +64,8 @@ ExApp container.
 		"ssl_key": "/path/to/ssl/key.pem",
 		"ssl_key_password": "ssl_key_password",
 		"ssl_cert": "/path/to/ssl/cert.pem",
-		"ssl_cert_password": "ssl_cert_password"
+		"ssl_cert_password": "ssl_cert_password",
+		"gpus": ["/dev/dri"],
 	}
 
 
@@ -120,10 +122,10 @@ Options
 	* ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
 	* ``-e|--env ENV`` *[optional]* - additional environment variables (e.g. ``-e "MY_VAR=123" -e "MY_VAR2=456"``)
 
-Deploy result JSON output
-*************************
+Deploy result JSON
+******************
 
-Example of deploy result JSON output:
+Example of deploy result JSON:
 
 .. code-block::
 
@@ -146,7 +148,7 @@ Manual install for development
 
 For development purposes, you can install ExApp manually.
 There is a ``manual-install`` DeployConfig type, which can be used in case of development.
-For ExApp registration with it you need to provide JSON output with structure described before
+For ExApp registration with it you need to provide JSON app info with structure described before
 using **app_ecosystem_v2:app:register** ``--json-info`` option.
 
 Deploy env variables
@@ -211,7 +213,7 @@ In case of ``manual-install`` DeployConfig type, ExApp info must be provided by 
 ExApp info.xml schema
 ---------------------
 
-ExApp info.xml (`example repo <https://github.com/cloud-py-api/py_app_v2-skeleton>`_) file is used to describe ExApp params.
+ExApp info.xml (`example <https://github.com/cloud-py-api/nc_py_api/blob/main/examples/as_app/talk_bot/appinfo/info.xml>`_) file is used to describe ExApp params.
 It is used to generate ExApp docker container and to register ExApp in Nextcloud.
 It has the same structure as Nextcloud appinfo/info.xml file, but with some additional fields:
 
@@ -221,15 +223,15 @@ It has the same structure as Nextcloud appinfo/info.xml file, but with some addi
 	<ex-app>
 		<docker-install>
 			<registry>ghcr.io</registry>
-			<image>cloud-py-api/py_app_v2-skeleton</image>
+			<image>cloud-py-api/talk_bot</image>
 			<image-tag>latest</image-tag>
 		</docker-install>
 		<scopes>
 			<required>
-				<value>2</value>
+				<value>TALK</value>
+				<value>TALK_BOT</value>
 			</required>
 			<optional>
-				<value>32</value>
 			</optional>
 		</scopes>
 		<protocol>http</protocol>
