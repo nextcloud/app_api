@@ -99,7 +99,7 @@ class DockerActions implements IDeployActions {
 
 		$containerInfo = $this->inspectContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($containerInfo['Id'])) {
-			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $containerInfo['Id']);
+			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 			if (isset($stopResult['error']) || isset($removeResult['error'])) {
 				return [$pullResult, $stopResult, $removeResult];
 			}
