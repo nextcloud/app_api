@@ -14,7 +14,6 @@ use OCP\IConfig;
 class AIODockerActions {
 	public const AIO_DAEMON_CONFIG_NAME = 'docker_aio';
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
-	public const AIO_DAEMON_HOST = 'http://nextcloud-aio-apache:11000/index.php';
 	private IConfig $config;
 	private DaemonConfigService $daemonConfigService;
 
@@ -49,7 +48,7 @@ class AIODockerActions {
 		$deployConfig = [
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
 			'host' => null,
-			'nextcloud_url' => self::AIO_DAEMON_HOST, // AIO default (11000) apache proxy to Nextcloud
+			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
 			'ssl_key' => null,
 			'ssl_key_password' => null,
 			'ssl_cert' => null,
