@@ -125,12 +125,9 @@ jobs:
           cd nc_py_api
           python3 tests/_install.py &
           echo $! > /tmp/_install.pid
+          python3 tests/_install_wait.py http://127.0.0.1:$APP_PORT/heartbeat "\"status\":\"ok\"" 15 0.5
           cd ..
-          sleep 5s
-          php occ app_ecosystem_v2:daemon:register manual_install "Manual Install" manual-install 0 0 0
-          php occ app_ecosystem_v2:app:register nc_py_api manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\"],\"optional\":[\"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\", \"TALK_BOT\"]},\"protocol\":\"http\",\"system_app\":1}" \
-            -e --force-scopes
+          sh nc_py_api/scripts/ci_register.sh "$APP_ID" "$APP_VERSION" "$APP_SECRET" "localhost" "$APP_PORT"
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
 

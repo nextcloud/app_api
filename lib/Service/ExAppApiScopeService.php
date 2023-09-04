@@ -98,6 +98,7 @@ class ExAppApiScopeService {
 			['api_route' => '/apps/notifications/api/', 'scope_group' => 32, 'name' => 'NOTIFICATIONS', 'user_check' => 1],
 			['api_route' => '/apps/weather_status/api/', 'scope_group' => 33, 'name' => 'WEATHER_STATUS', 'user_check' => 1],
 			['api_route' => '/apps/spreed/api/', 'scope_group' => 50, 'name' => 'TALK', 'user_check' => 1],
+			['api_route' => '/apps/activity/api/', 'scope_group' => 110, 'name' => 'ACTIVITIES', 'user_check' => 1],
 		];
 
 		$this->cache->clear('/all_api_scopes');
