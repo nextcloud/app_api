@@ -115,8 +115,8 @@ jobs:
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect skeleton | json_pp > container.json
-          docker logs skeleton > container.log 2>&1
+          docker inspect nc_app_skeleton | json_pp > container.json
+          docker logs nc_app_skeleton > container.log 2>&1
 
       - name: Upload Container info
         if: always()
@@ -188,8 +188,8 @@ jobs:
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect skeleton | json_pp > container.json
-          docker logs skeleton > container.log 2>&1
+          docker inspect nc_app_skeleton | json_pp > container.json
+          docker logs nc_app_skeleton > container.log 2>&1
 
       - name: Upload Container info
         if: always()
@@ -266,8 +266,8 @@ jobs:
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect skeleton | json_pp > container.json
-          docker logs skeleton > container.log 2>&1
+          docker inspect nc_app_skeleton | json_pp > container.json
+          docker logs nc_app_skeleton > container.log 2>&1
 
       - name: Upload Container info
         if: always()
@@ -343,8 +343,8 @@ jobs:
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect skeleton | json_pp > container.json
-          docker logs skeleton > container.log 2>&1
+          docker inspect nc_app_skeleton | json_pp > container.json
+          docker logs nc_app_skeleton > container.log 2>&1
 
       - name: Upload Container info
         if: always()
@@ -482,8 +482,8 @@ jobs:
       - name: Save container ingo & logs
         if: always()
         run: |
-          docker inspect skeleton | json_pp > container.json
-          docker logs skeleton > container.log 2>&1
+          docker inspect nc_app_skeleton | json_pp > container.json
+          docker logs nc_app_skeleton > container.log 2>&1
 
       - name: Check redis keys
         run: |
