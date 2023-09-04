@@ -80,4 +80,8 @@ class TalkBotsService {
 		}
 		return [$id, $url, $secret];
 	}
+
+	public function unregisterExAppTalkBots(ExApp $exApp): void {
+		// TODO: Find out a way to get registered ExApp talk bots
+	}
 }
