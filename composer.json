@@ -1,6 +1,6 @@
 {
-	"name": "nextcloud/app_ecosystem_v2",
-	"description": "Nextcloud App Ecosystem V2 provides a new API for external apps on different programming languages",
+	"name": "nextcloud/app_api",
+	"description": "Nextcloud AppAPI provides a new API for external apps on different programming languages",
 	"type": "project",
 	"license": "AGPL-3.0-or-later",
 	"authors": [

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2;
+namespace OCA\AppAPI;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppAPI\AppInfo\Application;
 
 use OCA\DAV\Connector\Sabre\Auth;
 use OCP\IRequest;

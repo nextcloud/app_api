@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\DaemonConfig;
-use OCA\AppEcosystemV2\Db\DaemonConfigMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Db\DaemonConfigMapper;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;

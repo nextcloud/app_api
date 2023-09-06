@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Settings;
+namespace OCA\AppAPI\Settings;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppAPI\AppInfo\Application;
 
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;

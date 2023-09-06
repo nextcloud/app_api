@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\AppEcosystemAuth;
+use OCA\AppAPI\Service\AppAPIService;
 
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -20,12 +20,12 @@ use Psr\Log\LoggerInterface;
 
 class OCSApiController extends OCSController {
 	protected $request;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private LoggerInterface $logger;
 
 	public function __construct(
-		IRequest $request,
-		AppEcosystemV2Service $service,
+		IRequest        $request,
+		AppAPIService   $service,
 		LoggerInterface $logger,
 	) {
 		parent::__construct(Application::APP_ID, $request);

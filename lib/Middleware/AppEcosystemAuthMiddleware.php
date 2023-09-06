@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Middleware;
+namespace OCA\AppAPI\Middleware;
 
-use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
-use OCA\AppEcosystemV2\Exceptions\AEAuthNotValidException;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Exceptions\AppAPIAuthNotValidException;
+use OCA\AppAPI\Service\AppAPIService;
 
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -19,15 +19,15 @@ use Psr\Log\LoggerInterface;
 use ReflectionMethod;
 
 class AppEcosystemAuthMiddleware extends Middleware {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	protected IRequest $request;
 	private IL10N $l;
 	private LoggerInterface $logger;
 
 	public function __construct(
-		AppEcosystemV2Service $service,
-		IRequest $request,
-		IL10N $l,
+		AppAPIService   $service,
+		IRequest        $request,
+		IL10N           $l,
 		LoggerInterface $logger,
 	) {
 		$this->service = $service;
@@ -39,11 +39,11 @@ class AppEcosystemAuthMiddleware extends Middleware {
 	public function beforeController($controller, $methodName) {
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
-		$isAppEcosystemAuth = !empty($reflectionMethod->getAttributes(AppEcosystemAuth::class));
+		$isAppEcosystemAuth = !empty($reflectionMethod->getAttributes(AppAPIAuth::class));
 
 		if ($isAppEcosystemAuth) {
 			if (!$this->service->validateExAppRequestToNC($this->request)) {
-				throw new AEAuthNotValidException($this->l->t('AppEcosystemV2 authentication failed'), Http::STATUS_UNAUTHORIZED);
+				throw new AppAPIAuthNotValidException($this->l->t('AppEcosystemV2 authentication failed'), Http::STATUS_UNAUTHORIZED);
 			}
 		}
 	}

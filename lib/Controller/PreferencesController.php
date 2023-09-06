@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
-use OCA\AppEcosystemV2\Db\ExAppPreference;
-use OCA\AppEcosystemV2\Service\ExAppPreferenceService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\AppEcosystemAuth;
+use OCA\AppAPI\Db\ExAppPreference;
+use OCA\AppAPI\Service\ExAppPreferenceService;
 
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;

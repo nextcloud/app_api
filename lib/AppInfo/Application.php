@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\AppInfo;
+namespace OCA\AppAPI\AppInfo;
 
-use OCA\AppEcosystemV2\Capabilities;
-use OCA\AppEcosystemV2\DavPlugin;
-use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
-use OCA\AppEcosystemV2\Listener\SabrePluginAuthInitListener;
-use OCA\AppEcosystemV2\Middleware\AppEcosystemAuthMiddleware;
-use OCA\AppEcosystemV2\Notifications\ExAppAdminNotifier;
-use OCA\AppEcosystemV2\Notifications\ExAppNotifier;
-use OCA\AppEcosystemV2\Profiler\AEDataCollector;
-use OCA\AppEcosystemV2\PublicCapabilities;
+use OCA\AppAPI\Capabilities;
+use OCA\AppAPI\DavPlugin;
+use OCA\AppAPI\Listener\LoadFilesPluginListener;
+use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
+use OCA\AppAPI\Middleware\AppEcosystemAuthMiddleware;
+use OCA\AppAPI\Notifications\ExAppAdminNotifier;
+use OCA\AppAPI\Notifications\ExAppNotifier;
+use OCA\AppAPI\Profiler\AEDataCollector;
+use OCA\AppAPI\PublicCapabilities;
 
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
@@ -28,7 +28,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 class Application extends App implements IBootstrap {
-	public const APP_ID = 'app_ecosystem_v2';
+	public const APP_ID = 'app_api';
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);

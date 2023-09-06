@@ -27,18 +27,18 @@ class ExFilesActionsMenuService {
 	private ExFilesActionsMenuMapper $mapper;
 	private LoggerInterface $logger;
 	private IClient $client;
-	private AppEcosystemV2Service $appEcosystemV2Service;
+	private AppAPIService $appEcosystemV2Service;
 	private IRequest $request;
 	private IConfig $config;
 
 	public function __construct(
-		ICacheFactory $cacheFactory,
+		ICacheFactory            $cacheFactory,
 		ExFilesActionsMenuMapper $mapper,
-		LoggerInterface $logger,
-		IClientService $clientService,
-		AppEcosystemV2Service $appEcosystemV2Service,
-		IRequest $request,
-		IConfig $config,
+		LoggerInterface          $logger,
+		IClientService           $clientService,
+		AppAPIService            $appEcosystemV2Service,
+		IRequest                 $request,
+		IConfig                  $config,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
 		$this->mapper = $mapper;

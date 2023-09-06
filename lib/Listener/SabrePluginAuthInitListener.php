@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Listener;
+namespace OCA\AppAPI\Listener;
 
-use OCA\AppEcosystemV2\AEAuthBackend;
+use OCA\AppAPI\AEAuthBackend;
 
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCP\EventDispatcher\Event;

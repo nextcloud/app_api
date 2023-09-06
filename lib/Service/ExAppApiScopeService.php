@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExAppApiScope;
-use OCA\AppEcosystemV2\Db\ExAppApiScopeMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExAppApiScope;
+use OCA\AppAPI\Db\ExAppApiScopeMapper;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;

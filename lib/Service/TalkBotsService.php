@@ -12,15 +12,15 @@ use OCP\Security\ISecureRandom;
 
 class TalkBotsService {
 	private ExAppConfigService $exAppConfigService;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private IEventDispatcher $dispatcher;
 	private ISecureRandom $random;
 
 	public function __construct(
 		ExAppConfigService $exAppConfigService,
-		AppEcosystemV2Service $service,
-		IEventDispatcher $dispatcher,
-		ISecureRandom $random,
+		AppAPIService      $service,
+		IEventDispatcher   $dispatcher,
+		ISecureRandom      $random,
 	) {
 		$this->exAppConfigService = $exAppConfigService;
 		$this->service = $service;

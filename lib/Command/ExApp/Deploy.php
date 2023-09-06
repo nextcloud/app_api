@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExApp;
+namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppEcosystemV2\DeployActions\DockerActions;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\DaemonConfigService;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,14 +15,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Deploy extends Command {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private DaemonConfigService $daemonConfigService;
 	private DockerActions $dockerActions;
 
 	public function __construct(
-		AppEcosystemV2Service $service,
+		AppAPIService       $service,
 		DaemonConfigService $daemonConfigService,
-		DockerActions $dockerActions,
+		DockerActions       $dockerActions,
 	) {
 		parent::__construct();
 
@@ -32,7 +32,7 @@ class Deploy extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:deploy');
+		$this->setName('app_api:app:deploy');
 		$this->setDescription('Deploy ExApp on configured daemon');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);

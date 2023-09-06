@@ -97,15 +97,15 @@ jobs:
       - name: Test deploy
         run: |
           php -S 127.0.0.1:8080 &
-          ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+          ./occ app_api:app:register skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:enable skeleton
-          ./occ app_ecosystem_v2:app:disable skeleton
-          ./occ app_ecosystem_v2:app:unregister skeleton --silent
-          ./occ app_ecosystem_v2:daemon:unregister docker_local_sock
+          ./occ app_api:app:enable skeleton
+          ./occ app_api:app:disable skeleton
+          ./occ app_api:app:unregister skeleton --silent
+          ./occ app_api:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
@@ -164,18 +164,18 @@ jobs:
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
+          docker exec nextcloud sudo -u www-data php occ app:enable app_api
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
+          docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+          docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_local_sock
+          docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_local_sock
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -240,20 +240,20 @@ jobs:
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
+          docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker cp ./certs/client/ nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
             --net=master_bridge --ssl_cert /client/cert.pem --ssl_key /client/key.pem
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_by_port \
+          docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_by_port \
+          docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_by_port
+          docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -317,20 +317,20 @@ jobs:
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_ecosystem_v2
+          docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker cp ./certs/client/ nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:register \
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://localhost:8080/index.php \
             --net=host --hostname=host.docker.internal --ssl_cert /client/cert.pem --ssl_key /client/key.pem
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:deploy skeleton docker_by_port \
+          docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:register skeleton docker_by_port \
+          docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:enable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:disable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:app:unregister skeleton --silent
-          docker exec nextcloud sudo -u www-data php occ app_ecosystem_v2:daemon:unregister docker_by_port
+          docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton --silent
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -464,15 +464,15 @@ jobs:
       - name: Test deploy
         run: |
           php -S 127.0.0.1:8080 &
-          ./occ app_ecosystem_v2:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_ecosystem_v2:app:deploy skeleton docker_local_sock \
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:register skeleton docker_local_sock \
+          ./occ app_api:app:register skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          ./occ app_ecosystem_v2:app:enable skeleton
-          ./occ app_ecosystem_v2:app:disable skeleton
-          ./occ app_ecosystem_v2:app:unregister skeleton --silent
-          ./occ app_ecosystem_v2:daemon:unregister docker_local_sock
+          ./occ app_api:app:enable skeleton
+          ./occ app_api:app:disable skeleton
+          ./occ app_api:app:unregister skeleton --silent
+          ./occ app_api:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
@@ -487,7 +487,7 @@ jobs:
 
       - name: Check redis keys
         run: |
-          docker exec redis redis-cli keys '*app_ecosystem_v2*' || error
+          docker exec redis redis-cli keys '*app_api*' || error
 
       - name: Upload Container info
         if: always()

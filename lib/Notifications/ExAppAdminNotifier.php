@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Notifications;
+namespace OCA\AppAPI\Notifications;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Service\AppAPIService;
 use OCP\IURLGenerator;
 use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
@@ -14,12 +14,12 @@ use OCP\Notification\INotifier;
 class ExAppAdminNotifier implements INotifier {
 	private IFactory $factory;
 	private IURLGenerator $url;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 
 	public function __construct(
-		IFactory $factory,
+		IFactory      $factory,
 		IURLGenerator $urlGenerator,
-		AppEcosystemV2Service $service,
+		AppAPIService $service,
 	) {
 		$this->factory = $factory;
 		$this->url = $urlGenerator;

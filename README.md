@@ -1,4 +1,4 @@
-# Nextcloud Application Ecosystem V2
+# Nextcloud AppAPI
 
 [![Tests - Deploy](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests-deploy.yml/badge.svg)](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests-deploy.yml)
 [![Tests](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests.yml/badge.svg)](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests.yml)

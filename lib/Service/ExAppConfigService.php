@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\Db\ExAppConfig;
-use OCA\AppEcosystemV2\Db\ExAppConfigMapper;
+use OCA\AppAPI\Db\ExAppConfig;
+use OCA\AppAPI\Db\ExAppConfigMapper;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;

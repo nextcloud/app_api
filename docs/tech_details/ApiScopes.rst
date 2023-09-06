@@ -3,7 +3,7 @@
 Api Scopes
 ==========
 
-One of the primary advantages inherent to the AppEcosystem is its clear-cut categorization of the required API groups
+One of the primary advantages inherent to the AppAPI is its clear-cut categorization of the required API groups
 essential for the application's operation.
 Equally significant is the provision of optional API groups, enabling the application to execute extra functions that
 enhance its capabilities, though not obligatory for its core functionality. An example of such a function is sending notifications.

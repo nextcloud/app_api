@@ -1,7 +1,7 @@
 Installation
 ============
 
-Following the release, the AppEcosystem will be accessible through the App Store.
+Following the release, the AppAPI will be accessible through the App Store.
 Additionally, in the context of Nextcloud AIO, it will come pre-installed within the system.
 
 Therefore, to install it on Nextcloud **27.1** or later, just install it from the store like any other application.

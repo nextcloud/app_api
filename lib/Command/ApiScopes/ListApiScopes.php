@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ApiScopes;
+namespace OCA\AppAPI\Command\ApiScopes;
 
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+use OCA\AppAPI\Service\ExAppApiScopeService;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,7 +20,7 @@ class ListApiScopes extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:scopes:list');
+		$this->setName('app_api:scopes:list');
 		$this->setDescription('List registered API scopes');
 	}
 

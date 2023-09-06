@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\DeployActions;
+namespace OCA\AppAPI\DeployActions;
 
-use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppAPI\Db\DaemonConfig;
 
 /**
  * Manual deploy actions for development.

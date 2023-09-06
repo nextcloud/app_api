@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2;
+namespace OCA\AppAPI;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\Service\AppAPIService;
 
 use OCA\DAV\Connector\Sabre\Auth;
 use OCP\IRequest;
@@ -20,9 +20,9 @@ use Sabre\HTTP\ResponseInterface;
 class DavPlugin extends ServerPlugin {
 	private IRequest $request;
 	private ISession $session;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 
-	public function __construct(IRequest $request, ISession $session, AppEcosystemV2Service $service) {
+	public function __construct(IRequest $request, ISession $session, AppAPIService $service) {
 		$this->request = $request;
 		$this->session = $session;
 		$this->service = $service;

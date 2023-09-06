@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Db\ExAppUser;
-use OCA\AppEcosystemV2\Db\ExAppUserMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppUser;
+use OCA\AppAPI\Db\ExAppUserMapper;
 
 use OCP\DB\Exception;
 use OCP\ICache;

@@ -1,53 +1,53 @@
 <?xml version="1.0"?>
 <info>
-	<id>app_ecosystem_v2</id>
-	<name>App Ecosystem V2</name>
-	<summary>Nextcloud App Ecosystem V2 integration</summary>
+	<id>app_api</id>
+	<name>App API</name>
+	<summary>Nextcloud App API</summary>
 	<description>
-	<![CDATA[Nextcloud App Ecosystem V2 provides a new API for external apps on different programming languages]]>
+	<![CDATA[Nextcloud App API provides a new API for external apps on different programming languages]]>
 	</description>
 	<version>1.0.0</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
-	<namespace>AppEcosystemV2</namespace>
+	<namespace>AppAPI</namespace>
 	<documentation>
-		<developer>https://github.com/nextcloud/app_ecosystem_v2</developer>
+		<developer>https://github.com/nextcloud/app_api</developer>
 	</documentation>
 	<category>integration</category>
-	<website>https://github.com/nextcloud/app_ecosystem_v2</website>
-	<bugs>https://github.com/nextcloud/app_ecosystem_v2/issues</bugs>
-	<repository type="git">https://github.com/nextcloud/app_ecosystem_v2.git</repository>
+	<website>https://github.com/nextcloud/app_api</website>
+	<bugs>https://github.com/nextcloud/app_api/issues</bugs>
+	<repository type="git">https://github.com/nextcloud/app_api.git</repository>
 	<dependencies>
 		<php min-version="8.1"/>
 		<nextcloud min-version="26" max-version="28"/>
 	</dependencies>
 	<repair-steps>
 		<install>
-			<step>OCA\AppEcosystemV2\Migration\DataInitializationStep</step>
+			<step>OCA\AppAPI\Migration\DataInitializationStep</step>
 		</install>
 	</repair-steps>
 	<commands>
-		<command>OCA\AppEcosystemV2\Command\ExApp\Deploy</command>
-		<command>OCA\AppEcosystemV2\Command\ExApp\Register</command>
-		<command>OCA\AppEcosystemV2\Command\ExApp\Unregister</command>
-		<command>OCA\AppEcosystemV2\Command\ExApp\Update</command>
-		<command>OCA\AppEcosystemV2\Command\ExApp\Enable</command>
-		<command>OCA\AppEcosystemV2\Command\ExApp\Disable</command>
-		<command>OCA\AppEcosystemV2\Command\ExApp\ListExApps</command>
-		<command>OCA\AppEcosystemV2\Command\ExApp\Scopes\ListScopes</command>
-		<command>OCA\AppEcosystemV2\Command\ExApp\Users\ListUsers</command>
-		<command>OCA\AppEcosystemV2\Command\ExAppConfig\GetConfig</command>
-		<command>OCA\AppEcosystemV2\Command\ExAppConfig\SetConfig</command>
-		<command>OCA\AppEcosystemV2\Command\ExAppConfig\DeleteConfig</command>
-		<command>OCA\AppEcosystemV2\Command\ExAppConfig\ListConfig</command>
-		<command>OCA\AppEcosystemV2\Command\Daemon\RegisterDaemon</command>
-		<command>OCA\AppEcosystemV2\Command\Daemon\UnregisterDaemon</command>
-		<command>OCA\AppEcosystemV2\Command\Daemon\ListDaemons</command>
-		<command>OCA\AppEcosystemV2\Command\ApiScopes\ListApiScopes</command>
+		<command>OCA\AppAPI\Command\ExApp\Deploy</command>
+		<command>OCA\AppAPI\Command\ExApp\Register</command>
+		<command>OCA\AppAPI\Command\ExApp\Unregister</command>
+		<command>OCA\AppAPI\Command\ExApp\Update</command>
+		<command>OCA\AppAPI\Command\ExApp\Enable</command>
+		<command>OCA\AppAPI\Command\ExApp\Disable</command>
+		<command>OCA\AppAPI\Command\ExApp\ListExApps</command>
+		<command>OCA\AppAPI\Command\ExApp\Scopes\ListScopes</command>
+		<command>OCA\AppAPI\Command\ExApp\Users\ListUsers</command>
+		<command>OCA\AppAPI\Command\ExAppConfig\GetConfig</command>
+		<command>OCA\AppAPI\Command\ExAppConfig\SetConfig</command>
+		<command>OCA\AppAPI\Command\ExAppConfig\DeleteConfig</command>
+		<command>OCA\AppAPI\Command\ExAppConfig\ListConfig</command>
+		<command>OCA\AppAPI\Command\Daemon\RegisterDaemon</command>
+		<command>OCA\AppAPI\Command\Daemon\UnregisterDaemon</command>
+		<command>OCA\AppAPI\Command\Daemon\ListDaemons</command>
+		<command>OCA\AppAPI\Command\ApiScopes\ListApiScopes</command>
 	</commands>
 	<settings>
-		<admin>OCA\AppEcosystemV2\Settings\Admin</admin>
-		<admin-section>OCA\AppEcosystemV2\Settings\AdminSection</admin-section>
+		<admin>OCA\AppAPI\Settings\Admin</admin>
+		<admin-section>OCA\AppAPI\Settings\AdminSection</admin-section>
 	</settings>
 </info>

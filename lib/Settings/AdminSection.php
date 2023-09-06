@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Settings;
+namespace OCA\AppAPI\Settings;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppAPI\AppInfo\Application;
 
 use OCP\IL10N;
 use OCP\IURLGenerator;
@@ -29,14 +29,14 @@ class AdminSection implements IIconSection {
 	 * @inheritDoc
 	 */
 	public function getID(): string {
-		return 'app_ecosystem_v2';
+		return Application::APP_ID;
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function getName(): string {
-		return $this->l->t('App Ecosystem V2');
+		return $this->l->t('AppAPI');
 	}
 
 	/**

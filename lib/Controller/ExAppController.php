@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\DeployActions\DockerActions;
-use OCA\AppEcosystemV2\DeployActions\ManualActions;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\ManualActions;
+use OCA\AppAPI\Service\AppEcosystemV2Service;
 
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExApp;
+namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\DeployActions\DockerActions;
-use OCA\AppEcosystemV2\DeployActions\ManualActions;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
-use OCA\AppEcosystemV2\Service\ExAppScopesService;
-use OCA\AppEcosystemV2\Service\ExAppUsersService;
+use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\ManualActions;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppApiScopeService;
+use OCA\AppAPI\Service\ExAppScopesService;
+use OCA\AppAPI\Service\ExAppUsersService;
 
 use OCP\DB\Exception;
 use Symfony\Component\Console\Command\Command;
@@ -23,7 +23,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Register extends Command {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private DaemonConfigService $daemonConfigService;
 	private ExAppApiScopeService $exAppApiScopeService;
 	private ExAppScopesService $exAppScopesService;
@@ -32,13 +32,13 @@ class Register extends Command {
 	private ManualActions $manualActions;
 
 	public function __construct(
-		AppEcosystemV2Service $service,
-		DaemonConfigService $daemonConfigService,
+		AppAPIService        $service,
+		DaemonConfigService  $daemonConfigService,
 		ExAppApiScopeService $exAppApiScopeService,
-		ExAppScopesService $exAppScopesService,
-		ExAppUsersService $exAppUsersService,
-		DockerActions $dockerActions,
-		ManualActions $manualActions,
+		ExAppScopesService   $exAppScopesService,
+		ExAppUsersService    $exAppUsersService,
+		DockerActions        $dockerActions,
+		ManualActions        $manualActions,
 	) {
 		parent::__construct();
 
@@ -52,7 +52,7 @@ class Register extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:register');
+		$this->setName('app_api:app:register');
 		$this->setDescription('Register external app');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);

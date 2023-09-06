@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Db\ExAppMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppMapper;
 
-use OCA\AppEcosystemV2\Notifications\ExNotificationsManager;
+use OCA\AppAPI\Notifications\ExNotificationsManager;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -28,7 +28,7 @@ use OCP\Security\Bruteforce\IThrottler;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 
-class AppEcosystemV2Service {
+class AppAPIService {
 	public const BASIC_API_SCOPE = 1;
 	public const MAX_SIGN_TIME_X_MIN_DIFF = 60 * 5;
 	public const CACHE_TTL = 60 * 60; // 1 hour

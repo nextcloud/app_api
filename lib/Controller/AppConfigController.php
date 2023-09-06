@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
-use OCA\AppEcosystemV2\Db\ExAppConfig;
-use OCA\AppEcosystemV2\Service\ExAppConfigService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Db\ExAppConfig;
+use OCA\AppAPI\Service\ExAppConfigService;
 
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -42,7 +42,7 @@ class AppConfigController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return DataResponse
 	 */
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function setAppConfigValue(string $configKey, mixed $configValue, ?int $sensitive = null): DataResponse {
