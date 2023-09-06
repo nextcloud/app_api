@@ -200,12 +200,13 @@ In case of AppEcosystemV2 is in Docker AIO setup (installed in Nextcloud contain
 
 			state Containers {
 				[*] --> NextcloudAIOMasterContainer : /var/run/docker.sock
+				[*] --> DockerSocketProxy : /var/run/docker.sock
 				NextcloudAIOMasterContainer --> Nextcloud
 				AppEcosystemV2 --> Nextcloud : installed in
-				Nextcloud --> NextcloudAIOMasterContainer
-				NextcloudAIOMasterContainer --> ExApp1
-				NextcloudAIOMasterContainer --> ExApp2
-				NextcloudAIOMasterContainer --> ExApp3
+				Nextcloud --> DockerSocketProxy
+				DockerSocketProxy --> ExApp1
+				DockerSocketProxy --> ExApp2
+				DockerSocketProxy --> ExApp3
 			}
 		}
 
