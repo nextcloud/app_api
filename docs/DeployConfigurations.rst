@@ -17,6 +17,7 @@ There are several Docker Daemon Deploy configurations:
 	* Nextcloud on the host and Docker on a **remote** host (via port)
 	* Nextcloud and **ExApps** in the **same Docker** (via socket or port)
 	* Nextcloud in a Docker and **ExApps** in the **child Docker** (DiD) (via socket)
+	* Nextcloud in AIO Docker and **ExApps** in the **same Docker** (via socket proxy)
 
 For each configuration that uses a socket, please ensure that the Nextcloud webserver user has sufficient permissions to access it.
 In the case of remote access to the Daemon, make certain that it's configured with **ssl_key**, **ssl_cert**, and **ca.cert**, and that the latter is imported into Nextcloud.
@@ -200,12 +201,13 @@ In case of AppEcosystemV2 is in Docker AIO setup (installed in Nextcloud contain
 
 			state Containers {
 				[*] --> NextcloudAIOMasterContainer : /var/run/docker.sock
+				[*] --> DockerSocketProxy : /var/run/docker.sock
 				NextcloudAIOMasterContainer --> Nextcloud
 				AppEcosystemV2 --> Nextcloud : installed in
-				Nextcloud --> NextcloudAIOMasterContainer
-				NextcloudAIOMasterContainer --> ExApp1
-				NextcloudAIOMasterContainer --> ExApp2
-				NextcloudAIOMasterContainer --> ExApp3
+				Nextcloud --> DockerSocketProxy
+				DockerSocketProxy --> ExApp1
+				DockerSocketProxy --> ExApp2
+				DockerSocketProxy --> ExApp3
 			}
 		}
 
