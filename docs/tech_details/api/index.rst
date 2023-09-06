@@ -4,7 +4,7 @@ AppEcosystemV2 APIs
 
 .. note::
 
-	AppEcosystemAuth is required for all AppEcosystemV2 OCS APIs, except ``ExApp``.
+	AppAPIAuth is required for all AppAPI OCS APIs, except ``ExApp``.
 
 .. toctree::
 	:maxdepth: 2

@@ -8,7 +8,7 @@ Therefore, to install it on Nextcloud **27.1** or later, just install it from th
 
 To install it in development mode, follow the instructions on this page: :ref:`dev-setup`.
 
-Upon the successful installation of the AppEcosystem, a one-time configuration is essential.
+Upon the successful installation of the AppAPI, a one-time configuration is essential.
 Details on this configuration can be found in the subsequent section: :ref:`create-deploy-daemon`.
 
 Best of luck!

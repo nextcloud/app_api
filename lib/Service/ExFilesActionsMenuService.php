@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppApi\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExFilesActionsMenu;
-use OCA\AppEcosystemV2\Db\ExFilesActionsMenuMapper;
+use OCA\AppApi\AppInfo\Application;
+use OCA\AppApi\Db\ExFilesActionsMenu;
+use OCA\AppApi\Db\ExFilesActionsMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;

@@ -8,7 +8,7 @@ use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
-use OCA\AppAPI\Middleware\AppEcosystemAuthMiddleware;
+use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\Profiler\AEDataCollector;
@@ -43,7 +43,7 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
 		$context->registerCapability(PublicCapabilities::class);
-		$context->registerMiddleware(AppEcosystemAuthMiddleware::class);
+		$context->registerMiddleware(AppAPIAuthMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);

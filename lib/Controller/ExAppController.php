@@ -7,7 +7,7 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
-use OCA\AppAPI\Service\AppEcosystemV2Service;
+use OCA\AppAPI\Service\AppAPIService;
 
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\AppFramework\ApiController;
@@ -24,7 +24,7 @@ use OCP\IRequest;
  */
 class ExAppController extends ApiController {
 	private IL10N $l10n;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private DaemonConfigService $daemonConfigService;
 	private DockerActions $dockerActions;
 	private ManualActions $manualActions;
@@ -32,7 +32,7 @@ class ExAppController extends ApiController {
 	public function __construct(
 		IRequest $request,
 		IL10N $l10n,
-		AppEcosystemV2Service $service,
+		AppAPIService $service,
 		DaemonConfigService $daemonConfigService,
 		DockerActions $dockerActions,
 		ManualActions $manualActions,

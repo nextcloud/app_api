@@ -65,7 +65,7 @@ class AppConfigController extends OCSController {
 	 *
 	 * @return DataResponse
 	 */
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getAppConfigValues(array $configKeys): DataResponse {
@@ -84,7 +84,7 @@ class AppConfigController extends OCSController {
 	 * @throws OCSNotFoundException
 	 * @return DataResponse
 	 */
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function deleteAppConfigValues(array $configKeys): DataResponse {

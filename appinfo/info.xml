@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <info>
 	<id>app_api</id>
-	<name>App API</name>
-	<summary>Nextcloud App API</summary>
+	<name>AppAPI</name>
+	<summary>Nextcloud AppAPI</summary>
 	<description>
-	<![CDATA[Nextcloud App API provides a new API for external apps on different programming languages]]>
+	<![CDATA[Nextcloud AppAPI provides a new API for external apps on different programming languages]]>
 	</description>
 	<version>1.0.0</version>
 	<licence>agpl</licence>

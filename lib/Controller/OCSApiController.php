@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Attribute\AppEcosystemAuth;
+use OCA\AppAPI\Attribute\AppApiAuth;
 use OCA\AppAPI\Service\AppAPIService;
 
 use OCP\AppFramework\Http;
@@ -46,7 +46,7 @@ class OCSApiController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return DataResponse
 	 */
-	#[AppEcosystemAuth]
+	#[AppApiAuth]
 	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
@@ -79,7 +79,7 @@ class OCSApiController extends OCSController {
 	 *
 	 * @return DataResponse
 	 */
-	#[AppEcosystemAuth]
+	#[AppApiAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getNCUsersList(): DataResponse {

@@ -9,7 +9,7 @@ Get ExApps list
 
 Get list of installed ExApps.
 
-OCS endpoint: ``GET /apps/app_ecosystem_v2/api/v1/ex-app/{list}``
+OCS endpoint: ``GET /apps/app_api/api/v1/ex-app/{list}``
 
 There are two ``list`` options:
 

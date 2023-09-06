@@ -8,7 +8,7 @@ There are some system utils APIs required for ExApps internal logic.
 Get list of NC users
 ^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``GET /apps/app_ecosystem_v2/api/v1/users``
+OCS endpoint: ``GET /apps/app_api/api/v1/users``
 
 Response data
 *************

@@ -18,7 +18,7 @@ use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 use ReflectionMethod;
 
-class AppEcosystemAuthMiddleware extends Middleware {
+class AppAPIAuthMiddleware extends Middleware {
 	private AppAPIService $service;
 	protected IRequest $request;
 	private IL10N $l;

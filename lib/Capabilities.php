@@ -42,7 +42,7 @@ class Capabilities implements ICapability {
 		];
 		$this->attachExAppScopes($capabilities);
 		return [
-			'app_ecosystem_v2' => $capabilities,
+			'app_api' => $capabilities,
 		];
 	}
 

@@ -10,7 +10,7 @@ use OCP\AppFramework\Db\Entity;
 /**
  * Class ExAppConfig
  *
- * @package OCA\AppEcosystemV2\Db
+ * @package OCA\AppApi\Db
  *
  * @method string getAppid()
  * @method string getConfigkey()

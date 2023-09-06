@@ -9,7 +9,7 @@ Set app config value
 
 Set ExApp config value.
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/ex-app/config``
+OCS endpoint: ``POST /apps/app_api/api/v1/ex-app/config``
 
 Request data
 ************
@@ -41,7 +41,7 @@ Update app config value or sensitive flag
 Update existing ExApp config value or sensitive flag.
 It's the same endpoint as for setting config value.
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/ex-app/config``
+OCS endpoint: ``POST /apps/app_api/api/v1/ex-app/config``
 
 .. code-block:: json
 
@@ -56,7 +56,7 @@ Get app config values
 
 Get ExApp config values
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/ex-app/config/get-values``
+OCS endpoint: ``POST /apps/app_api/api/v1/ex-app/config/get-values``
 
 Request data
 ************
@@ -85,7 +85,7 @@ Delete app config values
 
 Delete ExApp config values.
 
-OCS endpoint: ``DELETE /apps/app_ecosystem_v2/api/v1/ex-app/config``
+OCS endpoint: ``DELETE /apps/app_api/api/v1/ex-app/config``
 
 Request data
 ************

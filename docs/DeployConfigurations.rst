@@ -30,8 +30,8 @@ The simplest configuration is when Nextcloud is installed on the host and Docker
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
+		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
 		Host
@@ -67,8 +67,8 @@ Benefit: no performance impact on Nextcloud host.
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
+		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
 		Direction LR
@@ -107,8 +107,8 @@ Applications are deployed in the same docker where Nextcloud resides.
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
+		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
 		Host
@@ -141,8 +141,8 @@ In this scenario, Nextcloud is installed within a container, and a separate Daem
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
-		classDef docker2 fill: #1f97ee, color: transparent, font-size: 20px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
+		classDef docker2 fill: #1f97ee, color: transparent, font-size: 20px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
 		classDef nextcloud fill: #006aa3, color: white, stroke: #045987, stroke-width: 1px
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
@@ -180,7 +180,7 @@ In this case, the AppEcosystem (Nextcloud) uses ``socket`` to interact with Dock
 Nextcloud in Docker AIO (all-in-one)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In case of AppEcosystemV2 is in Docker AIO setup (installed in Nextcloud container).
+In case of AppAPI is in Docker AIO setup (installed in Nextcloud container).
 
 .. note::
 
@@ -189,9 +189,9 @@ In case of AppEcosystemV2 is in Docker AIO setup (installed in Nextcloud contain
 .. mermaid::
 
 	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
-		classDef docker2 fill: #1f97ee, color: transparent, font-size: 20px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/docker.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/docs/img/nextcloud.svg) no-repeat center center / contain
+		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
+		classDef docker2 fill: #1f97ee, color: transparent, font-size: 20px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
+		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/nextcloud.svg) no-repeat center center / contain
 		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
 
 		Host
@@ -203,7 +203,7 @@ In case of AppEcosystemV2 is in Docker AIO setup (installed in Nextcloud contain
 				[*] --> NextcloudAIOMasterContainer : /var/run/docker.sock
 				[*] --> DockerSocketProxy : /var/run/docker.sock
 				NextcloudAIOMasterContainer --> Nextcloud
-				AppEcosystemV2 --> Nextcloud : installed in
+				AppAPI --> Nextcloud : installed in
 				Nextcloud --> DockerSocketProxy
 				DockerSocketProxy --> ExApp1
 				DockerSocketProxy --> ExApp2
@@ -218,4 +218,4 @@ In case of AppEcosystemV2 is in Docker AIO setup (installed in Nextcloud contain
 		class ExApp2 python
 		class ExApp3 python
 
-AppEcosystemV2 will automatically create default default DaemonConfig to use AIO Docker Socket Proxy as orchestrator to create ExApp containers.
+AppAPI will automatically create default default DaemonConfig to use AIO Docker Socket Proxy as orchestrator to create ExApp containers.

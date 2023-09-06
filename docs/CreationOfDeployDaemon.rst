@@ -14,16 +14,16 @@ OCC CLI
 
 There are a few commands to manage Deploy Daemons:
 
-1. Register ``occ app_ecosystem_v2:daemon:register``
-2. Unregister ``occ app_ecosystem_v2:daemon:unregister``
-3. List registered daemons ``occ app_ecosystem_v2:daemon:list``
+1. Register ``occ app_api:daemon:register``
+2. Unregister ``occ app_api:daemon:unregister``
+3. List registered daemons ``occ app_api:daemon:list``
 
 Register
 --------
 
 Register Deploy Daemon (DaemonConfig).
 
-Command: ``app_ecosystem_v2:daemon:register [--net NET] [--hostname HOSTNAME] [--ssl_key SSL_KEY] [--ssl_key_password SSL_KEY_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [--gpu GPU] [--] <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url>``
+Command: ``app_api:daemon:register [--net NET] [--hostname HOSTNAME] [--ssl_key SSL_KEY] [--ssl_key_password SSL_KEY_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [--gpu GPU] [--] <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url>``
 
 Arguments
 *********
@@ -82,17 +82,17 @@ Unregister
 
 Unregister Deploy Daemon (DaemonConfig).
 
-Command: ``app_ecosystem_v2:daemon:unregister <daemon-config-name>``
+Command: ``app_api:daemon:unregister <daemon-config-name>``
 
 List registered daemons
 -----------------------
 
 List registered Deploy Daemons (DaemonConfigs).
 
-Command: ``app_ecosystem_v2:daemon:list``
+Command: ``app_api:daemon:list``
 
 Nextcloud AIO
 ^^^^^^^^^^^^^
 
-In case of AppEcosystemV2 installed in AIO, default Deploy Daemon is registered automatically.
+In case of AppAPI installed in AIO, default Deploy Daemon is registered automatically.
 It is possible to register additional Deploy Daemons with the same ways as described above.

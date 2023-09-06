@@ -41,7 +41,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"OCA\\AppEcosystemV2\\": "lib/"
+			"OCA\\AppAPI\\": "lib/"
 		}
 	},
 	"autoload-dev": {

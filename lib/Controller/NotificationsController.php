@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Attribute\AppEcosystemAuth;
+use OCA\AppAPI\Attribute\AppApiAuth;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
 
 use OCP\AppFramework\Http;
@@ -39,7 +39,7 @@ class NotificationsController extends OCSController {
 	 *
 	 * @return Response
 	 */
-	#[AppEcosystemAuth]
+	#[AppApiAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function sendNotification(array $params): Response {

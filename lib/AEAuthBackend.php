@@ -35,7 +35,7 @@ class AEAuthBackend implements BackendInterface {
 				return [true, $authString];
 			}
 		}
-		return [false, 'AEAuth has not passed'];
+		return [false, 'AppAPIAuth has not passed'];
 	}
 
 	public function challenge(RequestInterface $request, ResponseInterface $response) {

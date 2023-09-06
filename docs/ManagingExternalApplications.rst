@@ -25,7 +25,7 @@ There are several commands to work with ExApps:
 Deploy
 ------
 
-Command: ``app_ecosystem_v2:app:deploy [--info-xml INFO-XML] [-e|--env ENV] [--] <appid> <daemon-config-name>``
+Command: ``app_api:app:deploy [--info-xml INFO-XML] [-e|--env ENV] [--] <appid> <daemon-config-name>``
 
 The deploy command is the first ExApp installation step.
 
@@ -44,7 +44,7 @@ Options
 Register
 --------
 
-Command: ``app_ecosystem_v2:app:register [-e|--enabled] [--force-scopes] [--info-xml INFO-XML] [--json-info JSON-INFO] [--] <appid> <daemon-config-name>``
+Command: ``app_api:app:register [-e|--enabled] [--force-scopes] [--info-xml INFO-XML] [--json-info JSON-INFO] [--] <appid> <daemon-config-name>``
 
 The register command is the second ExApp installation step.
 
@@ -66,7 +66,7 @@ Options
 Unregister
 ----------
 
-Command: ``app_ecosystem_v2:app:unregister [--silent] [--rm-container] [--rm-data] [--] <appid>``
+Command: ``app_api:app:unregister [--silent] [--rm-container] [--rm-data] [--] <appid>``
 
 To remove an ExApp you can use the unregister command.
 There are additional options to remove the ExApp container and persistent storage (data volume).
@@ -86,7 +86,7 @@ Options
 Update
 ------
 
-Command: ``app_ecosystem_v2:app:update [--info-xml INFO-XML] [--force-update] [--force-scopes] [-e|--enabled] [--] <appid>``
+Command: ``app_api:app:update [--info-xml INFO-XML] [--force-update] [--force-scopes] [-e|--enabled] [--] <appid>``
 
 ExApp will be updated if there is a new version available.
 
@@ -106,17 +106,17 @@ Options
 Enable
 ------
 
-Command: ``app_ecosystem_v2:app:enable <appid>``
+Command: ``app_api:app:enable <appid>``
 
 Disable
 -------
 
-Command: ``app_ecosystem_v2:app:disable <appid>``
+Command: ``app_api:app:disable <appid>``
 
 List ExApps
 -----------
 
-Command: ``app_ecosystem_v2:app:list``
+Command: ``app_api:app:list``
 
 ListExApps command will show all ExApps:
 
@@ -130,7 +130,7 @@ ListExApps command will show all ExApps:
 List ExApp users
 ----------------
 
-Command: ``app_ecosystem_v2:app:users:list <appid>``
+Command: ``app_api:app:users:list <appid>``
 
 System user
 ***********
@@ -142,7 +142,7 @@ List ExApp Scopes
 
 List accepted scopes (see :ref:`api_scopes`) for ExApp.
 
-Command: ``app_ecosystem_v2:app:scopes:list <appid>``
+Command: ``app_api:app:scopes:list <appid>``
 
 Using the ExApp Management UI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
