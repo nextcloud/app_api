@@ -20,7 +20,7 @@ class Admin implements ISettings {
 
 	public function __construct(
 		IConfig $config,
-		IInitialState $initialStateService
+		IInitialState $initialStateService,
 	) {
 		$this->config = $config;
 		$this->initialStateService = $initialStateService;

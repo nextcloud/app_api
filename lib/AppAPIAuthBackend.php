@@ -13,7 +13,7 @@ use Sabre\DAV\Auth\Backend\BackendInterface;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
-class AEAuthBackend implements BackendInterface {
+class AppAPIAuthBackend implements BackendInterface {
 	private IRequest $request;
 	private ISession $session;
 
