@@ -371,7 +371,7 @@ class AppAPIService {
 	}
 
 	/**
-	 * Request to ExApp with AppEcosystem auth headers and ExApp user initialization
+	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
 	 *
 	 * @param IRequest|null $request
 	 * @param string $userId
@@ -400,7 +400,7 @@ class AppAPIService {
 	}
 
 	/**
-	 * Request to ExApp with AppEcosystem auth headers
+	 * Request to ExApp with AppAPI auth headers
 	 *
 	 * @param IRequest|null $request
 	 * @param string|null $userId
@@ -563,7 +563,7 @@ class AppAPIService {
 	}
 
 	/**
-	 * AppEcosystem authentication request validation for Nextcloud:
+	 * AppAPI authentication request validation for Nextcloud:
 	 *  - checks if ExApp exists and is enabled
 	 *  - checks if ExApp version changed and updates it in database
 	 *  - validates request sign time (if it's complies with set time window)
@@ -678,7 +678,7 @@ class AppAPIService {
 	}
 
 	/**
-	 * Final step of AppEcosystem authentication request validation for Nextcloud:
+	 * Final step of AppAPI authentication request validation for Nextcloud:
 	 *  - sets active user (null if not a user context)
 	 *  - updates ExApp last response time
 	 *

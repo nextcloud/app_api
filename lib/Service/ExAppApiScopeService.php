@@ -74,7 +74,7 @@ class ExAppApiScopeService {
 		$aeApiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
 
 		$initApiScopes = [
-			// AppEcosystemV2 scopes
+			// AppAPI scopes
 			['api_route' => $aeApiV1Prefix . '/files/actions/menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/log', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ex-app/config', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],

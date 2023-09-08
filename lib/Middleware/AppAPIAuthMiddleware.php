@@ -39,11 +39,11 @@ class AppAPIAuthMiddleware extends Middleware {
 	public function beforeController($controller, $methodName) {
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
-		$isAppEcosystemAuth = !empty($reflectionMethod->getAttributes(AppAPIAuth::class));
+		$isAppAPIAuth = !empty($reflectionMethod->getAttributes(AppAPIAuth::class));
 
-		if ($isAppEcosystemAuth) {
+		if ($isAppAPIAuth) {
 			if (!$this->service->validateExAppRequestToNC($this->request)) {
-				throw new AppAPIAuthNotValidException($this->l->t('AppEcosystemV2 authentication failed'), Http::STATUS_UNAUTHORIZED);
+				throw new AppAPIAuthNotValidException($this->l->t('AppAPIAuth authentication failed'), Http::STATUS_UNAUTHORIZED);
 			}
 		}
 	}
@@ -59,7 +59,7 @@ class AppAPIAuthMiddleware extends Middleware {
 	 * @throws \Exception the passed in exception if it can't handle it
 	 */
 	public function afterException($controller, $methodName, \Exception $exception): Response {
-		if ($exception instanceof AEAuthNotValidException) {
+		if ($exception instanceof AppAPIAuth) {
 			$response = new JSONResponse([
 				'message' => $exception->getMessage(),
 			]);

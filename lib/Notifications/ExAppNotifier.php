@@ -31,7 +31,7 @@ class ExAppNotifier implements INotifier {
 	}
 
 	public function getName(): string {
-		return $this->factory->get(Application::APP_ID)->t('AppEcosystemV2 ExApp notifier');
+		return $this->factory->get(Application::APP_ID)->t('AppAPI ExApp notifier');
 	}
 
 	public function prepare(INotification $notification, string $languageCode): INotification {

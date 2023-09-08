@@ -7,7 +7,7 @@ namespace OCA\AppAPI\DeployActions;
 use OCA\AppAPI\Db\DaemonConfig;
 
 /**
- * Base interface for AppEcosystemV2 ExApp deploy actions
+ * Base interface for AppAPI ExApp deploy actions
  */
 interface IDeployActions {
 	/**

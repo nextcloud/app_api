@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Attribute\AppApiAuth;
+use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Service\ExFilesActionsMenuService;
 
 use OCP\AppFramework\Http;
@@ -44,7 +44,7 @@ class ExFileActionsMenuController extends OCSController {
 	 *
 	 * @return DataResponse
 	 */
-	#[AppApiAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerFileActionMenu(array $fileActionMenuParams): DataResponse {
@@ -65,7 +65,7 @@ class ExFileActionsMenuController extends OCSController {
 	 * @throws OCSNotFoundException
 	 * @return DataResponse
 	 */
-	#[AppApiAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function unregisterFileActionMenu(string $fileActionMenuName): DataResponse {

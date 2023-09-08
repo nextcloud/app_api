@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Attribute\AppApiAuth;
+use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Db\ExAppPreference;
 use OCA\AppAPI\Service\ExAppPreferenceService;
 
@@ -46,7 +46,7 @@ class PreferencesController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return DataResponse
 	 */
-	#[AppApiAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function setUserConfigValue(string $configKey, mixed $configValue): DataResponse {
@@ -70,7 +70,7 @@ class PreferencesController extends OCSController {
 	 *
 	 * @return DataResponse
 	 */
-	#[AppApiAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getUserConfigValues(array $configKeys): DataResponse {
@@ -90,7 +90,7 @@ class PreferencesController extends OCSController {
 	 * @throws OCSNotFoundException
 	 * @return DataResponse
 	 */
-	#[AppApiAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function deleteUserConfigValues(array $configKeys): DataResponse {

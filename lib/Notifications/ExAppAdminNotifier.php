@@ -31,7 +31,7 @@ class ExAppAdminNotifier implements INotifier {
 	}
 
 	public function getName(): string {
-		return $this->factory->get(Application::APP_ID)->t('AppEcosystemV2 ExApp version update notifier');
+		return $this->factory->get(Application::APP_ID)->t('AppAPI ExApp version update notifier');
 	}
 
 	public function prepare(INotification $notification, string $languageCode): INotification {
@@ -47,7 +47,7 @@ class ExAppAdminNotifier implements INotifier {
 
 		$parameters = $notification->getSubjectParameters();
 
-		$notification->setLink($this->url->getAbsoluteURL('/index.php/settings/admin/app_ecosystem_v2'));
+		$notification->setLink($this->url->getAbsoluteURL('/index.php/settings/admin/' . Application::APP_ID));
 		$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 
 		if (isset($parameters['rich_subject']) && isset($parameters['rich_subject_params'])) {

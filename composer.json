@@ -18,7 +18,7 @@
 	"require-dev": {
 		"nextcloud/ocp": "dev-master",
 		"roave/security-advisories": "dev-latest",
-		"psalm/phar": "5.13",
+		"psalm/phar": "^5.15",
 		"nextcloud/coding-standard": "^1.1",
 		"friendsofphp/php-cs-fixer": "3.16"
 	},

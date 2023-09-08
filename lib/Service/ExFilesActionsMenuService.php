@@ -27,7 +27,7 @@ class ExFilesActionsMenuService {
 	private ExFilesActionsMenuMapper $mapper;
 	private LoggerInterface $logger;
 	private IClient $client;
-	private AppAPIService $appEcosystemV2Service;
+	private AppAPIService $appAPIService;
 	private IRequest $request;
 	private IConfig $config;
 
@@ -36,7 +36,7 @@ class ExFilesActionsMenuService {
 		ExFilesActionsMenuMapper $mapper,
 		LoggerInterface          $logger,
 		IClientService           $clientService,
-		AppAPIService            $appEcosystemV2Service,
+		AppAPIService            $appAPIService,
 		IRequest                 $request,
 		IConfig                  $config,
 	) {
@@ -44,7 +44,7 @@ class ExFilesActionsMenuService {
 		$this->mapper = $mapper;
 		$this->logger = $logger;
 		$this->client = $clientService->newClient();
-		$this->appEcosystemV2Service = $appEcosystemV2Service;
+		$this->appAPIService = $appAPIService;
 		$this->request = $request;
 		$this->config = $config;
 	}
@@ -171,9 +171,9 @@ class ExFilesActionsMenuService {
 					'instanceId' => $this->config->getSystemValue('instanceid', null),
 				],
 			];
-			$exApp = $this->appEcosystemV2Service->getExApp($appId);
+			$exApp = $this->appAPIService->getExApp($appId);
 			if ($exApp !== null) {
-				$result = $this->appEcosystemV2Service->aeRequestToExApp($this->request, $userId, $exApp, $handler, 'POST', $params);
+				$result = $this->appAPIService->aeRequestToExApp($this->request, $userId, $exApp, $handler, 'POST', $params);
 				if ($result instanceof IResponse) {
 					return $result->getStatusCode() === 200;
 				}
