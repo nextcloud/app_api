@@ -28,6 +28,30 @@ class TalkBotsService {
 		$this->random = $random;
 	}
 
+	public function registerExAppBot(ExApp $exApp, string $name, string $route, string $description): ?array {
+		if (!class_exists(BotInstallEvent::class)) {
+			return null;
+		}
+
+		[$id, $url, $secret] = $this->getExAppTalkBotConfig($exApp, $route);
+
+		$event = new BotInstallEvent(
+			$name,
+			$secret,
+			$url,
+			$description,
+		);
+		$this->dispatcher->dispatchTyped($event);
+
+		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), $id, $secret);
+		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), 'talk_bot_' . $secret, $route);
+
+		return [
+			'id' => $id,
+			'secret' => $secret,
+		];
+	}
+
 	public function unregisterExAppBot(ExApp $exApp, string $route): ?bool {
 		if (!class_exists(BotUninstallEvent::class)) {
 			return null;
@@ -45,29 +69,6 @@ class TalkBotsService {
 		return true;
 	}
 
-	public function registerExAppBot(ExApp $exApp, string $name, string $route, string $description): ?array {
-		if (!class_exists(BotInstallEvent::class)) {
-			return null;
-		}
-
-		[$id, $url, $secret] = $this->getExAppTalkBotConfig($exApp, $route);
-
-		$event = new BotInstallEvent(
-			$name,
-			$secret,
-			$url,
-			$description,
-		);
-		$this->dispatcher->dispatchTyped($event);
-
-		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), $id, $secret);
-
-		return [
-			'id' => $id,
-			'secret' => $secret,
-		];
-	}
-
 	private function getExAppTalkBotConfig(ExApp $exApp, string $route): array {
 		$url = $this->service->getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
 		$id = sha1($exApp->getAppid() . '_' . $route);
@@ -82,6 +83,14 @@ class TalkBotsService {
 	}
 
 	public function unregisterExAppTalkBots(ExApp $exApp): void {
-		// TODO: Find out a way to get registered ExApp talk bots
+		$exAppConfigs = $this->exAppConfigService->getAllAppConfig($exApp->getAppid());
+		foreach ($exAppConfigs as $exAppConfig) {
+			if (str_starts_with($exAppConfig->getConfigkey(), 'talk_bot_')) {
+				$route = $exAppConfig->getConfigvalue();
+				if ($this->unregisterExAppBot($exApp, $route)) {
+					$this->exAppConfigService->deleteAppConfig($exAppConfig);
+				}
+			}
+		}
 	}
 }
