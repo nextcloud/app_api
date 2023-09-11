@@ -20,20 +20,23 @@ class AEDataCollector extends AbstractDataCollector {
 	}
 
 	public function collect(Request $request, Response $response, \Throwable $exception = null): void {
-		//		TODO: Check why DAV requests missing AE headers data
 		$headers = [];
 		$aeHeadersList = [
-			'AE-VERSION',
+			'AA-VERSION',
 			'EX-APP-ID',
 			'EX-APP-VERSION',
-			'NC-USER-ID',
-			'AE-DATA-HASH',
-			'AE-SIGN-TIME',
-			'AE-SIGNATURE',
+			'AUTHORIZATION-APP-API',
 			'AE-REQUEST-ID',
 		];
 		foreach ($aeHeadersList as $header) {
 			if ($request->getHeader($header) !== '') {
+				if ($header === 'AUTHORIZATION-APP-API') {
+					$authorization = $request->getHeader($header);
+					$headers[$header] = $authorization;
+					$headers['NC-USER-ID'] = explode(':', base64_decode($authorization))[0];
+					$headers['EX-APP-SECRET'] = explode(':', base64_decode($authorization))[1];
+					continue;
+				}
 				$headers[$header] = $request->getHeader($header);
 			}
 		}
