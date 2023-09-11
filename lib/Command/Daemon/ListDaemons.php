@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\Daemon;
+namespace OCA\AppAPI\Command\Daemon;
 
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppAPI\Service\DaemonConfigService;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,7 +20,7 @@ class ListDaemons extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:daemon:list');
+		$this->setName('app_api:daemon:list');
 		$this->setDescription('List registered daemons');
 	}
 

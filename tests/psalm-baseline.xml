@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
+<files psalm-version="5.15.0@5c774aca4746caf3d239d9c8cadb9f882ca29352">
   <file src="lib/AppInfo/Application.php">
     <InvalidArgument>
       <code>LoadFilesPluginListener::class</code>
@@ -9,10 +9,66 @@
       <code>DavPlugin</code>
     </MissingDependency>
   </file>
+  <file src="lib/Command/ExApp/Deploy.php">
+    <ImplicitToStringCast>
+      <code><![CDATA[$infoXml->id]]></code>
+    </ImplicitToStringCast>
+  </file>
+  <file src="lib/Command/ExApp/Update.php">
+    <ImplicitToStringCast>
+      <code><![CDATA[$infoXml->id]]></code>
+    </ImplicitToStringCast>
+  </file>
+  <file src="lib/Controller/AppConfigController.php">
+    <InvalidClass>
+      <code>AppAPIAuth</code>
+      <code>AppAPIAuth</code>
+      <code>AppAPIAuth</code>
+    </InvalidClass>
+  </file>
+  <file src="lib/Controller/ExFileActionsMenuController.php">
+    <InvalidClass>
+      <code>AppAPIAuth</code>
+      <code>AppAPIAuth</code>
+      <code>ExFilesActionsMenuService</code>
+      <code>ExFilesActionsMenuService</code>
+      <code>ExFilesActionsMenuService</code>
+    </InvalidClass>
+  </file>
+  <file src="lib/Controller/NotificationsController.php">
+    <InvalidClass>
+      <code>AppAPIAuth</code>
+    </InvalidClass>
+  </file>
+  <file src="lib/Controller/OCSApiController.php">
+    <InvalidClass>
+      <code>AppAPIAuth</code>
+      <code>AppAPIAuth</code>
+    </InvalidClass>
+  </file>
+  <file src="lib/Controller/PreferencesController.php">
+    <InvalidClass>
+      <code>AppAPIAuth</code>
+      <code>AppAPIAuth</code>
+      <code>AppAPIAuth</code>
+    </InvalidClass>
+  </file>
+  <file src="lib/Controller/TalkBotController.php">
+    <InvalidClass>
+      <code>AppAPIAuth</code>
+      <code>AppAPIAuth</code>
+      <code>TalkBotsService</code>
+      <code>TalkBotsService</code>
+    </InvalidClass>
+  </file>
   <file src="lib/Listener/LoadFilesPluginListener.php">
     <ImplementedParamTypeMismatch>
       <code>$event</code>
     </ImplementedParamTypeMismatch>
+    <InvalidClass>
+      <code>ExFilesActionsMenuService</code>
+      <code>ExFilesActionsMenuService</code>
+    </InvalidClass>
     <InvalidDocblock>
       <code>class LoadFilesPluginListener implements IEventListener {</code>
     </InvalidDocblock>
@@ -37,16 +93,62 @@
       <code>IEventListener</code>
     </InvalidTemplateParam>
     <MissingDependency>
-      <code>AEAuthBackend</code>
-      <code>AEAuthBackend</code>
+      <code>AppAPIAuthBackend</code>
+      <code>AppAPIAuthBackend</code>
     </MissingDependency>
     <MissingTemplateParam>
       <code>IEventListener</code>
     </MissingTemplateParam>
   </file>
+  <file src="lib/Middleware/AppAPIAuthMiddleware.php">
+    <InvalidClass>
+      <code>AppAPIAuth</code>
+      <code>AppAPIAuth</code>
+    </InvalidClass>
+    <TypeDoesNotContainType>
+      <code>$exception instanceof AppAPIAuth</code>
+    </TypeDoesNotContainType>
+    <UndefinedMethod>
+      <code>getCode</code>
+      <code>getMessage</code>
+      <code>getMessage</code>
+      <code>getMessage</code>
+    </UndefinedMethod>
+  </file>
   <file src="lib/Profiler/AEDataCollector.php">
     <UndefinedClass>
       <code>Request</code>
     </UndefinedClass>
+  </file>
+  <file src="lib/Service/ExFilesActionsMenuService.php">
+    <InvalidClass>
+      <code>?ExFilesActionsMenu</code>
+      <code>?ExFilesActionsMenu</code>
+      <code>?ExFilesActionsMenu</code>
+      <code>AppAPIService</code>
+      <code>AppAPIService</code>
+      <code>Application</code>
+      <code>ExFilesActionsMenu</code>
+      <code>ExFilesActionsMenu</code>
+      <code>ExFilesActionsMenu</code>
+      <code>ExFilesActionsMenu</code>
+      <code>ExFilesActionsMenu</code>
+      <code>ExFilesActionsMenuMapper</code>
+      <code>ExFilesActionsMenuMapper</code>
+      <code>ExFilesActionsMenu[]|null</code>
+      <code>ExFilesActionsMenu|null</code>
+    </InvalidClass>
+  </file>
+  <file src="lib/Service/TalkBotsService.php">
+    <InvalidClass>
+      <code>AppAPIService</code>
+      <code>AppAPIService</code>
+      <code>ExApp</code>
+      <code>ExApp</code>
+      <code>ExApp</code>
+      <code>ExApp</code>
+      <code>ExAppConfigService</code>
+      <code>ExAppConfigService</code>
+    </InvalidClass>
   </file>
 </files>

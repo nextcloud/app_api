@@ -12,9 +12,9 @@ Get last version from GitHub
 
 Assuming you're in the ``apps`` folder of Nextcloud with command :command:`git`::
 
-	git clone https://github.com/cloud-py-api/app_ecosystem_v2.git
+	git clone https://github.com/cloud-py-api/app_api.git
 
-Move to the ``app_ecosystem_v2`` directory with :command:`shell`::
+Move to the ``app_api`` directory with :command:`shell`::
 
 	cd app_ecosystem_v2
 
@@ -24,7 +24,7 @@ Then, build NPM and JS with :command:`shell`::
 
 AAfter this, you can enable it from the directory where the ``occ`` command resides, with :command:`shell`::
 
-	./occ app:enable --force app_ecosystem_v2
+	./occ app:enable --force app_api
 
 
 Patching Nextcloud 26
@@ -37,32 +37,36 @@ The only changes to Nextcloud server are in ``base.php`` file, required only for
 
 .. code-block:: php
 
-	if (self::tryAppEcosystemV2Login($request)) {
+	if (self::tryAppAPILogin($request)) {
 		return true;
 	}
 
 
-And down below ``tryAppEcosystemV2Login`` method is added:
+And down below ``tryAppAPILogin`` method is added:
 
 .. code-block:: php
 
-	protected static function tryAppEcosystemV2Login(OCP\IRequest $request): bool {
+	protected static function tryAppAPILogin(OCP\IRequest $request): bool {
 		$appManager = Server::get(OCP\App\IAppManager::class);
-		if (!$request->getHeader('AE-SIGNATURE')) {
+		if (!$request->getHeader('AUTHORIZATION-APP-API')) {
 			return false;
 		}
-		if (!$appManager->isInstalled('app_ecosystem_v2')) {
+		if (!$appManager->isInstalled('app_api')) {
 			return false;
 		}
-		$appEcosystemV2Service = Server::get(OCA\AppEcosystemV2\Service\AppEcosystemV2Service::class);
-		return $appEcosystemV2Service->validateExAppRequestToNC($request);
+		try {
+			$appAPIService = Server::get(OCA\AppAPI\Service\AppAPIService::class);
+			return $appAPIService->validateExAppRequestToNC($request);
+		} catch (\Psr\Container\NotFoundExceptionInterface|\Psr\Container\ContainerExceptionInterface $e) {
+			return false;
+		}
 	}
 
 .. note:: The patch itself can be found in the project root directory under the name ``base_php.patch``.
 
 Apply the patch from the root directory of Nextcloud using :command:`patch`::
 
-	patch -p 1 -i apps/app_ecosystem_v2/base_php.patch
+	patch -p 1 -i apps/app_api/base_php.patch
 
 
 In Place of a Conclusion

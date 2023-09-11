@@ -53,7 +53,7 @@ body:
     description: |
       Paste or describe the configuration setting, including software versions, to help diagnose the problem more quickly.
     placeholder: >
-      Example: app_ecosystem_v2 = 1.0.0, nextcloud = 28.0.4, etc.
+      Example: app_api = 1.0.0, nextcloud = 28.0.4, etc.
   validations:
     required: true
 - type: markdown

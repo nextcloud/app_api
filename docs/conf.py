@@ -56,4 +56,4 @@ def setup(app):
     app.add_css_file("css/light.css")
 
 
-issues_github_path = "cloud-py-api/app_ecosystem_v2"
+issues_github_path = "cloud-py-api/app_api"

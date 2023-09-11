@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Profiler;
+namespace OCA\AppAPI\Profiler;
 
 use OC\AppFramework\Http\Request;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppAPI\AppInfo\Application;
 
 use OCP\AppFramework\Http\Response;
 use OCP\DataCollector\AbstractDataCollector;

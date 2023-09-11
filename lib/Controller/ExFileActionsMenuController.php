@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
-use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Service\ExFilesActionsMenuService;
 
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -44,7 +44,7 @@ class ExFileActionsMenuController extends OCSController {
 	 *
 	 * @return DataResponse
 	 */
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerFileActionMenu(array $fileActionMenuParams): DataResponse {
@@ -65,7 +65,7 @@ class ExFileActionsMenuController extends OCSController {
 	 * @throws OCSNotFoundException
 	 * @return DataResponse
 	 */
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function unregisterFileActionMenu(string $fileActionMenuName): DataResponse {

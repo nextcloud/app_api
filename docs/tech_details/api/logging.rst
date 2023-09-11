@@ -7,12 +7,12 @@ There is a logging API that can be used to log messages from ExApps in Nextcloud
 .. note::
 
 	You can retrieve Nextcloud `loglevel` for internal ExApp usage
-	from private `app_ecosystem_v2` (after authentication) capabilities
+	from private `app_api` (after authentication) capabilities
 
 Send log message (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/log``
+OCS endpoint: ``POST /apps/app_api/api/v1/log``
 
 Request data
 ************

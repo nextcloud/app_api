@@ -12,7 +12,7 @@ webpackConfig.stats = {
 	modules: false,
 }
 
-const appId = 'app_ecosystem_v2'
+const appId = 'app_api'
 webpackConfig.entry = {
 	adminSettings: { import: path.join(__dirname, 'src', 'adminSettings.js'), filename: appId + '-adminSettings.js' },
 	filesplugin: { import: path.join(__dirname, 'src', 'filesplugin.js'), filename: appId + '-filesplugin.js' },

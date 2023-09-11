@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExApp;
+namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\Service\AppAPIService;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,16 +12,16 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Enable extends Command {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 
-	public function __construct(AppEcosystemV2Service $service) {
+	public function __construct(AppAPIService $service) {
 		parent::__construct();
 
 		$this->service = $service;
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:enable');
+		$this->setName('app_api:app:enable');
 		$this->setDescription('Enable registered external app');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);

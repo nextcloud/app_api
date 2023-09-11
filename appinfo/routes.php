@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
 	'routes' => [
-		// AppEcosystemV2 admin settings
+		// AppAPI admin settings
 		['name' => 'config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
 
 		// ExApps actions

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Notifications;
+namespace OCA\AppAPI\Notifications;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Service\AppAPIService;
 use OCP\IURLGenerator;
 use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
@@ -14,12 +14,12 @@ use OCP\Notification\INotifier;
 class ExAppAdminNotifier implements INotifier {
 	private IFactory $factory;
 	private IURLGenerator $url;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 
 	public function __construct(
-		IFactory $factory,
+		IFactory      $factory,
 		IURLGenerator $urlGenerator,
-		AppEcosystemV2Service $service,
+		AppAPIService $service,
 	) {
 		$this->factory = $factory;
 		$this->url = $urlGenerator;
@@ -31,7 +31,7 @@ class ExAppAdminNotifier implements INotifier {
 	}
 
 	public function getName(): string {
-		return $this->factory->get(Application::APP_ID)->t('AppEcosystemV2 ExApp version update notifier');
+		return $this->factory->get(Application::APP_ID)->t('AppAPI ExApp version update notifier');
 	}
 
 	public function prepare(INotification $notification, string $languageCode): INotification {
@@ -47,7 +47,7 @@ class ExAppAdminNotifier implements INotifier {
 
 		$parameters = $notification->getSubjectParameters();
 
-		$notification->setLink($this->url->getAbsoluteURL('/index.php/settings/admin/app_ecosystem_v2'));
+		$notification->setLink($this->url->getAbsoluteURL('/index.php/settings/admin/' . Application::APP_ID));
 		$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 
 		if (isset($parameters['rich_subject']) && isset($parameters['rich_subject_params'])) {

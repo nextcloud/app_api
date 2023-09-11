@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExApp\Scopes;
+namespace OCA\AppAPI\Command\ExApp\Scopes;
 
-use OCA\AppEcosystemV2\Db\ExAppScope;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
-use OCA\AppEcosystemV2\Service\ExAppScopesService;
+use OCA\AppAPI\Db\ExAppScope;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppApiScopeService;
+use OCA\AppAPI\Service\ExAppScopesService;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,14 +15,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ListScopes extends Command {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private ExAppScopesService $exAppScopeService;
 	private ExAppApiScopeService $exAppApiScopeService;
 
 	public function __construct(
-		AppEcosystemV2Service $service,
-		ExAppScopesService    $exAppScopeService,
-		ExAppApiScopeService  $exAppApiScopeService,
+		AppAPIService        $service,
+		ExAppScopesService   $exAppScopeService,
+		ExAppApiScopeService $exAppApiScopeService,
 	) {
 		parent::__construct();
 
@@ -32,7 +32,7 @@ class ListScopes extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:scopes:list');
+		$this->setName('app_api:app:scopes:list');
 		$this->setDescription('List ExApp granted scopes');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);

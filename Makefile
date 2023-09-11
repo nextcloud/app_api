@@ -8,7 +8,7 @@ docs html:
 
 .PHONY: help
 help:
-	@echo "Welcome to AppEcosystemV2 development. Please use \`make <target>\` where <target> is one of"
+	@echo "Welcome to AppAPI development. Please use \`make <target>\` where <target> is one of"
 	@echo "  docs               make HTML docs"
 	@echo "  html               make HTML docs"
 	@echo " "

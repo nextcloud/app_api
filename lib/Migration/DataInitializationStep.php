@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Migration;
+namespace OCA\AppAPI\Migration;
 
-use OCA\AppEcosystemV2\DeployActions\AIODockerActions;
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+use OCA\AppAPI\DeployActions\AIODockerActions;
+use OCA\AppAPI\Service\ExAppApiScopeService;
 
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;

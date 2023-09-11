@@ -1,7 +1,7 @@
-AppEcosystemV2 documentation
+AppAPI documentation
 ============================
 
-The AppEcosystem is a project introduced by Nextcloud to revolutionize the process of application development within the Nextcloud ecosystem.
+The AppAPI is a project introduced by Nextcloud to revolutionize the process of application development within the Nextcloud ecosystem.
 
 Overview
 ========

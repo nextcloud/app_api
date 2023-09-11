@@ -1,6 +1,6 @@
 {
-	"name": "nextcloud/app_ecosystem_v2",
-	"description": "Nextcloud App Ecosystem V2 provides a new API for external apps on different programming languages",
+	"name": "nextcloud/app_api",
+	"description": "Nextcloud AppAPI provides a new API for external apps on different programming languages",
 	"type": "project",
 	"license": "AGPL-3.0-or-later",
 	"authors": [
@@ -18,7 +18,7 @@
 	"require-dev": {
 		"nextcloud/ocp": "dev-master",
 		"roave/security-advisories": "dev-latest",
-		"psalm/phar": "^5.13",
+		"psalm/phar": "^5.15",
 		"nextcloud/coding-standard": "^1.1",
 		"friendsofphp/php-cs-fixer": "3.16"
 	},
@@ -41,7 +41,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"OCA\\AppEcosystemV2\\": "lib/"
+			"OCA\\AppAPI\\": "lib/"
 		}
 	},
 	"autoload-dev": {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExAppApiScope;
-use OCA\AppEcosystemV2\Db\ExAppApiScopeMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExAppApiScope;
+use OCA\AppAPI\Db\ExAppApiScopeMapper;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -74,7 +74,7 @@ class ExAppApiScopeService {
 		$aeApiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
 
 		$initApiScopes = [
-			// AppEcosystemV2 scopes
+			// AppAPI scopes
 			['api_route' => $aeApiV1Prefix . '/files/actions/menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/log', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ex-app/config', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],

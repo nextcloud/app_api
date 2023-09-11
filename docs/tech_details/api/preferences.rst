@@ -9,7 +9,7 @@ It's a user specific settings.
 Set user config value
 ^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/ex-app/preference``
+OCS endpoint: ``POST /apps/app_api/api/v1/ex-app/preference``
 
 Request data
 ************
@@ -33,7 +33,7 @@ If config value is not set - ``null`` is returned.
 Get user config values
 ^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/ex-app/preference/get-values``
+OCS endpoint: ``POST /apps/app_api/api/v1/ex-app/preference/get-values``
 
 Request data
 ************
@@ -49,7 +49,7 @@ Get config values for **current authenticated user**.
 Delete user config values
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``DELETE /apps/app_ecosystem_v2/api/v1/ex-app/preference``
+OCS endpoint: ``DELETE /apps/app_api/api/v1/ex-app/preference``
 
 Request data
 ************

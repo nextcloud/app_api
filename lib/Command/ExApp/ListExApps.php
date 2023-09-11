@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExApp;
+namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppEcosystemV2\Db\ExAppMapper;
+use OCA\AppAPI\Db\ExAppMapper;
 
 use OCP\DB\Exception;
 use Symfony\Component\Console\Command\Command;
@@ -21,7 +21,7 @@ class ListExApps extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:list');
+		$this->setName('app_api:app:list');
 		$this->setDescription('List ExApps');
 	}
 

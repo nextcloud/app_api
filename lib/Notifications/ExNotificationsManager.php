@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Notifications;
+namespace OCA\AppAPI\Notifications;
 
 use OCP\IGroupManager;
 use OCP\Notification\IManager;

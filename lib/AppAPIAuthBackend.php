@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2;
+namespace OCA\AppAPI;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppAPI\AppInfo\Application;
 
 use OCA\DAV\Connector\Sabre\Auth;
 use OCP\IRequest;
@@ -13,7 +13,7 @@ use Sabre\DAV\Auth\Backend\BackendInterface;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
-class AEAuthBackend implements BackendInterface {
+class AppAPIAuthBackend implements BackendInterface {
 	private IRequest $request;
 	private ISession $session;
 
@@ -35,7 +35,7 @@ class AEAuthBackend implements BackendInterface {
 				return [true, $authString];
 			}
 		}
-		return [false, 'AEAuth has not passed'];
+		return [false, 'AppAPIAuth has not passed'];
 	}
 
 	public function challenge(RequestInterface $request, ResponseInterface $response) {

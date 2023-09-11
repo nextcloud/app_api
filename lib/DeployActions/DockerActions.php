@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\DeployActions;
+namespace OCA\AppAPI\DeployActions;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Service\AppAPIService;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
 use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
@@ -40,16 +40,16 @@ class DockerActions implements IDeployActions {
 	private IAppManager $appManager;
 	private ISecureRandom $random;
 	private IURLGenerator $urlGenerator;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 
 	public function __construct(
-		LoggerInterface $logger,
-		IConfig $config,
+		LoggerInterface     $logger,
+		IConfig             $config,
 		ICertificateManager $certificateManager,
-		IAppManager $appManager,
-		ISecureRandom $random,
-		IURLGenerator $urlGenerator,
-		AppEcosystemV2Service $service,
+		IAppManager         $appManager,
+		ISecureRandom       $random,
+		IURLGenerator       $urlGenerator,
+		AppAPIService       $service,
 	) {
 		$this->logger = $logger;
 		$this->certificateManager = $certificateManager;

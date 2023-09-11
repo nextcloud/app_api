@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppApi\Service;
 
-use OCA\AppEcosystemV2\Db\ExApp;
+use OCA\AppApi\Db\ExApp;
 use OCA\Talk\Events\BotInstallEvent;
 use OCA\Talk\Events\BotUninstallEvent;
 use OCP\EventDispatcher\IEventDispatcher;
@@ -12,15 +12,15 @@ use OCP\Security\ISecureRandom;
 
 class TalkBotsService {
 	private ExAppConfigService $exAppConfigService;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private IEventDispatcher $dispatcher;
 	private ISecureRandom $random;
 
 	public function __construct(
 		ExAppConfigService $exAppConfigService,
-		AppEcosystemV2Service $service,
-		IEventDispatcher $dispatcher,
-		ISecureRandom $random,
+		AppAPIService      $service,
+		IEventDispatcher   $dispatcher,
+		ISecureRandom      $random,
 	) {
 		$this->exAppConfigService = $exAppConfigService;
 		$this->service = $service;
