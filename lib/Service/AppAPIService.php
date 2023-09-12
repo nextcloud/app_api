@@ -523,7 +523,7 @@ class AppAPIService {
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
 				'appid' => $request->getHeader('EX-APP-ID'),
-				'userid' => explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')))[0],
+				'userid' => explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 1)[0],
 			]);
 			return false;
 		}

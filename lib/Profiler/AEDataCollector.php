@@ -33,8 +33,8 @@ class AEDataCollector extends AbstractDataCollector {
 				if ($header === 'AUTHORIZATION-APP-API') {
 					$authorization = $request->getHeader($header);
 					$headers[$header] = $authorization;
-					$headers['NC-USER-ID'] = explode(':', base64_decode($authorization))[0];
-					$headers['EX-APP-SECRET'] = explode(':', base64_decode($authorization))[1];
+					$headers['NC-USER-ID'] = explode(':', base64_decode($authorization), 1)[0];
+					$headers['EX-APP-SECRET'] = explode(':', base64_decode($authorization), 1)[1];
 					continue;
 				}
 				$headers[$header] = $request->getHeader($header);
