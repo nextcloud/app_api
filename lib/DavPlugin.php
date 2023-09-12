@@ -36,7 +36,7 @@ class DavPlugin extends ServerPlugin {
 	public function beforeMethod(RequestInterface $request, ResponseInterface $response) {
 		if ($this->request->getHeader('AUTHORIZATION-APP-API')) {
 			if ($this->service->validateExAppRequestToNC($this->request, true)) {
-				$this->session->set(Auth::DAV_AUTHENTICATED, explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 1)[0]);
+				$this->session->set(Auth::DAV_AUTHENTICATED, explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 2)[0]);
 			}
 		}
 	}
