@@ -1,72 +1,37 @@
-From 1ed62d007ce19934edf71740099665e661fbb368 Mon Sep 17 00:00:00 2001
-From: Andrey Borysenko <andrey18106x@gmail.com>
-Date: Tue, 27 Jun 2023 15:05:52 +0300
-Subject: [PATCH 1/2] Added app_ecosystem_v2 auth to base.php
-
----
- lib/base.php | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
-
 diff --git a/lib/base.php b/lib/base.php
-index 09ec5be441b5..b49491e61b02 100644
+index 732fc55be3e..db2c2866b7b 100644
 --- a/lib/base.php
 +++ b/lib/base.php
-@@ -1133,6 +1133,9 @@ public static function handleLogin(OCP\IRequest $request): bool {
+@@ -1132,6 +1132,9 @@ class OC {
  		if (OC_User::handleApacheAuth()) {
  			return true;
  		}
-+		if (self::tryAppEcosystemV2Login($request)) {
++		if (self::tryAppAPILogin($request)) {
 +			return true;
 +		}
  		if ($userSession->tryTokenLogin($request)) {
  			return true;
  		}
-@@ -1170,6 +1173,21 @@ protected static function handleAuthHeaders(): void {
+@@ -1169,6 +1172,22 @@ class OC {
  			}
  		}
  	}
 +
-+	protected static function tryAppEcosystemV2Login(OCP\IRequest $request): bool {
++	protected static function tryAppAPILogin(OCP\IRequest $request): bool {
 +		$appManager = Server::get(OCP\App\IAppManager::class);
-+		if (!$request->getHeader('AE-SIGNATURE')) {
++		if (!$request->getHeader('AUTHORIZATION-APP-API')) {
 +			return false;
 +		}
-+		if (!$appManager->isAppLoaded('app_ecosystem_v2')) {
++		if (!$appManager->isInstalled('app_api')) {
 +			return false;
 +		}
-+		if (!$appManager->isInstalled('app_ecosystem_v2')) {
++		try {
++			$appAPIService = Server::get(OCA\AppAPI\Service\AppAPIService::class);
++			return $appAPIService->validateExAppRequestToNC($request);
++		} catch (\Psr\Container\NotFoundExceptionInterface|\Psr\Container\ContainerExceptionInterface $e) {
 +			return false;
 +		}
-+		$appEcosystemV2Service = Server::get(OCA\AppEcosystemV2\Service\AppEcosystemV2Service::class);
-+		return $appEcosystemV2Service->validateExAppRequestToNC($request);
 +	}
  }
  
  OC::init();
-
-From b8f1a58f7daf2ade87f2600d37b1926fdfbd949a Mon Sep 17 00:00:00 2001
-From: Alexander Piskun <13381981+bigcat88@users.noreply.github.com>
-Date: Thu, 13 Jul 2023 14:17:29 +0300
-Subject: [PATCH 2/2] Update base.php
-
-Support 26 Nextcloud
-
-Signed-off-by: Alexander Piskun <13381981+bigcat88@users.noreply.github.com>
----
- lib/base.php | 3 ---
- 1 file changed, 3 deletions(-)
-
-diff --git a/lib/base.php b/lib/base.php
-index b49491e61b02..27556a10acc3 100644
---- a/lib/base.php
-+++ b/lib/base.php
-@@ -1179,9 +1179,6 @@ protected static function tryAppEcosystemV2Login(OCP\IRequest $request): bool {
- 		if (!$request->getHeader('AE-SIGNATURE')) {
- 			return false;
- 		}
--		if (!$appManager->isAppLoaded('app_ecosystem_v2')) {
--			return false;
--		}
- 		if (!$appManager->isInstalled('app_ecosystem_v2')) {
- 			return false;
- 		}
