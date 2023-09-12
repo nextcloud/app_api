@@ -14,7 +14,7 @@ use OCP\DataCollector\AbstractDataCollector;
 /**
  * @psalm-suppress UndefinedClass
  */
-class AEDataCollector extends AbstractDataCollector {
+class AppAPIDataCollector extends AbstractDataCollector {
 	public function getName(): string {
 		return Application::APP_ID;
 	}
@@ -33,8 +33,8 @@ class AEDataCollector extends AbstractDataCollector {
 				if ($header === 'AUTHORIZATION-APP-API') {
 					$authorization = $request->getHeader($header);
 					$headers[$header] = $authorization;
-					$headers['NC-USER-ID'] = explode(':', base64_decode($authorization), 1)[0];
-					$headers['EX-APP-SECRET'] = explode(':', base64_decode($authorization), 1)[1];
+					$headers['NC-USER-ID'] = explode(':', base64_decode($authorization), 2)[0];
+					$headers['EX-APP-SECRET'] = explode(':', base64_decode($authorization), 2)[1];
 					continue;
 				}
 				$headers[$header] = $request->getHeader($header);

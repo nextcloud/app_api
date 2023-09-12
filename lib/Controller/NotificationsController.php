@@ -44,7 +44,7 @@ class NotificationsController extends OCSController {
 	#[NoCSRFRequired]
 	public function sendNotification(array $params): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$userId = explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 1)[0];
+		$userId = explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
 		$notification = $this->exNotificationsManager->sendNotification($appId, $userId, $params);
 		return new DataResponse($this->notificationToArray($notification), Http::STATUS_OK);
 	}
