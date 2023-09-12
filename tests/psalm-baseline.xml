@@ -115,7 +115,7 @@
       <code>getMessage</code>
     </UndefinedMethod>
   </file>
-  <file src="lib/Profiler/AEDataCollector.php">
+  <file src="lib/Profiler/AppAPIDataCollector.php">
     <UndefinedClass>
       <code>Request</code>
     </UndefinedClass>
