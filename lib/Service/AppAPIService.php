@@ -500,12 +500,6 @@ class AppAPIService {
 		return $paramsContent . http_build_query($params);
 	}
 
-	private function generateDataHash(string $data): string {
-		$hashContext = hash_init('xxh64');
-		hash_update($hashContext, $data);
-		return hash_final($hashContext);
-	}
-
 	/**
 	 * AppAPI authentication request validation for Nextcloud:
 	 *  - checks if ExApp exists and is enabled
@@ -739,9 +733,8 @@ class AppAPIService {
 	private function buildRequestInfo(IRequest $request): array {
 		$headers = [];
 		$aeHeadersList = [
-			'AE-VERSION',
+			'AA-VERSION',
 			'EX-APP-VERSION',
-			'AE-SIGN-TIME',
 		];
 		foreach ($aeHeadersList as $header) {
 			if ($request->getHeader($header) !== '') {
@@ -778,7 +771,7 @@ class AppAPIService {
 			$message = $fromNextcloud
 				? '[' . Application::APP_ID . '] Nextcloud --> ' . $exApp->getAppid()
 				: '[' . Application::APP_ID . '] ' . $exApp->getAppid() . ' --> Nextcloud';
-			$aeDebugLogger = $this->getCustomLogger('ae_debug.log');
+			$aeDebugLogger = $this->getCustomLogger('aa_debug.log');
 			$aeDebugLogger->log($exAppDebugSettings['level'], $message, [
 				'app' => $exApp->getAppid(),
 				'request_info' => $request instanceof IRequest ? $this->buildRequestInfo($request) : 'CLI request',
