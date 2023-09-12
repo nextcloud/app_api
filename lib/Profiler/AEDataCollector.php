@@ -26,7 +26,7 @@ class AEDataCollector extends AbstractDataCollector {
 			'EX-APP-ID',
 			'EX-APP-VERSION',
 			'AUTHORIZATION-APP-API',
-			'AE-REQUEST-ID',
+			'AA-REQUEST-ID',
 		];
 		foreach ($aeHeadersList as $header) {
 			if ($request->getHeader($header) !== '') {

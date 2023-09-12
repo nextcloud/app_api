@@ -431,7 +431,7 @@ class AppAPIService {
 					'EX-APP-ID' => $exApp->getAppid(),
 					'EX-APP-VERSION' => $exApp->getVersion(),
 					'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $exApp->getSecret()),
-					'AE-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
+					'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
 				],
 				'nextcloud' => [
 					'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
