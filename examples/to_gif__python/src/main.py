@@ -1,23 +1,19 @@
 """Simplest example of files_dropdown_menu, notification without using the framework."""
 
-import asyncio
-import datetime
-import hashlib
-import hmac
 import json
 import os
 import tempfile
 import typing
+from base64 import b64encode, b64decode
 from random import choice
 from string import ascii_lowercase, ascii_uppercase, digits
-from urllib.parse import quote, urlencode
+from urllib.parse import quote
 
 import cv2
 import httpx
 import imageio
 import numpy
 import uvicorn
-import xxhash
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, responses, status
 from pydantic import BaseModel
 from pygifsicle import optimize
@@ -53,70 +49,29 @@ def random_string(size: int) -> str:
     return "".join(choice(ascii_lowercase + ascii_uppercase + digits) for _ in range(size))
 
 
-def sign_request(method: str, url_params: str, headers: dict, data: typing.Optional[bytes], user="") -> None:
-    data_hash = xxhash.xxh64()
-    if data and method != "GET":
-        data_hash.update(data)
-
-    sign_headers = {
-        "AE-VERSION": "1.0.0",
-        "EX-APP-ID": os.environ["APP_ID"],
-        "EX-APP-VERSION": os.environ["APP_VERSION"],
-        "NC-USER-ID": user,
-        "AE-DATA-HASH": data_hash.hexdigest(),
-        "AE-SIGN-TIME": str(int(datetime.datetime.now(datetime.timezone.utc).timestamp())),
-    }
-    if not sign_headers["NC-USER-ID"]:
-        sign_headers.pop("NC-USER-ID")
-
-    request_to_sign = (
-        method.encode("UTF-8")
-        + url_params.encode("UTF-8")
-        + json.dumps(sign_headers, separators=(",", ":")).encode("UTF-8")
-    )
-    hmac_sign = hmac.new(os.environ["APP_SECRET"].encode("UTF-8"), request_to_sign, digestmod=hashlib.sha256)
-    headers["AE-SIGNATURE"] = hmac_sign.hexdigest()
-    headers.update(sign_headers)
-    if "NC-USER-ID" in sign_headers:
-        headers["NC-USER-ID"] = sign_headers["NC-USER-ID"]
+def sign_request(headers: dict, user="") -> None:
+    headers["AUTHORIZATION-APP-API"] = b64encode(f"{user}:{os.environ['APP_SECRET']}".encode("UTF=8"))
 
 
-def sign_check(request: Request) -> None:
-    current_time = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+def sign_check(request: Request) -> str:
     headers = {
-        "AE-VERSION": request.headers["AE-VERSION"],
+        "AA-VERSION": request.headers["AE-VERSION"],
         "EX-APP-ID": request.headers["EX-APP-ID"],
         "EX-APP-VERSION": request.headers["EX-APP-VERSION"],
-        "NC-USER-ID": request.headers.get("NC-USER-ID", ""),
-        "AE-DATA-HASH": request.headers["AE-DATA-HASH"],
-        "AE-SIGN-TIME": request.headers["AE-SIGN-TIME"],
+        "AUTHORIZATION-APP-API": request.headers.get("AUTHORIZATION-APP-API", ""),
     }
-    if not headers["NC-USER-ID"]:
-        headers.pop("NC-USER-ID")
+    # AA-VERSION contains AppAPI version, for now it can be only one version, so no handling of it.
+    if headers["EX-APP-ID"] != os.environ["APP_ID"]:
+        raise ValueError(f"Invalid EX-APP-ID:{headers['EX-APP-ID']} != {os.environ['APP_ID']}")
 
     if headers["EX-APP-VERSION"] != os.environ["APP_VERSION"]:
         raise ValueError(f"Invalid EX-APP-VERSION:{headers['EX-APP-VERSION']} <=> {os.environ['APP_VERSION']}")
 
-    request_time = int(headers["AE-SIGN-TIME"])
-    if request_time < current_time - 5 * 60 or request_time > current_time + 5 * 60:
-        raise ValueError(f"Invalid AE-SIGN-TIME:{request_time} <=> {current_time}")
-
-    query_params = f"?{request.url.components.query}" if request.url.components.query else ""
-    request_to_sign = (
-        request.method.upper() + request.url.components.path + query_params + json.dumps(headers, separators=(",", ":"))
-    )
-    hmac_sign = hmac.new(
-        os.environ["APP_SECRET"].encode("UTF-8"), request_to_sign.encode("UTF-8"), digestmod=hashlib.sha256
-    ).hexdigest()
-    if hmac_sign != request.headers["AE-SIGNATURE"]:
-        raise ValueError(f"Invalid AE-SIGNATURE:{hmac_sign} != {request.headers['AE-SIGNATURE']}")
-
-    data_hash = xxhash.xxh64()
-    data = asyncio.run(request.body())
-    if data:
-        data_hash.update(data)
-    if data_hash.hexdigest() != headers["AE-DATA-HASH"]:
-        raise ValueError(f"Invalid AE-DATA-HASH:{data_hash.hexdigest()} !={headers['AE-DATA-HASH']}")
+    auth_aa = b64decode(headers.get("AUTHORIZATION-APP-API", "")).decode("UTF-8")
+    username, app_secret = auth_aa.split(":", maxsplit=1)
+    if app_secret != os.environ["APP_SECRET"]:
+        raise ValueError(f"Invalid APP_SECRET:{app_secret} != {os.environ['APP_SECRET']}")
+    return username
 
 
 def ocs_call(
@@ -135,8 +90,7 @@ def ocs_call(
     if json_data is not None:
         headers.update({"Content-Type": "application/json"})
         data_bytes = json.dumps(json_data).encode("utf-8")
-    path_params = f"{quote(path)}?{urlencode(params, True)}"
-    sign_request(method, path_params, headers, data_bytes, kwargs.get("user", ""))
+    sign_request(headers, kwargs.get("user", ""))
     return httpx.request(
         method,
         url=os.environ["NEXTCLOUD_URL"] + path,
@@ -152,7 +106,7 @@ def dav_call(method: str, path: str, data: typing.Optional[typing.Union[str, byt
     if data is not None:
         data_bytes = data.encode("UTF-8") if isinstance(data, str) else data
     path = quote("/remote.php/dav" + path)
-    sign_request(method, path, headers, data_bytes, kwargs.get("user", ""))
+    sign_request(headers, kwargs.get("user", ""))
     return httpx.request(
         method,
         url=os.environ["NEXTCLOUD_URL"] + path,
@@ -251,10 +205,10 @@ def video_to_gif(
     background_tasks: BackgroundTasks,
 ):
     try:
-        sign_check(request)
+        user_id = sign_check(request)
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    background_tasks.add_task(convert_video_to_gif, file.actionFile, request.headers["NC-USER-ID"])
+    background_tasks.add_task(convert_video_to_gif, file.actionFile, user_id)
     return Response()
 
 
