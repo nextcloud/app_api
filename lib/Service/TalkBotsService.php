@@ -41,7 +41,7 @@ class TalkBotsService {
 		$this->dispatcher->dispatchTyped($event);
 
 		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), $id, $secret);
-		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), 'talk_bot_route_' . $secret, $route);
+		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), 'talk_bot_route_' . $id, $route);
 
 		return [
 			'id' => $id,
