@@ -5,7 +5,7 @@
 [![Docs](https://github.com/cloud-py-api/app_api/actions/workflows/docs.yml/badge.svg)](https://cloud-py-api.github.io/app_api/)
 
 
-The App Ecosystem Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud. 
+The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud. 
 
 Unlike the traditional approach that limits developers to using PHP, this innovative ecosystem empowers them 
 to create applications using a variety of programming languages, opening up a world of possibilities.
@@ -55,7 +55,7 @@ _If you wish to develop a library for any other language, such as **Go**, **Ruby
 - [Technical Details](https://cloud-py-api.github.io/app_api/tech_details/index.html)
 	- [Concepts](https://cloud-py-api.github.io/app_api/Concepts.html)
 	- [Api Scopes](https://cloud-py-api.github.io/app_api/tech_details/ApiScopes.html)
-	- [AppEcosystemV2 APIs](https://cloud-py-api.github.io/app_api/tech_details/api/index.html)
+	- [AppAPI Nextcloud APIs](https://cloud-py-api.github.io/app_api/tech_details/api/index.html)
     - [Authentication](https://cloud-py-api.github.io/app_api/tech_details/Authentication.html)
     - [Deployment](https://cloud-py-api.github.io/app_api/tech_details/Deployment.html)
 - [Contribute](https://github.com/cloud-py-api/app_api/blob/main/.github/CONTRIBUTING.md)
@@ -66,12 +66,12 @@ _If you wish to develop a library for any other language, such as **Go**, **Ruby
 
 ## ExApps list
 
-Here is a list of the Nextcloud ExApps, using AppEcosystemV2:
+Here is a list of the Nextcloud ExApps, using AppAPI:
 
-| Name          | Language | Type        | Description                                 | Link                                                    |
-|---------------|----------|-------------|---------------------------------------------|---------------------------------------------------------|
-| nc_py_api     | Python   | library     | Python library for Nextcloud AppEcosystemV2 | [GitHub](https://github.com/cloud-py-api/nc_py_api)     |	
-| upscaler_demo | Python   | application | Image UpScaler demonstration                | [GitHub](https://github.com/cloud-py-api/upscaler_demo) |
+| Name          | Language | Type        | Description                         | Link                                                    |
+|---------------|----------|-------------|-------------------------------------|---------------------------------------------------------|
+| nc_py_api     | Python   | library     | Python library for Nextcloud AppAPI | [GitHub](https://github.com/cloud-py-api/nc_py_api)     |	
+| upscaler_demo | Python   | application | Image UpScaler demonstration        | [GitHub](https://github.com/cloud-py-api/upscaler_demo) |
 
 ### Support
 
@@ -82,7 +82,7 @@ We appreciate any support for this project:
 - 💁 Resolve an Issue and create a Pull Request (contribute to this project)
 - 🧑‍💻 Develop your own ExApp and share it to world (it will be listed above)
 
-In closing, we are genuinely excited about the future of the AppEcosystem Project and the potential 
+In closing, we are genuinely excited about the future of the AppAPI Project and the potential 
 it holds for transforming the way applications are developed and experienced within Nextcloud. 
 
 As we embark on this journey, we extend our warmest invitation to you — developers, thinkers, creators, and 
