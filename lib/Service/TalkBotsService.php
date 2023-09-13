@@ -12,18 +12,15 @@ use OCP\Security\ISecureRandom;
 
 class TalkBotsService {
 	private ExAppConfigService $exAppConfigService;
-	private AppAPIService $service;
 	private IEventDispatcher $dispatcher;
 	private ISecureRandom $random;
 
 	public function __construct(
 		ExAppConfigService $exAppConfigService,
-		AppAPIService      $service,
 		IEventDispatcher   $dispatcher,
 		ISecureRandom      $random,
 	) {
 		$this->exAppConfigService = $exAppConfigService;
-		$this->service = $service;
 		$this->dispatcher = $dispatcher;
 		$this->random = $random;
 	}
@@ -70,7 +67,7 @@ class TalkBotsService {
 	}
 
 	private function getExAppTalkBotConfig(ExApp $exApp, string $route): array {
-		$url = $this->service->getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
+		$url = sprintf('%s://%s:%s', $exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
 		$id = $this->getExAppTalkBotHash($exApp, $route);
 
 		$exAppConfig = $this->exAppConfigService->getAppConfig($exApp->getAppid(), $id);
