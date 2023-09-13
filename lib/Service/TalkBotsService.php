@@ -44,7 +44,7 @@ class TalkBotsService {
 		$this->dispatcher->dispatchTyped($event);
 
 		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), $id, $secret);
-		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), 'talk_bot_' . $secret, $route);
+		$this->exAppConfigService->setAppConfigValue($exApp->getAppid(), 'talk_bot_route_' . $secret, $route);
 
 		return [
 			'id' => $id,
@@ -71,7 +71,7 @@ class TalkBotsService {
 
 	private function getExAppTalkBotConfig(ExApp $exApp, string $route): array {
 		$url = $this->service->getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
-		$id = sha1($exApp->getAppid() . '_' . $route);
+		$id = $this->getExAppTalkBotHash($exApp, $route);
 
 		$exAppConfig = $this->exAppConfigService->getAppConfig($exApp->getAppid(), $id);
 		if ($exAppConfig === null) {
@@ -85,12 +85,19 @@ class TalkBotsService {
 	public function unregisterExAppTalkBots(ExApp $exApp): void {
 		$exAppConfigs = $this->exAppConfigService->getAllAppConfig($exApp->getAppid());
 		foreach ($exAppConfigs as $exAppConfig) {
-			if (str_starts_with($exAppConfig->getConfigkey(), 'talk_bot_')) {
+			if (str_starts_with($exAppConfig->getConfigkey(), 'talk_bot_route_')) {
 				$route = $exAppConfig->getConfigvalue();
-				if ($this->unregisterExAppBot($exApp, $route)) {
+				$id = $this->getExAppTalkBotHash($exApp, $route);
+				$configHash = substr($exAppConfig->getConfigkey(), 15);
+				if ($id === $configHash) {
+					$this->unregisterExAppBot($exApp, $route);
 					$this->exAppConfigService->deleteAppConfig($exAppConfig);
 				}
 			}
 		}
+	}
+
+	private function getExAppTalkBotHash(ExApp $exApp, string $route): string {
+		return sha1($exApp->getAppid() . '_' . $route);
 	}
 }
