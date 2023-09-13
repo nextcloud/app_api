@@ -10,7 +10,7 @@ use OCP\AppFramework\Db\Entity;
 /**
  * Class ExAppPreference
  *
- * @package OCA\AppApi\Db
+ * @package OCA\AppAPI\Db
  *
  * @method string getUserid()
  * @method string getAppid()
