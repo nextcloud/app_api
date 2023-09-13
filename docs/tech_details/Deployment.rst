@@ -4,7 +4,7 @@ Deployment
 Overview
 --------
 
-AppEcosystemV2 ExApps deployment process in short consists of 3 steps:
+AppAPI ExApps deployment process in short consists of 3 steps:
 
 1. `DaemonConfig registration`_
 2. `ExApp deployment`_
@@ -157,14 +157,14 @@ Deploy env variables
 Deploy env variables are used to configure ExApp container.
 The following env variables are required and built automatically:
 
-	* ``AE_VERSION`` - AppEcosystemV2 version
-	* ``APP_SECRET`` - generated shared secret used for AppEcosystemV2 authentication
+	* ``AA_VERSION`` - AppAPI version
+	* ``APP_SECRET`` - generated shared secret used for AppAPI authentication
 	* ``APP_ID`` - ExApp appid
 	* ``APP_DISPLAY_NAME`` - ExApp display name
 	* ``APP_VERSION`` - ExApp version
 	* ``APP_PROTOCOL`` - protocol ExApp is listening on (http|https)
 	* ``APP_HOST`` - host ExApp is listening on
-	* ``APP_PORT`` - port ExApp is listening on (randomly selected by AppEcosystemV2)
+	* ``APP_PORT`` - port ExApp is listening on (randomly selected by AppAPI)
 	* ``IS_SYSTEM_APP`` - ExApp system app flag (true|false)
 	* ``NEXTCLOUD_URL`` - Nextcloud URL to connect to
 

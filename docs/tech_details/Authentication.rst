@@ -9,7 +9,7 @@ Authentication flow
 
 1. ExApp sends a request to Nextcloud
 2. Nextcloud passes request to AppAPI
-3. AppApi validates request (see `authentication flow in details`_)
+3. AppAPI validates request (see `authentication flow in details`_)
 4. Request is accepted/rejected
 
 .. mermaid::
@@ -47,32 +47,32 @@ Authentication flow in details
 		participant ExApp
 		box Nextcloud
 			participant Nextcloud
-			participant AppApi
+			participant AppAPI
 		end
 		ExApp->>+Nextcloud: Request to API
 		Nextcloud->>Nextcloud: Check if AUTHORIZATION-APP-API header exists
 		Nextcloud-->>ExApp: Reject if AUTHORIZATION-APP-API header not exists
-		Nextcloud->>Nextcloud: Check if AppApi app is enabled
-		Nextcloud-->>ExApp: Reject if AppApi is not exists or disabled
-		Nextcloud->>+AppApi: Validate request
-		AppApi-->>AppApi: Check if ExApp exists and enabled
-		AppApi-->>Nextcloud: Reject if ExApp not exists or disabled
-		AppApi-->>AppApi: Check if ExApp version changed
-		AppApi-->>Nextcloud: Disable ExApp and notify admins if version changed
-		AppApi-->>AppApi: Validate shared secret from AUTHORIZATION-APP-API
-		AppApi-->>Nextcloud: Reject if secret does not match
-		AppApi-->>AppApi: Check API scope
-		AppApi-->>Nextcloud: Reject if API scope not match
-		AppApi-->>AppApi: Check if user interacted with ExApp
-		AppApi-->>Nextcloud: Reject if user has not interacted with ExApp (attempt to bypass user)
-		AppApi-->>AppApi: Check if user is not empty and active
-		AppApi-->>Nextcloud: Set active user
-		AppApi->>-Nextcloud: Request accepted/rejected
+		Nextcloud->>Nextcloud: Check if AppAPI app is enabled
+		Nextcloud-->>ExApp: Reject if AppAPI is not exists or disabled
+		Nextcloud->>+AppAPI: Validate request
+		AppAPI-->>AppAPI: Check if ExApp exists and enabled
+		AppAPI-->>Nextcloud: Reject if ExApp not exists or disabled
+		AppAPI-->>AppAPI: Check if ExApp version changed
+		AppAPI-->>Nextcloud: Disable ExApp and notify admins if version changed
+		AppAPI-->>AppAPI: Validate shared secret from AUTHORIZATION-APP-API
+		AppAPI-->>Nextcloud: Reject if secret does not match
+		AppAPI-->>AppAPI: Check API scope
+		AppAPI-->>Nextcloud: Reject if API scope not match
+		AppAPI-->>AppAPI: Check if user interacted with ExApp
+		AppAPI-->>Nextcloud: Reject if user has not interacted with ExApp (attempt to bypass user)
+		AppAPI-->>AppAPI: Check if user is not empty and active
+		AppAPI-->>Nextcloud: Set active user
+		AppAPI->>-Nextcloud: Request accepted/rejected
 		Nextcloud->>-ExApp: Response (200/401)
 
 
 AppAPIAuth
 ^^^^^^^^^^
 
-AppApi provides ``AppAPIAuth`` attribute with middleware to validate requests from ExApps.
+AppAPI provides ``AppAPIAuth`` attribute with middleware to validate requests from ExApps.
 In your API controllers you can use it as an PHP attribute.

@@ -10,7 +10,7 @@ use OCP\AppFramework\Db\Entity;
 /**
  * Class ExAppApiScope
  *
- * @package OCA\AppApi\Db
+ * @package OCA\AppAPI\Db
  *
  * @method string getApiRoute()
  * @method int getScopeGroup()

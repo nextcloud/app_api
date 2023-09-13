@@ -10,7 +10,7 @@ use OCP\AppFramework\Db\Entity;
 /**
  * Class DaemonConfig
  *
- * @package OCA\AppApi\Db
+ * @package OCA\AppAPI\Db
  *
  * @method string getAcceptsDeployId()
  * @method string getName()

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppApi\Attribute;
+namespace OCA\AppAPI\Attribute;
 
 use Attribute;
 

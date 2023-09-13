@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppApi\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppApi\Db\ExApp;
+use OCA\AppAPI\Db\ExApp;
 use OCA\Talk\Events\BotInstallEvent;
 use OCA\Talk\Events\BotUninstallEvent;
 use OCP\EventDispatcher\IEventDispatcher;

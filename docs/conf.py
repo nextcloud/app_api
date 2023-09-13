@@ -20,7 +20,7 @@ extensions = [
 ]
 
 # General information about the project.
-project = "AppEcosystemV2"
+project = "AppAPI"
 copyright = str(now.year) + " Nextcloud GmbH"  # noqa
 
 # The version info for the project you're documenting, acts as replacement for
