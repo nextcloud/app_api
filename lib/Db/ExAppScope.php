@@ -10,7 +10,7 @@ use OCP\AppFramework\Db\Entity;
 /**
  * Class ExAppScope
  *
- * @package OCA\AppApi\Db
+ * @package OCA\AppAPI\Db
  *
  * @method string getAppid()
  * @method int getScopeGroup()
