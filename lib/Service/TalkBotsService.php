@@ -67,7 +67,7 @@ class TalkBotsService {
 	}
 
 	private function getExAppTalkBotConfig(ExApp $exApp, string $route): array {
-		$url = sprintf('%s://%s:%s', $exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
+		$url = AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
 		$id = $this->getExAppTalkBotHash($exApp, $route);
 
 		$exAppConfig = $this->exAppConfigService->getAppConfig($exApp->getAppid(), $id);

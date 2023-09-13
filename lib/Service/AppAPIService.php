@@ -311,7 +311,7 @@ class AppAPIService {
 		$heartbeatAttempts = 0;
 		$delay = 1;
 		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
-		$heartbeatUrl = $this->getExAppUrl(
+		$heartbeatUrl = self::getExAppUrl(
 			$params['protocol'],
 			$params['host'],
 			(int) $params['port'],
@@ -424,7 +424,7 @@ class AppAPIService {
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
-			$url = $this->getExAppUrl(
+			$url = self::getExAppUrl(
 				$exApp->getProtocol(),
 				$exApp->getHost(),
 				$exApp->getPort()) . $route;
@@ -480,7 +480,7 @@ class AppAPIService {
 	 *
 	 * @return string
 	 */
-	public function getExAppUrl(string $protocol, string $host, int $port): string {
+	public static function getExAppUrl(string $protocol, string $host, int $port): string {
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 
