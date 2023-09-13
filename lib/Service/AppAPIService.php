@@ -48,6 +48,7 @@ class AppAPIService {
 	private ExAppScopesService $exAppScopesService;
 	private ExAppConfigService $exAppConfigService;
 	private ExNotificationsManager $exNotificationsManager;
+	private TalkBotsService $talkBotsService;
 
 	public function __construct(
 		LoggerInterface $logger,
@@ -66,6 +67,7 @@ class AppAPIService {
 		IUserManager $userManager,
 		ExAppConfigService $exAppConfigService,
 		ExNotificationsManager $exNotificationsManager,
+		TalkBotsService $talkBotsService,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
@@ -83,6 +85,7 @@ class AppAPIService {
 		$this->exAppScopesService = $exAppScopesService;
 		$this->exAppConfigService = $exAppConfigService;
 		$this->exNotificationsManager = $exNotificationsManager;
+		$this->talkBotsService = $talkBotsService;
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -157,6 +160,7 @@ class AppAPIService {
 			// TODO: Do we need to remove app_config_ex, app_preferences_ex too
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
+			$this->talkBotsService->unregisterExAppTalkBots($exApp);
 			$this->cache->remove('/exApp_' . $appId);
 			// TODO: Do we need to remove ExApp container
 			return $exApp;
@@ -307,7 +311,7 @@ class AppAPIService {
 		$heartbeatAttempts = 0;
 		$delay = 1;
 		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
-		$heartbeatUrl = $this->getExAppUrl(
+		$heartbeatUrl = self::getExAppUrl(
 			$params['protocol'],
 			$params['host'],
 			(int) $params['port'],
@@ -420,7 +424,7 @@ class AppAPIService {
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
-			$url = $this->getExAppUrl(
+			$url = self::getExAppUrl(
 				$exApp->getProtocol(),
 				$exApp->getHost(),
 				$exApp->getPort()) . $route;
@@ -476,7 +480,7 @@ class AppAPIService {
 	 *
 	 * @return string
 	 */
-	public function getExAppUrl(string $protocol, string $host, int $port): string {
+	public static function getExAppUrl(string $protocol, string $host, int $port): string {
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 
