@@ -30,7 +30,6 @@ use Psr\Log\LoggerInterface;
 
 class AppAPIService {
 	public const BASIC_API_SCOPE = 1;
-	public const MAX_SIGN_TIME_X_MIN_DIFF = 60 * 5;
 	public const CACHE_TTL = 60 * 60; // 1 hour
 
 	private LoggerInterface $logger;
@@ -428,10 +427,11 @@ class AppAPIService {
 
 			$options = [
 				'headers' => [
-					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+					'AA-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
 					'EX-APP-ID' => $exApp->getAppid(),
 					'EX-APP-VERSION' => $exApp->getVersion(),
-					'NC-USER-ID' => $userId,
+					'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $exApp->getSecret()),
+					'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
 				],
 				'nextcloud' => [
 					'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
@@ -445,13 +445,6 @@ class AppAPIService {
 					$options['json'] = $params;
 				}
 			}
-
-			$options['headers']['AE-DATA-HASH'] = '';
-			$options['headers']['AE-SIGN-TIME'] = strval(time());
-			[$signature, $dataHash] = $this->generateRequestSignature($method, $route, $options, $exApp->getSecret(), $params);
-			$options['headers']['AE-SIGNATURE'] = $signature;
-			$options['headers']['AE-DATA-HASH'] = $dataHash;
-			$options['headers']['AE-REQUEST-ID'] = $request instanceof IRequest ? $request->getId() : 'CLI';
 
 			switch ($method) {
 				case 'GET':
@@ -469,7 +462,6 @@ class AppAPIService {
 				default:
 					return ['error' => 'Bad HTTP method'];
 			}
-			//			TODO: Add files support
 			return $response;
 		} catch (\Exception $e) {
 			$this->logger->error(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
@@ -509,69 +501,13 @@ class AppAPIService {
 	}
 
 	/**
-	 * Generates request signature and data hash.
-	 * Data hash computed from request body even if it's empty.
-	 *
-	 * @param string $method
-	 * @param string $uri
-	 * @param array $options
-	 * @param string $secret
-	 * @param array $params
-	 *
-	 * @return array
-	 */
-	public function generateRequestSignature(string $method, string $uri, array $options, string $secret, array $params = []): array {
-		$headers = [];
-		if (isset($options['headers']['AE-VERSION'])) {
-			$headers['AE-VERSION'] = $options['headers']['AE-VERSION'];
-		}
-		if (isset($options['headers']['EX-APP-ID'])) {
-			$headers['EX-APP-ID'] = $options['headers']['EX-APP-ID'];
-		}
-		if (isset($options['headers']['EX-APP-VERSION'])) {
-			$headers['EX-APP-VERSION'] = $options['headers']['EX-APP-VERSION'];
-		}
-		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
-			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
-		}
-
-		if ($method === 'GET') {
-			if (!empty($params)) {
-				$queryParams = $this->getUriEncodedParams($params);
-				$uri .= '?' . $queryParams;
-			}
-			$dataParams = '';
-		} else {
-			$dataParams = isset($options['json']) ? json_encode($options['json']) : '';
-		}
-
-		$dataHash = $this->generateDataHash($dataParams);
-		if (isset($options['headers']['AE-DATA-HASH'])) {
-			$headers['AE-DATA-HASH'] = $dataHash;
-		}
-		if (isset($options['headers']['AE-SIGN-TIME'])) {
-			$headers['AE-SIGN-TIME'] = $options['headers']['AE-SIGN-TIME'];
-		}
-		$body = $method . $uri . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		return [hash_hmac('sha256', $body, $secret), $dataHash];
-	}
-
-	private function generateDataHash(string $data): string {
-		$hashContext = hash_init('xxh64');
-		hash_update($hashContext, $data);
-		return hash_final($hashContext);
-	}
-
-	/**
 	 * AppAPI authentication request validation for Nextcloud:
 	 *  - checks if ExApp exists and is enabled
 	 *  - checks if ExApp version changed and updates it in database
-	 *  - validates request sign time (if it's complies with set time window)
-	 *  - builds and checks request signature
-	 *  - checks if request data hash is valid
+	 *  - checks if ExApp shared secret valid
 	 *  - checks ExApp scopes <-> ExApp API copes
 	 *
-	 * More info in docs: https://cloud-py-api.github.io/app_ecosystem_v2/authentication.html
+	 * More info in docs: https://cloud-py-api.github.io/app_api/authentication.html
 	 *
 	 * @param IRequest $request
 	 * @param bool $isDav
@@ -587,46 +523,28 @@ class AppAPIService {
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
 				'appid' => $request->getHeader('EX-APP-ID'),
-				'userid' => $request->getHeader('NC-USER-ID'),
+				'userid' => explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 2)[0],
 			]);
 			return false;
 		}
 
 		$this->handleExAppDebug($exApp, $request, false);
 
-		$headers = [
-			'AE-VERSION' => $request->getHeader('AE-VERSION'),
-			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
-			'EX-APP-VERSION' => $request->getHeader('EX-APP-VERSION'),
-		];
-		$userId = $request->getHeader('NC-USER-ID');
-		if ($userId !== '') {
-			$headers['NC-USER-ID'] = $userId;
-		}
-		$requestSignature = $request->getHeader('AE-SIGNATURE');
-		$dataHash = $request->getHeader('AE-DATA-HASH');
-		$headers['AE-DATA-HASH'] = $dataHash;
-		$signTime = $request->getHeader('AE-SIGN-TIME');
-		if (!$this->verifySignTime($signTime)) {
-			$this->logger->error(sprintf('Sign time %s is not valid', $signTime));
+		$authorization = base64_decode($request->getHeader('AUTHORIZATION-APP-API'));
+		if ($authorization === false) {
+			$this->logger->error('Failed to parse AUTHORIZATION-APP-API');
 			return false;
 		}
-		$headers['AE-SIGN-TIME'] = $signTime;
+		$userId = explode(':', $authorization, 2)[0];
+		$authorizationSecret = explode(':', $authorization, 2)[1];
+		$authValid = $authorizationSecret === $exApp->getSecret();
 
-		$body = $request->getMethod() . $request->getRequestUri() . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		$signature = hash_hmac('sha256', $body, $exApp->getSecret());
-		$signatureValid = $signature === $requestSignature;
-
-		if ($signatureValid) {
+		if ($authValid) {
 			if (!$exApp->getEnabled()) {
 				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $exApp->getEnabled()));
 				return false;
 			}
 			if (!$this->handleExAppVersionChange($request, $exApp)) {
-				return false;
-			}
-			if (!$this->verifyDataHash($dataHash)) {
-				$this->logger->error(sprintf('Data hash %s is not valid', $dataHash));
 				return false;
 			}
 			if (!$isDav) {
@@ -669,7 +587,7 @@ class AppAPIService {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
 				'appid' => $request->getHeader('EX-APP-ID'),
-				'userid' => $request->getHeader('NC-USER-ID'),
+				'userid' => $userId,
 			]);
 		}
 
@@ -705,36 +623,6 @@ class AppAPIService {
 		return true;
 	}
 
-	/**
-	 * Verify if sign time is within MAX_SIGN_TIME_DIFF (5 min)
-	 *
-	 * @param string $signTime
-	 * @return bool
-	 */
-	private function verifySignTime(string $signTime): bool {
-		$signTime = intval($signTime);
-		$currentTime = time();
-		$diff = $currentTime - $signTime;
-		if ($diff > self::MAX_SIGN_TIME_X_MIN_DIFF) {
-			$this->logger->error(sprintf('AE-SIGN-TIME is too old. Diff: %s', $diff));
-			return false;
-		}
-		if ($diff < 0) {
-			$this->logger->error(sprintf('AE-SIGN-TIME diff is negative: %s', $diff));
-			return false;
-		}
-		return true;
-	}
-
-	private function verifyDataHash(string $dataHash): bool {
-		$hashContext = hash_init('xxh64');
-		$stream = fopen('php://input', 'r');
-		hash_update_stream($hashContext, $stream, -1);
-		fclose($stream);
-		$phpInputHash = hash_final($hashContext);
-		return $dataHash === $phpInputHash;
-	}
-
 	public function updateExAppLastCheckTime(ExApp &$exApp): void {
 		$exApp->setLastCheckTime(time());
 		try {
@@ -768,7 +656,7 @@ class AppAPIService {
 	 * This handling only intentional case of manual ExApp update
 	 * so the administrator must re-enable ExApp in UI or CLI after that.
 	 *
-	 * Ref: https://github.com/cloud-py-api/app_ecosystem_v2/pull/29
+	 * Ref: https://github.com/cloud-py-api/app_api/pull/29
 	 * TODO: Add link to docs with warning and mark as not-recommended
 	 *
 	 * @param IRequest $request
@@ -845,9 +733,8 @@ class AppAPIService {
 	private function buildRequestInfo(IRequest $request): array {
 		$headers = [];
 		$aeHeadersList = [
-			'AE-VERSION',
+			'AA-VERSION',
 			'EX-APP-VERSION',
-			'AE-SIGN-TIME',
 		];
 		foreach ($aeHeadersList as $header) {
 			if ($request->getHeader($header) !== '') {
@@ -884,7 +771,7 @@ class AppAPIService {
 			$message = $fromNextcloud
 				? '[' . Application::APP_ID . '] Nextcloud --> ' . $exApp->getAppid()
 				: '[' . Application::APP_ID . '] ' . $exApp->getAppid() . ' --> Nextcloud';
-			$aeDebugLogger = $this->getCustomLogger('ae_debug.log');
+			$aeDebugLogger = $this->getCustomLogger('aa_debug.log');
 			$aeDebugLogger->log($exAppDebugSettings['level'], $message, [
 				'app' => $exApp->getAppid(),
 				'request_info' => $request instanceof IRequest ? $this->buildRequestInfo($request) : 'CLI request',
