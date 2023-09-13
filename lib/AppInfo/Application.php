@@ -11,7 +11,7 @@ use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
-use OCA\AppAPI\Profiler\AEDataCollector;
+use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
 
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
@@ -54,7 +54,7 @@ class Application extends App implements IBootstrap {
 		try {
 			$profiler = $server->get(IProfiler::class);
 			if ($profiler->isEnabled()) {
-				$profiler->add(new AEDataCollector());
+				$profiler->add(new AppAPIDataCollector());
 			}
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}

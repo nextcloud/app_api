@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppApi\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppApi\AppInfo\Application;
-use OCA\AppApi\Db\ExFilesActionsMenu;
-use OCA\AppApi\Db\ExFilesActionsMenuMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExFilesActionsMenu;
+use OCA\AppAPI\Db\ExFilesActionsMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;

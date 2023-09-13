@@ -26,9 +26,9 @@ class AppAPIAuthBackend implements BackendInterface {
 	}
 
 	public function check(RequestInterface $request, ResponseInterface $response) {
-		if ($this->request->getHeader('AE-SIGNATURE')) {
+		if ($this->request->getHeader('AUTHORIZATION-APP-API')) {
 			$davAuthenticated = $this->session->get(Auth::DAV_AUTHENTICATED);
-			$userIdHeader = $this->request->getHeader('NC-USER-ID');
+			$userIdHeader = explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
 			$sessionUserId = $this->session->get('user_id');
 			if ($sessionUserId === $userIdHeader && $davAuthenticated === $sessionUserId) {
 				$authString = 'principals/' . Application::APP_ID . '/' . $this->session->get('user_id');

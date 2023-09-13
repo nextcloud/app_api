@@ -55,7 +55,7 @@ jobs:
           ref: ${{ matrix.server-version }}
           path: apps/notifications
 
-      - name: Checkout AppEcosystemV2
+      - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}
@@ -159,7 +159,7 @@ jobs:
           sudo chmod 766 /var/run/docker.sock
           sleep 120s
 
-      - name: Install AppEcosystemV2
+      - name: Install AppAPI
         run: |
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
@@ -235,7 +235,7 @@ jobs:
             -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
           sleep 30s
 
-      - name: Install AppEcosystemV2
+      - name: Install AppAPI
         run: |
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
@@ -312,7 +312,7 @@ jobs:
             -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
           sleep 30s
 
-      - name: Install AppEcosystemV2
+      - name: Install AppAPI
         run: |
           docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
@@ -414,7 +414,7 @@ jobs:
           repository: nextcloud/server
           ref: ${{ matrix.server-version }}
 
-      - name: Checkout AppEcosystemV2
+      - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}

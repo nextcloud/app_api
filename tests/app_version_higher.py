@@ -13,7 +13,7 @@ if __name__ == "__main__":
     assert not nc_application.notifications.get_all()  # there are no notifications
     nc_application._session.adapter.headers.update({"EX-APP-VERSION": "99.0.0"})  # change ExApp version
     with pytest.raises(NextcloudException) as exc_info:
-        nc_application.users.get_details()  # this call should be rejected by AppEcosystem
+        nc_application.users.get_details()  # this call should be rejected by AppAPI
     assert exc_info.value.status_code == 401
 
     assert nc_client.apps.ex_app_is_disabled("nc_py_api") is True
