@@ -30,9 +30,6 @@
     <InvalidClass>
       <code>AppAPIAuth</code>
       <code>AppAPIAuth</code>
-      <code>ExFilesActionsMenuService</code>
-      <code>ExFilesActionsMenuService</code>
-      <code>ExFilesActionsMenuService</code>
     </InvalidClass>
   </file>
   <file src="lib/Controller/NotificationsController.php">
@@ -65,10 +62,6 @@
     <ImplementedParamTypeMismatch>
       <code>$event</code>
     </ImplementedParamTypeMismatch>
-    <InvalidClass>
-      <code>ExFilesActionsMenuService</code>
-      <code>ExFilesActionsMenuService</code>
-    </InvalidClass>
     <InvalidDocblock>
       <code>class LoadFilesPluginListener implements IEventListener {</code>
     </InvalidDocblock>
@@ -119,25 +112,6 @@
     <UndefinedClass>
       <code>Request</code>
     </UndefinedClass>
-  </file>
-  <file src="lib/Service/ExFilesActionsMenuService.php">
-    <InvalidClass>
-      <code>?ExFilesActionsMenu</code>
-      <code>?ExFilesActionsMenu</code>
-      <code>?ExFilesActionsMenu</code>
-      <code>AppAPIService</code>
-      <code>AppAPIService</code>
-      <code>Application</code>
-      <code>ExFilesActionsMenu</code>
-      <code>ExFilesActionsMenu</code>
-      <code>ExFilesActionsMenu</code>
-      <code>ExFilesActionsMenu</code>
-      <code>ExFilesActionsMenu</code>
-      <code>ExFilesActionsMenuMapper</code>
-      <code>ExFilesActionsMenuMapper</code>
-      <code>ExFilesActionsMenu[]|null</code>
-      <code>ExFilesActionsMenu|null</code>
-    </InvalidClass>
   </file>
   <file src="lib/Service/TalkBotsService.php">
     <InvalidClass>
