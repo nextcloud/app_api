@@ -116,15 +116,15 @@ def dav_call(method: str, path: str, data: typing.Optional[typing.Union[str, byt
 
 
 def nc_log(log_lvl: int, content: str):
-    ocs_call("POST", "/ocs/v1.php/apps/app_ecosystem_v2/api/v1/log", json_data={"level": log_lvl, "message": content})
+    ocs_call("POST", "/ocs/v1.php/apps/app_api/api/v1/log", json_data={"level": log_lvl, "message": content})
 
 
 def create_notification(user_id: str, subject: str, message: str):
     params: dict = {
         "params": {
-            "object": "app_ecosystem_v2",
+            "object": "app_api",
             "object_id": random_string(56),
-            "subject_type": "app_ecosystem_v2_ex_app",
+            "subject_type": "app_api_ex_app",
             "subject_params": {
                 "rich_subject": subject,
                 "rich_subject_params": {},
@@ -134,7 +134,7 @@ def create_notification(user_id: str, subject: str, message: str):
         }
     }
     ocs_call(
-        method="POST", path=f"/ocs/v1.php/apps/app_ecosystem_v2/api/v1/notification", json_data=params, user=user_id
+        method="POST", path=f"/ocs/v1.php/apps/app_api/api/v1/notification", json_data=params, user=user_id
     )
 
 
@@ -228,7 +228,7 @@ def enabled_callback(
             # nc.ui.files_dropdown_menu.register("to_gif", "TO GIF", "/video_to_gif", mime="video")
             ocs_call(
                 "POST",
-                "/ocs/v1.php/apps/app_ecosystem_v2/api/v1/files/actions/menu",
+                "/ocs/v1.php/apps/app_api/api/v1/files/actions/menu",
                 json_data={
                     "fileActionMenuParams": {
                         "name": "to_gif",
@@ -246,7 +246,7 @@ def enabled_callback(
             # nc.ui.files_dropdown_menu.unregister("to_gif")
             ocs_call(
                 "DELETE",
-                "/ocs/v1.php/apps/app_ecosystem_v2/api/v1/files/actions/menu",
+                "/ocs/v1.php/apps/app_api/api/v1/files/actions/menu",
                 json_data={"fileActionMenuName": "to_gif"},
             )
     except Exception as e:
