@@ -19,45 +19,6 @@
       <code><![CDATA[$infoXml->id]]></code>
     </ImplicitToStringCast>
   </file>
-  <file src="lib/Controller/AppConfigController.php">
-    <InvalidClass>
-      <code>AppAPIAuth</code>
-      <code>AppAPIAuth</code>
-      <code>AppAPIAuth</code>
-    </InvalidClass>
-  </file>
-  <file src="lib/Controller/ExFileActionsMenuController.php">
-    <InvalidClass>
-      <code>AppAPIAuth</code>
-      <code>AppAPIAuth</code>
-    </InvalidClass>
-  </file>
-  <file src="lib/Controller/NotificationsController.php">
-    <InvalidClass>
-      <code>AppAPIAuth</code>
-    </InvalidClass>
-  </file>
-  <file src="lib/Controller/OCSApiController.php">
-    <InvalidClass>
-      <code>AppAPIAuth</code>
-      <code>AppAPIAuth</code>
-    </InvalidClass>
-  </file>
-  <file src="lib/Controller/PreferencesController.php">
-    <InvalidClass>
-      <code>AppAPIAuth</code>
-      <code>AppAPIAuth</code>
-      <code>AppAPIAuth</code>
-    </InvalidClass>
-  </file>
-  <file src="lib/Controller/TalkBotController.php">
-    <InvalidClass>
-      <code>AppAPIAuth</code>
-      <code>AppAPIAuth</code>
-      <code>TalkBotsService</code>
-      <code>TalkBotsService</code>
-    </InvalidClass>
-  </file>
   <file src="lib/Listener/LoadFilesPluginListener.php">
     <ImplementedParamTypeMismatch>
       <code>$event</code>
@@ -94,10 +55,6 @@
     </MissingTemplateParam>
   </file>
   <file src="lib/Middleware/AppAPIAuthMiddleware.php">
-    <InvalidClass>
-      <code>AppAPIAuth</code>
-      <code>AppAPIAuth</code>
-    </InvalidClass>
     <TypeDoesNotContainType>
       <code>$exception instanceof AppAPIAuth</code>
     </TypeDoesNotContainType>
@@ -112,17 +69,5 @@
     <UndefinedClass>
       <code>Request</code>
     </UndefinedClass>
-  </file>
-  <file src="lib/Service/TalkBotsService.php">
-    <InvalidClass>
-      <code>AppAPIService</code>
-      <code>AppAPIService</code>
-      <code>ExApp</code>
-      <code>ExApp</code>
-      <code>ExApp</code>
-      <code>ExApp</code>
-      <code>ExAppConfigService</code>
-      <code>ExAppConfigService</code>
-    </InvalidClass>
   </file>
 </files>
