@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
 class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	public const AE_REQUIRED_ENVS = [
-		'AE_VERSION',
+		'AA_VERSION',
 		'APP_SECRET',
 		'APP_ID',
 		'APP_DISPLAY_NAME',
@@ -388,7 +388,7 @@ class DockerActions implements IDeployActions {
 
 	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
 		$autoEnvs = [
-			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
+			sprintf('AA_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
 			sprintf('APP_SECRET=%s', $params['secret']),
 			sprintf('APP_ID=%s', $params['appid']),
 			sprintf('APP_DISPLAY_NAME=%s', $params['name']),

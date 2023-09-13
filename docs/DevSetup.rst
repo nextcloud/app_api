@@ -16,7 +16,7 @@ Assuming you're in the ``apps`` folder of Nextcloud with command :command:`git`:
 
 Move to the ``app_api`` directory with :command:`shell`::
 
-	cd app_ecosystem_v2
+	cd app_api
 
 Then, build NPM and JS with :command:`shell`::
 

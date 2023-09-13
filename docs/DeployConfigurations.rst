@@ -97,7 +97,7 @@ Benefit: no performance impact on Nextcloud host.
 		class ExApp2 python
 		class ExApp3 python
 
-In this case, the AppEcosystem (Nextcloud) uses ``port`` to interact with Docker.
+In this case, the AppAPI (Nextcloud) uses ``port`` to interact with Docker.
 
 NC & ExApps in the same Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -175,7 +175,7 @@ In this scenario, Nextcloud is installed within a container, and a separate Daem
 		class ExApp2 python
 		class ExApp3 python
 
-In this case, the AppEcosystem (Nextcloud) uses ``socket`` to interact with Docker.
+In this case, the AppAPI (Nextcloud) uses ``socket`` to interact with Docker.
 
 Nextcloud in Docker AIO (all-in-one)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
