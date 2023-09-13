@@ -1,8 +1,8 @@
 # Nextcloud AppAPI
 
-[![Tests - Deploy](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests-deploy.yml/badge.svg)](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests-deploy.yml)
-[![Tests](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests.yml/badge.svg)](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/tests.yml)
-[![Docs](https://github.com/cloud-py-api/app_ecosystem_v2/actions/workflows/docs.yml/badge.svg)](https://cloud-py-api.github.io/app_ecosystem_v2/)
+[![Tests - Deploy](https://github.com/cloud-py-api/app_api/actions/workflows/tests-deploy.yml/badge.svg)](https://github.com/cloud-py-api/app_api/actions/workflows/tests-deploy.yml)
+[![Tests](https://github.com/cloud-py-api/app_api/actions/workflows/tests.yml/badge.svg)](https://github.com/cloud-py-api/app_api/actions/workflows/tests.yml)
+[![Docs](https://github.com/cloud-py-api/app_api/actions/workflows/docs.yml/badge.svg)](https://cloud-py-api.github.io/app_api/)
 
 
 The App Ecosystem Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud. 
@@ -48,21 +48,21 @@ _If you wish to develop a library for any other language, such as **Go**, **Ruby
 
 ## Documentation
 
-- [Documentation](https://cloud-py-api.github.io/app_ecosystem_v2/)
-	- [Installation](https://cloud-py-api.github.io/app_ecosystem_v2/Installation.html)
-	- [Creation of Deploy Daemon](https://cloud-py-api.github.io/app_ecosystem_v2/ManagingExternalApplications.html)
-	- [Managing External Applications](https://cloud-py-api.github.io/app_ecosystem_v2/CreationOfDeployDaemon.html)
-- [Technical Details](https://cloud-py-api.github.io/app_ecosystem_v2/tech_details/index.html)
-	- [Concepts](https://cloud-py-api.github.io/app_ecosystem_v2/Concepts.html)
-	- [Api Scopes](https://cloud-py-api.github.io/app_ecosystem_v2/tech_details/ApiScopes.html)
-	- [AppEcosystemV2 APIs](https://cloud-py-api.github.io/app_ecosystem_v2/tech_details/api/index.html)
-    - [Authentication](https://cloud-py-api.github.io/app_ecosystem_v2/tech_details/Authentication.html)
-    - [Deployment](https://cloud-py-api.github.io/app_ecosystem_v2/tech_details/Deployment.html)
-- [Contribute](https://github.com/cloud-py-api/app_ecosystem_v2/blob/main/.github/CONTRIBUTING.md)
-	- [Discussions](https://github.com/cloud-py-api/app_ecosystem_v2/discussions)
-	- [Issues](https://github.com/cloud-py-api/app_ecosystem_v2/issues)
-    - [Setting up dev environment](https://cloud-py-api.github.io/app_ecosystem_v2/DevSetup.html)
-- [Changelog](https://github.com/cloud-py-api/app_ecosystem_v2/blob/main/CHANGELOG.md)
+- [Documentation](https://cloud-py-api.github.io/app_api/)
+	- [Installation](https://cloud-py-api.github.io/app_api/Installation.html)
+	- [Creation of Deploy Daemon](https://cloud-py-api.github.io/app_api/ManagingExternalApplications.html)
+	- [Managing External Applications](https://cloud-py-api.github.io/app_api/CreationOfDeployDaemon.html)
+- [Technical Details](https://cloud-py-api.github.io/app_api/tech_details/index.html)
+	- [Concepts](https://cloud-py-api.github.io/app_api/Concepts.html)
+	- [Api Scopes](https://cloud-py-api.github.io/app_api/tech_details/ApiScopes.html)
+	- [AppEcosystemV2 APIs](https://cloud-py-api.github.io/app_api/tech_details/api/index.html)
+    - [Authentication](https://cloud-py-api.github.io/app_api/tech_details/Authentication.html)
+    - [Deployment](https://cloud-py-api.github.io/app_api/tech_details/Deployment.html)
+- [Contribute](https://github.com/cloud-py-api/app_api/blob/main/.github/CONTRIBUTING.md)
+	- [Discussions](https://github.com/cloud-py-api/app_api/discussions)
+	- [Issues](https://github.com/cloud-py-api/app_api/issues)
+    - [Setting up dev environment](https://cloud-py-api.github.io/app_api/DevSetup.html)
+- [Changelog](https://github.com/cloud-py-api/app_api/blob/main/CHANGELOG.md)
 
 ## ExApps list
 
