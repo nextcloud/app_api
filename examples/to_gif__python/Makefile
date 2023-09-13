@@ -22,18 +22,18 @@ build-push:
 
 .PHONY: deploy
 deploy:
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:deploy to_gif docker_dev \
-		--info-xml https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/examples/to_gif__python/appinfo/info.xml
+	docker exec master-stable27-1 sudo -u www-data php occ app_api:app:deploy to_gif docker_dev \
+		--info-xml https://raw.githubusercontent.com/cloud-py-api/app_api/main/examples/to_gif__python/appinfo/info.xml
 
 .PHONY: run27
 run27:
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister to_gif --silent || true
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:register to_gif docker_dev -e --force-scopes \
-		--info-xml https://raw.githubusercontent.com/cloud-py-api/app_ecosystem_v2/main/examples/to_gif__python/appinfo/info.xml
+	docker exec master-stable27-1 sudo -u www-data php occ app_api:app:unregister to_gif --silent || true
+	docker exec master-stable27-1 sudo -u www-data php occ app_api:app:register to_gif docker_dev -e --force-scopes \
+		--info-xml https://raw.githubusercontent.com/cloud-py-api/app_api/main/examples/to_gif__python/appinfo/info.xml
 
 .PHONY: manual_register27
 manual_register27:
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:unregister to_gif --silent || true
-	docker exec master-stable27-1 sudo -u www-data php occ app_ecosystem_v2:app:register to_gif manual_install --json-info \
+	docker exec master-stable27-1 sudo -u www-data php occ app_api:app:unregister to_gif --silent || true
+	docker exec master-stable27-1 sudo -u www-data php occ app_api:app:register to_gif manual_install --json-info \
   "{\"appid\":\"to_gif\",\"name\":\"to_gif\",\"daemon_config_name\":\"manual_install\",\"version\":\"1.0.0\",\"secret\":\"12345\",\"host\":\"host.docker.internal\",\"port\":9031,\"scopes\":{\"required\":[\"FILES\", \"NOTIFICATIONS\"],\"optional\":[]},\"protocol\":\"http\",\"system_app\":0}" \
   -e --force-scopes
