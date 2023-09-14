@@ -91,6 +91,11 @@ class Register extends Command {
 			$exAppInfo = $this->manualActions->loadExAppInfo($appId, $daemonConfig, [
 				'json-info' => $exAppJson,
 			]);
+
+			if (!$this->manualActions->healthcheck($exAppInfo)) {
+				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure ExApp was started and initialized manually.', $appId));
+				return 2;
+			}
 		} else {
 			$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfigName, $daemonConfig->getAcceptsDeployId()));
 			return 2;
