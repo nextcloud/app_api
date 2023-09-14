@@ -29,6 +29,7 @@ class DockerActions implements IDeployActions {
 		'APP_PROTOCOL',
 		'APP_HOST',
 		'APP_PORT',
+		'APP_PERSISTENT_STORAGE',
 		'IS_SYSTEM_APP',
 		'NEXTCLOUD_URL',
 	];
@@ -334,6 +335,7 @@ class DockerActions implements IDeployActions {
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
 			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
 			$secret = $oldEnvs['APP_SECRET'];
+			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
 			// Preserve previous devices or use from params (if any)
 			$devices = array_map(function (array $device) {
 				return $device['PathOnHost'];
@@ -341,6 +343,7 @@ class DockerActions implements IDeployActions {
 		} else {
 			$port = $this->service->getExAppRandomPort();
 			$devices = $deployConfig['gpus'];
+			$storage = $this->buildDefaultExAppVolume($appId);
 		}
 
 		$imageParams = [
@@ -356,6 +359,7 @@ class DockerActions implements IDeployActions {
 			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $port,
+			'storage' => $storage,
 			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
 			'secret' => $secret ?? $this->random->generate(128),
 		], $params['env_options'] ?? [], $deployConfig);
@@ -396,6 +400,7 @@ class DockerActions implements IDeployActions {
 			sprintf('APP_PROTOCOL=%s', $params['protocol']),
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
+			sprintf('APP_PERSISTENT_STORAGE=%s', $params['storage']),
 			sprintf('IS_SYSTEM_APP=%s', $params['system_app']),
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
