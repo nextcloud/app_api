@@ -165,6 +165,7 @@ The following env variables are required and built automatically:
 	* ``APP_PROTOCOL`` - protocol ExApp is listening on (http|https)
 	* ``APP_HOST`` - host ExApp is listening on
 	* ``APP_PORT`` - port ExApp is listening on (randomly selected by AppAPI)
+	* ``APP_PERSISTENT_STORAGE`` - path to mounted volume for persistent data storage between ExApp updates
 	* ``IS_SYSTEM_APP`` - ExApp system app flag (true|false)
 	* ``NEXTCLOUD_URL`` - Nextcloud URL to connect to
 
