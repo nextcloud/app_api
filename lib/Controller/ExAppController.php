@@ -163,6 +163,7 @@ class ExAppController extends ApiController {
 	public function updateExApp(string $appId): Response {
 		$exApp = $this->service->getExApp($appId);
 		// TODO: Replicate algorithm with adjustments for UI workflow
+
 		return new DataResponse();
 	}
 }

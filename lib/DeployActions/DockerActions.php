@@ -556,6 +556,14 @@ class DockerActions implements IDeployActions {
 		];
 	}
 
+	public function isDockerSocketAvailable(): bool {
+		$dockerSocket = '/var/run/docker.sock';
+		if (file_exists($dockerSocket) && is_readable($dockerSocket)) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Build ExApp container name (prefix + appid)
 	 *

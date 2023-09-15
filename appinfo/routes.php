@@ -8,9 +8,16 @@ return [
 		['name' => 'config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
 
 		// ExApps actions
+		['name' => 'page#index', 'url' => '/apps', 'verb' => 'GET'],
 		['name' => 'exApp#registerExApp', 'url' => '/api/v1/ex-app', 'verb' => 'POST'],
 		['name' => 'exApp#unregisterExApp', 'url' => '/api/v1/ex-app', 'verb' => 'DELETE'],
 		['name' => 'exApp#updateExApp', 'url' => '/api/v1/ex-app/{appId}/update', 'verb' => 'POST'],
+
+		// DaemonConfig actions
+		['name' => 'daemonConfig#getAllDaemonConfigs', 'url' => '/daemons', 'verb' => 'GET'],
+		['name' => 'daemonConfig#registerDaemonConfig', 'url' => '/daemons', 'verb' => 'POST'],
+		['name' => 'daemonConfig#unregisterDaemonConfig', 'url' => '/daemons/{name}', 'verb' => 'DELETE'],
+		['name' => 'daemonConfig#updateDaemonConfig', 'url' => '/daemons', 'verb' => 'PUT'],
 	],
 	'ocs' => [
 		// Logging
