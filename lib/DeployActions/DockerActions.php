@@ -343,7 +343,7 @@ class DockerActions implements IDeployActions {
 		} else {
 			$port = $this->service->getExAppRandomPort();
 			$devices = $deployConfig['gpus'];
-			$storage = $this->buildDefaultExAppVolume($appId);
+			$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
 		}
 
 		$imageParams = [
