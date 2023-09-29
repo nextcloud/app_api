@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI;
 
-use OCA\AppAPI\AppInfo\Application;
-
 use OCA\DAV\Connector\Sabre\Auth;
 use OCP\IRequest;
 use OCP\ISession;
