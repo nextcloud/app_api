@@ -31,7 +31,7 @@ class AppAPIAuthBackend implements BackendInterface {
 			$userIdHeader = explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
 			$sessionUserId = $this->session->get('user_id');
 			if ($sessionUserId === $userIdHeader && $davAuthenticated === $sessionUserId) {
-				$authString = 'principals/' . Application::APP_ID . '/' . $this->session->get('user_id');
+				$authString = 'principals/users/' . $this->session->get('user_id');
 				return [true, $authString];
 			}
 		}
