@@ -30,6 +30,7 @@ The following API groups are currently supported:
 * ``50``  TALK
 * ``60``  TALK_BOT
 * ``110`` ACTIVITIES
+* ``120`` NOTES
 
 These groups are identified using names. As time progresses,
 the list will steadily expand, comprehensively encompassing all potential APIs provided by Nextcloud.
