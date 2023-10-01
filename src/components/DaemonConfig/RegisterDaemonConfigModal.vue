@@ -2,7 +2,7 @@
 	<div class="register-daemon-config">
 		<NcModal :show="show" @close="closeModal">
 			<div class="register-daemon-config-body">
-				<h3>{{ t('app_api', 'Register Deploy Daemon') }}</h3>
+				<h2>{{ t('app_api', 'Register Deploy Daemon') }}</h2>
 				<NcNoteCard type="warning">
 					{{ t('app_api', 'Supported daemon accepts-deploy-id:') }}
 					<b>
@@ -19,8 +19,8 @@
 						<NcInputField
 							id="daemon-name"
 							:value.sync="name"
-							:placeholder="t('app_api', 'Name')"
-							:aria-label="t('app_api', 'Name')" />
+							:placeholder="t('app_api', 'Unique Deploy Daemon Name')"
+							:aria-label="t('app_api', 'Unique Deploy Daemon Name')" />
 					</div>
 					<div class="external-label">
 						<label for="daemon-display-name">{{ t('app_api', 'Display name') }}</label>
@@ -55,34 +55,46 @@
 							:placeholder="t('app_api', 'Daemon host (e.g. /var/run/docker.sock, https://proxy-domain.com:2375)')"
 							:aria-label="t('app_api', 'Daemon host (e.g. /var/run/docker.sock, https://proxy-domain.com:2375)')" />
 					</div>
-					<NcButton :aria-label="t('app_api', 'Deploy config')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
-						{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy config') : t('app_api', 'Hide deploy config') }}
-						<template #icon>
-							<UnfoldLessHorizontal v-if="deployConfigSettingsOpened" :size="20" />
-							<UnfoldMoreHorizontal v-else :size="20" />
-						</template>
-					</NcButton>
-					<div v-show="deployConfigSettingsOpened" class="deploy-config">
-						<div class="external-label">
-							<label for="deploy-config-net">{{ t('app_api', 'Net') }}</label>
-							<NcInputField
-								id="deploy-config-net"
-								:value.sync="deployConfig.net"
-								:placeholder="t('app_api', 'Docker network mode (default: host)')"
-								:aria-label="t('app_api', 'Docker network mode (default: host)')" />
+					<NcCheckboxRadioSwitch
+						v-if="acceptsDeployId !== 'manual-install'"
+						id="default-deploy-config"
+						:checked.sync="defaultDaemon"
+						:placeholder="t('app_api', 'Set daemon as default')"
+						:aria-label="t('app_api', 'Set daemon as default')"
+						style="margin-top: 1rem;">
+						{{ t('app_api', 'Default daemon') }}
+					</NcCheckboxRadioSwitch>
+					<template v-if="acceptsDeployId !== 'manual-install'">
+						<NcButton :aria-label="t('app_api', 'Deploy config')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
+							{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy config') : t('app_api', 'Hide deploy config') }}
+							<template #icon>
+								<UnfoldLessHorizontal v-if="deployConfigSettingsOpened" :size="20" />
+								<UnfoldMoreHorizontal v-else :size="20" />
+							</template>
+						</NcButton>
+						<div v-show="deployConfigSettingsOpened" class="deploy-config">
+							<div class="external-label">
+								<label for="deploy-config-net">{{ t('app_api', 'Network') }}</label>
+								<NcInputField
+									id="deploy-config-net"
+									:value.sync="deployConfig.net"
+									:placeholder="t('app_api', 'Docker network name (default: host)')"
+									:aria-label="t('app_api', 'Docker network name (default: host)')"
+									:helper-text="t('app_api', 'Docker network name (default: host)')" />
+							</div>
+							<NcCheckboxRadioSwitch
+								id="deploy-config-gpus"
+								:checked.sync="deployConfig.gpu"
+								:placeholder="t('app_api', 'Enable gpus support (attach gpu to ExApp containers)')"
+								:aria-label="t('app_api', 'Enable gpus support (attach gpu to ExApp containers))')"
+								style="margin-top: 1rem;">
+								{{ t('app_api', 'GPUs support') }}
+							</NcCheckboxRadioSwitch>
+							<p v-if="deployConfig.gpu" class="hint">
+								{{ t('app_api', 'Default "/dev/dri" device will be attached to ExApp containers') }}
+							</p>
 						</div>
-						<NcCheckboxRadioSwitch
-							id="deploy-config-gpus"
-							:checked.sync="deployConfig.gpu"
-							:placeholder="t('app_api', 'Enable gpus support (attach gpu to ExApp containers)')"
-							:aria-label="t('app_api', 'Enable gpus support (attach gpu to ExApp containers))')"
-							style="margin-top: 1rem;">
-							{{ t('app_api', 'GPUs support') }}
-						</NcCheckboxRadioSwitch>
-						<p v-if="deployConfig.gpu" class="hint">
-							{{ t('app_api', 'Default "/dev/dri" device will be attached to ExApp containers') }}
-						</p>
-					</div>
+					</template>
 					<div class="actions">
 						<NcButton type="primary" @click="registerDaemon">
 							{{ t('app_api', 'Register') }}
@@ -158,6 +170,7 @@ export default {
 				ssl_cert_password: '',
 				gpu: false,
 			},
+			defaultDaemon: false,
 			registeringDaemon: false,
 			registerInOneClickLoading: false,
 		}
@@ -194,6 +207,7 @@ export default {
 						gpus: this.deployConfig.gpu ? ['/dev/dri'] : [],
 					},
 				},
+				defaultDaemon: this.acceptsDeployId === 'docker-install' ? this.defaultDaemon : false,
 			})
 				.then(res => {
 					this.registeringDaemon = false

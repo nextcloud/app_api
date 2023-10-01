@@ -1,8 +1,10 @@
 import VueRouter from 'vue-router' // eslint-disable-line
 import { generateUrl } from '@nextcloud/router'
 import Vue from 'vue'
+import { APPS_SECTION_ENUM } from '../constants/AppsConstants.js'
+import store from '../store/index.js'
 
-const ExApps = () => import('../views/ExApps.vue')
+const Apps = () => import('../views/Apps.vue')
 
 Vue.use(VueRouter)
 
@@ -21,16 +23,13 @@ const router = new VueRouter({
 	routes: [
 		{
 			path: '/apps',
-			component: ExApps,
+			component: Apps,
 			name: 'apps',
 			meta: {
 				title: () => {
 					return t('app_api', 'Your ExApps')
 				},
 			},
-			props: (route) => ({
-				rootTitle: t('app_api', 'ExApps'),
-			}),
 			children: [
 				{
 					path: ':category',
@@ -40,8 +39,24 @@ const router = new VueRouter({
 							if (to.name === 'apps') {
 								return t('app_api', 'Your ExApps')
 							}
+							if (APPS_SECTION_ENUM[to.params.category]) {
+								return APPS_SECTION_ENUM[to.params.category]
+							}
+							await store.dispatch('getCategories')
+							const category = store.getters.getCategoryById(to.params.category)
+							if (category.displayName) {
+								return category.displayName
+							}
 						},
 					},
+					component: Apps,
+					children: [
+						{
+							path: ':id',
+							name: 'apps-details',
+							component: Apps,
+						},
+					],
 				},
 			],
 		},

@@ -7,6 +7,7 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 
+use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -21,16 +22,19 @@ use OCP\IRequest;
 class DaemonConfigController extends ApiController {
 	private DaemonConfigService $daemonConfigService;
 	private IConfig $config;
+	private DockerActions $dockerActions;
 
 	public function __construct(
 		IRequest $request,
 		IConfig $config,
 		DaemonConfigService $daemonConfigService,
+		DockerActions $dockerActions,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->daemonConfigService = $daemonConfigService;
 		$this->config = $config;
+		$this->dockerActions = $dockerActions;
 	}
 
 	/**
@@ -41,7 +45,7 @@ class DaemonConfigController extends ApiController {
 		$daemonConfigs = $this->daemonConfigService->getRegisteredDaemonConfigs();
 		return new JSONResponse([
 			'daemons' => $daemonConfigs,
-			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', null),
+			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', ''),
 		]);
 	}
 
@@ -49,8 +53,11 @@ class DaemonConfigController extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	#[NoCSRFRequired]
-	public function registerDaemonConfig(array $daemonConfigParams): Response {
+	public function registerDaemonConfig(array $daemonConfigParams, bool $defaultDaemon = false): Response {
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
+		if ($daemonConfig !== null && $defaultDaemon) {
+			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
+		}
 		return new JSONResponse([
 			'success' => $daemonConfig !== null,
 			'daemonConfig' => $daemonConfig,
@@ -78,7 +85,7 @@ class DaemonConfigController extends ApiController {
 	#[NoCSRFRequired]
 	public function unregisterDaemonConfig(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
-		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', null);
+		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
 		if ($daemonConfig->getName() === $defaultDaemonConfig) {
 			$this->config->deleteAppValue(Application::APP_ID, 'default_daemon_config');
 		}
@@ -95,8 +102,15 @@ class DaemonConfigController extends ApiController {
 	#[NoCSRFRequired]
 	public function verifyDaemonConnection(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
+			return new JSONResponse([
+				'error' => sprintf('Only "%s" is supported', $this->dockerActions->getAcceptsDeployId()),
+			]);
+		}
+		$this->dockerActions->initGuzzleClient($daemonConfig);
+		$dockerDaemonAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 		return new JSONResponse([
-			'success' => $daemonConfig !== null,
+			'success' => $dockerDaemonAccessible,
 		]);
 	}
 }

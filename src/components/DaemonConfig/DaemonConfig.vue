@@ -1,7 +1,7 @@
 <template>
 	<div class="daemon" :class="{'daemon-default': isDefault }">
 		<NcListItem
-			:title="daemon.display_name"
+			:title="itemTitle"
 			:details="isDefault ? t('app_api', 'Default') : ''"
 			:force-display-actions="true"
 			@click="showDaemonConfigDetailsModal(daemon)">
@@ -9,7 +9,7 @@
 				{{ daemon.accepts_deploy_id }}
 			</template>
 			<template #actions>
-				<NcActionButton :disabled="isDefault || settingDefault" @click="setDaemonDefault(daemon)">
+				<NcActionButton :disabled="isDefault || settingDefault || daemon.accepts_deploy_id === 'manual-install'" @click="setDaemonDefault(daemon)">
 					<template #icon>
 						<CheckBold v-if="!settingDefault" :size="20" />
 						<NcLoadingIcon v-else :size="20" />
@@ -81,8 +81,8 @@ export default {
 		}
 	},
 	computed: {
-		displayName() {
-			return !this.isDefault ? this.daemon.display_name : this.daemon.display_name + ' - ' + t('app_api', 'Default')
+		itemTitle() {
+			return this.daemon.name + ' - ' + this.daemon.display_name
 		},
 	},
 	methods: {

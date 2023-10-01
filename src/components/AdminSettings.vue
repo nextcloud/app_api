@@ -13,9 +13,9 @@
 			<NcButton
 				type="primary"
 				:href="linkToExAppsManagement()"
-				:aria-label="t('app_api', 'ExApps managements')"
+				:aria-label="t('app_api', 'External Apps management')"
 				style="margin: 20px 0;">
-				{{ t('app_api', 'ExApps management') }}
+				{{ exAppsManagementButtonText }}
 				<template #icon>
 					<OpenInNew :size="20" />
 				</template>
@@ -70,6 +70,11 @@ export default {
 			default_daemon_config: '',
 			docker_socket_accessible: false,
 		}
+	},
+	computed: {
+		exAppsManagementButtonText() {
+			return this.state.updates_count > 0 ? t('app_api', 'External Apps management') + ` (${this.state.updates_count})` : t('app_api', 'External Apps management')
+		},
 	},
 	mounted() {
 		this.loadInitialState()

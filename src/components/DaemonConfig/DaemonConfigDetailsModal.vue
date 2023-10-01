@@ -8,6 +8,10 @@
 					{{ t('app_api', 'Default daemon. ExApps will be installed on it') }}
 				</NcNoteCard>
 
+				<NcNoteCard v-if="daemon.accepts_deploy_id === 'manual-install'" type="warning">
+					{{ t('app_api', 'Manual install daemon usually used for development. It cannot be set as default daemon.') }}
+				</NcNoteCard>
+
 				<p><b>{{ t('app_api', 'Name: ') }}</b>{{ daemon.name }}</p>
 				<p><b>{{ t('app_api', 'Protocol: ') }}</b>{{ daemon.protocol }}</p>
 				<p><b>{{ t('app_api', 'Host: ') }}</b>{{ daemon.host }}</p>
@@ -25,7 +29,7 @@
 				<p><b>{{ t('app_api', 'GPUs support: ') }}</b>{{ daemon.deploy_config.gpus.length > 0 }}</p>
 
 				<div class="actions">
-					<NcButton @click="verifyConnection">
+					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install'" @click="verifyConnection">
 						{{ t('app_api', 'Verify connection') }}
 						<template #icon>
 							<NcLoadingIcon v-if="verifying" :size="20" />
@@ -46,7 +50,6 @@ import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
 
 export default {
 	name: 'DaemonConfigDetailsModal',
@@ -55,7 +58,6 @@ export default {
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
-		NcInputField,
 	},
 	props: {
 		daemon: {
@@ -90,7 +92,7 @@ export default {
 					if (res.data.success) {
 						showSuccess(t('app_api', 'Daemon connection successful'))
 					} else {
-						showError(t('app_api', 'Failed to connect to Daemon'))
+						showError(t('app_api', 'Failed to connect to Daemon. Check the logs'))
 					}
 					this.verifying = false
 				})

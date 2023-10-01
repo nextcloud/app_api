@@ -11,6 +11,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Service\AppAPIService;
 
+use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
@@ -42,6 +43,7 @@ class DockerActions implements IDeployActions {
 	private ISecureRandom $random;
 	private IURLGenerator $urlGenerator;
 	private AppAPIService $service;
+	private DaemonConfigService $daemonConfigService;
 
 	public function __construct(
 		LoggerInterface     $logger,
@@ -51,6 +53,7 @@ class DockerActions implements IDeployActions {
 		ISecureRandom       $random,
 		IURLGenerator       $urlGenerator,
 		AppAPIService       $service,
+		DaemonConfigService $daemonConfigService,
 	) {
 		$this->logger = $logger;
 		$this->certificateManager = $certificateManager;
@@ -59,6 +62,7 @@ class DockerActions implements IDeployActions {
 		$this->random = $random;
 		$this->urlGenerator = $urlGenerator;
 		$this->service = $service;
+		$this->daemonConfigService = $daemonConfigService;
 	}
 
 	public function getAcceptsDeployId(): string {
@@ -284,6 +288,20 @@ class DockerActions implements IDeployActions {
 		return ['error' => 'Failed to remove volume'];
 	}
 
+	public function ping(string $dockerUrl): bool {
+		$url = $this->buildApiUrl($dockerUrl, '_ping');
+		try {
+			$response = $this->guzzleClient->get($url);
+			if ($response->getStatusCode() === 200) {
+				return true;
+			}
+		} catch (GuzzleException $e) {
+			$this->logger->error('Could not connect to Docker daemon', ['exception' => $e]);
+			error_log($e->getMessage());
+		}
+		return false;
+	}
+
 	/**
 	 * @param DaemonConfig $daemonConfig
 	 * @param array $params Deploy params (image_params, container_params)
@@ -347,20 +365,20 @@ class DockerActions implements IDeployActions {
 		}
 
 		$imageParams = [
-			'image_src' => (string) ($infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io'),
-			'image_name' => (string) ($infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId),
-			'image_tag' => (string) ($infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest'),
+			'image_src' => (string) ($infoXml->xpath('external-app/docker-install/registry')[0] ?? 'docker.io'),
+			'image_name' => (string) ($infoXml->xpath('external-app/docker-install/image')[0] ?? $appId),
+			'image_tag' => (string) ($infoXml->xpath('external-app/docker-install/image-tag')[0] ?? 'latest'),
 		];
 
 		$envs = $this->buildDeployEnvs([
 			'appid' => $appId,
 			'name' => (string) $infoXml->name,
 			'version' => (string) $infoXml->version,
-			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
+			'protocol' => (string) ($infoXml->xpath('external-app/protocol')[0] ?? 'http'),
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $port,
 			'storage' => $storage,
-			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
+			'system_app' => (bool) ($infoXml->xpath('external-app/system')[0] ?? false),
 			'secret' => $secret ?? $this->random->generate(128),
 		], $params['env_options'] ?? [], $deployConfig);
 
@@ -577,5 +595,51 @@ class DockerActions implements IDeployActions {
 
 	public function buildExAppVolumeName(string $appId): string {
 		return self::EX_APP_CONTAINER_PREFIX . $appId . '_data';
+	}
+
+	public function registerDefaultDaemonConfig(): ?DaemonConfig {
+		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfig);
+		if ($daemonConfig !== null) {
+			return $daemonConfig;
+		}
+
+		$deployConfig = [
+			'net' => 'host', // TODO: Add ExApp skeleton heartbeat check to verify default configuration works or manual configuration required
+			'host' => null,
+			'nextcloud_url' => str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL('/index.php')),
+			'ssl_key' => null,
+			'ssl_key_password' => null,
+			'ssl_cert' => null,
+			'ssl_cert_password' => null,
+			'gpus' => [],
+		];
+
+		if ($this->isGPUAvailable()) {
+			$deployConfig['gpus'] = ['/dev/dri'];
+		}
+
+		$daemonConfigParams = [
+			'name' => 'docker_socket_local',
+			'display_name' => 'Docker Socket Local',
+			'accepts_deploy_id' => 'docker-install',
+			'protocol' => 'unix-socket',
+			'host' => '/var/run/docker.sock',
+			'deploy_config' => $deployConfig,
+		];
+
+		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
+		if ($daemonConfig !== null) {
+			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
+		}
+		return $daemonConfig;
+	}
+
+	private function isGPUAvailable(): bool {
+		$gpusDir = '/dev/dri';
+		if (is_dir($gpusDir) && is_readable($gpusDir)) {
+			return true;
+		}
+		return false;
 	}
 }
