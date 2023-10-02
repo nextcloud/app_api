@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ListDaemons extends Command {
 	private DaemonConfigService $daemonConfigService;
+	private IConfig $config;
 
 	public function __construct(
 		DaemonConfigService $daemonConfigService,
