@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\Daemon;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Service\DaemonConfigService;
 
 use OCP\IConfig;
@@ -53,7 +52,6 @@ class ListDaemons extends Command {
 
 		foreach ($daemonConfigs as $daemon) {
 			$rows[] = [$daemon->getName() === $defaultDaemonName ? '*' : '', $daemon->getName(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getProtocol(), $daemon->getHost()];
-			//$output->writeln(sprintf('%s. %s - %s [%s]: %s://%s', $daemon->getId(), $daemon->getName(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getProtocol(), $daemon->getHost()));
 		}
 
 		$table->setRows($rows);

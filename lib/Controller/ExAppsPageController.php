@@ -34,7 +34,6 @@ use OCP\IL10N;
 use OCP\IRequest;
 use OCP\L10N\IFactory;
 use Psr\Log\LoggerInterface;
-use function Aws\boolean_value;
 
 /**
  * ExApps actions controller similar to default one with project-specific changes and additions

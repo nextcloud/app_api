@@ -20,12 +20,12 @@ class ExAppFetcher extends AppAPIFetcher {
 
 	public function __construct(
 		Factory $appDataFactory,
-        IClientService $clientService,
-        ITimeFactory $timeFactory,
-        IConfig $config,
-        CompareVersion $compareVersion,
-        LoggerInterface $logger,
-        IRegistry $registry
+		IClientService $clientService,
+		ITimeFactory $timeFactory,
+		IConfig $config,
+		CompareVersion $compareVersion,
+		LoggerInterface $logger,
+		IRegistry $registry
 	) {
 		parent::__construct(
 			$appDataFactory,
@@ -89,15 +89,15 @@ class ExAppFetcher extends AppAPIFetcher {
 							$minPhpVersion = $phpVersion->getMinimumVersion();
 							$maxPhpVersion = $phpVersion->getMaximumVersion();
 							$minPhpFulfilled = $minPhpVersion === '' || $this->compareVersion->isCompatible(
-									PHP_VERSION,
-									$minPhpVersion,
-									'>='
-								);
+								PHP_VERSION,
+								$minPhpVersion,
+								'>='
+							);
 							$maxPhpFulfilled = $maxPhpVersion === '' || $this->compareVersion->isCompatible(
-									PHP_VERSION,
-									$maxPhpVersion,
-									'<='
-								);
+								PHP_VERSION,
+								$maxPhpVersion,
+								'<='
+							);
 
 							$isPhpCompatible = $minPhpFulfilled && $maxPhpFulfilled;
 						}
