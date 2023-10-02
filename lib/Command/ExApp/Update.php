@@ -58,13 +58,12 @@ class Update extends Command {
 		$appId = $input->getArgument('appid');
 
 		$pathToInfoXml = $input->getOption('info-xml');
-		if ($pathToInfoXml === null) {
-			$output->writeln(sprintf('No info.xml specified for %s', $appId));
-			return 2;
+		if ($pathToInfoXml !== null) {
+			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
+		} else {
+			$infoXml = $this->service->getLatestExAppInfoFromAppstore($appId);
 		}
 
-		// TODO: Change to check of info.xml from AppStore
-		$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
 		if ($infoXml === false) {
 			$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
 			return 2;
@@ -97,8 +96,7 @@ class Update extends Command {
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 		if ($daemonConfig === null) {
-			$output->writeln(sprintf('Daemon config %s not found.', $exApp->getDaemonConfigName()));
-			return 2;
+			$output->writeln(sprintf('Daemon config %s not found', $exApp->getDaemonConfigName()));
 		}
 
 		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {
@@ -122,7 +120,7 @@ class Update extends Command {
 			}
 
 			$this->dockerActions->initGuzzleClient($daemonConfig); // Required init
-			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $appId);
+			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
 			if (isset($containerInfo['error'])) {
 				$output->writeln(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
 				return 1;
@@ -162,7 +160,6 @@ class Update extends Command {
 				$output->writeln(sprintf('ExApp %s container successfully updated.', $appId));
 			}
 		}
-		// TODO: Add AIO update DeployActions
 
 		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
 		if (!$this->service->updateExAppInfo($exApp, $exAppInfo)) {

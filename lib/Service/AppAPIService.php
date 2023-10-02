@@ -8,6 +8,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
 
+use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -51,6 +52,7 @@ class AppAPIService {
 	private ExAppConfigService $exAppConfigService;
 	private ExNotificationsManager $exNotificationsManager;
 	private TalkBotsService $talkBotsService;
+	private ExAppFetcher $exAppFetcher;
 
 	public function __construct(
 		LoggerInterface $logger,
@@ -71,6 +73,7 @@ class AppAPIService {
 		ExAppConfigService $exAppConfigService,
 		ExNotificationsManager $exNotificationsManager,
 		TalkBotsService $talkBotsService,
+		ExAppFetcher $exAppFetcher,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
@@ -90,6 +93,7 @@ class AppAPIService {
 		$this->exAppConfigService = $exAppConfigService;
 		$this->exNotificationsManager = $exNotificationsManager;
 		$this->talkBotsService = $talkBotsService;
+		$this->exAppFetcher = $exAppFetcher;
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -164,9 +168,8 @@ class AppAPIService {
 			// TODO: Do we need to remove app_config_ex, app_preferences_ex too
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
-			$this->talkBotsService->unregisterExAppTalkBots($exApp);
+			$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
 			$this->cache->remove('/exApp_' . $appId);
-			// TODO: Do we need to remove ExApp container
 			return $exApp;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()), ['exception' => $e]);
@@ -266,7 +269,7 @@ class AppAPIService {
 	}
 
 	/**
-	 * Update ExApp info (version and name changes after update)
+	 * Update ExApp info (version, name, system app flag changes after update)
 	 *
 	 * @param ExApp $exApp
 	 * @param array $exAppInfo
@@ -283,6 +286,14 @@ class AppAPIService {
 		$exApp->setName($exAppInfo['name']);
 		if (!$this->updateExAppName($exApp)) {
 			return false;
+		}
+
+		// Update system app flag
+		$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
+		if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
+			$this->exAppUsersService->setupSystemAppFlag($exApp);
+		} else {
+			$this->exAppUsersService->removeExAppUser($exApp, '');
 		}
 
 		$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
@@ -353,10 +364,15 @@ class AppAPIService {
 	}
 
 	public function getExAppRequestedScopes(ExApp $exApp, ?\SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
-		// TODO: Add download of info.xml from AppStore if not passed
+		if ($infoXml === null) {
+			$exAppInfo = $this->getExAppInfoFromAppstore($exApp);
+			if (isset($exAppInfo)) {
+				$infoXml = $exAppInfo;
+			}
+		}
 
 		if (isset($infoXml)) {
-			$scopes = $infoXml->xpath('ex-app/scopes');
+			$scopes = $infoXml->xpath('external-app/scopes');
 			if ($scopes !== false) {
 				$scopes = (array) $scopes[0];
 				$required = array_map(function (string $scopeGroup) {
@@ -375,6 +391,47 @@ class AppAPIService {
 		}
 
 		return ['error' => 'Failed to get ExApp requested scopes.'];
+	}
+
+	/**
+	 * Get info from App Store releases for specific ExApp and its current version
+	 *
+	 * @param ExApp $exApp
+	 *
+	 * @return \SimpleXMLElement|null
+	 */
+	public function getExAppInfoFromAppstore(ExApp $exApp): ?\SimpleXMLElement {
+		$exApps = $this->exAppFetcher->get();
+		$exAppReleaseInfo = array_filter($exApps, function (array $exAppItem) use ($exApp) {
+			return $exAppItem['id'] === $exApp->getAppid() && count(array_filter($exAppItem['releases'], function (array $release) use ($exApp) {
+				return $release['version'] === $exApp->getVersion();
+			})) === 1;
+		});
+		if (count($exAppReleaseInfo) === 1) {
+			$pathToInfoXml = end($exAppReleaseInfo[0]['releases'])['download'];
+			return simplexml_load_string(file_get_contents($pathToInfoXml));
+		}
+		return null;
+	}
+
+	/**
+	 * Get latest ExApp release info by ExApp appid (in case of first installation or update)
+	 *
+	 * @param string $appId
+	 *
+	 * @return \SimpleXMLElement|null
+	 */
+	public function getLatestExAppInfoFromAppstore(string $appId): ?\SimpleXMLElement {
+		$exApps = $this->exAppFetcher->get();
+		$exAppReleaseInfo = array_filter($exApps, function (array $exAppItem) use ($appId) {
+			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;
+		});
+		$exAppReleaseInfo = end($exAppReleaseInfo);
+		$exAppInfo = end($exAppReleaseInfo['releases']);
+		if ($exAppInfo !== false) {
+			return simplexml_load_string(file_get_contents($exAppInfo['download']));
+		}
+		return null;
 	}
 
 	/**

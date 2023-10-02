@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\DeployActions;
 
+use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\IConfig;
@@ -69,7 +70,11 @@ class AIODockerActions {
 			'deploy_config' => $deployConfig,
 		];
 
-		return $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
+		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
+		if ($daemonConfig !== null) {
+			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
+		}
+		return $daemonConfig;
 	}
 
 	/**

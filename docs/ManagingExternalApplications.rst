@@ -147,5 +147,9 @@ Command: ``app_api:app:scopes:list <appid>``
 Using the ExApp Management UI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Currently the ExApp Management UI is in progress.
-There will be the same functionality as in the CLI but in a more user friendly and easy way.
+ExApps management is similar to default Apps management.
+To access ExApps management navigate using Admin settings dropdown menu or from AppAPI admin settings section.
+
+.. note::
+
+	ExApps management support only apps from App Store. For manual-install type use CLI ExApps management commands.

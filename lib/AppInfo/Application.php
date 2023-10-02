@@ -8,6 +8,7 @@ use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
+use OCA\AppAPI\Listener\UserDeletedListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
@@ -21,9 +22,16 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\IGroupManager;
+use OCP\IL10N;
+use OCP\INavigationManager;
+use OCP\IURLGenerator;
+use OCP\IUser;
+use OCP\IUserSession;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
 
+use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -45,6 +53,7 @@ class Application extends App implements IBootstrap {
 		$context->registerCapability(PublicCapabilities::class);
 		$context->registerMiddleware(AppAPIAuthMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
+		$context->registerEventListener(UserDeletedEvent::class, UserDeletedListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 	}
@@ -56,7 +65,8 @@ class Application extends App implements IBootstrap {
 			if ($profiler->isEnabled()) {
 				$profiler->add(new AppAPIDataCollector());
 			}
-		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
+			$context->injectFn($this->registerExAppsManagementNavigation(...));
+		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|\Throwable) {
 		}
 	}
 
@@ -67,5 +77,37 @@ class Application extends App implements IBootstrap {
 		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
 			$event->getServer()->addPlugin($container->query(DavPlugin::class));
 		});
+	}
+
+	/**
+	 * Register ExApps management navigation entry right after default Apps management link.
+	 *
+	 * @param IUserSession $userSession
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
+	 *
+	 * @return void
+	 */
+	private function registerExAppsManagementNavigation(IUserSession $userSession): void {
+		$container = $this->getContainer();
+		/** @var IGroupManager $groupManager */
+		$groupManager = $container->get(IGroupManager::class);
+		/** @var IUser $user */
+		$user = $userSession->getUser();
+		if ($groupManager->isInGroup($user->getUID(), 'admin')) {
+			$container->get(INavigationManager::class)->add(function () use ($container) {
+				$urlGenerator = $container->get(IURLGenerator::class);
+				$l10n = $container->get(IL10N::class);
+				return [
+					'id' => self::APP_ID,
+					'type' => 'settings',
+					'order' => 6,
+					'href' => $urlGenerator->linkToRoute('app_api.ExAppsPage.viewApps'),
+					'icon' => $urlGenerator->imagePath('app_api', 'app-dark.svg'),
+					'target' => '_blank',
+					'name' => $l10n->t('External Apps'),
+				];
+			});
+		}
 	}
 }

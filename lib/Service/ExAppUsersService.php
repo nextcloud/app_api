@@ -91,6 +91,32 @@ class ExAppUsersService {
 		}
 	}
 
+	public function removeExAppUser(ExApp $exApp, string $userId): bool {
+		try {
+			$result = $this->mapper->deleteByAppid($exApp->getAppid()) !== 0;
+			if ($result) {
+				$this->cache->clear('/ex_apps_users_' . $exApp->getAppid());
+			}
+			return $result;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to remove ex_app_user %s for ExApp %s. Error: %s', $userId, $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			return false;
+		}
+	}
+
+	public function removeDeletedUser(string $userId): bool {
+		try {
+			$result = $this->mapper->deleteByUserId($userId) !== 0;
+			if ($result) {
+				$this->cache->clear('/ex_apps_users_');
+			}
+			return $result;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to remove ex_app_user %s after User deletion. Error: %s', $userId, $e->getMessage()), ['exception' => $e]);
+			return false;
+		}
+	}
+
 	/**
 	 * @throws Exception
 	 */
