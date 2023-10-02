@@ -6,6 +6,7 @@ namespace OCA\AppAPI\Settings;
 
 use OCA\AppAPI\AppInfo\Application;
 
+use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
@@ -43,8 +44,23 @@ class Admin implements ISettings {
 	 * @return TemplateResponse
 	 */
 	public function getForm(): TemplateResponse {
+		$exApps = $this->service->getExAppsList('all');
+		$daemonsExAppsCount = [];
+		foreach ($exApps as $app) {
+			$exApp = $this->service->getExApp($app['id']);
+			if (!isset($daemonsExAppsCount[$exApp->getDaemonConfigName()])) {
+				$daemonsExAppsCount[$exApp->getDaemonConfigName()] = 0;
+			}
+			$daemonsExAppsCount[$exApp->getDaemonConfigName()] += 1;
+		}
+		$daemons = array_map(function (DaemonConfig $daemonConfig) use ($daemonsExAppsCount) {
+			return [
+				...$daemonConfig->jsonSerialize(),
+				'exAppsCount' => isset($daemonsExAppsCount[$daemonConfig->getName()]) ? $daemonsExAppsCount[$daemonConfig->getName()] : 0,
+			];
+		}, $this->daemonConfigService->getRegisteredDaemonConfigs());
 		$adminConfig = [
-			'daemons' => $this->daemonConfigService->getRegisteredDaemonConfigs(),
+			'daemons' => $daemons,
 			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', ''),
 			'docker_socket_accessible' => $this->dockerActions->isDockerSocketAvailable(),
 			'updates_count' => count($this->getExAppsWithUpdates()),

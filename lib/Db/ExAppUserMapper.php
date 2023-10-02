@@ -75,4 +75,17 @@ class ExAppUserMapper extends QBMapper {
 			->where($qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)))
 			->executeStatement();
 	}
+
+	/**
+	 * @param string $userId
+	 *
+	 * @throws Exception
+	 * @return int
+	 */
+	public function deleteByUserid(string $userId): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where($qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)))
+			->executeStatement();
+	}
 }

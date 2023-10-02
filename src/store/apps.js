@@ -98,6 +98,9 @@ const mutations = {
 		state.apps.find(app => app.id === appId).canUnInstall = false
 		state.apps.find(app => app.id === appId).canInstall = true
 		state.apps.find(app => app.id === appId).daemon = null
+		if (state.apps.find(app => app.id === appId).update !== null) {
+			state.updateCount--
+		}
 		state.apps.find(app => app.id === appId).update = null
 	},
 

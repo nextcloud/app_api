@@ -4,6 +4,8 @@
 			:title="itemTitle"
 			:details="isDefault ? t('app_api', 'Default') : ''"
 			:force-display-actions="true"
+			:counter-number="daemon.exAppsCount"
+			counter-type="hightlighet"
 			@click="showDaemonConfigDetailsModal(daemon)">
 			<template #subtitle>
 				{{ daemon.accepts_deploy_id }}
@@ -107,6 +109,18 @@ export default {
 				})
 		},
 		deleteDaemonConfig(daemon) {
+			const self = this
+			OC.dialogs.confirm(
+				t('app_api', 'Are you sure you want delete Deploy Daemon?'),
+				t('app_api', 'Confirm Deploy daemon deletion'),
+				function(success) {
+					if (success) {
+						self._deleteDaemonConfig(daemon)
+					}
+				}
+			)
+		},
+		_deleteDaemonConfig(daemon) {
 			this.deleting = true
 			return axios.delete(generateUrl(`/apps/app_api/daemons/${daemon.name}`))
 				.then(res => {

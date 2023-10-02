@@ -576,7 +576,7 @@ class DockerActions implements IDeployActions {
 
 	public function isDockerSocketAvailable(): bool {
 		$dockerSocket = '/var/run/docker.sock';
-		if (file_exists($dockerSocket) && is_readable($dockerSocket)) {
+		if (file_exists($dockerSocket) && is_readable($dockerSocket) && is_writable($dockerSocket)) {
 			return true;
 		}
 		return false;

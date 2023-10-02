@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\AppAPIService;
@@ -12,7 +11,6 @@ use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppScopesService;
 
-use OCP\IConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -27,7 +25,6 @@ class Update extends Command {
 	private DockerActions $dockerActions;
 	private ExAppScopesService $exAppScopeService;
 	private ExAppApiScopeService $exAppApiScopeService;
-	private IConfig $config;
 
 	public function __construct(
 		AppAPIService        $service,
@@ -35,7 +32,6 @@ class Update extends Command {
 		ExAppApiScopeService $exAppApiScopeService,
 		DaemonConfigService  $daemonConfigService,
 		DockerActions        $dockerActions,
-		IConfig              $config,
 	) {
 		parent::__construct();
 
@@ -44,7 +40,6 @@ class Update extends Command {
 		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->dockerActions = $dockerActions;
-		$this->config = $config;
 	}
 
 	protected function configure() {
@@ -101,15 +96,7 @@ class Update extends Command {
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 		if ($daemonConfig === null) {
-			$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
-			if ($defaultDaemonConfigName !== '') {
-				$output->writeln(sprintf('Daemon config %s not found. Using default: %s', $exApp->getDaemonConfigName(), $defaultDaemonConfigName));
-				$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
-				if ($daemonConfig === null) {
-					$output->writeln(sprintf('Default Daemon config %s not found.', $defaultDaemonConfigName));
-					return 2;
-				}
-			}
+			$output->writeln(sprintf('Daemon config %s not found', $exApp->getDaemonConfigName()));
 		}
 
 		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {

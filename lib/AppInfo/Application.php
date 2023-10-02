@@ -8,6 +8,7 @@ use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
+use OCA\AppAPI\Listener\UserDeletedListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
@@ -30,6 +31,7 @@ use OCP\IUserSession;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
 
+use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -51,6 +53,7 @@ class Application extends App implements IBootstrap {
 		$context->registerCapability(PublicCapabilities::class);
 		$context->registerMiddleware(AppAPIAuthMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
+		$context->registerEventListener(UserDeletedEvent::class, UserDeletedListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 	}

@@ -90,18 +90,12 @@
 						:app="search_app"
 						:category="category" />
 				</template>
-				<template v-else-if="apps.length === 0 && !loading">
-					<div id="apps-list-empty" class="emptycontent emptycontent-search">
-						<div id="app-list-empty-icon" class="icon-settings-dark" />
-						<h2>{{ t('app_api', 'No apps found for your version') }}</h2>
-					</div>
-				</template>
 			</div>
 		</div>
 
 		<div v-if="search !== '' && !loading && searchApps.length === 0 && apps.length === 0" id="apps-list-empty" class="emptycontent emptycontent-search">
 			<div id="app-list-empty-icon" class="icon-settings-dark" />
-			<h2>{{ t('app_api', 'No apps found for your version') }}</h2>
+			<h2>{{ t('app_api', 'No apps found') }}</h2>
 		</div>
 
 		<div id="searchresults" />
