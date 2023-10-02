@@ -620,6 +620,7 @@ class AppAPIService {
 		} else {
 			$this->userSession->setUser(null);
 		}
+		$this->userSession->getSession()->set('app_api', true);
 		$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
 			'appid' => $request->getHeader('EX-APP-ID'),
 			'userid' => $userId,
