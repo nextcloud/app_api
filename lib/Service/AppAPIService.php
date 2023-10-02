@@ -23,6 +23,7 @@ use OCP\IRequest;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use OCP\ISession;
 use OCP\Log\ILogFactory;
 use OCP\Security\Bruteforce\IThrottler;
 use OCP\Security\ISecureRandom;
