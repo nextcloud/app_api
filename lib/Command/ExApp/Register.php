@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp;
 
+use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
@@ -14,6 +15,7 @@ use OCA\AppAPI\Service\ExAppScopesService;
 use OCA\AppAPI\Service\ExAppUsersService;
 
 use OCP\DB\Exception;
+use OCP\IConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -30,6 +32,7 @@ class Register extends Command {
 	private ExAppUsersService $exAppUsersService;
 	private DockerActions $dockerActions;
 	private ManualActions $manualActions;
+	private IConfig $config;
 
 	public function __construct(
 		AppAPIService        $service,
@@ -39,6 +42,7 @@ class Register extends Command {
 		ExAppUsersService    $exAppUsersService,
 		DockerActions        $dockerActions,
 		ManualActions        $manualActions,
+		IConfig              $config,
 	) {
 		parent::__construct();
 
@@ -49,6 +53,7 @@ class Register extends Command {
 		$this->exAppUsersService = $exAppUsersService;
 		$this->dockerActions = $dockerActions;
 		$this->manualActions = $manualActions;
+		$this->config = $config;
 	}
 
 	protected function configure() {
@@ -56,7 +61,7 @@ class Register extends Command {
 		$this->setDescription('Register external app');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
-		$this->addArgument('daemon-config-name', InputArgument::REQUIRED);
+		$this->addArgument('daemon-config-name', InputArgument::OPTIONAL);
 
 		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
@@ -72,7 +77,11 @@ class Register extends Command {
 			return 2;
 		}
 
+		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
 		$daemonConfigName = $input->getArgument('daemon-config-name');
+		if (!isset($daemonConfigName) && $defaultDaemonConfigName !== '') {
+			$daemonConfigName = $defaultDaemonConfigName;
+		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
 			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));

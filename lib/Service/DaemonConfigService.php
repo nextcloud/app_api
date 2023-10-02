@@ -102,4 +102,16 @@ class DaemonConfigService {
 			return null;
 		}
 	}
+
+	public function updateDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
+		try {
+			$cacheKey = '/daemon_config_' . $daemonConfig->getName();
+			$daemonConfig = $this->mapper->update($daemonConfig);
+			$this->cache->set($cacheKey, $daemonConfig, self::CACHE_TTL);
+			return $daemonConfig;
+		} catch (Exception $e) {
+			$this->logger->error('Failed to update DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
+			return null;
+		}
+	}
 }

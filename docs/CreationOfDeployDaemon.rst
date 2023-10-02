@@ -9,6 +9,13 @@ The Deploy Daemon (DaemonConfig) is used to orchestrate the deployment of ExApps
 
 	Currently only Docker (``accepts-deploy-id: docker-install``) is supported as a Deploy Daemon.
 
+
+Default Deploy Daemon
+^^^^^^^^^^^^^^^^^^^^^
+
+AppAPI will automatically register basic Deploy Daemon configured with default values to work with local Docker via socket (``/var/run/docker.sock``).
+You can set default Deploy daemon in Admin settings - AppAPI section.
+
 OCC CLI
 ^^^^^^^
 
@@ -45,6 +52,7 @@ Options
 	* ``--ssl_cert SSL_CERT`` - ``[optional]`` path to SSL cert file (local absolute path)
 	* ``--ssl_cert_password SSL_CERT_PASSWORD`` - ``[optional]`` SSL cert password
 	* ``--gpu GPU`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``/dev/dri``)
+	* ``--set-default`` - ``[optional]`` set created daemon as default for ExApps installation
 
 DeployConfig
 ************
@@ -96,3 +104,9 @@ Nextcloud AIO
 
 In case of AppAPI installed in AIO, default Deploy Daemon is registered automatically.
 It is possible to register additional Deploy Daemons with the same ways as described above.
+
+
+DaemonConfig admin settings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There is AppAPI Admin settings where you can manage Deploy Daemons.

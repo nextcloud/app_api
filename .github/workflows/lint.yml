@@ -116,36 +116,36 @@ jobs:
         with:
           sarif_file: results.sarif
 
-#  js-eslint:
-#    runs-on: ubuntu-22.04
-#    name: eslint
-#
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: Install dependencies
-#        run: npm ci
-#
-#      - name: ESLint
-#        run: npm run lint
+  js-eslint:
+    runs-on: ubuntu-22.04
+    name: eslint
 
-#  stylelint:
-#    runs-on: ubuntu-22.04
-#
-#    name: stylelint
-#
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: Install dependencies
-#        run: npm ci
-#
-#      - name: Lint
-#        run: npm run stylelint
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+  stylelint:
+    runs-on: ubuntu-22.04
+
+    name: stylelint
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run stylelint
 
   lint-success:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [xml-lint, php-lint, php-cs, php-psalm-analysis, php-security-analysis]
+    needs: [xml-lint, php-lint, php-cs, php-psalm-analysis, php-security-analysis, js-eslint, stylelint]
     name: Lint-OK
     steps:
       - run: echo "Lint passed successfully"
