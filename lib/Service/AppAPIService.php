@@ -21,6 +21,7 @@ use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\ISession;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
@@ -43,6 +44,7 @@ class AppAPIService {
 	private IAppManager $appManager;
 	private ISecureRandom $random;
 	private IUserSession $userSession;
+	private ISession $session;
 	private IUserManager $userManager;
 	private ExAppApiScopeService $exAppApiScopeService;
 	private ExAppUsersService $exAppUsersService;
@@ -66,6 +68,7 @@ class AppAPIService {
 		ExAppScopesService $exAppScopesService,
 		ISecureRandom $random,
 		IUserSession $userSession,
+		ISession $session,
 		IUserManager $userManager,
 		ExAppConfigService $exAppConfigService,
 		ExNotificationsManager $exNotificationsManager,
@@ -82,6 +85,7 @@ class AppAPIService {
 		$this->appManager = $appManager;
 		$this->random = $random;
 		$this->userSession = $userSession;
+		$this->session = $session;
 		$this->userManager = $userManager;
 		$this->exAppUsersService = $exAppUserService;
 		$this->exAppApiScopeService = $exAppApiScopeService;
@@ -677,6 +681,7 @@ class AppAPIService {
 		} else {
 			$this->userSession->setUser(null);
 		}
+		$this->session->set('app_api', true);
 		$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
 			'appid' => $request->getHeader('EX-APP-ID'),
 			'userid' => $userId,
