@@ -51,6 +51,10 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<website>https://github.com/cloud-py-api/app_api</website>
 	<bugs>https://github.com/cloud-py-api/app_api/issues</bugs>
 	<repository type="git">https://github.com/cloud-py-api/app_api.git</repository>
+	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_apps_management_1.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_apps_management_2.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_apps_management_3.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_admin_settings.png</screenshot>
 	<dependencies>
 		<php min-version="8.1"/>
 		<nextcloud min-version="26" max-version="28"/>
