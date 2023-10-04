@@ -48,7 +48,6 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	</documentation>
 	<category>integration</category>
 	<category>tools</category>
-	<category>flow</category>
 	<website>https://github.com/cloud-py-api/app_api</website>
 	<bugs>https://github.com/cloud-py-api/app_api/issues</bugs>
 	<repository type="git">https://github.com/cloud-py-api/app_api.git</repository>
