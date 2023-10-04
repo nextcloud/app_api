@@ -7,16 +7,18 @@
 	<![CDATA[
 ### Supercharge your Nextcloud with AppAPI and applications specifically designed for it.
 
+
 The AppAPI is a project within the Nextcloud ecosystem designed to streamline and enhance the process of
 application development, deployment, and management. It introduces a new methodology that allows developers to create
 applications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.
 
-### List of Nextcloud applications that require AppAPI:
 
-| Name                | Language | Type        | Description                  | Link                                                          |
-|---------------------|----------|-------------|------------------------------|---------------------------------------------------------------|
-| talk_bot_ai_example | Python   | application | Talk Bot demonstration       | [GitHub](https://github.com/cloud-py-api/talk_bot_ai_example) |
-| upscaler_example    | Python   | application | Image UpScaler demonstration | [GitHub](https://github.com/cloud-py-api/upscaler_example)    |
+### List of applications that require AppAPI:
+
+| Name                | Language | Description         | Link                                                          |
+|---------------------|----------|---------------------|---------------------------------------------------------------|
+| talk_bot_ai_example | Python   | Talk Bot demo       | [GitHub](https://github.com/cloud-py-api/talk_bot_ai_example) |
+| upscaler_example    | Python   | Image UpScaler demo | [GitHub](https://github.com/cloud-py-api/upscaler_example)    |
 
 _If you wish to develop an application, we will gladly help and assist you._
 
@@ -57,7 +59,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_admin_settings.png</screenshot>
 	<dependencies>
 		<php min-version="8.1"/>
-		<nextcloud min-version="26" max-version="28"/>
+		<nextcloud min-version="27" max-version="28"/>
 	</dependencies>
 	<repair-steps>
 		<install>
