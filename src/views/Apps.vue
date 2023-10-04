@@ -103,7 +103,7 @@
 				:order="0">
 				<AppDetails :app="app" />
 			</NcAppSidebarTab>
-			<NcAppSidebarTab v-if="app.appstoreData && app.releases[0].translations.en.changelog"
+			<NcAppSidebarTab v-if="app.appstoreData && app.releases.length > 0 && app.releases[0].translations.en.changelog"
 				id="desca"
 				icon="icon-category-organization"
 				:name="t('app_api', 'Changelog')"
@@ -120,7 +120,8 @@
 				:order="1">
 				<DaemonDetails :app="app" />
 			</NcAppSidebarTab>
-			<NcAppSidebarTab id="scopes"
+			<NcAppSidebarTab v-if="app.scopes"
+				id="scopes"
 				icon="icon-category-security"
 				:name="t('app_api', 'Scopes')"
 				:order="2">
@@ -246,7 +247,7 @@ export default {
 				: authorName(this.app.author)
 			const license = t('app_api', '{license}-licensed', { license: ('' + this.app.licence).toUpperCase() })
 
-			const subname = t('app_api', 'by {author}\n{license}', { author, license })
+			const subname = author && license ? t('app_api', 'by {author}\n{license}', { author, license }) : ''
 
 			return {
 				background: this.app.screenshot && this.screenshotLoaded
