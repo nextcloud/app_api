@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.0.0 - 2023-xx-xx]
+## [1.0.0 - 2023-10-05]
 
-First AppAPI external apps ecosystem release
+### Added
+
+- First release

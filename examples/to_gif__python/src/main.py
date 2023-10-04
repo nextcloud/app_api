@@ -51,11 +51,14 @@ def random_string(size: int) -> str:
 
 def sign_request(headers: dict, user="") -> None:
     headers["AUTHORIZATION-APP-API"] = b64encode(f"{user}:{os.environ['APP_SECRET']}".encode("UTF=8"))
+    headers["EX-APP-ID"] = os.environ["APP_ID"]
+    headers["EX-APP-VERSION"] = os.environ["APP_VERSION"]
+    headers["OCS-APIRequest"] = "true"
 
 
 def sign_check(request: Request) -> str:
     headers = {
-        "AA-VERSION": request.headers["AE-VERSION"],
+        "AA-VERSION": request.headers["AA-VERSION"],
         "EX-APP-ID": request.headers["EX-APP-ID"],
         "EX-APP-VERSION": request.headers["EX-APP-VERSION"],
         "AUTHORIZATION-APP-API": request.headers.get("AUTHORIZATION-APP-API", ""),
