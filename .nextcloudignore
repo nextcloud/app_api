@@ -15,10 +15,14 @@
 /babel.config.js
 /build
 /CHANGELOG.md
+/APPS.md
+/AUTHORS.md
 /README.md
 /composer.*
 /node_modules
 /screenshots
+/examples
+/docs
 /src
 /vendor/bin
 /jest.config.js
@@ -33,3 +37,5 @@
 /stylelint.config.js
 /webpack.*
 tests
+base_php.patch
+
