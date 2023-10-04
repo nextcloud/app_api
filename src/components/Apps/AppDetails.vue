@@ -39,58 +39,62 @@
 			</div>
 		</div>
 
-		<ul class="app-details__dependencies">
-			<li v-if="app.missingMinOwnCloudVersion">
-				{{ t('settings', 'This app has no minimum Nextcloud version assigned. This will be an error in the future.') }}
-			</li>
-			<li v-if="app.missingMaxOwnCloudVersion">
-				{{ t('settings', 'This app has no maximum Nextcloud version assigned. This will be an error in the future.') }}
-			</li>
-			<li v-if="!app.canInstall">
-				{{ t('settings', 'This app cannot be installed because the following dependencies are not fulfilled:') }}
-				<ul class="missing-dependencies">
-					<li v-for="(dep, index) in app.missingDependencies" :key="index">
-						{{ dep }}
-					</li>
-				</ul>
-			</li>
-		</ul>
+		<template v-if="app.fromAppStore">
+			<ul class="app-details__dependencies">
+				<li v-if="app.missingMinOwnCloudVersion">
+					{{ t('settings', 'This app has no minimum Nextcloud version assigned. This will be an error in the future.') }}
+				</li>
+				<li v-if="app.missingMaxOwnCloudVersion">
+					{{ t('settings', 'This app has no maximum Nextcloud version assigned. This will be an error in the future.') }}
+				</li>
+				<li v-if="!app.canInstall">
+					{{ t('settings', 'This app cannot be installed because the following dependencies are not fulfilled:') }}
+					<ul class="missing-dependencies">
+						<li v-for="(dep, index) in app.missingDependencies" :key="index">
+							{{ dep }}
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<p class="app-details__documentation">
+				<a v-if="!app.internal"
+					class="appslink"
+					:href="appstoreUrl"
+					target="_blank"
+					rel="noreferrer noopener">{{ t('settings', 'View in store') }} ↗</a>
 
-		<p class="app-details__documentation">
-			<a v-if="!app.internal"
-				class="appslink"
-				:href="appstoreUrl"
-				target="_blank"
-				rel="noreferrer noopener">{{ t('settings', 'View in store') }} ↗</a>
+				<a v-if="app.website"
+					class="appslink"
+					:href="app.website"
+					target="_blank"
+					rel="noreferrer noopener">{{ t('settings', 'Visit website') }} ↗</a>
+				<a v-if="app.bugs"
+					class="appslink"
+					:href="app.bugs"
+					target="_blank"
+					rel="noreferrer noopener">{{ t('settings', 'Report a bug') }} ↗</a>
 
-			<a v-if="app.website"
-				class="appslink"
-				:href="app.website"
-				target="_blank"
-				rel="noreferrer noopener">{{ t('settings', 'Visit website') }} ↗</a>
-			<a v-if="app.bugs"
-				class="appslink"
-				:href="app.bugs"
-				target="_blank"
-				rel="noreferrer noopener">{{ t('settings', 'Report a bug') }} ↗</a>
-
-			<a v-if="app.documentation && app.documentation.user"
-				class="appslink"
-				:href="app.documentation.user"
-				target="_blank"
-				rel="noreferrer noopener">{{ t('settings', 'User documentation') }} ↗</a>
-			<a v-if="app.documentation && app.documentation.admin"
-				class="appslink"
-				:href="app.documentation.admin"
-				target="_blank"
-				rel="noreferrer noopener">{{ t('settings', 'Admin documentation') }} ↗</a>
-			<a v-if="app.documentation && app.documentation.developer"
-				class="appslink"
-				:href="app.documentation.developer"
-				target="_blank"
-				rel="noreferrer noopener">{{ t('settings', 'Developer documentation') }} ↗</a>
-		</p>
-		<Markdown class="app-details__description" :text="app.description" />
+				<a v-if="app.documentation && app.documentation.user"
+					class="appslink"
+					:href="app.documentation.user"
+					target="_blank"
+					rel="noreferrer noopener">{{ t('settings', 'User documentation') }} ↗</a>
+				<a v-if="app.documentation && app.documentation.admin"
+					class="appslink"
+					:href="app.documentation.admin"
+					target="_blank"
+					rel="noreferrer noopener">{{ t('settings', 'Admin documentation') }} ↗</a>
+				<a v-if="app.documentation && app.documentation.developer"
+					class="appslink"
+					:href="app.documentation.developer"
+					target="_blank"
+					rel="noreferrer noopener">{{ t('settings', 'Developer documentation') }} ↗</a>
+			</p>
+			<Markdown class="app-details__description" :text="app.description" />
+		</template>
+		<template v-else>
+			<p>{{ t('app_api', 'This app is not registered in AppStore. No extra information available. Only enable/disable actions allowed.') }}</p>
+		</template>
 	</div>
 </template>
 

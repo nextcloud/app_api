@@ -271,6 +271,7 @@ class ExAppsPageController extends Controller {
 		$apps = $this->getAppsForCategory('');
 		$appsWithUpdate = $this->getExAppsWithUpdates();
 
+		$exApps = $this->service->getExAppsList('all');
 		$dependencyAnalyzer = new DependencyAnalyzer(new Platform($this->config), $this->l10n);
 
 		$ignoreMaxApps = $this->config->getSystemValue('app_install_overwrite', []);
@@ -324,9 +325,84 @@ class ExAppsPageController extends Controller {
 			return $appData;
 		}, $apps);
 
+		$apps = $this->buildLocalAppsList($apps, $exApps);
+
 		usort($apps, [$this, 'sortApps']);
 
 		return new JSONResponse(['apps' => $apps, 'status' => 'success']);
+	}
+
+	/**
+	 * Prepare list of local ExApps with required data structure to be listed in UI.
+	 * This is a temporal solution to display local apps with lack of information about it until
+	 * it's support extended.
+	 *
+	 * @param array $apps Formatted list of apps available in App Store
+	 * @param array $exApps List of registered ExApps (could be not listed in App Store)
+	 *
+	 * @return array
+	 */
+	private function buildLocalAppsList(array $apps, array $exApps): array {
+		$registeredAppsIds = array_map(function ($app) {
+			return $app['id'];
+		}, $apps);
+		$formattedLocalApps = [];
+		foreach ($exApps as $app) {
+			if (!in_array($app['id'], $registeredAppsIds)) {
+				$exApp = $this->service->getExApp($app['id']);
+				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
+					return $exAppScope->getScopeGroup();
+				}, $this->exAppScopeService->getExAppScopes($exApp)));
+
+				$formattedLocalApps[] = [
+					'id' => $app['id'],
+					'appstore' => false,
+					'installed' => true,
+					'name' => $exApp->getName(),
+					'description' => '',
+					'summary' => '',
+					'license' => '',
+					'author' => '',
+					'shipped' => false,
+					'version' => $exApp->getVersion(),
+					'types' => [],
+					'documentation' => [
+						'admin' => '',
+						'user' => '',
+						'developer' => ''
+					],
+					'website' => '',
+					'bugs' => '',
+					'detailpage' => '',
+					'dependencies' => [],
+					'level' => 100,
+					'missingMaxOwnCloudVersion' => false,
+					'missingMinOwnCloudVersion' => false,
+					'canInstall' => true,
+					'canUnInstall' => false,
+					'isCompatible' => true,
+					'screenshot' => '',
+					'score' => 0,
+					'ratingNumOverall' => 0,
+					'ratingNumThresholdReached' => false,
+					'removable' => false,
+					'active' => $exApp->getEnabled() === 1,
+					'needsDownload' => false,
+					'groups' => [],
+					'fromAppStore' => false,
+					'appstoreData' => $app,
+					'scopes' => $scopes,
+					'daemon' => $daemon,
+					'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
+					'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
+					'releases' => [],
+					'update' => null,
+				];
+			}
+		}
+		$apps = array_merge($apps, $formattedLocalApps);
+		return $apps;
 	}
 
 	/**
@@ -372,6 +448,13 @@ class ExAppsPageController extends Controller {
 						if (!$this->registerExApp($appId, $infoXml, $daemonConfig)) {
 							$this->service->unregisterExApp($appId); // Fallback unregister if failure
 						}
+					} else {
+						$this->logger->error('Failed to Deploy ExApp');
+						return new JSONResponse([
+							'data' => [
+								'message' => 'Failed to Deploy ExApp',
+							]
+						], Http::STATUS_INTERNAL_SERVER_ERROR);
 					}
 
 					$exApp = $this->service->getExApp($appId);
@@ -395,7 +478,9 @@ class ExAppsPageController extends Controller {
 					$updateRequired = true;
 				}
 
-				$this->service->enableExApp($exApp);
+				if (!$this->service->enableExApp($exApp)) {
+					return new JSONResponse(['data' => ['message' => 'Failed to enable ExApp']], Http::STATUS_INTERNAL_SERVER_ERROR);
+				}
 			}
 
 			return new JSONResponse(['data' => ['update_required' => $updateRequired]]);
@@ -407,7 +492,11 @@ class ExAppsPageController extends Controller {
 
 	private function deployExApp(string $appId, \SimpleXMLElement $infoXml, DaemonConfig $daemonConfig): bool {
 		$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml);
-		$this->dockerActions->deployExApp($daemonConfig, $deployParams);
+		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $deployParams);
+
+		if (isset($pullResult['error']) || isset($createResult['error']) || isset($startResult['error'])) {
+			return false;
+		}
 
 		if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig)) {
 			return false;
@@ -495,7 +584,9 @@ class ExAppsPageController extends Controller {
 		try {
 			foreach ($appIds as $appId) {
 				$exApp = $this->service->getExApp($appId);
-				$this->service->disableExApp($exApp);
+				if (!$this->service->disableExApp($exApp)) {
+					return new JSONResponse(['data' => ['message' => 'Failed to disable ExApp']], Http::STATUS_INTERNAL_SERVER_ERROR);
+				}
 			}
 			return new JSONResponse([]);
 		} catch (\Exception $e) {
