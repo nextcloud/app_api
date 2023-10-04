@@ -4,7 +4,7 @@
 [![Tests](https://github.com/cloud-py-api/app_api/actions/workflows/tests.yml/badge.svg)](https://github.com/cloud-py-api/app_api/actions/workflows/tests.yml)
 [![Docs](https://github.com/cloud-py-api/app_api/actions/workflows/docs.yml/badge.svg)](https://cloud-py-api.github.io/app_api/)
 
-### Boost your Nextcloud with AppAPI and its specially designed applications.
+### Supercharge your Nextcloud with AppAPI and applications specifically designed for it.
 
 ### This project pivots on four main pillars:
 
@@ -17,7 +17,7 @@
 3. **Reliable computing power.** The ecosystem is designed to solve resource-intensive problems.
    Developers can easily integrate complex computing functions, including advanced machine learning models, and run them on external hardware.
 
-4. **Community friendly.** The project aims to attract a diverse and broader developer community by creating applications
+4. **Community friendly** The project aims to attract a diverse and broader developer community by creating applications
    in various programming languages and providing a well-documented, consistent and user-friendly API.
    Community collaboration and contributions are encouraged to drive open source innovation.
 

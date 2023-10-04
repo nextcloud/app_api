@@ -5,20 +5,20 @@
 	<summary>Nextcloud AppAPI</summary>
 	<description>
 	<![CDATA[
-### Supercharge your Nextcloud with AppAPI and applications specifically designed for it.
+### Boost your Nextcloud with AppAPI and its specially designed applications.
 
 
 The AppAPI is a project within the Nextcloud ecosystem designed to streamline and enhance the process of
-application development, deployment, and management. It introduces a new methodology that allows developers to create
+application development, deployment, and management.
+
+It introduces a new methodology that allows developers to create
 applications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.
 
 
 ### List of applications that require AppAPI:
 
-| Name                | Language | Description         | Link                                                          |
-|---------------------|----------|---------------------|---------------------------------------------------------------|
-| talk_bot_ai_example | Python   | Talk Bot demo       | [GitHub](https://github.com/cloud-py-api/talk_bot_ai_example) |
-| upscaler_example    | Python   | Image UpScaler demo | [GitHub](https://github.com/cloud-py-api/upscaler_example)    |
+- [talk_bot_ai_example](https://github.com/cloud-py-api/talk_bot_ai_example)
+- [upscaler_example](https://github.com/cloud-py-api/upscaler_example)
 
 _If you wish to develop an application, we will gladly help and assist you._
 
@@ -26,10 +26,10 @@ _If you wish to develop an application, we will gladly help and assist you._
 
 We appreciate any support for this project:
 
-- ⭐ Star our work on GitHub (it helps us a lot)
-- ❗ Create an Issue or feature request (bring to us an excellent idea)
-- 💁 Resolve an Issue and create a Pull Request (contribute to this project)
-- 🧑‍💻 Develop your own application using AppAPI and share it with the world (contact us if help is needed)
+- ⭐ Star our work on GitHub
+- ❗ Create an Issue or feature request
+- 💁 Resolve an Issue and create a Pull Request
+- 🧑‍💻 Develop your own application using AppAPI
 
 We are genuinely excited about the future of the AppAPI project and its potential to transform
 the way applications are developed and experienced within Nextcloud.
@@ -37,7 +37,7 @@ the way applications are developed and experienced within Nextcloud.
 As we embark on this journey, we warmly invite you - developers, thinkers, creators, and visionaries -
 to join us in shaping a more versatile, stable, and secure app landscape.
 
-#### Your insights, suggestions, and contributions are invaluable to us.
+*Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
 	<version>1.0.0</version>
