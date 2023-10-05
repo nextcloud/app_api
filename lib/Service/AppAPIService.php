@@ -8,6 +8,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
 
+use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
 use OCP\App\IAppManager;
@@ -53,6 +54,7 @@ class AppAPIService {
 	private ExNotificationsManager $exNotificationsManager;
 	private TalkBotsService $talkBotsService;
 	private ExAppFetcher $exAppFetcher;
+	private ExAppArchiveFetcher $exAppArchiveFetcher;
 
 	public function __construct(
 		LoggerInterface $logger,
@@ -74,6 +76,7 @@ class AppAPIService {
 		ExNotificationsManager $exNotificationsManager,
 		TalkBotsService $talkBotsService,
 		ExAppFetcher $exAppFetcher,
+		ExAppArchiveFetcher $exAppArchiveFetcher,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
@@ -94,6 +97,7 @@ class AppAPIService {
 		$this->exNotificationsManager = $exNotificationsManager;
 		$this->talkBotsService = $talkBotsService;
 		$this->exAppFetcher = $exAppFetcher;
+		$this->exAppArchiveFetcher = $exAppArchiveFetcher;
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -364,6 +368,10 @@ class AppAPIService {
 	}
 
 	public function getExAppRequestedScopes(ExApp $exApp, ?\SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
+		if (isset($jsonInfo['scopes'])) {
+			return $jsonInfo['scopes'];
+		}
+
 		if ($infoXml === null) {
 			$exAppInfo = $this->getExAppInfoFromAppstore($exApp);
 			if (isset($exAppInfo)) {
@@ -386,8 +394,6 @@ class AppAPIService {
 					'optional' => array_values($optional),
 				];
 			}
-		} elseif (isset($jsonInfo['scopes'])) {
-			return $jsonInfo['scopes'];
 		}
 
 		return ['error' => 'Failed to get ExApp requested scopes.'];
@@ -402,14 +408,13 @@ class AppAPIService {
 	 */
 	public function getExAppInfoFromAppstore(ExApp $exApp): ?\SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
-		$exAppReleaseInfo = array_filter($exApps, function (array $exAppItem) use ($exApp) {
+		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($exApp) {
 			return $exAppItem['id'] === $exApp->getAppid() && count(array_filter($exAppItem['releases'], function (array $release) use ($exApp) {
 				return $release['version'] === $exApp->getVersion();
 			})) === 1;
 		});
-		if (count($exAppReleaseInfo) === 1) {
-			$pathToInfoXml = end($exAppReleaseInfo[0]['releases'])['download'];
-			return simplexml_load_string(file_get_contents($pathToInfoXml));
+		if (count($exAppAppstoreData) === 1) {
+			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
 		}
 		return null;
 	}
@@ -423,13 +428,13 @@ class AppAPIService {
 	 */
 	public function getLatestExAppInfoFromAppstore(string $appId): ?\SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
-		$exAppReleaseInfo = array_filter($exApps, function (array $exAppItem) use ($appId) {
+		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($appId) {
 			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;
 		});
-		$exAppReleaseInfo = end($exAppReleaseInfo);
-		$exAppInfo = end($exAppReleaseInfo['releases']);
-		if ($exAppInfo !== false) {
-			return simplexml_load_string(file_get_contents($exAppInfo['download']));
+		$exAppAppstoreData = end($exAppAppstoreData);
+		$exAppReleaseInfo = end($exAppAppstoreData['releases']);
+		if ($exAppReleaseInfo !== false) {
+			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
 		}
 		return null;
 	}
