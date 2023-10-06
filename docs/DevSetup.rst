@@ -26,49 +26,6 @@ AAfter this, you can enable it from the directory where the ``occ`` command resi
 
 	./occ app:enable --force app_api
 
-
-Patching Nextcloud 26
-"""""""""""""""""""""
-
-Although only NextCloud since version 27.1 is officially supported, installation on NextCloud version 26 is possible.
-If you are not using NextCloud version 26, you can skip this section.
-
-The only changes to Nextcloud server are in ``base.php`` file, required only for **Nextcloud 26**.
-
-.. code-block:: php
-
-	if (self::tryAppAPILogin($request)) {
-		return true;
-	}
-
-
-And down below ``tryAppAPILogin`` method is added:
-
-.. code-block:: php
-
-	protected static function tryAppAPILogin(OCP\IRequest $request): bool {
-		$appManager = Server::get(OCP\App\IAppManager::class);
-		if (!$request->getHeader('AUTHORIZATION-APP-API')) {
-			return false;
-		}
-		if (!$appManager->isInstalled('app_api')) {
-			return false;
-		}
-		try {
-			$appAPIService = Server::get(OCA\AppAPI\Service\AppAPIService::class);
-			return $appAPIService->validateExAppRequestToNC($request);
-		} catch (\Psr\Container\NotFoundExceptionInterface|\Psr\Container\ContainerExceptionInterface $e) {
-			return false;
-		}
-	}
-
-.. note:: The patch itself can be found in the project root directory under the name ``base_php.patch``.
-
-Apply the patch from the root directory of Nextcloud using :command:`patch`::
-
-	patch -p 1 -i apps/app_api/base_php.patch
-
-
 In Place of a Conclusion
 """"""""""""""""""""""""
 

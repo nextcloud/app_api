@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.1 - 2023-10-06]
+
+### Fixed
+
+- Invalid download of ex. applications from the AppStore. #88
+
 ## [1.0.0 - 2023-10-05]
 
 ### Added

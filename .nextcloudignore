@@ -36,5 +36,3 @@
 /stylelint.config.js
 /webpack.*
 tests
-base_php.patch
-
