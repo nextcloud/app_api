@@ -14,7 +14,6 @@
 /.pre-commit-config.yaml
 /babel.config.js
 /build
-/CHANGELOG.md
 /APPS.md
 /AUTHORS.md
 /README.md
@@ -37,5 +36,3 @@
 /stylelint.config.js
 /webpack.*
 tests
-base_php.patch
-
