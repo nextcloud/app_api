@@ -59,7 +59,7 @@ class ExAppApiScopeService {
 
 			$apiScopes = $this->getExAppApiScopes();
 			foreach ($apiScopes as $apiScope) {
-				if (str_starts_with($apiRoute, $apiScope->getApiRoute())) {
+				if (str_starts_with($this->sanitizeOcsRoute($apiRoute), $apiScope->getApiRoute())) {
 					$this->cache->set($cacheKey, $apiScope);
 					return $apiScope;
 				}
@@ -68,6 +68,20 @@ class ExAppApiScopeService {
 		} catch (Exception) {
 			return null;
 		}
+	}
+
+	/**
+	 * Check if the given route has ocs prefix and cut it off
+	 *
+	 * @param string $route
+	 *
+	 * @return string
+	 */
+	private function sanitizeOcsRoute(string $route): string {
+		if (preg_match("/\/ocs\/v(1|2)\.php/", $route, $matches)) {
+			return str_replace($matches[0], '', $route);
+		}
+		return $route;
 	}
 
 	public function registerInitScopes(): bool {

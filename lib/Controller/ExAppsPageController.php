@@ -458,7 +458,9 @@ class ExAppsPageController extends Controller {
 					}
 
 					$exApp = $this->service->getExApp($appId);
-					$this->service->enableExApp($exApp);
+					if (!$this->service->enableExApp($exApp)) {
+						return new JSONResponse(['data' => ['message' => 'Failed to enable ExApp']], Http::STATUS_INTERNAL_SERVER_ERROR);
+					}
 					return new JSONResponse([
 						'data' => [
 							'update_required' => $updateRequired,
