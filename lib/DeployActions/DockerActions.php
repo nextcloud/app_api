@@ -378,7 +378,7 @@ class DockerActions implements IDeployActions {
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $port,
 			'storage' => $storage,
-			'system_app' => (bool) ($infoXml->xpath('external-app/system')[0] ?? false),
+			'system_app' => filter_var((string) $infoXml->xpath('external-app/system')[0], FILTER_VALIDATE_BOOLEAN),
 			'secret' => $secret ?? $this->random->generate(128),
 		], $params['env_options'] ?? [], $deployConfig);
 
@@ -419,7 +419,7 @@ class DockerActions implements IDeployActions {
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
 			sprintf('APP_PERSISTENT_STORAGE=%s', $params['storage']),
-			sprintf('IS_SYSTEM_APP=%s', $params['system_app']),
+			sprintf('IS_SYSTEM_APP=%s', $params['system_app'] ? 'true' : 'false'),
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
