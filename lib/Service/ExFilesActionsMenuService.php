@@ -72,7 +72,7 @@ class ExFilesActionsMenuService {
 				'permissions' => $params['permissions'] ?? 31,
 				'order' => $params['order'] ?? 0,
 				'icon' => $params['icon'] ?? null,
-				'icon_class' => $params['icon_class'] ?? 'icon-app-ecosystem-v2',
+				'icon_class' => $params['icon_class'] ?? 'icon-app-api',
 				'action_handler' => $params['action_handler'],
 			]);
 			if ($fileActionMenu !== null) {
