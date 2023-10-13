@@ -106,7 +106,7 @@ class ExAppApiScopeService {
 			['api_route' => '/dav/', 'scope_group' => 10, 'name' => 'FILES', 'user_check' => 1],
 			['api_route' => '/apps/files/ajax/', 'scope_group' => 10, 'name' => 'FILES', 'user_check' => 1],
 			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 11, 'name' => 'FILES_SHARING', 'user_check' => 1],
-			['api_route' => '/cloud/users', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
+			['api_route' => '/cloud/user', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
 			['api_route' => '/cloud/groups', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
 			['api_route' => '/apps/user_status/api/', 'scope_group' => 31, 'name' => 'USER_STATUS', 'user_check' => 1],
 			['api_route' => '/apps/notifications/api/', 'scope_group' => 32, 'name' => 'NOTIFICATIONS', 'user_check' => 1],
