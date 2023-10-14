@@ -20,7 +20,6 @@
 /composer.*
 /node_modules
 /screenshots
-/examples
 /docs
 /src
 /vendor/bin
