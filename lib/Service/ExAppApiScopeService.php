@@ -108,6 +108,7 @@ class ExAppApiScopeService {
 			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 11, 'name' => 'FILES_SHARING', 'user_check' => 1],
 			['api_route' => '/cloud/user', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
 			['api_route' => '/cloud/groups', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
+			['api_route' => '/avatar', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
 			['api_route' => '/apps/user_status/api/', 'scope_group' => 31, 'name' => 'USER_STATUS', 'user_check' => 1],
 			['api_route' => '/apps/notifications/api/', 'scope_group' => 32, 'name' => 'NOTIFICATIONS', 'user_check' => 1],
 			['api_route' => '/apps/weather_status/api/', 'scope_group' => 33, 'name' => 'WEATHER_STATUS', 'user_check' => 1],
