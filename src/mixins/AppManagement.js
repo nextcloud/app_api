@@ -10,10 +10,10 @@ export default {
 			return this.app && this.$store.getters.loading(this.app.id)
 		},
 		isInitializing() {
-			return this.app && Object.hasOwn(this.app.status, 'progress') && this.app.status.progress < 100
+			return this.app && Object.hasOwn(this.app?.status, 'progress') && this.app.status.progress < 100
 		},
 		enableButtonText() {
-			if (this.app && Object.hasOwn(this.app.status, 'progress')) {
+			if (this.app && Object.hasOwn(this.app?.status, 'progress')) {
 				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.progress })
 			}
 			if (this.app.needsDownload) {
@@ -28,7 +28,7 @@ export default {
 			return t('app_api', 'Allow untested app')
 		},
 		enableButtonTooltip() {
-			if (!this.$store.getters.getDaemonAccessbile) {
+			if (!this.$store.getters.getDaemonAccessible) {
 				return t('app_api', 'Default Deploy daemon is not accessible. Please verify configuration')
 			}
 			if (this.app.needsDownload) {
@@ -44,7 +44,7 @@ export default {
 			return base
 		},
 		defaultDeployDaemonAccessible() {
-			return this.$store.getters.getDaemonAccessbile || false
+			return this.$store.getters.getDaemonAccessible || false
 		},
 	},
 

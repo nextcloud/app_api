@@ -10,6 +10,7 @@ use OC\App\DependencyAnalyzer;
 use OC\App\Platform;
 use OC_App;
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppScope;
@@ -25,6 +26,7 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -468,16 +470,15 @@ class ExAppsPageController extends Controller {
 					// Start ExApp initialization step (to download dynamic content, e.g. models)
 					$this->service->dispatchExAppInit($exApp);
 
-					// TODO: Return intermediate status for UI, so that it knows when to call separate enable endpoint to finish enable action
-					if (!$this->service->enableExApp($exApp)) {
-						return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
-					}
+					//if (!$this->service->enableExApp($exApp)) {
+					//	return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+					//}
 					return new JSONResponse([
 						'data' => [
-							'update_required' => $updateRequired,
 							'daemon_config' => $daemonConfig,
 							'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 							'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
+							'status' => json_decode($exApp->getStatus(), true),
 						]
 					]);
 				}
@@ -661,27 +662,20 @@ class ExAppsPageController extends Controller {
 			'host' => $exAppInfo['host'],
 			'port' => (int) $exAppInfo['port'],
 		])) {
-			// TODO: Set ExApp status before initialization to display progress in UI
-			// 5.5 Dispatch init step on ExApp side
+			// 6. Set initialization progress to start
+			$this->service->setAppInitProgress($appId, 0);
+			// 7. Dispatch init step on ExApp side
 			$this->service->dispatchExAppInit($exApp);
-
-			// 6. Enable ExApp
-			//$this->service->enableExApp($exApp);
 		}
 
 		return new JSONResponse([
 			'data' => [
 				'appid' => $appId,
+				'status' => ['progress' => 0],
+				'systemApp' => filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN),
+				'exAppUrl' => AppAPIService::getExAppUrl($exAppInfo['protocol'], $exAppInfo['host'], (int) $exAppInfo['port']),
 			]
 		]);
-
-		//return new JSONResponse([
-		//	'data' => [
-		//		'appid' => $appId,
-		//		'systemApp' => filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN),
-		//		'exAppUrl' => AppAPIService::getExAppUrl($exAppInfo['protocol'], $exAppInfo['host'], (int) $exAppInfo['port']),
-		//	]
-		//]);
 	}
 
 	public function enableExApp(string $appId): JSONResponse {

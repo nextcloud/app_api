@@ -318,6 +318,9 @@ class AppAPIService {
 		$cacheKey = '/exApp_' . $exApp->getAppid();
 
 		$status = json_decode($exApp->getStatus(), true);
+		if ($progress === -1) {
+			$this->logger->error(sprintf('ExApp %s initialization failed', $appId));
+		}
 		if ($progress < 100 && $progress >= 0) {
 			$status['progress'] = $progress;
 		} else {

@@ -99,6 +99,10 @@ class OCSApiController extends OCSController {
 	#[NoCSRFRequired]
 	public function setAppProgress(string $appId, int $progress): DataResponse {
 		$this->service->setAppInitProgress($appId, $progress);
+		if ($progress === 100) {
+			$exApp = $this->service->getExApp($appId);
+			$this->service->enableExApp($exApp);
+		}
 		return new DataResponse();
 	}
 }

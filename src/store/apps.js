@@ -10,6 +10,7 @@ const state = {
 	updateCount: 0,
 	loading: {},
 	loadingList: false,
+	statusUpdater: null,
 	gettingCategoriesPromise: null,
 	daemonAccessible: false,
 }
@@ -62,7 +63,7 @@ const mutations = {
 		app.error = null
 	},
 
-	enableApp(state, { appId, groups, daemon, systemApp, exAppUrl }) {
+	enableApp(state, { appId, groups, daemon, systemApp, exAppUrl, status }) {
 		const app = state.apps.find(app => app.id === appId)
 		if (daemon) {
 			app.installed = true
@@ -74,6 +75,9 @@ const mutations = {
 		}
 		if (exAppUrl) {
 			app.exAppUrl = exAppUrl
+		}
+		if (status) {
+			app.status = status
 		}
 		app.active = true
 		app.groups = groups
@@ -103,13 +107,14 @@ const mutations = {
 		state.apps.find(app => app.id === appId).update = null
 	},
 
-	updateApp(state, { appId, systemApp, exAppUrl }) {
+	updateApp(state, { appId, systemApp, exAppUrl, status }) {
 		const app = state.apps.find(app => app.id === appId)
 		const version = app.update
 		app.update = null
 		app.version = version
 		app.systemApp = systemApp
 		app.exAppUrl = exAppUrl
+		app.status = status
 		state.updateCount--
 	},
 
@@ -149,6 +154,14 @@ const mutations = {
 
 	setAppStatus(state, { appId, status }) {
 		state.apps.find(app => app.id === appId).status = status
+		if (!Object.hasOwn(status, 'progress') || status?.progress === 100) {
+			state.apps.find(app => app.id === appId).active = true
+			state.apps.find(app => app.id === appId).canUnInstall = false
+		}
+	},
+
+	setIntervalUpdater(state, updater) {
+		state.statusUpdater = updater
 	},
 }
 
@@ -170,13 +183,16 @@ const getters = {
 	getCategoryById: (state) => (selectedCategoryId) => {
 		return state.categories.find((category) => category.id === selectedCategoryId)
 	},
-	getDaemonAccessbile(state) {
+	getDaemonAccessible(state) {
 		return state.daemonAccessible
 	},
 	getAppStatus(state) {
 		return function(appId) {
 			return state.apps.find(app => app.id === appId).status
 		}
+	},
+	getStatusUpdater(state) {
+		return state.statusUpdater
 	},
 }
 
@@ -192,12 +208,11 @@ const actions = {
 		return api.requireAdmin().then((response) => {
 			context.commit('startLoading', apps)
 			context.commit('startLoading', 'install')
-			// TODO: Rewrite to separate actions
 			return api.post(generateUrl('/apps/app_api/apps/enable'), { appIds: apps, groups })
 				.then((response) => {
 					context.commit('stopLoading', apps)
 					context.commit('stopLoading', 'install')
-					// TODO: Divide enableApp mutations to different ones (deploy&register, enable)
+
 					apps.forEach(_appId => {
 						context.commit('enableApp', {
 							appId: _appId,
@@ -205,8 +220,11 @@ const actions = {
 							daemon: response.data.data?.daemon_config,
 							systemApp: response.data.data?.systemApp,
 							exAppUrl: response.data.data?.exAppUrl,
+							status: response.data.data?.status,
 						})
 					})
+
+					context.dispatch('updateAppsStatus')
 
 					// check for server health
 					return api.get(generateUrl('apps/files'))
@@ -323,7 +341,9 @@ const actions = {
 						appId,
 						systemApp: response.data.data?.systemApp,
 						exAppUrl: response.data.data?.exAppUrl,
+						status: response.data.data?.status,
 					})
+					context.dispatch('updateAppsStatus')
 					return true
 				})
 				.catch((error) => {
@@ -369,12 +389,25 @@ const actions = {
 	getAppStatus(context, { appId }) {
 		return api.get(generateUrl(`/apps/app_api/apps/status/${appId}`))
 			.then((response) => {
+				context.commit('setAppStatus', { appId, status: response.data })
 				if (!Object.hasOwn(response.data, 'progress') || response.data?.progress === 100) {
-					context.commit('stopLoading', appId)
+					const initializingApps = context.getters.getAllApps.filter(app => Object.hasOwn(app.status, 'progress'))
+					if (initializingApps.length === 0) {
+						clearInterval(context.getters.getStatusUpdater)
+						context.commit('setIntervalUpdater', null)
+					}
 				}
-				context.commit('setAppStatus', { appId, status: response.data.status })
 			})
 			.catch((error) => context.commit('API_FAILURE', error))
+	},
+
+	updateAppsStatus(context) {
+		context.commit('setIntervalUpdater', setInterval(() => {
+			const initializingApps = context.getters.getAllApps.filter(app => Object.hasOwn(app.status, 'progress'))
+			Array.from(initializingApps).forEach(app => {
+				context.dispatch('getAppStatus', { appId: app.id })
+			})
+		}, 5000))
 	},
 
 }

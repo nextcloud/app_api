@@ -193,20 +193,6 @@ class Register extends Command {
 
 			$this->service->dispatchExAppInit($exApp);
 
-			// TODO: Set initialization step as an option and disable --enabled flag if app has initialization step
-
-			$enabled = (bool) $input->getOption('enabled');
-			if ($enabled) {
-				if ($this->service->enableExApp($exApp)) {
-					$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
-				} else {
-					$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
-					// Fallback unregistering ExApp
-					$this->service->unregisterExApp($exApp->getAppid());
-					return 1;
-				}
-			}
-
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 			return 0;
 		}

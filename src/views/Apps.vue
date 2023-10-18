@@ -206,7 +206,6 @@ export default {
 			searchQuery: '',
 			screenshotLoaded: false,
 			state: loadState('app_api', 'apps'),
-			statusUpdater: null,
 		}
 	},
 
@@ -305,7 +304,7 @@ export default {
 		this.$store.dispatch('getAllApps')
 		this.$store.commit('setUpdateCount', this.state.updateCount)
 		this.$store.commit('setDaemonAccessible', this.state.daemon_config_accessible)
-		this.statusUpdater = setInterval(this.updateAppsStatus, 5000)
+		this.$store.dispatch('updateAppsStatus')
 	},
 
 	mounted() {
@@ -315,7 +314,7 @@ export default {
 	beforeDestroy() {
 		unsubscribe('nextcloud:unified-search.search', this.setSearch)
 		unsubscribe('nextcloud:unified-search.reset', this.resetSearch)
-		clearInterval(this.statusUpdater)
+		clearInterval(this.$store.getters.getStatusUpdater)
 	},
 
 	methods: {
@@ -331,15 +330,6 @@ export default {
 				name: 'apps-category',
 				params: { category: this.$route.params.category ?? 'installed' },
 			})
-		},
-		updateAppsStatus() {
-			if (this.apps.length > 0) {
-				const initializingApps = this.apps.filter(app => Object.hasOwn(app.status, 'progress'))
-				console.debug(initializingApps)
-				Array.from(initializingApps).forEach(app => {
-					this.$store.dispatch('getAppStatus', { appId: app.id })
-				})
-			}
 		},
 	},
 }
