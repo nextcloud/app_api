@@ -191,6 +191,10 @@ class Register extends Command {
 				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], 'optional');
 			}
 
+			$this->service->dispatchExAppInit($exApp);
+
+			// TODO: Set initialization step as an option and disable --enabled flag if app has initialization step
+
 			$enabled = (bool) $input->getOption('enabled');
 			if ($enabled) {
 				if ($this->service->enableExApp($exApp)) {

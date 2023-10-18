@@ -12,13 +12,13 @@
 					class="uninstall"
 					type="button"
 					:value="t('settings', 'Remove')"
-					:disabled="installing || isLoading"
+					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
 					@click="remove(app.id)">
 				<input v-if="app.active"
 					class="enable"
 					type="button"
 					:value="t('settings','Disable')"
-					:disabled="installing || isLoading"
+					:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
 					@click="disable(app.id)">
 				<input v-if="!app.active && (app.canInstall || app.isCompatible)"
 					:title="enableButtonTooltip"
@@ -26,7 +26,7 @@
 					class="enable primary"
 					type="button"
 					:value="enableButtonText"
-					:disabled="!app.canInstall || installing || isLoading"
+					:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
 					@click="enable(app.id)">
 				<input v-else-if="!app.active && !app.canInstall"
 					:title="forceEnableButtonTooltip"
@@ -34,7 +34,7 @@
 					class="enable force"
 					type="button"
 					:value="forceEnableButtonText"
-					:disabled="installing || isLoading"
+					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
 					@click="forceEnable(app.id)">
 			</div>
 		</div>

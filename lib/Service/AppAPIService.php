@@ -136,7 +136,7 @@ class AppAPIService {
 			'host' => $appData['host'],
 			'port' => $appData['port'],
 			'secret' => $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
-			'status' => json_encode(['active' => true]), // TODO: Add status request to ExApp
+			'status' => json_encode(['active' => false, 'progress' => 0]),
 			'created_time' => time(),
 			'last_check_time' => time(),
 		]);
@@ -305,31 +305,46 @@ class AppAPIService {
 	}
 
 	/**
-	 * Send status check request to ExApp
+	 * Update ExApp status during initialization step.
+	 * Active status is set when progress reached 100%.
 	 *
 	 * @param string $appId
+	 * @param int $progress
 	 *
-	 * @return array|null
+	 * @return void
 	 */
-	public function getAppStatus(string $appId): ?array {
+	public function setAppInitProgress(string $appId, int $progress): void {
 		$exApp = $this->getExApp($appId);
-		if ($exApp === null) {
-			return null;
-		}
+		$cacheKey = '/exApp_' . $exApp->getAppid();
 
-		$response = $this->requestToExApp(null, '', $exApp, '/status', 'GET');
-		if ($response instanceof IResponse && $response->getStatusCode() === 200) {
-			$status = json_decode($response->getBody(), true);
-			$exApp->setStatus($status);
-			$this->updateExAppLastCheckTime($exApp);
+		$status = json_decode($exApp->getStatus(), true);
+		if ($progress < 100 && $progress >= 0) {
+			$status['progress'] = $progress;
+		} else {
+			unset($status['progress']);
 		}
-		return json_decode($exApp->getStatus(), true);
+		$status['active'] = $progress === 100;
+		$exApp->setStatus(json_encode($status));
+
+		try {
+			$this->exAppMapper->update($exApp);
+			$this->updateExAppLastCheckTime($exApp);
+			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+		} catch (Exception) {
+		}
 	}
 
+	/**
+	 * Regular ExApp heartbeat to verify connection
+	 *
+	 * @param array $params ExApp url params (protocol, host, port)
+	 *
+	 * @return bool
+	 */
 	public function heartbeatExApp(array $params): bool {
 		$heartbeatAttempts = 0;
 		$delay = 1;
-		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
+		$maxHeartbeatAttempts = 60 * 10 * $delay; // minutes for container initialization
 		$heartbeatUrl = self::getExAppUrl(
 			$params['protocol'],
 			$params['host'],
@@ -365,6 +380,34 @@ class AppAPIService {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Dispatch ExApp initialization step, that may take a long time to display the progress of initialization.
+	 *
+	 * @return void
+	 */
+	public function dispatchExAppInit(ExApp $exApp): void {
+		$initUrl = self::getExAppUrl(
+				$exApp->getProtocol(),
+				$exApp->getHost(),
+				$exApp->getPort(),
+			) . '/init';
+
+		$options = [
+			'headers' => [
+				'Accept' => 'application/json',
+				'Content-Type' => 'application/json',
+			],
+			'nextcloud' => [
+				'allow_local_address' => true,
+			],
+		];
+
+		try {
+			$this->client->postAsync($initUrl, $options);
+		} catch (\Exception) {
+		}
 	}
 
 	public function getExAppRequestedScopes(ExApp $exApp, ?\SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
@@ -611,8 +654,11 @@ class AppAPIService {
 
 		if ($authValid) {
 			if (!$exApp->getEnabled()) {
-				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $exApp->getEnabled()));
-				return false;
+				// If ExApp is in initializing state, it is disabled yet, so we allow requests in such case
+				if (!isset(json_decode($exApp->getStatus(), true)['progress'])) {
+					$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
+					return false;
+				}
 			}
 			if (!$this->handleExAppVersionChange($request, $exApp)) {
 				return false;

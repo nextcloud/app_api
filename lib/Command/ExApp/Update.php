@@ -223,6 +223,10 @@ class Update extends Command {
 			return 1;
 		}
 
+		$this->service->dispatchExAppInit($exApp);
+
+		// TODO: Set initialization step as an option and disable --enabled flag if app has initialization step
+
 		$enabled = (bool) $input->getOption('enabled');
 		if ($enabled) {
 			if ($this->service->enableExApp($exApp)) {

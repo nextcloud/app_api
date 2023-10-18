@@ -6,7 +6,7 @@
 		<p><b>{{ t('app_api', 'Display Name') }}</b>: {{ daemon.display_name }}</p>
 		<div class="exappinfo">
 			<div class="exappinfo-row">
-				<b>{{ t('app_api', 'External App URL') }}</b>
+				<b>{{ t('app_api', 'External App URL: ') }}</b>
 				<span>{{ app.exAppUrl }}</span>
 			</div>
 			<div class="exappinfo-row">

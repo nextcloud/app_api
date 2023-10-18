@@ -11,8 +11,7 @@ const state = {
 	loading: {},
 	loadingList: false,
 	gettingCategoriesPromise: null,
-	defaultDaemonName: '',
-	daemon: null,
+	daemonAccessible: false,
 }
 
 const mutations = {
@@ -143,6 +142,14 @@ const mutations = {
 			Vue.set(state.loading, id, false) // eslint-disable-line
 		}
 	},
+
+	setDaemonAccessible(state, value) {
+		state.daemonAccessible = value
+	},
+
+	setAppStatus(state, { appId, status }) {
+		state.apps.find(app => app.id === appId).status = status
+	},
 }
 
 const getters = {
@@ -163,6 +170,14 @@ const getters = {
 	getCategoryById: (state) => (selectedCategoryId) => {
 		return state.categories.find((category) => category.id === selectedCategoryId)
 	},
+	getDaemonAccessbile(state) {
+		return state.daemonAccessible
+	},
+	getAppStatus(state) {
+		return function(appId) {
+			return state.apps.find(app => app.id === appId).status
+		}
+	},
 }
 
 const actions = {
@@ -177,10 +192,12 @@ const actions = {
 		return api.requireAdmin().then((response) => {
 			context.commit('startLoading', apps)
 			context.commit('startLoading', 'install')
+			// TODO: Rewrite to separate actions
 			return api.post(generateUrl('/apps/app_api/apps/enable'), { appIds: apps, groups })
 				.then((response) => {
 					context.commit('stopLoading', apps)
 					context.commit('stopLoading', 'install')
+					// TODO: Divide enableApp mutations to different ones (deploy&register, enable)
 					apps.forEach(_appId => {
 						context.commit('enableApp', {
 							appId: _appId,
@@ -198,12 +215,11 @@ const actions = {
 								showInfo(
 									t(
 										'app_api',
-										'The app has been enabled but needs to be updated. You will be redirected to the update page in 5 seconds.'
+										'The app has been enabled but needs to be updated.'
 									),
 									{
 										onClick: () => window.location.reload(),
 										close: false,
-
 									}
 								)
 								setTimeout(function() {
@@ -348,6 +364,17 @@ const actions = {
 			}
 		}
 		return context.state.gettingCategoriesPromise
+	},
+
+	getAppStatus(context, { appId }) {
+		return api.get(generateUrl(`/apps/app_api/apps/status/${appId}`))
+			.then((response) => {
+				if (!Object.hasOwn(response.data, 'progress') || response.data?.progress === 100) {
+					context.commit('stopLoading', appId)
+				}
+				context.commit('setAppStatus', { appId, status: response.data.status })
+			})
+			.catch((error) => context.commit('API_FAILURE', error))
 	},
 
 }

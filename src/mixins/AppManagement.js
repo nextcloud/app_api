@@ -9,30 +9,42 @@ export default {
 		isLoading() {
 			return this.app && this.$store.getters.loading(this.app.id)
 		},
+		isInitializing() {
+			return this.app && Object.hasOwn(this.app.status, 'progress') && this.app.status.progress < 100
+		},
 		enableButtonText() {
-			if (this.app.needsDownload) {
-				return t('settings', 'Deploy and Enable')
+			if (this.app && Object.hasOwn(this.app.status, 'progress')) {
+				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.progress })
 			}
-			return t('settings', 'Enable')
+			if (this.app.needsDownload) {
+				return t('app_api', 'Deploy and Enable')
+			}
+			return t('app_api', 'Enable')
 		},
 		forceEnableButtonText() {
 			if (this.app.needsDownload) {
-				return t('settings', 'Allow untested app')
+				return t('app_api', 'Allow untested app')
 			}
-			return t('settings', 'Allow untested app')
+			return t('app_api', 'Allow untested app')
 		},
 		enableButtonTooltip() {
+			if (!this.$store.getters.getDaemonAccessbile) {
+				return t('app_api', 'Default Deploy daemon is not accessible. Please verify configuration')
+			}
 			if (this.app.needsDownload) {
-				return t('settings', 'The app will be downloaded from the App Store and deployed on default Deploy Daemon')
+				return t('app_api', 'The app will be downloaded from the App Store and deployed on default Deploy Daemon')
 			}
 			return ''
 		},
 		forceEnableButtonTooltip() {
-			const base = t('settings', 'This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected.')
+			const base = t('app_api', 'This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected.')
 			if (this.app.needsDownload) {
-				return base + ' ' + t('settings', 'The app will be downloaded from the App Store and deployed on default Deploy Daemon')
+				return base + ' ' + t('app_api', 'The app will be downloaded from the App Store and deployed on default Deploy Daemon')
 			}
 			return base
+		},
+		defaultDeployDaemonAccessible() {
+			return this.$store.getters.getDaemonAccessbile || false
 		},
 	},
 
