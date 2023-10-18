@@ -10,7 +10,6 @@ use OC\App\DependencyAnalyzer;
 use OC\App\Platform;
 use OC_App;
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppScope;
@@ -24,10 +23,8 @@ use OCA\AppAPI\Service\ExAppUsersService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
-use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -668,15 +665,15 @@ class ExAppsPageController extends Controller {
 			// 5.5 Dispatch init step on ExApp side
 			$this->service->dispatchExAppInit($exApp);
 
-			return new JSONResponse([
-				'data' => [
-					'appid' => $appId,
-				]
-			]);
-
 			// 6. Enable ExApp
 			//$this->service->enableExApp($exApp);
 		}
+
+		return new JSONResponse([
+			'data' => [
+				'appid' => $appId,
+			]
+		]);
 
 		//return new JSONResponse([
 		//	'data' => [

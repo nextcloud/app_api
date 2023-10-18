@@ -389,10 +389,10 @@ class AppAPIService {
 	 */
 	public function dispatchExAppInit(ExApp $exApp): void {
 		$initUrl = self::getExAppUrl(
-				$exApp->getProtocol(),
-				$exApp->getHost(),
-				$exApp->getPort(),
-			) . '/init';
+			$exApp->getProtocol(),
+			$exApp->getHost(),
+			$exApp->getPort(),
+		) . '/init';
 
 		$options = [
 			'headers' => [
