@@ -51,7 +51,6 @@ class Update extends Command {
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('force-update', null, InputOption::VALUE_NONE, 'Force ExApp update approval');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force new ExApp scopes approval');
-		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after update');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {

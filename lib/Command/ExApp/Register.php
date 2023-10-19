@@ -63,7 +63,6 @@ class Register extends Command {
 		$this->addArgument('appid', InputArgument::REQUIRED);
 		$this->addArgument('daemon-config-name', InputArgument::OPTIONAL);
 
-		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info');
@@ -202,6 +201,7 @@ class Register extends Command {
 						$output->writeln(sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']));
 						return 1;
 					}
+					usleep(100000); // 0.1s
 				} while (isset($status['progress']));
 			}
 
