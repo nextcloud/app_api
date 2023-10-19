@@ -328,18 +328,20 @@ class AppAPIService {
 			return;
 		}
 
-		if ($progress === -1) {
+		if ($error !== '') {
 			$this->logger->error(sprintf('ExApp %s initialization failed. Error: %s', $appId, $error));
-			if ($error !== '') {
-				$status['error'] = $error;
-			}
-		}
-		if ($progress >= 0 && $progress < 100) {
-			$status['progress'] = $progress;
-		} else {
+			$status['error'] = $error;
 			unset($status['progress']);
+		} else {
+			if ($progress >= 0 && $progress < 100) {
+				$status['progress'] = $progress;
+			} else if ($progress === 100) {
+				unset($status['progress']);
+			} else {
+				throw new \InvalidArgumentException('Invalid ExApp status progress value');
+			}
+			$status['active'] = $progress === 100;
 		}
-		$status['active'] = $progress === 100;
 		$exApp->setStatus(json_encode($status));
 
 		try {
