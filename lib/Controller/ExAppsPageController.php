@@ -101,13 +101,16 @@ class ExAppsPageController extends Controller {
 		$appInitialData = [
 			'appstoreEnabled' => $this->config->getSystemValueBool('appstoreenabled', true),
 			'updateCount' => count($this->getExAppsWithUpdates()),
-			'default_daemon_config' => $defaultDaemonConfigName,
-			'docker_socket_accessible' => $this->dockerActions->isDockerSocketAvailable(),
 		];
 
 		if ($defaultDaemonConfigName !== '') {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
-			$appInitialData['daemon_config'] = $daemonConfig;
+			$this->dockerActions->initGuzzleClient($daemonConfig);
+			$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
+			$appInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
+			if (!$daemonConfigAccessible) {
+				$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please verify its configuration', $daemonConfig->getName()));
+			}
 		}
 
 		$this->initialStateService->provideInitialState('apps', $appInitialData);
@@ -256,6 +259,7 @@ class ExAppsPageController extends Controller {
 				'daemon' => $daemon,
 				'systemApp' => $exApp !== null && $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 				'exAppUrl' => $exApp !== null ? AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) : '',
+				'status' => $exApp !== null ? json_decode($exApp->getStatus(), true) : [],
 			];
 		}
 
@@ -398,6 +402,7 @@ class ExAppsPageController extends Controller {
 					'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
 					'releases' => [],
 					'update' => null,
+					'status' => json_decode($exApp->getStatus(), true),
 				];
 			}
 		}
@@ -447,26 +452,31 @@ class ExAppsPageController extends Controller {
 						// 2. Register ExApp (container must be already initialized successfully)
 						if (!$this->registerExApp($appId, $infoXml, $daemonConfig)) {
 							$this->service->unregisterExApp($appId); // Fallback unregister if failure
+							return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to register ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 						}
 					} else {
-						$this->logger->error('Failed to Deploy ExApp');
+						$this->logger->error(sprintf('Failed to Deploy %s ExApp', $appId));
 						return new JSONResponse([
 							'data' => [
-								'message' => 'Failed to Deploy ExApp',
+								'message' => $this->l10n->t('Failed to Deploy ExApp'),
 							]
 						], Http::STATUS_INTERNAL_SERVER_ERROR);
 					}
 
 					$exApp = $this->service->getExApp($appId);
-					if (!$this->service->enableExApp($exApp)) {
-						return new JSONResponse(['data' => ['message' => 'Failed to enable ExApp']], Http::STATUS_INTERNAL_SERVER_ERROR);
-					}
+
+					// Start ExApp initialization step (to download dynamic content, e.g. models)
+					$this->service->dispatchExAppInit($exApp);
+
+					//if (!$this->service->enableExApp($exApp)) {
+					//	return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+					//}
 					return new JSONResponse([
 						'data' => [
-							'update_required' => $updateRequired,
 							'daemon_config' => $daemonConfig,
 							'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 							'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
+							'status' => json_decode($exApp->getStatus(), true),
 						]
 					]);
 				}
@@ -481,7 +491,7 @@ class ExAppsPageController extends Controller {
 				}
 
 				if (!$this->service->enableExApp($exApp)) {
-					return new JSONResponse(['data' => ['message' => 'Failed to enable ExApp']], Http::STATUS_INTERNAL_SERVER_ERROR);
+					return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 				}
 			}
 
@@ -587,7 +597,7 @@ class ExAppsPageController extends Controller {
 			foreach ($appIds as $appId) {
 				$exApp = $this->service->getExApp($appId);
 				if (!$this->service->disableExApp($exApp)) {
-					return new JSONResponse(['data' => ['message' => 'Failed to disable ExApp']], Http::STATUS_INTERNAL_SERVER_ERROR);
+					return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 				}
 			}
 			return new JSONResponse([]);
@@ -650,15 +660,33 @@ class ExAppsPageController extends Controller {
 			'host' => $exAppInfo['host'],
 			'port' => (int) $exAppInfo['port'],
 		])) {
-			// 6. Enable ExApp
-			$this->service->enableExApp($exApp);
+			// 6. Set initialization progress to start
+			$this->service->setAppInitProgress($appId, 0, '', true);
+			// 7. Dispatch init step on ExApp side
+			$this->service->dispatchExAppInit($exApp);
 		}
 
 		return new JSONResponse([
 			'data' => [
 				'appid' => $appId,
+				'status' => ['progress' => 0],
 				'systemApp' => filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN),
 				'exAppUrl' => AppAPIService::getExAppUrl($exAppInfo['protocol'], $exAppInfo['host'], (int) $exAppInfo['port']),
+			]
+		]);
+	}
+
+	public function enableExApp(string $appId): JSONResponse {
+		$exApp = $this->service->getExApp($appId);
+		if (!$this->service->enableExApp($exApp)) {
+			return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]]);
+		}
+
+		return new JSONResponse([
+			'data' => [
+				'appid' => $appId,
+				'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
+				'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
 			]
 		]);
 	}
@@ -727,6 +755,16 @@ class ExAppsPageController extends Controller {
 	 */
 	public function listCategories(): JSONResponse {
 		return new JSONResponse($this->getAllCategories());
+	}
+
+	/**
+	 * Get ExApp status, that includes initialization information
+	 *
+	 * @return JSONResponse
+	 */
+	public function getAppStatus(string $appId): JSONResponse {
+		$exApp = $this->service->getExApp($appId);
+		return new JSONResponse(json_decode($exApp->getStatus(), true));
 	}
 
 	/**

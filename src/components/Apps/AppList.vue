@@ -14,6 +14,9 @@
 
 				<div v-if="!showUpdateAll" class="toolbar">
 					{{ t('app_api', 'All ExApps are up-to-date.') }}
+					<b v-if="!daemonConfigAccessible">
+						&nbsp;{{ t('app_api', 'Default Deploy daemon is not accessible') }}
+					</b>
 				</div>
 
 				<transition-group name="app-list" tag="table" class="apps-list-container">
@@ -127,6 +130,11 @@ export default {
 			type: String,
 			required: false,
 			default: () => '',
+		},
+		daemonConfigAccessible: {
+			type: Boolean,
+			required: true,
+			default: () => false,
 		},
 	},
 	computed: {

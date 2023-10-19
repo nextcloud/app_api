@@ -63,7 +63,6 @@ class Register extends Command {
 		$this->addArgument('appid', InputArgument::REQUIRED);
 		$this->addArgument('daemon-config-name', InputArgument::OPTIONAL);
 
-		$this->addOption('enabled', 'e', InputOption::VALUE_NONE, 'Enable ExApp after registration');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info');
@@ -191,16 +190,19 @@ class Register extends Command {
 				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], 'optional');
 			}
 
-			$enabled = (bool) $input->getOption('enabled');
-			if ($enabled) {
-				if ($this->service->enableExApp($exApp)) {
-					$output->writeln(sprintf('ExApp %s successfully enabled.', $appId));
-				} else {
-					$output->writeln(sprintf('Failed to enable ExApp %s.', $appId));
-					// Fallback unregistering ExApp
-					$this->service->unregisterExApp($exApp->getAppid());
-					return 1;
-				}
+			$this->service->dispatchExAppInit($exApp);
+
+			if ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
+				// Wait until ExApp initialized in case of manual-install type
+				do {
+					$exApp = $this->service->getExApp($appId);
+					$status = json_decode($exApp->getStatus(), true);
+					if (isset($status['error'])) {
+						$output->writeln(sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']));
+						return 1;
+					}
+					usleep(100000); // 0.1s
+				} while (isset($status['progress']));
 			}
 
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
