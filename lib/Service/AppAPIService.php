@@ -335,7 +335,7 @@ class AppAPIService {
 		} else {
 			if ($progress >= 0 && $progress < 100) {
 				$status['progress'] = $progress;
-			} else if ($progress === 100) {
+			} elseif ($progress === 100) {
 				unset($status['progress']);
 			} else {
 				throw new \InvalidArgumentException('Invalid ExApp status progress value');
