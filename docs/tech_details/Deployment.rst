@@ -4,7 +4,7 @@ Deployment
 Overview
 --------
 
-AppEcosystemV2 ExApps deployment process in short consists of 3 steps:
+AppAPI ExApps deployment process in short consists of 3 steps:
 
 1. `DaemonConfig registration`_
 2. `ExApp deployment`_
@@ -22,11 +22,11 @@ In case of remote Docker Engine API, you will need to expose it so it is accessi
 	For now only Docker daemon ``accepts-deploy-id: docker-install`` is supported.
 	For development and manually deployed app in docker there is ``accepts-deploy-id: manual-install``.
 
-This can be done by ``occ`` CLI command **app_ecosystem_v2:daemon:register**:
+This can be done by ``occ`` CLI command **app_api:daemon:register**:
 
 .. code-block:: bash
 
-	app_ecosystem_v2:daemon:register <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url> [--net NET] [--host HOST] [--ssl_key SSL_KEY] [--ssl_key_password SSL_KEY_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [--]
+	app_api:daemon:register <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url> [--net NET] [--host HOST] [--ssl_key SSL_KEY] [--ssl_key_password SSL_KEY_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [--]
 
 Arguments
 *********
@@ -37,12 +37,13 @@ Arguments
 	* ``protocol`` - protocol used to connect to the daemon (``unix-socket``, ``http`` or ``https``)
 	* ``host`` - host of the daemon (e.g. ``/var/run/docker.sock`` for ``unix-socket`` protocol or ``host:port`` for ``http(s)`` protocol)
 	* ``nextcloud_url`` - Nextcloud URL, Daemon config required option (e.g. ``https://nextcloud.local``)
+	* ``--gpu`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``/dev/dri``)
 
 Options
 *******
 
 	* ``--net [network-name]``  - ``[required]`` network name to bind docker container to (default: ``host``)
-	* ``--host HOST`` - ``[required]`` host to expose daemon to (defaults to ExApp appid)
+	* ``--hostname HOST`` - ``[required]`` host to expose daemon to (defaults to ExApp appid)
 	* ``--ssl_key SSL_KEY`` - ``[optional]`` path to SSL key file (local absolute path)
 	* ``--ssl_password SSL_PASSWORD`` - ``[optional]`` SSL key password
 	* ``--ssl_cert SSL_CERT`` - ``[optional]`` path to SSL cert file (local absolute path)
@@ -63,7 +64,8 @@ ExApp container.
 		"ssl_key": "/path/to/ssl/key.pem",
 		"ssl_key_password": "ssl_key_password",
 		"ssl_cert": "/path/to/ssl/cert.pem",
-		"ssl_cert_password": "ssl_cert_password"
+		"ssl_cert_password": "ssl_cert_password",
+		"gpus": ["/dev/dri"],
 	}
 
 
@@ -79,27 +81,27 @@ DeployConfig options
 	* ``ssl_cert_password`` *[optional]* - SSL cert password
 
 .. note::
-	Common configurations are tested by CI in our repository, see `workflows on github <https://github.com/cloud-py-api/app_ecosystem_v2/blob/main/.github/workflows/tests-deploy.yml>`_.
+	Common configurations are tested by CI in our repository, see `workflows on github <https://github.com/cloud-py-api/app_api/blob/main/.github/workflows/tests-deploy.yml>`_.
 
 Example
 *******
 
-Example of ``occ`` **app_ecosystem_v2:daemon:register** command:
+Example of ``occ`` **app_api:daemon:register** command:
 
 .. code-block:: bash
 
-	sudo -u www-data php occ app_ecosystem_v2:daemon:register docker_local_sock "My Local Docker" docker-install unix-socket /var/run/docker.sock "https://nextcloud.local" --net nextcloud
+	sudo -u www-data php occ app_api:daemon:register docker_local_sock "My Local Docker" docker-install unix-socket /var/run/docker.sock "https://nextcloud.local" --net nextcloud
 
 
 ExApp deployment
 ----------------
 
 Second step is to deploy ExApp on registered daemon.
-This can be done by ``occ`` CLI command **app_ecosystem_v2:app:deploy**:
+This can be done by ``occ`` CLI command **app_api:app:deploy**:
 
 .. code-block:: bash
 
-	app_ecosystem_v2:app:deploy <appid> <daemon-config-name> [--info-xml INFO-XML] [-e|--env ENV] [--]
+	app_api:app:deploy <appid> <daemon-config-name> [--info-xml INFO-XML] [-e|--env ENV] [--]
 
 .. note::
 	For development this step is skipped, as ExApp is deployed and started manually by developer.
@@ -120,10 +122,10 @@ Options
 	* ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
 	* ``-e|--env ENV`` *[optional]* - additional environment variables (e.g. ``-e "MY_VAR=123" -e "MY_VAR2=456"``)
 
-Deploy result JSON output
-*************************
+Deploy result JSON
+******************
 
-Example of deploy result JSON output:
+Example of deploy result JSON:
 
 .. code-block::
 
@@ -146,8 +148,8 @@ Manual install for development
 
 For development purposes, you can install ExApp manually.
 There is a ``manual-install`` DeployConfig type, which can be used in case of development.
-For ExApp registration with it you need to provide JSON output with structure described before
-using **app_ecosystem_v2:app:register** ``--json-info`` option.
+For ExApp registration with it you need to provide JSON app info with structure described before
+using **app_api:app:register** ``--json-info`` option.
 
 Deploy env variables
 ********************
@@ -155,14 +157,15 @@ Deploy env variables
 Deploy env variables are used to configure ExApp container.
 The following env variables are required and built automatically:
 
-	* ``AE_VERSION`` - AppEcosystemV2 version
-	* ``APP_SECRET`` - generated shared secret used for AppEcosystemV2 authentication
+	* ``AA_VERSION`` - AppAPI version
+	* ``APP_SECRET`` - generated shared secret used for AppAPI authentication
 	* ``APP_ID`` - ExApp appid
 	* ``APP_DISPLAY_NAME`` - ExApp display name
 	* ``APP_VERSION`` - ExApp version
 	* ``APP_PROTOCOL`` - protocol ExApp is listening on (http|https)
 	* ``APP_HOST`` - host ExApp is listening on
-	* ``APP_PORT`` - port ExApp is listening on (randomly selected by AppEcosystemV2)
+	* ``APP_PORT`` - port ExApp is listening on (randomly selected by AppAPI)
+	* ``APP_PERSISTENT_STORAGE`` - path to mounted volume for persistent data storage between ExApp updates
 	* ``IS_SYSTEM_APP`` - ExApp system app flag (true|false)
 	* ``NEXTCLOUD_URL`` - Nextcloud URL to connect to
 
@@ -186,11 +189,11 @@ ExApp registration
 ------------------
 
 Final step is to register ExApp in Nextcloud.
-This can be done by ``occ`` CLI command **app_ecosystem_v2:app:register**:
+This can be done by ``occ`` CLI command **app_api:app:register**:
 
 .. code-block:: bash
 
-	app_ecosystem_v2:app:register <appid> <daemon-config-name> [-e|--enabled] [--force-scopes] [--]
+	app_api:app:register <appid> <daemon-config-name> [-e|--enabled] [--force-scopes] [--]
 
 Arguments
 *********
@@ -211,7 +214,7 @@ In case of ``manual-install`` DeployConfig type, ExApp info must be provided by 
 ExApp info.xml schema
 ---------------------
 
-ExApp info.xml (`example repo <https://github.com/cloud-py-api/py_app_v2-skeleton>`_) file is used to describe ExApp params.
+ExApp info.xml (`example <https://github.com/cloud-py-api/nc_py_api/blob/main/examples/as_app/talk_bot/appinfo/info.xml>`_) file is used to describe ExApp params.
 It is used to generate ExApp docker container and to register ExApp in Nextcloud.
 It has the same structure as Nextcloud appinfo/info.xml file, but with some additional fields:
 
@@ -221,15 +224,15 @@ It has the same structure as Nextcloud appinfo/info.xml file, but with some addi
 	<ex-app>
 		<docker-install>
 			<registry>ghcr.io</registry>
-			<image>cloud-py-api/py_app_v2-skeleton</image>
+			<image>cloud-py-api/talk_bot</image>
 			<image-tag>latest</image-tag>
 		</docker-install>
 		<scopes>
 			<required>
-				<value>2</value>
+				<value>TALK</value>
+				<value>TALK_BOT</value>
 			</required>
 			<optional>
-				<value>32</value>
 			</optional>
 		</scopes>
 		<protocol>http</protocol>

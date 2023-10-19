@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2;
+namespace OCA\AppAPI;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExAppScope;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\ExAppScopesService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExAppScope;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppScopesService;
 
 use OCP\App\IAppManager;
 use OCP\Capabilities\ICapability;
@@ -17,16 +17,16 @@ use OCP\IRequest;
 class Capabilities implements ICapability {
 	private IConfig $config;
 	private IAppManager $appManager;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private ExAppScopesService $exAppScopesService;
 	private IRequest $request;
 
 	public function __construct(
-		IConfig $config,
-		IAppManager $appManager,
-		AppEcosystemV2Service $service,
+		IConfig            $config,
+		IAppManager        $appManager,
+		AppAPIService      $service,
 		ExAppScopesService $exAppScopesService,
-		IRequest $request,
+		IRequest           $request,
 	) {
 		$this->config = $config;
 		$this->appManager = $appManager;
@@ -42,7 +42,7 @@ class Capabilities implements ICapability {
 		];
 		$this->attachExAppScopes($capabilities);
 		return [
-			'app_ecosystem_v2' => $capabilities,
+			'app_api' => $capabilities,
 		];
 	}
 

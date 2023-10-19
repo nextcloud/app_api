@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppAPI\AppInfo\Application;
 
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataResponse;

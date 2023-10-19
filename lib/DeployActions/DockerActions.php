@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\DeployActions;
+namespace OCA\AppAPI\DeployActions;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Service\AppAPIService;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
@@ -21,7 +22,7 @@ use Psr\Log\LoggerInterface;
 class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	public const AE_REQUIRED_ENVS = [
-		'AE_VERSION',
+		'AA_VERSION',
 		'APP_SECRET',
 		'APP_ID',
 		'APP_DISPLAY_NAME',
@@ -29,9 +30,11 @@ class DockerActions implements IDeployActions {
 		'APP_PROTOCOL',
 		'APP_HOST',
 		'APP_PORT',
+		'APP_PERSISTENT_STORAGE',
 		'IS_SYSTEM_APP',
 		'NEXTCLOUD_URL',
 	];
+	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	private LoggerInterface $logger;
 	private Client $guzzleClient;
 	private ICertificateManager $certificateManager;
@@ -39,16 +42,18 @@ class DockerActions implements IDeployActions {
 	private IAppManager $appManager;
 	private ISecureRandom $random;
 	private IURLGenerator $urlGenerator;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
+	private DaemonConfigService $daemonConfigService;
 
 	public function __construct(
-		LoggerInterface $logger,
-		IConfig $config,
+		LoggerInterface     $logger,
+		IConfig             $config,
 		ICertificateManager $certificateManager,
-		IAppManager $appManager,
-		ISecureRandom $random,
-		IURLGenerator $urlGenerator,
-		AppEcosystemV2Service $service,
+		IAppManager         $appManager,
+		ISecureRandom       $random,
+		IURLGenerator       $urlGenerator,
+		AppAPIService       $service,
+		DaemonConfigService $daemonConfigService,
 	) {
 		$this->logger = $logger;
 		$this->certificateManager = $certificateManager;
@@ -57,6 +62,7 @@ class DockerActions implements IDeployActions {
 		$this->random = $random;
 		$this->urlGenerator = $urlGenerator;
 		$this->service = $service;
+		$this->daemonConfigService = $daemonConfigService;
 	}
 
 	public function getAcceptsDeployId(): string {
@@ -96,9 +102,9 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, null, null];
 		}
 
-		$containerInfo = $this->inspectContainer($dockerUrl, $params['container_params']['name']);
+		$containerInfo = $this->inspectContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($containerInfo['Id'])) {
-			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $containerInfo['Id']);
+			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 			if (isset($stopResult['error']) || isset($removeResult['error'])) {
 				return [$pullResult, $stopResult, $removeResult];
 			}
@@ -109,7 +115,7 @@ class DockerActions implements IDeployActions {
 			return [null, $createResult, null];
 		}
 
-		$startResult = $this->startContainer($dockerUrl, $createResult['Id']);
+		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		return [$pullResult, $createResult, $startResult];
 	}
 
@@ -122,7 +128,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function createContainer(string $dockerUrl, array $imageParams, array $params = []): array {
-		$createVolumeResult = $this->createVolume($dockerUrl, $params['name'] . '_data');
+		$createVolumeResult = $this->createVolume($dockerUrl, $this->buildExAppVolumeName($params['name']));
 		if (isset($createVolumeResult['error'])) {
 			return $createVolumeResult;
 		}
@@ -154,7 +160,7 @@ class DockerActions implements IDeployActions {
 			$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams($params['devices']);
 		}
 
-		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($params['name'])));
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
 		try {
 			$options['json'] = $containerParams;
 			$response = $this->guzzleClient->post($url, $options);
@@ -227,8 +233,6 @@ class DockerActions implements IDeployActions {
 			$response = $this->guzzleClient->get($url);
 			return json_decode((string) $response->getBody(), true);
 		} catch (GuzzleException $e) {
-			//$this->logger->error('Failed to inspect container', ['exception' => $e]);
-			//error_log($e->getMessage());
 			return ['error' => $e->getMessage(), 'exception' => $e];
 		}
 	}
@@ -284,6 +288,20 @@ class DockerActions implements IDeployActions {
 		return ['error' => 'Failed to remove volume'];
 	}
 
+	public function ping(string $dockerUrl): bool {
+		$url = $this->buildApiUrl($dockerUrl, '_ping');
+		try {
+			$response = $this->guzzleClient->get($url);
+			if ($response->getStatusCode() === 200) {
+				return true;
+			}
+		} catch (GuzzleException $e) {
+			$this->logger->error('Could not connect to Docker daemon', ['exception' => $e]);
+			error_log($e->getMessage());
+		}
+		return false;
+	}
+
 	/**
 	 * @param DaemonConfig $daemonConfig
 	 * @param array $params Deploy params (image_params, container_params)
@@ -298,7 +316,7 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, null, null, null, null];
 		}
 
-		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $params['prev_container_id']);
+		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($stopResult['error'])) {
 			return [$pullResult, $stopResult, null, null, null];
 		}
@@ -311,7 +329,7 @@ class DockerActions implements IDeployActions {
 			return [$pullResult, $stopResult, $removeResult, $createResult, null];
 		}
 
-		$startResult = $this->startContainer($dockerUrl, $createResult['Id']);
+		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
 	}
 
@@ -335,6 +353,7 @@ class DockerActions implements IDeployActions {
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
 			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
 			$secret = $oldEnvs['APP_SECRET'];
+			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
 			// Preserve previous devices or use from params (if any)
 			$devices = array_map(function (array $device) {
 				return $device['PathOnHost'];
@@ -342,22 +361,24 @@ class DockerActions implements IDeployActions {
 		} else {
 			$port = $this->service->getExAppRandomPort();
 			$devices = $deployConfig['gpus'];
+			$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
 		}
 
 		$imageParams = [
-			'image_src' => (string) ($infoXml->xpath('ex-app/docker-install/registry')[0] ?? 'docker.io'),
-			'image_name' => (string) ($infoXml->xpath('ex-app/docker-install/image')[0] ?? $appId),
-			'image_tag' => (string) ($infoXml->xpath('ex-app/docker-install/image-tag')[0] ?? 'latest'),
+			'image_src' => (string) ($infoXml->xpath('external-app/docker-install/registry')[0] ?? 'docker.io'),
+			'image_name' => (string) ($infoXml->xpath('external-app/docker-install/image')[0] ?? $appId),
+			'image_tag' => (string) ($infoXml->xpath('external-app/docker-install/image-tag')[0] ?? 'latest'),
 		];
 
 		$envs = $this->buildDeployEnvs([
 			'appid' => $appId,
 			'name' => (string) $infoXml->name,
 			'version' => (string) $infoXml->version,
-			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
+			'protocol' => (string) ($infoXml->xpath('external-app/protocol')[0] ?? 'http'),
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $port,
-			'system_app' => (bool) ($infoXml->xpath('ex-app/system')[0] ?? false),
+			'storage' => $storage,
+			'system_app' => filter_var((string) $infoXml->xpath('external-app/system')[0], FILTER_VALIDATE_BOOLEAN),
 			'secret' => $secret ?? $this->random->generate(128),
 		], $params['env_options'] ?? [], $deployConfig);
 
@@ -389,7 +410,7 @@ class DockerActions implements IDeployActions {
 
 	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
 		$autoEnvs = [
-			sprintf('AE_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
+			sprintf('AA_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
 			sprintf('APP_SECRET=%s', $params['secret']),
 			sprintf('APP_ID=%s', $params['appid']),
 			sprintf('APP_DISPLAY_NAME=%s', $params['name']),
@@ -397,7 +418,8 @@ class DockerActions implements IDeployActions {
 			sprintf('APP_PROTOCOL=%s', $params['protocol']),
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
-			sprintf('IS_SYSTEM_APP=%s', $params['system_app']),
+			sprintf('APP_PERSISTENT_STORAGE=%s', $params['storage']),
+			sprintf('IS_SYSTEM_APP=%s', $params['system_app'] ? 'true' : 'false'),
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
@@ -421,7 +443,7 @@ class DockerActions implements IDeployActions {
 	 */
 	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array {
 		$this->initGuzzleClient($daemonConfig);
-		$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $appId);
+		$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $this->buildExAppContainerName($appId));
 		if (isset($containerInfo['error'])) {
 			return ['error' => sprintf('Failed to inspect ExApp %s container: %s', $appId, $containerInfo['error'])];
 		}
@@ -545,10 +567,79 @@ class DockerActions implements IDeployActions {
 		return [
 			[
 				'Type' => 'volume',
-				'Source' => $appId . '_data',
-				'Target' => '/' . $appId . '_data',
+				'Source' => $this->buildExAppVolumeName($appId),
+				'Target' => '/' . $this->buildExAppVolumeName($appId),
 				'ReadOnly' => false
 			],
 		];
+	}
+
+	public function isDockerSocketAvailable(): bool {
+		$dockerSocket = '/var/run/docker.sock';
+		if (file_exists($dockerSocket) && is_readable($dockerSocket) && is_writable($dockerSocket)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Build ExApp container name (prefix + appid)
+	 *
+	 * @param string $appId
+	 *
+	 * @return string
+	 */
+	public function buildExAppContainerName(string $appId): string {
+		return self::EX_APP_CONTAINER_PREFIX . $appId;
+	}
+
+	public function buildExAppVolumeName(string $appId): string {
+		return self::EX_APP_CONTAINER_PREFIX . $appId . '_data';
+	}
+
+	public function registerDefaultDaemonConfig(): ?DaemonConfig {
+		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfig);
+		if ($daemonConfig !== null) {
+			return $daemonConfig;
+		}
+
+		$deployConfig = [
+			'net' => 'host', // TODO: Add ExApp skeleton heartbeat check to verify default configuration works or manual configuration required
+			'host' => null,
+			'nextcloud_url' => str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL('/index.php')),
+			'ssl_key' => null,
+			'ssl_key_password' => null,
+			'ssl_cert' => null,
+			'ssl_cert_password' => null,
+			'gpus' => [],
+		];
+
+		if ($this->isGPUAvailable()) {
+			$deployConfig['gpus'] = ['/dev/dri'];
+		}
+
+		$daemonConfigParams = [
+			'name' => 'docker_socket_local',
+			'display_name' => 'Docker Socket Local',
+			'accepts_deploy_id' => 'docker-install',
+			'protocol' => 'unix-socket',
+			'host' => '/var/run/docker.sock',
+			'deploy_config' => $deployConfig,
+		];
+
+		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
+		if ($daemonConfig !== null) {
+			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
+		}
+		return $daemonConfig;
+	}
+
+	private function isGPUAvailable(): bool {
+		$gpusDir = '/dev/dri';
+		if (is_dir($gpusDir) && is_readable($gpusDir)) {
+			return true;
+		}
+		return false;
 	}
 }

@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Db\ExAppMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppMapper;
 
-use OCA\AppEcosystemV2\Notifications\ExNotificationsManager;
+use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
+use OCA\AppAPI\Fetcher\ExAppFetcher;
+use OCA\AppAPI\Notifications\ExNotificationsManager;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -20,6 +22,7 @@ use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\ISession;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
@@ -28,9 +31,8 @@ use OCP\Security\Bruteforce\IThrottler;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 
-class AppEcosystemV2Service {
+class AppAPIService {
 	public const BASIC_API_SCOPE = 1;
-	public const MAX_SIGN_TIME_X_MIN_DIFF = 60 * 5;
 	public const CACHE_TTL = 60 * 60; // 1 hour
 
 	private LoggerInterface $logger;
@@ -43,12 +45,16 @@ class AppEcosystemV2Service {
 	private IAppManager $appManager;
 	private ISecureRandom $random;
 	private IUserSession $userSession;
+	private ISession $session;
 	private IUserManager $userManager;
 	private ExAppApiScopeService $exAppApiScopeService;
 	private ExAppUsersService $exAppUsersService;
 	private ExAppScopesService $exAppScopesService;
 	private ExAppConfigService $exAppConfigService;
 	private ExNotificationsManager $exNotificationsManager;
+	private TalkBotsService $talkBotsService;
+	private ExAppFetcher $exAppFetcher;
+	private ExAppArchiveFetcher $exAppArchiveFetcher;
 
 	public function __construct(
 		LoggerInterface $logger,
@@ -64,9 +70,13 @@ class AppEcosystemV2Service {
 		ExAppScopesService $exAppScopesService,
 		ISecureRandom $random,
 		IUserSession $userSession,
+		ISession $session,
 		IUserManager $userManager,
 		ExAppConfigService $exAppConfigService,
 		ExNotificationsManager $exNotificationsManager,
+		TalkBotsService $talkBotsService,
+		ExAppFetcher $exAppFetcher,
+		ExAppArchiveFetcher $exAppArchiveFetcher,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
@@ -78,12 +88,16 @@ class AppEcosystemV2Service {
 		$this->appManager = $appManager;
 		$this->random = $random;
 		$this->userSession = $userSession;
+		$this->session = $session;
 		$this->userManager = $userManager;
 		$this->exAppUsersService = $exAppUserService;
 		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->exAppScopesService = $exAppScopesService;
 		$this->exAppConfigService = $exAppConfigService;
 		$this->exNotificationsManager = $exNotificationsManager;
+		$this->talkBotsService = $talkBotsService;
+		$this->exAppFetcher = $exAppFetcher;
+		$this->exAppArchiveFetcher = $exAppArchiveFetcher;
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -158,8 +172,8 @@ class AppEcosystemV2Service {
 			// TODO: Do we need to remove app_config_ex, app_preferences_ex too
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
+			$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
 			$this->cache->remove('/exApp_' . $appId);
-			// TODO: Do we need to remove ExApp container
 			return $exApp;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()), ['exception' => $e]);
@@ -259,7 +273,7 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Update ExApp info (version and name changes after update)
+	 * Update ExApp info (version, name, system app flag changes after update)
 	 *
 	 * @param ExApp $exApp
 	 * @param array $exAppInfo
@@ -276,6 +290,14 @@ class AppEcosystemV2Service {
 		$exApp->setName($exAppInfo['name']);
 		if (!$this->updateExAppName($exApp)) {
 			return false;
+		}
+
+		// Update system app flag
+		$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
+		if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
+			$this->exAppUsersService->setupSystemAppFlag($exApp);
+		} else {
+			$this->exAppUsersService->removeExAppUser($exApp, '');
 		}
 
 		$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
@@ -308,28 +330,33 @@ class AppEcosystemV2Service {
 		$heartbeatAttempts = 0;
 		$delay = 1;
 		$maxHeartbeatAttempts = (60 * 60) / $delay; // 60 * 60 / delay = minutes for container initialization
-		$heartbeatUrl = $this->getExAppUrl(
+		$heartbeatUrl = self::getExAppUrl(
 			$params['protocol'],
 			$params['host'],
 			(int) $params['port'],
 		) . '/heartbeat';
 
+		$options = [
+			'headers' => [
+				'Accept' => 'application/json',
+				'Content-Type' => 'application/json',
+			],
+			'nextcloud' => [
+				'allow_local_address' => true,
+			],
+		];
+
 		while ($heartbeatAttempts < $maxHeartbeatAttempts) {
 			$heartbeatAttempts++;
-			$ch = curl_init($heartbeatUrl);
-			$headers = [
-				'Accept: application/json',
-				'Content-Type: application/json',
-			];
-			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-			$heartbeatResult = curl_exec($ch);
-			$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			curl_close($ch);
+			try {
+				$heartbeatResult = $this->client->get($heartbeatUrl, $options);
+			} catch (\Exception) {
+				sleep($delay);
+				continue;
+			}
+			$statusCode = $heartbeatResult->getStatusCode();
 			if ($statusCode === 200) {
-				$result = json_decode($heartbeatResult, true);
+				$result = json_decode($heartbeatResult->getBody(), true);
 				if (isset($result['status']) && $result['status'] === 'ok') {
 					return true;
 				}
@@ -341,10 +368,19 @@ class AppEcosystemV2Service {
 	}
 
 	public function getExAppRequestedScopes(ExApp $exApp, ?\SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
-		// TODO: Add download of info.xml from AppStore if not passed
+		if (isset($jsonInfo['scopes'])) {
+			return $jsonInfo['scopes'];
+		}
+
+		if ($infoXml === null) {
+			$exAppInfo = $this->getExAppInfoFromAppstore($exApp);
+			if (isset($exAppInfo)) {
+				$infoXml = $exAppInfo;
+			}
+		}
 
 		if (isset($infoXml)) {
-			$scopes = $infoXml->xpath('ex-app/scopes');
+			$scopes = $infoXml->xpath('external-app/scopes');
 			if ($scopes !== false) {
 				$scopes = (array) $scopes[0];
 				$required = array_map(function (string $scopeGroup) {
@@ -358,15 +394,53 @@ class AppEcosystemV2Service {
 					'optional' => array_values($optional),
 				];
 			}
-		} elseif (isset($jsonInfo['scopes'])) {
-			return $jsonInfo['scopes'];
 		}
 
 		return ['error' => 'Failed to get ExApp requested scopes.'];
 	}
 
 	/**
-	 * Request to ExApp with AppEcosystem auth headers and ExApp user initialization
+	 * Get info from App Store releases for specific ExApp and its current version
+	 *
+	 * @param ExApp $exApp
+	 *
+	 * @return \SimpleXMLElement|null
+	 */
+	public function getExAppInfoFromAppstore(ExApp $exApp): ?\SimpleXMLElement {
+		$exApps = $this->exAppFetcher->get();
+		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($exApp) {
+			return $exAppItem['id'] === $exApp->getAppid() && count(array_filter($exAppItem['releases'], function (array $release) use ($exApp) {
+				return $release['version'] === $exApp->getVersion();
+			})) === 1;
+		});
+		if (count($exAppAppstoreData) === 1) {
+			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
+		}
+		return null;
+	}
+
+	/**
+	 * Get latest ExApp release info by ExApp appid (in case of first installation or update)
+	 *
+	 * @param string $appId
+	 *
+	 * @return \SimpleXMLElement|null
+	 */
+	public function getLatestExAppInfoFromAppstore(string $appId): ?\SimpleXMLElement {
+		$exApps = $this->exAppFetcher->get();
+		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($appId) {
+			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;
+		});
+		$exAppAppstoreData = end($exAppAppstoreData);
+		$exAppReleaseInfo = end($exAppAppstoreData['releases']);
+		if ($exAppReleaseInfo !== false) {
+			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
+		}
+		return null;
+	}
+
+	/**
+	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
 	 *
 	 * @param IRequest|null $request
 	 * @param string $userId
@@ -395,7 +469,7 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Request to ExApp with AppEcosystem auth headers
+	 * Request to ExApp with AppAPI auth headers
 	 *
 	 * @param IRequest|null $request
 	 * @param string|null $userId
@@ -416,17 +490,18 @@ class AppEcosystemV2Service {
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
-			$url = $this->getExAppUrl(
+			$url = self::getExAppUrl(
 				$exApp->getProtocol(),
 				$exApp->getHost(),
 				$exApp->getPort()) . $route;
 
 			$options = [
 				'headers' => [
-					'AE-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+					'AA-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
 					'EX-APP-ID' => $exApp->getAppid(),
 					'EX-APP-VERSION' => $exApp->getVersion(),
-					'NC-USER-ID' => $userId,
+					'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $exApp->getSecret()),
+					'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
 				],
 				'nextcloud' => [
 					'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
@@ -440,13 +515,6 @@ class AppEcosystemV2Service {
 					$options['json'] = $params;
 				}
 			}
-
-			$options['headers']['AE-DATA-HASH'] = '';
-			$options['headers']['AE-SIGN-TIME'] = strval(time());
-			[$signature, $dataHash] = $this->generateRequestSignature($method, $route, $options, $exApp->getSecret(), $params);
-			$options['headers']['AE-SIGNATURE'] = $signature;
-			$options['headers']['AE-DATA-HASH'] = $dataHash;
-			$options['headers']['AE-REQUEST-ID'] = $request instanceof IRequest ? $request->getId() : 'CLI';
 
 			switch ($method) {
 				case 'GET':
@@ -464,7 +532,6 @@ class AppEcosystemV2Service {
 				default:
 					return ['error' => 'Bad HTTP method'];
 			}
-			//			TODO: Add files support
 			return $response;
 		} catch (\Exception $e) {
 			$this->logger->error(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
@@ -479,7 +546,7 @@ class AppEcosystemV2Service {
 	 *
 	 * @return string
 	 */
-	public function getExAppUrl(string $protocol, string $host, int $port): string {
+	public static function getExAppUrl(string $protocol, string $host, int $port): string {
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 
@@ -504,69 +571,13 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Generates request signature and data hash.
-	 * Data hash computed from request body even if it's empty.
-	 *
-	 * @param string $method
-	 * @param string $uri
-	 * @param array $options
-	 * @param string $secret
-	 * @param array $params
-	 *
-	 * @return array
-	 */
-	public function generateRequestSignature(string $method, string $uri, array $options, string $secret, array $params = []): array {
-		$headers = [];
-		if (isset($options['headers']['AE-VERSION'])) {
-			$headers['AE-VERSION'] = $options['headers']['AE-VERSION'];
-		}
-		if (isset($options['headers']['EX-APP-ID'])) {
-			$headers['EX-APP-ID'] = $options['headers']['EX-APP-ID'];
-		}
-		if (isset($options['headers']['EX-APP-VERSION'])) {
-			$headers['EX-APP-VERSION'] = $options['headers']['EX-APP-VERSION'];
-		}
-		if (isset($options['headers']['NC-USER-ID']) && $options['headers']['NC-USER-ID'] !== '') {
-			$headers['NC-USER-ID'] = $options['headers']['NC-USER-ID'];
-		}
-
-		if ($method === 'GET') {
-			if (!empty($params)) {
-				$queryParams = $this->getUriEncodedParams($params);
-				$uri .= '?' . $queryParams;
-			}
-			$dataParams = '';
-		} else {
-			$dataParams = isset($options['json']) ? json_encode($options['json']) : '';
-		}
-
-		$dataHash = $this->generateDataHash($dataParams);
-		if (isset($options['headers']['AE-DATA-HASH'])) {
-			$headers['AE-DATA-HASH'] = $dataHash;
-		}
-		if (isset($options['headers']['AE-SIGN-TIME'])) {
-			$headers['AE-SIGN-TIME'] = $options['headers']['AE-SIGN-TIME'];
-		}
-		$body = $method . $uri . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		return [hash_hmac('sha256', $body, $secret), $dataHash];
-	}
-
-	private function generateDataHash(string $data): string {
-		$hashContext = hash_init('xxh64');
-		hash_update($hashContext, $data);
-		return hash_final($hashContext);
-	}
-
-	/**
-	 * AppEcosystem authentication request validation for Nextcloud:
+	 * AppAPI authentication request validation for Nextcloud:
 	 *  - checks if ExApp exists and is enabled
 	 *  - checks if ExApp version changed and updates it in database
-	 *  - validates request sign time (if it's complies with set time window)
-	 *  - builds and checks request signature
-	 *  - checks if request data hash is valid
+	 *  - checks if ExApp shared secret valid
 	 *  - checks ExApp scopes <-> ExApp API copes
 	 *
-	 * More info in docs: https://cloud-py-api.github.io/app_ecosystem_v2/authentication.html
+	 * More info in docs: https://cloud-py-api.github.io/app_api/authentication.html
 	 *
 	 * @param IRequest $request
 	 * @param bool $isDav
@@ -582,46 +593,28 @@ class AppEcosystemV2Service {
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
 				'appid' => $request->getHeader('EX-APP-ID'),
-				'userid' => $request->getHeader('NC-USER-ID'),
+				'userid' => explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 2)[0],
 			]);
 			return false;
 		}
 
 		$this->handleExAppDebug($exApp, $request, false);
 
-		$headers = [
-			'AE-VERSION' => $request->getHeader('AE-VERSION'),
-			'EX-APP-ID' => $request->getHeader('EX-APP-ID'),
-			'EX-APP-VERSION' => $request->getHeader('EX-APP-VERSION'),
-		];
-		$userId = $request->getHeader('NC-USER-ID');
-		if ($userId !== '') {
-			$headers['NC-USER-ID'] = $userId;
-		}
-		$requestSignature = $request->getHeader('AE-SIGNATURE');
-		$dataHash = $request->getHeader('AE-DATA-HASH');
-		$headers['AE-DATA-HASH'] = $dataHash;
-		$signTime = $request->getHeader('AE-SIGN-TIME');
-		if (!$this->verifySignTime($signTime)) {
-			$this->logger->error(sprintf('Sign time %s is not valid', $signTime));
+		$authorization = base64_decode($request->getHeader('AUTHORIZATION-APP-API'));
+		if ($authorization === false) {
+			$this->logger->error('Failed to parse AUTHORIZATION-APP-API');
 			return false;
 		}
-		$headers['AE-SIGN-TIME'] = $signTime;
+		$userId = explode(':', $authorization, 2)[0];
+		$authorizationSecret = explode(':', $authorization, 2)[1];
+		$authValid = $authorizationSecret === $exApp->getSecret();
 
-		$body = $request->getMethod() . $request->getRequestUri() . json_encode($headers, JSON_UNESCAPED_SLASHES);
-		$signature = hash_hmac('sha256', $body, $exApp->getSecret());
-		$signatureValid = $signature === $requestSignature;
-
-		if ($signatureValid) {
+		if ($authValid) {
 			if (!$exApp->getEnabled()) {
 				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $exApp->getEnabled()));
 				return false;
 			}
 			if (!$this->handleExAppVersionChange($request, $exApp)) {
-				return false;
-			}
-			if (!$this->verifyDataHash($dataHash)) {
-				$this->logger->error(sprintf('Data hash %s is not valid', $dataHash));
 				return false;
 			}
 			if (!$isDav) {
@@ -664,7 +657,7 @@ class AppEcosystemV2Service {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
 				'appid' => $request->getHeader('EX-APP-ID'),
-				'userid' => $request->getHeader('NC-USER-ID'),
+				'userid' => $userId,
 			]);
 		}
 
@@ -673,7 +666,7 @@ class AppEcosystemV2Service {
 	}
 
 	/**
-	 * Final step of AppEcosystem authentication request validation for Nextcloud:
+	 * Final step of AppAPI authentication request validation for Nextcloud:
 	 *  - sets active user (null if not a user context)
 	 *  - updates ExApp last response time
 	 *
@@ -693,41 +686,12 @@ class AppEcosystemV2Service {
 		} else {
 			$this->userSession->setUser(null);
 		}
+		$this->session->set('app_api', true);
 		$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
 			'appid' => $request->getHeader('EX-APP-ID'),
 			'userid' => $userId,
 		]);
 		return true;
-	}
-
-	/**
-	 * Verify if sign time is within MAX_SIGN_TIME_DIFF (5 min)
-	 *
-	 * @param string $signTime
-	 * @return bool
-	 */
-	private function verifySignTime(string $signTime): bool {
-		$signTime = intval($signTime);
-		$currentTime = time();
-		$diff = $currentTime - $signTime;
-		if ($diff > self::MAX_SIGN_TIME_X_MIN_DIFF) {
-			$this->logger->error(sprintf('AE-SIGN-TIME is too old. Diff: %s', $diff));
-			return false;
-		}
-		if ($diff < 0) {
-			$this->logger->error(sprintf('AE-SIGN-TIME diff is negative: %s', $diff));
-			return false;
-		}
-		return true;
-	}
-
-	private function verifyDataHash(string $dataHash): bool {
-		$hashContext = hash_init('xxh64');
-		$stream = fopen('php://input', 'r');
-		hash_update_stream($hashContext, $stream, -1);
-		fclose($stream);
-		$phpInputHash = hash_final($hashContext);
-		return $dataHash === $phpInputHash;
 	}
 
 	public function updateExAppLastCheckTime(ExApp &$exApp): void {
@@ -763,7 +727,7 @@ class AppEcosystemV2Service {
 	 * This handling only intentional case of manual ExApp update
 	 * so the administrator must re-enable ExApp in UI or CLI after that.
 	 *
-	 * Ref: https://github.com/cloud-py-api/app_ecosystem_v2/pull/29
+	 * Ref: https://github.com/cloud-py-api/app_api/pull/29
 	 * TODO: Add link to docs with warning and mark as not-recommended
 	 *
 	 * @param IRequest $request
@@ -840,9 +804,8 @@ class AppEcosystemV2Service {
 	private function buildRequestInfo(IRequest $request): array {
 		$headers = [];
 		$aeHeadersList = [
-			'AE-VERSION',
+			'AA-VERSION',
 			'EX-APP-VERSION',
-			'AE-SIGN-TIME',
 		];
 		foreach ($aeHeadersList as $header) {
 			if ($request->getHeader($header) !== '') {
@@ -879,7 +842,7 @@ class AppEcosystemV2Service {
 			$message = $fromNextcloud
 				? '[' . Application::APP_ID . '] Nextcloud --> ' . $exApp->getAppid()
 				: '[' . Application::APP_ID . '] ' . $exApp->getAppid() . ' --> Nextcloud';
-			$aeDebugLogger = $this->getCustomLogger('ae_debug.log');
+			$aeDebugLogger = $this->getCustomLogger('aa_debug.log');
 			$aeDebugLogger->log($exAppDebugSettings['level'], $message, [
 				'app' => $exApp->getAppid(),
 				'request_info' => $request instanceof IRequest ? $this->buildRequestInfo($request) : 'CLI request',

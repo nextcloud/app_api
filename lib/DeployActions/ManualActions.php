@@ -2,14 +2,23 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\DeployActions;
+namespace OCA\AppAPI\DeployActions;
 
-use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Service\AppAPIService;
 
 /**
  * Manual deploy actions for development.
  */
 class ManualActions implements IDeployActions {
+	private AppAPIService $service;
+
+	public function __construct(
+		AppAPIService $service,
+	) {
+		$this->service = $service;
+	}
+
 	public function getAcceptsDeployId(): string {
 		return 'manual-install';
 	}
@@ -52,5 +61,13 @@ class ManualActions implements IDeployActions {
 	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string {
 		$jsonInfo = json_decode($params['json-info'], true);
 		return $jsonInfo['host'];
+	}
+
+	public function healthcheck(array $jsonInfo): bool {
+		return $this->service->heartbeatExApp([
+			'protocol' => $jsonInfo['protocol'],
+			'host' => $jsonInfo['host'],
+			'port' => $jsonInfo['port'],
+		]);
 	}
 }

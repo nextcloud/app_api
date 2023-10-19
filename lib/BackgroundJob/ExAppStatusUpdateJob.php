@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\BackgroundJob;
+namespace OCA\AppAPI\BackgroundJob;
 
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;

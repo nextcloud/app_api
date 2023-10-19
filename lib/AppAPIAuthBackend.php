@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2;
-
-use OCA\AppEcosystemV2\AppInfo\Application;
+namespace OCA\AppAPI;
 
 use OCA\DAV\Connector\Sabre\Auth;
 use OCP\IRequest;
@@ -13,7 +11,7 @@ use Sabre\DAV\Auth\Backend\BackendInterface;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
-class AEAuthBackend implements BackendInterface {
+class AppAPIAuthBackend implements BackendInterface {
 	private IRequest $request;
 	private ISession $session;
 
@@ -26,16 +24,16 @@ class AEAuthBackend implements BackendInterface {
 	}
 
 	public function check(RequestInterface $request, ResponseInterface $response) {
-		if ($this->request->getHeader('AE-SIGNATURE')) {
+		if ($this->request->getHeader('AUTHORIZATION-APP-API')) {
 			$davAuthenticated = $this->session->get(Auth::DAV_AUTHENTICATED);
-			$userIdHeader = $this->request->getHeader('NC-USER-ID');
+			$userIdHeader = explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
 			$sessionUserId = $this->session->get('user_id');
 			if ($sessionUserId === $userIdHeader && $davAuthenticated === $sessionUserId) {
-				$authString = 'principals/' . Application::APP_ID . '/' . $this->session->get('user_id');
+				$authString = 'principals/users/' . $this->session->get('user_id');
 				return [true, $authString];
 			}
 		}
-		return [false, 'AEAuth has not passed'];
+		return [false, 'AppAPIAuth has not passed'];
 	}
 
 	public function challenge(RequestInterface $request, ResponseInterface $response) {

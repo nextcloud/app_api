@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\DeployActions;
+namespace OCA\AppAPI\DeployActions;
 
-use OCA\AppEcosystemV2\Db\DaemonConfig;
+use OCA\AppAPI\Db\DaemonConfig;
 
 /**
- * Base interface for AppEcosystemV2 ExApp deploy actions
+ * Base interface for AppAPI ExApp deploy actions
  */
 interface IDeployActions {
 	/**

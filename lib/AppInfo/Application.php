@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\AppInfo;
+namespace OCA\AppAPI\AppInfo;
 
-use OCA\AppEcosystemV2\Capabilities;
-use OCA\AppEcosystemV2\DavPlugin;
-use OCA\AppEcosystemV2\Listener\LoadFilesPluginListener;
-use OCA\AppEcosystemV2\Listener\SabrePluginAuthInitListener;
-use OCA\AppEcosystemV2\Middleware\AppEcosystemAuthMiddleware;
-use OCA\AppEcosystemV2\Notifications\ExAppAdminNotifier;
-use OCA\AppEcosystemV2\Notifications\ExAppNotifier;
-use OCA\AppEcosystemV2\Profiler\AEDataCollector;
-use OCA\AppEcosystemV2\PublicCapabilities;
+use OCA\AppAPI\Capabilities;
+use OCA\AppAPI\DavPlugin;
+use OCA\AppAPI\Listener\LoadFilesPluginListener;
+use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
+use OCA\AppAPI\Listener\UserDeletedListener;
+use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
+use OCA\AppAPI\Notifications\ExAppAdminNotifier;
+use OCA\AppAPI\Notifications\ExAppNotifier;
+use OCA\AppAPI\Profiler\AppAPIDataCollector;
+use OCA\AppAPI\PublicCapabilities;
 
 use OCA\AppEcosystemV2\Service\SpeechToTextService;
 use OCA\AppEcosystemV2\Service\TextProcessingService;
@@ -23,14 +24,21 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\IGroupManager;
+use OCP\IL10N;
+use OCP\INavigationManager;
+use OCP\IURLGenerator;
+use OCP\IUser;
+use OCP\IUserSession;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
 
+use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 class Application extends App implements IBootstrap {
-	public const APP_ID = 'app_ecosystem_v2';
+	public const APP_ID = 'app_api';
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);
@@ -45,8 +53,9 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
 		$context->registerCapability(PublicCapabilities::class);
-		$context->registerMiddleware(AppEcosystemAuthMiddleware::class);
+		$context->registerMiddleware(AppAPIAuthMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
+		$context->registerEventListener(UserDeletedEvent::class, UserDeletedListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 
@@ -69,9 +78,10 @@ class Application extends App implements IBootstrap {
 		try {
 			$profiler = $server->get(IProfiler::class);
 			if ($profiler->isEnabled()) {
-				$profiler->add(new AEDataCollector());
+				$profiler->add(new AppAPIDataCollector());
 			}
-		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
+			$context->injectFn($this->registerExAppsManagementNavigation(...));
+		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|\Throwable) {
 		}
 	}
 
@@ -84,6 +94,38 @@ class Application extends App implements IBootstrap {
 				$event->getServer()->addPlugin($container->get(DavPlugin::class));
 			});
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
+		}
+	}
+
+	/**
+	 * Register ExApps management navigation entry right after default Apps management link.
+	 *
+	 * @param IUserSession $userSession
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
+	 *
+	 * @return void
+	 */
+	private function registerExAppsManagementNavigation(IUserSession $userSession): void {
+		$container = $this->getContainer();
+		/** @var IGroupManager $groupManager */
+		$groupManager = $container->get(IGroupManager::class);
+		/** @var IUser $user */
+		$user = $userSession->getUser();
+		if ($groupManager->isInGroup($user->getUID(), 'admin')) {
+			$container->get(INavigationManager::class)->add(function () use ($container) {
+				$urlGenerator = $container->get(IURLGenerator::class);
+				$l10n = $container->get(IL10N::class);
+				return [
+					'id' => self::APP_ID,
+					'type' => 'settings',
+					'order' => 6,
+					'href' => $urlGenerator->linkToRoute('app_api.ExAppsPage.viewApps'),
+					'icon' => $urlGenerator->imagePath('app_api', 'app-dark.svg'),
+					'target' => '_blank',
+					'name' => $l10n->t('External Apps'),
+				];
+			});
 		}
 	}
 }

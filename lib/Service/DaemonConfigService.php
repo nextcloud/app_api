@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\DaemonConfig;
-use OCA\AppEcosystemV2\Db\DaemonConfigMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Db\DaemonConfigMapper;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -99,6 +99,18 @@ class DaemonConfigService {
 			return $daemonConfig;
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 			$this->logger->error('Failed to get daemon config by name. Error: ' . $e->getMessage(), ['exception' => $e]);
+			return null;
+		}
+	}
+
+	public function updateDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
+		try {
+			$cacheKey = '/daemon_config_' . $daemonConfig->getName();
+			$daemonConfig = $this->mapper->update($daemonConfig);
+			$this->cache->set($cacheKey, $daemonConfig, self::CACHE_TTL);
+			return $daemonConfig;
+		} catch (Exception $e) {
+			$this->logger->error('Failed to update DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
 	}

@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\Daemon;
+namespace OCA\AppAPI\Command\Daemon;
 
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Service\DaemonConfigService;
 
+use OCP\IConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,15 +16,20 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RegisterDaemon extends Command {
 	private DaemonConfigService $daemonConfigService;
+	private IConfig $config;
 
-	public function __construct(DaemonConfigService $daemonConfigService) {
+	public function __construct(
+		DaemonConfigService $daemonConfigService,
+		IConfig $config,
+	) {
 		parent::__construct();
 
 		$this->daemonConfigService = $daemonConfigService;
+		$this->config = $config;
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:daemon:register');
+		$this->setName('app_api:daemon:register');
 		$this->setDescription('Register daemon config for ExApp deployment');
 
 		$this->addArgument('name', InputArgument::REQUIRED);
@@ -43,6 +50,8 @@ class RegisterDaemon extends Command {
 		$this->addOption('ssl_cert_password', null, InputOption::VALUE_REQUIRED, 'SSL cert password for daemon connection(optional)');
 
 		$this->addOption('gpu', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Docker containers gpu device mapping (will be forwarded to all created containers)', []);
+
+		$this->addOption('set-default', null, InputOption::VALUE_NONE, 'Set DaemonConfig as default');
 
 		$this->addUsage('local_docker "Docker local" "docker-install" "unix-socket" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
 	}
@@ -78,6 +87,10 @@ class RegisterDaemon extends Command {
 		if ($daemonConfig === null) {
 			$output->writeln('Failed to register daemon.');
 			return 1;
+		}
+
+		if ($input->getOption('set-default')) {
+			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
 		}
 
 		$output->writeln('Daemon successfully registered.');

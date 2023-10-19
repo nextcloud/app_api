@@ -1,13 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
+<files psalm-version="5.15.0@5c774aca4746caf3d239d9c8cadb9f882ca29352">
   <file src="lib/AppInfo/Application.php">
     <InvalidArgument>
       <code>LoadFilesPluginListener::class</code>
       <code>SabrePluginAuthInitListener::class</code>
+      <code>UserDeletedListener::class</code>
     </InvalidArgument>
     <MissingDependency>
       <code>DavPlugin</code>
     </MissingDependency>
+  </file>
+  <file src="lib/Command/ExApp/Deploy.php">
+    <ImplicitToStringCast>
+      <code><![CDATA[$infoXml->id]]></code>
+    </ImplicitToStringCast>
+  </file>
+  <file src="lib/Command/ExApp/Update.php">
+    <ImplicitToStringCast>
+      <code><![CDATA[$infoXml->id]]></code>
+    </ImplicitToStringCast>
+  </file>
+  <file src="lib/Controller/ExAppsPageController.php">
+    <UndefinedClass>
+      <code><![CDATA[$this->categoryFetcher]]></code>
+      <code>CategoryFetcher</code>
+      <code>CategoryFetcher</code>
+      <code>DependencyAnalyzer</code>
+      <code>OC_App</code>
+      <code>Platform</code>
+      <code>VersionParser</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Fetcher/AppAPIFetcher.php">
+    <InvalidThrow>
+      <code>throw $e;</code>
+    </InvalidThrow>
+    <TooManyArguments>
+      <code>fetch</code>
+    </TooManyArguments>
+    <UndefinedClass>
+      <code>$appDataFactory</code>
+      <code>$e</code>
+      <code>ConnectException</code>
+      <code>ConnectException</code>
+      <code>Factory</code>
+      <code>\OC_Util</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Fetcher/ExAppFetcher.php">
+    <UndefinedClass>
+      <code><![CDATA[$this->compareVersion]]></code>
+      <code><![CDATA[$this->compareVersion]]></code>
+      <code><![CDATA[$this->compareVersion]]></code>
+      <code><![CDATA[$this->compareVersion]]></code>
+      <code>$versionParser</code>
+      <code>$versionParser</code>
+      <code>CompareVersion</code>
+      <code>CompareVersion</code>
+      <code>Factory</code>
+      <code>VersionParser</code>
+    </UndefinedClass>
   </file>
   <file src="lib/Listener/LoadFilesPluginListener.php">
     <ImplementedParamTypeMismatch>
@@ -37,14 +89,25 @@
       <code>IEventListener</code>
     </InvalidTemplateParam>
     <MissingDependency>
-      <code>AEAuthBackend</code>
-      <code>AEAuthBackend</code>
+      <code>AppAPIAuthBackend</code>
+      <code>AppAPIAuthBackend</code>
     </MissingDependency>
     <MissingTemplateParam>
       <code>IEventListener</code>
     </MissingTemplateParam>
   </file>
-  <file src="lib/Profiler/AEDataCollector.php">
+  <file src="lib/Middleware/AppAPIAuthMiddleware.php">
+    <TypeDoesNotContainType>
+      <code>$exception instanceof AppAPIAuth</code>
+    </TypeDoesNotContainType>
+    <UndefinedMethod>
+      <code>getCode</code>
+      <code>getMessage</code>
+      <code>getMessage</code>
+      <code>getMessage</code>
+    </UndefinedMethod>
+  </file>
+  <file src="lib/Profiler/AppAPIDataCollector.php">
     <UndefinedClass>
       <code>Request</code>
     </UndefinedClass>

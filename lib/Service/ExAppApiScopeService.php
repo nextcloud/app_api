@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExAppApiScope;
-use OCA\AppEcosystemV2\Db\ExAppApiScopeMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExAppApiScope;
+use OCA\AppAPI\Db\ExAppApiScopeMapper;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -59,7 +59,7 @@ class ExAppApiScopeService {
 
 			$apiScopes = $this->getExAppApiScopes();
 			foreach ($apiScopes as $apiScope) {
-				if (str_starts_with($apiRoute, $apiScope->getApiRoute())) {
+				if (str_starts_with($this->sanitizeOcsRoute($apiRoute), $apiScope->getApiRoute())) {
 					$this->cache->set($cacheKey, $apiScope);
 					return $apiScope;
 				}
@@ -70,11 +70,25 @@ class ExAppApiScopeService {
 		}
 	}
 
+	/**
+	 * Check if the given route has ocs prefix and cut it off
+	 *
+	 * @param string $route
+	 *
+	 * @return string
+	 */
+	private function sanitizeOcsRoute(string $route): string {
+		if (preg_match("/\/ocs\/v(1|2)\.php/", $route, $matches)) {
+			return str_replace($matches[0], '', $route);
+		}
+		return $route;
+	}
+
 	public function registerInitScopes(): bool {
 		$aeApiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
 
 		$initApiScopes = [
-			// AppEcosystemV2 scopes
+			// AppAPI scopes
 			['api_route' => $aeApiV1Prefix . '/files/actions/menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/log', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ex-app/config', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
@@ -92,12 +106,14 @@ class ExAppApiScopeService {
 			['api_route' => '/dav/', 'scope_group' => 10, 'name' => 'FILES', 'user_check' => 1],
 			['api_route' => '/apps/files/ajax/', 'scope_group' => 10, 'name' => 'FILES', 'user_check' => 1],
 			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 11, 'name' => 'FILES_SHARING', 'user_check' => 1],
-			['api_route' => '/cloud/users', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
+			['api_route' => '/cloud/user', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
 			['api_route' => '/cloud/groups', 'scope_group' => 30, 'name' => 'USER_INFO', 'user_check' => 1],
 			['api_route' => '/apps/user_status/api/', 'scope_group' => 31, 'name' => 'USER_STATUS', 'user_check' => 1],
 			['api_route' => '/apps/notifications/api/', 'scope_group' => 32, 'name' => 'NOTIFICATIONS', 'user_check' => 1],
 			['api_route' => '/apps/weather_status/api/', 'scope_group' => 33, 'name' => 'WEATHER_STATUS', 'user_check' => 1],
 			['api_route' => '/apps/spreed/api/', 'scope_group' => 50, 'name' => 'TALK', 'user_check' => 1],
+			['api_route' => '/apps/activity/api/', 'scope_group' => 110, 'name' => 'ACTIVITIES', 'user_check' => 1],
+			['api_route' => '/apps/notes/api/', 'scope_group' => 120, 'name' => 'NOTES', 'user_check' => 1],
 		];
 
 		$this->cache->clear('/all_api_scopes');

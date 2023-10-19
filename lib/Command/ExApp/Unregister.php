@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExApp;
+namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppEcosystemV2\DeployActions\DockerActions;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\Service\AppAPIService;
 
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppAPI\Service\DaemonConfigService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,14 +15,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Unregister extends Command {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private DockerActions $dockerActions;
 	private DaemonConfigService $daemonConfigService;
 
 	public function __construct(
-		AppEcosystemV2Service $service,
+		AppAPIService       $service,
 		DaemonConfigService $daemonConfigService,
-		DockerActions $dockerActions,
+		DockerActions       $dockerActions,
 	) {
 		parent::__construct();
 
@@ -32,7 +32,7 @@ class Unregister extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:unregister');
+		$this->setName('app_api:app:unregister');
 		$this->setDescription('Unregister external app');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
@@ -81,13 +81,13 @@ class Unregister extends Command {
 			}
 			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 				$this->dockerActions->initGuzzleClient($daemonConfig);
-				[$stopResult, $removeResult] = $this->dockerActions->removePrevExAppContainer($this->dockerActions->buildDockerUrl($daemonConfig), $appId);
+				[$stopResult, $removeResult] = $this->dockerActions->removePrevExAppContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
 				if (isset($stopResult['error']) || isset($removeResult['error'])) {
 					$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
 				} else {
 					$rmData = $input->getOption('rm-data');
 					if ($rmData) {
-						$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $appId . '_data');
+						$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
 						if (isset($removeVolumeResult['error'])) {
 							$output->writeln(sprintf('Failed to remove ExApp %s volume %s', $appId, $appId . '_data'));
 						}

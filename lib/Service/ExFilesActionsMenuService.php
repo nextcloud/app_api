@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExFilesActionsMenu;
-use OCA\AppEcosystemV2\Db\ExFilesActionsMenuMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExFilesActionsMenu;
+use OCA\AppAPI\Db\ExFilesActionsMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -27,24 +27,24 @@ class ExFilesActionsMenuService {
 	private ExFilesActionsMenuMapper $mapper;
 	private LoggerInterface $logger;
 	private IClient $client;
-	private AppEcosystemV2Service $appEcosystemV2Service;
+	private AppAPIService $appAPIService;
 	private IRequest $request;
 	private IConfig $config;
 
 	public function __construct(
-		ICacheFactory $cacheFactory,
+		ICacheFactory            $cacheFactory,
 		ExFilesActionsMenuMapper $mapper,
-		LoggerInterface $logger,
-		IClientService $clientService,
-		AppEcosystemV2Service $appEcosystemV2Service,
-		IRequest $request,
-		IConfig $config,
+		LoggerInterface          $logger,
+		IClientService           $clientService,
+		AppAPIService            $appAPIService,
+		IRequest                 $request,
+		IConfig                  $config,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
 		$this->mapper = $mapper;
 		$this->logger = $logger;
 		$this->client = $clientService->newClient();
-		$this->appEcosystemV2Service = $appEcosystemV2Service;
+		$this->appAPIService = $appAPIService;
 		$this->request = $request;
 		$this->config = $config;
 	}
@@ -69,10 +69,10 @@ class ExFilesActionsMenuService {
 				'name' => $params['name'],
 				'display_name' => $params['display_name'],
 				'mime' => $params['mime'],
-				'permissions' => $params['permissions'],
-				'order' => $params['order'],
-				'icon' => $params['icon'],
-				'icon_class' => $params['icon_class'],
+				'permissions' => $params['permissions'] ?? 31,
+				'order' => $params['order'] ?? 0,
+				'icon' => $params['icon'] ?? null,
+				'icon_class' => $params['icon_class'] ?? 'icon-app-api',
 				'action_handler' => $params['action_handler'],
 			]);
 			if ($fileActionMenu !== null) {
@@ -171,9 +171,9 @@ class ExFilesActionsMenuService {
 					'instanceId' => $this->config->getSystemValue('instanceid', null),
 				],
 			];
-			$exApp = $this->appEcosystemV2Service->getExApp($appId);
+			$exApp = $this->appAPIService->getExApp($appId);
 			if ($exApp !== null) {
-				$result = $this->appEcosystemV2Service->aeRequestToExApp($this->request, $userId, $exApp, $handler, 'POST', $params);
+				$result = $this->appAPIService->aeRequestToExApp($this->request, $userId, $exApp, $handler, 'POST', $params);
 				if ($result instanceof IResponse) {
 					return $result->getStatusCode() === 200;
 				}

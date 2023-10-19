@@ -20,7 +20,7 @@ extensions = [
 ]
 
 # General information about the project.
-project = "AppEcosystemV2"
+project = "AppAPI"
 copyright = str(now.year) + " Nextcloud GmbH"  # noqa
 
 # The version info for the project you're documenting, acts as replacement for
@@ -56,4 +56,4 @@ def setup(app):
     app.add_css_file("css/light.css")
 
 
-issues_github_path = "cloud-py-api/app_ecosystem_v2"
+issues_github_path = "cloud-py-api/app_api"

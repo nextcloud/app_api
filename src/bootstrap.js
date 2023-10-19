@@ -8,4 +8,4 @@ Vue.prototype.OC = window.OC
 Vue.prototype.OCA = window.OCA
 
 // eslint-disable-next-line
-__webpack_public_path__ = generateFilePath('app_ecosystem_v2', '', 'js/')
+__webpack_public_path__ = generateFilePath('app_api', '', 'js/')

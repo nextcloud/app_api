@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExApp;
+namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppEcosystemV2\Db\ExAppScope;
-use OCA\AppEcosystemV2\DeployActions\DockerActions;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
+use OCA\AppAPI\Db\ExAppScope;
+use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppApiScopeService;
+use OCA\AppAPI\Service\ExAppScopesService;
 
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
-use OCA\AppEcosystemV2\Service\ExAppScopesService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,18 +20,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Update extends Command {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private DaemonConfigService $daemonConfigService;
 	private DockerActions $dockerActions;
 	private ExAppScopesService $exAppScopeService;
 	private ExAppApiScopeService $exAppApiScopeService;
 
 	public function __construct(
-		AppEcosystemV2Service $service,
-		ExAppScopesService $exAppScopesService,
+		AppAPIService        $service,
+		ExAppScopesService   $exAppScopesService,
 		ExAppApiScopeService $exAppApiScopeService,
-		DaemonConfigService $daemonConfigService,
-		DockerActions $dockerActions,
+		DaemonConfigService  $daemonConfigService,
+		DockerActions        $dockerActions,
 	) {
 		parent::__construct();
 
@@ -43,7 +43,7 @@ class Update extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:update');
+		$this->setName('app_api:app:update');
 		$this->setDescription('Update ExApp');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
@@ -58,13 +58,12 @@ class Update extends Command {
 		$appId = $input->getArgument('appid');
 
 		$pathToInfoXml = $input->getOption('info-xml');
-		if ($pathToInfoXml === null) {
-			$output->writeln(sprintf('No info.xml specified for %s', $appId));
-			return 2;
+		if ($pathToInfoXml !== null) {
+			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
+		} else {
+			$infoXml = $this->service->getLatestExAppInfoFromAppstore($appId);
 		}
 
-		// TODO: Change to check of info.xml from AppStore
-		$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
 		if ($infoXml === false) {
 			$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
 			return 2;
@@ -97,8 +96,7 @@ class Update extends Command {
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 		if ($daemonConfig === null) {
-			$output->writeln(sprintf('Daemon config %s not found.', $exApp->getDaemonConfigName()));
-			return 2;
+			$output->writeln(sprintf('Daemon config %s not found', $exApp->getDaemonConfigName()));
 		}
 
 		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {
@@ -122,7 +120,7 @@ class Update extends Command {
 			}
 
 			$this->dockerActions->initGuzzleClient($daemonConfig); // Required init
-			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $appId);
+			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
 			if (isset($containerInfo['error'])) {
 				$output->writeln(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
 				return 1;
@@ -130,7 +128,6 @@ class Update extends Command {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
 				'container_info' => $containerInfo,
 			]);
-			$deployParams['prev_container_id'] = $containerInfo['Id'];
 			[$pullResult, $stopResult, $removeResult, $createResult, $startResult] = $this->dockerActions->updateExApp($daemonConfig, $deployParams);
 
 			if (isset($pullResult['error'])) {
@@ -163,7 +160,6 @@ class Update extends Command {
 				$output->writeln(sprintf('ExApp %s container successfully updated.', $appId));
 			}
 		}
-		// TODO: Add AIO update DeployActions
 
 		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
 		if (!$this->service->updateExAppInfo($exApp, $exAppInfo)) {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Db;
+namespace OCA\AppAPI\Db;
 
 use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
@@ -10,7 +10,7 @@ use OCP\AppFramework\Db\Entity;
 /**
  * Class ExAppPreference
  *
- * @package OCA\AppEcosystemV2\Db
+ * @package OCA\AppAPI\Db
  *
  * @method string getUserid()
  * @method string getAppid()

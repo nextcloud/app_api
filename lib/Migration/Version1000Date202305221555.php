@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Migration;
+namespace OCA\AppAPI\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
@@ -211,7 +211,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('icon_class', Types::STRING, [
 				'notnull' => true,
-				'default' => 'icon-app-ecosystem-v2',
+				'default' => 'icon-app-api',
 			]);
 			// Action handler key name, that will be sent to exApp for handling
 			$table->addColumn('action_handler', Types::STRING, [

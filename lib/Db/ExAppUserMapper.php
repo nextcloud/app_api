@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Db;
+namespace OCA\AppAPI\Db;
 
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\Exception;
@@ -58,6 +58,34 @@ class ExAppUserMapper extends QBMapper {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->delete($this->tableName)
 			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)))
+			->executeStatement();
+	}
+
+	/**
+	 * @param string $appId
+	 * @param string $userId
+	 *
+	 * @throws Exception
+	 * @return int
+	 */
+	public function deleteByAppidUserid(string $appId, string $userId): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)))
+			->where($qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)))
+			->executeStatement();
+	}
+
+	/**
+	 * @param string $userId
+	 *
+	 * @throws Exception
+	 * @return int
+	 */
+	public function deleteByUserid(string $userId): int {
+		$qb = $this->db->getQueryBuilder();
+		return $qb->delete($this->tableName)
+			->where($qb->expr()->eq('userid', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR)))
 			->executeStatement();
 	}
 }

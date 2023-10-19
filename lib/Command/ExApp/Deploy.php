@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExApp;
+namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppEcosystemV2\DeployActions\DockerActions;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\DaemonConfigService;
 
+use OCP\IConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,28 +17,31 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Deploy extends Command {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private DaemonConfigService $daemonConfigService;
 	private DockerActions $dockerActions;
+	private IConfig $config;
 
 	public function __construct(
-		AppEcosystemV2Service $service,
+		AppAPIService       $service,
 		DaemonConfigService $daemonConfigService,
-		DockerActions $dockerActions,
+		DockerActions       $dockerActions,
+		IConfig             $config,
 	) {
 		parent::__construct();
 
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
 		$this->dockerActions = $dockerActions;
+		$this->config = $config;
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:deploy');
+		$this->setName('app_api:app:deploy');
 		$this->setDescription('Deploy ExApp on configured daemon');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
-		$this->addArgument('daemon-config-name', InputArgument::REQUIRED);
+		$this->addArgument('daemon-config-name', InputArgument::OPTIONAL);
 
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('env', 'e', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Docker container environment variables', []);
@@ -45,13 +50,20 @@ class Deploy extends Command {
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 
-		$pathToInfoXml = $input->getOption('info-xml');
-		if ($pathToInfoXml === null) {
-			$output->writeln(sprintf('No info.xml specified for %s', $appId));
+		$exApp = $this->service->getExApp($appId);
+		if ($exApp !== null) {
+			$output->writeln(sprintf('ExApp %s already registered.', $appId));
 			return 2;
 		}
 
-		$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
+		$pathToInfoXml = $input->getOption('info-xml');
+		if ($pathToInfoXml !== null) {
+			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
+		} else {
+			$infoXml = $this->service->getLatestExAppInfoFromAppstore($appId);
+			// TODO: Add default release signature check and use of release archive download and info.xml file extraction
+		}
+
 		if ($infoXml === false) {
 			$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
 			return 2;
@@ -61,13 +73,11 @@ class Deploy extends Command {
 			return 2;
 		}
 
-		$exApp = $this->service->getExApp($appId);
-		if ($exApp !== null) {
-			$output->writeln(sprintf('ExApp %s already registered.', $appId));
-			return 2;
-		}
-
+		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
 		$daemonConfigName = $input->getArgument('daemon-config-name');
+		if (!isset($daemonConfigName) && $defaultDaemonConfigName !== '') {
+			$daemonConfigName = $defaultDaemonConfigName;
+		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
 			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
@@ -88,7 +98,7 @@ class Deploy extends Command {
 		}
 
 		if (!isset($startResult['error']) && isset($createResult['Id'])) {
-			if (!$this->dockerActions->healthcheckContainer($createResult['Id'], $daemonConfig)) {
+			if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig)) {
 				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, 'Container healthcheck failed.'));
 				return 1;
 			}

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Db\ExAppUser;
-use OCA\AppEcosystemV2\Db\ExAppUserMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppUser;
+use OCA\AppAPI\Db\ExAppUserMapper;
 
 use OCP\DB\Exception;
 use OCP\ICache;
@@ -87,6 +87,32 @@ class ExAppUsersService {
 			return $result;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to remove ex_app_users for ExApp %s. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			return false;
+		}
+	}
+
+	public function removeExAppUser(ExApp $exApp, string $userId): bool {
+		try {
+			$result = $this->mapper->deleteByAppid($exApp->getAppid()) !== 0;
+			if ($result) {
+				$this->cache->clear('/ex_apps_users_' . $exApp->getAppid());
+			}
+			return $result;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to remove ex_app_user %s for ExApp %s. Error: %s', $userId, $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			return false;
+		}
+	}
+
+	public function removeDeletedUser(string $userId): bool {
+		try {
+			$result = $this->mapper->deleteByUserId($userId) !== 0;
+			if ($result) {
+				$this->cache->clear('/ex_apps_users_');
+			}
+			return $result;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Failed to remove ex_app_user %s after User deletion. Error: %s', $userId, $e->getMessage()), ['exception' => $e]);
 			return false;
 		}
 	}

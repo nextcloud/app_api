@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Listener;
+namespace OCA\AppAPI\Listener;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Service\ExFilesActionsMenuService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Service\ExFilesActionsMenuService;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\Services\IInitialState;

@@ -2,25 +2,27 @@
 Notifications
 =============
 
-AppEcosystemV2 allows ExApps to send limited notifications to users.
+AppAPI allows ExApps to send limited notifications to users.
 ExApp can send simple notification using available `rich object strings <https://github.com/nextcloud/server/blob/master/lib/public/RichObjectStrings/Definitions.php#L42>`_.
 More info about rich objects string can be found `here <https://github.com/nextcloud/server/issues/1706>`_.
 
 Send notification (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/notification``
+OCS endpoint: ``POST /apps/app_api/api/v1/notification``
 
 Request payload
 ***************
+
+Example payload.
 
 .. code-block:: json
 
 	{
 		"params": {
-			"object": "app_ecosystem_v2",
-			"object_id": "app_ecosystem_v2_id",
-			"subject_type": "app_ecosystem_v2_ex_app",
+			"object": "app_api",
+			"object_id": "app_api_id",
+			"subject_type": "app_api_ex_app",
 			"subject_params": {
 				"rich_subject": "Image {file} successfully upscaled!",
 				"rich_subject_params": {

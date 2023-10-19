@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2;
+namespace OCA\AppAPI;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
+use OCA\AppAPI\AppInfo\Application;
 
 use OCP\App\IAppManager;
 use OCP\Capabilities\IPublicCapability;
@@ -23,7 +23,7 @@ class PublicCapabilities implements IPublicCapability {
 			'version' => $this->appManager->getAppVersion(Application::APP_ID),
 		];
 		return [
-			'app_ecosystem_v2' => $capabilities,
+			'app_api' => $capabilities,
 		];
 	}
 }

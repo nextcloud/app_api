@@ -2,18 +2,28 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Migration;
+namespace OCA\AppAPI\Migration;
 
-use OCA\AppEcosystemV2\Service\ExAppApiScopeService;
+use OCA\AppAPI\DeployActions\AIODockerActions;
+use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\Service\ExAppApiScopeService;
 
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
 class DataInitializationStep implements IRepairStep {
 	private ExAppApiScopeService $service;
+	private DockerActions $dockerActions;
+	private AIODockerActions $AIODockerActions;
 
-	public function __construct(ExAppApiScopeService $service) {
+	public function __construct(
+		ExAppApiScopeService $service,
+		DockerActions $dockerActions,
+		AIODockerActions $AIODockerActions,
+	) {
 		$this->service = $service;
+		$this->dockerActions = $dockerActions;
+		$this->AIODockerActions = $AIODockerActions;
 	}
 
 	public function getName(): string {
@@ -25,6 +35,18 @@ class DataInitializationStep implements IRepairStep {
 			$output->info('Successfully initialized data for App Ecosystem V2');
 		} else {
 			$output->warning('Failed to initialize data for App Ecosystem V2');
+		}
+
+		// If in AIO - automatically register default DaemonConfig
+		if ($this->AIODockerActions->isAIO()) {
+			$output->info('AIO installation detected. Registering default daemon');
+			if ($this->AIODockerActions->registerAIODaemonConfig() !== null) {
+				$output->info('AIO DaemonConfig successfully registered');
+			}
+		} else { // register default DaemonConfig for local Docker socket
+			if ($this->dockerActions->registerDefaultDaemonConfig()) {
+				$output->info('Default DaemonConfig successfully registered');
+			}
 		}
 	}
 }

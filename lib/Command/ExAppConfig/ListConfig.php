@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\ExAppConfig;
+namespace OCA\AppAPI\Command\ExAppConfig;
 
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\ExAppConfigService;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppConfigService;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -14,12 +14,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ListConfig extends Command {
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private ExAppConfigService $appConfigService;
 
 	private const SENSITIVE_VALUE = '***REMOVED SENSITIVE VALUE***';
 
-	public function __construct(AppEcosystemV2Service $service, ExAppConfigService $appConfigService) {
+	public function __construct(AppAPIService $service, ExAppConfigService $appConfigService) {
 		parent::__construct();
 
 		$this->service = $service;
@@ -27,7 +27,7 @@ class ListConfig extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:app:config:list');
+		$this->setName('app_api:app:config:list');
 		$this->setDescription('List ExApp configs');
 		$this->addArgument('appid', InputArgument::REQUIRED);
 

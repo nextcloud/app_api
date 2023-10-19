@@ -14,11 +14,13 @@
 /.pre-commit-config.yaml
 /babel.config.js
 /build
-/CHANGELOG.md
+/APPS.md
+/AUTHORS.md
 /README.md
 /composer.*
 /node_modules
 /screenshots
+/docs
 /src
 /vendor/bin
 /jest.config.js

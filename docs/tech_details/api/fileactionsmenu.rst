@@ -3,7 +3,7 @@ File Actions Menu
 =================
 
 FileActionsMenu is a simple API for registering entry to the file actions menu for ExApps.
-AppEcosystemV2 takes responsibility to register FileActionsMenu, ExApps needs only to register it in AppEcosystemV2.
+AppAPI takes responsibility to register FileActionsMenu, ExApps needs only to register it in AppAPI.
 
 .. note::
 
@@ -12,10 +12,12 @@ AppEcosystemV2 takes responsibility to register FileActionsMenu, ExApps needs on
 Register
 ^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/files/actions/menu``
+OCS endpoint: ``POST /apps/app_api/api/v1/files/actions/menu``
 
 Params
 ******
+
+Complete list of params (including optional):
 
 .. code-block:: json
 
@@ -31,14 +33,23 @@ Params
 	}
 
 
+Optional params
+***************
+
+	* `permissions` - File permissions required to display action menu, default: **31** (all permissions)
+	* `order` - Order in file actions menu, default: **0**
+	* `icon` - Url to icon, default: **null**
+	* `icon_class` - Icon class instead of `icon`, default: **icon-app-ecosystem-v2**
+
 Unregister
 ^^^^^^^^^^
 
-OCS endpoint: ``DELETE /apps/app_ecosystem_v2/api/v1/files/actions/menu``
+OCS endpoint: ``DELETE /apps/app_api/api/v1/files/actions/menu``
 
 Params
 ******
 
+To unregister FileActionsMenu, you just need to provide name of registered FileActionsMenu:
 
 .. code-block:: json
 
@@ -49,7 +60,7 @@ Params
 Action payload to ExApp
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-When FileActionsMenu invoked, AppEcosystemV2 forwards action for handling to ExApp.
+When FileActionsMenu invoked, AppAPI forwards action for handling to ExApp.
 The following data is sent to ExApp FileActionsMenu handler from the context of action:
 
 .. code-block:: json
@@ -64,13 +75,17 @@ The following data is sent to ExApp FileActionsMenu handler from the context of 
 			"etag": "file_etag",
 			"mime": "file_full_mime",
 			"fileType": "dir/file",
+			"mtime": "last modify time(integer)",
 			"size": "integer",
 			"favorite": "nc_favorite_flag",
 			"permissions": "file_permissions_for_owner",
-			"mtime": "last modify time(integer)",
-			"userId": "string",
 			"shareOwner": "optional, str",
 			"shareOwnerId": "optional, str",
+			"shareTypes": "optional, int",
+			"shareAttributes": "optional, int",
+			"sharePermissions": "optional, int",
+			"userId": "string",
+			"instanceId": "string",
 		}
 	}
 
@@ -87,10 +102,10 @@ User action
 
 	sequenceDiagram
 		User->>FileActionMenu: Press on registered ExApp action
-		FileActionMenu->>AppEcosystemV2: send action context payload
-		AppEcosystemV2->>ExApp: forward request to handler
-		ExApp->>AppEcosystemV2: handler accepted action status
-		AppEcosystemV2->>User: Alert (action sent or error)
+		FileActionMenu->>AppAPI: send action context payload
+		AppAPI->>ExApp: forward request to handler
+		ExApp->>AppAPI: handler accepted action status
+		AppAPI->>User: Alert (action sent or error)
 
 
 Action results
@@ -103,7 +118,7 @@ e.g. on configured location in ExApp settings (``appconfig_ex``) or ExApp user s
 
 	sequenceDiagram
 		ExApp->>Nextcloud: Upload result file
-		ExApp->>AppEcosystemV2: Send notification about action results
+		ExApp->>AppAPI: Send notification about action results
 
 Examples
 ^^^^^^^^

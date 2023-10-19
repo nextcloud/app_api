@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Command\Daemon;
+namespace OCA\AppAPI\Command\Daemon;
 
-use OCA\AppEcosystemV2\Service\DaemonConfigService;
+use OCA\AppAPI\Service\DaemonConfigService;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -21,7 +21,7 @@ class UnregisterDaemon extends Command {
 	}
 
 	protected function configure() {
-		$this->setName('app_ecosystem_v2:daemon:unregister');
+		$this->setName('app_api:daemon:unregister');
 		$this->setDescription('Unregister daemon');
 
 		$this->addArgument('daemon-config-name', InputArgument::REQUIRED);

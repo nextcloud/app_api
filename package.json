@@ -1,19 +1,19 @@
 {
-	"name": "app_ecosystem_v2",
-	"description": "Nextcloud App Ecosystem V2",
+	"name": "app_api",
+	"description": "Nextcloud AppAPI",
 	"version": "1.0.0",
 	"keywords": [
 		"nextcloud",
 		"app",
 		"ecosystem"
 	],
-	"homepage": "https://github.com/nextcloud/app_ecosystem_v2",
+	"homepage": "https://github.com/nextcloud/app_api",
 	"bugs": {
-		"url": "https://github.com/nextcloud/app_ecosystem_v2/issues"
+		"url": "https://github.com/nextcloud/app_api/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/nextcloud/app_ecosystem_v2"
+		"url": "https://github.com/nextcloud/app_api"
 	},
 	"license": "AGPL-3.0",
 	"private": true,
@@ -35,21 +35,26 @@
 		"extends @nextcloud/browserslist-config"
 	],
 	"dependencies": {
-		"@nextcloud/auth": "^2.0.0",
-		"@nextcloud/axios": "^2.3.0",
-		"@nextcloud/calendar-js": "^6.0.0",
-		"@nextcloud/dialogs": "^4.0.1",
-		"@nextcloud/initial-state": "^2.0.0",
-		"@nextcloud/l10n": "^2.1.0",
+		"@nextcloud/auth": "^2.1.0",
+		"@nextcloud/axios": "^2.4.0",
+		"@nextcloud/dialogs": "^4.1.0",
+		"@nextcloud/event-bus": "^3.1.0",
+		"@nextcloud/initial-state": "^2.1.0",
+		"@nextcloud/l10n": "^2.2.0",
 		"@nextcloud/moment": "^1.2.1",
-		"@nextcloud/router": "^2.1.1",
-		"@nextcloud/vue": "^7.10.0",
-		"@nextcloud/vue-dashboard": "^2.0.1",
-		"@nextcloud/vue-richtext": "^2.1.0-beta.6",
+		"@nextcloud/password-confirmation": "^4.0.4",
+		"@nextcloud/router": "^2.1.2",
+		"@nextcloud/vue": "^7.12.4",
+		"dompurify": "^3.0.5",
+		"marked": "^9.0.3",
+		"p-limit": "^4.0.0",
 		"vue": "^2.7.14",
 		"vue-click-outside": "^1.1.0",
 		"vue-clipboard2": "^0.3.3",
-		"vue-material-design-icons": "^5.2.0"
+		"vue-localstorage": "^0.6.2",
+		"vue-material-design-icons": "^5.2.0",
+		"vuex": "^3.6.2",
+		"vuex-router-sync": "^5.0.0"
 	},
 	"devDependencies": {
 		"@nextcloud/babel-config": "^1.0.0",

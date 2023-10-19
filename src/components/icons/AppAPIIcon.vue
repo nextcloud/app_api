@@ -1,7 +1,7 @@
 <template>
 	<span :aria-hidden="!title"
 		:aria-label="title"
-		class="material-design-icon app-ecosystem-v2-icon"
+		class="material-design-icon app-api-icon"
 		role="img"
 		v-bind="$attrs"
 		@click="$emit('click', $event)">
@@ -33,7 +33,7 @@
 
 <script>
 export default {
-	name: 'AppEcosystemV2Icon',
+	name: 'AppAPIIcon',
 	props: {
 		title: {
 			type: String,

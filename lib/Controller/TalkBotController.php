@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\TalkBotsService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\TalkBotsService;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
@@ -19,12 +19,12 @@ use OCP\IRequest;
 
 class TalkBotController extends OCSController {
 	protected $request;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private TalkBotsService $talkBotsService;
 
 	public function __construct(
-		IRequest $request,
-		AppEcosystemV2Service $service,
+		IRequest        $request,
+		AppAPIService   $service,
 		TalkBotsService $talkBotsService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
@@ -45,7 +45,7 @@ class TalkBotController extends OCSController {
 	 * @throws OCSBadRequestException
 	 * @return Response
 	 */
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	#[NoCSRFRequired]
 	#[PublicPage]
 	public function registerExAppTalkBot(string $name, string $route, string $description): Response {
@@ -67,7 +67,7 @@ class TalkBotController extends OCSController {
 	 * @throws OCSNotFoundException
 	 * @return Response
 	 */
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	#[NoCSRFRequired]
 	#[PublicPage]
 	public function unregisterExAppTalkBot(string $route): Response {

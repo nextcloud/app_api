@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
-use OCA\AppEcosystemV2\Notifications\ExNotificationsManager;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Notifications\ExNotificationsManager;
 
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -39,12 +39,12 @@ class NotificationsController extends OCSController {
 	 *
 	 * @return Response
 	 */
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function sendNotification(array $params): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$userId = $this->request->getHeader('NC-USER-ID');
+		$userId = explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
 		$notification = $this->exNotificationsManager->sendNotification($appId, $userId, $params);
 		return new DataResponse($this->notificationToArray($notification), Http::STATUS_OK);
 	}

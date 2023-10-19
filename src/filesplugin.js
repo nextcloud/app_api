@@ -3,25 +3,25 @@ import { generateOcsUrl } from '@nextcloud/router'
 import { loadState } from '@nextcloud/initial-state'
 import { translate as t } from '@nextcloud/l10n'
 
-const state = loadState('app_ecosystem_v2', 'ex_files_actions_menu')
+const state = loadState('app_api', 'ex_files_actions_menu')
 console.debug('state', state)
 
 state.fileActions.forEach(fileAction => {
-	console.debug('[AppEcosystemV2] registering file action', fileAction)
+	console.debug('[AppAPI] registering file action', fileAction)
 	const action = {
 		name: fileAction.name,
 		displayName: t(fileAction.appid, fileAction.display_name),
 		mime: fileAction.mime,
 		permissions: Number(fileAction.permissions),
 		order: Number(fileAction.order),
-		icon: fileAction.icon !== '' ? generateOcsUrl('/apps/app_ecosystem_v2/api/v1/files/action/icon?appId=' + fileAction.appid + '&exFileActionName=' + fileAction.name) : null,
+		icon: fileAction.icon !== '' ? generateOcsUrl('/apps/app_api/api/v1/files/action/icon?appId=' + fileAction.appid + '&exFileActionName=' + fileAction.name) : null,
 		iconClass: fileAction.icon_class,
 		actionHandler: (fileName, context) => {
-			console.debug('[AppEcosystemV2] file', fileName)
-			console.debug('[AppEcosystemV2] context', context)
-			console.debug('[AppEcosystemV2] fileAction', fileAction)
+			console.debug('[AppAPI] file', fileName)
+			console.debug('[AppAPI] context', context)
+			console.debug('[AppAPI] fileAction', fileAction)
 			const file = context.$file[0]
-			axios.post(generateOcsUrl('/apps/app_ecosystem_v2/api/v1/files/action'), {
+			axios.post(generateOcsUrl('/apps/app_api/api/v1/files/action'), {
 				appId: fileAction.appid,
 				actionName: fileAction.name,
 				actionHandler: fileAction.action_handler,
