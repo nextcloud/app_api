@@ -397,6 +397,12 @@ const actions = {
 						context.commit('setIntervalUpdater', null)
 					}
 				}
+				if (Object.hasOwn(state, 'error') && state?.error !== '') {
+					context.commit('setError', {
+						appId: [appId],
+						error: response.data?.error,
+					})
+				}
 			})
 			.catch((error) => context.commit('API_FAILURE', error))
 	},

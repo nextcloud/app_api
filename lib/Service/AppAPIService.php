@@ -313,15 +313,28 @@ class AppAPIService {
 	 *
 	 * @return void
 	 */
-	public function setAppInitProgress(string $appId, int $progress): void {
+	public function setAppInitProgress(string $appId, int $progress, string $error = '', bool $update = false): void {
 		$exApp = $this->getExApp($appId);
 		$cacheKey = '/exApp_' . $exApp->getAppid();
 
 		$status = json_decode($exApp->getStatus(), true);
-		if ($progress === -1) {
-			$this->logger->error(sprintf('ExApp %s initialization failed', $appId));
+
+		if ($update) {
+			// Set active=false during update action, for register it already false
+			$status['active'] = false;
 		}
-		if ($progress < 100 && $progress >= 0) {
+
+		if ($status['active']) {
+			return;
+		}
+
+		if ($progress === -1) {
+			$this->logger->error(sprintf('ExApp %s initialization failed. Error: %s', $appId, $error));
+			if ($error !== '') {
+				$status['error'] = $error;
+			}
+		}
+		if ($progress >= 0 && $progress < 100) {
 			$status['progress'] = $progress;
 		} else {
 			unset($status['progress']);
@@ -330,9 +343,12 @@ class AppAPIService {
 		$exApp->setStatus(json_encode($status));
 
 		try {
-			$this->exAppMapper->update($exApp);
+			$exApp = $this->exAppMapper->update($exApp);
 			$this->updateExAppLastCheckTime($exApp);
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+			if ($progress === 100) {
+				$this->enableExApp($exApp);
+			}
 		} catch (Exception) {
 		}
 	}

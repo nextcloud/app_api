@@ -10,7 +10,6 @@ use OC\App\DependencyAnalyzer;
 use OC\App\Platform;
 use OC_App;
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppScope;
@@ -26,7 +25,6 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
-use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -663,7 +661,7 @@ class ExAppsPageController extends Controller {
 			'port' => (int) $exAppInfo['port'],
 		])) {
 			// 6. Set initialization progress to start
-			$this->service->setAppInitProgress($appId, 0);
+			$this->service->setAppInitProgress($appId, 0, '', true);
 			// 7. Dispatch init step on ExApp side
 			$this->service->dispatchExAppInit($exApp);
 		}

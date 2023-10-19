@@ -97,12 +97,8 @@ class OCSApiController extends OCSController {
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function setAppProgress(string $appId, int $progress): DataResponse {
-		$this->service->setAppInitProgress($appId, $progress);
-		if ($progress === 100) {
-			$exApp = $this->service->getExApp($appId);
-			$this->service->enableExApp($exApp);
-		}
+	public function setAppProgress(string $appId, int $progress, string $error): DataResponse {
+		$this->service->setAppInitProgress($appId, $progress, $error);
 		return new DataResponse();
 	}
 }

@@ -193,6 +193,18 @@ class Register extends Command {
 
 			$this->service->dispatchExAppInit($exApp);
 
+			if ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
+				// Wait until ExApp initialized in case of manual-install type
+				do {
+					$exApp = $this->service->getExApp($appId);
+					$status = json_decode($exApp->getStatus(), true);
+					if (isset($status['error'])) {
+						$output->writeln(sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']));
+						return 1;
+					}
+				} while (isset($status['progress']));
+			}
+
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 			return 0;
 		}

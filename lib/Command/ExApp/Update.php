@@ -223,6 +223,7 @@ class Update extends Command {
 			return 1;
 		}
 
+		$this->service->setAppInitProgress($appId, 0, '', true);
 		$this->service->dispatchExAppInit($exApp);
 
 		$output->writeln(sprintf('ExApp %s successfully updated.', $appId));
