@@ -2,6 +2,7 @@
 <files psalm-version="5.15.0@5c774aca4746caf3d239d9c8cadb9f882ca29352">
   <file src="lib/AppInfo/Application.php">
     <InvalidArgument>
+      <code>ExAppInitializedListener::class</code>
       <code>LoadFilesPluginListener::class</code>
       <code>SabrePluginAuthInitListener::class</code>
       <code>UserDeletedListener::class</code>
