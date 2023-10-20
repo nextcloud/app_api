@@ -89,6 +89,7 @@ class OCSApiController extends OCSController {
 	/**
 	 * @PublicPage
 	 * @NoCSRFRequired
+	 * @NoAdminRequired
 	 *
 	 * Get ExApp status, that required during initialization step with progress information
 	 *
@@ -96,6 +97,7 @@ class OCSApiController extends OCSController {
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
+	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function setAppProgress(string $appId, int $progress, string $error = ''): DataResponse {
 		$this->service->setAppInitProgress($appId, $progress, $error);
