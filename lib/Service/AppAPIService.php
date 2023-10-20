@@ -8,6 +8,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
 
+use OCA\AppAPI\Event\ExAppInitializedEvent;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
@@ -15,6 +16,7 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IResponse;
@@ -55,6 +57,7 @@ class AppAPIService {
 	private TalkBotsService $talkBotsService;
 	private ExAppFetcher $exAppFetcher;
 	private ExAppArchiveFetcher $exAppArchiveFetcher;
+	private IEventDispatcher $eventDispatcher;
 
 	public function __construct(
 		LoggerInterface $logger,
@@ -77,6 +80,7 @@ class AppAPIService {
 		TalkBotsService $talkBotsService,
 		ExAppFetcher $exAppFetcher,
 		ExAppArchiveFetcher $exAppArchiveFetcher,
+		IEventDispatcher $eventDispatcher,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
@@ -98,6 +102,7 @@ class AppAPIService {
 		$this->talkBotsService = $talkBotsService;
 		$this->exAppFetcher = $exAppFetcher;
 		$this->exAppArchiveFetcher = $exAppArchiveFetcher;
+		$this->eventDispatcher = $eventDispatcher;
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -349,7 +354,7 @@ class AppAPIService {
 			$this->updateExAppLastCheckTime($exApp);
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 			if ($progress === 100) {
-				$this->enableExApp($exApp);
+				$this->eventDispatcher->dispatchTyped(new ExAppInitializedEvent($appId));
 			}
 		} catch (Exception) {
 		}

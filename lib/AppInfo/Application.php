@@ -6,6 +6,8 @@ namespace OCA\AppAPI\AppInfo;
 
 use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
+use OCA\AppAPI\Event\ExAppInitializedEvent;
+use OCA\AppAPI\Listener\ExAppInitializedListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Listener\UserDeletedListener;
@@ -54,6 +56,7 @@ class Application extends App implements IBootstrap {
 		$context->registerMiddleware(AppAPIAuthMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 		$context->registerEventListener(UserDeletedEvent::class, UserDeletedListener::class);
+		$context->registerEventListener(ExAppInitializedEvent::class, ExAppInitializedListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 	}
