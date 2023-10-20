@@ -37,7 +37,6 @@ class ExAppInitializedListener implements IEventListener {
 			$attempts++;
 			$exApp = $this->service->getExApp($event->getAppid());
 			$status = json_decode($exApp->getStatus(), true);
-			$this->logger->warning('ExApp ' . $event->getAppid() . ' status: ' . json_encode($status) );
 			if (!isset($status['progress']) && !isset($status['error']) && $status['active']) {
 				$this->service->enableExApp($exApp);
 				return;
