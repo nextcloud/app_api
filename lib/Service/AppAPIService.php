@@ -361,6 +361,11 @@ class AppAPIService {
 				$this->logger->warning('Sending async postAppProgressFinished');
 				$this->client->postAsync($this->url->getAbsoluteURL(sprintf('/index.php/apps/app_api/apps/status/%s/init-finished', $appId)), [
 					'json' => ['secret' => $exApp->getSecret()],
+					'options' => [
+						'nextcloud' => [
+							'allow_local_address' => true,
+						],
+					],
 				])->then(function (IResponse $response) {
 					$this->logger->warning('Then postAppProgressFinished: ' . $response->getStatusCode() . ', body: ' . $response->getBody());
 				})->wait();

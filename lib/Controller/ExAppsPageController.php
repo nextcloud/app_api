@@ -786,10 +786,24 @@ class ExAppsPageController extends Controller {
 		if ($exApp->getSecret() !== $secret) {
 			throw new \InvalidArgumentException('ExApp secret does not match');
 		}
-		$status = json_decode($exApp->getStatus(), true);
-		if (!isset($status['error']) && !isset($status['progress']) && $status['active'] && $this->service->enableExApp($exApp)) {
-			return new JSONResponse('OK');
+
+		$attempts = 0;
+		$totalAttempts = 3;
+		$delay = 1;
+
+		while ($attempts < $totalAttempts) {
+			$attempts++;
+			$exApp = $this->service->getExApp($appId);
+			$status = json_decode($exApp->getStatus(), true);
+			$this->logger->warning('ExApp initialization attempt: ' . $attempts . ', status: ' . $exApp->getStatus());
+			if (!isset($status['progress']) && !isset($status['error']) && $status['active']) {
+				if ($this->service->enableExApp($exApp)) {
+					return new JSONResponse('OK');
+				}
+			}
+			sleep($delay);
 		}
+
 		return new JSONResponse('ERROR', Http::STATUS_INTERNAL_SERVER_ERROR);
 	}
 
