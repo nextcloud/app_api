@@ -100,6 +100,7 @@ class OCSApiController extends OCSController {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function setAppProgress(string $appId, int $progress, string $error = ''): DataResponse {
+		$this->logger->warning(sprintf('[AppAPI] Setting ExApp %s progress %s', $appId, $progress));
 		$this->service->setAppInitProgress($appId, $progress, $error);
 		return new DataResponse();
 	}

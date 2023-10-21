@@ -23,8 +23,10 @@ use OCA\AppAPI\Service\ExAppUsersService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -765,6 +767,30 @@ class ExAppsPageController extends Controller {
 	public function getAppStatus(string $appId): JSONResponse {
 		$exApp = $this->service->getExApp($appId);
 		return new JSONResponse(json_decode($exApp->getStatus(), true));
+	}
+
+	/**
+	 * @NoAdminRequired
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
+	 * @param string $appId
+	 *
+	 * @return JSONResponse
+	 */
+	#[NoAdminRequired]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function postAppProgressFinished(string $appId, string $secret): JSONResponse {
+		$exApp = $this->service->getExApp($appId);
+		if ($exApp->getSecret() !== $secret) {
+			throw new \InvalidArgumentException('ExApp secret does not match');
+		}
+		$status = json_decode($exApp->getStatus(), true);
+		if (!isset($status['error']) && !isset($status['progress']) && $status['active'] && $this->service->enableExApp($exApp)) {
+			return new JSONResponse('OK');
+		}
+		return new JSONResponse('ERROR', Http::STATUS_INTERNAL_SERVER_ERROR);
 	}
 
 	/**

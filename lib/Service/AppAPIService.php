@@ -25,6 +25,7 @@ use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ISession;
+use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
@@ -58,6 +59,7 @@ class AppAPIService {
 	private ExAppFetcher $exAppFetcher;
 	private ExAppArchiveFetcher $exAppArchiveFetcher;
 	private IEventDispatcher $eventDispatcher;
+	private IURLGenerator $url;
 
 	public function __construct(
 		LoggerInterface $logger,
@@ -81,6 +83,7 @@ class AppAPIService {
 		ExAppFetcher $exAppFetcher,
 		ExAppArchiveFetcher $exAppArchiveFetcher,
 		IEventDispatcher $eventDispatcher,
+		IURLGenerator $urlGenerator,
 	) {
 		$this->logger = $logger;
 		$this->logFactory = $logFactory;
@@ -103,6 +106,7 @@ class AppAPIService {
 		$this->exAppFetcher = $exAppFetcher;
 		$this->exAppArchiveFetcher = $exAppArchiveFetcher;
 		$this->eventDispatcher = $eventDispatcher;
+		$this->url = $urlGenerator;
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -354,7 +358,13 @@ class AppAPIService {
 			$this->updateExAppLastCheckTime($exApp);
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 			if ($progress === 100) {
-				$this->eventDispatcher->dispatchTyped(new ExAppInitializedEvent($appId));
+				$this->logger->warning('Sending async postAppProgressFinished');
+				$this->client->postAsync($this->url->getAbsoluteURL(sprintf('/index.php/apps/app_api/apps/status/%s/init-finished', $appId)), [
+					'json' => ['secret' => $exApp->getSecret()],
+				])->then(function (IResponse $response) {
+					$this->logger->warning('Then postAppProgressFinished: ' . $response->getStatusCode() . ', body: ' . $response->getBody());
+				})->wait();
+				//$this->eventDispatcher->dispatchTyped(new ExAppInitializedEvent($appId));
 			}
 		} catch (Exception) {
 		}
