@@ -85,4 +85,20 @@ class OCSApiController extends OCSController {
 	public function getNCUsersList(): DataResponse {
 		return new DataResponse($this->service->getNCUsersList(), Http::STATUS_OK);
 	}
+
+	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
+	 * Get ExApp status, that required during initialization step with progress information
+	 *
+	 * @return DataResponse
+	 */
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function setAppProgress(string $appId, int $progress, string $error = ''): DataResponse {
+		$this->service->setAppInitProgress($appId, $progress, $error);
+		return new DataResponse();
+	}
 }

@@ -57,13 +57,20 @@
 				<NcAppNavigationItem
 					id="admin-section"
 					:href="linkToAdminSettings"
-					:name="t('app_api', 'Admin settings') + ' ↗'" />
+					:name="t('app_api', 'Admin settings') + ' ↗'">
+					<template v-if="!state.daemon_config_accessible" #icon>
+						<Alert :size="20" />
+					</template>
+				</NcAppNavigationItem>
 			</template>
 		</NcAppNavigation>
 
 		<!-- Apps list -->
 		<NcAppContent class="app-settings-content" :class="{ 'icon-loading': loadingList }">
-			<AppList :category="$route.params.category ?? 'installed'" :app="app" :search="searchQuery" />
+			<AppList :category="$route.params.category ?? 'installed'"
+				:app="app"
+				:search="searchQuery"
+				:daemon-config-accessible="state.daemon_config_accessible" />
 		</NcAppContent>
 
 		<!-- Selected app details -->
@@ -144,6 +151,7 @@ import NcAppSidebarTab from '@nextcloud/vue/dist/Components/NcAppSidebarTab.js'
 import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble.js'
 import NcContent from '@nextcloud/vue/dist/Components/NcContent.js'
 import IconStarShooting from 'vue-material-design-icons/StarShooting.vue'
+import Alert from 'vue-material-design-icons/Alert.vue'
 
 import AppList from '../components/Apps/AppList.vue'
 import AppDetails from '../components/Apps/AppDetails.vue'
@@ -177,6 +185,7 @@ export default {
 		Markdown,
 		DaemonDetails,
 		ScopesDetails,
+		Alert,
 	},
 
 	mixins: [AppManagement],
@@ -294,6 +303,8 @@ export default {
 		this.$store.dispatch('getCategories', { shouldRefetchCategories: true })
 		this.$store.dispatch('getAllApps')
 		this.$store.commit('setUpdateCount', this.state.updateCount)
+		this.$store.commit('setDaemonAccessible', this.state.daemon_config_accessible)
+		this.$store.dispatch('updateAppsStatus')
 	},
 
 	mounted() {
@@ -303,6 +314,7 @@ export default {
 	beforeDestroy() {
 		unsubscribe('nextcloud:unified-search.search', this.setSearch)
 		unsubscribe('nextcloud:unified-search.reset', this.resetSearch)
+		clearInterval(this.$store.getters.getStatusUpdater)
 	},
 
 	methods: {

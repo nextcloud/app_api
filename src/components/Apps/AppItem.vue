@@ -67,22 +67,22 @@
 			<div v-if="app.error" class="warning">
 				{{ app.error }}
 			</div>
-			<div v-if="isLoading" class="icon icon-loading-small" />
+			<div v-if="isLoading || isInitializing" class="icon icon-loading-small" />
 			<NcButton v-if="app.update"
 				type="primary"
-				:disabled="installing || isLoading"
+				:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
 				@click.stop="update(app.id)">
 				{{ t('settings', 'Update to {update}', {update:app.update}) }}
 			</NcButton>
 			<NcButton v-if="app.canUnInstall"
 				class="uninstall"
 				type="tertiary"
-				:disabled="installing || isLoading"
+				:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
 				@click.stop="remove(app.id)">
 				{{ t('settings', 'Remove') }}
 			</NcButton>
 			<NcButton v-if="app.active"
-				:disabled="installing || isLoading"
+				:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
 				@click.stop="disable(app.id)">
 				{{ t('settings','Disable') }}
 			</NcButton>
@@ -90,7 +90,7 @@
 				:title="enableButtonTooltip"
 				:aria-label="enableButtonTooltip"
 				type="primary"
-				:disabled="!app.canInstall || installing || isLoading"
+				:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
 				@click.stop="enable(app.id)">
 				{{ enableButtonText }}
 			</NcButton>
@@ -98,7 +98,7 @@
 				:title="forceEnableButtonTooltip"
 				:aria-label="forceEnableButtonTooltip"
 				type="secondary"
-				:disabled="installing || isLoading"
+				:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
 				@click.stop="forceEnable(app.id)">
 				{{ forceEnableButtonText }}
 			</NcButton>
