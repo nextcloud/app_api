@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Db\ExAppTextProcessingProvider;
-use OCA\AppEcosystemV2\Db\ExAppTextProcessingProviderMapper;
-use OCA\AppEcosystemV2\Db\ExAppTextProcessingTaskType;
-use OCA\AppEcosystemV2\Db\ExAppTextProcessingTaskTypeMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppTextProcessingProvider;
+use OCA\AppAPI\Db\ExAppTextProcessingProviderMapper;
+use OCA\AppAPI\Db\ExAppTextProcessingTaskType;
+use OCA\AppAPI\Db\ExAppTextProcessingTaskTypeMapper;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\IAppContainer;
 use OCP\ICache;
@@ -20,11 +20,11 @@ use OCP\TextProcessing\ITaskType;
 class TextProcessingService {
 	private ICache $cache;
 	private ExAppTextProcessingProviderMapper $textProcessingProviderMapper;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private ExAppTextProcessingTaskTypeMapper $textProcessingTaskTypeMapper;
 
 	public function __construct(
-		AppEcosystemV2Service $service,
+		AppAPIService $service,
 		ICacheFactory $cacheFactory,
 		ExAppTextProcessingProviderMapper $textProcessingProviderMapper,
 		ExAppTextProcessingTaskTypeMapper $textProcessingTaskTypeMapper,
@@ -99,21 +99,21 @@ class TextProcessingService {
 	 *
 	 * @return void
 	 */
-	public function registerExAppTextProcessingProviders(IAppContainer $container, IRegistrationContext &$context): void {
+	public function registerExAppTextProcessingProviders(IRegistrationContext &$context): void {
 		$exAppsProviders = $this->getTextProcessingProviders();
 		/** @var ExAppTextProcessingProvider $exAppProvider */
 		foreach ($exAppsProviders as $exAppProvider) {
 			$exApp = $this->service->getExApp($exAppProvider->getAppid());
 			$tpTaskType = $this->getExAppTextProcessingTaskType($exApp, $exAppProvider->getActionType());
 			$taskType = $this->getAnonymousTaskType($exAppProvider, $tpTaskType);
-			$taskTypeClassName = get_class($taskType) . $tpTaskType->getAppid() . $tpTaskType->getName();
-			$container->getServer()->registerService($taskTypeClassName, function () use ($taskType) {
+			$taskTypeClassName = '\\OCA\\AppAPI\\' . $tpTaskType->getAppid() . '_' . $tpTaskType->getName();
+			$context->registerService($taskTypeClassName, function () use ($taskType) {
 				return $taskType;
 			});
 
 			$provider = $this->getAnonymousExAppProvider($exAppProvider, $taskTypeClassName);
-			$className = get_class($provider) . $exAppProvider->getAppid() . $exAppProvider->getName();
-			$container->getServer()->registerService($className, function () use ($provider) {
+			$className = '\\OCA\\AppAPI\\' . $exAppProvider->getAppid() . '_' . $exAppProvider->getName();
+			$context->registerService($className, function () use ($provider) {
 				return $provider;
 			});
 			$context->registerTextProcessingProvider($className);
@@ -130,12 +130,12 @@ class TextProcessingService {
 	 */
 	private function getAnonymousExAppProvider(ExAppTextProcessingProvider $provider, string $taskTypeClassName): IProvider {
 		return new class ($this->service, $provider, $taskTypeClassName) implements IProvider {
-			private AppEcosystemV2Service $service;
+			private AppAPIService $service;
 			private ExAppTextProcessingProvider $provider;
 			private string $taskTypeClassName;
 
 			public function __construct(
-				AppEcosystemV2Service $service,
+				AppAPIService $service,
 				ExAppTextProcessingProvider $provider,
 				string $taskTypeClassName,
 			) {

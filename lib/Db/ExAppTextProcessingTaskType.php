@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Db;
+namespace OCA\AppAPI\Db;
 
 use OCP\AppFramework\Db\Entity;
 

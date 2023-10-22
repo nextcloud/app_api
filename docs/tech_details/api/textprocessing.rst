@@ -2,13 +2,13 @@
 Text-Processing
 ===============
 
-AppEcosystemV2 provides a text-processing service
+AppAPI provides a text-processing service
 that can be used to register ExApps providers and to process passed through text.
 
 Registering text-processing provider (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/text_processing``
+OCS endpoint: ``POST /apps/app_api/api/v1/text_processing``
 
 Request data
 ************
@@ -31,7 +31,7 @@ On successful registration response with status code 200 is returned.
 Unregistering text-processing provider (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``DELETE /apps/app_ecosystem_v2/api/v1/text_processing``
+OCS endpoint: ``DELETE /apps/app_api/api/v1/text_processing``
 
 Request data
 ************
@@ -51,7 +51,7 @@ On successful unregister response with status code 200 is returned.
 Registering Text-Processing task type (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/text_processing/task_type``
+OCS endpoint: ``POST /apps/app_api/api/v1/text_processing/task_type``
 
 Request data
 ************
@@ -72,7 +72,7 @@ On successful registration response with status code 200 is returned.
 Unregistering Text-Processing task type (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``DELETE /apps/app_ecosystem_v2/api/v1/text_processing/task_type``
+OCS endpoint: ``DELETE /apps/app_api/api/v1/text_processing/task_type``
 
 Request data
 ************

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Service;
+namespace OCA\AppAPI\Service;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Db\ExApp;
-use OCA\AppEcosystemV2\Db\ExAppSpeechToTextProvider;
-use OCA\AppEcosystemV2\Db\ExAppSpeechToTextProviderMapper;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppSpeechToTextProvider;
+use OCA\AppAPI\Db\ExAppSpeechToTextProviderMapper;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\IAppContainer;
@@ -21,12 +21,12 @@ use Psr\Log\LoggerInterface;
 class SpeechToTextService {
 	private ICache $cache;
 	private ExAppSpeechToTextProviderMapper $speechToTextProviderMapper;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private LoggerInterface $logger;
 
 	public function __construct(
 		ICacheFactory $cacheFactory,
-		AppEcosystemV2Service $service,
+		AppAPIService $service,
 		ExAppSpeechToTextProviderMapper $speechToTextProviderMapper,
 		LoggerInterface $logger,
 	) {
@@ -103,13 +103,13 @@ class SpeechToTextService {
 	 *
 	 * @return void
 	 */
-	public function registerExAppSpeechToTextProviders(IAppContainer $container, IRegistrationContext &$context): void {
+	public function registerExAppSpeechToTextProviders(IRegistrationContext &$context): void {
 		$exAppsProviders = $this->getSpeechToTextProviders();
 		/** @var ExAppSpeechToTextProvider $exAppProvider */
 		foreach ($exAppsProviders as $exAppProvider) {
 			$sttProvider = $this->getAnonymousExAppProvider($exAppProvider);
-			$class = get_class($sttProvider) . $exAppProvider->getAppid() . $exAppProvider->getName();
-			$container->getServer()->registerService($class, function () use ($sttProvider) {
+			$class = '\\OCA\\AppAPI\\' . $exAppProvider->getAppid() . '_' . $exAppProvider->getName();
+			$context->registerService($class, function () use ($sttProvider) {
 				return $sttProvider;
 			});
 			$context->registerSpeechToTextProvider($class);
@@ -118,11 +118,11 @@ class SpeechToTextService {
 
 	private function getAnonymousExAppProvider(ExAppSpeechToTextProvider $provider): ?ISpeechToTextProvider {
 		return new class ($this->service, $provider) implements ISpeechToTextProvider {
-			private AppEcosystemV2Service $service;
+			private AppAPIService $service;
 			private ExAppSpeechToTextProvider $sttProvider;
 
 			public function __construct(
-				AppEcosystemV2Service $service,
+				AppAPIService $service,
 				ExAppSpeechToTextProvider $sttProvider,
 			) {
 				$this->service = $service;

@@ -2,13 +2,13 @@
 Speech-To-Text
 ==============
 
-AppEcosystemV2 provides a Speech-To-Text (STT) service
+AppAPI provides a Speech-To-Text (STT) service
 that can be used to register ExApp as a custom STT model and transcribe audio files via it.
 
 Registering ExApp STT provider (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_ecosystem_v2/api/v1/speech_to_text``
+OCS endpoint: ``POST /apps/app_api/api/v1/speech_to_text``
 
 Request data
 ************
@@ -29,7 +29,7 @@ On successful registration response with status code 200 is returned.
 Unregistering ExApp STT provider (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``DELETE /apps/app_ecosystem_v2/api/v1/speech_to_text``
+OCS endpoint: ``DELETE /apps/app_api/api/v1/speech_to_text``
 
 Request data
 ************

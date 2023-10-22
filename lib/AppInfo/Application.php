@@ -15,8 +15,8 @@ use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
 
-use OCA\AppEcosystemV2\Service\SpeechToTextService;
-use OCA\AppEcosystemV2\Service\TextProcessingService;
+use OCA\AppAPI\Service\SpeechToTextService;
+use OCA\AppAPI\Service\TextProcessingService;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -64,11 +64,11 @@ class Application extends App implements IBootstrap {
 		try {
 			/** @var TextProcessingService $textProcessingService */
 			$textProcessingService = $container->get(TextProcessingService::class);
-			$textProcessingService->registerExAppTextProcessingProviders($container, $context);
+			$textProcessingService->registerExAppTextProcessingProviders($context);
 
 			/** @var SpeechToTextService $speechToTextService */
 			$speechToTextService = $container->get(SpeechToTextService::class);
-			$speechToTextService->registerExAppSpeechToTextProviders($container, $context);
+			$speechToTextService->registerExAppSpeechToTextProviders($context);
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 	}

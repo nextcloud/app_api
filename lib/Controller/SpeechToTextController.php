@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppEcosystemV2\Controller;
+namespace OCA\AppAPI\Controller;
 
-use OCA\AppEcosystemV2\AppInfo\Application;
-use OCA\AppEcosystemV2\Attribute\AppEcosystemAuth;
-use OCA\AppEcosystemV2\Service\AppEcosystemV2Service;
-use OCA\AppEcosystemV2\Service\SpeechToTextService;
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\SpeechToTextService;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
@@ -18,12 +18,12 @@ use OCP\IRequest;
 
 class SpeechToTextController extends OCSController {
 	protected $request;
-	private AppEcosystemV2Service $service;
+	private AppAPIService $service;
 	private SpeechToTextService $speechToTextService;
 
 	public function __construct(
 		IRequest $request,
-		AppEcosystemV2Service $service,
+		AppAPIService $service,
 		SpeechToTextService $speechToTextService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
@@ -46,7 +46,7 @@ class SpeechToTextController extends OCSController {
 	 */
 	#[NoCSRFRequired]
 	#[PublicPage]
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	public function registerProvider(string $name, string $displayName, string $actionHandlerRoute): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$exApp = $this->service->getExApp($appId);
@@ -71,7 +71,7 @@ class SpeechToTextController extends OCSController {
 	 */
 	#[NoCSRFRequired]
 	#[PublicPage]
-	#[AppEcosystemAuth]
+	#[AppAPIAuth]
 	public function unregisterProvider(string $name): Response {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$exApp = $this->service->getExApp($appId);
