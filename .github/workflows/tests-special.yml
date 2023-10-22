@@ -95,7 +95,7 @@ jobs:
           ./occ app:enable --force ${{ env.APP_NAME }}
 
       - name: Run Nextcloud
-        run: php -S 127.0.0.1:8080 &
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
         uses: actions/checkout@v3
@@ -117,7 +117,7 @@ jobs:
           php occ app_api:daemon:register manual_install "Manual Install" manual-install 0 0 0
           php occ app_api:app:register nc_py_api manual_install --json-info \
             "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\"],\"optional\":[\"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"]},\"protocol\":\"http\",\"system_app\":1}" \
-            -e --force-scopes
+            --force-scopes
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
 
