@@ -95,7 +95,7 @@ jobs:
           ./occ app:enable --force ${{ env.APP_NAME }}
 
       - name: Run Nextcloud
-        run: php -S 127.0.0.1:8080 &
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
         uses: actions/checkout@v3

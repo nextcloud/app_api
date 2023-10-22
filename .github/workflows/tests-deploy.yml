@@ -96,7 +96,7 @@ jobs:
 
       - name: Test deploy
         run: |
-          php -S 127.0.0.1:8080 &
+          PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
@@ -463,7 +463,7 @@ jobs:
 
       - name: Test deploy
         run: |
-          php -S 127.0.0.1:8080 &
+          PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
