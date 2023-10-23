@@ -28,9 +28,8 @@
 			<NcNoteCard type="warning">
 				<p>{{ t('app_api', 'Currently only Docker Daemon is supported.') }}</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="!state?.docker_socket_accessible" type="error">
-				<p>{{ t('app_api', 'Default Docker socket (/var/run/docker.sock) is not accessible.') }}</p>
-				<p>{{ t('app_api', 'Please, make sure that docker is installed on server and webserver user have enough rights to it.') }}</p>
+			<NcNoteCard v-if="state.default_daemon_config !== '' && !state?.daemon_config_accessible" type="error">
+				<p>{{ t('app_api', 'Default Deploy Daemon is not accessible. Please verify its configuration') }}</p>
 			</NcNoteCard>
 			<DaemonConfigList :daemons.sync="daemons" :default-daemon.sync="default_daemon_config" :save-options="saveOptions" />
 		</NcSettingsSection>
@@ -65,7 +64,7 @@ export default {
 	},
 	data() {
 		return {
-			state: loadState('app_api', 'admin-config'),
+			state: loadState('app_api', 'admin-initial-data'),
 			daemons: [],
 			default_daemon_config: '',
 			docker_socket_accessible: false,
@@ -81,7 +80,7 @@ export default {
 	},
 	methods: {
 		loadInitialState() {
-			const state = loadState('app_api', 'admin-config')
+			const state = loadState('app_api', 'admin-initial-data')
 			this.daemons = state.daemons
 			this.default_daemon_config = state.default_daemon_config
 			this.docker_socket_accessible = state.docker_socket_accessible
