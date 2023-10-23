@@ -15,6 +15,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
+use Psr\Log\LoggerInterface;
 
 class Admin implements ISettings {
 	private IInitialState $initialStateService;
@@ -23,6 +24,7 @@ class Admin implements ISettings {
 	private DockerActions $dockerActions;
 	private ExAppFetcher $exAppFetcher;
 	private AppAPIService $service;
+	private LoggerInterface $logger;
 
 	public function __construct(
 		IInitialState $initialStateService,
@@ -31,6 +33,7 @@ class Admin implements ISettings {
 		DockerActions $dockerActions,
 		ExAppFetcher $exAppFetcher,
 		AppAPIService $service,
+		LoggerInterface $logger,
 	) {
 		$this->config = $config;
 		$this->initialStateService = $initialStateService;
@@ -38,6 +41,7 @@ class Admin implements ISettings {
 		$this->dockerActions = $dockerActions;
 		$this->exAppFetcher = $exAppFetcher;
 		$this->service = $service;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -59,13 +63,24 @@ class Admin implements ISettings {
 				'exAppsCount' => isset($daemonsExAppsCount[$daemonConfig->getName()]) ? $daemonsExAppsCount[$daemonConfig->getName()] : 0,
 			];
 		}, $this->daemonConfigService->getRegisteredDaemonConfigs());
-		$adminConfig = [
+		$adminInitialData = [
 			'daemons' => $daemons,
 			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', ''),
-			'docker_socket_accessible' => $this->dockerActions->isDockerSocketAvailable(),
 			'updates_count' => count($this->getExAppsWithUpdates()),
 		];
-		$this->initialStateService->provideInitialState('admin-config', $adminConfig);
+
+		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		if ($defaultDaemonConfigName !== '') {
+			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
+			$this->dockerActions->initGuzzleClient($daemonConfig);
+			$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
+			$adminInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
+			if (!$daemonConfigAccessible) {
+				$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please verify its configuration', $daemonConfig->getName()));
+			}
+		}
+
+		$this->initialStateService->provideInitialState('admin-initial-data', $adminInitialData);
 		return new TemplateResponse(Application::APP_ID, 'adminSettings');
 	}
 

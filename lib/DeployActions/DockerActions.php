@@ -574,14 +574,6 @@ class DockerActions implements IDeployActions {
 		];
 	}
 
-	public function isDockerSocketAvailable(): bool {
-		$dockerSocket = '/var/run/docker.sock';
-		if (file_exists($dockerSocket) && is_readable($dockerSocket) && is_writable($dockerSocket)) {
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	 * Build ExApp container name (prefix + appid)
 	 *
@@ -599,9 +591,11 @@ class DockerActions implements IDeployActions {
 
 	public function registerDefaultDaemonConfig(): ?DaemonConfig {
 		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
-		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfig);
-		if ($daemonConfig !== null) {
-			return $daemonConfig;
+		if ($defaultDaemonConfig !== '') {
+			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfig);
+			if ($daemonConfig !== null) {
+				return $daemonConfig;
+			}
 		}
 
 		$deployConfig = [
