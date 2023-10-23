@@ -13,8 +13,8 @@ Provides the deployment of applications as Docker containers.
 
 .. warning::
 
-	Administrator is responsible for security actions taken to configure Docker daemon connected to Nextcloud.
-	As for example look at the Docker Socket Proxy secured with strict rules without root access (`like in AIO <#nextcloud-in-docker-aio-all-in-one>`_)
+	The administrator is responsible for the security actions taken to configure the Docker daemon connected to Nextcloud.
+	For example, look at the Docker Socket Proxy protected by strict rules without root access (`like in AIO <#nextcloud-in-docker-aio-all-in-one>`_)
 
 There are several Docker Daemon Deploy configurations (example schemes):
 
@@ -227,13 +227,13 @@ AppAPI will automatically create default default DaemonConfig to use AIO Docker 
 
 .. note::
 
-	Default DaemonConfig will be created only if there is no default DaemonConfig already registered.
+	Default DaemonConfig will be created only if the default DaemonConfig is not already registered.
 
 
 Default AIO Deploy Daemon
 *************************
 
-Nextcloud AIO has specifically created Docker Socket Proxy container to be used as Deploy Daemon in AppAPI.
+Nextcloud AIO has a specifically created Docker Socket Proxy container to be used as the Deploy Daemon in AppAPI.
 It has `fixed parameters <https://github.com/cloud-py-api/app_api/blob/main/lib/DeployActions/AIODockerActions.php#L52-L74)>`_:
 
 * Name: ``docker_aio``
@@ -248,4 +248,4 @@ It has `fixed parameters <https://github.com/cloud-py-api/app_api/blob/main/lib/
 Docker Socket Proxy security
 ****************************
 
-AIO Docker Socket Proxy has strictly limited access to Docker APIs described in `HAProxy configuration <https://github.com/nextcloud/all-in-one/blob/main/Containers/docker-socket-proxy/haproxy.cfg>`_.
+AIO Docker Socket Proxy has strictly limited access to the Docker APIs described in `HAProxy configuration <https://github.com/nextcloud/all-in-one/blob/main/Containers/docker-socket-proxy/haproxy.cfg>`_.
