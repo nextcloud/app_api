@@ -489,7 +489,7 @@ class DockerActions implements IDeployActions {
 
 	public function healthcheckContainer(string $containerId, DaemonConfig $daemonConfig): bool {
 		$attempts = 0;
-		$totalAttempts = 60; // ~60 seconds for container to initialize
+		$totalAttempts = 90; // ~90 seconds for container to initialize
 		while ($attempts < $totalAttempts) {
 			$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $containerId);
 			if ($this->containerStateHealthy($containerInfo)) {
