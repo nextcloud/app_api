@@ -97,6 +97,7 @@ class ExFilesActionsMenuService {
 			}
 			$this->mapper->delete($fileActionMenu);
 			$this->cache->remove('/ex_files_actions_menu_' . $appId . '_' . $fileActionMenuName);
+			$this->cache->remove('/ex_files_actions_menus');
 			return $fileActionMenu;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s FileActionMenu %s. Error: %s', $appId, $fileActionMenuName, $e->getMessage()), ['exception' => $e]);
