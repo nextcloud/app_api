@@ -68,6 +68,8 @@ class DaemonConfig extends Entity implements JsonSerializable {
 		}
 		if (isset($params['deploy_config'])) {
 			$this->setDeployConfig($params['deploy_config']);
+		} else {
+			$this->setDeployConfig([]);
 		}
 	}
 

@@ -140,7 +140,8 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'length' => 255,
 			]);
 			$table->addColumn('deploy_config', Types::JSON, [
-				'default' => '{}',
+				'default' => null,
+				'notnull' => false,
 			]);
 
 			$table->setPrimaryKey(['id']);
