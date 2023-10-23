@@ -7,13 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.1.0 - 2023-10-20]
+## [1.1.0 - 2023-10-23]
 
 ### Added
 
 - Added ExApp initialization progress
-- Added disabled state of app management actions if Deploy daemon is not accessible
+- Added disabled state of app management actions if default Deploy daemon is not accessible
 - Added support for new fileActions registration (Nextcloud 28)
+
+### Fixed
+
+- Fixed incorrect error message in admin settings (https://github.com/cloud-py-api/app_api/issues/100)
+- Fixed database schema for MySQL (https://github.com/cloud-py-api/app_api/issues/94)
 
 ## [1.0.1 - 2023-10-06]
 
