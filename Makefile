@@ -25,11 +25,6 @@ help:
 	@echo "  dock-port          create docker daemons for Nextcloud 28, 27 (host.docker.internal:8443)"
 	@echo "  dock-port28        create docker daemon for Nextcloud 28 (host.docker.internal:8443)"
 	@echo "  dock-port27        create docker daemon for Nextcloud 27 (host.docker.internal:8443)"
-	@echo " "
-	@echo " "
-	@echo "  example-deploy     deploy Example App to docker"
-	@echo "  example28          register & enable Example App in Nextcloud 28"
-	@echo "  example27          register & enable Example App in Nextcloud 27"
 
 .PHONY: dock-sock
 dock-sock:
@@ -45,7 +40,7 @@ dock-sock28:
 .PHONY: dock-sock27
 dock-sock27:
 	@echo "creating daemon for nextcloud 'stable27' container"
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
+	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://stable27/index.php --net=master_default
 
@@ -86,20 +81,3 @@ dock-port27:
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
         docker_dev Docker docker-install https host.docker.internal:6443 http://stable27/index.php \
         --net=master_default --ssl_cert /client/cert.pem --ssl_key /client/key.pem
-
-.PHONY: example-deploy
-example-deploy:
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:app:deploy skeleton docker_dev \
-    		--info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-
-.PHONY: example28
-example28:
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:app:unregister skeleton --silent || true
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:app:register skeleton docker_dev
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:app:enable skeleton
-
-.PHONY: example27
-example27:
-	docker exec master-stable27-1 sudo -u www-data php occ app_api:app:unregister skeleton --silent || true
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:app:register skeleton docker_dev
-	docker exec master-stable27-1 sudo -u www-data php occ app_api:app:enable skeleton

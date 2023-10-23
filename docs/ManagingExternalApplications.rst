@@ -44,7 +44,7 @@ Options
 Register
 --------
 
-Command: ``app_api:app:register [-e|--enabled] [--force-scopes] [--info-xml INFO-XML] [--json-info JSON-INFO] [--] <appid> <daemon-config-name>``
+Command: ``app_api:app:register [--force-scopes] [--info-xml INFO-XML] [--json-info JSON-INFO] [--] <appid> <daemon-config-name>``
 
 The register command is the second ExApp installation step.
 
@@ -57,7 +57,6 @@ Arguments
 Options
 *******
 
-    * ``-e|--enabled`` *[optional]* - enable ExApp after registration
     * ``--force-scopes`` *[optional]* - force scopes approval
     * ``--json-info JSON-INFO`` **[optional]** - ExApp deploy JSON info (json string)
     * ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
