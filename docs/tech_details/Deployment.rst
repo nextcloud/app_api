@@ -107,8 +107,7 @@ This can be done by ``occ`` CLI command **app_api:app:deploy**:
 	For development this step is skipped, as ExApp is deployed and started manually by developer.
 
 .. warning::
-	After successful deployment (pull, create and start container), there is a heartbeat check with 1 hour timeout (will be configurable).
-	If command seems to be stuck, check if ExApp is running and accessible by Nextcloud instance.
+	After successful deployment (pull, create and start container), there is a heartbeat check with 90 seconds timeout (will be configurable).
 
 Arguments
 *********
@@ -193,7 +192,7 @@ This can be done by ``occ`` CLI command **app_api:app:register**:
 
 .. code-block:: bash
 
-	app_api:app:register <appid> <daemon-config-name> [-e|--enabled] [--force-scopes] [--]
+	app_api:app:register <appid> <daemon-config-name> [--force-scopes] [--]
 
 Arguments
 *********
@@ -204,12 +203,20 @@ Arguments
 Options
 *******
 
-	* ``-e|--enabled`` *[optional]* - enable ExApp after registration
 	* ``--force-scopes`` *[optional]* - force scopes approval
 	* ``--json-info JSON-INFO`` **[required]** - path to JSON file with deploy result (url or local absolute path)
 
 With provided ``appid`` and ``daemon-config-name``, Nextcloud will retrieve ExApp info from deployed container and register it.
 In case of ``manual-install`` DeployConfig type, ExApp info must be provided by ``--json-info`` option `as described before <#deploy-result-json-output>`_.
+
+Application installation scheme
+-------------------------------
+
+1. AppAPI deploys the application and launches it.
+2. AppAPI for `N` seconds (default ``90``) checks the ``/heartbeat`` endpoint with ``GET`` request.
+3. AppAPI sends a ``PUT`` to the ``/init`` endpoint.
+4. ExApp sends an integer from ``0`` to ``100` to the OCS endpoint ``apps/app_api/apps/status`` indicating the initialization progress. After sending ``100``, the application is considered initialized.
+5. AppAPI sends a PUT to the ``/enabled`` endpoint.
 
 ExApp info.xml schema
 ---------------------

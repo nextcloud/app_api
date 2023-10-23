@@ -6,3 +6,7 @@ th p {
     font-size: 1rem;
     margin-bottom: 0;
 }
+
+.wy-nav-content {
+	max-width: 80% !important;
+}
