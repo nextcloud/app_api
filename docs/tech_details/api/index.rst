@@ -17,3 +17,4 @@ AppAPI Nextcloud APIs
 	fileactionsmenu
 	notifications
 	talkbots
+	other_ocs
