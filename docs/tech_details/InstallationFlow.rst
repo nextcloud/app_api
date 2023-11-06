@@ -16,7 +16,7 @@ In the case of ``Docker``, this is:
 
 The application, in response to the request "/heartbeat", should return json: ``{"status": "ok"}``.
 
-.. note:: The request to ``/heartbeat`` endpoint is made without authentication.
+.. note:: The request to ``/heartbeat`` endpoint is made without AppAPI authentication.
 
 Init
 ----
