@@ -26,6 +26,8 @@ Authentication flow
     	Nextcloud-->>-ExApp: Response (200/401)
 
 
+.. _auth-headers:
+
 Authentication headers
 ^^^^^^^^^^^^^^^^^^^^^^
 
