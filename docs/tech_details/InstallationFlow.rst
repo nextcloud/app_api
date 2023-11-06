@@ -26,7 +26,7 @@ AppAPI sends ``POST`` request to the ``/init`` application endpoint.
 
 *Application should response with empty JSON, if initialization takes long time it should be done in background and not in this request handler.*
 
-.. note:: Starting from this point, all requests made by AppAPI contains authentications headers.
+.. note:: Starting from this point, all requests made by AppAPI contains :ref:`auth-headers`.
 
 If the application does not need to carry out long initialization, it can immediately execute an ``OCS request`` to
 ``/ocs/v1.php/apps/app_api/apps/status/$APP_ID`` with such a payload in json format::
