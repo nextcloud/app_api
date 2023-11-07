@@ -5,6 +5,7 @@ import { APPS_SECTION_ENUM } from '../constants/AppsConstants.js'
 import store from '../store/index.js'
 
 const Apps = () => import('../views/Apps.vue')
+const ExAppView = () => import('../views/ExAppView.vue')
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,16 @@ const router = new VueRouter({
 	base: generateUrl('/apps/app_api', ''),
 	linkActiveClass: 'active',
 	routes: [
+		{
+			path: '/embedded/:appid/:name',
+			component: ExAppView,
+			name: 'embedded',
+			meta: {
+				title: async () => {
+					return t('app_api', 'Embedded ExApp')
+				},
+			},
+		},
 		{
 			path: '/apps',
 			component: Apps,

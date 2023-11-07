@@ -7,8 +7,13 @@ return [
 		// AppAPI admin settings
 		['name' => 'config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
 
+		// Menu Entries
+		['name' => 'MenuEntry#viewExAppPage', 'url' => '/embedded/{appId}/{name}', 'verb' => 'GET' , 'root' => '/embedded'],
+		['name' => 'MenuEntry#ExAppIframeProxy', 'url' => '/embedded/{appId}/{name}/proxy', 'verb' => 'GET' , 'root' => '/embedded'],
+		['name' => 'MenuEntry#ExAppIconProxy', 'url' => '/embedded/{appId}/{name}/icon', 'verb' => 'GET' , 'root' => '/embedded'],
+
 		// ExApps actions
-		['name' => 'ExAppsPage#viewApps', 'url' => '/apps', 'verb' => 'GET' , 'root' => ''],
+		['name' => 'ExAppsPage#viewApps', 'url' => '/apps', 'verb' => 'GET' , 'root' => '/apps'],
 		['name' => 'ExAppsPage#listCategories', 'url' => '/apps/categories', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#listApps', 'url' => '/apps/list', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}', 'verb' => 'GET' , 'root' => ''],

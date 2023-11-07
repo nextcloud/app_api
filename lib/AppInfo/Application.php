@@ -15,6 +15,7 @@ use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
 
+use OCA\AppAPI\Service\MenuEntryService;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -66,6 +67,7 @@ class Application extends App implements IBootstrap {
 				$profiler->add(new AppAPIDataCollector());
 			}
 			$context->injectFn($this->registerExAppsManagementNavigation(...));
+			$context->injectFn($this->registerExAppsMenuEntries(...));
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|\Throwable) {
 		}
 	}
@@ -109,5 +111,11 @@ class Application extends App implements IBootstrap {
 				];
 			});
 		}
+	}
+
+	private function registerExAppsMenuEntries(): void {
+		$container = $this->getContainer();
+		$menuEntryService = $container->get(MenuEntryService::class);
+		$menuEntryService->registerMenuEntries($container);
 	}
 }
