@@ -98,7 +98,9 @@ class MenuEntryController extends Controller {
 			return new NotFoundResponse(404);
 		}
 		$response = $this->service->aeRequestToExApp($this->request, $this->userId, $exApp, $menuEntry->getRoute(), 'GET');
-		return new DataResponse($response);
+		$reHeaders = $response->getHeaders();
+		$reHeaders['content-security-policy'] = 'frame-ancestors *;';
+		return new DataResponse($response->getBody(), $response->getStatusCode(), $reHeaders);
 	}
 
 	/**
