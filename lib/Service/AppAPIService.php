@@ -511,6 +511,7 @@ class AppAPIService {
 	 * @param string $route
 	 * @param string $method
 	 * @param array $params
+	 * @param array $options
 	 *
 	 * @return array|IResponse
 	 */
@@ -520,7 +521,8 @@ class AppAPIService {
 		ExApp $exApp,
 		string $route,
 		string $method = 'POST',
-		array $params = []
+		array $params = [],
+		array $options = [],
 	): array|IResponse {
 		try {
 			$this->exAppUsersService->setupExAppUser($exApp, $userId);
@@ -528,7 +530,7 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 		}
-		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params);
+		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params, $options);
 	}
 
 	/**
@@ -540,6 +542,7 @@ class AppAPIService {
 	 * @param string $route
 	 * @param string $method
 	 * @param array $params
+	 * @param array $options
 	 *
 	 * @return array|IResponse
 	 */
@@ -549,7 +552,8 @@ class AppAPIService {
 		string $appId,
 		string $route,
 		string $method = 'POST',
-		array $params = []
+		array $params = [],
+		array $options = [],
 	):  array|IResponse {
 		$exApp = $this->getExApp($appId);
 		if ($exApp === null) {
@@ -561,7 +565,7 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 		}
-		return $this->aeRequestToExApp($request, $userId, $exApp, $route, $method, $params);
+		return $this->aeRequestToExApp($request, $userId, $exApp, $route, $method, $params, $options);
 	}
 
 	/**
@@ -573,6 +577,7 @@ class AppAPIService {
 	 * @param string $route
 	 * @param string $method
 	 * @param array $params
+	 * @param array $options
 	 *
 	 * @return array|IResponse
 	 */
@@ -582,13 +587,14 @@ class AppAPIService {
 		string $appId,
 		string $route,
 		string $method = 'POST',
-		array $params = []
+		array $params = [],
+		array $options = [],
 	):  array|IResponse {
 		$exApp = $this->getExApp($appId);
 		if ($exApp === null) {
 			return ['error' => 'ExApp not found'];
 		}
-		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params);
+		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params, $options);
 	}
 
 	/**
@@ -600,6 +606,7 @@ class AppAPIService {
 	 * @param string $route
 	 * @param string $method
 	 * @param array $params
+	 * @param array $options
 	 *
 	 * @return array|IResponse
 	 */
@@ -609,7 +616,8 @@ class AppAPIService {
 		ExApp $exApp,
 		string $route,
 		string $method = 'POST',
-		array $params = []
+		array $params = [],
+		array $options = [],
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
@@ -618,11 +626,9 @@ class AppAPIService {
 				$exApp->getHost(),
 				$exApp->getPort()) . $route;
 
-			$options = [
-				'headers' => $this->buildAppAPIAuthHeaders($request, $userId, $exApp),
-				'nextcloud' => [
-					'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
-				],
+			$options['headers'] = isset($options['headers']) ? [...$options['headers'], $this->buildAppAPIAuthHeaders($request, $userId, $exApp)] : $this->buildAppAPIAuthHeaders($request, $userId, $exApp);
+			$options['nextcloud'] = [
+				'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 			];
 
 			if (count($params) > 0) {
