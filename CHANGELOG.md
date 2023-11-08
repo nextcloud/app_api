@@ -11,8 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Prototypes of functions for calling external applications and PHP have been redesigned. @bigcat88, @kyteinsky
-- Init (`/init`) handler now called with AppAPI auth too.
+- Prototypes of functions for calling external applications and PHP have been redesigned. #112 @bigcat88, @kyteinsky
+- ExApp init (`/init`) endpoint now called with AppAPI auth too. #111
+
+### Fixed
+
+- UI error when default daemon missing. #109
+- FilesActions API: correct cast of file's permission to the number.
+- Docs: ExApp install flow described. #108
 
 ## [1.1.0 - 2023-10-23]
 
