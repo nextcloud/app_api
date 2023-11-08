@@ -416,8 +416,6 @@ class AppAPIService {
 		) . '/init';
 
 		$options = [
-			'Accept' => 'application/json',
-			'Content-Type' => 'application/json',
 			'headers' => $this->buildAppAPIAuthHeaders(null, null, $exApp),
 			'nextcloud' => [
 				'allow_local_address' => true,
@@ -572,7 +570,7 @@ class AppAPIService {
 	 * Request to ExApp by appId with AppAPI auth headers
 	 *
 	 * @param IRequest|null $request
-	 * @param string $userId
+	 * @param string|null $userId
 	 * @param string $appId
 	 * @param string $route
 	 * @param string $method
@@ -583,7 +581,7 @@ class AppAPIService {
 	 */
 	public function requestToExAppById(
 		?IRequest $request,
-		string $userId,
+		?string $userId,
 		string $appId,
 		string $route,
 		string $method = 'POST',
@@ -626,7 +624,11 @@ class AppAPIService {
 				$exApp->getHost(),
 				$exApp->getPort()) . $route;
 
-			$options['headers'] = isset($options['headers']) ? [...$options['headers'], $this->buildAppAPIAuthHeaders($request, $userId, $exApp)] : $this->buildAppAPIAuthHeaders($request, $userId, $exApp);
+			if (is_array($options['headers'])) {
+				$options['headers'] =  [...$options['headers'], $this->buildAppAPIAuthHeaders($request, $userId, $exApp)];
+			} else {
+				$options['headers'] = $this->buildAppAPIAuthHeaders($request, $userId, $exApp);
+			}
 			$options['nextcloud'] = [
 				'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 			];
