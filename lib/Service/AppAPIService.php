@@ -505,7 +505,7 @@ class AppAPIService {
 	 *
 	 * @param ExApp $exApp
 	 * @param string $route
-	 * @param string|null $userId
+	 * @param string $userId
 	 * @param string $method
 	 * @param array $params
 	 * @param array $options
@@ -516,7 +516,7 @@ class AppAPIService {
 	public function aeRequestToExApp(
 		ExApp $exApp,
 		string $route,
-		string $userId = null,
+		string $userId,
 		string $method = 'POST',
 		array $params = [],
 		array $options = [],
@@ -534,24 +534,24 @@ class AppAPIService {
 	/**
 	 * Request to ExApp by appId with AppAPI auth headers and ExApp user initialization
 	 *
-	 * @param IRequest|null $request
-	 * @param string $userId
 	 * @param string $appId
 	 * @param string $route
+	 * @param string $userId
 	 * @param string $method
 	 * @param array $params
 	 * @param array $options
+	 * @param IRequest|null $request
 	 *
 	 * @return array|IResponse
 	 */
 	public function aeRequestToExAppById(
-		?IRequest $request,
-		string $userId,
 		string $appId,
 		string $route,
+		string $userId,
 		string $method = 'POST',
 		array $params = [],
 		array $options = [],
+		?IRequest $request = null,
 	):  array|IResponse {
 		$exApp = $this->getExApp($appId);
 		if ($exApp === null) {
