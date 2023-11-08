@@ -416,10 +416,9 @@ class AppAPIService {
 		) . '/init';
 
 		$options = [
-			'headers' => [
-				'Accept' => 'application/json',
-				'Content-Type' => 'application/json',
-			],
+			'Accept' => 'application/json',
+			'Content-Type' => 'application/json',
+			'headers' => $this->buildAppAPIAuthHeaders(null, null, $exApp),
 			'nextcloud' => [
 				'allow_local_address' => true,
 			],
@@ -560,13 +559,7 @@ class AppAPIService {
 				$exApp->getPort()) . $route;
 
 			$options = [
-				'headers' => [
-					'AA-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
-					'EX-APP-ID' => $exApp->getAppid(),
-					'EX-APP-VERSION' => $exApp->getVersion(),
-					'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $exApp->getSecret()),
-					'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
-				],
+				'headers' => $this->buildAppAPIAuthHeaders($request, $userId, $exApp),
 				'nextcloud' => [
 					'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 				],
@@ -601,6 +594,16 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => $e->getMessage()];
 		}
+	}
+
+	private function buildAppAPIAuthHeaders(?IRequest $request, ?string $userId, ExApp $exApp): array {
+		return [
+			'AA-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+			'EX-APP-ID' => $exApp->getAppid(),
+			'EX-APP-VERSION' => $exApp->getVersion(),
+			'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $exApp->getSecret()),
+			'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
+		];
 	}
 
 	/**
