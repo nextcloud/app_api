@@ -532,6 +532,66 @@ class AppAPIService {
 	}
 
 	/**
+	 * Request to ExApp by appId with AppAPI auth headers and ExApp user initialization
+	 *
+	 * @param IRequest|null $request
+	 * @param string $userId
+	 * @param string $appId
+	 * @param string $route
+	 * @param string $method
+	 * @param array $params
+	 *
+	 * @return array|IResponse
+	 */
+	public function aeRequestToExAppById(
+		?IRequest $request,
+		string $userId,
+		string $appId,
+		string $route,
+		string $method = 'POST',
+		array $params = []
+	):  array|IResponse {
+		$exApp = $this->getExApp($appId);
+		if ($exApp === null) {
+			return ['error' => 'ExApp not found'];
+		}
+		try {
+			$this->exAppUsersService->setupExAppUser($exApp, $userId);
+		} catch (\Exception $e) {
+			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
+		}
+		return $this->aeRequestToExApp($request, $userId, $exApp, $route, $method, $params);
+	}
+
+	/**
+	 * Request to ExApp by appId with AppAPI auth headers
+	 *
+	 * @param IRequest|null $request
+	 * @param string $userId
+	 * @param string $appId
+	 * @param string $route
+	 * @param string $method
+	 * @param array $params
+	 *
+	 * @return array|IResponse
+	 */
+	public function requestToExAppById(
+		?IRequest $request,
+		string $userId,
+		string $appId,
+		string $route,
+		string $method = 'POST',
+		array $params = []
+	):  array|IResponse {
+		$exApp = $this->getExApp($appId);
+		if ($exApp === null) {
+			return ['error' => 'ExApp not found'];
+		}
+		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params);
+	}
+
+	/**
 	 * Request to ExApp with AppAPI auth headers
 	 *
 	 * @param IRequest|null $request
