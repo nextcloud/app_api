@@ -625,7 +625,7 @@ class AppAPIService {
 				$exApp->getPort()) . $route;
 
 			if (is_array($options['headers'])) {
-				$options['headers'] =  [...$options['headers'], $this->buildAppAPIAuthHeaders($request, $userId, $exApp)];
+				$options['headers'] = [...$options['headers'], $this->buildAppAPIAuthHeaders($request, $userId, $exApp)];
 			} else {
 				$options['headers'] = $this->buildAppAPIAuthHeaders($request, $userId, $exApp);
 			}
