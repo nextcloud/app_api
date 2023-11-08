@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0 - 2023-11-08]
+
+### Changed
+
+- Prototypes of functions for calling external applications and PHP have been redesigned. @bigcat88, @kyteinsky
+- Init (`/init`) handler now called with AppAPI auth too.
+
 ## [1.1.0 - 2023-10-23]
 
 ### Added
