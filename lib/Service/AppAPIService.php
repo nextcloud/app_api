@@ -557,12 +557,6 @@ class AppAPIService {
 		if ($exApp === null) {
 			return ['error' => 'ExApp not found'];
 		}
-		try {
-			$this->exAppUsersService->setupExAppUser($exApp, $userId);
-		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
-			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
-		}
 		return $this->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 
