@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.1 - 2023-11-08]
+
+### Fixed
+
+- Fix bug in requestToExApp function introduced in previous release.
+
 ## [1.2.0 - 2023-11-08]
 
 ### Changed
