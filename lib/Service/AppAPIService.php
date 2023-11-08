@@ -213,7 +213,7 @@ class AppAPIService {
 				$exApp->setEnabled(1);
 				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 
-				$exAppEnabled = $this->requestToExApp(null, null, $exApp, '/enabled?enabled=1', 'PUT');
+				$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT');
 				if ($exAppEnabled instanceof IResponse) {
 					$response = json_decode($exAppEnabled->getBody(), true);
 					if (isset($response['error']) && strlen($response['error']) === 0) {
@@ -249,7 +249,7 @@ class AppAPIService {
 	 */
 	public function disableExApp(ExApp $exApp): bool {
 		try {
-			$exAppDisabled = $this->requestToExApp(null, null, $exApp, '/enabled?enabled=0', 'PUT');
+			$exAppDisabled = $this->requestToExApp($exApp, '/enabled?enabled=0', null, 'PUT');
 			if ($exAppDisabled instanceof IResponse) {
 				$response = json_decode($exAppDisabled->getBody(), true);
 				if (isset($response['error']) && strlen($response['error']) !== 0) {
@@ -503,24 +503,24 @@ class AppAPIService {
 	/**
 	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
 	 *
-	 * @param IRequest|null $request
-	 * @param string $userId
 	 * @param ExApp $exApp
 	 * @param string $route
+	 * @param string|null $userId
 	 * @param string $method
 	 * @param array $params
 	 * @param array $options
+	 * @param IRequest|null $request
 	 *
 	 * @return array|IResponse
 	 */
 	public function aeRequestToExApp(
-		?IRequest $request,
-		string $userId,
 		ExApp $exApp,
 		string $route,
+		string $userId = null,
 		string $method = 'POST',
 		array $params = [],
 		array $options = [],
+		?IRequest $request = null,
 	): array|IResponse {
 		try {
 			$this->exAppUsersService->setupExAppUser($exApp, $userId);
@@ -528,7 +528,7 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 		}
-		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params, $options);
+		return $this->requestToExApp($exApp, $userId, $route, $method, $params, $options, $request);
 	}
 
 	/**
@@ -563,59 +563,59 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 		}
-		return $this->aeRequestToExApp($request, $userId, $exApp, $route, $method, $params, $options);
+		return $this->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 
 	/**
 	 * Request to ExApp by appId with AppAPI auth headers
 	 *
-	 * @param IRequest|null $request
-	 * @param string|null $userId
 	 * @param string $appId
 	 * @param string $route
+	 * @param string|null $userId
 	 * @param string $method
 	 * @param array $params
 	 * @param array $options
+	 * @param IRequest|null $request
 	 *
 	 * @return array|IResponse
 	 */
 	public function requestToExAppById(
-		?IRequest $request,
-		?string $userId,
 		string $appId,
 		string $route,
+		?string $userId = null,
 		string $method = 'POST',
 		array $params = [],
 		array $options = [],
+		?IRequest $request = null,
 	):  array|IResponse {
 		$exApp = $this->getExApp($appId);
 		if ($exApp === null) {
 			return ['error' => 'ExApp not found'];
 		}
-		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params, $options);
+		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 
 	/**
 	 * Request to ExApp with AppAPI auth headers
 	 *
-	 * @param IRequest|null $request
-	 * @param string|null $userId
 	 * @param ExApp $exApp
 	 * @param string $route
+	 * @param string|null $userId
 	 * @param string $method
 	 * @param array $params
 	 * @param array $options
+	 * @param IRequest|null $request
 	 *
 	 * @return array|IResponse
 	 */
 	public function requestToExApp(
-		?IRequest $request,
-		?string $userId,
 		ExApp $exApp,
 		string $route,
+		?string $userId = null,
 		string $method = 'POST',
 		array $params = [],
 		array $options = [],
+		?IRequest $request = null,
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
