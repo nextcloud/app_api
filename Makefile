@@ -35,14 +35,14 @@ dock-sock28:
 	@echo "creating daemon for nextcloud 'master' container"
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
-		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php --net=master_default
+		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://nextcloud.local/index.php --net=master_default
 
 .PHONY: dock-sock27
 dock-sock27:
 	@echo "creating daemon for nextcloud 'stable27' container"
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
-		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://stable27/index.php --net=master_default
+		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://stable27.local/index.php --net=master_default
 
 .PHONY: dock2port
 dock2port:
@@ -71,7 +71,7 @@ dock-port28:
 	@echo "creating daemon for nextcloud 'master' container"
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
-    	docker_dev Docker docker-install https host.docker.internal:6443 http://nextcloud/index.php \
+    	docker_dev Docker docker-install https host.docker.internal:6443 http://nextcloud.local/index.php \
     	--net=master_default --ssl_cert /client/cert.pem --ssl_key /client/key.pem
 
 .PHONY: dock-port27
@@ -79,5 +79,5 @@ dock-port27:
 	@echo "creating daemon for nextcloud '27' container"
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
-        docker_dev Docker docker-install https host.docker.internal:6443 http://stable27/index.php \
+        docker_dev Docker docker-install https host.docker.internal:6443 http://stable27.local/index.php \
         --net=master_default --ssl_cert /client/cert.pem --ssl_key /client/key.pem
