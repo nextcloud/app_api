@@ -528,7 +528,7 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 		}
-		return $this->requestToExApp($exApp, $userId, $route, $method, $params, $options, $request);
+		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 
 	/**
