@@ -37,7 +37,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 64
 			]);
-			$table->addColumn('configvalue', Types::STRING, [
+			$table->addColumn('configvalue', Types::TEXT, [
 				'notnull' => false,
 			]);
 			$table->addColumn('sensitive', Types::SMALLINT, [
@@ -167,7 +167,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('configvalue', Types::STRING, [
+			$table->addColumn('configvalue', Types::TEXT, [
 				'notnull' => false,
 			]);
 
