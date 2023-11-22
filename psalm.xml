@@ -26,14 +26,15 @@
 		</UndefinedMagicMethod>
 		<UndefinedClass>
 			<errorLevel type="suppress">
+				<referencedClass name="GuzzleHttp\Client" />
+				<referencedClass name="GuzzleHttp\Exception\GuzzleException" />
 				<referencedClass name="OC" />
+				<referencedClass name="OC\Security\CSP\ContentSecurityPolicyNonceManager" />
+				<referencedClass name="OCA\DAV\Events\SabrePluginAuthInitEvent" />
 				<referencedClass name="Sabre\DAV\Server" />
 				<referencedClass name="Sabre\DAV\Auth\Plugin" />
 				<referencedClass name="Sabre\DAV\ServerPlugin" />
 				<referencedClass name="Sabre\DAV\Auth\Backend\BackendInterface" />
-				<referencedClass name="OCA\DAV\Events\SabrePluginAuthInitEvent" />
-				<referencedClass name="GuzzleHttp\Client" />
-				<referencedClass name="GuzzleHttp\Exception\GuzzleException" />
 			</errorLevel>
 		</UndefinedClass>
 		<UndefinedDocblockClass>

@@ -11,6 +11,16 @@ return [
 		['name' => 'MenuEntry#viewExAppPage', 'url' => '/embedded/{appId}/{name}', 'verb' => 'GET' , 'root' => '/embedded'],
 		['name' => 'MenuEntry#ExAppIframeProxy', 'url' => '/embedded/{appId}/{name}/proxy', 'verb' => 'GET' , 'root' => '/embedded'],
 		['name' => 'MenuEntry#ExAppIconProxy', 'url' => '/embedded/{appId}/{name}/icon', 'verb' => 'GET' , 'root' => '/embedded'],
+		// Proxy
+		['name' => 'MenuEntry#ExAppIframeProxySubLinksGet',
+			'url' => '/proxying/{appId}/{other}', 'verb' => 'GET' , 'root' => '/proxying',
+			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+		['name' => 'MenuEntry#ExAppIframeProxySubLinksPost',
+			'url' => '/proxying/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxying',
+			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+		['name' => 'MenuEntry#ExAppIframeProxySubLinksPut',
+			'url' => '/proxying/{appId}/{other}', 'verb' => 'PUT' , 'root' => '/proxying',
+			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
 
 		// ExApps actions
 		['name' => 'ExAppsPage#viewApps', 'url' => '/apps', 'verb' => 'GET' , 'root' => '/apps'],

@@ -79,26 +79,26 @@ class MenuEntryService {
 	}
 
 	public function loadFileActionIcon(string $appId, string $name, ExApp $exApp, IRequest $request, string $userId): ?array {
-		$menuEntry = $this->getExAppMenuEntry($appId, $name);
-		if ($menuEntry === null) {
-			return null;
-		}
-		$iconUrl = $menuEntry->getIconUrl();
-		if (!isset($iconUrl) || $iconUrl === '') {
-			return null;
-		}
-		try {
-			$iconResponse = $this->service->requestToExApp($request, $userId, $exApp, $iconUrl, 'GET');
-			if ($iconResponse->getStatusCode() === Http::STATUS_OK) {
-				return [
-					'body' => $iconResponse->getBody(),
-					'headers' => $iconResponse->getHeaders(),
-				];
-			}
-		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Failed to load ExApp %s MenuEntry icon %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
-			return null;
-		}
+		//		$menuEntry = $this->getExAppMenuEntry($appId, $name);
+		//		if ($menuEntry === null) {
+		//			return null;
+		//		}
+		//		$iconUrl = $menuEntry->getIconUrl();
+		//		if (!isset($iconUrl) || $iconUrl === '') {
+		//			return null;
+		//		}
+		//		try {
+		//			$iconResponse = $this->service->requestToExApp($request, $userId, $exApp, $iconUrl, 'GET');
+		//			if ($iconResponse->getStatusCode() === Http::STATUS_OK) {
+		//				return [
+		//					'body' => $iconResponse->getBody(),
+		//					'headers' => $iconResponse->getHeaders(),
+		//				];
+		//			}
+		//		} catch (\Exception $e) {
+		//			$this->logger->error(sprintf('Failed to load ExApp %s MenuEntry icon %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
+		//			return null;
+		//		}
 		return null;
 	}
 }
