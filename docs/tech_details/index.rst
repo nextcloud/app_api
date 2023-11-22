@@ -5,6 +5,7 @@ Technical details
    :maxdepth: 2
 
    Glossary
+   InstallationFlow
    ApiScopes
    Deployment
    Authentication

@@ -33,7 +33,7 @@ if (OCA.Files && OCA.Files.fileActions) {
 						etag: file.dataset.etag,
 						mime: file.dataset.mime,
 						favorite: file.dataset?.favorite,
-						permissions: file.dataset.permissions,
+						permissions: Number(file.dataset.permissions),
 						fileType: file.dataset.type,
 						size: file.dataset.size,
 						mtime: file.dataset.mtime,

@@ -174,7 +174,7 @@ class ExFilesActionsMenuService {
 			];
 			$exApp = $this->appAPIService->getExApp($appId);
 			if ($exApp !== null) {
-				$result = $this->appAPIService->aeRequestToExApp($this->request, $userId, $exApp, $handler, 'POST', $params);
+				$result = $this->appAPIService->aeRequestToExApp($exApp, $handler, $userId, 'POST', $params, [], $this->request);
 				if ($result instanceof IResponse) {
 					return $result->getStatusCode() === 200;
 				}

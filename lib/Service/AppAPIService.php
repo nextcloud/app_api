@@ -213,7 +213,7 @@ class AppAPIService {
 				$exApp->setEnabled(1);
 				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 
-				$exAppEnabled = $this->requestToExApp(null, null, $exApp, '/enabled?enabled=1', 'PUT');
+				$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT');
 				if ($exAppEnabled instanceof IResponse) {
 					$response = json_decode($exAppEnabled->getBody(), true);
 					if (isset($response['error']) && strlen($response['error']) === 0) {
@@ -249,7 +249,7 @@ class AppAPIService {
 	 */
 	public function disableExApp(ExApp $exApp): bool {
 		try {
-			$exAppDisabled = $this->requestToExApp(null, null, $exApp, '/enabled?enabled=0', 'PUT');
+			$exAppDisabled = $this->requestToExApp($exApp, '/enabled?enabled=0', null, 'PUT');
 			if ($exAppDisabled instanceof IResponse) {
 				$response = json_decode($exAppDisabled->getBody(), true);
 				if (isset($response['error']) && strlen($response['error']) !== 0) {
@@ -416,10 +416,7 @@ class AppAPIService {
 		) . '/init';
 
 		$options = [
-			'headers' => [
-				'Accept' => 'application/json',
-				'Content-Type' => 'application/json',
-			],
+			'headers' => $this->buildAppAPIAuthHeaders(null, null, $exApp),
 			'nextcloud' => [
 				'allow_local_address' => true,
 			],
@@ -506,22 +503,24 @@ class AppAPIService {
 	/**
 	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
 	 *
-	 * @param IRequest|null $request
-	 * @param string $userId
 	 * @param ExApp $exApp
 	 * @param string $route
+	 * @param string $userId
 	 * @param string $method
 	 * @param array $params
+	 * @param array $options
+	 * @param IRequest|null $request
 	 *
 	 * @return array|IResponse
 	 */
 	public function aeRequestToExApp(
-		?IRequest $request,
-		string $userId,
 		ExApp $exApp,
 		string $route,
+		string $userId,
 		string $method = 'POST',
-		array $params = []
+		array $params = [],
+		array $options = [],
+		?IRequest $request = null,
 	): array|IResponse {
 		try {
 			$this->exAppUsersService->setupExAppUser($exApp, $userId);
@@ -529,28 +528,88 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 		}
-		return $this->requestToExApp($request, $userId, $exApp, $route, $method, $params);
+		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+	}
+
+	/**
+	 * Request to ExApp by appId with AppAPI auth headers and ExApp user initialization
+	 *
+	 * @param string $appId
+	 * @param string $route
+	 * @param string $userId
+	 * @param string $method
+	 * @param array $params
+	 * @param array $options
+	 * @param IRequest|null $request
+	 *
+	 * @return array|IResponse
+	 */
+	public function aeRequestToExAppById(
+		string $appId,
+		string $route,
+		string $userId,
+		string $method = 'POST',
+		array $params = [],
+		array $options = [],
+		?IRequest $request = null,
+	):  array|IResponse {
+		$exApp = $this->getExApp($appId);
+		if ($exApp === null) {
+			return ['error' => 'ExApp not found'];
+		}
+		return $this->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+	}
+
+	/**
+	 * Request to ExApp by appId with AppAPI auth headers
+	 *
+	 * @param string $appId
+	 * @param string $route
+	 * @param string|null $userId
+	 * @param string $method
+	 * @param array $params
+	 * @param array $options
+	 * @param IRequest|null $request
+	 *
+	 * @return array|IResponse
+	 */
+	public function requestToExAppById(
+		string $appId,
+		string $route,
+		?string $userId = null,
+		string $method = 'POST',
+		array $params = [],
+		array $options = [],
+		?IRequest $request = null,
+	):  array|IResponse {
+		$exApp = $this->getExApp($appId);
+		if ($exApp === null) {
+			return ['error' => 'ExApp not found'];
+		}
+		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 
 	/**
 	 * Request to ExApp with AppAPI auth headers
 	 *
-	 * @param IRequest|null $request
-	 * @param string|null $userId
 	 * @param ExApp $exApp
 	 * @param string $route
+	 * @param string|null $userId
 	 * @param string $method
 	 * @param array $params
+	 * @param array $options
+	 * @param IRequest|null $request
 	 *
 	 * @return array|IResponse
 	 */
 	public function requestToExApp(
-		?IRequest $request,
-		?string $userId,
 		ExApp $exApp,
 		string $route,
+		?string $userId = null,
 		string $method = 'POST',
-		array $params = []
+		array $params = [],
+		array $options = [],
+		?IRequest $request = null,
 	): array|IResponse {
 		$this->handleExAppDebug($exApp, $request, true);
 		try {
@@ -559,17 +618,13 @@ class AppAPIService {
 				$exApp->getHost(),
 				$exApp->getPort()) . $route;
 
-			$options = [
-				'headers' => [
-					'AA-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
-					'EX-APP-ID' => $exApp->getAppid(),
-					'EX-APP-VERSION' => $exApp->getVersion(),
-					'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $exApp->getSecret()),
-					'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
-				],
-				'nextcloud' => [
-					'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
-				],
+			if (isset($options['headers']) && is_array($options['headers'])) {
+				$options['headers'] = [...$options['headers'], ...$this->buildAppAPIAuthHeaders($request, $userId, $exApp)];
+			} else {
+				$options['headers'] = $this->buildAppAPIAuthHeaders($request, $userId, $exApp);
+			}
+			$options['nextcloud'] = [
+				'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 			];
 
 			if (count($params) > 0) {
@@ -601,6 +656,16 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => $e->getMessage()];
 		}
+	}
+
+	private function buildAppAPIAuthHeaders(?IRequest $request, ?string $userId, ExApp $exApp): array {
+		return [
+			'AA-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
+			'EX-APP-ID' => $exApp->getAppid(),
+			'EX-APP-VERSION' => $exApp->getVersion(),
+			'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $exApp->getSecret()),
+			'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
+		];
 	}
 
 	/**
