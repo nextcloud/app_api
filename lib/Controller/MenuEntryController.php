@@ -85,7 +85,7 @@ class MenuEntryController extends Controller {
 
 		$response = new TemplateResponse(Application::APP_ID, 'main');
 		$csp = new ContentSecurityPolicy();
-		$csp->addAllowedFrameDomain($exApp->getAppid());
+		$csp->addAllowedFrameDomain('\'self\'');
 		$response->setContentSecurityPolicy($csp);
 
 		return $response;
