@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Notifications;
 
+use DateTime;
 use OCP\IGroupManager;
 use OCP\Notification\IManager;
 use OCP\Notification\INotification;
@@ -29,7 +30,7 @@ class ExNotificationsManager {
 		$notification
 			->setApp($appId)
 			->setUser($userId)
-			->setDateTime(new \DateTime())
+			->setDateTime(new DateTime())
 			->setObject($params['object'], $params['object_id'])
 			->setSubject($params['subject_type'], $params['subject_params']);
 		$this->notificationManager->notify($notification);
@@ -44,7 +45,7 @@ class ExNotificationsManager {
 			$notification
 				->setApp($appId)
 				->setUser($adminUser->getUID())
-				->setDateTime(new \DateTime())
+				->setDateTime(new DateTime())
 				->setObject($params['object'], $params['object_id'])
 				->setSubject($params['subject_type'], $params['subject_params']);
 			$this->notificationManager->notify($notification);

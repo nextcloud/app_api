@@ -18,6 +18,7 @@ use OCP\IConfig;
 use OCP\IURLGenerator;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
+use SimpleXMLElement;
 
 class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
@@ -327,7 +328,7 @@ class DockerActions implements IDeployActions {
 		return [$stopResult, $removeResult];
 	}
 
-	public function buildDeployParams(DaemonConfig $daemonConfig, \SimpleXMLElement $infoXml, array $params = []): array {
+	public function buildDeployParams(DaemonConfig $daemonConfig, SimpleXMLElement $infoXml, array $params = []): array {
 		$appId = (string) $infoXml->id;
 		$deployConfig = $daemonConfig->getDeployConfig();
 

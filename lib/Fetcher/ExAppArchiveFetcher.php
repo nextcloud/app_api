@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Fetcher;
 
+use Exception;
 use OC\Archive\TAR;
 use OCP\Http\Client\IClientService;
 use OCP\ITempManager;
 use phpseclib\File\X509;
+use SimpleXMLElement;
 
 /**
  * ExApps release archive fetcher with the same logic as for default (signature check).
@@ -26,9 +28,9 @@ class ExAppArchiveFetcher {
 	 *
 	 * @param array $exAppAppstoreData
 	 *
-	 * @return \SimpleXMLElement|null
+	 * @return SimpleXMLElement|null
 	 */
-	public function downloadInfoXml(array $exAppAppstoreData): ?\SimpleXMLElement {
+	public function downloadInfoXml(array $exAppAppstoreData): ?SimpleXMLElement {
 		// 1. Signature check
 		if (!$this->checkExAppSignature($exAppAppstoreData)) {
 			return null;
@@ -99,12 +101,12 @@ class ExAppArchiveFetcher {
 		}
 		$crl->loadCRL(file_get_contents(\OC::$SERVERROOT . '/resources/codesigning/root.crl'));
 		if ($crl->validateSignature() !== true) {
-			throw new \Exception('Could not validate CRL signature');
+			throw new Exception('Could not validate CRL signature');
 		}
 		$csn = $loadedCertificate['tbsCertificate']['serialNumber']->toString();
 		$revoked = $crl->getRevoked($csn);
 		if ($revoked !== false) {
-			throw new \Exception(
+			throw new Exception(
 				sprintf(
 					'Certificate "%s" has been revoked',
 					$csn
@@ -114,7 +116,7 @@ class ExAppArchiveFetcher {
 
 		// Verify if the certificate has been issued by the Nextcloud Code Authority CA
 		if ($certificate->validateSignature() !== true) {
-			throw new \Exception(
+			throw new Exception(
 				sprintf(
 					'App with id %s has a certificate not issued by a trusted Code Signing Authority',
 					$appId
@@ -125,7 +127,7 @@ class ExAppArchiveFetcher {
 		// Verify if the certificate is issued for the requested app id
 		$certInfo = openssl_x509_parse($exAppAppstoreData['certificate']);
 		if (!isset($certInfo['subject']['CN'])) {
-			throw new \Exception(
+			throw new Exception(
 				sprintf(
 					'App with id %s has a cert with no CN',
 					$appId
@@ -133,7 +135,7 @@ class ExAppArchiveFetcher {
 			);
 		}
 		if ($certInfo['subject']['CN'] !== $appId) {
-			throw new \Exception(
+			throw new Exception(
 				sprintf(
 					'App with id %s has a cert issued to %s',
 					$appId,

@@ -51,11 +51,11 @@ class Admin implements ISettings {
 		}, $this->daemonConfigService->getRegisteredDaemonConfigs());
 		$adminInitialData = [
 			'daemons' => $daemons,
-			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', ''),
+			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config'),
 			'updates_count' => count($this->getExAppsWithUpdates()),
 		];
 
-		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		if ($defaultDaemonConfigName !== '') {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
 			if ($daemonConfig !== null) {

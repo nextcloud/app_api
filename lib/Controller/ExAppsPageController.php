@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Controller;
 
+use Exception;
 use OC\App\AppStore\Fetcher\CategoryFetcher;
 use OC\App\AppStore\Version\VersionParser;
 use OC\App\DependencyAnalyzer;
@@ -34,6 +35,7 @@ use OCP\IL10N;
 use OCP\IRequest;
 use OCP\L10N\IFactory;
 use Psr\Log\LoggerInterface;
+use SimpleXMLElement;
 
 /**
  * ExApps actions controller similar to default one with project-specific changes and additions
@@ -96,7 +98,7 @@ class ExAppsPageController extends Controller {
 	 */
 	#[NoCSRFRequired]
 	public function viewApps(): TemplateResponse {
-		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 
 		$appInitialData = [
 			'appstoreEnabled' => $this->config->getSystemValueBool('appstoreenabled', true),
@@ -142,7 +144,7 @@ class ExAppsPageController extends Controller {
 	 * @param string $requestedCategory
 	 * @return array
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getAppsForCategory(string $requestedCategory = ''): array {
 		$versionParser = new VersionParser();
@@ -498,13 +500,13 @@ class ExAppsPageController extends Controller {
 			}
 
 			return new JSONResponse(['data' => ['update_required' => $updateRequired]]);
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			$this->logger->error('Could not enable ExApps', ['exception' => $e]);
 			return new JSONResponse(['data' => ['message' => $e->getMessage()]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	private function deployExApp(string $appId, \SimpleXMLElement $infoXml, DaemonConfig $daemonConfig): bool {
+	private function deployExApp(string $appId, SimpleXMLElement $infoXml, DaemonConfig $daemonConfig): bool {
 		$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml);
 		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $deployParams);
 
@@ -527,7 +529,7 @@ class ExAppsPageController extends Controller {
 		return true;
 	}
 
-	private function registerExApp(string $appId, \SimpleXMLElement $infoXml, DaemonConfig $daemonConfig): bool {
+	private function registerExApp(string $appId, SimpleXMLElement $infoXml, DaemonConfig $daemonConfig): bool {
 		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
 
 		$exApp = $this->service->registerExApp($appId, [
@@ -603,7 +605,7 @@ class ExAppsPageController extends Controller {
 				}
 			}
 			return new JSONResponse([]);
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			$this->logger->error('Could not disable ExApp', ['exception' => $e]);
 			return new JSONResponse(['data' => ['message' => $e->getMessage()]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
@@ -695,11 +697,11 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * @param ExApp $exApp
-	 * @param \SimpleXMLElement $infoXml
+	 * @param SimpleXMLElement $infoXml
 	 *
 	 * @return void
 	 */
-	private function upgradeExAppScopes(ExApp $exApp, \SimpleXMLElement $infoXml): void {
+	private function upgradeExAppScopes(ExApp $exApp, SimpleXMLElement $infoXml): void {
 		$newExAppScopes = $this->service->getExAppRequestedScopes($exApp, $infoXml);
 
 		$newExAppScopes = array_merge(

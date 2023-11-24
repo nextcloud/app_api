@@ -30,6 +30,7 @@ use OCP\Log\ILogFactory;
 use OCP\Security\Bruteforce\IThrottler;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
+use SimpleXMLElement;
 
 class AppAPIService {
 	public const BASIC_API_SCOPE = 1;
@@ -392,7 +393,7 @@ class AppAPIService {
 		}
 	}
 
-	public function getExAppRequestedScopes(ExApp $exApp, ?\SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
+	public function getExAppRequestedScopes(ExApp $exApp, ?SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
 		if (isset($jsonInfo['scopes'])) {
 			return $jsonInfo['scopes'];
 		}
@@ -429,9 +430,9 @@ class AppAPIService {
 	 *
 	 * @param ExApp $exApp
 	 *
-	 * @return \SimpleXMLElement|null
+	 * @return SimpleXMLElement|null
 	 */
-	public function getExAppInfoFromAppstore(ExApp $exApp): ?\SimpleXMLElement {
+	public function getExAppInfoFromAppstore(ExApp $exApp): ?SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
 		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($exApp) {
 			return $exAppItem['id'] === $exApp->getAppid() && count(array_filter($exAppItem['releases'], function (array $release) use ($exApp) {
@@ -449,9 +450,9 @@ class AppAPIService {
 	 *
 	 * @param string $appId
 	 *
-	 * @return \SimpleXMLElement|null
+	 * @return SimpleXMLElement|null
 	 */
-	public function getLatestExAppInfoFromAppstore(string $appId): ?\SimpleXMLElement {
+	public function getLatestExAppInfoFromAppstore(string $appId): ?SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
 		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($appId) {
 			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;
@@ -790,7 +791,7 @@ class AppAPIService {
 		return true;
 	}
 
-	public function updateExAppLastCheckTime(ExApp &$exApp): void {
+	public function updateExAppLastCheckTime(ExApp $exApp): void {
 		$exApp->setLastCheckTime(time());
 		try {
 			$this->exAppMapper->updateLastCheckTime($exApp);
@@ -831,7 +832,7 @@ class AppAPIService {
 	 *
 	 * @return bool
 	 */
-	public function handleExAppVersionChange(IRequest $request, ExApp &$exApp): bool {
+	public function handleExAppVersionChange(IRequest $request, ExApp $exApp): bool {
 		$requestExAppVersion = $request->getHeader('EX-APP-VERSION');
 		$versionValid = $exApp->getVersion() === $requestExAppVersion;
 		if (!$versionValid) {

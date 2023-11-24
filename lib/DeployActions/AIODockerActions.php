@@ -37,7 +37,7 @@ class AIODockerActions {
 	 * @return DaemonConfig|null
 	 */
 	public function registerAIODaemonConfig(): ?DaemonConfig {
-		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		if ($defaultDaemonConfig !== '') {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName(self::AIO_DAEMON_CONFIG_NAME);
 			if ($daemonConfig !== null) {

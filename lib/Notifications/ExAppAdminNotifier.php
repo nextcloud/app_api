@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Notifications;
 
+use InvalidArgumentException;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\AppAPIService;
 use OCP\IURLGenerator;
@@ -33,10 +34,10 @@ class ExAppAdminNotifier implements INotifier {
 		// TODO: Think about another possible admin ExApp notifications, make them unified
 		// TODO: Think about ExApp rich objects
 		if ($exApp === null || $notification->getSubject() !== 'ex_app_version_update') {
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException();
 		}
 		if ($exApp->getEnabled()) {
-			throw new \InvalidArgumentException('ExApp is probably already re-enabled');
+			throw new InvalidArgumentException('ExApp is probably already re-enabled');
 		}
 
 		$parameters = $notification->getSubjectParameters();

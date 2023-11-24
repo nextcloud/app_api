@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Fetcher;
 
+use Exception;
+use InvalidArgumentException;
 use OC\App\AppStore\Version\VersionParser;
 use OC\App\CompareVersion;
 use OC\Files\AppData\Factory;
@@ -49,7 +51,7 @@ class ExAppFetcher extends AppAPIFetcher {
 	 * @param string $content
 	 * @param bool $allowUnstable [$allowUnstable] Allow unstable releases
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 * @return array
 	 */
 	protected function fetch(string $ETag, string $content, bool $allowUnstable = false): array {
@@ -102,7 +104,7 @@ class ExAppFetcher extends AppAPIFetcher {
 						if ($minFulfilled && ($this->ignoreMaxVersion || $maxFulfilled) && $isPhpCompatible) {
 							$releases[] = $release;
 						}
-					} catch (\InvalidArgumentException $e) {
+					} catch (InvalidArgumentException $e) {
 						$this->logger->warning($e->getMessage(), [
 							'exception' => $e,
 						]);
