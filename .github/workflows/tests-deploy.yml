@@ -23,8 +23,10 @@ jobs:
         php-version: [ '8.1' ]
         server-version: [ 'stable27' ]
         include:
-          - server-version: "master"
+          - server-version: "stable28"
             php-version: "8.2"
+          - server-version: "master"
+            php-version: "8.3"
 
     services:
       postgres:
