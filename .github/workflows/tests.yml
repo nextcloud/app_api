@@ -73,10 +73,10 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php ${{ matrix.php-versions }}
+      - name: Set up php ${{ matrix.php-version }}
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php-version }}
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
           coverage: none
           ini-file: development
