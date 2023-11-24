@@ -24,7 +24,7 @@ class Unregister extends Command {
 		parent::__construct();
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:unregister');
 		$this->setDescription('Unregister external app');
 

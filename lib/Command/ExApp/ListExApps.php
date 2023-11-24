@@ -16,7 +16,7 @@ class ListExApps extends Command {
 		parent::__construct();
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:list');
 		$this->setDescription('List ExApps');
 	}

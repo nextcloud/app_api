@@ -17,7 +17,7 @@ class Enable extends Command {
 		parent::__construct();
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:enable');
 		$this->setDescription('Enable registered external app');
 

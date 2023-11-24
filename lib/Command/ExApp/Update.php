@@ -34,7 +34,7 @@ class Update extends Command {
 		$this->service = $service;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:update');
 		$this->setDescription('Update ExApp');
 
