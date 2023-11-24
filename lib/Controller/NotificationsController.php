@@ -18,17 +18,15 @@ use OCP\IRequest;
 use OCP\Notification\INotification;
 
 class NotificationsController extends OCSController {
-	private ExNotificationsManager $exNotificationsManager;
 	protected $request;
 
 	public function __construct(
 		IRequest $request,
-		ExNotificationsManager $exNotificationsManager,
+		private ExNotificationsManager $exNotificationsManager,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
-		$this->exNotificationsManager = $exNotificationsManager;
 	}
 
 	/**

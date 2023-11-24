@@ -14,20 +14,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ListDaemons extends Command {
-	private DaemonConfigService $daemonConfigService;
-	private IConfig $config;
 
 	public function __construct(
-		DaemonConfigService $daemonConfigService,
-		IConfig $config
+		private DaemonConfigService $daemonConfigService,
+		private IConfig $config
 	) {
 		parent::__construct();
-
-		$this->daemonConfigService = $daemonConfigService;
-		$this->config = $config;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:daemon:list');
 		$this->setDescription('List registered daemons');
 	}
@@ -44,7 +39,7 @@ class ListDaemons extends Command {
 			return 0;
 		}
 
-		$defaultDaemonName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$defaultDaemonName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 
 		$output->writeln('Registered ExApp daemon configs:');
 		$table = new Table($output);

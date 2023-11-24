@@ -12,12 +12,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Enable extends Command {
-	private AppAPIService $service;
 
-	public function __construct(AppAPIService $service) {
+	public function __construct(private AppAPIService $service) {
 		parent::__construct();
-
-		$this->service = $service;
 	}
 
 	protected function configure() {

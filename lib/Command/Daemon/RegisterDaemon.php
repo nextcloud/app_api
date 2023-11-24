@@ -15,20 +15,15 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class RegisterDaemon extends Command {
-	private DaemonConfigService $daemonConfigService;
-	private IConfig $config;
 
 	public function __construct(
-		DaemonConfigService $daemonConfigService,
-		IConfig $config,
+		private DaemonConfigService $daemonConfigService,
+		private IConfig $config,
 	) {
 		parent::__construct();
-
-		$this->daemonConfigService = $daemonConfigService;
-		$this->config = $config;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:daemon:register');
 		$this->setDescription('Register daemon config for ExApp deployment');
 

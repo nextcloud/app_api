@@ -35,34 +35,18 @@ class DockerActions implements IDeployActions {
 		'NEXTCLOUD_URL',
 	];
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
-	private LoggerInterface $logger;
 	private Client $guzzleClient;
-	private ICertificateManager $certificateManager;
-	private IConfig $config;
-	private IAppManager $appManager;
-	private ISecureRandom $random;
-	private IURLGenerator $urlGenerator;
-	private AppAPIService $service;
-	private DaemonConfigService $daemonConfigService;
 
 	public function __construct(
-		LoggerInterface     $logger,
-		IConfig             $config,
-		ICertificateManager $certificateManager,
-		IAppManager         $appManager,
-		ISecureRandom       $random,
-		IURLGenerator       $urlGenerator,
-		AppAPIService       $service,
-		DaemonConfigService $daemonConfigService,
+		private LoggerInterface     $logger,
+		private IConfig             $config,
+		private  ICertificateManager $certificateManager,
+		private IAppManager         $appManager,
+		private ISecureRandom       $random,
+		private IURLGenerator       $urlGenerator,
+		private AppAPIService       $service,
+		private DaemonConfigService $daemonConfigService,
 	) {
-		$this->logger = $logger;
-		$this->certificateManager = $certificateManager;
-		$this->config = $config;
-		$this->appManager = $appManager;
-		$this->random = $random;
-		$this->urlGenerator = $urlGenerator;
-		$this->service = $service;
-		$this->daemonConfigService = $daemonConfigService;
 	}
 
 	public function getAcceptsDeployId(): string {

@@ -19,19 +19,15 @@ use OCP\IRequest;
 
 class TalkBotController extends OCSController {
 	protected $request;
-	private AppAPIService $service;
-	private TalkBotsService $talkBotsService;
 
 	public function __construct(
 		IRequest        $request,
-		AppAPIService   $service,
-		TalkBotsService $talkBotsService,
+		private AppAPIService   $service,
+		private TalkBotsService $talkBotsService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
-		$this->service = $service;
-		$this->talkBotsService = $talkBotsService;
 	}
 
 	/**

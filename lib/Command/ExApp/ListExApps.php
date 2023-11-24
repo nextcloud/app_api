@@ -12,12 +12,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ListExApps extends Command {
-	private ExAppMapper $mapper;
-
-	public function __construct(ExAppMapper $mapper) {
+	public function __construct(private ExAppMapper $mapper) {
 		parent::__construct();
-
-		$this->mapper = $mapper;
 	}
 
 	protected function configure() {

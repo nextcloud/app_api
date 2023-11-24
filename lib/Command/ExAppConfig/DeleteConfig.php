@@ -13,17 +13,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DeleteConfig extends Command {
-	private AppAPIService $service;
-	private ExAppConfigService $exAppConfigService;
 
-	public function __construct(AppAPIService $service, ExAppConfigService $exAppConfigService) {
+	public function __construct(
+		private AppAPIService $service,
+		private ExAppConfigService $exAppConfigService) {
 		parent::__construct();
-
-		$this->service = $service;
-		$this->exAppConfigService = $exAppConfigService;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:config:delete');
 		$this->setDescription('Delete ExApp configs');
 

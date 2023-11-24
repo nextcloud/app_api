@@ -17,17 +17,13 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class ExAppScopesService {
-	private LoggerInterface $logger;
-	private ExAppScopeMapper $mapper;
 	private ICache $cache;
 
 	public function __construct(
-		LoggerInterface $logger,
-		ExAppScopeMapper $mapper,
+		private LoggerInterface $logger,
+		private ExAppScopeMapper $mapper,
 		ICacheFactory $cacheFactory,
 	) {
-		$this->logger = $logger;
-		$this->mapper = $mapper;
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_apps_scopes');
 	}
 

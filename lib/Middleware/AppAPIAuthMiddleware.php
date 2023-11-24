@@ -19,21 +19,13 @@ use Psr\Log\LoggerInterface;
 use ReflectionMethod;
 
 class AppAPIAuthMiddleware extends Middleware {
-	private AppAPIService $service;
-	protected IRequest $request;
-	private IL10N $l;
-	private LoggerInterface $logger;
 
 	public function __construct(
-		AppAPIService   $service,
-		IRequest        $request,
-		IL10N           $l,
-		LoggerInterface $logger,
+		private AppAPIService   $service,
+		protected IRequest        $request,
+		private IL10N           $l,
+		private LoggerInterface $logger,
 	) {
-		$this->service = $service;
-		$this->request = $request;
-		$this->l = $l;
-		$this->logger = $logger;
 	}
 
 	public function beforeController($controller, $methodName) {

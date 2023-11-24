@@ -16,18 +16,14 @@ use Psr\Log\LoggerInterface;
 
 class ExAppUsersService {
 	public const CACHE_TLL = 60 * 60; // 1 hour
-	private LoggerInterface $logger;
 	private ICache $cache;
-	private ExAppUserMapper $mapper;
 
 	public function __construct(
-		LoggerInterface $logger,
+		private LoggerInterface $logger,
 		ICacheFactory $cacheFactory,
-		ExAppUserMapper $mapper,
+		private ExAppUserMapper $mapper,
 	) {
-		$this->logger = $logger;
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_apps_users');
-		$this->mapper = $mapper;
 	}
 
 	/**

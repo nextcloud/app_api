@@ -35,69 +35,33 @@ class AppAPIService {
 	public const BASIC_API_SCOPE = 1;
 	public const CACHE_TTL = 60 * 60; // 1 hour
 
-	private LoggerInterface $logger;
-	private ILogFactory $logFactory;
 	private ICache $cache;
-	private IThrottler $throttler;
-	private IConfig $config;
 	private IClient $client;
-	private ExAppMapper $exAppMapper;
-	private IAppManager $appManager;
-	private ISecureRandom $random;
-	private IUserSession $userSession;
-	private ISession $session;
-	private IUserManager $userManager;
-	private ExAppApiScopeService $exAppApiScopeService;
-	private ExAppUsersService $exAppUsersService;
-	private ExAppScopesService $exAppScopesService;
-	private ExAppConfigService $exAppConfigService;
-	private ExNotificationsManager $exNotificationsManager;
-	private TalkBotsService $talkBotsService;
-	private ExAppFetcher $exAppFetcher;
-	private ExAppArchiveFetcher $exAppArchiveFetcher;
 
 	public function __construct(
-		LoggerInterface $logger,
-		ILogFactory $logFactory,
+		private LoggerInterface $logger,
+		private ILogFactory $logFactory,
 		ICacheFactory $cacheFactory,
-		IThrottler $throttler,
-		IConfig $config,
+		private IThrottler $throttler,
+		private IConfig $config,
 		IClientService $clientService,
-		ExAppMapper $exAppMapper,
-		IAppManager $appManager,
-		ExAppUsersService $exAppUserService,
-		ExAppApiScopeService $exAppApiScopeService,
-		ExAppScopesService $exAppScopesService,
-		ISecureRandom $random,
-		IUserSession $userSession,
-		ISession $session,
-		IUserManager $userManager,
-		ExAppConfigService $exAppConfigService,
-		ExNotificationsManager $exNotificationsManager,
-		TalkBotsService $talkBotsService,
-		ExAppFetcher $exAppFetcher,
-		ExAppArchiveFetcher $exAppArchiveFetcher,
+		private ExAppMapper $exAppMapper,
+		private IAppManager $appManager,
+		private ExAppUsersService $exAppUsersService,
+		private ExAppApiScopeService $exAppApiScopeService,
+		private ExAppScopesService $exAppScopesService,
+		private ISecureRandom $random,
+		private IUserSession $userSession,
+		private ISession $session,
+		private IUserManager $userManager,
+		private ExAppConfigService $exAppConfigService,
+		private ExNotificationsManager $exNotificationsManager,
+		private TalkBotsService $talkBotsService,
+		private ExAppFetcher $exAppFetcher,
+		private ExAppArchiveFetcher $exAppArchiveFetcher,
 	) {
-		$this->logger = $logger;
-		$this->logFactory = $logFactory;
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
-		$this->throttler = $throttler;
-		$this->config = $config;
 		$this->client = $clientService->newClient();
-		$this->exAppMapper = $exAppMapper;
-		$this->appManager = $appManager;
-		$this->random = $random;
-		$this->userSession = $userSession;
-		$this->session = $session;
-		$this->userManager = $userManager;
-		$this->exAppUsersService = $exAppUserService;
-		$this->exAppApiScopeService = $exAppApiScopeService;
-		$this->exAppScopesService = $exAppScopesService;
-		$this->exAppConfigService = $exAppConfigService;
-		$this->exNotificationsManager = $exNotificationsManager;
-		$this->talkBotsService = $talkBotsService;
-		$this->exAppFetcher = $exAppFetcher;
-		$this->exAppArchiveFetcher = $exAppArchiveFetcher;
 	}
 
 	public function getExApp(string $appId): ?ExApp {

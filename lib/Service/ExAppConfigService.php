@@ -16,15 +16,11 @@ use Psr\Log\LoggerInterface;
  * App configuration (appconfig_ex)
  */
 class ExAppConfigService {
-	private LoggerInterface $logger;
-	private ExAppConfigMapper $mapper;
 
 	public function __construct(
-		ExAppConfigMapper $mapper,
-		LoggerInterface $logger,
+		private ExAppConfigMapper $mapper,
+		private LoggerInterface $logger,
 	) {
-		$this->mapper = $mapper;
-		$this->logger = $logger;
 	}
 
 	/**

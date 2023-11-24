@@ -15,15 +15,11 @@ use OCP\IConfig;
 class AIODockerActions {
 	public const AIO_DAEMON_CONFIG_NAME = 'docker_aio';
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
-	private IConfig $config;
-	private DaemonConfigService $daemonConfigService;
 
 	public function __construct(
-		IConfig $config,
-		DaemonConfigService $daemonConfigService
+		private IConfig $config,
+		private DaemonConfigService $daemonConfigService
 	) {
-		$this->config = $config;
-		$this->daemonConfigService = $daemonConfigService;
 	}
 
 	/**

@@ -15,24 +15,14 @@ use OCP\IConfig;
 use OCP\IRequest;
 
 class Capabilities implements ICapability {
-	private IConfig $config;
-	private IAppManager $appManager;
-	private AppAPIService $service;
-	private ExAppScopesService $exAppScopesService;
-	private IRequest $request;
 
 	public function __construct(
-		IConfig            $config,
-		IAppManager        $appManager,
-		AppAPIService      $service,
-		ExAppScopesService $exAppScopesService,
-		IRequest           $request,
+		private IConfig            $config,
+		private IAppManager        $appManager,
+		private AppAPIService      $service,
+		private ExAppScopesService $exAppScopesService,
+		private IRequest           $request,
 	) {
-		$this->config = $config;
-		$this->appManager = $appManager;
-		$this->service = $service;
-		$this->request = $request;
-		$this->exAppScopesService = $exAppScopesService;
 	}
 
 	public function getCapabilities(): array {

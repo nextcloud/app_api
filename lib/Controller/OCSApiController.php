@@ -20,19 +20,15 @@ use Psr\Log\LoggerInterface;
 
 class OCSApiController extends OCSController {
 	protected $request;
-	private AppAPIService $service;
-	private LoggerInterface $logger;
 
 	public function __construct(
 		IRequest        $request,
-		AppAPIService   $service,
-		LoggerInterface $logger,
+		private AppAPIService   $service,
+		private LoggerInterface $logger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
-		$this->service = $service;
-		$this->logger = $logger;
 	}
 
 	/**

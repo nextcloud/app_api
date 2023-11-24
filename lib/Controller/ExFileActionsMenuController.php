@@ -19,20 +19,16 @@ use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
 class ExFileActionsMenuController extends OCSController {
-	private ExFilesActionsMenuService $exFilesActionsMenuService;
-	private ?string $userId;
 	protected $request;
 
 	public function __construct(
 		IRequest $request,
-		?string $userId,
-		ExFilesActionsMenuService $exFilesActionsMenuService,
+		private ?string $userId,
+		private ExFilesActionsMenuService $exFilesActionsMenuService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
-		$this->exFilesActionsMenuService = $exFilesActionsMenuService;
-		$this->userId = $userId;
 	}
 
 

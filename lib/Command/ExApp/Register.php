@@ -25,38 +25,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Register extends Command {
-	private AppAPIService $service;
-	private DaemonConfigService $daemonConfigService;
-	private ExAppApiScopeService $exAppApiScopeService;
-	private ExAppScopesService $exAppScopesService;
-	private ExAppUsersService $exAppUsersService;
-	private DockerActions $dockerActions;
-	private ManualActions $manualActions;
-	private IConfig $config;
 
 	public function __construct(
-		AppAPIService        $service,
-		DaemonConfigService  $daemonConfigService,
-		ExAppApiScopeService $exAppApiScopeService,
-		ExAppScopesService   $exAppScopesService,
-		ExAppUsersService    $exAppUsersService,
-		DockerActions        $dockerActions,
-		ManualActions        $manualActions,
-		IConfig              $config,
+		private AppAPIService        $service,
+		private DaemonConfigService  $daemonConfigService,
+		private ExAppApiScopeService $exAppApiScopeService,
+		private ExAppScopesService   $exAppScopesService,
+		private ExAppUsersService    $exAppUsersService,
+		private DockerActions        $dockerActions,
+		private ManualActions        $manualActions,
+		private IConfig              $config,
 	) {
 		parent::__construct();
-
-		$this->service = $service;
-		$this->daemonConfigService = $daemonConfigService;
-		$this->exAppApiScopeService = $exAppApiScopeService;
-		$this->exAppScopesService = $exAppScopesService;
-		$this->exAppUsersService = $exAppUsersService;
-		$this->dockerActions = $dockerActions;
-		$this->manualActions = $manualActions;
-		$this->config = $config;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:register');
 		$this->setDescription('Register external app');
 
