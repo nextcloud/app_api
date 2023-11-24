@@ -11,18 +11,12 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Security\ISecureRandom;
 
 class TalkBotsService {
-	private ExAppConfigService $exAppConfigService;
-	private IEventDispatcher $dispatcher;
-	private ISecureRandom $random;
 
 	public function __construct(
-		ExAppConfigService $exAppConfigService,
-		IEventDispatcher   $dispatcher,
-		ISecureRandom      $random,
+		private ExAppConfigService $exAppConfigService,
+		private IEventDispatcher   $dispatcher,
+		private ISecureRandom      $random,
 	) {
-		$this->exAppConfigService = $exAppConfigService;
-		$this->dispatcher = $dispatcher;
-		$this->random = $random;
 	}
 
 	public function registerExAppBot(ExApp $exApp, string $name, string $route, string $description): ?array {

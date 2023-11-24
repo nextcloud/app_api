@@ -11,12 +11,10 @@ use OCA\AppAPI\Service\AppAPIService;
  * Manual deploy actions for development.
  */
 class ManualActions implements IDeployActions {
-	private AppAPIService $service;
 
 	public function __construct(
-		AppAPIService $service,
+		private AppAPIService $service,
 	) {
-		$this->service = $service;
 	}
 
 	public function getAcceptsDeployId(): string {

@@ -9,12 +9,10 @@ use OCP\Notification\IManager;
 use OCP\Notification\INotification;
 
 class ExNotificationsManager {
-	private IManager $notificationManager;
-	private IGroupManager $groupManager;
 
-	public function __construct(IManager $manager, IGroupManager $groupManager) {
-		$this->notificationManager = $manager;
-		$this->groupManager = $groupManager;
+	public function __construct(
+		private IManager $notificationManager,
+		private IGroupManager $groupManager) {
 	}
 
 	/**

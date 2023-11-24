@@ -16,15 +16,12 @@ use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
 class OCSExAppController extends OCSController {
-	private AppAPIService $service;
 
 	public function __construct(
 		IRequest      $request,
-		AppAPIService $service,
+		private AppAPIService $service,
 	) {
 		parent::__construct(Application::APP_ID, $request);
-
-		$this->service = $service;
 	}
 
 	/**

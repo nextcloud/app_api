@@ -18,14 +18,10 @@ use Sabre\HTTP\ResponseInterface;
  * @psalm-suppress UndefinedClass, MissingDependency
  */
 class DavPlugin extends ServerPlugin {
-	private IRequest $request;
-	private ISession $session;
-	private AppAPIService $service;
 
-	public function __construct(IRequest $request, ISession $session, AppAPIService $service) {
-		$this->request = $request;
-		$this->session = $session;
-		$this->service = $service;
+	public function __construct(private IRequest $request,
+		private ISession $session,
+		private AppAPIService $service) {
 	}
 
 	public function initialize(Server $server) {

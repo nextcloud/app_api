@@ -21,28 +21,20 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Update extends Command {
 	private AppAPIService $service;
-	private DaemonConfigService $daemonConfigService;
-	private DockerActions $dockerActions;
-	private ExAppScopesService $exAppScopeService;
-	private ExAppApiScopeService $exAppApiScopeService;
 
 	public function __construct(
 		AppAPIService        $service,
-		ExAppScopesService   $exAppScopesService,
-		ExAppApiScopeService $exAppApiScopeService,
-		DaemonConfigService  $daemonConfigService,
-		DockerActions        $dockerActions,
+		private ExAppScopesService   $exAppScopeService,
+		private ExAppApiScopeService $exAppApiScopeService,
+		private DaemonConfigService  $daemonConfigService,
+		private DockerActions        $dockerActions,
 	) {
 		parent::__construct();
 
 		$this->service = $service;
-		$this->exAppScopeService = $exAppScopesService;
-		$this->exAppApiScopeService = $exAppApiScopeService;
-		$this->daemonConfigService = $daemonConfigService;
-		$this->dockerActions = $dockerActions;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:update');
 		$this->setDescription('Update ExApp');
 

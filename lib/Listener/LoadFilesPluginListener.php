@@ -17,15 +17,11 @@ use OCP\Util;
  * @template-extends IEventListener<LoadFilesPluginListener>
  */
 class LoadFilesPluginListener implements IEventListener {
-	private IInitialState $initialState;
-	private ExFilesActionsMenuService $service;
 
 	public function __construct(
-		IInitialState $initialState,
-		ExFilesActionsMenuService $service
+		private IInitialState $initialState,
+		private ExFilesActionsMenuService $service
 	) {
-		$this->initialState = $initialState;
-		$this->service = $service;
 	}
 
 	public function handle(Event $event): void {

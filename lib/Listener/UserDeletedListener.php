@@ -16,12 +16,10 @@ use Psr\Log\LoggerInterface;
  * @template-implements IEventListener<UserDeletedEvent>
  */
 class UserDeletedListener implements IEventListener {
-	private LoggerInterface $logger;
-	private ExAppUsersService $exAppUsersService;
 
-	public function __construct(LoggerInterface $logger, ExAppUsersService $exAppUsersService) {
-		$this->logger = $logger;
-		$this->exAppUsersService = $exAppUsersService;
+	public function __construct(
+		private LoggerInterface $logger,
+		private ExAppUsersService $exAppUsersService) {
 	}
 
 	public function handle(Event $event): void {

@@ -12,15 +12,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class UnregisterDaemon extends Command {
-	private DaemonConfigService $daemonConfigService;
 
-	public function __construct(DaemonConfigService $daemonConfigService) {
+	public function __construct(private DaemonConfigService $daemonConfigService) {
 		parent::__construct();
-
-		$this->daemonConfigService = $daemonConfigService;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:daemon:unregister');
 		$this->setDescription('Unregister daemon');
 

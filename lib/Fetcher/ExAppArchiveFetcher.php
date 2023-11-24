@@ -13,15 +13,11 @@ use phpseclib\File\X509;
  * ExApps release archive fetcher with the same logic as for default (signature check).
  */
 class ExAppArchiveFetcher {
-	private ITempManager $tempManager;
-	private IClientService $clientService;
 
 	public function __construct(
-		ITempManager $tempManager,
-		IClientService $clientService,
+		private ITempManager $tempManager,
+		private IClientService $clientService,
 	) {
-		$this->tempManager = $tempManager;
-		$this->clientService = $clientService;
 	}
 
 	/**

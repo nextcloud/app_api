@@ -19,17 +19,15 @@ use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
 class AppConfigController extends OCSController {
-	private ExAppConfigService $exAppConfigService;
 	protected $request;
 
 	public function __construct(
 		IRequest $request,
-		ExAppConfigService $exAppConfigService,
+		private ExAppConfigService $exAppConfigService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
-		$this->exAppConfigService = $exAppConfigService;
 	}
 
 	/**

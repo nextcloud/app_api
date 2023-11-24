@@ -12,15 +12,11 @@ use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
 class AppAPIAuthBackend implements BackendInterface {
-	private IRequest $request;
-	private ISession $session;
 
 	public function __construct(
-		IRequest $request,
-		ISession $session,
+		private IRequest $request,
+		private ISession $session,
 	) {
-		$this->request = $request;
-		$this->session = $session;
 	}
 
 	public function check(RequestInterface $request, ResponseInterface $response) {

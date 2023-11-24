@@ -12,18 +12,12 @@ use OCP\Notification\INotification;
 use OCP\Notification\INotifier;
 
 class ExAppAdminNotifier implements INotifier {
-	private IFactory $factory;
-	private IURLGenerator $url;
-	private AppAPIService $service;
 
 	public function __construct(
-		IFactory      $factory,
-		IURLGenerator $urlGenerator,
-		AppAPIService $service,
+		private IFactory      $factory,
+		private IURLGenerator $url,
+		private AppAPIService $service,
 	) {
-		$this->factory = $factory;
-		$this->url = $urlGenerator;
-		$this->service = $service;
 	}
 
 	public function getID(): string {

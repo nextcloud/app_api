@@ -10,12 +10,10 @@ use OCP\App\IAppManager;
 use OCP\Capabilities\IPublicCapability;
 
 class PublicCapabilities implements IPublicCapability {
-	private IAppManager $appManager;
 
 	public function __construct(
-		IAppManager $appManager,
+		private IAppManager $appManager,
 	) {
-		$this->appManager = $appManager;
 	}
 
 	public function getCapabilities(): array {

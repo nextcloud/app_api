@@ -14,19 +14,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ListConfig extends Command {
-	private AppAPIService $service;
-	private ExAppConfigService $appConfigService;
 
 	private const SENSITIVE_VALUE = '***REMOVED SENSITIVE VALUE***';
 
-	public function __construct(AppAPIService $service, ExAppConfigService $appConfigService) {
+	public function __construct(private AppAPIService $service, private ExAppConfigService $appConfigService) {
 		parent::__construct();
-
-		$this->service = $service;
-		$this->appConfigService = $appConfigService;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:config:list');
 		$this->setDescription('List ExApp configs');
 		$this->addArgument('appid', InputArgument::REQUIRED);

@@ -15,23 +15,16 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ListScopes extends Command {
-	private AppAPIService $service;
-	private ExAppScopesService $exAppScopeService;
-	private ExAppApiScopeService $exAppApiScopeService;
 
 	public function __construct(
-		AppAPIService        $service,
-		ExAppScopesService   $exAppScopeService,
-		ExAppApiScopeService $exAppApiScopeService,
+		private AppAPIService        $service,
+		private ExAppScopesService   $exAppScopeService,
+		private ExAppApiScopeService $exAppApiScopeService,
 	) {
 		parent::__construct();
-
-		$this->service = $service;
-		$this->exAppScopeService = $exAppScopeService;
-		$this->exAppApiScopeService = $exAppApiScopeService;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:scopes:list');
 		$this->setDescription('List ExApp granted scopes');
 

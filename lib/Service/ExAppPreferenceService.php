@@ -16,15 +16,11 @@ use Psr\Log\LoggerInterface;
  * App per-user preferences (preferences_ex)
  */
 class ExAppPreferenceService {
-	private ExAppPreferenceMapper $mapper;
-	private LoggerInterface $logger;
 
 	public function __construct(
-		ExAppPreferenceMapper $mapper,
-		LoggerInterface $logger,
+		private ExAppPreferenceMapper $mapper,
+		private LoggerInterface $logger,
 	) {
-		$this->mapper = $mapper;
-		$this->logger = $logger;
 	}
 
 	public function setUserConfigValue(string $userId, string $appId, string $configKey, mixed $configValue) {

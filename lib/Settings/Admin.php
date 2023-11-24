@@ -18,30 +18,16 @@ use OCP\Settings\ISettings;
 use Psr\Log\LoggerInterface;
 
 class Admin implements ISettings {
-	private IInitialState $initialStateService;
-	private DaemonConfigService $daemonConfigService;
-	private IConfig $config;
-	private DockerActions $dockerActions;
-	private ExAppFetcher $exAppFetcher;
-	private AppAPIService $service;
-	private LoggerInterface $logger;
 
 	public function __construct(
-		IInitialState $initialStateService,
-		DaemonConfigService $daemonConfigService,
-		IConfig $config,
-		DockerActions $dockerActions,
-		ExAppFetcher $exAppFetcher,
-		AppAPIService $service,
-		LoggerInterface $logger,
+		private IInitialState $initialStateService,
+		private DaemonConfigService $daemonConfigService,
+		private IConfig $config,
+		private DockerActions $dockerActions,
+		private ExAppFetcher $exAppFetcher,
+		private AppAPIService $service,
+		private LoggerInterface $logger,
 	) {
-		$this->config = $config;
-		$this->initialStateService = $initialStateService;
-		$this->daemonConfigService = $daemonConfigService;
-		$this->dockerActions = $dockerActions;
-		$this->exAppFetcher = $exAppFetcher;
-		$this->service = $service;
-		$this->logger = $logger;
 	}
 
 	/**

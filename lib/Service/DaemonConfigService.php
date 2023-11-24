@@ -20,18 +20,14 @@ use Psr\Log\LoggerInterface;
  */
 class DaemonConfigService {
 	public const CACHE_TTL = 60 * 60 * 2; // 2 hours
-	private LoggerInterface $logger;
 	private ICache $cache;
-	private DaemonConfigMapper $mapper;
 
 	public function __construct(
-		LoggerInterface $logger,
+		private LoggerInterface $logger,
 		ICacheFactory $cacheFactory,
-		DaemonConfigMapper $mapper,
+		private DaemonConfigMapper $mapper,
 	) {
-		$this->logger = $logger;
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/daemon_configs');
-		$this->mapper = $mapper;
 	}
 
 	public function registerDaemonConfig(array $params): ?DaemonConfig {

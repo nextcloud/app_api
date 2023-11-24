@@ -24,29 +24,19 @@ use Psr\Log\LoggerInterface;
 class ExFilesActionsMenuService {
 	public const ICON_CACHE_TTL = 60 * 60 * 24; // 1 day
 	private ICache $cache;
-	private ExFilesActionsMenuMapper $mapper;
-	private LoggerInterface $logger;
 	private IClient $client;
-	private AppAPIService $appAPIService;
-	private IRequest $request;
-	private IConfig $config;
 
 	public function __construct(
 		ICacheFactory            $cacheFactory,
-		ExFilesActionsMenuMapper $mapper,
-		LoggerInterface          $logger,
+		private  ExFilesActionsMenuMapper $mapper,
+		private LoggerInterface          $logger,
 		IClientService           $clientService,
-		AppAPIService            $appAPIService,
-		IRequest                 $request,
-		IConfig                  $config,
+		private AppAPIService            $appAPIService,
+		private IRequest                 $request,
+		private IConfig                  $config,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
-		$this->mapper = $mapper;
-		$this->logger = $logger;
 		$this->client = $clientService->newClient();
-		$this->appAPIService = $appAPIService;
-		$this->request = $request;
-		$this->config = $config;
 	}
 
 	/**

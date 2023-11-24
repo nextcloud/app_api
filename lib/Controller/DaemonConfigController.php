@@ -20,21 +20,14 @@ use OCP\IRequest;
  * DaemonConfig actions (for UI)
  */
 class DaemonConfigController extends ApiController {
-	private DaemonConfigService $daemonConfigService;
-	private IConfig $config;
-	private DockerActions $dockerActions;
 
 	public function __construct(
 		IRequest $request,
-		IConfig $config,
-		DaemonConfigService $daemonConfigService,
-		DockerActions $dockerActions,
+		private IConfig $config,
+		private DaemonConfigService $daemonConfigService,
+		private DockerActions $dockerActions,
 	) {
 		parent::__construct(Application::APP_ID, $request);
-
-		$this->daemonConfigService = $daemonConfigService;
-		$this->config = $config;
-		$this->dockerActions = $dockerActions;
 	}
 
 	/**

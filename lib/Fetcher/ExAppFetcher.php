@@ -15,7 +15,6 @@ use Psr\Log\LoggerInterface;
 
 class ExAppFetcher extends AppAPIFetcher {
 	private CompareVersion $compareVersion;
-	protected IRegistry $registry;
 	private bool $ignoreMaxVersion;
 
 	public function __construct(
@@ -25,7 +24,7 @@ class ExAppFetcher extends AppAPIFetcher {
 		IConfig $config,
 		CompareVersion $compareVersion,
 		LoggerInterface $logger,
-		IRegistry $registry
+		protected IRegistry $registry
 	) {
 		parent::__construct(
 			$appDataFactory,
@@ -37,7 +36,6 @@ class ExAppFetcher extends AppAPIFetcher {
 		);
 
 		$this->compareVersion = $compareVersion;
-		$this->registry = $registry;
 
 		$this->fileName = 'appapi_apps.json';
 		$this->endpointName = 'appapi_apps.json';

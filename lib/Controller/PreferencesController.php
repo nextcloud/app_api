@@ -21,19 +21,15 @@ use OCP\IUserSession;
 
 class PreferencesController extends OCSController {
 	protected $request;
-	private IUserSession $userSession;
-	private ExAppPreferenceService $exAppPreferenceService;
 
 	public function __construct(
 		IRequest $request,
-		IUserSession $userSession,
-		ExAppPreferenceService $exAppPreferenceService,
+		private IUserSession $userSession,
+		private ExAppPreferenceService $exAppPreferenceService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
-		$this->userSession = $userSession;
-		$this->exAppPreferenceService = $exAppPreferenceService;
 	}
 
 	/**

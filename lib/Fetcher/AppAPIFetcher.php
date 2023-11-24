@@ -22,11 +22,6 @@ abstract class AppAPIFetcher {
 	public const RETRY_AFTER_FAILURE_SECONDS = 300;
 
 	protected IAppData $appData;
-	protected IClientService $clientService;
-	protected ITimeFactory $timeFactory;
-	protected IConfig $config;
-	protected LoggerInterface $logger;
-	protected IRegistry $registry;
 
 	protected string $fileName;
 	protected string $endpointName;
@@ -35,18 +30,13 @@ abstract class AppAPIFetcher {
 
 	public function __construct(
 		Factory $appDataFactory,
-		IClientService $clientService,
-		ITimeFactory $timeFactory,
-		IConfig $config,
-		LoggerInterface $logger,
-		IRegistry $registry
+		protected IClientService $clientService,
+		protected ITimeFactory $timeFactory,
+		protected IConfig $config,
+		protected LoggerInterface $logger,
+		protected IRegistry $registry
 	) {
 		$this->appData = $appDataFactory->get('appstore');
-		$this->clientService = $clientService;
-		$this->timeFactory = $timeFactory;
-		$this->config = $config;
-		$this->logger = $logger;
-		$this->registry = $registry;
 	}
 
 	/**

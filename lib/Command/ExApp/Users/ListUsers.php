@@ -13,20 +13,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ListUsers extends Command {
-	private AppAPIService $service;
-	private ExAppUsersService $exAppUserService;
 
 	public function __construct(
-		AppAPIService     $service,
-		ExAppUsersService $exAppUserService,
+		private AppAPIService     $service,
+		private ExAppUsersService $exAppUserService,
 	) {
 		parent::__construct();
-
-		$this->service = $service;
-		$this->exAppUserService = $exAppUserService;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:users:list');
 		$this->setDescription('List ExApp authorized users');
 

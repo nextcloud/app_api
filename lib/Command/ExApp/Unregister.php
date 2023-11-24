@@ -15,23 +15,16 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Unregister extends Command {
-	private AppAPIService $service;
-	private DockerActions $dockerActions;
-	private DaemonConfigService $daemonConfigService;
 
 	public function __construct(
-		AppAPIService       $service,
-		DaemonConfigService $daemonConfigService,
-		DockerActions       $dockerActions,
+		private AppAPIService       $service,
+		private DaemonConfigService $daemonConfigService,
+		private DockerActions       $dockerActions,
 	) {
 		parent::__construct();
-
-		$this->service = $service;
-		$this->daemonConfigService = $daemonConfigService;
-		$this->dockerActions = $dockerActions;
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this->setName('app_api:app:unregister');
 		$this->setDescription('Unregister external app');
 
