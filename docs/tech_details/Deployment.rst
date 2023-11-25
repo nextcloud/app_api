@@ -150,6 +150,16 @@ There is a ``manual-install`` DeployConfig type, which can be used in case of de
 For ExApp registration with it you need to provide JSON app info with structure described before
 using **app_api:app:register** ``--json-info`` option.
 
+For all examples and applications we release we usually add manual_install command in it's makefile for easier development.
+
+.. code-block::
+
+	php occ app_api:app:register nc_py_api manual_install --json-info \
+            "{\"appid\":\"nc_py_api\",\"name\":\"nc_py_api\",\"daemon_config_name\":\"manual_install\",\"version\":\"1.0.0\",\"secret\":\"12345\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\"],\"optional\":[\"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"]},\"protocol\":\"http\",\"system_app\":1}" \
+            --force-scopes
+
+.. note:: **Deployment/Startup of App should be done by developer when manual_install DeployConfig type is used.**
+
 Deploy env variables
 ********************
 
