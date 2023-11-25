@@ -64,7 +64,7 @@ class Deploy extends Command {
 			return 2;
 		}
 
-		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		$daemonConfigName = $input->getArgument('daemon-config-name');
 		if (!isset($daemonConfigName) && $defaultDaemonConfigName !== '') {
 			$daemonConfigName = $defaultDaemonConfigName;

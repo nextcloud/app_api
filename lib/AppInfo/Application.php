@@ -34,6 +34,7 @@ use OCP\SabrePluginEvent;
 use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Throwable;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_api';
@@ -66,7 +67,7 @@ class Application extends App implements IBootstrap {
 				$profiler->add(new AppAPIDataCollector());
 			}
 			$context->injectFn($this->registerExAppsManagementNavigation(...));
-		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|\Throwable) {
+		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|Throwable) {
 		}
 	}
 

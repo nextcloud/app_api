@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Listener;
 
+use Exception;
 use OCA\AppAPI\Service\ExAppUsersService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -30,7 +31,7 @@ class UserDeletedListener implements IEventListener {
 		// Delete ExApp user record on user deletion
 		try {
 			$this->exAppUsersService->removeDeletedUser($event->getUser()->getUID());
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			// Ignore exceptions
 			$this->logger->info('Could not delete ExApp user ' . $event->getUser()->getUID(), [
 				'exception' => $e,

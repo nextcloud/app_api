@@ -19,7 +19,7 @@ class AppAPIAuthBackend implements BackendInterface {
 	) {
 	}
 
-	public function check(RequestInterface $request, ResponseInterface $response) {
+	public function check(RequestInterface $request, ResponseInterface $response): array {
 		if ($this->request->getHeader('AUTHORIZATION-APP-API')) {
 			$davAuthenticated = $this->session->get(Auth::DAV_AUTHENTICATED);
 			$userIdHeader = explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 2)[0];

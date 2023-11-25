@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Fetcher;
 
+use Exception;
 use GuzzleHttp\Exception\ConnectException;
 use OC\Files\AppData\Factory;
 use OCA\AppAPI\AppInfo\Application;
@@ -45,7 +46,7 @@ abstract class AppAPIFetcher {
 	 * @param string $ETag
 	 * @param string $content
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 * @return array
 	 */
 	protected function fetch(string $ETag, string $content): array {
@@ -160,7 +161,7 @@ abstract class AppAPIFetcher {
 		} catch (ConnectException $e) {
 			$this->logger->warning('Could not connect to appstore: ' . $e->getMessage(), ['app' => 'appstoreFetcher']);
 			return [];
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			$this->logger->warning($e->getMessage(), [
 				'exception' => $e,
 				'app' => 'appstoreFetcher',

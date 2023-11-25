@@ -10,6 +10,7 @@ use OCA\AppAPI\AppInfo\Application;
 
 use OCP\AppFramework\Http\Response;
 use OCP\DataCollector\AbstractDataCollector;
+use Throwable;
 
 /**
  * @psalm-suppress UndefinedClass
@@ -19,7 +20,7 @@ class AppAPIDataCollector extends AbstractDataCollector {
 		return Application::APP_ID;
 	}
 
-	public function collect(Request $request, Response $response, \Throwable $exception = null): void {
+	public function collect(Request $request, Response $response, Throwable $exception = null): void {
 		$headers = [];
 		$aeHeadersList = [
 			'AA-VERSION',

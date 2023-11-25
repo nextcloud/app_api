@@ -16,6 +16,7 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
+use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
 class OCSApiController extends OCSController {
@@ -63,7 +64,7 @@ class OCSApiController extends OCSController {
 				'app' => $appId,
 			]);
 			return new DataResponse();
-		} catch (\Psr\Log\InvalidArgumentException) {
+		} catch (InvalidArgumentException) {
 			$this->logger->error('Invalid log level');
 			throw new OCSBadRequestException('Invalid log level');
 		}

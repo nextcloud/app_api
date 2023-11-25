@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Notifications;
 
+use InvalidArgumentException;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\AppAPIService;
 use OCP\IURLGenerator;
@@ -31,12 +32,12 @@ class ExAppNotifier implements INotifier {
 	public function prepare(INotification $notification, string $languageCode): INotification {
 		$exApp = $this->service->getExApp($notification->getApp());
 		if ($exApp === null) {
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException();
 		}
 		if ($notification->getSubject() === 'ex_app_version_update' && $exApp->getEnabled()) {
-			throw new \InvalidArgumentException('ExApp is probably already re-enabled');
+			throw new InvalidArgumentException('ExApp is probably already re-enabled');
 		} elseif (!$exApp->getEnabled()) { // Only enabled ExApps can render notifications
-			throw new \InvalidArgumentException('ExApp is disabled');
+			throw new InvalidArgumentException('ExApp is disabled');
 		}
 
 		$parameters = $notification->getSubjectParameters();
