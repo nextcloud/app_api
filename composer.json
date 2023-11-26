@@ -48,5 +48,8 @@
 		"psr-4": {
 			"OCP\\": "vendor/nextcloud/ocp/OCP"
 		}
-	}
+	},
+  "require": {
+    "ext-simplexml": "*"
+  }
 }

@@ -98,13 +98,16 @@ jobs:
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:enable skeleton
           ./occ app_api:app:disable skeleton
-          ./occ app_api:app:unregister skeleton --silent
+          ./occ app_api:app:unregister skeleton
           ./occ app_api:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
           grep -q 'Hello from skeleton :)' data/nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
+
+      - name: Test OCC commands(docker)
+        run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
 
       - name: Save container ingo & logs
         if: always()
@@ -472,6 +475,9 @@ jobs:
         run: |
           grep -q 'Hello from skeleton :)' data/nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
+
+      - name: Test OCC commands(docker)
+        run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
 
       - name: Save container ingo & logs
         if: always()

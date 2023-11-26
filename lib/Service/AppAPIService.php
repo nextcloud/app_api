@@ -221,9 +221,10 @@ class AppAPIService {
 					$this->logger->error(sprintf('Failed to disable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
 				}
 			} elseif (isset($exAppDisabled['error'])) {
-				$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $exAppDisabled['error']));
+				$this->logger->error(sprintf('Failed to disable ExApp %s. Error: %s', $exApp->getAppid(), $exAppDisabled['error']));
 			}
 			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) !== 1) {
+				$this->logger->error(sprintf('Error updating state of ExApp %s.', $exApp->getAppid()));
 				return false;
 			}
 			$this->updateExAppLastCheckTime($exApp);
