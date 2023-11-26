@@ -59,10 +59,9 @@ class Register extends Command {
 			return 2;
 		}
 
-		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		$daemonConfigName = $input->getArgument('daemon-config-name');
-		if (!isset($daemonConfigName) && $defaultDaemonConfigName !== '') {
-			$daemonConfigName = $defaultDaemonConfigName;
+		if (!isset($daemonConfigName)) {
+			$daemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
