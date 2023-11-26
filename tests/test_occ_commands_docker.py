@@ -38,12 +38,12 @@ if __name__ == "__main__":
     assert not r.stderr.decode("UTF-8")
     assert not r.stdout.decode("UTF-8")
     # without "--silent" it should fail, as there are not such ExApp
-    r = run("php occ app_api:app:unregister skeleton".split(), stdout=PIPE, stderr=PIPE)
+    r = run("php occ app_api:app:unregister skeleton".split(), stdout=PIPE)
     assert r.returncode
-    assert r.stderr.decode("UTF-8")
+    assert r.stdout.decode("UTF-8")
     # testing if "--keep-data" works.
     deploy_register()
-    r = run("php occ app_api:app:unregister skeleton --keep-data".split(), stdout=PIPE, stderr=PIPE, check=True)
+    r = run("php occ app_api:app:unregister skeleton --keep-data".split(), stdout=PIPE, check=True)
     assert r.stdout.decode("UTF-8")
     run("docker volume inspect nc_app_skeleton_data".split(), check=True)
     # test if volume will be removed without "--keep-data"
