@@ -50,13 +50,6 @@ jobs:
           repository: nextcloud/server
           ref: ${{ matrix.server-version }}
 
-      - name: Checkout Notifications
-        uses: actions/checkout@v3
-        with:
-          repository: nextcloud/notifications
-          ref: ${{ matrix.server-version }}
-          path: apps/notifications
-
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
@@ -69,6 +62,8 @@ jobs:
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
           coverage: none
           ini-file: development
+          ini-values:
+            apc.enabled=on, apc.enable_cli=on, disable_functions=
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -93,7 +88,6 @@ jobs:
             --admin-user admin --admin-pass admin
           ./occ config:system:set loglevel --value=0 --type=integer
           ./occ config:system:set debug --value=true --type=boolean
-          ./occ app:enable notifications
           ./occ app:enable --force ${{ env.APP_NAME }}
 
       - name: Test deploy
@@ -106,8 +100,6 @@ jobs:
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:enable skeleton
           ./occ app_api:app:disable skeleton
-          ./occ app_api:app:unregister skeleton --silent
-          ./occ app_api:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
@@ -119,6 +111,14 @@ jobs:
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
           docker logs nc_app_skeleton > container.log 2>&1
+
+      - name: Unregister Skeleton & Daemon
+        run: |
+          ./occ app_api:app:unregister skeleton
+          ./occ app_api:daemon:unregister docker_local_sock
+
+      - name: Test OCC commands(docker)
+        run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
 
       - name: Upload Container info
         if: always()
@@ -176,8 +176,6 @@ jobs:
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton --silent
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_local_sock
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -192,6 +190,11 @@ jobs:
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
           docker logs nc_app_skeleton > container.log 2>&1
+
+      - name: Unregister Skeleton & Daemon
+        run: |
+          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_local_sock
 
       - name: Upload Container info
         if: always()
@@ -254,8 +257,6 @@ jobs:
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton --silent
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -270,6 +271,11 @@ jobs:
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
           docker logs nc_app_skeleton > container.log 2>&1
+
+      - name: Unregister Skeleton & Daemon
+        run: |
+          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
 
       - name: Upload Container info
         if: always()
@@ -331,8 +337,6 @@ jobs:
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton --silent
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
 
       - name: Copy NC log to host
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
@@ -347,6 +351,11 @@ jobs:
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
           docker logs nc_app_skeleton > container.log 2>&1
+
+      - name: Unregister Skeleton & Daemon
+        run: |
+          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
 
       - name: Upload Container info
         if: always()
@@ -473,8 +482,6 @@ jobs:
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:enable skeleton
           ./occ app_api:app:disable skeleton
-          ./occ app_api:app:unregister skeleton --silent
-          ./occ app_api:daemon:unregister docker_local_sock
 
       - name: Check logs
         run: |
@@ -486,6 +493,14 @@ jobs:
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
           docker logs nc_app_skeleton > container.log 2>&1
+
+      - name: Unregister Skeleton & Daemon
+        run: |
+          ./occ app_api:app:unregister skeleton
+          ./occ app_api:daemon:unregister docker_local_sock
+
+      - name: Test OCC commands(docker)
+        run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
 
       - name: Check redis keys
         run: |

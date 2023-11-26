@@ -30,67 +30,104 @@ class Unregister extends Command {
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
 
-		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Unregister only from Nextcloud. Do not send request to external app.');
-		$this->addOption('rm-container', null, InputOption::VALUE_NONE, 'Remove ExApp container');
-		$this->addOption('rm-data', null, InputOption::VALUE_NONE, 'Remove ExApp data (volume)');
+		$this->addOption(
+			'silent',
+			null,
+			InputOption::VALUE_NONE,
+			'Print only minimum and only errors.');
+		$this->addOption(
+			'force',
+			null,
+			InputOption::VALUE_NONE,
+			'Continue removal even if errors.');
+		$this->addOption('keep-data', null, InputOption::VALUE_NONE, 'Keep ExApp data (volume)');
 
 		$this->addUsage('test_app');
 		$this->addUsage('test_app --silent');
-		$this->addUsage('test_app --rm');
+		$this->addUsage('test_app --keep-data');
+		$this->addUsage('test_app --silent --force --keep-data');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
+		$silent = $input->getOption('silent');
+		$force = $input->getOption('force');
+		$keep_data = $input->getOption('keep-data');
 
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
+			if ($silent) {
+				return 0;
+			}
 			$output->writeln(sprintf('ExApp %s not found. Failed to unregister.', $appId));
 			return 1;
 		}
 
-		$silent = $input->getOption('silent');
-
-		if (!$silent) {
-			if ($this->service->disableExApp($exApp)) {
+		if ($exApp->getEnabled()) {
+			if (!$this->service->disableExApp($exApp)) {
+				if (!$silent) {
+					$output->writeln(sprintf('Error during disabling %s ExApp.', $appId));
+				}
+				if (!$force) {
+					return 1;
+				}
+			} elseif (!$silent) {
 				$output->writeln(sprintf('ExApp %s successfully disabled.', $appId));
-			} else {
-				$output->writeln(sprintf('ExApp %s not disabled. Failed to disable.', $appId));
-				return 1;
 			}
 		}
 
-		$exApp = $this->service->unregisterExApp($appId);
-		if ($exApp === null) {
-			$output->writeln(sprintf('Failed to unregister ExApp %s.', $appId));
-			return 1;
-		}
-
-		$rmContainer = $input->getOption('rm-container');
-		if ($rmContainer) {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-			if ($daemonConfig === null) {
-				$output->writeln(sprintf('Failed to get ExApp %s DaemonConfig by name %s', $appId, $exApp->getDaemonConfigName()));
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		if ($daemonConfig === null) {
+			if (!$silent) {
+				$output->writeln(
+					sprintf('Failed to get ExApp %s DaemonConfig by name %s', $appId, $exApp->getDaemonConfigName())
+				);
+			}
+			if (!$force) {
 				return 1;
 			}
-			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-				$this->dockerActions->initGuzzleClient($daemonConfig);
-				[$stopResult, $removeResult] = $this->dockerActions->removePrevExAppContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
-				if (isset($stopResult['error']) || isset($removeResult['error'])) {
+		}
+		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$this->dockerActions->initGuzzleClient($daemonConfig);
+			[$stopResult, $removeResult] = $this->dockerActions->removePrevExAppContainer(
+				$this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId)
+			);
+			if (isset($stopResult['error']) || isset($removeResult['error'])) {
+				if (!$silent) {
 					$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
-				} else {
-					$rmData = $input->getOption('rm-data');
-					if ($rmData) {
-						$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
-						if (isset($removeVolumeResult['error'])) {
-							$output->writeln(sprintf('Failed to remove ExApp %s volume %s', $appId, $appId . '_data'));
-						}
+				}
+				if (!$force) {
+					return 1;
+				}
+			} elseif (!$silent) {
+				$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
+			}
+			if (!$keep_data) {
+				$volumeName = $this->dockerActions->buildExAppVolumeName($appId);
+				$removeVolumeResult = $this->dockerActions->removeVolume(
+					$this->dockerActions->buildDockerUrl($daemonConfig), $volumeName
+				);
+				if (!$silent) {
+					if (isset($removeVolumeResult['error'])) {
+						$output->writeln(sprintf('Failed to remove ExApp %s volume: %s', $appId, $volumeName));
+					} else {
+						$output->writeln(sprintf('ExApp %s data volume successfully removed', $appId));
 					}
-					$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
 				}
 			}
 		}
 
-		$output->writeln(sprintf('ExApp %s successfully unregistered.', $appId));
+		if ($this->service->unregisterExApp($appId) === null) {
+			if (!$silent) {
+				$output->writeln(sprintf('Failed to unregister ExApp %s.', $appId));
+			}
+			if (!$force) {
+				return 1;
+			}
+		}
+		if (!$silent) {
+			$output->writeln(sprintf('ExApp %s successfully unregistered.', $appId));
+		}
 		return 0;
 	}
 }

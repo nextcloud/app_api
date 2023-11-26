@@ -13,16 +13,17 @@ concurrency:
   group: tests-special-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+env:
+  NEXTCLOUD_URL: "http://localhost:8080/"
+  APP_ID: "nc_py_api"
+  APP_PORT: 9009
+  APP_VERSION: "1.0.0"
+  APP_SECRET: "tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6E"
+
 jobs:
   app-version-higher:
     runs-on: ubuntu-22.04
     name: ExApp version higher
-    env:
-      NEXTCLOUD_URL: "http://localhost:8080/"
-      APP_ID: "nc_py_api"
-      APP_PORT: 9009
-      APP_VERSION: "1.0.0"
-      APP_SECRET: "tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6E"
 
     services:
       postgres:

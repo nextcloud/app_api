@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0 - 2023-12-0x]
+
+### Changed
+
+- Reworked: `app_api:app:unregister` occ cli command, make it much robust. #127
+
 ## [1.2.2 - 2023-11-13]
 
 ### Fixed
