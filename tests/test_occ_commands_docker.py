@@ -53,7 +53,9 @@ if __name__ == "__main__":
     assert r.returncode
     # test "--force" option
     deploy_register()
-    run("docker container stop nc_app_skeleton".split(), check=True)
+    run("docker container rm --force nc_app_skeleton".split(), check=True)
     r = run("php occ app_api:app:unregister skeleton".split())
+    assert r.returncode
+    r = run("php occ app_api:app:unregister skeleton --silent".split())
     assert r.returncode
     run("php occ app_api:app:unregister skeleton --force".split(), check=True)
