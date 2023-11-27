@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Reworked: algorithm  of `app:register` and occ cli command, "/init" endpoint now is optional. #128
 - Reworked: `app_api:app:unregister` occ cli command, make it much robust. #127
 
+### Fixed
+
+- Proper pass-through of NVIDIA GPU to into application containers. #130
+
 ## [1.2.2 - 2023-11-13]
 
 ### Fixed
