@@ -27,4 +27,4 @@ async def heartbeat_callback():
 
 
 if __name__ == "__main__":
-    ex_app.run_app("_install_no_init.:APP", log_level="trace")
+    ex_app.run_app("install_no_init:APP", log_level="trace")
