@@ -670,10 +670,8 @@ class ExAppsPageController extends Controller {
 			'host' => $exAppInfo['host'],
 			'port' => (int) $exAppInfo['port'],
 		])) {
-			// 6. Set initialization progress to start
-			$this->service->setAppInitProgress($appId, 0, '', true);
-			// 7. Dispatch init step on ExApp side
-			if (!$this->service->dispatchExAppInit($exApp)) {
+			// 6. Dispatch init step on ExApp side
+			if (!$this->service->dispatchExAppInit($exApp, true)) {
 				return new JSONResponse([
 					'data' => [
 						'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),
@@ -730,7 +728,7 @@ class ExAppsPageController extends Controller {
 	 * @PasswordConfirmationRequired
 	 */
 	#[PasswordConfirmationRequired]
-	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = true): JSONResponse {
+	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
 		$exApp = $this->service->getExApp($appId);
 		$this->service->disableExApp($exApp);
 

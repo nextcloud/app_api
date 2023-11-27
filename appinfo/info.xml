@@ -61,6 +61,9 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		<php min-version="8.1"/>
 		<nextcloud min-version="27" max-version="29"/>
 	</dependencies>
+	<background-jobs>
+		<job>OCA\AppAPI\BackgroundJob\ExAppInitStatusCheckJob</job>
+	</background-jobs>
 	<repair-steps>
 		<install>
 			<step>OCA\AppAPI\Migration\DataInitializationStep</step>

@@ -277,14 +277,21 @@ class AppAPIService {
 	 *
 	 * @param string $appId
 	 * @param int $progress
+	 * @param string $error
+	 * @param bool $update
+	 * @param bool $init
 	 *
 	 * @return void
 	 */
-	public function setAppInitProgress(string $appId, int $progress, string $error = '', bool $update = false): void {
+	public function setAppInitProgress(string $appId, int $progress, string $error = '', bool $update = false, bool $init = false): void {
 		$exApp = $this->getExApp($appId);
 		$cacheKey = '/exApp_' . $exApp->getAppid();
 
 		$status = json_decode($exApp->getStatus(), true);
+
+		if ($init) {
+			$status['init_start_time'] = time();
+		}
 
 		if ($update) {
 			// Set active=false during update action, for register it already false
@@ -299,6 +306,7 @@ class AppAPIService {
 			$this->logger->error(sprintf('ExApp %s initialization failed. Error: %s', $appId, $error));
 			$status['error'] = $error;
 			unset($status['progress']);
+			unset($status['init_start_time']);
 		} else {
 			if ($progress >= 0 && $progress < 100) {
 				$status['progress'] = $progress;
@@ -376,7 +384,8 @@ class AppAPIService {
 	 * @param ExApp $exApp
 	 * @return bool
 	 */
-	public function dispatchExAppInit(ExApp $exApp): bool {
+	public function dispatchExAppInit(ExApp $exApp, bool $update = false): bool {
+		$this->setAppInitProgress($exApp->getAppid(), 0, '', $update, true);
 		$descriptors = [
 			0 => ['pipe', 'r'],
 			1 => ['pipe', 'w'],

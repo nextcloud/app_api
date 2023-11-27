@@ -22,6 +22,8 @@ class ExAppMapper extends QBMapper {
 
 	/**
 	 * @throws Exception
+	 *
+	 * @return ExApp[]
 	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();

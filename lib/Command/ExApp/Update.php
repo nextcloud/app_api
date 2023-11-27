@@ -214,8 +214,7 @@ class Update extends Command {
 			return 1;
 		}
 
-		$this->service->setAppInitProgress($appId, 0, '', true);
-		if (!$this->service->dispatchExAppInit($exApp)) {
+		if (!$this->service->dispatchExAppInit($exApp, true)) {
 			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
 			return 1;
 		}
