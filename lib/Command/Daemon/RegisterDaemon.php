@@ -44,7 +44,7 @@ class RegisterDaemon extends Command {
 		$this->addOption('ssl_cert', null, InputOption::VALUE_REQUIRED, 'SSL cert for daemon connection (local absolute path)');
 		$this->addOption('ssl_cert_password', null, InputOption::VALUE_REQUIRED, 'SSL cert password for daemon connection(optional)');
 
-		$this->addOption('gpu', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Docker containers gpu device mapping (will be forwarded to all created containers)', []);
+		$this->addOption('gpu', null, InputOption::VALUE_NONE, 'Enable support of GPUs for containers');
 
 		$this->addOption('set-default', null, InputOption::VALUE_NONE, 'Set DaemonConfig as default');
 
@@ -67,7 +67,7 @@ class RegisterDaemon extends Command {
 			'ssl_key_password' => $input->getOption('ssl_key_password'),
 			'ssl_cert' => $input->getOption('ssl_cert'),
 			'ssl_cert_password' => $input->getOption('ssl_cert_password'),
-			'gpus' => $input->getOption('gpu'),
+			'gpu' => $input->getOption('gpu') ?? false,
 		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
