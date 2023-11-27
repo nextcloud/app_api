@@ -70,6 +70,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		<command>OCA\AppAPI\Command\ExApp\Deploy</command>
 		<command>OCA\AppAPI\Command\ExApp\Register</command>
 		<command>OCA\AppAPI\Command\ExApp\Unregister</command>
+		<command>OCA\AppAPI\Command\ExApp\DispatchInit</command>
 		<command>OCA\AppAPI\Command\ExApp\Update</command>
 		<command>OCA\AppAPI\Command\ExApp\Enable</command>
 		<command>OCA\AppAPI\Command\ExApp\Disable</command>

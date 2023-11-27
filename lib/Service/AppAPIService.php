@@ -14,6 +14,7 @@ use OCA\AppAPI\Notifications\ExNotificationsManager;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Http;
 use OCP\DB\Exception;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
@@ -372,9 +373,34 @@ class AppAPIService {
 	/**
 	 * Dispatch ExApp initialization step, that may take a long time to display the progress of initialization.
 	 *
-	 * @return void
+	 * @param ExApp $exApp
+	 * @return bool
 	 */
-	public function dispatchExAppInit(ExApp $exApp): void {
+	public function dispatchExAppInit(ExApp $exApp): bool {
+		$descriptors = [
+			0 => ['pipe', 'r'],
+			1 => ['pipe', 'w'],
+			2 => ['pipe', 'w'],
+		];
+		$args = ['app_api:app:dispatch_init', $exApp->getAppid()];
+		$args = array_map(function ($arg) {
+			return escapeshellarg($arg);
+		}, $args);
+		$args[] = '--no-ansi --no-warnings';
+		$args = implode(' ', $args);
+		$occDirectory = dirname(__FILE__, 5);
+		$process = proc_open('php console.php ' . $args, $descriptors, $pipes, $occDirectory);
+		if (!is_resource($process)) {
+			return false;
+		}
+		fclose($pipes[0]);
+		fclose($pipes[1]);
+		fclose($pipes[2]);
+		return true;
+	}
+
+	public function dispatchExAppInitInternal(ExApp $exApp): void {
+		// start in background in a separate process
 		$initUrl = self::getExAppUrl(
 			$exApp->getProtocol(),
 			$exApp->getHost(),
@@ -389,8 +415,14 @@ class AppAPIService {
 		];
 
 		try {
-			$this->client->postAsync($initUrl, $options);
-		} catch (\Exception) {
+			$this->client->post($initUrl, $options);
+		} catch (\Exception $e) {
+			$statusCode = $e->getCode();
+			if (($statusCode === Http::STATUS_NOT_IMPLEMENTED) || ($statusCode === Http::STATUS_NOT_FOUND)) {
+				$this->setAppInitProgress($exApp->getAppid(), 100);
+			} else {
+				$this->setAppInitProgress($exApp->getAppid(), 0, $e->getMessage());
+			}
 		}
 	}
 

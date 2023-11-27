@@ -470,7 +470,13 @@ class ExAppsPageController extends Controller {
 					$exApp = $this->service->getExApp($appId);
 
 					// Start ExApp initialization step (to download dynamic content, e.g. models)
-					$this->service->dispatchExAppInit($exApp);
+					if (!$this->service->dispatchExAppInit($exApp)) {
+						return new JSONResponse([
+							'data' => [
+								'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),
+							]
+						], Http::STATUS_INTERNAL_SERVER_ERROR);
+					}
 
 					//if (!$this->service->enableExApp($exApp)) {
 					//	return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
@@ -667,7 +673,13 @@ class ExAppsPageController extends Controller {
 			// 6. Set initialization progress to start
 			$this->service->setAppInitProgress($appId, 0, '', true);
 			// 7. Dispatch init step on ExApp side
-			$this->service->dispatchExAppInit($exApp);
+			if (!$this->service->dispatchExAppInit($exApp)) {
+				return new JSONResponse([
+					'data' => [
+						'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),
+					]
+				], Http::STATUS_INTERNAL_SERVER_ERROR);
+			}
 		}
 
 		return new JSONResponse([
