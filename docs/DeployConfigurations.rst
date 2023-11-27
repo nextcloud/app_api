@@ -298,3 +298,12 @@ Docker Socket Proxy security
 ****************************
 
 AIO Docker Socket Proxy has strictly limited access to the Docker APIs described in `HAProxy configuration <https://github.com/nextcloud/all-in-one/blob/main/Containers/docker-socket-proxy/haproxy.cfg>`_.
+
+Network configurations
+----------------------
+
+When GUI will support all command line options like: ``hostname``, ``ssl_key``... they will be described here.
+
+If you want to run ExApp on the remote host, see :ref:`occ cli commands <occ_daemon_config_registration>` for it.
+
+.. note:: AppAPI does not currently support automatic configuration for applications to use **https**, but we have plans for this in the future.

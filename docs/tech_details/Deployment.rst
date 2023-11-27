@@ -10,6 +10,7 @@ AppAPI ExApps deployment process in short consists of 3 steps:
 2. `ExApp deployment`_
 3. `ExApp registration`_
 
+.. _occ_daemon_config_registration:
 
 DaemonConfig registration
 -------------------------
