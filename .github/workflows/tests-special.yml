@@ -223,7 +223,7 @@ jobs:
 
       - name: Register NcPyApi
         run: |
-          python3 tests/install_no_init.py &
+          python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
           echo $! > /tmp/_install.pid
           cd ..
           sleep 5s
