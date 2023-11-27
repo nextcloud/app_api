@@ -7,10 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.3.0 - 2023-12-0x]
+## [1.3.0 - 2023-11-28]
 
 ### Changed
 
+- Reworked: algorithm  of `app:register` and occ cli command, "/init" endpoint now is optional. #128
 - Reworked: `app_api:app:unregister` occ cli command, make it much robust. #127
 
 ## [1.2.2 - 2023-11-13]

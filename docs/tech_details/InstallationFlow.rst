@@ -21,20 +21,18 @@ The application, in response to the request "/heartbeat", should return json: ``
 Init
 ----
 
+.. note:: Starting from this point, all requests made by AppAPI contains :ref:`auth-headers`.
+
 After application is ready, which is determined by previous step,
 AppAPI sends ``POST`` request to the ``/init`` application endpoint.
 
-*Application should response with empty JSON, if initialization takes long time it should be done in background and not in this request handler.*
+*If the application does not need to carry out long initialization, it has an option to not implement "/init" endpoint, so
+AppAPI will get 404 or 501 error on it's request, and consider that initialization is done and this section can be skipped.*
 
-.. note:: Starting from this point, all requests made by AppAPI contains :ref:`auth-headers`.
+In case you want to implement "/init" endpoint, your application should:
 
-If the application does not need to carry out long initialization, it can immediately execute an ``OCS request`` to
-``/ocs/v1.php/apps/app_api/apps/status/$APP_ID`` with such a payload in json format::
-
-	{"progress": 100}
-
-If the application initialization takes a long time, the application should periodically send an ``OCS request`` to
-``/ocs/v1.php/apps/app_api/apps/status/$APP_ID`` with the progress value.
+1. In "/init" handler: Response with empty JSON on AppAPI call.
+2. In background job: Send an ``OCS request`` to ``/ocs/v1.php/apps/app_api/apps/status/$APP_ID`` with the progress value.
 
 Possible values for **progress** are integers from 1 to 100;
 after receiving the value 100, the **application is considered initialized and ready to work**.
