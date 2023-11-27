@@ -225,7 +225,6 @@ jobs:
         run: |
           python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
           echo $! > /tmp/_install.pid
-          cd ..
           sleep 5s
           php occ app_api:daemon:register manual_install "Manual Install" manual-install 0 0 0
           php occ app_api:app:register nc_py_api manual_install --json-info \
