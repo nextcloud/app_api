@@ -53,11 +53,11 @@ class AIODockerActions {
 			'ssl_key_password' => null,
 			'ssl_cert' => null,
 			'ssl_cert_password' => null,
-			'gpus' => [],
+			'gpu' => false,
 		];
 
 		if ($this->isGPUsEnabled()) {
-			$deployConfig['gpus'] = ['/dev/dri'];
+			$deployConfig['gpu'] = true;
 		}
 
 		$daemonConfigParams = [

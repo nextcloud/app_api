@@ -141,8 +141,12 @@ class DockerActions implements IDeployActions {
 			$containerParams['NetworkingConfig'] = $networkingConfig;
 		}
 
-		if (isset($params['gpu']) && $params['gpu']) {
-			$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
+		if (isset($params['gpu']) && filter_var($params['gpu'], FILTER_VALIDATE_BOOLEAN)) {
+			if (isset($params['deviceRequests'])) {
+				$containerParams['HostConfig']['DeviceRequests'] = $params['deviceRequests'];
+			} else {
+				$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
+			}
 		}
 
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
@@ -376,6 +380,7 @@ class DockerActions implements IDeployActions {
 			'net' => $deployConfig['net'] ?? 'host',
 			'env' => $envs,
 			'deviceRequests' => $deviceRequests,
+			'gpu' => count($deviceRequests) > 0,
 		];
 
 		return [
@@ -599,7 +604,7 @@ class DockerActions implements IDeployActions {
 			'ssl_key_password' => null,
 			'ssl_cert' => null,
 			'ssl_cert_password' => null,
-			'gpus' => [],
+			'gpu' => false,
 		];
 
 		if ($this->isGPUAvailable()) {
