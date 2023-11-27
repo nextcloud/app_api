@@ -91,7 +91,7 @@
 								{{ t('app_api', 'GPUs support') }}
 							</NcCheckboxRadioSwitch>
 							<p v-if="deployConfig.gpu" class="hint">
-								{{ t('app_api', 'Default "/dev/dri" device will be attached to ExApp containers') }}
+								{{ t('app_api', 'All GPU devices will be requested to be enabled in ExApp containers') }}
 							</p>
 						</div>
 					</template>
@@ -204,7 +204,7 @@ export default {
 						ssl_key_password: this.deployConfig.ssl_key_password,
 						ssl_cert: this.deployConfig.ssl_cert,
 						ssl_cert_password: this.deployConfig.ssl_cert_password,
-						gpus: this.deployConfig.gpu ? ['/dev/dri'] : [],
+						gpu: this.deployConfig.gpu,
 					},
 				},
 				defaultDaemon: this.acceptsDeployId === 'docker-install' ? this.defaultDaemon : false,

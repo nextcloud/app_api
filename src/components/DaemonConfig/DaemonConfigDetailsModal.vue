@@ -26,7 +26,7 @@
 				<p><b>{{ t('app_api', 'SSL key pass: ') }}</b>{{ daemon.deploy_config.ssl_key_password || 'null' }}</p>
 				<p><b>{{ t('app_api', 'SSL cert: ') }}</b>{{ daemon.deploy_config.ssl_cert || 'null' }}</p>
 				<p><b>{{ t('app_api', 'SSL cert pass: ') }}</b>{{ daemon.deploy_config.ssl_cert_password || 'null' }}</p>
-				<p><b>{{ t('app_api', 'GPUs support: ') }}</b>{{ daemon.deploy_config.gpus.length > 0 }}</p>
+				<p><b>{{ t('app_api', 'GPUs support: ') }}</b>{{ daemon.deploy_config?.gpu || 'false' }}</p>
 
 				<div class="actions">
 					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install'" @click="verifyConnection">

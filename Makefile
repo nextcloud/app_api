@@ -17,7 +17,9 @@ help:
 	@echo "  Daemon register(Linux, socket):"
 	@echo "  dock-sock          create docker daemon for Nextcloud 28, 27 (/var/run/docker.sock)"
 	@echo "  dock-sock28        create docker daemon for Nextcloud 28 (/var/run/docker.sock)"
+	@echo "  dock-sock28-gpu    create docker daemon with GPU for Nextcloud 28 (/var/run/docker.sock)"
 	@echo "  dock-sock27        create docker daemon for Nextcloud 27 (/var/run/docker.sock)"
+	@echo "  dock-sock27-gpu    create docker daemon with GPU for Nextcloud 27 (/var/run/docker.sock)"
 	@echo " "
 	@echo "  Daemon register(any OS, host:port)"
 	@echo "  dock2port          will map docker socket to port. first use this!"
@@ -37,12 +39,26 @@ dock-sock28:
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://nextcloud.local/index.php --net=master_default
 
+.PHONY: dock-sock28-gpu
+dock-sock28-gpu:
+	@echo "creating daemon with NVIDIA gpu for nextcloud 'master' container"
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev_nvidia || true
+	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
+		docker_dev_gpu "Docker with GPU" docker-install unix-socket /var/run/docker.sock http://nextcloud.local/index.php --net=master_default --gpu --set-default
+
 .PHONY: dock-sock27
 dock-sock27:
 	@echo "creating daemon for nextcloud 'stable27' container"
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://stable27.local/index.php --net=master_default
+
+.PHONY: dock-sock27-gpu
+dock-sock27-gpu:
+	@echo "creating daemon with NVIDIA gpu for nextcloud 'stable27' container"
+	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev_nvidia || true
+	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
+		docker_dev_gpu "Docker with GPU" docker-install unix-socket /var/run/docker.sock http://stable27.local/index.php --net=master_default --gpu --set-default
 
 .PHONY: dock2port
 dock2port:

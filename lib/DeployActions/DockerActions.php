@@ -141,8 +141,8 @@ class DockerActions implements IDeployActions {
 			$containerParams['NetworkingConfig'] = $networkingConfig;
 		}
 
-		if (isset($params['devices'])) {
-			$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams($params['devices']);
+		if (isset($params['gpu']) && $params['gpu']) {
+			$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
 		}
 
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
@@ -339,13 +339,15 @@ class DockerActions implements IDeployActions {
 			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
 			$secret = $oldEnvs['APP_SECRET'];
 			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
-			// Preserve previous devices or use from params (if any)
-			$devices = array_map(function (array $device) {
-				return $device['PathOnHost'];
-			}, (array) $containerInfo['HostConfig']['Devices']);
+			// Preserve previous device requests (GPU)
+			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'];
 		} else {
 			$port = $this->service->getExAppRandomPort();
-			$devices = $deployConfig['gpus'];
+			if ($deployConfig['gpu']) {
+				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
+			} else {
+				$deviceRequests = [];
+			}
 			$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
 		}
 
@@ -373,7 +375,7 @@ class DockerActions implements IDeployActions {
 			'port' => $port,
 			'net' => $deployConfig['net'] ?? 'host',
 			'env' => $envs,
-			'devices' => $devices,
+			'deviceRequests' => $deviceRequests,
 		];
 
 		return [
@@ -407,6 +409,12 @@ class DockerActions implements IDeployActions {
 			sprintf('IS_SYSTEM_APP=%s', $params['system_app'] ? 'true' : 'false'),
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
+
+		// Add required GPU runtime envs if daemon configured to use GPU
+		if (filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
+			$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
+			$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
+		}
 
 		foreach ($envOptions as $envOption) {
 			[$key, $value] = explode('=', $envOption, 2);
@@ -620,5 +628,22 @@ class DockerActions implements IDeployActions {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Return default GPU device requests for container.
+	 * For now only NVIDIA GPUs supported.
+	 * TODO: Add support for other GPU vendors
+	 *
+	 * @return array[]
+	 */
+	private function buildDefaultGPUDeviceRequests() {
+		return [
+			[
+				'Driver' => 'nvidia', // Currently only NVIDIA GPU vendor
+				'Count' => -1, // All available GPUs
+				'Capabilities' => [['compute', 'utility']], // Compute and utility capabilities
+			],
+		];
 	}
 }
