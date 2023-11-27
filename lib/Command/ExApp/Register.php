@@ -49,6 +49,7 @@ class Register extends Command {
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info');
+		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until the end of the "init" phase.');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -59,10 +60,9 @@ class Register extends Command {
 			return 2;
 		}
 
-		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		$daemonConfigName = $input->getArgument('daemon-config-name');
-		if (!isset($daemonConfigName) && $defaultDaemonConfigName !== '') {
-			$daemonConfigName = $defaultDaemonConfigName;
+		if (!isset($daemonConfigName)) {
+			$daemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
@@ -109,91 +109,91 @@ class Register extends Command {
 			'port' => $port,
 			'secret' => $secret,
 		]);
-
-		if ($exApp !== null) {
-			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
-				try {
-					$this->exAppUsersService->setupSystemAppFlag($exApp);
-				} catch (Exception $e) {
-					$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
-					return 1;
-				}
-			}
-
-			$pathToInfoXml = $input->getOption('info-xml');
-			$infoXml = null;
-			if ($pathToInfoXml !== null) {
-				$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
-			}
-
-			$requestedExAppScopeGroups = $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
-			if (isset($requestedExAppScopeGroups['error'])) {
-				$output->writeln($requestedExAppScopeGroups['error']);
-				// Fallback unregistering ExApp
-				$this->service->unregisterExApp($exApp->getAppid());
-				return 2;
-			}
-
-			$forceScopes = (bool) $input->getOption('force-scopes');
-			$confirmRequiredScopes = $forceScopes;
-			$confirmOptionalScopes = $forceScopes;
-
-			if (!$forceScopes && $input->isInteractive()) {
-				/** @var QuestionHelper $helper */
-				$helper = $this->getHelper('question');
-
-				// Prompt to approve required ExApp scopes
-				if (count($requestedExAppScopeGroups['required']) > 0) {
-					$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups['required'])));
-					$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-					$confirmRequiredScopes = $helper->ask($input, $output, $question);
-				} else {
-					$confirmRequiredScopes = true;
-				}
-
-				// Prompt to approve optional ExApp scopes
-				if ($confirmRequiredScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-					$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups['optional'])));
-					$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-					$confirmOptionalScopes = $helper->ask($input, $output, $question);
-				}
-			}
-
-			if (!$confirmRequiredScopes && count($requestedExAppScopeGroups['required']) > 0) {
-				$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
-				// Fallback unregistering ExApp
-				$this->service->unregisterExApp($exApp->getAppid());
-				return 1;
-			}
-
-			if (count($requestedExAppScopeGroups['required']) > 0) {
-				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required'], 'required');
-			}
-			if ($confirmOptionalScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-				$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], 'optional');
-			}
-
-			$this->service->dispatchExAppInit($exApp);
-
-			if ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
-				// Wait until ExApp initialized in case of manual-install type
-				do {
-					$exApp = $this->service->getExApp($appId);
-					$status = json_decode($exApp->getStatus(), true);
-					if (isset($status['error'])) {
-						$output->writeln(sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']));
-						return 1;
-					}
-					usleep(100000); // 0.1s
-				} while (isset($status['progress']));
-			}
-
-			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
-			return 0;
+		if ($exApp === null) {
+			$output->writeln(sprintf('Failed to register ExApp %s.', $appId));
+			return 1;
 		}
 
-		$output->writeln(sprintf('Failed to register ExApp %s.', $appId));
-		return 1;
+		if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
+			try {
+				$this->exAppUsersService->setupSystemAppFlag($exApp);
+			} catch (Exception $e) {
+				$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
+				return 1;
+			}
+		}
+
+		$pathToInfoXml = $input->getOption('info-xml');
+		$infoXml = null;
+		if ($pathToInfoXml !== null) {
+			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
+		}
+
+		$requestedExAppScopeGroups = $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
+		if (isset($requestedExAppScopeGroups['error'])) {
+			$output->writeln($requestedExAppScopeGroups['error']);
+			$this->service->unregisterExApp($exApp->getAppid());
+			return 2;
+		}
+
+		$forceScopes = (bool) $input->getOption('force-scopes');
+		$confirmRequiredScopes = $forceScopes;
+		$confirmOptionalScopes = $forceScopes;
+
+		if (!$forceScopes && $input->isInteractive()) {
+			/** @var QuestionHelper $helper */
+			$helper = $this->getHelper('question');
+
+			// Prompt to approve required ExApp scopes
+			if (count($requestedExAppScopeGroups['required']) > 0) {
+				$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups['required'])));
+				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
+				$confirmRequiredScopes = $helper->ask($input, $output, $question);
+			} else {
+				$confirmRequiredScopes = true;
+			}
+
+			// Prompt to approve optional ExApp scopes
+			if ($confirmRequiredScopes && count($requestedExAppScopeGroups['optional']) > 0) {
+				$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups['optional'])));
+				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
+				$confirmOptionalScopes = $helper->ask($input, $output, $question);
+			}
+		}
+
+		if (!$confirmRequiredScopes && count($requestedExAppScopeGroups['required']) > 0) {
+			$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
+			$this->service->unregisterExApp($exApp->getAppid());
+			return 1;
+		}
+
+		if (count($requestedExAppScopeGroups['required']) > 0) {
+			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required'], 'required');
+		}
+		if ($confirmOptionalScopes && count($requestedExAppScopeGroups['optional']) > 0) {
+			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], 'optional');
+		}
+
+		if (!$this->service->dispatchExAppInit($exApp)) {
+			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
+			$this->service->unregisterExApp($exApp->getAppid());
+			return 1;
+		}
+		$waitFinish = (bool) $input->getOption('wait-finish');
+		if ($waitFinish) {
+			do {
+				$exApp = $this->service->getExApp($appId);
+				$status = json_decode($exApp->getStatus(), true);
+				if (isset($status['error'])) {
+					$output->writeln(sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']));
+					return 1;
+				}
+				usleep(100000); // 0.1s
+			} while (isset($status['progress']));
+		}
+
+		$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
+		return 0;
 	}
 
 	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, string $scopeType): void {

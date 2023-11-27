@@ -225,7 +225,11 @@ Application installation scheme
 1. AppAPI deploys the application and launches it.
 2. AppAPI for `N` seconds (default ``90``) checks the ``/heartbeat`` endpoint with ``GET`` request.
 3. AppAPI sends a ``POST`` to the ``/init`` endpoint.
-4. ExApp sends an integer from ``0`` to ``100` to the OCS endpoint ``apps/app_api/apps/status`` indicating the initialization progress. After sending ``100``, the application is considered initialized.
+
+	.. note:: if ExApp do not implements ``/init`` endpoint and
+		AppAPI receives 501 or 404 status error, AppAPI enables the application by going to point 5.
+
+4. **ExApp** sends an integer from ``0`` to ``100`` to the OCS endpoint ``apps/app_api/apps/status`` indicating the initialization progress. After sending ``100``, the application is considered initialized.
 5. AppAPI sends a PUT to the ``/enabled`` endpoint.
 
 ExApp info.xml schema

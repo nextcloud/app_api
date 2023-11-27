@@ -210,12 +210,14 @@ class Update extends Command {
 			$this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes['optional'])
 		);
 		if (!$this->exAppScopeService->updateExAppScopes($exApp, $newExAppScopes)) {
-			$output->writeln(sprintf('Failed to update ExApp %s scopes', $appId));
+			$output->writeln(sprintf('Failed to update ExApp %s scopes.', $appId));
 			return 1;
 		}
 
-		$this->service->setAppInitProgress($appId, 0, '', true);
-		$this->service->dispatchExAppInit($exApp);
+		if (!$this->service->dispatchExAppInit($exApp, true)) {
+			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
+			return 1;
+		}
 
 		$output->writeln(sprintf('ExApp %s successfully updated.', $appId));
 		return 0;
