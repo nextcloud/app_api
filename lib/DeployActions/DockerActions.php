@@ -347,7 +347,7 @@ class DockerActions implements IDeployActions {
 			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'];
 		} else {
 			$port = $this->service->getExAppRandomPort();
-			if ($deployConfig['gpu']) {
+			if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
 				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
 			} else {
 				$deviceRequests = [];
@@ -416,7 +416,7 @@ class DockerActions implements IDeployActions {
 		];
 
 		// Add required GPU runtime envs if daemon configured to use GPU
-		if (filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
+		if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
 			$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
 			$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
 		}
