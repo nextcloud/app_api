@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Proper pass-through of NVIDIA GPU to into application containers. #130
+- Proper pass-through of NVIDIA GPU into External apps containers. #130
 
 ## [1.2.2 - 2023-11-13]
 
