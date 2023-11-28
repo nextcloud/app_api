@@ -7,8 +7,26 @@ return [
 		// AppAPI admin settings
 		['name' => 'config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
 
+		// Menu Entries
+		['name' => 'MenuEntry#viewExAppPage', 'url' => '/embedded/{appId}/{name}', 'verb' => 'GET' , 'root' => '/embedded'],
+		['name' => 'MenuEntry#ExAppIcon', 'url' => '/embedded/{appId}/{name}/icon', 'verb' => 'GET' , 'root' => '/embedded'],
+
+		// Proxy
+//		['name' => 'MenuEntry#ExAppProxySubLinksGet',
+//			'url' => '/proxying/{appId}/{other}', 'verb' => 'GET' , 'root' => '/proxying',
+//			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+//		['name' => 'MenuEntry#ExAppProxySubLinksPost',
+//			'url' => '/proxying/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxying',
+//			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+//		['name' => 'MenuEntry#ExAppProxySubLinksPut',
+//			'url' => '/proxying/{appId}/{other}', 'verb' => 'PUT' , 'root' => '/proxying',
+//			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+		['name' => 'MenuEntry#ExAppProxySubLinksGet',
+			'url' => '/proxy/css/{appId}/{other}', 'verb' => 'GET' , 'root' => '',
+			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+
 		// ExApps actions
-		['name' => 'ExAppsPage#viewApps', 'url' => '/apps', 'verb' => 'GET' , 'root' => ''],
+		['name' => 'ExAppsPage#viewApps', 'url' => '/apps', 'verb' => 'GET' , 'root' => '/apps'],
 		['name' => 'ExAppsPage#listCategories', 'url' => '/apps/categories', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#listApps', 'url' => '/apps/list', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}', 'verb' => 'GET' , 'root' => ''],

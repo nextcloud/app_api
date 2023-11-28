@@ -22,6 +22,16 @@ const router = new VueRouter({
 	linkActiveClass: 'active',
 	routes: [
 		{
+			path: '/embedded/:appid/:name',
+			component: ExAppView,
+			name: 'embedded',
+			meta: {
+				title: async () => {
+					return t('app_api', 'Embedded ExApp')
+				},
+			},
+		},
+		{
 			path: '/apps',
 			component: Apps,
 			name: 'apps',
