@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Controller;
 
-use DOMDocument;
-use DOMException;
 use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\ProxyResponse;
 use OCA\AppAPI\Service\AppAPIService;
-use OCA\AppAPI\Service\ExAppMenuEntryService;
 use OCA\AppAPI\Service\ExAppInitialStateService;
+use OCA\AppAPI\Service\ExAppMenuEntryService;
 use OCA\AppAPI\Service\ExAppScriptsService;
 use OCA\AppAPI\Service\ExAppStylesService;
 use OCP\AppFramework\Controller;
@@ -31,9 +29,11 @@ use OCP\Files\IMimeTypeDetector;
 use OCP\Http\Client\IResponse;
 use OCP\IRequest;
 use OCP\IURLGenerator;
-use OCP\Util;
 
 class MenuEntryController extends Controller {
+
+	public bool $postprocess = false;
+	public array $jsProxyMap = [];
 
 	public function __construct(
 		IRequest                                  $request,
@@ -74,62 +74,12 @@ class MenuEntryController extends Controller {
 		foreach ($initialStates as $key => $value) {
 			$this->initialState->provideInitialState($key, $value);
 		}
-		$this->scriptsService->applyExAppScripts($appId, 'top_menu');
+		$this->jsProxyMap = $this->scriptsService->applyExAppScripts($appId, 'top_menu');
 		$this->stylesService->applyExAppStyles($appId, 'top_menu');
 
+		$this->postprocess = true;
 		$response = new TemplateResponse(Application::APP_ID, 'main');
 		return $response;
-	}
-
-	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
-	 * @throws DOMException
-	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function ExAppIframeProxy(string $appId, string $name): Response {
-		$exApp = $this->service->getExApp($appId);
-		if ($exApp === null) {
-			return new NotFoundResponse();
-		}
-		if (!$exApp->getEnabled()) {
-			return new NotFoundResponse();
-		}
-		$menuEntry = $this->menuEntryService->getExAppMenuEntry($appId, $name);
-		if ($menuEntry === null) {
-			return new NotFoundResponse();
-		}
-		$response = $this->service->aeRequestToExApp(
-			$exApp, $menuEntry->getRoute(), $this->userId, 'GET', request: $this->request
-		);
-		if (is_array($response)) {
-			$error_response = new Response();
-			return $error_response->setStatus(500);
-		}
-		$reHeaders = [];
-		foreach ($response->getHeaders() as $k => $values) {
-			$reHeaders[$k] = count($values) === 1 ? $values[0] : $values;
-		}
-		$reHeaders['content-security-policy'] = 'frame-ancestors *;';
-
-		$dom = new DOMDocument();
-		@$dom->loadHTML($response->getBody(), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-		$base = $dom->createElement('base');
-		$base->setAttribute(
-			'href',
-			$this->url->getAbsoluteURL('index.php/apps/app_api/proxying/'. $exApp->getAppid() . '/')
-		);
-		$base->setAttribute('target', '_parent');
-		$head = $dom->getElementsByTagName('head')->item(0);
-		if ($head) {
-			if ($head->hasChildNodes()) {
-				$head->insertBefore($base, $head->firstChild);
-			} else {
-				$head->appendChild($base);
-			}
-		}
-		return new DataDisplayResponse($dom->saveHTML(), $response->getStatusCode(), $reHeaders);
 	}
 
 	private function createProxyResponse(string $path, IResponse $response, $cache = true): ProxyResponse {
@@ -181,7 +131,7 @@ class MenuEntryController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function ExAppProxyCss(string $appId, string $other): Response {
+	public function ExAppProxyGet(string $appId, string $other): Response {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();
@@ -202,28 +152,7 @@ class MenuEntryController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function ExAppProxySubLinksGet(string $appId, string $other): Response {
-		$exApp = $this->service->getExApp($appId);
-		if ($exApp === null) {
-			return new NotFoundResponse();
-		}
-		if (!$exApp->getEnabled()) {
-			return new NotFoundResponse();
-		}
-
-		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'GET', request: $this->request
-		);
-		if (is_array($response)) {
-			$error_response = new Response();
-			return $error_response->setStatus(500);
-		}
-		return $this->createProxyResponse($other, $response);
-	}
-
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function ExAppIframeProxySubLinksPost(string $appId, string $other): Response {
+	public function ExAppProxyPost(string $appId, string $other): Response {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();
@@ -246,7 +175,7 @@ class MenuEntryController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function ExAppIframeProxySubLinksPut(string $appId, string $other): Response {
+	public function ExAppProxyPut(string $appId, string $other): Response {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();

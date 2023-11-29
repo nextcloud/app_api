@@ -31,7 +31,8 @@ class InitialStateMapper extends QBMapper {
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
 				$qb->expr()->eq('type', $qb->createNamedParameter($type, IQueryBuilder::PARAM_STR))
-			)->executeQuery();;
+			)->executeQuery();
+			;
 		return $result->fetchAll();
 	}
 }

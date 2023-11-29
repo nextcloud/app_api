@@ -12,17 +12,14 @@ return [
 		['name' => 'MenuEntry#ExAppIcon', 'url' => '/embedded/{appId}/{name}/icon', 'verb' => 'GET' , 'root' => '/embedded'],
 
 		// Proxy
-//		['name' => 'MenuEntry#ExAppProxySubLinksGet',
-//			'url' => '/proxying/{appId}/{other}', 'verb' => 'GET' , 'root' => '/proxying',
-//			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
-//		['name' => 'MenuEntry#ExAppProxySubLinksPost',
-//			'url' => '/proxying/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxying',
-//			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
-//		['name' => 'MenuEntry#ExAppProxySubLinksPut',
-//			'url' => '/proxying/{appId}/{other}', 'verb' => 'PUT' , 'root' => '/proxying',
-//			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
-		['name' => 'MenuEntry#ExAppProxySubLinksGet',
-			'url' => '/proxy/css/{appId}/{other}', 'verb' => 'GET' , 'root' => '',
+		['name' => 'MenuEntry#ExAppProxyGet',
+			'url' => '/proxy/{appId}/{other}', 'verb' => 'GET' , 'root' => '/proxy',
+			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+		['name' => 'MenuEntry#ExAppProxyPost',
+			'url' => '/proxy/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxying',
+			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+		['name' => 'MenuEntry#ExAppProxyPut',
+			'url' => '/proxy/{appId}/{other}', 'verb' => 'PUT' , 'root' => '/proxying',
 			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
 
 		// ExApps actions

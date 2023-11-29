@@ -4,21 +4,14 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Middleware;
 
-use Exception;
-use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Controller\MenuEntryController;
-use OCA\AppAPI\Exceptions\AppAPIAuthNotValidException;
 use OCA\AppAPI\Service\AppAPIService;
 
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Middleware;
 use OCP\IL10N;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
-use ReflectionMethod;
 
 class ExAppUiMiddleware extends Middleware {
 
@@ -31,12 +24,19 @@ class ExAppUiMiddleware extends Middleware {
 	}
 
 	public function beforeOutput(Controller $controller, string $methodName, string $output) {
-		if ($controller instanceof MenuEntryController) {
-			$adjustedCss = preg_replace(
-				'/(href=")(\/.*?)(\/app_api\/css\/)(proxy\/css\/.*css")/',
+		if (($controller instanceof MenuEntryController) && ($controller->postprocess)) {
+			$correctedOutput = preg_replace(
+				'/(href=")(\/.*?)(\/app_api\/css\/)(proxy\/.*css")/',
 				'$1/index.php/apps/app_api/$4',
 				$output);
-			return $adjustedCss;
+			foreach ($controller->jsProxyMap as $key => $value) {
+				$correctedOutput = preg_replace(
+					'/(src=")(\/.*?)(\/app_api\/js\/)(proxy_js\/' . $key . '.js")/',
+					'$1/index.php/apps/app_api/proxy/' . $value . '.js"',
+					$correctedOutput,
+					limit: 1);
+			}
+			return $correctedOutput;
 		}
 		return $output;
 	}

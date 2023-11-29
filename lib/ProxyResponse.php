@@ -14,8 +14,8 @@ class ProxyResponse extends Response implements ICallbackResponse {
 	private mixed $data;
 
 	public function __construct(int $status = HttpAlias::STATUS_OK,
-								array $headers = [], mixed $data = null, int $length = 0,
-								string $mimeType = '', int $lastModified = 0) {
+		array $headers = [], mixed $data = null, int $length = 0,
+		string $mimeType = '', int $lastModified = 0) {
 		parent::__construct();
 		$this->data = $data;
 		$this->setStatus($status);

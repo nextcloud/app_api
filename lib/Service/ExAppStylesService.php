@@ -37,10 +37,9 @@ class ExAppStylesService {
 		foreach ($styles as $value) {
 			if (str_starts_with($value['path'], '/')) {
 				// in the future we should allow offload of styles to the NC instance if they start with '/'
-				$path = 'proxy/css/'. $appId . $value['path'];
-			}
-			else {
-				$path = 'proxy/css/'. $appId . '/' . $value['path'];
+				$path = 'proxy/'. $appId . $value['path'];
+			} else {
+				$path = 'proxy/'. $appId . '/' . $value['path'];
 			}
 			Util::addStyle(Application::APP_ID, $path);
 		}
