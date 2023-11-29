@@ -22,8 +22,8 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		if (!$schema->hasTable('menu_entries_ex')) {
-			$table = $schema->createTable('menu_entries_ex');
+		if (!$schema->hasTable('ex_apps_ui_top_menu')) {
+			$table = $schema->createTable('ex_apps_ui_top_menu');
 
 			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
@@ -55,7 +55,7 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'name'], 'menu_entries_ex__idx');
+			$table->addUniqueIndex(['appid', 'name'], 'ui_top_menu__idx');
 		}
 
 		if (!$schema->hasTable('ex_apps_ui_state')) {

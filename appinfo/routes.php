@@ -12,14 +12,14 @@ return [
 		['name' => 'MenuEntry#ExAppIcon', 'url' => '/embedded/{appId}/{name}/icon', 'verb' => 'GET' , 'root' => '/embedded'],
 
 		// Proxy
-		['name' => 'MenuEntry#ExAppProxyGet',
+		['name' => 'ExAppProxy#ExAppGet',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'GET' , 'root' => '/proxy',
 			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
-		['name' => 'MenuEntry#ExAppProxyPost',
-			'url' => '/proxy/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxying',
+		['name' => 'ExAppProxy#ExAppPost',
+			'url' => '/proxy/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxy',
 			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
-		['name' => 'MenuEntry#ExAppProxyPut',
-			'url' => '/proxy/{appId}/{other}', 'verb' => 'PUT' , 'root' => '/proxying',
+		['name' => 'ExAppProxy#ExAppPut',
+			'url' => '/proxy/{appId}/{other}', 'verb' => 'PUT' , 'root' => '/proxy',
 			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
 
 		// ExApps actions
