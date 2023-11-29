@@ -102,7 +102,7 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('path', Types::STRING, [
 				'notnull' => true,
-				'length' => 2000,
+				'length' => 256 * 3,
 			]);
 			$table->addColumn('after_app_id', Types::STRING, [
 				'notnull' => false,
@@ -130,7 +130,7 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('path', Types::STRING, [
 				'notnull' => true,
-				'length' => 2000,
+				'length' => 256 * 3,
 			]);
 
 			$table->setPrimaryKey(['id']);
