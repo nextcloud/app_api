@@ -69,8 +69,7 @@ class MenuEntryController extends Controller {
 		$this->stylesService->applyExAppStyles($appId, 'top_menu');
 
 		$this->postprocess = true;
-		$response = new TemplateResponse(Application::APP_ID, 'main');
-		return $response;
+		return new TemplateResponse(Application::APP_ID, 'embedded');
 	}
 
 	/**
