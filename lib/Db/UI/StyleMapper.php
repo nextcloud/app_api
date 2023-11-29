@@ -32,7 +32,6 @@ class StyleMapper extends QBMapper {
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
 				$qb->expr()->eq('type', $qb->createNamedParameter($type, IQueryBuilder::PARAM_STR))
 			)->executeQuery();
-			;
 		return $result->fetchAll();
 	}
 }
