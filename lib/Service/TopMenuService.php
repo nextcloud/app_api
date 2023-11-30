@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+
 namespace OCA\AppAPI\Service;
 
+use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\UI\TopMenu;
 use OCA\AppAPI\Db\UI\TopMenuMapper;
@@ -12,9 +14,9 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\IAppContainer;
 use OCP\DB\Exception;
 use OCP\ICache;
+use OCP\ICacheFactory;
 use OCP\IGroupManager;
 use OCP\INavigationManager;
-use OCP\IRequest;
 use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserSession;
@@ -24,13 +26,14 @@ use Psr\Log\LoggerInterface;
 
 class TopMenuService {
 	public const ICON_CACHE_TTL = 60 * 60 * 24; // 1 day
+	private ICache $cache;
 
 	public function __construct(
 		private TopMenuMapper   $mapper,
 		private LoggerInterface $logger,
-		private AppAPIService   $service,
-		private ICache			$cache,
+		ICacheFactory           $cacheFactory,
 	) {
+		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_top_menus');
 	}
 
 	/**
@@ -53,8 +56,14 @@ class TopMenuService {
 				$urlGenerator = $container->get(IURLGenerator::class);
 				return [
 					'id' => $menuEntry['appid'] . '_' . $menuEntry['name'],
-					'href' => $urlGenerator->linkToRoute('app_api.TopMenu.viewExAppPage', ['appId' => $menuEntry['appid'], 'name' => $menuEntry['name']]),
-					'icon' => $menuEntry['icon_url'] === '' ? $urlGenerator->imagePath('app_api', 'app.svg') : $urlGenerator->linkToRoute('app_api.TopMenu.ExAppIconProxy', ['appId' => $menuEntry['appid'], 'name' => $menuEntry['name']]),
+					'href' => $urlGenerator->linkToRoute(
+						'app_api.TopMenu.viewExAppPage', ['appId' => $menuEntry['appid'], 'name' => $menuEntry['name']]
+					),
+					'icon' => $menuEntry['icon_url'] === '' ?
+						$urlGenerator->imagePath('app_api', 'app.svg') :
+						$urlGenerator->linkToRoute(
+							'app_api.ExAppProxy.ExAppGet', ['appId' => $menuEntry['appid'], 'other' => $menuEntry['icon_url']]
+						),
 					'name' => $menuEntry['display_name'],
 				];
 			});
@@ -62,7 +71,7 @@ class TopMenuService {
 	}
 
 	public function registerExAppMenuEntry(string $appId, string $name, string $displayName,
-										   string $iconUrl, int $adminRequired): ?TopMenu {
+		string $iconUrl, int $adminRequired): ?TopMenu {
 		try {
 			$menuEntry = $this->mapper->findByAppIdName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
@@ -139,36 +148,11 @@ class TopMenuService {
 					return $cacheEntry instanceof TopMenu ? $cacheEntry : new TopMenu($cacheEntry);
 				}, $cached);
 			}
-
 			$menuEntries = $this->mapper->findAllEnabled();
 			$this->cache->set($cacheKey, $menuEntries);
 			return $menuEntries;
 		} catch (Exception) {
 			return [];
 		}
-	}
-
-	public function loadFileActionIcon(string $appId, string $name, ExApp $exApp, IRequest $request, string $userId): ?array {
-		//		$menuEntry = $this->getExAppMenuEntry($appId, $name);
-		//		if ($menuEntry === null) {
-		//			return null;
-		//		}
-		//		$iconUrl = $menuEntry->getIconUrl();
-		//		if (!isset($iconUrl) || $iconUrl === '') {
-		//			return null;
-		//		}
-		//		try {
-		//			$iconResponse = $this->service->requestToExApp($request, $userId, $exApp, $iconUrl, 'GET');
-		//			if ($iconResponse->getStatusCode() === Http::STATUS_OK) {
-		//				return [
-		//					'body' => $iconResponse->getBody(),
-		//					'headers' => $iconResponse->getHeaders(),
-		//				];
-		//			}
-		//		} catch (\Exception $e) {
-		//			$this->logger->error(sprintf('Failed to load ExApp %s MenuEntry icon %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
-		//			return null;
-		//		}
-		return null;
 	}
 }

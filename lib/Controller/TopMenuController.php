@@ -12,13 +12,10 @@ use OCA\AppAPI\Service\ExAppScriptsService;
 use OCA\AppAPI\Service\ExAppStylesService;
 use OCA\AppAPI\Service\TopMenuService;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http as HttpAlias;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\NotFoundResponse;
-use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
@@ -39,7 +36,6 @@ class TopMenuController extends Controller {
 		private ExAppScriptsService      $scriptsService,
 		private ExAppStylesService       $stylesService,
 		private AppAPIService            $service,
-		private ?string                  $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -72,33 +68,6 @@ class TopMenuController extends Controller {
 
 		$this->postprocess = true;
 		return new TemplateResponse(Application::APP_ID, 'embedded');
-	}
-
-	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
-	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function ExAppIconProxy(string $appId, string $name): Response {
-		$exApp = $this->service->getExApp($appId);
-		if ($exApp === null) {
-			return new NotFoundResponse();
-		}
-		if (!$exApp->getEnabled()) {
-			return new NotFoundResponse();
-		}
-		$icon = $this->menuEntryService->loadFileActionIcon($appId, $name, $exApp, $this->request, $this->userId);
-		if ($icon !== null && isset($icon['body'], $icon['headers'])) {
-			$response = new DataDisplayResponse(
-				$icon['body'],
-				HttpAlias::STATUS_OK,
-				['Content-Type' => $icon['headers']['Content-Type'][0] ?? 'image/svg+xml']
-			);
-			$response->cacheFor(TopMenuService::ICON_CACHE_TTL, false, true);
-			return $response;
-		}
-		return new DataDisplayResponse('', 400);
 	}
 
 	/**
