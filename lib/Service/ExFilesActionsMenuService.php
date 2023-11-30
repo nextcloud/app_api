@@ -126,7 +126,7 @@ class ExFilesActionsMenuService {
 		}
 
 		try {
-			$fileAction = $this->mapper->findByAppidName($appId, $fileActionName);
+			$fileAction = $this->mapper->findByAppIdName($appId, $fileActionName);
 			$this->cache->set($cacheKey, $fileAction);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 			$this->logger->error(sprintf('ExApp %s FileAction %s not found. Error: %s', $appId, $fileActionName, $e->getMessage()), ['exception' => $e]);

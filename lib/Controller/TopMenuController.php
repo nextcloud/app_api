@@ -20,6 +20,8 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\OCS\OCSBadRequestException;
+use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\DB\Exception;
 use OCP\IRequest;
@@ -102,24 +104,36 @@ class TopMenuController extends Controller {
 	/**
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
+	 * @throws OCSBadRequestException
 	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	#[AppAPIAuth]
 	public function registerExAppMenuEntry(
-		string $name, string $displayName, string $route,
+		string $name, string $displayName,
 		string $iconUrl = '', int $adminRequired = 0): DataResponse {
+		$result = $this->menuEntryService->registerExAppMenuEntry(
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $iconUrl, $adminRequired);
+		if (!$result) {
+			throw new OCSBadRequestException("Top Menu entry could not be registered");
+		}
 		return new DataResponse();
 	}
 
 	/**
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
+	 * @throws OCSNotFoundException
 	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	#[AppAPIAuth]
 	public function unregisterExAppMenuEntry(string $name): DataResponse {
+		$result = $this->menuEntryService->unregisterExAppMenuEntry(
+			$this->request->getHeader('EX-APP-ID'), $name);
+		if (!$result) {
+			throw new OCSNotFoundException('No such Top Menu entry');
+		}
 		return new DataResponse();
 	}
 }

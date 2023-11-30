@@ -40,6 +40,33 @@ class TopMenuMapper extends QBMapper {
 		return $result->fetchAll();
 	}
 
+	public function removeByAppIdName(string $appId, string $name): bool {
+		$qb = $this->db->getQueryBuilder();
+		$qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
+			);
+		try {
+			$qb->executeStatement();
+		} catch (Exception) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * @throws Exception
+	 */
+	public function removeAllByAppId(string $appId): int {
+		$qb = $this->db->getQueryBuilder();
+		$qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+			);
+		return $qb->executeStatement();
+	}
+
 	/**
 	 * @param string $appId
 	 * @param string $name
@@ -49,7 +76,7 @@ class TopMenuMapper extends QBMapper {
 	 * @throws MultipleObjectsReturnedException if more than one result
 	 * @throws DoesNotExistException if not found
 	 */
-	public function findByAppidName(string $appId, string $name): TopMenu {
+	public function findByAppIdName(string $appId, string $name): TopMenu {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)

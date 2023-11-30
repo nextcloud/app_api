@@ -11,12 +11,15 @@ use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\IAppContainer;
 use OCP\DB\Exception;
+use OCP\ICache;
 use OCP\IGroupManager;
 use OCP\INavigationManager;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserSession;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 
 class TopMenuService {
@@ -26,13 +29,18 @@ class TopMenuService {
 		private TopMenuMapper   $mapper,
 		private LoggerInterface $logger,
 		private AppAPIService   $service,
+		private ICache			$cache,
 	) {
 	}
 
+	/**
+	 * @throws NotFoundExceptionInterface
+	 * @throws ContainerExceptionInterface
+	 * @throws Exception
+	 */
 	public function registerMenuEntries(IAppContainer $container): void {
-		$enabledEntries = $this->mapper->findAllEnabled();
 		/** @var TopMenu $menuEntry */
-		foreach ($enabledEntries as $menuEntry) {
+		foreach ($this->getExAppMenuEntries() as $menuEntry) {
 			$userSession = $container->get(IUserSession::class);
 			/** @var IGroupManager $groupManager */
 			$groupManager = $container->get(IGroupManager::class);
@@ -53,21 +61,90 @@ class TopMenuService {
 		}
 	}
 
-	public function registerExAppMenuEntry(string $appId, array $params) {
-		//	TODO: Register new MenuEntry from ExApp
+	public function registerExAppMenuEntry(string $appId, string $name, string $displayName,
+										   string $iconUrl, int $adminRequired): ?TopMenu {
+		try {
+			$menuEntry = $this->mapper->findByAppIdName($appId, $name);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			$menuEntry = null;
+		}
+		try {
+			$newMenuEntry = new TopMenu([
+				'appid' => $appId,
+				'name' => $name,
+				'display_name' => $displayName,
+				'icon_url' => $iconUrl,
+				'admin_required' => $adminRequired,
+			]);
+			if ($menuEntry !== null) {
+				$newMenuEntry->setId($menuEntry->getId());
+			}
+			$menuEntry = $this->mapper->insertOrUpdate($newMenuEntry);
+			$cacheKey = '/ex_top_menu_' . $appId . '_' . $name;
+			$this->cache->remove('/ex_top_menus');
+			$this->cache->set($cacheKey, $menuEntry);
+		} catch (Exception $e) {
+			$this->logger->error(
+				sprintf('Failed to register ExApp %s TopMenu %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]
+			);
+			return null;
+		}
+		return $menuEntry;
 	}
 
-	public function unregisterExAppMenuEntry(string $appId, string $route) {
-		//	TODO: Unregister ExApp MenuEntry by route
+	public function unregisterExAppMenuEntry(string $appId, string $name): bool {
+		$result = $this->mapper->removeByAppIdName($appId, $name);
+		if (!$result) {
+			return false;
+		}
+		$this->cache->remove('/ex_top_menu_' . $appId . '_' . $name);
+		$this->cache->remove('/ex_top_menus');
+		return true;
+	}
+
+	public function unregisterExAppMenuEntries(ExApp $exApp): int {
+		try {
+			$result = $this->mapper->removeAllByAppId($exApp->getAppid());
+		} catch (Exception) {
+			$result = -1;
+		}
+		$this->cache->clear('/ex_top_menu_' . $exApp->getAppid());
+		$this->cache->remove('/ex_top_menus');
+		return $result;
 	}
 
 	public function getExAppMenuEntry(string $appId, string $name): ?TopMenu {
+		$cacheKey = '/ex_top_menu_' . $appId . '_' . $name;
+		$cache = $this->cache->get($cacheKey);
+		if ($cache !== null) {
+			return $cache instanceof TopMenu ? $cache : new TopMenu($cache);
+		}
+
 		try {
-			// TODO: Add caching
-			return $this->mapper->findByAppidName($appId, $name);
+			$menuEntry = $this->mapper->findByAppIdName($appId, $name);
+			$this->cache->set($cacheKey, $menuEntry);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 			$this->logger->error($e->getMessage());
 			return null;
+		}
+		return $menuEntry;
+	}
+
+	public function getExAppMenuEntries(): array {
+		try {
+			$cacheKey = '/ex_top_menus';
+			$cached = $this->cache->get($cacheKey);
+			if ($cached !== null) {
+				return array_map(function ($cacheEntry) {
+					return $cacheEntry instanceof TopMenu ? $cacheEntry : new TopMenu($cacheEntry);
+				}, $cached);
+			}
+
+			$menuEntries = $this->mapper->findAllEnabled();
+			$this->cache->set($cacheKey, $menuEntries);
+			return $menuEntries;
+		} catch (Exception) {
+			return [];
 		}
 	}
 

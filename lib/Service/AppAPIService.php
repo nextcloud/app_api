@@ -52,6 +52,7 @@ class AppAPIService {
 		private ExAppUsersService $exAppUsersService,
 		private ExAppApiScopeService $exAppApiScopeService,
 		private ExAppScopesService $exAppScopesService,
+		private TopMenuService $topMenuService,
 		private ISecureRandom $random,
 		private IUserSession $userSession,
 		private ISession $session,
@@ -139,6 +140,7 @@ class AppAPIService {
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
 			$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
+			$this->topMenuService->unregisterExAppMenuEntries($exApp);
 			$this->cache->remove('/exApp_' . $appId);
 			return $exApp;
 		} catch (Exception $e) {
