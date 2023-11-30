@@ -8,9 +8,9 @@ use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Class MenuEntry
+ * Class TopMenu
  *
- * @package OCA\AppAPI\Db\MenuEntry
+ * @package OCA\AppAPI\Db\UI
  *
  * @method string getAppid()
  * @method string getName()

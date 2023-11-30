@@ -10,7 +10,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<TopMenu>
+ * @template-extends QBMapper<Script>
  */
 class ScriptMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
