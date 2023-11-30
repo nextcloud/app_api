@@ -41,10 +41,6 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 32,
 			]);
-			$table->addColumn('route', Types::STRING, [
-				'notnull' => true,
-				'length' => 32,
-			]);
 			$table->addColumn('icon_url', Types::STRING, [
 				'notnull' => true,
 				'default' => '',
@@ -73,6 +69,10 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 16,
 			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+				'length' => 32,
+			]);
 			$table->addColumn('key', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
@@ -82,7 +82,7 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'type', 'key'], 'ui_state__idx');
+			$table->addUniqueIndex(['appid', 'type', 'name', 'key'], 'ui_state__idx');
 		}
 
 		if (!$schema->hasTable('ex_apps_ui_scripts')) {
@@ -100,9 +100,13 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 16,
 			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+				'length' => 32,
+			]);
 			$table->addColumn('path', Types::STRING, [
 				'notnull' => true,
-				'length' => 256 * 2,
+				'length' => 2000,
 			]);
 			$table->addColumn('after_app_id', Types::STRING, [
 				'notnull' => false,
@@ -110,7 +114,7 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'type', 'path'], 'ui_script__idx');
+			$table->addUniqueIndex(['appid', 'type', 'name'], 'ui_script__idx');
 		}
 
 		if (!$schema->hasTable('ex_apps_ui_styles')) {
@@ -128,13 +132,17 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 16,
 			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+				'length' => 32,
+			]);
 			$table->addColumn('path', Types::STRING, [
 				'notnull' => true,
-				'length' => 256 * 2,
+				'length' => 2000,
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'type', 'path'], 'ui_style__idx');
+			$table->addUniqueIndex(['appid', 'type', 'name'], 'ui_style__idx');
 		}
 
 		return $schema;

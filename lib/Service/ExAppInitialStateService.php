@@ -24,10 +24,10 @@ class ExAppInitialStateService {
 		//	TODO
 	}
 
-	public function getExAppInitialStates(string $appId, string $type): ?array {
+	public function getExAppInitialStates(string $appId, string $type, string $name): ?array {
 		try {
 			// TODO: Add caching
-			$initialStates = $this->mapper->findByAppIdType($appId, $type);
+			$initialStates = $this->mapper->findByAppIdTypeName($appId, $type, $name);
 			$results = [];
 			foreach ($initialStates as $value) {
 				$results[$value['key']] = $value['value'];

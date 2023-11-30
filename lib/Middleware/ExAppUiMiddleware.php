@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Middleware;
 
-use OCA\AppAPI\Controller\MenuEntryController;
+use OCA\AppAPI\Controller\TopMenuController;
 use OCA\AppAPI\Service\AppAPIService;
 
 use OCP\AppFramework\Controller;
@@ -24,7 +24,7 @@ class ExAppUiMiddleware extends Middleware {
 	}
 
 	public function beforeOutput(Controller $controller, string $methodName, string $output) {
-		if (($controller instanceof MenuEntryController) && ($controller->postprocess)) {
+		if (($controller instanceof TopMenuController) && ($controller->postprocess)) {
 			$correctedOutput = preg_replace(
 				'/(href=")(\/.*?)(\/app_api\/css\/)(proxy\/.*css")/',
 				'$1/index.php/apps/app_api/$4',

@@ -31,9 +31,9 @@ class ExAppStylesService {
 	/**
 	 * @throws Exception
 	 */
-	public function applyExAppStyles(string $appId, string $type): void {
+	public function applyExAppStyles(string $appId, string $type, string $name): void {
 		// TODO: Add caching
-		$styles = $this->mapper->findByAppIdType($appId, $type);
+		$styles = $this->mapper->findByAppIdTypeName($appId, $type, $name);
 		foreach ($styles as $value) {
 			if (str_starts_with($value['path'], '/')) {
 				// in the future we should allow offload of styles to the NC instance if they start with '/'

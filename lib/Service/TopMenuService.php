@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\Db\ExApp;
-use OCA\AppAPI\Db\UI\MenuEntry;
-use OCA\AppAPI\Db\UI\MenuEntryMapper;
+use OCA\AppAPI\Db\UI\TopMenu;
+use OCA\AppAPI\Db\UI\TopMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\IAppContainer;
@@ -19,19 +19,19 @@ use OCP\IUser;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
-class ExAppMenuEntryService {
+class TopMenuService {
 	public const ICON_CACHE_TTL = 60 * 60 * 24; // 1 day
 
 	public function __construct(
-		private MenuEntryMapper $mapper,
+		private TopMenuMapper   $mapper,
 		private LoggerInterface $logger,
-		private AppAPIService $service,
+		private AppAPIService   $service,
 	) {
 	}
 
 	public function registerMenuEntries(IAppContainer $container): void {
 		$enabledEntries = $this->mapper->findAllEnabled();
-		/** @var MenuEntry $menuEntry */
+		/** @var TopMenu $menuEntry */
 		foreach ($enabledEntries as $menuEntry) {
 			$userSession = $container->get(IUserSession::class);
 			/** @var IGroupManager $groupManager */
@@ -44,9 +44,9 @@ class ExAppMenuEntryService {
 			$container->get(INavigationManager::class)->add(function () use ($container, $menuEntry) {
 				$urlGenerator = $container->get(IURLGenerator::class);
 				return [
-					'id' => $menuEntry['appid'] . $menuEntry['route'],
-					'href' => $urlGenerator->linkToRoute('app_api.MenuEntry.viewExAppPage', ['appId' => $menuEntry['appid'], 'name' => $menuEntry['name']]),
-					'icon' => $menuEntry['icon_url'] === '' ? $urlGenerator->imagePath('app_api', 'app.svg') : $urlGenerator->linkToRoute('app_api.MenuEntry.ExAppIconProxy', ['appId' => $menuEntry['appid'], 'name' => $menuEntry['name']]),
+					'id' => $menuEntry['appid'] . '_' . $menuEntry['name'],
+					'href' => $urlGenerator->linkToRoute('app_api.TopMenu.viewExAppPage', ['appId' => $menuEntry['appid'], 'name' => $menuEntry['name']]),
+					'icon' => $menuEntry['icon_url'] === '' ? $urlGenerator->imagePath('app_api', 'app.svg') : $urlGenerator->linkToRoute('app_api.TopMenu.ExAppIconProxy', ['appId' => $menuEntry['appid'], 'name' => $menuEntry['name']]),
 					'name' => $menuEntry['display_name'],
 				];
 			});
@@ -61,7 +61,7 @@ class ExAppMenuEntryService {
 		//	TODO: Unregister ExApp MenuEntry by route
 	}
 
-	public function getExAppMenuEntry(string $appId, string $name): ?MenuEntry {
+	public function getExAppMenuEntry(string $appId, string $name): ?TopMenu {
 		try {
 			// TODO: Add caching
 			return $this->mapper->findByAppidName($appId, $name);

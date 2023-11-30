@@ -14,14 +14,17 @@ use OCP\AppFramework\Db\Entity;
  *
  * @method string getAppId()
  * @method string getType()
+ * @method string getName()
  * @method string getPath()
  * @method void setAppId(string $appid)
  * @method void setType(string $type)
+ * @method void setName(string $name)
  * @method void setPath(string $path)
  */
 class Style extends Entity implements JsonSerializable {
 	protected $appid;
 	protected $type;
+	protected $name;
 	protected $path;
 
 	/**
@@ -30,6 +33,7 @@ class Style extends Entity implements JsonSerializable {
 	public function __construct(array $params = []) {
 		$this->addType('appid', 'string');
 		$this->addType('type', 'string');
+		$this->addType('name', 'string');
 		$this->addType('path', 'string');
 
 		if (isset($params['id'])) {
@@ -41,6 +45,9 @@ class Style extends Entity implements JsonSerializable {
 		if (isset($params['type'])) {
 			$this->setType($params['type']);
 		}
+		if (isset($params['name'])) {
+			$this->setType($params['name']);
+		}
 		if (isset($params['path'])) {
 			$this->setPath($params['path']);
 		}
@@ -51,6 +58,7 @@ class Style extends Entity implements JsonSerializable {
 			'id' => $this->getId(),
 			'appid' => $this->getAppId(),
 			'type' => $this->getType(),
+			'name' => $this->getName(),
 			'path' => $this->getPath(),
 		];
 	}

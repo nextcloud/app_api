@@ -15,21 +15,18 @@ use OCP\AppFramework\Db\Entity;
  * @method string getAppid()
  * @method string getName()
  * @method string getDisplayName()
- * @method string getRoute()
  * @method string getIconUrl()
  * @method int getAdminRequired()
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
- * @method void setRoute(string $route)
  * @method void setIconUrl(string $iconUrl)
  * @method void setAdminRequired(int $adminRequired)
  */
-class MenuEntry extends Entity implements JsonSerializable {
+class TopMenu extends Entity implements JsonSerializable {
 	protected $appid;
 	protected $name;
 	protected $displayName;
-	protected $route;
 	protected $iconUrl;
 	protected $adminRequired;
 
@@ -40,7 +37,6 @@ class MenuEntry extends Entity implements JsonSerializable {
 		$this->addType('appid', 'string');
 		$this->addType('name', 'string');
 		$this->addType('display_name', 'string');
-		$this->addType('route', 'string');
 		$this->addType('icon_url', 'string');
 		$this->addType('admin_required', 'integer');
 
@@ -56,9 +52,6 @@ class MenuEntry extends Entity implements JsonSerializable {
 		if (isset($params['display_name'])) {
 			$this->setDisplayName($params['display_name']);
 		}
-		if (isset($params['route'])) {
-			$this->setRoute($params['route']);
-		}
 		if (isset($params['icon_url'])) {
 			$this->setIconUrl($params['icon_url']);
 		}
@@ -73,7 +66,6 @@ class MenuEntry extends Entity implements JsonSerializable {
 			'appid' => $this->getAppid(),
 			'name' => $this->getName(),
 			'display_name' => $this->getDisplayName(),
-			'route' => $this->getRoute(),
 			'icon_url' => $this->getIconUrl(),
 			'admin_required' => $this->getAdminRequired(),
 		];

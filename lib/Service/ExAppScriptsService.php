@@ -32,10 +32,10 @@ class ExAppScriptsService {
 	/**
 	 * @throws Exception
 	 */
-	public function applyExAppScripts(string $appId, string $type): array {
+	public function applyExAppScripts(string $appId, string $type, string $name): array {
 		// TODO: Add caching
 		$mapResult = [];
-		$scripts = $this->mapper->findByAppIdType($appId, $type);
+		$scripts = $this->mapper->findByAppIdTypeName($appId, $type, $name);
 		if (count($scripts) > self::MAX_JS_FILES) {
 			throw new LengthException('More than' . self::MAX_JS_FILES . 'JS files on one page are not supported.');
 		}

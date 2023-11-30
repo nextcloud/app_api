@@ -8,9 +8,9 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppInitialStateService;
-use OCA\AppAPI\Service\ExAppMenuEntryService;
 use OCA\AppAPI\Service\ExAppScriptsService;
 use OCA\AppAPI\Service\ExAppStylesService;
+use OCA\AppAPI\Service\TopMenuService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http as HttpAlias;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -24,20 +24,20 @@ use OCP\AppFramework\Services\IInitialState;
 use OCP\DB\Exception;
 use OCP\IRequest;
 
-class MenuEntryController extends Controller {
+class TopMenuController extends Controller {
 
 	public bool $postprocess = false;
 	public array $jsProxyMap = [];
 
 	public function __construct(
-		IRequest                                  $request,
-		private IInitialState                     $initialState,
-		private ExAppMenuEntryService             $menuEntryService,
-		private ExAppInitialStateService          $initialStateService,
-		private ExAppScriptsService				  $scriptsService,
-		private ExAppStylesService				  $stylesService,
-		private AppAPIService                     $service,
-		private ?string                           $userId,
+		IRequest                         $request,
+		private IInitialState            $initialState,
+		private TopMenuService           $menuEntryService,
+		private ExAppInitialStateService $initialStateService,
+		private ExAppScriptsService      $scriptsService,
+		private ExAppStylesService       $stylesService,
+		private AppAPIService            $service,
+		private ?string                  $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -61,12 +61,12 @@ class MenuEntryController extends Controller {
 		if ($menuEntry === null) {
 			return new NotFoundResponse();
 		}
-		$initialStates = $this->initialStateService->getExAppInitialStates($appId, 'top_menu');
+		$initialStates = $this->initialStateService->getExAppInitialStates($appId, 'top_menu', $menuEntry->getName());
 		foreach ($initialStates as $key => $value) {
 			$this->initialState->provideInitialState($key, $value);
 		}
-		$this->jsProxyMap = $this->scriptsService->applyExAppScripts($appId, 'top_menu');
-		$this->stylesService->applyExAppStyles($appId, 'top_menu');
+		$this->jsProxyMap = $this->scriptsService->applyExAppScripts($appId, 'top_menu', $menuEntry->getName());
+		$this->stylesService->applyExAppStyles($appId, 'top_menu', $menuEntry->getName());
 
 		$this->postprocess = true;
 		return new TemplateResponse(Application::APP_ID, 'embedded');
@@ -93,7 +93,7 @@ class MenuEntryController extends Controller {
 				HttpAlias::STATUS_OK,
 				['Content-Type' => $icon['headers']['Content-Type'][0] ?? 'image/svg+xml']
 			);
-			$response->cacheFor(ExAppMenuEntryService::ICON_CACHE_TTL, false, true);
+			$response->cacheFor(TopMenuService::ICON_CACHE_TTL, false, true);
 			return $response;
 		}
 		return new DataDisplayResponse('', 400);
@@ -106,7 +106,9 @@ class MenuEntryController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	#[AppAPIAuth]
-	public function registerExAppMenuEntry(string $name, string $displayName, string $route, string $iconUrl = '', int $adminRequired = 0): DataResponse {
+	public function registerExAppMenuEntry(
+		string $name, string $displayName, string $route,
+		string $iconUrl = '', int $adminRequired = 0): DataResponse {
 		return new DataResponse();
 	}
 

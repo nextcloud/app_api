@@ -10,7 +10,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<MenuEntry>
+ * @template-extends QBMapper<TopMenu>
  */
 class InitialStateMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
@@ -20,17 +20,18 @@ class InitialStateMapper extends QBMapper {
 	/**
 	 * @param string $appId
 	 * @param string $type
-	 *
-	 * @throws Exception
+	 * @param string $name
 	 * @return array
+	 * @throws Exception
 	 */
-	public function findByAppIdType(string $appId, string $type): array {
+	public function findByAppIdTypeName(string $appId, string $type, string $name): array {
 		$qb = $this->db->getQueryBuilder();
 		$result = $qb->select('key', 'value')
 			->from($this->tableName)
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('type', $qb->createNamedParameter($type, IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('type', $qb->createNamedParameter($type, IQueryBuilder::PARAM_STR)),
+				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
 			)->executeQuery();
 		return $result->fetchAll();
 	}

@@ -12,9 +12,9 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<MenuEntry>
+ * @template-extends QBMapper<TopMenu>
  */
-class MenuEntryMapper extends QBMapper {
+class TopMenuMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_apps_ui_top_menu');
 	}
@@ -28,7 +28,6 @@ class MenuEntryMapper extends QBMapper {
 			'menu_entries.appid',
 			'menu_entries.name',
 			'menu_entries.display_name',
-			'menu_entries.route',
 			'menu_entries.icon_url',
 			'menu_entries.admin_required',
 		)
@@ -45,12 +44,12 @@ class MenuEntryMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $name
 	 *
-	 * @throws DoesNotExistException if not found
-	 * @throws Exception
+	 * @return TopMenu
+	 *@throws Exception
 	 * @throws MultipleObjectsReturnedException if more than one result
-	 * @return MenuEntry
+	 * @throws DoesNotExistException if not found
 	 */
-	public function findByAppidName(string $appId, string $name): MenuEntry {
+	public function findByAppidName(string $appId, string $name): TopMenu {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)

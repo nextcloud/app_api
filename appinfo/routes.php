@@ -8,8 +8,8 @@ return [
 		['name' => 'config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
 
 		// Menu Entries
-		['name' => 'MenuEntry#viewExAppPage', 'url' => '/embedded/{appId}/{name}', 'verb' => 'GET' , 'root' => '/embedded'],
-		['name' => 'MenuEntry#ExAppIcon', 'url' => '/embedded/{appId}/{name}/icon', 'verb' => 'GET' , 'root' => '/embedded'],
+		['name' => 'TopMenu#viewExAppPage', 'url' => '/embedded/{appId}/{name}', 'verb' => 'GET' , 'root' => '/embedded'],
+		['name' => 'TopMenu#ExAppIcon', 'url' => '/embedded/{appId}/{name}/icon', 'verb' => 'GET' , 'root' => '/embedded'],
 
 		// Proxy
 		['name' => 'ExAppProxy#ExAppGet',

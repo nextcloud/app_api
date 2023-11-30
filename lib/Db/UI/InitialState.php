@@ -14,16 +14,19 @@ use OCP\AppFramework\Db\Entity;
  *
  * @method string getAppId()
  * @method string getType()
+ * @method string getName()
  * @method string getKey()
  * @method string getValue()
  * @method void setAppId(string $appid)
  * @method void setType(string $type)
+ * @method void setName(string $name)
  * @method void setKey(string $key)
  * @method void setValue(array $value)
  */
 class InitialState extends Entity implements JsonSerializable {
 	protected $appid;
 	protected $type;
+	protected $name;
 	protected $key;
 	protected $value;
 
@@ -33,6 +36,7 @@ class InitialState extends Entity implements JsonSerializable {
 	public function __construct(array $params = []) {
 		$this->addType('appid', 'string');
 		$this->addType('type', 'string');
+		$this->addType('name', 'string');
 		$this->addType('key', 'string');
 		$this->addType('value', 'json');
 
@@ -44,6 +48,9 @@ class InitialState extends Entity implements JsonSerializable {
 		}
 		if (isset($params['type'])) {
 			$this->setType($params['type']);
+		}
+		if (isset($params['name'])) {
+			$this->setType($params['name']);
 		}
 		if (isset($params['key'])) {
 			$this->setKey($params['key']);
@@ -58,6 +65,7 @@ class InitialState extends Entity implements JsonSerializable {
 			'id' => $this->getId(),
 			'appid' => $this->getAppId(),
 			'type' => $this->getType(),
+			'name' => $this->getName(),
 			'key' => $this->getKey(),
 			'value' => $this->getValue(),
 		];
