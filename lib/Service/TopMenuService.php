@@ -11,7 +11,6 @@ use OCA\AppAPI\Db\UI\TopMenu;
 use OCA\AppAPI\Db\UI\TopMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\AppFramework\IAppContainer;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
@@ -21,11 +20,11 @@ use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserSession;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 
 class TopMenuService {
-	public const ICON_CACHE_TTL = 60 * 60 * 24; // 1 day
 	private ICache $cache;
 
 	public function __construct(
@@ -41,7 +40,7 @@ class TopMenuService {
 	 * @throws ContainerExceptionInterface
 	 * @throws Exception
 	 */
-	public function registerMenuEntries(IAppContainer $container): void {
+	public function registerMenuEntries(ContainerInterface $container): void {
 		/** @var TopMenu $menuEntry */
 		foreach ($this->getExAppMenuEntries() as $menuEntry) {
 			$userSession = $container->get(IUserSession::class);
@@ -49,22 +48,25 @@ class TopMenuService {
 			$groupManager = $container->get(IGroupManager::class);
 			/** @var IUser $user */
 			$user = $userSession->getUser();
-			if ($menuEntry['admin_required'] === 1 && !$groupManager->isInGroup($user->getUID(), 'admin')) {
+			if ($menuEntry->getAdminRequired() === 1 && !$groupManager->isInGroup($user->getUID(), 'admin')) {
 				continue; // Skip this entry if user is not admin and entry requires admin privileges
 			}
 			$container->get(INavigationManager::class)->add(function () use ($container, $menuEntry) {
 				$urlGenerator = $container->get(IURLGenerator::class);
+				$appId = $menuEntry->getAppid();
+				$entryName = $menuEntry->getName();
+				$iconUrl = $menuEntry->getIconUrl();
 				return [
-					'id' => $menuEntry['appid'] . '_' . $menuEntry['name'],
+					'id' => $appId . '_' . $entryName,
 					'href' => $urlGenerator->linkToRoute(
-						'app_api.TopMenu.viewExAppPage', ['appId' => $menuEntry['appid'], 'name' => $menuEntry['name']]
+						'app_api.TopMenu.viewExAppPage', ['appId' => $appId, 'name' => $entryName]
 					),
-					'icon' => $menuEntry['icon_url'] === '' ?
+					'icon' => $iconUrl === '' ?
 						$urlGenerator->imagePath('app_api', 'app.svg') :
 						$urlGenerator->linkToRoute(
-							'app_api.ExAppProxy.ExAppGet', ['appId' => $menuEntry['appid'], 'other' => $menuEntry['icon_url']]
+							'app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => $iconUrl]
 						),
-					'name' => $menuEntry['display_name'],
+					'name' => $menuEntry->getDisplayName(),
 				];
 			});
 		}

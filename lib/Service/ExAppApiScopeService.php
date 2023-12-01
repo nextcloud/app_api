@@ -81,11 +81,13 @@ class ExAppApiScopeService {
 	}
 
 	public function registerInitScopes(): bool {
+		// Note: "user_check" should be zero for APIs that does not need user context.
 		$aeApiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
 
 		$initApiScopes = [
 			// AppAPI scopes
 			['api_route' => $aeApiV1Prefix . '/files/actions/menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
+			['api_route' => $aeApiV1Prefix . '/ui/top-menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/log', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ex-app/config', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ex-app/preference', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],

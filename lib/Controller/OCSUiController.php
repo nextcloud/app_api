@@ -8,29 +8,31 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Service\ExFilesActionsMenuService;
 
+use OCA\AppAPI\Service\TopMenuService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
-class ExFileActionsMenuController extends OCSController {
+class OCSUiController extends OCSController {
 	protected $request;
 
 	public function __construct(
 		IRequest $request,
 		private ?string $userId,
 		private ExFilesActionsMenuService $exFilesActionsMenuService,
+		private TopMenuService           $menuEntryService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
 	}
-
 
 	/**
 	 * @PublicPage
@@ -71,6 +73,59 @@ class ExFileActionsMenuController extends OCSController {
 			throw new OCSNotFoundException('FileActionMenu not found');
 		}
 		return new DataResponse();
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 * @throws OCSBadRequestException
+	 */
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	#[AppAPIAuth]
+	public function registerExAppMenuEntry(
+		string $name, string $displayName,
+		string $iconUrl = '', int $adminRequired = 0): DataResponse {
+		$result = $this->menuEntryService->registerExAppMenuEntry(
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $iconUrl, $adminRequired);
+		if (!$result) {
+			throw new OCSBadRequestException("Top Menu entry could not be registered");
+		}
+		return new DataResponse();
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 * @throws OCSNotFoundException
+	 */
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	#[AppAPIAuth]
+	public function unregisterExAppMenuEntry(string $name): DataResponse {
+		$result = $this->menuEntryService->unregisterExAppMenuEntry(
+			$this->request->getHeader('EX-APP-ID'), $name);
+		if (!$result) {
+			throw new OCSNotFoundException('No such Top Menu entry');
+		}
+		return new DataResponse();
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 * @throws OCSNotFoundException
+	 */
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	#[AppAPIAuth]
+	public function getExAppMenuEntry(string $name): DataResponse {
+		$result = $this->menuEntryService->getExAppMenuEntry(
+			$this->request->getHeader('EX-APP-ID'), $name);
+		if (!$result) {
+			throw new OCSNotFoundException('No such Top Menu entry');
+		}
+		return new DataResponse($result, Http::STATUS_OK);
 	}
 
 	/**
