@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Middleware;
 
+use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Controller\TopMenuController;
-use OCA\AppAPI\Service\AppAPIService;
 
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Middleware;
-use OCP\IL10N;
+use OCP\INavigationManager;
 use OCP\IRequest;
-use Psr\Log\LoggerInterface;
 
 class ExAppUiMiddleware extends Middleware {
 
 	public function __construct(
-		private AppAPIService   $service,
 		protected IRequest      $request,
-		private IL10N           $l,
-		private LoggerInterface $logger,
+		private INavigationManager $navigationManager,
 	) {
 	}
 
@@ -39,5 +37,15 @@ class ExAppUiMiddleware extends Middleware {
 			return $correctedOutput;
 		}
 		return $output;
+	}
+
+	public function afterController(Controller $controller, string $methodName, Response $response) {
+		if (($controller instanceof TopMenuController) && ($controller->postprocess)) {
+			$exAppId = $this->request->getParam('appId');
+			$menuEntryName = $this->request->getParam('name');
+			// Setting Navigation active entry manually because they have been added dynamically with custom id
+			$this->navigationManager->setActiveEntry(Application::APP_ID . '_' . $exAppId . '_' . $menuEntryName);
+		}
+		return $response;
 	}
 }

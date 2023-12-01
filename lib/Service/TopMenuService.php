@@ -57,7 +57,9 @@ class TopMenuService {
 				$entryName = $menuEntry->getName();
 				$iconUrl = $menuEntry->getIconUrl();
 				return [
-					'id' => $appId . '_' . $entryName,
+					'id' => Application::APP_ID . '_' . $appId . '_' . $entryName,
+					'type' => 'link',
+					'app' => Application::APP_ID,
 					'href' => $urlGenerator->linkToRoute(
 						'app_api.TopMenu.viewExAppPage', ['appId' => $appId, 'name' => $entryName]
 					),
