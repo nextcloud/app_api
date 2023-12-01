@@ -48,11 +48,13 @@ class TopMenuMapper extends QBMapper {
 				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
 			);
 		try {
-			$qb->executeStatement();
+			$result = $qb->executeStatement();
+			if ($result) {
+				return true;
+			}
 		} catch (Exception) {
-			return false;
 		}
-		return true;
+		return false;
 	}
 
 	/**
