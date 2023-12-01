@@ -42,11 +42,17 @@ class TopMenuController extends Controller {
 	/**
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
+	 * @param string $appId
+	 * @param string $name
+	 * @return TemplateResponse
 	 * @throws Exception
 	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function viewExAppPage(string $appId, string $name): TemplateResponse {
+		if (str_ends_with($name, '/')) {
+			$name = substr($name, 0, -1);
+		}
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();
