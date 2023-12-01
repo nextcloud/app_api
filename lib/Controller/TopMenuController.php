@@ -49,10 +49,7 @@ class TopMenuController extends Controller {
 	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function viewExAppPage(string $appId, string $name): TemplateResponse {
-		if (str_ends_with($name, '/')) {
-			$name = substr($name, 0, -1);
-		}
+	public function viewExAppPage(string $appId, string $name, string $other): TemplateResponse {
 		$exApp = $this->service->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();
