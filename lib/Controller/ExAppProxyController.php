@@ -88,7 +88,7 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->aeRequestToExApp(
+		$response = $this->service->requestToExApp(
 			$exApp, '/' . $other, $this->userId, 'GET', request: $this->request
 		);
 		if (is_array($response)) {

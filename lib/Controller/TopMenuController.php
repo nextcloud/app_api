@@ -9,6 +9,7 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppInitialStateService;
 use OCA\AppAPI\Service\ExAppScriptsService;
 use OCA\AppAPI\Service\ExAppStylesService;
+use OCA\AppAPI\Service\ExAppUsersService;
 use OCA\AppAPI\Service\TopMenuService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -31,7 +32,9 @@ class TopMenuController extends Controller {
 		private ExAppInitialStateService $initialStateService,
 		private ExAppScriptsService      $scriptsService,
 		private ExAppStylesService       $stylesService,
+		private ExAppUsersService		 $exAppUsersService,
 		private AppAPIService            $service,
+		private ?string                  $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -63,6 +66,7 @@ class TopMenuController extends Controller {
 		$this->stylesService->applyExAppStyles($appId, 'top_menu', $menuEntry->getName());
 
 		$this->postprocess = true;
+		$this->exAppUsersService->setupExAppUser($exApp, $this->userId);
 		return new TemplateResponse(Application::APP_ID, 'embedded');
 	}
 }
