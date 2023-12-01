@@ -46,8 +46,8 @@ class OCSUiController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerFileActionMenu(array $fileActionMenuParams): DataResponse {
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$registeredFileActionMenu = $this->exFilesActionsMenuService->registerFileActionMenu($appId, $fileActionMenuParams);
+		$registeredFileActionMenu = $this->exFilesActionsMenuService->registerFileActionMenu(
+			$this->request->getHeader('EX-APP-ID'), $fileActionMenuParams);
 		return new DataResponse([
 			'success' => $registeredFileActionMenu !== null,
 			'registeredFileActionMenu' => $registeredFileActionMenu,
@@ -67,12 +67,29 @@ class OCSUiController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function unregisterFileActionMenu(string $fileActionMenuName): DataResponse {
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$unregisteredFileActionMenu = $this->exFilesActionsMenuService->unregisterFileActionMenu($appId, $fileActionMenuName);
+		$unregisteredFileActionMenu = $this->exFilesActionsMenuService->unregisterFileActionMenu(
+			$this->request->getHeader('EX-APP-ID'), $fileActionMenuName);
 		if ($unregisteredFileActionMenu === null) {
 			throw new OCSNotFoundException('FileActionMenu not found');
 		}
 		return new DataResponse();
+	}
+
+	/**
+	 * @NoCSRFRequired
+	 * @NoAdminRequired
+	 * @throws OCSNotFoundException
+	 */
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	#[AppAPIAuth]
+	public function getFileActionMenu(string $name): DataResponse {
+		$result = $this->exFilesActionsMenuService->getExAppFileAction(
+			$this->request->getHeader('EX-APP-ID'), $name);
+		if (!$result) {
+			throw new OCSNotFoundException('FileActionMenu not found');
+		}
+		return new DataResponse($result, Http::STATUS_OK);
 	}
 
 	/**
