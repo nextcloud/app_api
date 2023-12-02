@@ -6,6 +6,7 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppInitialStateService;
 use OCA\AppAPI\Service\ExAppScriptsService;
 use OCA\AppAPI\Service\ExAppStylesService;
@@ -21,7 +22,10 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
+use OCP\Http\Client\IResponse;
+use OCP\IConfig;
 use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 class OCSUiController extends OCSController {
 	protected $request;
@@ -32,8 +36,11 @@ class OCSUiController extends OCSController {
 		private readonly ExFilesActionsMenuService $exFilesActionsMenuService,
 		private readonly TopMenuService            $menuEntryService,
 		private readonly ExAppInitialStateService  $initialStateService,
-		private readonly ExAppScriptsService $scriptsService,
-		private readonly ExAppStylesService $stylesService,
+		private readonly ExAppScriptsService       $scriptsService,
+		private readonly ExAppStylesService        $stylesService,
+		private readonly AppAPIService             $appAPIService,
+		private readonly IConfig                   $config,
+		private readonly LoggerInterface           $logger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -318,7 +325,44 @@ class OCSUiController extends OCSController {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler): DataResponse {
-		$result = $this->exFilesActionsMenuService->handleFileAction($this->userId, $appId, $actionName, $actionHandler, $actionFile);
+		$result = false;
+		$exFileAction = $this->exFilesActionsMenuService->getExAppFileAction($appId, $actionName);
+		if ($exFileAction !== null) {
+			$handler = $exFileAction->getActionHandler(); // route on ex app
+			$params = [
+				'actionName' => $actionName,
+				'actionHandler' => $actionHandler,
+				'actionFile' => [
+					'fileId' => $actionFile['fileId'],
+					'name' => $actionFile['name'],
+					'directory' => $actionFile['directory'],
+					'etag' => $actionFile['etag'],
+					'mime' => $actionFile['mime'],
+					'fileType' => $actionFile['fileType'],
+					'mtime' => $actionFile['mtime'] / 1000, // convert ms to s
+					'size' => intval($actionFile['size']),
+					'favorite' => $actionFile['favorite'] ?? "false",
+					'permissions' => $actionFile['permissions'],
+					'shareOwner' => $actionFile['shareOwner'] ?? null,
+					'shareOwnerId' => $actionFile['shareOwnerId'] ?? null,
+					'shareTypes' => $actionFile['shareTypes'] ?? null,
+					'shareAttributes' => $actionFile['shareAttributes'] ?? null,
+					'sharePermissions' => $actionFile['sharePermissions'] ?? null,
+					'userId' => $this->userId,
+					'instanceId' => $this->config->getSystemValue('instanceid', null),
+				],
+			];
+			$exApp = $this->appAPIService->getExApp($appId);
+			if ($exApp !== null) {
+				$result = $this->appAPIService->aeRequestToExApp($exApp, $handler, $this->userId, 'POST', $params, [], $this->request);
+				if ($result instanceof IResponse) {
+					$result = $result->getStatusCode() === 200;
+				}
+				else if (isset($result['error'])) {
+					$this->logger->error(sprintf('Failed to handle ExApp %s FileAction %s. Error: %s', $appId, $actionName, $result['error']));
+				}
+			}
+		}
 		return new DataResponse([
 			'success' => $result,
 			'handleFileActionSent' => $result,

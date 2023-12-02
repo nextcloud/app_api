@@ -14,11 +14,8 @@ use OCP\AppFramework\Http;
 use OCP\DB\Exception;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
-use OCP\Http\Client\IResponse;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\IConfig;
-use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
 class ExFilesActionsMenuService {
@@ -27,13 +24,10 @@ class ExFilesActionsMenuService {
 	private IClient $client;
 
 	public function __construct(
-		ICacheFactory            $cacheFactory,
-		private  ExFilesActionsMenuMapper $mapper,
-		private LoggerInterface          $logger,
-		IClientService           $clientService,
-		private AppAPIService            $appAPIService,
-		private IRequest                 $request,
-		private IConfig                  $config,
+		ICacheFactory                             $cacheFactory,
+		private readonly ExFilesActionsMenuMapper $mapper,
+		private readonly LoggerInterface          $logger,
+		IClientService                            $clientService,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
 		$this->client = $clientService->newClient();
@@ -132,48 +126,6 @@ class ExFilesActionsMenuService {
 			$fileAction = null;
 		}
 		return $fileAction;
-	}
-
-	public function handleFileAction(string $userId, string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
-		$exFileAction = $this->getExAppFileAction($appId, $fileActionName);
-		if ($exFileAction !== null) {
-			$handler = $exFileAction->getActionHandler(); // route on ex app
-			$params = [
-				'actionName' => $fileActionName,
-				'actionHandler' => $actionHandler,
-				'actionFile' => [
-					'fileId' => $actionFile['fileId'],
-					'name' => $actionFile['name'],
-					'directory' => $actionFile['directory'],
-					'etag' => $actionFile['etag'],
-					'mime' => $actionFile['mime'],
-					'fileType' => $actionFile['fileType'],
-					'mtime' => $actionFile['mtime'] / 1000, // convert ms to s
-					'size' => intval($actionFile['size']),
-					'favorite' => $actionFile['favorite'] ?? "false",
-					'permissions' => $actionFile['permissions'],
-					'shareOwner' => $actionFile['shareOwner'] ?? null,
-					'shareOwnerId' => $actionFile['shareOwnerId'] ?? null,
-					'shareTypes' => $actionFile['shareTypes'] ?? null,
-					'shareAttributes' => $actionFile['shareAttributes'] ?? null,
-					'sharePermissions' => $actionFile['sharePermissions'] ?? null,
-					'userId' => $userId,
-					'instanceId' => $this->config->getSystemValue('instanceid', null),
-				],
-			];
-			$exApp = $this->appAPIService->getExApp($appId);
-			if ($exApp !== null) {
-				$result = $this->appAPIService->aeRequestToExApp($exApp, $handler, $userId, 'POST', $params, [], $this->request);
-				if ($result instanceof IResponse) {
-					return $result->getStatusCode() === 200;
-				}
-				if (isset($result['error'])) {
-					$this->logger->error(sprintf('Failed to handle ExApp %s FileAction %s. Error: %s', $appId, $fileActionName, $result['error']));
-					return false;
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
