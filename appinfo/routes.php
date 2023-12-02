@@ -8,7 +8,6 @@ return [
 		['name' => 'Config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
 
 		// Menu Entries
-		['name' => 'TopMenu#ExAppIcon', 'url' => '/embedded/{appId}/{name}/icon', 'verb' => 'GET' , 'root' => '/embedded'],
 		['name' => 'TopMenu#viewExAppPage',
 			'url' => '/embedded/{appId}/{name}/{other}', 'verb' => 'GET' , 'root' => '/embedded',
 			'requirements' => array('other' => '.*'), 'defaults' => array('other' => '')],
@@ -88,5 +87,16 @@ return [
 		['name' => 'OCSUi#registerExAppMenuEntry', 'url' => '/api/v1/ui/top-menu', 'verb' => 'POST'],
 		['name' => 'OCSUi#unregisterExAppMenuEntry', 'url' => '/api/v1/ui/top-menu', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getExAppMenuEntry', 'url' => '/api/v1/ui/top-menu', 'verb' => 'GET'],
+
+		//Common UI
+		['name' => 'OCSUi#setExAppInitialState', 'url' => '/api/v1/ui/initial-state', 'verb' => 'POST'],
+		['name' => 'OCSUi#deleteExAppInitialState', 'url' => '/api/v1/ui/initial-state', 'verb' => 'DELETE'],
+		['name' => 'OCSUi#getExAppInitialState', 'url' => '/api/v1/ui/initial-state', 'verb' => 'GET'],
+		['name' => 'OCSUi#setExAppScript', 'url' => '/api/v1/ui/script', 'verb' => 'POST'],
+		['name' => 'OCSUi#deleteExAppScript', 'url' => '/api/v1/ui/script', 'verb' => 'DELETE'],
+		['name' => 'OCSUi#getExAppScript', 'url' => '/api/v1/ui/script', 'verb' => 'GET'],
+		['name' => 'OCSUi#setExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'POST'],
+		['name' => 'OCSUi#deleteExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'DELETE'],
+		['name' => 'OCSUi#getExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'GET'],
 	],
 ];

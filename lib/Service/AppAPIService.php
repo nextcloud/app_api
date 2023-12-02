@@ -41,27 +41,30 @@ class AppAPIService {
 	private IClient $client;
 
 	public function __construct(
-		private LoggerInterface $logger,
-		private ILogFactory $logFactory,
-		ICacheFactory $cacheFactory,
-		private IThrottler $throttler,
-		private IConfig $config,
-		IClientService $clientService,
-		private ExAppMapper $exAppMapper,
-		private IAppManager $appManager,
-		private ExAppUsersService $exAppUsersService,
-		private ExAppApiScopeService $exAppApiScopeService,
-		private ExAppScopesService $exAppScopesService,
-		private TopMenuService $topMenuService,
-		private ISecureRandom $random,
-		private IUserSession $userSession,
-		private ISession $session,
-		private IUserManager $userManager,
-		private ExAppConfigService $exAppConfigService,
-		private ExNotificationsManager $exNotificationsManager,
-		private TalkBotsService $talkBotsService,
-		private ExAppFetcher $exAppFetcher,
-		private ExAppArchiveFetcher $exAppArchiveFetcher,
+		private readonly LoggerInterface          $logger,
+		private readonly ILogFactory              $logFactory,
+		ICacheFactory                             $cacheFactory,
+		private readonly IThrottler               $throttler,
+		private readonly IConfig                  $config,
+		IClientService                            $clientService,
+		private readonly ExAppMapper              $exAppMapper,
+		private readonly IAppManager              $appManager,
+		private readonly ExAppUsersService        $exAppUsersService,
+		private readonly ExAppApiScopeService     $exAppApiScopeService,
+		private readonly ExAppScopesService       $exAppScopesService,
+		private readonly TopMenuService           $topMenuService,
+		private readonly ExAppInitialStateService $initialStateService,
+		private readonly ExAppScriptsService      $scriptsService,
+		private readonly ExAppStylesService       $stylesService,
+		private readonly ISecureRandom            $random,
+		private readonly IUserSession             $userSession,
+		private readonly ISession                 $session,
+		private readonly IUserManager             $userManager,
+		private readonly ExAppConfigService       $exAppConfigService,
+		private readonly ExNotificationsManager   $exNotificationsManager,
+		private readonly TalkBotsService          $talkBotsService,
+		private readonly ExAppFetcher             $exAppFetcher,
+		private readonly ExAppArchiveFetcher      $exAppArchiveFetcher,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 		$this->client = $clientService->newClient();
@@ -140,7 +143,10 @@ class AppAPIService {
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
 			$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
-			$this->topMenuService->unregisterExAppMenuEntries($exApp);
+			$this->topMenuService->unregisterExAppMenuEntries($appId);
+			$this->initialStateService->deleteExAppInitialStates($appId);
+			$this->scriptsService->deleteExAppScripts($appId);
+			$this->stylesService->deleteExAppStyles($appId);
 			$this->cache->remove('/exApp_' . $appId);
 			return $exApp;
 		} catch (Exception $e) {

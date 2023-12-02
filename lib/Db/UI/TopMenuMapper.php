@@ -74,7 +74,7 @@ class TopMenuMapper extends QBMapper {
 	 * @param string $name
 	 *
 	 * @return TopMenu
-	 *@throws Exception
+	 * @throws Exception
 	 * @throws MultipleObjectsReturnedException if more than one result
 	 * @throws DoesNotExistException if not found
 	 */

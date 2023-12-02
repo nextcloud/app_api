@@ -106,7 +106,7 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('path', Types::STRING, [
 				'notnull' => true,
-				'length' => 2000,
+				'length' => 410,
 			]);
 			$table->addColumn('after_app_id', Types::STRING, [
 				'notnull' => false,
@@ -114,7 +114,7 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'type', 'name'], 'ui_script__idx');
+			$table->addUniqueIndex(['appid', 'type', 'name', 'path'], 'ui_script__idx');
 		}
 
 		if (!$schema->hasTable('ex_apps_ui_styles')) {
@@ -138,11 +138,11 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('path', Types::STRING, [
 				'notnull' => true,
-				'length' => 2000,
+				'length' => 410,
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid', 'type', 'name'], 'ui_style__idx');
+			$table->addUniqueIndex(['appid', 'type', 'name', 'path'], 'ui_style__idx');
 		}
 
 		return $schema;

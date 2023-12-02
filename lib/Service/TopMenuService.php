@@ -6,7 +6,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\UI\TopMenu;
 use OCA\AppAPI\Db\UI\TopMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -28,9 +27,12 @@ class TopMenuService {
 	private ICache $cache;
 
 	public function __construct(
-		private TopMenuMapper   $mapper,
-		private LoggerInterface $logger,
-		ICacheFactory           $cacheFactory,
+		private readonly TopMenuMapper            $mapper,
+		private readonly LoggerInterface          $logger,
+		private readonly ExAppInitialStateService $initialStateService,
+		private readonly ExAppScriptsService      $scriptsService,
+		private readonly ExAppStylesService       $stylesService,
+		ICacheFactory                             $cacheFactory,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_top_menus');
 	}
@@ -76,11 +78,7 @@ class TopMenuService {
 
 	public function registerExAppMenuEntry(string $appId, string $name, string $displayName,
 		string $iconUrl, int $adminRequired): ?TopMenu {
-		try {
-			$menuEntry = $this->mapper->findByAppIdName($appId, $name);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$menuEntry = null;
-		}
+		$menuEntry = $this->getExAppMenuEntry($appId, $name);
 		try {
 			$newMenuEntry = new TopMenu([
 				'appid' => $appId,
@@ -112,16 +110,19 @@ class TopMenuService {
 		}
 		$this->cache->remove('/ex_top_menu_' . $appId . '_' . $name);
 		$this->cache->remove('/ex_top_menus');
+		$this->initialStateService->deleteExAppInitialStatesByTypeName($appId, 'top_menu', $name);
+		$this->scriptsService->deleteExAppScriptsByTypeName($appId, 'top_menu', $name);
+		$this->stylesService->deleteExAppStylesByTypeName($appId, 'top_menu', $name);
 		return true;
 	}
 
-	public function unregisterExAppMenuEntries(ExApp $exApp): int {
+	public function unregisterExAppMenuEntries(string $appId): int {
 		try {
-			$result = $this->mapper->removeAllByAppId($exApp->getAppid());
+			$result = $this->mapper->removeAllByAppId($appId);
 		} catch (Exception) {
 			$result = -1;
 		}
-		$this->cache->clear('/ex_top_menu_' . $exApp->getAppid());
+		$this->cache->clear('/ex_top_menu_' . $appId);
 		$this->cache->remove('/ex_top_menus');
 		return $result;
 	}
