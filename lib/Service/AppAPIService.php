@@ -56,6 +56,7 @@ class AppAPIService {
 		private readonly ExAppInitialStateService $initialStateService,
 		private readonly ExAppScriptsService      $scriptsService,
 		private readonly ExAppStylesService       $stylesService,
+		private readonly ExFilesActionsMenuService $filesActionsMenuService,
 		private readonly ISecureRandom            $random,
 		private readonly IUserSession             $userSession,
 		private readonly ISession                 $session,
@@ -143,6 +144,7 @@ class AppAPIService {
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
 			$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
+			$this->filesActionsMenuService->unregisterExAppFileActions($appId);
 			$this->topMenuService->unregisterExAppMenuEntries($appId);
 			$this->initialStateService->deleteExAppInitialStates($appId);
 			$this->scriptsService->deleteExAppScripts($appId);
@@ -186,6 +188,8 @@ class AppAPIService {
 				$cacheKey = '/exApp_' . $exApp->getAppid();
 				$exApp->setEnabled(1);
 				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+				$this->filesActionsMenuService->resetCacheEnabled();
+				$this->topMenuService->resetCacheEnabled();
 
 				$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT');
 				if ($exAppEnabled instanceof IResponse) {
@@ -240,6 +244,8 @@ class AppAPIService {
 			$cacheKey = '/exApp_' . $exApp->getAppid();
 			$exApp->setEnabled(0);
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+			$this->topMenuService->resetCacheEnabled();
+			$this->filesActionsMenuService->resetCacheEnabled();
 			return true;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while disabling ExApp: %s', $e->getMessage()));

@@ -69,9 +69,8 @@ class ExFilesActionsMenuService {
 				$newFileActionMenu->setId($fileActionMenu->getId());
 			}
 			$fileActionMenu = $this->mapper->insertOrUpdate($newFileActionMenu);
-			$cacheKey = '/ex_files_actions_menu_' . $appId . '_' . $params['name'];
-			$this->cache->remove('/ex_files_actions_menus');
-			$this->cache->set($cacheKey, $fileActionMenu);
+			$this->cache->set('/ex_files_actions_menu_' . $appId . '_' . $params['name'], $fileActionMenu);
+			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to register ExApp %s FileActionMenu %s. Error: %s', $appId, $params['name'], $e->getMessage()), ['exception' => $e]);
 			return null;
@@ -87,7 +86,7 @@ class ExFilesActionsMenuService {
 			}
 			$this->mapper->delete($fileActionMenu);
 			$this->cache->remove('/ex_files_actions_menu_' . $appId . '_' . $fileActionMenuName);
-			$this->cache->remove('/ex_files_actions_menus');
+			$this->resetCacheEnabled();
 			return $fileActionMenu;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s FileActionMenu %s. Error: %s', $appId, $fileActionMenuName, $e->getMessage()), ['exception' => $e]);
@@ -205,5 +204,20 @@ class ExFilesActionsMenuService {
 			return null;
 		}
 		return null;
+	}
+
+	public function unregisterExAppFileActions(string $appId): int {
+		try {
+			$result = $this->mapper->removeAllByAppId($appId);
+		} catch (Exception) {
+			$result = -1;
+		}
+		$this->cache->clear('/ex_files_actions_menu_' . $appId);
+		$this->resetCacheEnabled();
+		return $result;
+	}
+
+	public function resetCacheEnabled(): void {
+		$this->cache->remove('/ex_files_actions_menus');
 	}
 }

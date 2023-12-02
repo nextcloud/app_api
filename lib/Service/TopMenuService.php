@@ -91,9 +91,8 @@ class TopMenuService {
 				$newMenuEntry->setId($menuEntry->getId());
 			}
 			$menuEntry = $this->mapper->insertOrUpdate($newMenuEntry);
-			$cacheKey = '/ex_top_menu_' . $appId . '_' . $name;
-			$this->cache->remove('/ex_top_menus');
-			$this->cache->set($cacheKey, $menuEntry);
+			$this->cache->set('/ex_top_menu_' . $appId . '_' . $name, $menuEntry);
+			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
 				sprintf('Failed to register ExApp %s TopMenu %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]
@@ -109,7 +108,7 @@ class TopMenuService {
 			return false;
 		}
 		$this->cache->remove('/ex_top_menu_' . $appId . '_' . $name);
-		$this->cache->remove('/ex_top_menus');
+		$this->resetCacheEnabled();
 		$this->initialStateService->deleteExAppInitialStatesByTypeName($appId, 'top_menu', $name);
 		$this->scriptsService->deleteExAppScriptsByTypeName($appId, 'top_menu', $name);
 		$this->stylesService->deleteExAppStylesByTypeName($appId, 'top_menu', $name);
@@ -123,7 +122,7 @@ class TopMenuService {
 			$result = -1;
 		}
 		$this->cache->clear('/ex_top_menu_' . $appId);
-		$this->cache->remove('/ex_top_menus');
+		$this->resetCacheEnabled();
 		return $result;
 	}
 
@@ -159,5 +158,9 @@ class TopMenuService {
 		} catch (Exception) {
 			return [];
 		}
+	}
+
+	public function resetCacheEnabled(): void {
+		$this->cache->remove('/ex_top_menus');
 	}
 }
