@@ -217,7 +217,7 @@ class OCSUiController extends OCSController {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	#[AppAPIAuth]
-	public function setExAppScript(string $type, string $name, string $path, string $afterAppId): DataResponse {
+	public function setExAppScript(string $type, string $name, string $path, string $afterAppId = ''): DataResponse {
 		$result = $this->scriptsService->setExAppScript(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path, $afterAppId);
 		if (!$result) {
