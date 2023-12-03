@@ -32,7 +32,7 @@ class ExAppScriptsService {
 				'type' => $type,
 				'name' => $name,
 				'path' => $path,
-				'afterAppId' => $afterAppId,
+				'after_app_id' => $afterAppId,
 			]);
 			if ($script !== null) {
 				$newScript->setId($script->getId());

@@ -50,13 +50,13 @@ class Script extends Entity implements JsonSerializable {
 			$this->setType($params['type']);
 		}
 		if (isset($params['name'])) {
-			$this->setType($params['name']);
+			$this->setName($params['name']);
 		}
 		if (isset($params['path'])) {
 			$this->setPath($params['path']);
 		}
-		if (isset($params['afterAppId'])) {
-			$this->setAfterAppId($params['afterAppId']);
+		if (isset($params['after_app_id'])) {
+			$this->setAfterAppId($params['after_app_id']);
 		}
 	}
 
@@ -67,7 +67,7 @@ class Script extends Entity implements JsonSerializable {
 			'type' => $this->getType(),
 			'name' => $this->getName(),
 			'path' => $this->getPath(),
-			'afterAppId' => $this->getAfterAppId(),
+			'after_app_id' => $this->getAfterAppId(),
 		];
 	}
 }
