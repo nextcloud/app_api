@@ -54,10 +54,9 @@ class ExAppScriptsService {
 	public function getExAppScript(string $appId, string $type, string $name, string $path): ?Script {
 		try {
 			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, $path);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error($e->getMessage());
-			return null;
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 		}
+		return null;
 	}
 
 	public function deleteExAppScriptsByTypeName(string $appId, string $type, string $name): int {
@@ -91,7 +90,7 @@ class ExAppScriptsService {
 		$i = 0;
 		foreach ($scripts as $value) {
 			$fakeJsPath = 'proxy_js/' . $i;
-			if (is_null($value['after_app_id'])) {
+			if (empty($value['after_app_id'])) {
 				Util::addScript(Application::APP_ID, $fakeJsPath);
 			} else {
 				Util::addScript(Application::APP_ID, $fakeJsPath, $value['after_app_id']);

@@ -50,9 +50,8 @@ class ExAppInitialStateService {
 		try {
 			return $this->mapper->findByAppIdTypeNameKey($appId, $type, $name, $key);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error($e->getMessage());
-			return null;
 		}
+		return null;
 	}
 
 	public function deleteExAppInitialStates(string $appId): int {
