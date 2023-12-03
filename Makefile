@@ -15,7 +15,9 @@ help:
 	@echo " "
 	@echo "  Next commands are only for dev environment with nextcloud-docker-dev!"
 	@echo "  Daemon register(Linux, socket):"
-	@echo "  dock-sock          create docker daemon for Nextcloud 28, 27 (/var/run/docker.sock)"
+	@echo "  dock-sock          create docker daemon for Nextcloud 29, 28, 27 (/var/run/docker.sock)"
+	@echo "  dock-sock29        create docker daemon for Nextcloud 28 (/var/run/docker.sock)"
+	@echo "  dock-sock29-gpu    create docker daemon with GPU for Nextcloud 28 (/var/run/docker.sock)"
 	@echo "  dock-sock28        create docker daemon for Nextcloud 28 (/var/run/docker.sock)"
 	@echo "  dock-sock28-gpu    create docker daemon with GPU for Nextcloud 28 (/var/run/docker.sock)"
 	@echo "  dock-sock27        create docker daemon for Nextcloud 27 (/var/run/docker.sock)"
@@ -30,21 +32,35 @@ help:
 
 .PHONY: dock-sock
 dock-sock:
-	$(MAKE) dock-sock28 dock-sock27
+	$(MAKE) dock-sock29 dock-sock28 dock-sock27
 
-.PHONY: dock-sock28
-dock-sock28:
+.PHONY: dock-sock29
+dock-sock29:
 	@echo "creating daemon for nextcloud 'master' container"
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://nextcloud.local/index.php --net=master_default
 
-.PHONY: dock-sock28-gpu
-dock-sock28-gpu:
+.PHONY: dock-sock29-gpu
+dock-sock29-gpu:
 	@echo "creating daemon with NVIDIA gpu for nextcloud 'master' container"
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev_nvidia || true
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev_gpu "Docker with GPU" docker-install unix-socket /var/run/docker.sock http://nextcloud.local/index.php --net=master_default --gpu --set-default
+
+.PHONY: dock-sock28
+dock-sock28:
+	@echo "creating daemon for nextcloud 'stable28' container"
+	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
+	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:register \
+		docker_dev Docker docker-install unix-socket /var/run/docker.sock http://stable28.local/index.php --net=master_default
+
+.PHONY: dock-sock28-gpu
+dock-sock28-gpu:
+	@echo "creating daemon with NVIDIA gpu for nextcloud 'stable28' container"
+	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev_nvidia || true
+	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:register \
+		docker_dev_gpu "Docker with GPU" docker-install unix-socket /var/run/docker.sock http://stable28.local/index.php --net=master_default --gpu --set-default
 
 .PHONY: dock-sock27
 dock-sock27:
