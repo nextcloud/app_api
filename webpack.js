@@ -12,6 +12,11 @@ webpackConfig.stats = {
 	modules: false,
 }
 
+webpackConfig.output.clean = {
+	// keep js/proxy_js folder
+	keep: 'proxy_js',
+}
+
 const appId = 'app_api'
 webpackConfig.entry = {
 	main: { import: path.join(__dirname, 'src', 'main.js'), filename: appId + '-main.js' },
