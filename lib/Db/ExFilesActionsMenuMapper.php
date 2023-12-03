@@ -84,4 +84,16 @@ class ExFilesActionsMenuMapper extends QBMapper {
 			);
 		return $this->findEntity($qb);
 	}
+
+	/**
+	 * @throws Exception
+	 */
+	public function removeAllByAppId(string $appId): int {
+		$qb = $this->db->getQueryBuilder();
+		$qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+			);
+		return $qb->executeStatement();
+	}
 }

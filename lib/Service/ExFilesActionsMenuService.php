@@ -14,11 +14,8 @@ use OCP\AppFramework\Http;
 use OCP\DB\Exception;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
-use OCP\Http\Client\IResponse;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\IConfig;
-use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
 class ExFilesActionsMenuService {
@@ -27,13 +24,10 @@ class ExFilesActionsMenuService {
 	private IClient $client;
 
 	public function __construct(
-		ICacheFactory            $cacheFactory,
-		private  ExFilesActionsMenuMapper $mapper,
-		private LoggerInterface          $logger,
-		IClientService           $clientService,
-		private AppAPIService            $appAPIService,
-		private IRequest                 $request,
-		private IConfig                  $config,
+		ICacheFactory                             $cacheFactory,
+		private readonly ExFilesActionsMenuMapper $mapper,
+		private readonly LoggerInterface          $logger,
+		IClientService                            $clientService,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
 		$this->client = $clientService->newClient();
@@ -69,9 +63,8 @@ class ExFilesActionsMenuService {
 				$newFileActionMenu->setId($fileActionMenu->getId());
 			}
 			$fileActionMenu = $this->mapper->insertOrUpdate($newFileActionMenu);
-			$cacheKey = '/ex_files_actions_menu_' . $appId . '_' . $params['name'];
-			$this->cache->remove('/ex_files_actions_menus');
-			$this->cache->set($cacheKey, $fileActionMenu);
+			$this->cache->set('/ex_files_actions_menu_' . $appId . '_' . $params['name'], $fileActionMenu);
+			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to register ExApp %s FileActionMenu %s. Error: %s', $appId, $params['name'], $e->getMessage()), ['exception' => $e]);
 			return null;
@@ -87,7 +80,7 @@ class ExFilesActionsMenuService {
 			}
 			$this->mapper->delete($fileActionMenu);
 			$this->cache->remove('/ex_files_actions_menu_' . $appId . '_' . $fileActionMenuName);
-			$this->cache->remove('/ex_files_actions_menus');
+			$this->resetCacheEnabled();
 			return $fileActionMenu;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s FileActionMenu %s. Error: %s', $appId, $fileActionMenuName, $e->getMessage()), ['exception' => $e]);
@@ -126,55 +119,13 @@ class ExFilesActionsMenuService {
 		}
 
 		try {
-			$fileAction = $this->mapper->findByAppidName($appId, $fileActionName);
+			$fileAction = $this->mapper->findByAppIdName($appId, $fileActionName);
 			$this->cache->set($cacheKey, $fileAction);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 			$this->logger->error(sprintf('ExApp %s FileAction %s not found. Error: %s', $appId, $fileActionName, $e->getMessage()), ['exception' => $e]);
 			$fileAction = null;
 		}
 		return $fileAction;
-	}
-
-	public function handleFileAction(string $userId, string $appId, string $fileActionName, string $actionHandler, array $actionFile): bool {
-		$exFileAction = $this->getExAppFileAction($appId, $fileActionName);
-		if ($exFileAction !== null) {
-			$handler = $exFileAction->getActionHandler(); // route on ex app
-			$params = [
-				'actionName' => $fileActionName,
-				'actionHandler' => $actionHandler,
-				'actionFile' => [
-					'fileId' => $actionFile['fileId'],
-					'name' => $actionFile['name'],
-					'directory' => $actionFile['directory'],
-					'etag' => $actionFile['etag'],
-					'mime' => $actionFile['mime'],
-					'fileType' => $actionFile['fileType'],
-					'mtime' => $actionFile['mtime'] / 1000, // convert ms to s
-					'size' => intval($actionFile['size']),
-					'favorite' => $actionFile['favorite'] ?? "false",
-					'permissions' => $actionFile['permissions'],
-					'shareOwner' => $actionFile['shareOwner'] ?? null,
-					'shareOwnerId' => $actionFile['shareOwnerId'] ?? null,
-					'shareTypes' => $actionFile['shareTypes'] ?? null,
-					'shareAttributes' => $actionFile['shareAttributes'] ?? null,
-					'sharePermissions' => $actionFile['sharePermissions'] ?? null,
-					'userId' => $userId,
-					'instanceId' => $this->config->getSystemValue('instanceid', null),
-				],
-			];
-			$exApp = $this->appAPIService->getExApp($appId);
-			if ($exApp !== null) {
-				$result = $this->appAPIService->aeRequestToExApp($exApp, $handler, $userId, 'POST', $params, [], $this->request);
-				if ($result instanceof IResponse) {
-					return $result->getStatusCode() === 200;
-				}
-				if (isset($result['error'])) {
-					$this->logger->error(sprintf('Failed to handle ExApp %s FileAction %s. Error: %s', $appId, $fileActionName, $result['error']));
-					return false;
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -205,5 +156,20 @@ class ExFilesActionsMenuService {
 			return null;
 		}
 		return null;
+	}
+
+	public function unregisterExAppFileActions(string $appId): int {
+		try {
+			$result = $this->mapper->removeAllByAppId($appId);
+		} catch (Exception) {
+			$result = -1;
+		}
+		$this->cache->clear('/ex_files_actions_menu_' . $appId);
+		$this->resetCacheEnabled();
+		return $result;
+	}
+
+	public function resetCacheEnabled(): void {
+		$this->cache->remove('/ex_files_actions_menus');
 	}
 }
