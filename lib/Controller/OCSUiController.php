@@ -115,9 +115,9 @@ class OCSUiController extends OCSController {
 	#[NoCSRFRequired]
 	public function registerExAppMenuEntry(
 		string $name, string $displayName,
-		string $iconUrl = '', int $adminRequired = 0): DataResponse {
+		string $icon = '', int $adminRequired = 0): DataResponse {
 		$result = $this->menuEntryService->registerExAppMenuEntry(
-			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $iconUrl, $adminRequired);
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $icon, $adminRequired);
 		if (!$result) {
 			throw new OCSBadRequestException("Top Menu entry could not be registered");
 		}

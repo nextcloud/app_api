@@ -213,7 +213,9 @@ jobs:
           DB_PORT: 4444
         run: |
           mkdir data
-          ./occ maintenance:install --verbose --database=mysql --database-name=nextcloud --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword --admin-user admin --admin-pass admin
+          ./occ maintenance:install --verbose --database=mysql --database-name=nextcloud \
+            --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
           ./occ app:enable --force ${{ env.APP_NAME }}
           ./occ app:enable notifications
           ./occ app:enable --force ${{ env.APP_NAME }}
@@ -254,11 +256,123 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
+  nc-py-api-oci:
+    runs-on: ubuntu-22.04
+    name: NC_Py_API • stable28 • 8.2 • Oracle
+
+    services:
+      oracle:
+        image: ghcr.io/gvenzl/oracle-xe:11
+        env:
+          ORACLE_RANDOM_PASSWORD: true
+          APP_USER: useroracle
+          APP_USER_PASSWORD: userpassword
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 1521:1521/tcp
+
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: stable28
+
+      - name: Checkout Notifications
+        uses: actions/checkout@v3
+        with:
+          repository: nextcloud/notifications
+          ref: stable28
+          path: apps/notifications
+
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, \
+            posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, oci8
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=oci --database-name=XE \
+            --database-host=127.0.0.1 --database-port=1521 --database-user=useroracle --database-pass=userpassword \
+            --admin-user admin --admin-pass admin
+          ./occ app:enable --force ${{ env.APP_NAME }}
+          ./occ app:enable notifications
+          ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Run Nextcloud
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+
+      - name: Checkout NcPyApi
+        uses: actions/checkout@v3
+        with:
+          path: nc_py_api
+          repository: cloud-py-api/nc_py_api
+
+      - name: Install NcPyApi
+        working-directory: nc_py_api
+        run: python3 -m pip -v install ".[dev]"
+
+      - name: Register NcPyApi
+        run: |
+          cd nc_py_api
+          python3 tests/_install.py &
+          echo $! > /tmp/_install.pid
+          python3 tests/_install_wait.py http://127.0.0.1:$APP_PORT/heartbeat "\"status\":\"ok\"" 15 0.5
+          cd ..
+          sh nc_py_api/scripts/ci_register.sh "$APP_ID" "$APP_VERSION" "$APP_SECRET" "localhost" "$APP_PORT"
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Run NC_Py_API tests
+        working-directory: nc_py_api
+        run: python3 -m pytest
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: oci_nc_py_api_stable28_8.2_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
   tests-success:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [nc-py-api-pgsql, nc-py-api-mysql]
+    needs: [nc-py-api-pgsql, nc-py-api-mysql, nc-py-api-oci]
     name: Tests-OK
     steps:
       - run: echo "Tests passed successfully"

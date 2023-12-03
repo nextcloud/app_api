@@ -207,7 +207,7 @@ class Version1000Date202305221555 extends SimpleMigrationStep {
 				'default' => 0,
 			]);
 			$table->addColumn('icon', Types::STRING, [
-				'notnull' => true,
+				'notnull' => false,
 				'default' => '',
 			]);
 			$table->addColumn('icon_class', Types::STRING, [

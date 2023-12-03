@@ -28,7 +28,7 @@ class TopMenuMapper extends QBMapper {
 			'menu_entries.appid',
 			'menu_entries.name',
 			'menu_entries.display_name',
-			'menu_entries.icon_url',
+			'menu_entries.icon',
 			'menu_entries.admin_required',
 		)
 			->from($this->tableName, 'menu_entries')
