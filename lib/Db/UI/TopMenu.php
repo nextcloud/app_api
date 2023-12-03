@@ -54,8 +54,6 @@ class TopMenu extends Entity implements JsonSerializable {
 		}
 		if (isset($params['icon_url'])) {
 			$this->setIconUrl($params['icon_url']);
-		} else {
-			$this->setIconUrl('');
 		}
 		if (isset($params['admin_required'])) {
 			$this->setAdminRequired($params['admin_required']);
