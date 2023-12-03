@@ -12,12 +12,12 @@ use OCP\AppFramework\Db\Entity;
  *
  * @package OCA\AppAPI\Db\UI
  *
- * @method string getAppId()
+ * @method string getAppid()
  * @method string getType()
  * @method string getName()
  * @method string getKey()
  * @method string getValue()
- * @method void setAppId(string $appid)
+ * @method void setAppid(string $appid)
  * @method void setType(string $type)
  * @method void setName(string $name)
  * @method void setKey(string $key)
@@ -44,13 +44,13 @@ class InitialState extends Entity implements JsonSerializable {
 			$this->setId($params['id']);
 		}
 		if (isset($params['appid'])) {
-			$this->setAppId($params['appid']);
+			$this->setAppid($params['appid']);
 		}
 		if (isset($params['type'])) {
 			$this->setType($params['type']);
 		}
 		if (isset($params['name'])) {
-			$this->setType($params['name']);
+			$this->setName($params['name']);
 		}
 		if (isset($params['key'])) {
 			$this->setKey($params['key']);
@@ -63,7 +63,7 @@ class InitialState extends Entity implements JsonSerializable {
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
-			'appid' => $this->getAppId(),
+			'appid' => $this->getAppid(),
 			'type' => $this->getType(),
 			'name' => $this->getName(),
 			'key' => $this->getKey(),

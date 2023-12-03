@@ -12,11 +12,11 @@ use OCP\AppFramework\Db\Entity;
  *
  * @package OCA\AppAPI\Db\UI
  *
- * @method string getAppId()
+ * @method string getAppid()
  * @method string getType()
  * @method string getName()
  * @method string getPath()
- * @method void setAppId(string $appid)
+ * @method void setAppid(string $appid)
  * @method void setType(string $type)
  * @method void setName(string $name)
  * @method void setPath(string $path)
@@ -40,7 +40,7 @@ class Style extends Entity implements JsonSerializable {
 			$this->setId($params['id']);
 		}
 		if (isset($params['appid'])) {
-			$this->setAppId($params['appid']);
+			$this->setAppid($params['appid']);
 		}
 		if (isset($params['type'])) {
 			$this->setType($params['type']);
@@ -56,7 +56,7 @@ class Style extends Entity implements JsonSerializable {
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
-			'appid' => $this->getAppId(),
+			'appid' => $this->getAppid(),
 			'type' => $this->getType(),
 			'name' => $this->getName(),
 			'path' => $this->getPath(),
