@@ -51,9 +51,8 @@ class ExAppStylesService {
 		try {
 			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, $path);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error($e->getMessage());
-			return null;
 		}
+		return null;
 	}
 
 	public function deleteExAppStylesByTypeName(string $appId, string $type, string $name): int {

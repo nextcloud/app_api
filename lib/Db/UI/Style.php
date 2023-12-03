@@ -46,7 +46,7 @@ class Style extends Entity implements JsonSerializable {
 			$this->setType($params['type']);
 		}
 		if (isset($params['name'])) {
-			$this->setType($params['name']);
+			$this->setName($params['name']);
 		}
 		if (isset($params['path'])) {
 			$this->setPath($params['path']);
