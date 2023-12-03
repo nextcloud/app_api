@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Db;
+namespace OCA\AppAPI\Db\UI;
 
 use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
@@ -31,7 +31,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setIconClass(string $iconClass)
  * @method void setActionHandler(string $actionHandler)
  */
-class ExFilesActionsMenu extends Entity implements JsonSerializable {
+class FilesActionsMenu extends Entity implements JsonSerializable {
 	protected $appid;
 	protected $name;
 	protected $displayName;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Db;
+namespace OCA\AppAPI\Db\UI;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -12,9 +12,9 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<ExFilesActionsMenu>
+ * @template-extends QBMapper<FilesActionsMenu>
  */
-class ExFilesActionsMenuMapper extends QBMapper {
+class FilesActionsMenuMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_files_actions_menu');
 	}
@@ -48,13 +48,13 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $name
 	 *
-	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @return FilesActionsMenu
 	 * @throws DoesNotExistException if not found
 	 * @throws Exception
 	 *
-	 * @return ExFilesActionsMenu
+	 * @throws MultipleObjectsReturnedException if more than one result
 	 */
-	public function findByAppidName(string $appId, string $name): ExFilesActionsMenu {
+	public function findByAppidName(string $appId, string $name): FilesActionsMenu {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
@@ -69,13 +69,13 @@ class ExFilesActionsMenuMapper extends QBMapper {
 	 * @param string $name
 	 *
 	 *
-	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @return FilesActionsMenu
 	 * @throws DoesNotExistException|Exception if not found
 	 * @throws Exception
 	 *
-	 * @return ExFilesActionsMenu
+	 * @throws MultipleObjectsReturnedException if more than one result
 	 */
-	public function findByName(string $name): ExFilesActionsMenu {
+	public function findByName(string $name): FilesActionsMenu {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)
