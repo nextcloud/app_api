@@ -42,7 +42,7 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 				'length' => 32,
 			]);
 			$table->addColumn('icon_url', Types::STRING, [
-				'notnull' => true,
+				'notnull' => false,
 				'default' => '',
 			]);
 			$table->addColumn('admin_required', Types::SMALLINT, [
