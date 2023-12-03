@@ -38,7 +38,7 @@ class TopMenu extends Entity implements JsonSerializable {
 		$this->addType('name', 'string');
 		$this->addType('display_name', 'string');
 		$this->addType('icon', 'string');
-		$this->addType('admin_required', 'integer');
+		$this->addType('admin_required', 'int');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);

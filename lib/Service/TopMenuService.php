@@ -57,7 +57,7 @@ class TopMenuService {
 				$urlGenerator = $container->get(IURLGenerator::class);
 				$appId = $menuEntry->getAppid();
 				$entryName = $menuEntry->getName();
-				$icon= $menuEntry->getIcon();
+				$icon = $menuEntry->getIcon();
 				return [
 					'id' => Application::APP_ID . '_' . $appId . '_' . $entryName,
 					'type' => 'link',
