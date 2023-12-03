@@ -89,13 +89,13 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
+	 * @PublicPage
 	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function getFileActionMenu(string $name): DataResponse {
 		$result = $this->exFilesActionsMenuService->getExAppFileAction(
 			$this->request->getHeader('EX-APP-ID'), $name);
@@ -110,9 +110,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSBadRequestException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function registerExAppMenuEntry(
 		string $name, string $displayName,
 		string $iconUrl = '', int $adminRequired = 0): DataResponse {
@@ -129,9 +129,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function unregisterExAppMenuEntry(string $name): DataResponse {
 		$result = $this->menuEntryService->unregisterExAppMenuEntry(
 			$this->request->getHeader('EX-APP-ID'), $name);
@@ -146,9 +146,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function getExAppMenuEntry(string $name): DataResponse {
 		$result = $this->menuEntryService->getExAppMenuEntry(
 			$this->request->getHeader('EX-APP-ID'), $name);
@@ -163,9 +163,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSBadRequestException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function setExAppInitialState(string $type, string $name, string $key, array $value): DataResponse {
 		$result = $this->initialStateService->setExAppInitialState(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $key, $value);
@@ -180,9 +180,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function deleteExAppInitialState(string $type, string $name, string $key): DataResponse {
 		$result = $this->initialStateService->deleteExAppInitialState(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $key);
@@ -197,9 +197,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function getExAppInitialState(string $type, string $name, string $key): DataResponse {
 		$result = $this->initialStateService->getExAppInitialState(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $key);
@@ -214,9 +214,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSBadRequestException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function setExAppScript(string $type, string $name, string $path, string $afterAppId = ''): DataResponse {
 		$result = $this->scriptsService->setExAppScript(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path, $afterAppId);
@@ -231,9 +231,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function deleteExAppScript(string $type, string $name, string $path): DataResponse {
 		$result = $this->scriptsService->deleteExAppScript(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path);
@@ -248,9 +248,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function getExAppScript(string $type, string $name, string $path): DataResponse {
 		$result = $this->scriptsService->getExAppScript(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path);
@@ -265,9 +265,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSBadRequestException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function setExAppStyle(string $type, string $name, string $path): DataResponse {
 		$result = $this->stylesService->setExAppStyle(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path);
@@ -282,9 +282,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function deleteExAppStyle(string $type, string $name, string $path): DataResponse {
 		$result = $this->stylesService->deleteExAppStyle(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path);
@@ -299,9 +299,9 @@ class OCSUiController extends OCSController {
 	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
 	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function getExAppStyle(string $type, string $name, string $path): DataResponse {
 		$result = $this->stylesService->getExAppStyle(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path);
