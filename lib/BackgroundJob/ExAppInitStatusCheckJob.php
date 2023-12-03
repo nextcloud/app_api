@@ -39,7 +39,7 @@ class ExAppInitStatusCheckJob extends TimedJob {
 				}
 				if (($status['init_start_time'] + $initTimeoutMinutes * 60) > time()) {
 					$this->service->setAppInitProgress(
-						$exApp->getAppId(), 0, sprintf('ExApp %s initialization timed out (%sm)', $exApp->getAppid(), $initTimeoutMinutes * 60)
+						$exApp->getAppid(), 0, sprintf('ExApp %s initialization timed out (%sm)', $exApp->getAppid(), $initTimeoutMinutes * 60)
 					);
 				}
 			}
