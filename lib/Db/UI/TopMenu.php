@@ -15,19 +15,19 @@ use OCP\AppFramework\Db\Entity;
  * @method string getAppid()
  * @method string getName()
  * @method string getDisplayName()
- * @method string getIconUrl()
+ * @method string getIcon()
  * @method int getAdminRequired()
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
- * @method void setIconUrl(string $iconUrl)
+ * @method void setIcon(string $icon)
  * @method void setAdminRequired(int $adminRequired)
  */
 class TopMenu extends Entity implements JsonSerializable {
 	protected $appid;
 	protected $name;
 	protected $displayName;
-	protected $iconUrl;
+	protected $icon;
 	protected $adminRequired;
 
 	/**
@@ -37,7 +37,7 @@ class TopMenu extends Entity implements JsonSerializable {
 		$this->addType('appid', 'string');
 		$this->addType('name', 'string');
 		$this->addType('display_name', 'string');
-		$this->addType('icon_url', 'string');
+		$this->addType('icon', 'string');
 		$this->addType('admin_required', 'integer');
 
 		if (isset($params['id'])) {
@@ -52,8 +52,8 @@ class TopMenu extends Entity implements JsonSerializable {
 		if (isset($params['display_name'])) {
 			$this->setDisplayName($params['display_name']);
 		}
-		if (isset($params['icon_url'])) {
-			$this->setIconUrl($params['icon_url']);
+		if (isset($params['icon'])) {
+			$this->setIcon($params['icon']);
 		}
 		if (isset($params['admin_required'])) {
 			$this->setAdminRequired($params['admin_required']);
@@ -66,7 +66,7 @@ class TopMenu extends Entity implements JsonSerializable {
 			'appid' => $this->getAppid(),
 			'name' => $this->getName(),
 			'display_name' => $this->getDisplayName(),
-			'icon_url' => $this->getIconUrl(),
+			'icon' => $this->getIcon(),
 			'admin_required' => $this->getAdminRequired(),
 		];
 	}

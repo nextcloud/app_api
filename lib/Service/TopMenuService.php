@@ -57,7 +57,7 @@ class TopMenuService {
 				$urlGenerator = $container->get(IURLGenerator::class);
 				$appId = $menuEntry->getAppid();
 				$entryName = $menuEntry->getName();
-				$iconUrl = $menuEntry->getIconUrl();
+				$icon= $menuEntry->getIcon();
 				return [
 					'id' => Application::APP_ID . '_' . $appId . '_' . $entryName,
 					'type' => 'link',
@@ -65,10 +65,10 @@ class TopMenuService {
 					'href' => $urlGenerator->linkToRoute(
 						'app_api.TopMenu.viewExAppPage', ['appId' => $appId, 'name' => $entryName]
 					),
-					'icon' => $iconUrl === '' ?
+					'icon' => $icon === '' ?
 						$urlGenerator->imagePath('app_api', 'app.svg') :
 						$urlGenerator->linkToRoute(
-							'app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => $iconUrl]
+							'app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => $icon]
 						),
 					'name' => $menuEntry->getDisplayName(),
 				];
@@ -77,14 +77,14 @@ class TopMenuService {
 	}
 
 	public function registerExAppMenuEntry(string $appId, string $name, string $displayName,
-		string $iconUrl, int $adminRequired): ?TopMenu {
+		string $icon, int $adminRequired): ?TopMenu {
 		$menuEntry = $this->getExAppMenuEntry($appId, $name);
 		try {
 			$newMenuEntry = new TopMenu([
 				'appid' => $appId,
 				'name' => $name,
 				'display_name' => $displayName,
-				'icon_url' => $iconUrl,
+				'icon' => $icon,
 				'admin_required' => $adminRequired,
 			]);
 			if ($menuEntry !== null) {
@@ -135,7 +135,7 @@ class TopMenuService {
 
 		try {
 			$menuEntry = $this->mapper->findByAppIdName($appId, $name);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
 		$this->cache->set($cacheKey, $menuEntry);
