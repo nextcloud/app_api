@@ -54,8 +54,8 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			$table->addUniqueIndex(['appid', 'name'], 'ui_top_menu__idx');
 		}
 
-		if (!$schema->hasTable('ex_apps_ui_state')) {
-			$table = $schema->createTable('ex_apps_ui_state');
+		if (!$schema->hasTable('ex_apps_ui_states')) {
+			$table = $schema->createTable('ex_apps_ui_states');
 
 			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
