@@ -10,18 +10,18 @@ return [
 		// Menu Entries
 		['name' => 'TopMenu#viewExAppPage',
 			'url' => '/embedded/{appId}/{name}/{other}', 'verb' => 'GET' , 'root' => '/embedded',
-			'requirements' => array('other' => '.*'), 'defaults' => array('other' => '')],
+			'requirements' => ['other' => '.*'], 'defaults' => ['other' => '']],
 
 		// Proxy
 		['name' => 'ExAppProxy#ExAppGet',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'GET' , 'root' => '/proxy',
-			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],
 		['name' => 'ExAppProxy#ExAppPost',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxy',
-			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],
 		['name' => 'ExAppProxy#ExAppPut',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'PUT' , 'root' => '/proxy',
-			'requirements' => array('other' => '.+'), 'defaults' => array('other' => '')],
+			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],
 
 		// ExApps actions
 		['name' => 'ExAppsPage#viewApps', 'url' => '/apps', 'verb' => 'GET' , 'root' => '/apps'],
