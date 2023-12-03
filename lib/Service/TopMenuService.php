@@ -135,11 +135,10 @@ class TopMenuService {
 
 		try {
 			$menuEntry = $this->mapper->findByAppIdName($appId, $name);
-			$this->cache->set($cacheKey, $menuEntry);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error($e->getMessage());
 			return null;
 		}
+		$this->cache->set($cacheKey, $menuEntry);
 		return $menuEntry;
 	}
 
