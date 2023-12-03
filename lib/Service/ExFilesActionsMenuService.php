@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\ExFilesActionsMenu;
-use OCA\AppAPI\Db\ExFilesActionsMenuMapper;
+use OCA\AppAPI\Db\UI\FilesActionsMenu;
+use OCA\AppAPI\Db\UI\FilesActionsMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
-
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\DB\Exception;
@@ -24,10 +23,10 @@ class ExFilesActionsMenuService {
 	private IClient $client;
 
 	public function __construct(
-		ICacheFactory                             $cacheFactory,
-		private readonly ExFilesActionsMenuMapper $mapper,
-		private readonly LoggerInterface          $logger,
-		IClientService                            $clientService,
+		ICacheFactory                           $cacheFactory,
+		private readonly FilesActionsMenuMapper $mapper,
+		private readonly LoggerInterface        $logger,
+		IClientService                          $clientService,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
 		$this->client = $clientService->newClient();
@@ -39,16 +38,16 @@ class ExFilesActionsMenuService {
 	 * @param string $appId
 	 * @param array $params
 	 *
-	 * @return ExFilesActionsMenu|null
+	 * @return FilesActionsMenu|null
 	 */
-	public function registerFileActionMenu(string $appId, array $params): ?ExFilesActionsMenu {
+	public function registerFileActionMenu(string $appId, array $params): ?FilesActionsMenu {
 		try {
 			$fileActionMenu = $this->mapper->findByName($params['name']);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$fileActionMenu = null;
 		}
 		try {
-			$newFileActionMenu = new ExFilesActionsMenu([
+			$newFileActionMenu = new FilesActionsMenu([
 				'appid' => $appId,
 				'name' => $params['name'],
 				'display_name' => $params['display_name'],
@@ -72,7 +71,7 @@ class ExFilesActionsMenuService {
 		return $fileActionMenu;
 	}
 
-	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName): ?ExFilesActionsMenu {
+	public function unregisterFileActionMenu(string $appId, string $fileActionMenuName): ?FilesActionsMenu {
 		try {
 			$fileActionMenu = $this->getExAppFileAction($appId, $fileActionMenuName);
 			if ($fileActionMenu === null) {
@@ -91,7 +90,7 @@ class ExFilesActionsMenuService {
 	/**
 	 * Get list of registered file actions (only for enabled ExApps)
 	 *
-	 * @return ExFilesActionsMenu[]|null
+	 * @return FilesActionsMenu[]|null
 	 */
 	public function getRegisteredFileActions(): ?array {
 		try {
@@ -99,7 +98,7 @@ class ExFilesActionsMenuService {
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
 				return array_map(function ($cacheEntry) {
-					return $cacheEntry instanceof ExFilesActionsMenu ? $cacheEntry : new ExFilesActionsMenu($cacheEntry);
+					return $cacheEntry instanceof FilesActionsMenu ? $cacheEntry : new FilesActionsMenu($cacheEntry);
 				}, $cached);
 			}
 
@@ -111,20 +110,19 @@ class ExFilesActionsMenuService {
 		}
 	}
 
-	public function getExAppFileAction(string $appId, string $fileActionName): ?ExFilesActionsMenu {
+	public function getExAppFileAction(string $appId, string $fileActionName): ?FilesActionsMenu {
 		$cacheKey = '/ex_files_actions_menu_' . $appId . '_' . $fileActionName;
 		$cache = $this->cache->get($cacheKey);
 		if ($cache !== null) {
-			return $cache instanceof ExFilesActionsMenu ? $cache : new ExFilesActionsMenu($cache);
+			return $cache instanceof FilesActionsMenu ? $cache : new FilesActionsMenu($cache);
 		}
 
 		try {
 			$fileAction = $this->mapper->findByAppIdName($appId, $fileActionName);
-			$this->cache->set($cacheKey, $fileAction);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error(sprintf('ExApp %s FileAction %s not found. Error: %s', $appId, $fileActionName, $e->getMessage()), ['exception' => $e]);
-			$fileAction = null;
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
+			return null;
 		}
+		$this->cache->set($cacheKey, $fileAction);
 		return $fileAction;
 	}
 
