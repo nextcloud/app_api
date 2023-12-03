@@ -357,8 +357,7 @@ class OCSUiController extends OCSController {
 				$result = $this->appAPIService->aeRequestToExApp($exApp, $handler, $this->userId, 'POST', $params, [], $this->request);
 				if ($result instanceof IResponse) {
 					$result = $result->getStatusCode() === 200;
-				}
-				else if (isset($result['error'])) {
+				} elseif (isset($result['error'])) {
 					$this->logger->error(sprintf('Failed to handle ExApp %s FileAction %s. Error: %s', $appId, $actionName, $result['error']));
 				}
 			}
