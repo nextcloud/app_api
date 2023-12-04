@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.0 - 2023-12-0x]
+
+This release contains breaking changes, all ExApps should be updated accordingly to it.
+
+### Added
+
+- A request proxy from Frontend to ExApps, ExApps can now have a user interface like regular applications.
+- New OCS endpoints to register entry in Nextcloud Top Menu. #135
+
+### Changed
+
+- UI: FileActions OCS API was reworked, make it simpler to use and be in line with new UI API. #141
+
+### Fixed
+
+- Correct cleaning of ExApp stuff upon deletion.
+- Oracle DB fixes and adjustments with additional tests.
+- Tons of other bugfixes, adjustments and CI tests.
+
 ## [1.3.0 - 2023-11-28]
 
 ### Changed
