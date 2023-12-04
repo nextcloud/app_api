@@ -61,9 +61,10 @@ if (OCA.Files && OCA.Files.fileActions) {
 					userId: getCurrentUser().uid,
 					instanceId: state.instanceId,
 				}).then((response) => {
-					if (response.data.ocs.meta.statuscode === 200) {
+					if (response.status === 200) {
 						OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
 					} else {
+						console.debug(response)
 						OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
 					}
 				}).catch((error) => {
@@ -110,7 +111,7 @@ if (OCA.Files && OCA.Files.fileActions) {
 					userId: getCurrentUser().uid,
 					instanceId: state.instanceId,
 				}).then((response) => {
-					if (response.data.ocs.meta.statuscode === 200) {
+					if (response.status === 200) {
 						OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
 					} else {
 						OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
