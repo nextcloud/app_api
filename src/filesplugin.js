@@ -53,11 +53,11 @@ if (OCA.Files && OCA.Files.fileActions) {
 					fileType: file.dataset.type,
 					size: Number(file.dataset.size),
 					mtime: Number(file.dataset.mtime) / 1000, // convert ms to s
-					shareTypes: file.dataset?.shareTypes,
-					shareAttributes: file.dataset?.shareAttributes,
-					sharePermissions: file.dataset?.sharePermissions,
-					shareOwner: file.dataset?.shareOwner,
-					shareOwnerId: file.dataset?.shareOwnerId,
+					shareTypes: file.dataset?.shareTypes || null,
+					shareAttributes: file.dataset?.shareAttributes || null,
+					sharePermissions: file.dataset?.sharePermissions || null,
+					shareOwner: file.dataset?.shareOwner || null,
+					shareOwnerId: file.dataset?.shareOwnerId || null,
 					userId: getCurrentUser().uid,
 					instanceId: state.instanceId,
 				}).then((response) => {
@@ -102,11 +102,11 @@ if (OCA.Files && OCA.Files.fileActions) {
 					fileType: node.type,
 					size: Number(node.size),
 					mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
-					shareTypes: node.attributes.shareTypes,
-					shareAttributes: node.attributes.shareAttributes,
-					sharePermissions: node.attributes.sharePermissions,
-					shareOwner: node.attributes.ownerDisplayName,
-					shareOwnerId: node.attributes.ownerId,
+					shareTypes: node.attributes.shareTypes || null,
+					shareAttributes: node.attributes.shareAttributes || null,
+					sharePermissions: node.attributes.sharePermissions || null,
+					shareOwner: node.attributes.ownerDisplayName || null,
+					shareOwnerId: node.attributes.ownerId || null,
 					userId: getCurrentUser().uid,
 					instanceId: state.instanceId,
 				}).then((response) => {
