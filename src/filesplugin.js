@@ -26,6 +26,10 @@ function loadExAppInlineSvgIcon(appId, route) {
 }
 
 function generateAppAPIProxyUrl(appId, route) {
+	// truncate leading slash
+	if (route.startsWith('/')) {
+		route = route.substring(1)
+	}
 	return generateUrl(`/apps/app_api/proxy/${appId}/${route}`)
 }
 
