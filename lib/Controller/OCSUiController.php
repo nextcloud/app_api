@@ -7,12 +7,11 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Service\AppAPIService;
-use OCA\AppAPI\Service\ExAppInitialStateService;
-use OCA\AppAPI\Service\ExAppScriptsService;
-use OCA\AppAPI\Service\ExAppStylesService;
-use OCA\AppAPI\Service\ExFilesActionsMenuService;
-
-use OCA\AppAPI\Service\TopMenuService;
+use OCA\AppAPI\Service\UI\FilesActionsMenuService;
+use OCA\AppAPI\Service\UI\InitialStateService;
+use OCA\AppAPI\Service\UI\ScriptsService;
+use OCA\AppAPI\Service\UI\StylesService;
+use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -31,16 +30,16 @@ class OCSUiController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                                   $request,
-		private readonly ?string                   $userId,
-		private readonly ExFilesActionsMenuService $exFilesActionsMenuService,
-		private readonly TopMenuService            $menuEntryService,
-		private readonly ExAppInitialStateService  $initialStateService,
-		private readonly ExAppScriptsService       $scriptsService,
-		private readonly ExAppStylesService        $stylesService,
-		private readonly AppAPIService             $appAPIService,
-		private readonly IConfig                   $config,
-		private readonly LoggerInterface           $logger,
+		IRequest                                 $request,
+		private readonly ?string                 $userId,
+		private readonly FilesActionsMenuService $filesActionsMenuService,
+		private readonly TopMenuService          $menuEntryService,
+		private readonly InitialStateService     $initialStateService,
+		private readonly ScriptsService          $scriptsService,
+		private readonly StylesService           $stylesService,
+		private readonly AppAPIService           $appAPIService,
+		private readonly IConfig                 $config,
+		private readonly LoggerInterface         $logger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -51,27 +50,35 @@ class OCSUiController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param array $fileActionMenuParams [name, display_name, mime, permissions, order, icon, icon_class, action_handler]
-	 *
+	 * @param string $name
+	 * @param string $displayName
+	 * @param string $actionHandler
+	 * @param string $icon
+	 * @param string $mime
+	 * @param int $permissions
+	 * @param int $order
 	 * @return DataResponse
+	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function registerFileActionMenu(array $fileActionMenuParams): DataResponse {
-		$registeredFileActionMenu = $this->exFilesActionsMenuService->registerFileActionMenu(
-			$this->request->getHeader('EX-APP-ID'), $fileActionMenuParams);
-		return new DataResponse([
-			'success' => $registeredFileActionMenu !== null,
-			'registeredFileActionMenu' => $registeredFileActionMenu,
-		], Http::STATUS_OK);
+	public function registerFileActionMenu(string $name, string $displayName, string $actionHandler,
+		string $icon = "", string $mime = "file", int $permissions = 31,
+		int $order = 0): DataResponse {
+		$result = $this->filesActionsMenuService->registerFileActionMenu(
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order);
+		if (!$result) {
+			throw new OCSBadRequestException("File Action Menu entry could not be registered");
+		}
+		return new DataResponse();
 	}
 
 	/**
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $fileActionMenuName
+	 * @param string $name
 	 *
 	 * @throws OCSNotFoundException
 	 * @return DataResponse
@@ -79,9 +86,9 @@ class OCSUiController extends OCSController {
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function unregisterFileActionMenu(string $fileActionMenuName): DataResponse {
-		$unregisteredFileActionMenu = $this->exFilesActionsMenuService->unregisterFileActionMenu(
-			$this->request->getHeader('EX-APP-ID'), $fileActionMenuName);
+	public function unregisterFileActionMenu(string $name): DataResponse {
+		$unregisteredFileActionMenu = $this->filesActionsMenuService->unregisterFileActionMenu(
+			$this->request->getHeader('EX-APP-ID'), $name);
 		if ($unregisteredFileActionMenu === null) {
 			throw new OCSNotFoundException('FileActionMenu not found');
 		}
@@ -97,7 +104,7 @@ class OCSUiController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getFileActionMenu(string $name): DataResponse {
-		$result = $this->exFilesActionsMenuService->getExAppFileAction(
+		$result = $this->filesActionsMenuService->getExAppFileAction(
 			$this->request->getHeader('EX-APP-ID'), $name);
 		if (!$result) {
 			throw new OCSNotFoundException('FileActionMenu not found');
@@ -326,7 +333,7 @@ class OCSUiController extends OCSController {
 	#[NoCSRFRequired]
 	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler): DataResponse {
 		$result = false;
-		$exFileAction = $this->exFilesActionsMenuService->getExAppFileAction($appId, $actionName);
+		$exFileAction = $this->filesActionsMenuService->getExAppFileAction($appId, $actionName);
 		if ($exFileAction !== null) {
 			$handler = $exFileAction->getActionHandler(); // route on ex app
 			$params = [
@@ -380,14 +387,14 @@ class OCSUiController extends OCSController {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function loadFileActionIcon(string $appId, string $exFileActionName): DataDisplayResponse {
-		$icon = $this->exFilesActionsMenuService->loadFileActionIcon($appId, $exFileActionName);
+		$icon = $this->filesActionsMenuService->loadFileActionIcon($appId, $exFileActionName);
 		if ($icon !== null && isset($icon['body'], $icon['headers'])) {
 			$response = new DataDisplayResponse(
 				$icon['body'],
 				Http::STATUS_OK,
 				['Content-Type' => $icon['headers']['Content-Type'][0] ?? 'image/svg+xml']
 			);
-			$response->cacheFor(ExFilesActionsMenuService::ICON_CACHE_TTL, false, true);
+			$response->cacheFor(FilesActionsMenuService::ICON_CACHE_TTL, false, true);
 			return $response;
 		}
 		return new DataDisplayResponse('', 400);

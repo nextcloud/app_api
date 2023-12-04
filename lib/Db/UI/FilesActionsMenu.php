@@ -19,7 +19,6 @@ use OCP\AppFramework\Db\Entity;
  * @method string getPermissions()
  * @method int getOrder()
  * @method string getIcon()
- * @method string getIconClass()
  * @method string getActionHandler()
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
@@ -28,7 +27,6 @@ use OCP\AppFramework\Db\Entity;
  * @method void setPermissions(string $permissions)
  * @method void setOrder(int $order)
  * @method void setIcon(string $icon)
- * @method void setIconClass(string $iconClass)
  * @method void setActionHandler(string $actionHandler)
  */
 class FilesActionsMenu extends Entity implements JsonSerializable {
@@ -39,7 +37,6 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 	protected $permissions;
 	protected $order;
 	protected $icon;
-	protected $iconClass;
 	protected $actionHandler;
 
 	/**
@@ -53,7 +50,6 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		$this->addType('permissions', 'string');
 		$this->addType('order', 'int');
 		$this->addType('icon', 'string');
-		$this->addType('iconClass', 'string');
 		$this->addType('actionHandler', 'string');
 
 		if (isset($params['id'])) {
@@ -80,9 +76,6 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		if (isset($params['icon'])) {
 			$this->setIcon($params['icon']);
 		}
-		if (isset($params['icon_class'])) {
-			$this->setIconClass($params['icon_class']);
-		}
 		if (isset($params['action_handler'])) {
 			$this->setActionHandler($params['action_handler']);
 		}
@@ -98,7 +91,6 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 			'permissions' => $this->getPermissions(),
 			'order' => $this->getOrder(),
 			'icon' => $this->getIcon(),
-			'icon_class' => $this->getIconClass(),
 			'action_handler' => $this->getActionHandler(),
 		];
 	}

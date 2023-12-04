@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\UI;
 
 use LengthException;
 use OCA\AppAPI\AppInfo\Application;
@@ -14,7 +14,7 @@ use OCP\DB\Exception;
 use OCP\Util;
 use Psr\Log\LoggerInterface;
 
-class ExAppScriptsService {
+class ScriptsService {
 
 	public const MAX_JS_FILES = 10; //should be equal to number of files in "proxy_js" folder.
 

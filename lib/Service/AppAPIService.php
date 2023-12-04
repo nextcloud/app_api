@@ -7,10 +7,14 @@ namespace OCA\AppAPI\Service;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
-
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
+use OCA\AppAPI\Service\UI\FilesActionsMenuService;
+use OCA\AppAPI\Service\UI\InitialStateService;
+use OCA\AppAPI\Service\UI\ScriptsService;
+use OCA\AppAPI\Service\UI\StylesService;
+use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -43,29 +47,29 @@ class AppAPIService {
 	public function __construct(
 		private readonly LoggerInterface          $logger,
 		private readonly ILogFactory              $logFactory,
-		ICacheFactory                             $cacheFactory,
-		private readonly IThrottler               $throttler,
-		private readonly IConfig                  $config,
-		IClientService                            $clientService,
-		private readonly ExAppMapper              $exAppMapper,
-		private readonly IAppManager              $appManager,
-		private readonly ExAppUsersService        $exAppUsersService,
-		private readonly ExAppApiScopeService     $exAppApiScopeService,
-		private readonly ExAppScopesService       $exAppScopesService,
-		private readonly TopMenuService           $topMenuService,
-		private readonly ExAppInitialStateService $initialStateService,
-		private readonly ExAppScriptsService      $scriptsService,
-		private readonly ExAppStylesService       $stylesService,
-		private readonly ExFilesActionsMenuService $filesActionsMenuService,
-		private readonly ISecureRandom            $random,
-		private readonly IUserSession             $userSession,
-		private readonly ISession                 $session,
-		private readonly IUserManager             $userManager,
-		private readonly ExAppConfigService       $exAppConfigService,
-		private readonly ExNotificationsManager   $exNotificationsManager,
-		private readonly TalkBotsService          $talkBotsService,
-		private readonly ExAppFetcher             $exAppFetcher,
-		private readonly ExAppArchiveFetcher      $exAppArchiveFetcher,
+		ICacheFactory                              $cacheFactory,
+		private readonly IThrottler              $throttler,
+		private readonly IConfig                 $config,
+		IClientService                           $clientService,
+		private readonly ExAppMapper             $exAppMapper,
+		private readonly IAppManager             $appManager,
+		private readonly ExAppUsersService       $exAppUsersService,
+		private readonly ExAppApiScopeService    $exAppApiScopeService,
+		private readonly ExAppScopesService      $exAppScopesService,
+		private readonly TopMenuService          $topMenuService,
+		private readonly InitialStateService     $initialStateService,
+		private readonly ScriptsService          $scriptsService,
+		private readonly StylesService           $stylesService,
+		private readonly FilesActionsMenuService $filesActionsMenuService,
+		private readonly ISecureRandom           $random,
+		private readonly IUserSession            $userSession,
+		private readonly ISession                $session,
+		private readonly IUserManager            $userManager,
+		private readonly ExAppConfigService      $exAppConfigService,
+		private readonly ExNotificationsManager  $exNotificationsManager,
+		private readonly TalkBotsService         $talkBotsService,
+		private readonly ExAppFetcher            $exAppFetcher,
+		private readonly ExAppArchiveFetcher     $exAppArchiveFetcher,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 		$this->client = $clientService->newClient();

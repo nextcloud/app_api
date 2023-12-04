@@ -76,10 +76,11 @@ return [
 		['name' => 'TalkBot#registerExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'POST'],
 		['name' => 'TalkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'DELETE'],
 
+		// --- UI ---
 		// File Actions Menu
-		['name' => 'OCSUi#registerFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'POST'],
-		['name' => 'OCSUi#unregisterFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'DELETE'],
-		['name' => 'OCSUi#getFileActionMenu', 'url' => '/api/v1/files/actions/menu', 'verb' => 'GET'],
+		['name' => 'OCSUi#registerFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'POST'],
+		['name' => 'OCSUi#unregisterFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'DELETE'],
+		['name' => 'OCSUi#getFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'GET'],
 		['name' => 'OCSUi#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
 		['name' => 'OCSUi#loadFileActionIcon', 'url' => '/api/v1/files/action/icon', 'verb' => 'GET'],
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\UI;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\UI\Style;
@@ -13,7 +13,7 @@ use OCP\DB\Exception;
 use OCP\Util;
 use Psr\Log\LoggerInterface;
 
-class ExAppStylesService {
+class StylesService {
 
 	public function __construct(
 		private readonly StyleMapper     $mapper,

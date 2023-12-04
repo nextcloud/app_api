@@ -6,11 +6,11 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\AppAPIService;
-use OCA\AppAPI\Service\ExAppInitialStateService;
-use OCA\AppAPI\Service\ExAppScriptsService;
-use OCA\AppAPI\Service\ExAppStylesService;
 use OCA\AppAPI\Service\ExAppUsersService;
-use OCA\AppAPI\Service\TopMenuService;
+use OCA\AppAPI\Service\UI\InitialStateService;
+use OCA\AppAPI\Service\UI\ScriptsService;
+use OCA\AppAPI\Service\UI\StylesService;
+use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -26,15 +26,15 @@ class TopMenuController extends Controller {
 	public array $jsProxyMap = [];
 
 	public function __construct(
-		IRequest                         $request,
-		private IInitialState            $initialState,
-		private TopMenuService           $menuEntryService,
-		private ExAppInitialStateService $initialStateService,
-		private ExAppScriptsService      $scriptsService,
-		private ExAppStylesService       $stylesService,
-		private ExAppUsersService		 $exAppUsersService,
-		private AppAPIService            $service,
-		private ?string                  $userId,
+		IRequest                    $request,
+		private IInitialState       $initialState,
+		private TopMenuService      $menuEntryService,
+		private InitialStateService $initialStateService,
+		private ScriptsService      $scriptsService,
+		private StylesService       $stylesService,
+		private ExAppUsersService   $exAppUsersService,
+		private AppAPIService       $service,
+		private ?string             $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\UI;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\UI\TopMenu;
@@ -27,12 +27,12 @@ class TopMenuService {
 	private ICache $cache;
 
 	public function __construct(
-		private readonly TopMenuMapper            $mapper,
-		private readonly LoggerInterface          $logger,
-		private readonly ExAppInitialStateService $initialStateService,
-		private readonly ExAppScriptsService      $scriptsService,
-		private readonly ExAppStylesService       $stylesService,
-		ICacheFactory                             $cacheFactory,
+		private readonly TopMenuMapper       $mapper,
+		private readonly LoggerInterface     $logger,
+		private readonly InitialStateService $initialStateService,
+		private readonly ScriptsService      $scriptsService,
+		private readonly StylesService       $stylesService,
+		ICacheFactory                        $cacheFactory,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_top_menus');
 	}

@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Listener;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Service\ExFilesActionsMenuService;
-
+use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\Event;
@@ -20,7 +19,7 @@ class LoadFilesPluginListener implements IEventListener {
 
 	public function __construct(
 		private IInitialState $initialState,
-		private ExFilesActionsMenuService $service
+		private FilesActionsMenuService $service
 	) {
 	}
 
