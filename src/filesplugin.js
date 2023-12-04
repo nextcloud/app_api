@@ -51,8 +51,8 @@ if (OCA.Files && OCA.Files.fileActions) {
 					favorite: file.dataset.favorite || 'false',
 					permissions: Number(file.dataset.permissions),
 					fileType: file.dataset.type,
-					size: file.dataset.size,
-					mtime: file.dataset.mtime,
+					size: Number(file.dataset.size),
+					mtime: Number(file.dataset.mtime) / 1000, // convert ms to s
 					shareTypes: file.dataset?.shareTypes,
 					shareAttributes: file.dataset?.shareAttributes,
 					sharePermissions: file.dataset?.sharePermissions,
@@ -100,8 +100,8 @@ if (OCA.Files && OCA.Files.fileActions) {
 					favorite: Boolean(node.attributes.favorite).toString(),
 					permissions: node.permissions,
 					fileType: node.type,
-					size: node.size,
-					mtime: new Date(node.mtime).getTime(),
+					size: Number(node.size),
+					mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
 					shareTypes: node.attributes.shareTypes,
 					shareAttributes: node.attributes.shareAttributes,
 					sharePermissions: node.attributes.sharePermissions,
