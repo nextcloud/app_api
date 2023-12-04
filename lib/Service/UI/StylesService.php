@@ -28,7 +28,7 @@ class StylesService {
 				'appid' => $appId,
 				'type' => $type,
 				'name' => $name,
-				'path' => $path,
+				'path' => ltrim($path, '/'),
 			]);
 			if ($style !== null) {
 				$newStyle->setId($style->getId());
@@ -79,7 +79,7 @@ class StylesService {
 	public function applyExAppStyles(string $appId, string $type, string $name): void {
 		$styles = $this->mapper->findByAppIdTypeName($appId, $type, $name);
 		foreach ($styles as $value) {
-			$path = 'proxy/'. $appId . '/' . ltrim($value['path'], '/');
+			$path = 'proxy/'. $appId . '/' . $value['path'];
 			Util::addStyle(Application::APP_ID, $path);
 		}
 	}

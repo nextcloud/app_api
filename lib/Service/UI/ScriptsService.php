@@ -31,7 +31,7 @@ class ScriptsService {
 				'appid' => $appId,
 				'type' => $type,
 				'name' => $name,
-				'path' => $path,
+				'path' => ltrim($path, '/'),
 				'after_app_id' => $afterAppId,
 			]);
 			if ($script !== null) {
@@ -95,7 +95,7 @@ class ScriptsService {
 			} else {
 				Util::addScript(Application::APP_ID, $fakeJsPath, $value['after_app_id']);
 			}
-			$mapResult[$i] = $appId . '/' . ltrim($value['path'], '/');
+			$mapResult[$i] = $appId . '/' . $value['path'];
 			$i++;
 		}
 		return $mapResult;

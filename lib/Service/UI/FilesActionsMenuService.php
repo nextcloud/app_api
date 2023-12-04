@@ -57,7 +57,7 @@ class FilesActionsMenuService {
 				'appid' => $appId,
 				'name' => $name,
 				'display_name' => $displayName,
-				'action_handler' => $actionHandler,
+				'action_handler' => ltrim($actionHandler, '/'),
 				'icon' => ltrim($icon, '/'),
 				'mime' => $mime,
 				'permissions' => $permissions,
