@@ -17,7 +17,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getDisplayName()
  * @method string getMime()
  * @method string getPermissions()
- * @method string getOrder()
+ * @method int getOrder()
  * @method string getIcon()
  * @method string getIconClass()
  * @method string getActionHandler()
@@ -26,7 +26,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setDisplayName(string $displayName)
  * @method void setMime(string $mime)
  * @method void setPermissions(string $permissions)
- * @method void setOrder(string $order)
+ * @method void setOrder(int $order)
  * @method void setIcon(string $icon)
  * @method void setIconClass(string $iconClass)
  * @method void setActionHandler(string $actionHandler)
@@ -51,7 +51,7 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		$this->addType('displayName', 'string');
 		$this->addType('mime', 'string');
 		$this->addType('permissions', 'string');
-		$this->addType('order', 'string');
+		$this->addType('order', 'int');
 		$this->addType('icon', 'string');
 		$this->addType('iconClass', 'string');
 		$this->addType('actionHandler', 'string');
