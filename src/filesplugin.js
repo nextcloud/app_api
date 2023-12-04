@@ -3,6 +3,7 @@ import { generateUrl } from '@nextcloud/router'
 import { loadState } from '@nextcloud/initial-state'
 import { translate as t } from '@nextcloud/l10n'
 import { registerFileAction, FileAction } from '@nextcloud/files'
+import { getCurrentUser } from '@nextcloud/auth'
 
 const state = loadState('app_api', 'ex_files_actions_menu')
 
@@ -57,6 +58,8 @@ if (OCA.Files && OCA.Files.fileActions) {
 					sharePermissions: file.dataset?.sharePermissions,
 					shareOwner: file.dataset?.shareOwner,
 					shareOwnerId: file.dataset?.shareOwnerId,
+					userId: getCurrentUser().uid,
+					instanceId: state.instanceId,
 				}).then((response) => {
 					if (response.data.ocs.meta.statuscode === 200) {
 						OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
@@ -104,6 +107,8 @@ if (OCA.Files && OCA.Files.fileActions) {
 					sharePermissions: node.attributes.sharePermissions,
 					shareOwner: node.attributes.ownerDisplayName,
 					shareOwnerId: node.attributes.ownerId,
+					userId: getCurrentUser().uid,
+					instanceId: state.instanceId,
 				}).then((response) => {
 					if (response.data.ocs.meta.statuscode === 200) {
 						OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
