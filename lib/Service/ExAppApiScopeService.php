@@ -86,7 +86,7 @@ class ExAppApiScopeService {
 
 		$initApiScopes = [
 			// AppAPI scopes
-			['api_route' => $aeApiV1Prefix . '/files/actions/menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
+			['api_route' => $aeApiV1Prefix . '/ui/files-actions-menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ui/top-menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ui/initial-state', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ui/script', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
