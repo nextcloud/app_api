@@ -47,7 +47,7 @@ if (OCA.Files && OCA.Files.fileActions) {
 					directory: file.dataset.path,
 					etag: file.dataset.etag,
 					mime: file.dataset.mime,
-					favorite: file.dataset?.favorite,
+					favorite: file.dataset.favorite || 'false',
 					permissions: Number(file.dataset.permissions),
 					fileType: file.dataset.type,
 					size: file.dataset.size,
