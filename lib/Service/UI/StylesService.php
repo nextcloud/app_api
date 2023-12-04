@@ -79,12 +79,7 @@ class StylesService {
 	public function applyExAppStyles(string $appId, string $type, string $name): void {
 		$styles = $this->mapper->findByAppIdTypeName($appId, $type, $name);
 		foreach ($styles as $value) {
-			if (str_starts_with($value['path'], '/')) {
-				// in the future we should allow offload of styles to the NC instance if they start with '/'
-				$path = 'proxy/'. $appId . $value['path'];
-			} else {
-				$path = 'proxy/'. $appId . '/' . $value['path'];
-			}
+			$path = 'proxy/'. $appId . '/' . ltrim($value['path'], '/');
 			Util::addStyle(Application::APP_ID, $path);
 		}
 	}

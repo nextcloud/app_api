@@ -95,11 +95,7 @@ class ScriptsService {
 			} else {
 				Util::addScript(Application::APP_ID, $fakeJsPath, $value['after_app_id']);
 			}
-			if (str_starts_with($value['path'], '/')) {
-				$mapResult[$i] = $appId . $value['path'];
-			} else {
-				$mapResult[$i] = $appId . '/' . $value['path'];
-			}
+			$mapResult[$i] = $appId . '/' . ltrim($value['path'], '/');
 			$i++;
 		}
 		return $mapResult;

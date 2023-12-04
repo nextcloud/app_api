@@ -84,7 +84,7 @@ class TopMenuService {
 				'appid' => $appId,
 				'name' => $name,
 				'display_name' => $displayName,
-				'icon' => $icon,
+				'icon' => ltrim($icon, '/'),
 				'admin_required' => $adminRequired,
 			]);
 			if ($menuEntry !== null) {
