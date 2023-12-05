@@ -31,12 +31,12 @@ function generateAppAPIProxyUrl(appId, route) {
 
 if (OCA.Files && OCA.Files.fileActions) {
 	state.fileActions.forEach(fileAction => {
-		const mimes = fileAction.mime.split(',') // multiple mimes are separated by comma
+		const mimes = fileAction.mime.split(',').map(mime => mime.trim()) // multiple mimes are separated by comma
 		mimes.forEach((mimeType) => {
 			const action = {
 				name: fileAction.name,
 				displayName: t(fileAction.appid, fileAction.display_name),
-				mime: mimeType.trim(),
+				mime: mimeType,
 				permissions: Number(fileAction.permissions),
 				order: Number(fileAction.order),
 				icon: fileAction.icon !== '' ? generateAppAPIProxyUrl(fileAction.appid, fileAction.icon) : null,
