@@ -16,7 +16,7 @@ use OCP\IDBConnection;
  */
 class TopMenuMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_apps_ui_top_menu');
+		parent::__construct($db, 'ex_ui_top_menu');
 	}
 
 	/**

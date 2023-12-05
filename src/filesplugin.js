@@ -31,49 +31,52 @@ function generateAppAPIProxyUrl(appId, route) {
 
 if (OCA.Files && OCA.Files.fileActions) {
 	state.fileActions.forEach(fileAction => {
-		const action = {
-			name: fileAction.name,
-			displayName: t(fileAction.appid, fileAction.display_name),
-			mime: fileAction.mime,
-			permissions: Number(fileAction.permissions),
-			order: Number(fileAction.order),
-			icon: fileAction.icon !== '' ? generateAppAPIProxyUrl(fileAction.appid, fileAction.icon) : null,
-			iconClass: fileAction.icon === '' ? 'icon-app-api' : '',
-			actionHandler: (fileName, context) => {
-				const file = context.$file[0]
-				const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-				axios.post(exAppFileActionHandler, {
-					fileId: Number(file.dataset.id),
-					name: fileName,
-					directory: file.dataset.path,
-					etag: file.dataset.etag,
-					mime: file.dataset.mime,
-					favorite: file.dataset.favorite || 'false',
-					permissions: Number(file.dataset.permissions),
-					fileType: file.dataset.type,
-					size: Number(file.dataset.size),
-					mtime: Number(file.dataset.mtime) / 1000, // convert ms to s
-					shareTypes: file.dataset?.shareTypes || null,
-					shareAttributes: file.dataset?.shareAttributes || null,
-					sharePermissions: file.dataset?.sharePermissions || null,
-					shareOwner: file.dataset?.shareOwner || null,
-					shareOwnerId: file.dataset?.shareOwnerId || null,
-					userId: getCurrentUser().uid,
-					instanceId: state.instanceId,
-				}).then((response) => {
-					if (response.status === 200) {
-						OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
-					} else {
-						console.debug(response)
+		const mimes = fileAction.mime.split(',').map(mime => mime.trim()) // multiple mimes are separated by comma
+		mimes.forEach((mimeType) => {
+			const action = {
+				name: fileAction.name,
+				displayName: t(fileAction.appid, fileAction.display_name),
+				mime: mimeType,
+				permissions: Number(fileAction.permissions),
+				order: Number(fileAction.order),
+				icon: fileAction.icon !== '' ? generateAppAPIProxyUrl(fileAction.appid, fileAction.icon) : null,
+				iconClass: fileAction.icon === '' ? 'icon-app-api' : '',
+				actionHandler: (fileName, context) => {
+					const file = context.$file[0]
+					const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
+					axios.post(exAppFileActionHandler, {
+						fileId: Number(file.dataset.id),
+						name: fileName,
+						directory: file.dataset.path,
+						etag: file.dataset.etag,
+						mime: file.dataset.mime,
+						favorite: file.dataset.favorite || 'false',
+						permissions: Number(file.dataset.permissions),
+						fileType: file.dataset.type,
+						size: Number(file.dataset.size),
+						mtime: Number(file.dataset.mtime) / 1000, // convert ms to s
+						shareTypes: file.dataset?.shareTypes || null,
+						shareAttributes: file.dataset?.shareAttributes || null,
+						sharePermissions: file.dataset?.sharePermissions || null,
+						shareOwner: file.dataset?.shareOwner || null,
+						shareOwnerId: file.dataset?.shareOwnerId || null,
+						userId: getCurrentUser().uid,
+						instanceId: state.instanceId,
+					}).then((response) => {
+						if (response.status === 200) {
+							OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
+						} else {
+							console.debug(response)
+							OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
+						}
+					}).catch((error) => {
+						console.error('error', error)
 						OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
-					}
-				}).catch((error) => {
-					console.error('error', error)
-					OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
-				})
-			},
-		}
-		OCA.Files.fileActions.registerAction(action)
+					})
+				},
+			}
+			OCA.Files.fileActions.registerAction(action)
+		})
 	})
 } else {
 	state.fileActions.forEach(fileAction => {
@@ -99,7 +102,15 @@ if (OCA.Files && OCA.Files.fileActions) {
 							return false
 						}
 
-						return (files[0].mime.indexOf(fileAction.mime) !== -1)
+						// Check for multiple mimes separated by comma
+						let isMimeMatch = false
+						fileAction.mime.split(',').forEach((mime) => {
+							if (files[0].mime.indexOf(mime.trim()) !== -1) {
+								isMimeMatch = true
+							}
+						})
+
+						return isMimeMatch
 					},
 					async exec(node) {
 						const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
