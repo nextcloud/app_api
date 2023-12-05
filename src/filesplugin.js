@@ -103,13 +103,14 @@ if (OCA.Files && OCA.Files.fileActions) {
 						}
 
 						// Check for multiple mimes separated by comma
+						let isMimeMatch = false
 						fileAction.mime.split(',').forEach((mime) => {
-							if (files[0].mime.indexOf(mime) !== -1) {
-								return true
+							if (files[0].mime.indexOf(mime.trim()) !== -1) {
+								isMimeMatch = true
 							}
 						})
 
-						return false
+						return isMimeMatch
 					},
 					async exec(node) {
 						const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
