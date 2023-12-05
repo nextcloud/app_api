@@ -77,52 +77,65 @@ if (OCA.Files && OCA.Files.fileActions) {
 	})
 } else {
 	state.fileActions.forEach(fileAction => {
-		const action = new FileAction({
-			id: fileAction.name,
-			displayName: () => fileAction.display_name,
-			iconSvgInline: () => fileAction.icon === '' ? loadStaticAppAPIInlineSvgIcon() : loadExAppInlineSvgIcon(fileAction.appid, fileAction.icon),
-			order: Number(fileAction.order),
-			enabled(files, view) {
-				console.debug(view)
-				if (files.length !== 1) {
-					return false
+		let inlineSvg = loadStaticAppAPIInlineSvgIcon()
+		if (fileAction.icon !== '') {
+			loadExAppInlineSvgIcon(fileAction.appid, fileAction.icon).then((svg) => {
+				if (svg !== null) {
+					// Set css filter for theming
+					const parser = new DOMParser()
+					const icon = parser.parseFromString(svg, 'image/svg+xml')
+					icon.documentElement.setAttribute('style', 'filter: var(--background-invert-if-dark);')
+					// Convert back to inline string
+					inlineSvg = icon.documentElement.outerHTML
 				}
+			}).finally(() => {
+				const action = new FileAction({
+					id: fileAction.name,
+					displayName: () => fileAction.display_name,
+					iconSvgInline: () => inlineSvg,
+					order: Number(fileAction.order),
+					enabled(files, view) {
+						if (files.length !== 1) {
+							return false
+						}
 
-				return (files[0].mime.indexOf(fileAction.mime) !== -1)
-			},
-			async exec(node) {
-				const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-				axios.post(exAppFileActionHandler, {
-					fileId: node.fileid,
-					name: node.basename,
-					directory: node.dirname,
-					etag: node.attributes.etag,
-					mime: node.mime,
-					favorite: Boolean(node.attributes.favorite).toString(),
-					permissions: node.permissions,
-					fileType: node.type,
-					size: Number(node.size),
-					mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
-					shareTypes: node.attributes.shareTypes || null,
-					shareAttributes: node.attributes.shareAttributes || null,
-					sharePermissions: node.attributes.sharePermissions || null,
-					shareOwner: node.attributes.ownerDisplayName || null,
-					shareOwnerId: node.attributes.ownerId || null,
-					userId: getCurrentUser().uid,
-					instanceId: state.instanceId,
-				}).then((response) => {
-					if (response.status === 200) {
-						OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
-					} else {
-						OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
-					}
-				}).catch((error) => {
-					console.error('error', error)
-					OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
+						return (files[0].mime.indexOf(fileAction.mime) !== -1)
+					},
+					async exec(node) {
+						const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
+						axios.post(exAppFileActionHandler, {
+							fileId: node.fileid,
+							name: node.basename,
+							directory: node.dirname,
+							etag: node.attributes.etag,
+							mime: node.mime,
+							favorite: Boolean(node.attributes.favorite).toString(),
+							permissions: node.permissions,
+							fileType: node.type,
+							size: Number(node.size),
+							mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
+							shareTypes: node.attributes.shareTypes || null,
+							shareAttributes: node.attributes.shareAttributes || null,
+							sharePermissions: node.attributes.sharePermissions || null,
+							shareOwner: node.attributes.ownerDisplayName || null,
+							shareOwnerId: node.attributes.ownerId || null,
+							userId: getCurrentUser().uid,
+							instanceId: state.instanceId,
+						}).then((response) => {
+							if (response.status === 200) {
+								OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
+							} else {
+								OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
+							}
+						}).catch((error) => {
+							console.error('error', error)
+							OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
+						})
+						return null
+					},
 				})
-				return null
-			},
-		})
-		registerFileAction(action)
+				registerFileAction(action)
+			})
+		}
 	})
 }
