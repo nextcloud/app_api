@@ -48,12 +48,12 @@ class ScriptsService {
 	}
 
 	public function deleteExAppScript(string $appId, string $type, string $name, string $path): bool {
-		return $this->mapper->removeByNameTypePath($appId, $type, $name, $path);
+		return $this->mapper->removeByNameTypePath($appId, $type, $name, ltrim($path, '/'));
 	}
 
 	public function getExAppScript(string $appId, string $type, string $name, string $path): ?Script {
 		try {
-			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, $path);
+			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, ltrim($path, '/'));
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 		}
 		return null;

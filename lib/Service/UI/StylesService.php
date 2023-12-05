@@ -44,12 +44,12 @@ class StylesService {
 	}
 
 	public function deleteExAppStyle(string $appId, string $type, string $name, string $path): bool {
-		return $this->mapper->removeByNameTypePath($appId, $type, $name, $path);
+		return $this->mapper->removeByNameTypePath($appId, $type, $name, ltrim($path, '/'));
 	}
 
 	public function getExAppStyle(string $appId, string $type, string $name, string $path): ?Style {
 		try {
-			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, $path);
+			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, ltrim($path, '/'));
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 		}
 		return null;
