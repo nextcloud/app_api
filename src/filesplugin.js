@@ -36,7 +36,7 @@ if (OCA.Files && OCA.Files.fileActions) {
 			const action = {
 				name: fileAction.name,
 				displayName: t(fileAction.appid, fileAction.display_name),
-				mime: mimeType,
+				mime: mimeType.trim(),
 				permissions: Number(fileAction.permissions),
 				order: Number(fileAction.order),
 				icon: fileAction.icon !== '' ? generateAppAPIProxyUrl(fileAction.appid, fileAction.icon) : null,
