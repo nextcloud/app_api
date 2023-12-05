@@ -65,26 +65,6 @@ class FilesActionsMenuMapper extends QBMapper {
 	}
 
 	/**
-	 * @param string $name
-	 *
-	 *
-	 * @return FilesActionsMenu
-	 * @throws DoesNotExistException|Exception if not found
-	 * @throws Exception
-	 *
-	 * @throws MultipleObjectsReturnedException if more than one result
-	 */
-	public function findByName(string $name): FilesActionsMenu {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
-			);
-		return $this->findEntity($qb);
-	}
-
-	/**
 	 * @throws Exception
 	 */
 	public function removeAllByAppId(string $appId): int {

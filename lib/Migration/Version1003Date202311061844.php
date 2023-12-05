@@ -199,7 +199,6 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 
 			$table->setPrimaryKey(['id']);
 			$table->addUniqueIndex(['appid', 'name'], 'ex_ui_files_actions__idx');
-			$table->addIndex(['name'], 'ex_ui_files_actions__name');
 		}
 
 		return $schema;

@@ -95,7 +95,7 @@ class FilesActionsMenuService {
 	 */
 	public function getRegisteredFileActions(): ?array {
 		try {
-			$cacheKey = '/ex_ui_files_actions_';
+			$cacheKey = '/ex_ui_files_actions';
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
 				return array_map(function ($cacheEntry) {
