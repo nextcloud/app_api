@@ -32,7 +32,6 @@ class FilesActionsMenuMapper extends QBMapper {
 			'ex_files_actions_menu.permissions',
 			'ex_files_actions_menu.order',
 			'ex_files_actions_menu.icon',
-			'ex_files_actions_menu.icon_class',
 			'ex_files_actions_menu.action_handler',
 		)
 			->from($this->tableName, 'ex_files_actions_menu')

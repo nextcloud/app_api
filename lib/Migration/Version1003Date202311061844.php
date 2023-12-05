@@ -146,6 +146,11 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			$table->addUniqueIndex(['appid', 'type', 'name', 'path'], 'ui_style__idx');
 		}
 
+		if ($schema->hasTable('ex_files_actions_menu')) {
+			$table = $schema->getTable('ex_files_actions_menu');
+			$table->dropColumn('icon_class');
+		}
+
 		return $schema;
 	}
 }

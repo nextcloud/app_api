@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\UI;
 
 use LengthException;
 use OCA\AppAPI\AppInfo\Application;
@@ -14,7 +14,7 @@ use OCP\DB\Exception;
 use OCP\Util;
 use Psr\Log\LoggerInterface;
 
-class ExAppScriptsService {
+class ScriptsService {
 
 	public const MAX_JS_FILES = 10; //should be equal to number of files in "proxy_js" folder.
 
@@ -31,7 +31,7 @@ class ExAppScriptsService {
 				'appid' => $appId,
 				'type' => $type,
 				'name' => $name,
-				'path' => $path,
+				'path' => ltrim($path, '/'),
 				'after_app_id' => $afterAppId,
 			]);
 			if ($script !== null) {
@@ -48,12 +48,12 @@ class ExAppScriptsService {
 	}
 
 	public function deleteExAppScript(string $appId, string $type, string $name, string $path): bool {
-		return $this->mapper->removeByNameTypePath($appId, $type, $name, $path);
+		return $this->mapper->removeByNameTypePath($appId, $type, $name, ltrim($path, '/'));
 	}
 
 	public function getExAppScript(string $appId, string $type, string $name, string $path): ?Script {
 		try {
-			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, $path);
+			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, ltrim($path, '/'));
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 		}
 		return null;
@@ -95,11 +95,7 @@ class ExAppScriptsService {
 			} else {
 				Util::addScript(Application::APP_ID, $fakeJsPath, $value['after_app_id']);
 			}
-			if (str_starts_with($value['path'], '/')) {
-				$mapResult[$i] = $appId . $value['path'];
-			} else {
-				$mapResult[$i] = $appId . '/' . $value['path'];
-			}
+			$mapResult[$i] = $appId . '/' . $value['path'];
 			$i++;
 		}
 		return $mapResult;
