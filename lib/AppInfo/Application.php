@@ -15,8 +15,7 @@ use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
-
-use OCA\AppAPI\Service\TopMenuService;
+use OCA\AppAPI\Service\UI\TopMenuService;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -32,7 +31,6 @@ use OCP\IUser;
 use OCP\IUserSession;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
-
 use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;

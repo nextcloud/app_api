@@ -16,7 +16,7 @@ use OCP\IDBConnection;
  */
 class ScriptMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_apps_ui_scripts');
+		parent::__construct($db, 'ex_ui_scripts');
 	}
 
 	/**

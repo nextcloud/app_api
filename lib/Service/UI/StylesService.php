@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\UI;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\UI\Style;
@@ -13,7 +13,7 @@ use OCP\DB\Exception;
 use OCP\Util;
 use Psr\Log\LoggerInterface;
 
-class ExAppStylesService {
+class StylesService {
 
 	public function __construct(
 		private readonly StyleMapper     $mapper,
@@ -28,7 +28,7 @@ class ExAppStylesService {
 				'appid' => $appId,
 				'type' => $type,
 				'name' => $name,
-				'path' => $path,
+				'path' => ltrim($path, '/'),
 			]);
 			if ($style !== null) {
 				$newStyle->setId($style->getId());
@@ -44,12 +44,12 @@ class ExAppStylesService {
 	}
 
 	public function deleteExAppStyle(string $appId, string $type, string $name, string $path): bool {
-		return $this->mapper->removeByNameTypePath($appId, $type, $name, $path);
+		return $this->mapper->removeByNameTypePath($appId, $type, $name, ltrim($path, '/'));
 	}
 
 	public function getExAppStyle(string $appId, string $type, string $name, string $path): ?Style {
 		try {
-			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, $path);
+			return $this->mapper->findByAppIdTypeNamePath($appId, $type, $name, ltrim($path, '/'));
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
 		}
 		return null;
@@ -79,12 +79,7 @@ class ExAppStylesService {
 	public function applyExAppStyles(string $appId, string $type, string $name): void {
 		$styles = $this->mapper->findByAppIdTypeName($appId, $type, $name);
 		foreach ($styles as $value) {
-			if (str_starts_with($value['path'], '/')) {
-				// in the future we should allow offload of styles to the NC instance if they start with '/'
-				$path = 'proxy/'. $appId . $value['path'];
-			} else {
-				$path = 'proxy/'. $appId . '/' . $value['path'];
-			}
+			$path = 'proxy/'. $appId . '/' . $value['path'];
 			Util::addStyle(Application::APP_ID, $path);
 		}
 	}

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\UI;
 
 use OCA\AppAPI\Db\UI\InitialState;
 use OCA\AppAPI\Db\UI\InitialStateMapper;
@@ -11,7 +11,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use Psr\Log\LoggerInterface;
 
-class ExAppInitialStateService {
+class InitialStateService {
 
 	public function __construct(
 		private readonly InitialStateMapper $mapper,

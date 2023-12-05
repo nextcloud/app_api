@@ -16,7 +16,7 @@ use OCP\IDBConnection;
  */
 class InitialStateMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_apps_ui_states');
+		parent::__construct($db, 'ex_ui_states');
 	}
 
 	/**
