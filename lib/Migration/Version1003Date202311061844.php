@@ -10,6 +10,9 @@ use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
+/**
+ * Breaking changes migration refactoring UI tables (renames)
+ */
 class Version1003Date202311061844 extends SimpleMigrationStep {
 	/**
 	 * @param IOutput $output
@@ -22,8 +25,8 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		if (!$schema->hasTable('ex_apps_ui_top_menu')) {
-			$table = $schema->createTable('ex_apps_ui_top_menu');
+		if (!$schema->hasTable('ex_ui_top_menu')) {
+			$table = $schema->createTable('ex_ui_top_menu');
 
 			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
@@ -55,8 +58,8 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			$table->addUniqueIndex(['appid', 'name'], 'ui_top_menu__idx');
 		}
 
-		if (!$schema->hasTable('ex_apps_ui_states')) {
-			$table = $schema->createTable('ex_apps_ui_states');
+		if (!$schema->hasTable('ex_ui_states')) {
+			$table = $schema->createTable('ex_ui_states');
 
 			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
@@ -86,8 +89,8 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			$table->addUniqueIndex(['appid', 'type', 'name', 'key'], 'ui_state__idx');
 		}
 
-		if (!$schema->hasTable('ex_apps_ui_scripts')) {
-			$table = $schema->createTable('ex_apps_ui_scripts');
+		if (!$schema->hasTable('ex_ui_scripts')) {
+			$table = $schema->createTable('ex_ui_scripts');
 
 			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
@@ -118,8 +121,8 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 			$table->addUniqueIndex(['appid', 'type', 'name', 'path'], 'ui_script__idx');
 		}
 
-		if (!$schema->hasTable('ex_apps_ui_styles')) {
-			$table = $schema->createTable('ex_apps_ui_styles');
+		if (!$schema->hasTable('ex_ui_styles')) {
+			$table = $schema->createTable('ex_ui_styles');
 
 			$table->addColumn('id', Types::BIGINT, [
 				'notnull' => true,
@@ -147,8 +150,56 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 		}
 
 		if ($schema->hasTable('ex_files_actions_menu')) {
-			$table = $schema->getTable('ex_files_actions_menu');
-			$table->dropColumn('icon_class');
+			$schema->dropTable('ex_files_actions_menu');
+		}
+
+		if (!$schema->hasTable('ex_ui_files_actions')) {
+			$table = $schema->createTable('ex_ui_files_actions');
+
+			$table->addColumn('id', Types::BIGINT, [
+				'notnull' => true,
+				'autoincrement' => true,
+			]);
+			$table->addColumn('appid', Types::STRING, [
+				'notnull' => true,
+				'length' => 32,
+			]);
+			$table->addColumn('name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('display_name', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+			$table->addColumn('mime', Types::TEXT, [
+				'notnull' => true,
+				'default' => 'file',
+			]);
+			$table->addColumn('permissions', Types::STRING, [
+				'notnull' => true,
+			]);
+			$table->addColumn('order', Types::BIGINT, [
+				'notnull' => true,
+				'default' => 0,
+			]);
+			$table->addColumn('icon', Types::STRING, [
+				'notnull' => false,
+				'default' => '',
+			]);
+			$table->addColumn('icon_class', Types::STRING, [
+				'notnull' => true,
+				'default' => 'icon-app-api',
+			]);
+			// Action handler key name, that will be sent to exApp for handling
+			$table->addColumn('action_handler', Types::STRING, [
+				'notnull' => true,
+				'length' => 64,
+			]);
+
+			$table->setPrimaryKey(['id']);
+			$table->addUniqueIndex(['appid', 'name'], 'ex_ui_files_actions__idx');
+			$table->addIndex(['name'], 'ex_ui_files_actions__name');
 		}
 
 		return $schema;

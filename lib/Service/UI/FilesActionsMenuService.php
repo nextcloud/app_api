@@ -23,7 +23,7 @@ class FilesActionsMenuService {
 		private readonly FilesActionsMenuMapper $mapper,
 		private readonly LoggerInterface        $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
+		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_ui_files_actions');
 	}
 
 	/**
@@ -61,7 +61,7 @@ class FilesActionsMenuService {
 				$newFileActionMenu->setId($fileActionMenu->getId());
 			}
 			$fileActionMenu = $this->mapper->insertOrUpdate($newFileActionMenu);
-			$this->cache->set('/ex_files_actions_menu_' . $appId . '_' . $name, $fileActionMenu);
+			$this->cache->set('/ex_ui_files_actions_' . $appId . '_' . $name, $fileActionMenu);
 			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
@@ -79,7 +79,7 @@ class FilesActionsMenuService {
 				return null;
 			}
 			$this->mapper->delete($fileActionMenu);
-			$this->cache->remove('/ex_files_actions_menu_' . $appId . '_' . $name);
+			$this->cache->remove('/ex_ui_files_actions_' . $appId . '_' . $name);
 			$this->resetCacheEnabled();
 			return $fileActionMenu;
 		} catch (Exception $e) {
@@ -95,7 +95,7 @@ class FilesActionsMenuService {
 	 */
 	public function getRegisteredFileActions(): ?array {
 		try {
-			$cacheKey = '/ex_files_actions_menus';
+			$cacheKey = '/ex_ui_files_actions_';
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
 				return array_map(function ($cacheEntry) {
@@ -112,7 +112,7 @@ class FilesActionsMenuService {
 	}
 
 	public function getExAppFileAction(string $appId, string $fileActionName): ?FilesActionsMenu {
-		$cacheKey = '/ex_files_actions_menu_' . $appId . '_' . $fileActionName;
+		$cacheKey = '/ex_ui_files_actions_' . $appId . '_' . $fileActionName;
 		$cache = $this->cache->get($cacheKey);
 		if ($cache !== null) {
 			return $cache instanceof FilesActionsMenu ? $cache : new FilesActionsMenu($cache);
@@ -133,12 +133,12 @@ class FilesActionsMenuService {
 		} catch (Exception) {
 			$result = -1;
 		}
-		$this->cache->clear('/ex_files_actions_menu_' . $appId);
+		$this->cache->clear('/ex_ui_files_actions_' . $appId);
 		$this->resetCacheEnabled();
 		return $result;
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_files_actions_menus');
+		$this->cache->remove('/ex_ui_files_actions');
 	}
 }

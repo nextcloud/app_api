@@ -16,7 +16,7 @@ use OCP\IDBConnection;
  */
 class StyleMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_apps_ui_styles');
+		parent::__construct($db, 'ex_ui_styles');
 	}
 
 	/**
