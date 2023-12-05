@@ -15,6 +15,7 @@ This release contains breaking changes, all ExApps should be updated accordingly
 
 - A request proxy from Frontend to ExApps, ExApps can now have a user interface like regular applications.
 - New OCS endpoints to register entry in Nextcloud Top Menu. #135
+- Ability to specify multiply mime types for FileAction Menu. #95
 
 ### Changed
 
