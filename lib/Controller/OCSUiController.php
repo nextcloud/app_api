@@ -6,40 +6,30 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
-use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
 use OCA\AppAPI\Service\UI\ScriptsService;
 use OCA\AppAPI\Service\UI\StylesService;
 use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
-use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
-use OCP\Http\Client\IResponse;
-use OCP\IConfig;
 use OCP\IRequest;
-use Psr\Log\LoggerInterface;
 
 class OCSUiController extends OCSController {
 	protected $request;
 
 	public function __construct(
 		IRequest                                 $request,
-		private readonly ?string                 $userId,
 		private readonly FilesActionsMenuService $filesActionsMenuService,
 		private readonly TopMenuService          $menuEntryService,
 		private readonly InitialStateService     $initialStateService,
 		private readonly ScriptsService          $scriptsService,
 		private readonly StylesService           $stylesService,
-		private readonly AppAPIService           $appAPIService,
-		private readonly IConfig                 $config,
-		private readonly LoggerInterface         $logger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -316,87 +306,5 @@ class OCSUiController extends OCSController {
 			throw new OCSNotFoundException('No such Style');
 		}
 		return new DataResponse($result, Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
-	 *
-	 * @param string $appId
-	 * @param string $actionName
-	 * @param array $actionFile
-	 * @param string $actionHandler
-	 *
-	 * @return DataResponse
-	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function handleFileAction(string $appId, string $actionName, array $actionFile, string $actionHandler): DataResponse {
-		$result = false;
-		$exFileAction = $this->filesActionsMenuService->getExAppFileAction($appId, $actionName);
-		if ($exFileAction !== null) {
-			$handler = $exFileAction->getActionHandler(); // route on ex app
-			$params = [
-				'actionName' => $actionName,
-				'actionHandler' => $actionHandler,
-				'actionFile' => [
-					'fileId' => $actionFile['fileId'],
-					'name' => $actionFile['name'],
-					'directory' => $actionFile['directory'],
-					'etag' => $actionFile['etag'],
-					'mime' => $actionFile['mime'],
-					'fileType' => $actionFile['fileType'],
-					'mtime' => $actionFile['mtime'] / 1000, // convert ms to s
-					'size' => intval($actionFile['size']),
-					'favorite' => $actionFile['favorite'] ?? "false",
-					'permissions' => $actionFile['permissions'],
-					'shareOwner' => $actionFile['shareOwner'] ?? null,
-					'shareOwnerId' => $actionFile['shareOwnerId'] ?? null,
-					'shareTypes' => $actionFile['shareTypes'] ?? null,
-					'shareAttributes' => $actionFile['shareAttributes'] ?? null,
-					'sharePermissions' => $actionFile['sharePermissions'] ?? null,
-					'userId' => $this->userId,
-					'instanceId' => $this->config->getSystemValue('instanceid', null),
-				],
-			];
-			$exApp = $this->appAPIService->getExApp($appId);
-			if ($exApp !== null) {
-				$result = $this->appAPIService->aeRequestToExApp($exApp, $handler, $this->userId, 'POST', $params, [], $this->request);
-				if ($result instanceof IResponse) {
-					$result = $result->getStatusCode() === 200;
-				} elseif (isset($result['error'])) {
-					$this->logger->error(sprintf('Failed to handle ExApp %s FileAction %s. Error: %s', $appId, $actionName, $result['error']));
-				}
-			}
-		}
-		return new DataResponse([
-			'success' => $result,
-			'handleFileActionSent' => $result,
-		], Http::STATUS_OK);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $appId
-	 * @param string $exFileActionName
-	 *
-	 * @return DataDisplayResponse
-	 */
-	#[NoAdminRequired]
-	#[NoCSRFRequired]
-	public function loadFileActionIcon(string $appId, string $exFileActionName): DataDisplayResponse {
-		$icon = $this->filesActionsMenuService->loadFileActionIcon($appId, $exFileActionName);
-		if ($icon !== null && isset($icon['body'], $icon['headers'])) {
-			$response = new DataDisplayResponse(
-				$icon['body'],
-				Http::STATUS_OK,
-				['Content-Type' => $icon['headers']['Content-Type'][0] ?? 'image/svg+xml']
-			);
-			$response->cacheFor(FilesActionsMenuService::ICON_CACHE_TTL, false, true);
-			return $response;
-		}
-		return new DataDisplayResponse('', 400);
 	}
 }

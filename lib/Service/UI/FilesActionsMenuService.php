@@ -9,10 +9,7 @@ use OCA\AppAPI\Db\UI\FilesActionsMenu;
 use OCA\AppAPI\Db\UI\FilesActionsMenuMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\AppFramework\Http;
 use OCP\DB\Exception;
-use OCP\Http\Client\IClient;
-use OCP\Http\Client\IClientService;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
@@ -20,16 +17,13 @@ use Psr\Log\LoggerInterface;
 class FilesActionsMenuService {
 	public const ICON_CACHE_TTL = 60 * 60 * 24; // 1 day
 	private ICache $cache;
-	private IClient $client;
 
 	public function __construct(
 		ICacheFactory                           $cacheFactory,
 		private readonly FilesActionsMenuMapper $mapper,
 		private readonly LoggerInterface        $logger,
-		IClientService                          $clientService,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_files_actions_menu');
-		$this->client = $clientService->newClient();
 	}
 
 	/**
@@ -131,36 +125,6 @@ class FilesActionsMenuService {
 		}
 		$this->cache->set($cacheKey, $fileAction);
 		return $fileAction;
-	}
-
-	/**
-	 * @param string $appId
-	 * @param string $exFileActionName
-	 *
-	 * @return array|null
-	 */
-	public function loadFileActionIcon(string $appId, string $exFileActionName): ?array {
-		$exFileAction = $this->getExAppFileAction($appId, $exFileActionName);
-		if ($exFileAction === null) {
-			return null;
-		}
-		$iconUrl = $exFileAction->getIcon();
-		if (!isset($iconUrl) || $iconUrl === '') {
-			return null;
-		}
-		try {
-			$thumbnailResponse = $this->client->get($iconUrl);
-			if ($thumbnailResponse->getStatusCode() === Http::STATUS_OK) {
-				return [
-					'body' => $thumbnailResponse->getBody(),
-					'headers' => $thumbnailResponse->getHeaders(),
-				];
-			}
-		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Failed to load ExApp %s FileAction icon %s. Error: %s', $appId, $exFileActionName, $e->getMessage()), ['exception' => $e]);
-			return null;
-		}
-		return null;
 	}
 
 	public function unregisterExAppFileActions(string $appId): int {

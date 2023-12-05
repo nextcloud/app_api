@@ -81,8 +81,6 @@ return [
 		['name' => 'OCSUi#registerFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'POST'],
 		['name' => 'OCSUi#unregisterFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'GET'],
-		['name' => 'OCSUi#handleFileAction', 'url' => '/api/v1/files/action', 'verb' => 'POST'],
-		['name' => 'OCSUi#loadFileActionIcon', 'url' => '/api/v1/files/action/icon', 'verb' => 'GET'],
 
 		// Top Menu
 		['name' => 'OCSUi#registerExAppMenuEntry', 'url' => '/api/v1/ui/top-menu', 'verb' => 'POST'],
