@@ -187,10 +187,6 @@ class Version1003Date202311061844 extends SimpleMigrationStep {
 				'notnull' => false,
 				'default' => '',
 			]);
-			$table->addColumn('icon_class', Types::STRING, [
-				'notnull' => true,
-				'default' => 'icon-app-api',
-			]);
 			// Action handler key name, that will be sent to exApp for handling
 			$table->addColumn('action_handler', Types::STRING, [
 				'notnull' => true,
