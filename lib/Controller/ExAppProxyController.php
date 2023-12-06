@@ -11,7 +11,6 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\Files\IMimeTypeDetector;
@@ -67,13 +66,6 @@ class ExAppProxyController extends Controller {
 		if ($cache && !$isHTML) {
 			$proxyResponse->cacheFor(3600);
 		}
-
-		$csp = new ContentSecurityPolicy();
-		$csp->addAllowedScriptDomain($this->request->getServerHost());
-		$csp->addAllowedScriptDomain('\'unsafe-eval\'');
-		$csp->addAllowedScriptDomain('\'unsafe-inline\'');
-		$csp->addAllowedFrameDomain($this->request->getServerHost());
-		$proxyResponse->setContentSecurityPolicy($csp);
 		return $proxyResponse;
 	}
 
@@ -134,6 +126,29 @@ class ExAppProxyController extends Controller {
 
 		$response = $this->service->aeRequestToExApp(
 			$exApp, '/' . $other, $this->userId, 'PUT',
+			params: $this->request->getParams(),
+			request: $this->request
+		);
+		if (is_array($response)) {
+			$error_response = new Response();
+			return $error_response->setStatus(500);
+		}
+		return $this->createProxyResponse($other, $response);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function ExAppDelete(string $appId, string $other): Response {
+		$exApp = $this->service->getExApp($appId);
+		if ($exApp === null) {
+			return new NotFoundResponse();
+		}
+		if (!$exApp->getEnabled()) {
+			return new NotFoundResponse();
+		}
+
+		$response = $this->service->aeRequestToExApp(
+			$exApp, '/' . $other, $this->userId, 'DELETE',
 			params: $this->request->getParams(),
 			request: $this->request
 		);
