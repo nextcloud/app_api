@@ -13,7 +13,7 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Breaking changes migration refactoring UI tables (renames)
  */
-class Version1003Date202311061844 extends SimpleMigrationStep {
+class Version1004Date202311061844 extends SimpleMigrationStep {
 	/**
 	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
