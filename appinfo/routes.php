@@ -22,6 +22,9 @@ return [
 		['name' => 'ExAppProxy#ExAppPut',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'PUT' , 'root' => '/proxy',
 			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],
+		['name' => 'ExAppProxy#ExAppDelete',
+			'url' => '/proxy/{appId}/{other}', 'verb' => 'DELETE' , 'root' => '/proxy',
+			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],
 
 		// ExApps actions
 		['name' => 'ExAppsPage#viewApps', 'url' => '/apps', 'verb' => 'GET' , 'root' => '/apps'],
