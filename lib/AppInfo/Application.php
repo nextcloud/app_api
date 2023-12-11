@@ -8,7 +8,6 @@ use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
 use OCA\AppAPI\DeclarativeSettings\DeclarativeSettingsForm;
 use OCA\AppAPI\Listener\DeclarativeSettings\GetValueListener;
-use OCA\AppAPI\Listener\DeclarativeSettings\RegisterFormListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
