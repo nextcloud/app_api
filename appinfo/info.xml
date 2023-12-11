@@ -94,5 +94,6 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<settings>
 		<admin>OCA\AppAPI\Settings\Admin</admin>
 		<admin-section>OCA\AppAPI\Settings\AdminSection</admin-section>
+		<admin-section>OCA\AppAPI\Settings\DeclarativeSettings\DeclarativeSettingsSection</admin-section>
 	</settings>
 </info>

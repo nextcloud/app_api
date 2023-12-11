@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OCA\AppAPI\Listener\DeclarativeSettings;
+
+use OCP\EventDispatcher\Event;
+use OCP\EventDispatcher\IEventListener;
+use OCP\IConfig;
+use OCP\Settings\SetDeclarativeSettingsValueEvent;
+
+/**
+ * @template-implements IEventListener<SetDeclarativeSettingsValueEvent>
+ */
+class SetValueListener implements IEventListener {
+	public function __construct(
+		private readonly IConfig $config,
+	) {
+	}
+
+	public function handle(Event $event): void {
+		if (!$event instanceof SetDeclarativeSettingsValueEvent) {
+			return;
+		}
+
+		$this->config->setUserValue($event->getUser()->getUID(), $event->getApp(), $event->getFieldId(), $event->getValue());
+	}
+}
