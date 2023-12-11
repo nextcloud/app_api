@@ -17,12 +17,13 @@ class AIODockerActions {
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
 
 	public function __construct(
+		private IConfig $config,
 		private DaemonConfigService $daemonConfigService
 	) {
 	}
 
 	/**
-	 * Detecting AIO instance by ENV
+	 * Detecting AIO instance by config setting or AIO_TOKEN env as fallback
 	 *
 	 * @return bool
 	 */
