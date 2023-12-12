@@ -34,6 +34,13 @@ class DeclarativeSettingsForm implements IDeclarativeSettingsForm {
 					'type' => 'select',
 					'options' => ['foo', 'bar', 'baz'],
 				],
+				[
+					'id' => 'test_ex_app_field_4',
+					'title' => 'Checkbox',
+					'description' => 'Select checkbox option setting',
+					'type' => 'bool',
+					'label' => 'Verify something if enabled'
+				],
 			],
 		];
 	}
