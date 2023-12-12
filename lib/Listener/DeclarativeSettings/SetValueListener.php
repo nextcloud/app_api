@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Listener\DeclarativeSettings;
 
+use OCA\AppAPI\AppInfo\Application;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\IConfig;
@@ -20,6 +21,10 @@ class SetValueListener implements IEventListener {
 
 	public function handle(Event $event): void {
 		if (!$event instanceof SetDeclarativeSettingsValueEvent) {
+			return;
+		}
+
+		if ($event->getApp() !== Application::APP_ID) {
 			return;
 		}
 
