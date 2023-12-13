@@ -14,6 +14,7 @@ use OCP\IConfig;
  */
 class AIODockerActions {
 	public const AIO_DAEMON_CONFIG_NAME = 'docker_aio';
+	public const AIO_DAEMON_CONFIG_NAME_GPU = 'docker_aio_gpu';
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
 
 	public function __construct(
@@ -57,7 +58,7 @@ class AIODockerActions {
 		];
 
 		if ($this->isGPUsEnabled()) {
-			$deployConfig['gpu'] = true;
+			$this->registerAIODaemonConfigWithGPU();
 		}
 
 		$daemonConfigParams = [
@@ -74,6 +75,40 @@ class AIODockerActions {
 			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
 		}
 		return $daemonConfig;
+	}
+
+	/**
+	 * Registers DaemonConfig with default params to use AIO Docker Socket Proxy with GPU
+	 *
+	 * @return DaemonConfig|null
+	 */
+	private function registerAIODaemonConfigWithGPU(): ?DaemonConfig {
+		$daemonConfigWithGPU = $this->daemonConfigService->getDaemonConfigByName(self::AIO_DAEMON_CONFIG_NAME_GPU);
+		if ($daemonConfigWithGPU !== null) {
+			return $daemonConfigWithGPU;
+		}
+
+		$deployConfig = [
+			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
+			'host' => null,
+			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
+			'ssl_key' => null,
+			'ssl_key_password' => null,
+			'ssl_cert' => null,
+			'ssl_cert_password' => null,
+			'gpu' => true,
+		];
+
+		$daemonConfigParams = [
+			'name' => self::AIO_DAEMON_CONFIG_NAME,
+			'display_name' => 'AIO Docker Socket Proxy with GPU',
+			'accepts_deploy_id' => 'docker-install',
+			'protocol' => 'http',
+			'host' => self::AIO_DOCKER_SOCKET_PROXY_HOST,
+			'deploy_config' => $deployConfig,
+		];
+
+		return $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
 	}
 
 	/**
