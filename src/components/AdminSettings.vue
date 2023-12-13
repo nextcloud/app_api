@@ -8,7 +8,7 @@
 			<p>{{ t('app_api', 'The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud.') }}</p>
 		</div>
 		<NcSettingsSection
-			:title="t('app_api', 'ExApps')"
+			:name="t('app_api', 'ExApps')"
 			:description="t('app_api', 'ExApps management similar to default apps and available by the link below or .')">
 			<NcButton
 				type="primary"
@@ -22,7 +22,7 @@
 			</NcButton>
 		</NcSettingsSection>
 		<NcSettingsSection
-			:title="t('app_api', 'Deploy Daemons')"
+			:name="t('app_api', 'Deploy Daemons')"
 			:description="t('app_api', 'Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon.')"
 			:doc-url="'https://cloud-py-api.github.io/app_api/CreationOfDeployDaemon.html'">
 			<NcNoteCard type="warning">
@@ -102,7 +102,7 @@ export default {
 			}).catch((error) => {
 				showError(
 					t('app_api', 'Failed to save admin options')
-					+ ': ' + (error.response?.request?.responseText ?? '')
+					+ ': ' + (error.response?.request?.responseText ?? ''),
 				)
 				console.error(error)
 			})

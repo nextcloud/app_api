@@ -1,13 +1,13 @@
 <template>
 	<div class="daemon" :class="{'daemon-default': isDefault }">
 		<NcListItem
-			:title="itemTitle"
+			:name="itemTitle"
 			:details="isDefault ? t('app_api', 'Default') : ''"
 			:force-display-actions="true"
 			:counter-number="daemon.exAppsCount"
-			counter-type="hightlighet"
+			counter-type="highlighted"
 			@click="showDaemonConfigDetailsModal(daemon)">
-			<template #subtitle>
+			<template #subname>
 				{{ daemon.accepts_deploy_id }}
 			</template>
 			<template #actions>
@@ -117,7 +117,7 @@ export default {
 					if (success) {
 						self._deleteDaemonConfig(daemon)
 					}
-				}
+				},
 			)
 		},
 		_deleteDaemonConfig(daemon) {
