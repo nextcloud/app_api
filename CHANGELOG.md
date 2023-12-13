@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.2 - 2023-12-13]
+
+Maintenance update of npm packages to support NC28
+
+### Changed
+
+- Changed AIO auto-created daemon with gpu enabled to separate one (#134)
+- Changed AIO detection to use new env (#150) 
+
 ## [1.4.1 - 2023-12-07]
 
 Attempt to fix release on appstore side.
