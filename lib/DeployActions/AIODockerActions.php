@@ -29,7 +29,7 @@ class AIODockerActions {
 	 * @return bool
 	 */
 	public function isAIO(): bool {
-		return $this->config->getSystemValue('one-click-instance', false);
+		return filter_var(getenv('THIS_IS_AIO'), FILTER_VALIDATE_BOOL);
 	}
 
 	/**

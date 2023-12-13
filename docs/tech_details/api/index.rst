@@ -15,6 +15,7 @@ AppAPI Nextcloud APIs
 	exapp
 	utils
 	fileactionsmenu
+	topmenu
 	notifications
 	talkbots
 	other_ocs

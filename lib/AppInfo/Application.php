@@ -10,11 +10,12 @@ use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Listener\UserDeletedListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
+use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
-
+use OCA\AppAPI\Service\UI\TopMenuService;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -30,7 +31,6 @@ use OCP\IUser;
 use OCP\IUserSession;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
-
 use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -53,6 +53,7 @@ class Application extends App implements IBootstrap {
 		$context->registerCapability(Capabilities::class);
 		$context->registerCapability(PublicCapabilities::class);
 		$context->registerMiddleware(AppAPIAuthMiddleware::class);
+		$context->registerMiddleware(ExAppUiMiddleware::class);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 		$context->registerEventListener(UserDeletedEvent::class, UserDeletedListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
@@ -67,6 +68,7 @@ class Application extends App implements IBootstrap {
 				$profiler->add(new AppAPIDataCollector());
 			}
 			$context->injectFn($this->registerExAppsManagementNavigation(...));
+			$context->injectFn($this->registerExAppsMenuEntries(...));
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|Throwable) {
 		}
 	}
@@ -110,5 +112,11 @@ class Application extends App implements IBootstrap {
 				];
 			});
 		}
+	}
+
+	private function registerExAppsMenuEntries(): void {
+		$container = $this->getContainer();
+		$menuEntryService = $container->get(TopMenuService::class);
+		$menuEntryService->registerMenuEntries($container);
 	}
 }

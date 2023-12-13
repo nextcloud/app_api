@@ -7,10 +7,14 @@ namespace OCA\AppAPI\Service;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
-
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
+use OCA\AppAPI\Service\UI\FilesActionsMenuService;
+use OCA\AppAPI\Service\UI\InitialStateService;
+use OCA\AppAPI\Service\UI\ScriptsService;
+use OCA\AppAPI\Service\UI\StylesService;
+use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -41,26 +45,31 @@ class AppAPIService {
 	private IClient $client;
 
 	public function __construct(
-		private LoggerInterface $logger,
-		private ILogFactory $logFactory,
-		ICacheFactory $cacheFactory,
-		private IThrottler $throttler,
-		private IConfig $config,
-		IClientService $clientService,
-		private ExAppMapper $exAppMapper,
-		private IAppManager $appManager,
-		private ExAppUsersService $exAppUsersService,
-		private ExAppApiScopeService $exAppApiScopeService,
-		private ExAppScopesService $exAppScopesService,
-		private ISecureRandom $random,
-		private IUserSession $userSession,
-		private ISession $session,
-		private IUserManager $userManager,
-		private ExAppConfigService $exAppConfigService,
-		private ExNotificationsManager $exNotificationsManager,
-		private TalkBotsService $talkBotsService,
-		private ExAppFetcher $exAppFetcher,
-		private ExAppArchiveFetcher $exAppArchiveFetcher,
+		private readonly LoggerInterface          $logger,
+		private readonly ILogFactory              $logFactory,
+		ICacheFactory                              $cacheFactory,
+		private readonly IThrottler              $throttler,
+		private readonly IConfig                 $config,
+		IClientService                           $clientService,
+		private readonly ExAppMapper             $exAppMapper,
+		private readonly IAppManager             $appManager,
+		private readonly ExAppUsersService       $exAppUsersService,
+		private readonly ExAppApiScopeService    $exAppApiScopeService,
+		private readonly ExAppScopesService      $exAppScopesService,
+		private readonly TopMenuService          $topMenuService,
+		private readonly InitialStateService     $initialStateService,
+		private readonly ScriptsService          $scriptsService,
+		private readonly StylesService           $stylesService,
+		private readonly FilesActionsMenuService $filesActionsMenuService,
+		private readonly ISecureRandom           $random,
+		private readonly IUserSession            $userSession,
+		private readonly ISession                $session,
+		private readonly IUserManager            $userManager,
+		private readonly ExAppConfigService      $exAppConfigService,
+		private readonly ExNotificationsManager  $exNotificationsManager,
+		private readonly TalkBotsService         $talkBotsService,
+		private readonly ExAppFetcher            $exAppFetcher,
+		private readonly ExAppArchiveFetcher     $exAppArchiveFetcher,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 		$this->client = $clientService->newClient();
@@ -139,6 +148,11 @@ class AppAPIService {
 			$this->exAppScopesService->removeExAppScopes($exApp);
 			$this->exAppUsersService->removeExAppUsers($exApp);
 			$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
+			$this->filesActionsMenuService->unregisterExAppFileActions($appId);
+			$this->topMenuService->unregisterExAppMenuEntries($appId);
+			$this->initialStateService->deleteExAppInitialStates($appId);
+			$this->scriptsService->deleteExAppScripts($appId);
+			$this->stylesService->deleteExAppStyles($appId);
 			$this->cache->remove('/exApp_' . $appId);
 			return $exApp;
 		} catch (Exception $e) {
@@ -178,6 +192,8 @@ class AppAPIService {
 				$cacheKey = '/exApp_' . $exApp->getAppid();
 				$exApp->setEnabled(1);
 				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+				$this->filesActionsMenuService->resetCacheEnabled();
+				$this->topMenuService->resetCacheEnabled();
 
 				$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT');
 				if ($exAppEnabled instanceof IResponse) {
@@ -232,6 +248,8 @@ class AppAPIService {
 			$cacheKey = '/exApp_' . $exApp->getAppid();
 			$exApp->setEnabled(0);
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+			$this->topMenuService->resetCacheEnabled();
+			$this->filesActionsMenuService->resetCacheEnabled();
 			return true;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while disabling ExApp: %s', $e->getMessage()));

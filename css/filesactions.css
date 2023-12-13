@@ -2,3 +2,8 @@
 	background-image: url('../img/app-dark.svg');
 	filter: var(--background-invert-if-dark);
 }
+
+/* For Nextcloud 27 */
+.menuitem.action > img.icon {
+	filter: var(--background-invert-if-dark);
+}
