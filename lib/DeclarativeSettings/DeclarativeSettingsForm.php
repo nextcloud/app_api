@@ -69,7 +69,7 @@ class DeclarativeSettingsForm implements IDeclarativeSettingsForm {
 				],
 				[
 					'id' => 'test_ex_app_field_5',
-					'title' => 'Multiple checkbox toggles, describing one setting, values are comma separated and concatenated to one string',
+					'title' => 'Multiple checkbox toggles, describing one setting, checked options are saved as an JSON object {foo: true, bar: false}',
 					'description' => 'Select checkbox option setting',
 					'type' => 'multi-checkbox', // checkbox, multi-checkbox
 					'label' => 'Select multiple toggles',
