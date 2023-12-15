@@ -18,6 +18,30 @@ class DeclarativeSettingsForm implements IDeclarativeSettingsForm {
 			'description' => 'These fields are rendered dynamically from declarative schema', // NcSettingsSection description
 			'fields' => [
 				[
+					'id' => 'some_real_setting',
+					'title' => 'Choose init status check background job interval',
+					'description' => 'How often AppAPI should check for initialization status',
+					'type' => 'radio', // radio, radio-button (NcCheckboxRadioSwitch button-variant)
+					'options' => [
+						[
+							'name' => 'Each 40 minutes', // NcCheckboxRadioSwitch display name
+							'value' => '40m' // NcCheckboxRadioSwitch value
+						],
+						[
+							'name' => 'Each 60 minutes',
+							'value' => '60m'
+						],
+						[
+							'name' => 'Each 120 minutes',
+							'value' => '120m'
+						],
+						[
+							'name' => 'Each day',
+							'value' => 60 * 24 . 'm'
+						],
+					],
+				],
+				[
 					'id' => 'test_ex_app_field_1', // configkey
 					'title' => 'Default text field', // label
 					'description' => 'Set some simple text setting', // hint
@@ -110,30 +134,6 @@ class DeclarativeSettingsForm implements IDeclarativeSettingsForm {
 						[
 							'name' => 'Second radio',
 							'value' => 'baz'
-						],
-					],
-				],
-				[
-					'id' => 'some_real_setting',
-					'title' => 'Choose init status check background job interval',
-					'description' => 'How often AppAPI should check for initialization status',
-					'type' => 'radio', // radio, radio-button (NcCheckboxRadioSwitch button-variant)
-					'options' => [
-						[
-							'name' => 'Each 40 minutes', // NcCheckboxRadioSwitch display name
-							'value' => '40m' // NcCheckboxRadioSwitch value
-						],
-						[
-							'name' => 'Each 60 minutes',
-							'value' => '60m'
-						],
-						[
-							'name' => 'Each 120 minutes',
-							'value' => '120m'
-						],
-						[
-							'name' => 'Each day',
-							'value' => 60 * 24 . 'm'
 						],
 					],
 				],
