@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.3 - 2023-12-2x]
+
+### Fixed
+
+- invalid timeout condition check for `/init` endpoint. #155
+
 ## [1.4.2 - 2023-12-13]
 
 Maintenance update of npm packages to support NC28
