@@ -580,7 +580,7 @@ class AppAPIService {
 	):  array|IResponse {
 		$exApp = $this->getExApp($appId);
 		if ($exApp === null) {
-			return ['error' => 'ExApp not found'];
+			return ['error' => sprintf('ExApp `%s` not found', $appId)];
 		}
 		return $this->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
@@ -609,7 +609,7 @@ class AppAPIService {
 	):  array|IResponse {
 		$exApp = $this->getExApp($appId);
 		if ($exApp === null) {
-			return ['error' => 'ExApp not found'];
+			return ['error' => sprintf('ExApp `%s` not found', $appId)];
 		}
 		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
