@@ -52,8 +52,17 @@
 						<NcInputField
 							id="daemon-host"
 							:value.sync="host"
-							:placeholder="t('app_api', 'Daemon host (e.g. /var/run/docker.sock, https://proxy-domain.com:2375)')"
-							:aria-label="t('app_api', 'Daemon host (e.g. /var/run/docker.sock, https://proxy-domain.com:2375)')" />
+							:placeholder="t('app_api', 'Daemon host (e.g. /var/run/docker.sock, proxy-domain.com:2375)')"
+							:aria-label="t('app_api', 'Daemon host (e.g. /var/run/docker.sock, proxy-domain.com:2375)')"
+							:helper-text="daemonHostHelperText" />
+					</div>
+					<div v-if="acceptsDeployId !== 'manual-install'" class="external-label">
+						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud url') }}</label>
+						<NcInputField
+							id="nextcloud-url"
+							:value.sync="nextcloud_url"
+							:placeholder="t('app_api', 'Nextcloud url')"
+							:aria-label="t('app_api', 'Nextcloud url')" />
 					</div>
 					<NcCheckboxRadioSwitch
 						v-if="acceptsDeployId !== 'manual-install'"
@@ -174,6 +183,16 @@ export default {
 			registeringDaemon: false,
 			registerInOneClickLoading: false,
 		}
+	},
+	computed: {
+		daemonHostHelperText() {
+			if (this.protocol === 'unix-socket') {
+				return t('app_api', 'Unix socket path (e.g. /var/run/docker.sock)')
+			} else if (['http', 'https'].includes(this.protocol)) {
+				return t('app_api', 'Host with port (e.g. proxy-domain.com:2375)')
+			}
+			return ''
+		},
 	},
 	watch: {
 		acceptsDeployId(newAcceptsDeployId) {
