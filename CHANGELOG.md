@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.4.3 - 2023-12-2x]
+## [1.4.3 - 2023-12-18]
+
+### Added
+
+- links to new apps that uses AppAPI. #158
 
 ### Fixed
 
