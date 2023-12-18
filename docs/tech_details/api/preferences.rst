@@ -9,12 +9,12 @@ It's a user specific settings.
 Set user config value
 ^^^^^^^^^^^^^^^^^^^^^
 
+Set or update config value for **current authenticated user**.
+
 OCS endpoint: ``POST /apps/app_api/api/v1/ex-app/preference``
 
 Request data
 ************
-
-Set config value for **current authenticated user**.
 
 .. code-block:: json
 
@@ -27,18 +27,41 @@ Response data
 *************
 
 On success ExAppPreference object is returned.
-If config value is not set - ``null`` is returned.
+On error OCS Bad Request is returned.
 
+.. code-block:: json
+
+	{
+		"ocs":
+		{
+			"meta":
+			{
+				"status":"ok",
+				"statuscode":100,
+				"message":"OK",
+				"totalitems":"",
+				"itemsperpage":""
+			},
+			"data":
+			{
+				"id":983,
+				"appid":"app_id",
+				"configkey":"test key",
+				"configvalue":"123",
+				"sensitive":0
+			}
+		}
+	}
 
 Get user config values
 ^^^^^^^^^^^^^^^^^^^^^^
+
+Get config values for **current authenticated user**.
 
 OCS endpoint: ``POST /apps/app_api/api/v1/ex-app/preference/get-values``
 
 Request data
 ************
-
-Get config values for **current authenticated user**.
 
 .. code-block:: json
 
@@ -46,15 +69,47 @@ Get config values for **current authenticated user**.
 		"configKeys": ["key1", "key2", "key3"]
 	}
 
+Response data
+*************
+
+List of ExApp preferences values are returned.
+
+.. code-block:: json
+
+	{
+		"ocs":
+		{
+			"meta":
+			{
+				"status":"ok",
+				"statuscode":100,
+				"message":"OK",
+				"totalitems":"",
+				"itemsperpage":""
+			},
+			"data":[
+				{
+				"configkey":"test key",
+				"configvalue":"123"
+				},
+				{
+				"configkey":"test key2",
+				"configvalue":"321"
+				}
+			]
+		}
+	}
+
+
 Delete user config values
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Delete config values for **current authenticated user**.
 
 OCS endpoint: ``DELETE /apps/app_api/api/v1/ex-app/preference``
 
 Request data
 ************
-
-Delete config values for **current authenticated user**.
 
 .. code-block:: json
 
@@ -65,4 +120,19 @@ Delete config values for **current authenticated user**.
 Response
 ********
 
-Returns the number of configuration values removed.
+.. code-block:: json
+
+	{
+		"ocs":
+		{
+			"meta":
+			{
+				"status":"ok",
+				"statuscode":100,
+				"message":"OK",
+				"totalitems":"",
+				"itemsperpage":""
+			},
+			"data":2
+		}
+	}

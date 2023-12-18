@@ -22,8 +22,8 @@ class AppConfigController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest $request,
-		private ExAppConfigService $exAppConfigService,
+		IRequest                            $request,
+		private readonly ExAppConfigService $exAppConfigService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -34,11 +34,7 @@ class AppConfigController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $configKey
-	 * @param mixed $configValue
-	 * @param int|null $sensitive
 	 * @throws OCSBadRequestException
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
@@ -58,10 +54,6 @@ class AppConfigController extends OCSController {
 	/**
 	 * @PublicPage
 	 * @NoCSRFRequired
-	 *
-	 * @param array $configKeys
-	 *
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
@@ -76,11 +68,8 @@ class AppConfigController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param array $configKeys
-	 *
 	 * @throws OCSBadRequestException
 	 * @throws OCSNotFoundException
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
