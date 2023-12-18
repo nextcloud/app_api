@@ -23,9 +23,9 @@ class PreferencesController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest $request,
-		private IUserSession $userSession,
-		private ExAppPreferenceService $exAppPreferenceService,
+		IRequest                                $request,
+		private readonly IUserSession           $userSession,
+		private readonly ExAppPreferenceService $exAppPreferenceService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -36,11 +36,7 @@ class PreferencesController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $configKey
-	 * @param mixed $configValue
-	 *
 	 * @throws OCSBadRequestException
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
@@ -53,7 +49,7 @@ class PreferencesController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$result = $this->exAppPreferenceService->setUserConfigValue($userId, $appId, $configKey, $configValue);
 		if ($result instanceof ExAppPreference) {
-			return new DataResponse(1, Http::STATUS_OK);
+			return new DataResponse($result, Http::STATUS_OK);
 		}
 		throw new OCSBadRequestException('Failed to set user config value');
 	}
@@ -61,10 +57,6 @@ class PreferencesController extends OCSController {
 	/**
 	 * @PublicPage
 	 * @NoCSRFRequired
-	 *
-	 * @param array $configKeys
-	 *
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
@@ -80,11 +72,8 @@ class PreferencesController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param array $configKeys
-	 *
 	 * @throws OCSBadRequestException
 	 * @throws OCSNotFoundException
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
