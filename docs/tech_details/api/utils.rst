@@ -17,5 +17,14 @@ Returns a list of user IDs only.
 
 .. code-block:: json
 
-	["user1", "user2", "user3"]
-
+	{"ocs": {
+		"meta": {
+			"status": "ok",
+			"statuscode": 100,
+			"message": "OK",
+			"totalitems": "",
+			"itemsperpage": ""
+			},
+		"data": ["admin", "alice", "bob", "jane", "john"]
+		}
+	}
