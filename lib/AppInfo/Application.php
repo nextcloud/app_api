@@ -8,6 +8,7 @@ use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
 use OCA\AppAPI\DeclarativeSettings\DeclarativeSettingsForm;
 use OCA\AppAPI\Listener\DeclarativeSettings\GetValueListener;
+use OCA\AppAPI\Listener\DeclarativeSettings\RegisterDeclarativeSettingsListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
@@ -37,6 +38,7 @@ use OCP\IUserSession;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
 use OCP\Settings\GetDeclarativeSettingsValueEvent;
+use OCP\Settings\RegisterDeclarativeSettingsFormEvent;
 use OCP\Settings\SetDeclarativeSettingsValueEvent;
 use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
@@ -67,7 +69,8 @@ class Application extends App implements IBootstrap {
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 
 		// Declarative settings using registrationContext
-		$context->registerDeclarativeSettings(DeclarativeSettingsForm::class);
+		//$context->registerDeclarativeSettings(DeclarativeSettingsForm::class);
+		$context->registerEventListener(RegisterDeclarativeSettingsFormEvent::class, RegisterDeclarativeSettingsListener::class);
 		$context->registerEventListener(GetDeclarativeSettingsValueEvent::class, GetValueListener::class);
 		$context->registerEventListener(SetDeclarativeSettingsValueEvent::class, SetValueListener::class);
 
