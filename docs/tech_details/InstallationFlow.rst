@@ -51,11 +51,26 @@ Example of request payload with error will look like this::
 Enabled
 -------
 
-After receiving **progress: 100**, AppAPI enables the application.
+After receiving **progress: 100** (*or when ExApp is not implementing "/init" endpoint*), AppAPI enables the application.
 
-It is done, by calling ``/enabled`` application endpoint with the ``PUT`` request.
+To enable or disable the application, a PUT request is sent to the ``/enabled`` endpoint.
 
-Payload of the request made by AppAPI to the application contains ``enabled`` value, which is ``True`` for enabling.
+.. note:: Unlike using a payload, this request utilizes a query parameter named ``enabled`` to specify the desired state.
+
+The ``enabled`` parameter accepts an integer value:
+
+* `1` to enable the application
+* `0` to disable the application
+
+For example, to enable the application, the request would be::
+
+	PUT http://expapp:2432/enabled?enabled=1
+
+Similarly, to disable the application, the request would be::
+
+	PUT http://expapp:2432/enabled?enabled=0
+
+This approach ensures that the application's state can be easily toggled using a simple query parameter.
 
 .. note:: ``/enabled`` endpoint shares both **enabling** and **disabling**,
 	so app should determine what is going on using the ``enabled`` input parameter of the request.
