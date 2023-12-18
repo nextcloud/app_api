@@ -20,9 +20,12 @@ Request data
 .. code-block:: json
 
 	{
-		"level": "loglevel",
+		"level": "log_lvl(integer)",
 		"message": "message",
 	}
+
+
+The possible value of ``log_lvl`` is described here: `Nextcloud Log level <https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/logging_configuration.html#log-level>`_
 
 Response data
 *************
