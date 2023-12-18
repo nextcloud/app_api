@@ -31,6 +31,14 @@ class DaemonConfigService {
 	}
 
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
+		$bad_patterns = ['http', 'https', 'tcp', 'udp', 'ssh'];
+		$docker_host = (string)$params['host'];
+		foreach ($bad_patterns as $bad_pattern) {
+			if (str_starts_with($docker_host, $bad_pattern . '://')) {
+				$this->logger->error('Failed to register daemon configuration. `host` must not include a protocol.');
+				return null;
+			}
+		}
 		try {
 			$daemonConfig = $this->mapper->insert(new DaemonConfig([
 				'name' => $params['name'],
