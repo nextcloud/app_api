@@ -19,6 +19,8 @@ applications using a variety of programming languages, not limited to PHP, which
 
 - [talk_bot_ai_example](https://github.com/cloud-py-api/talk_bot_ai_example)
 - [upscaler_example](https://github.com/cloud-py-api/upscaler_example)
+- [image_to_text_example](https://github.com/cloud-py-api/file_to_text_example)
+- [ai_image_generator_bot](https://github.com/cloud-py-api/ai_image_generator_bot)
 
 _If you wish to develop an application, we will gladly help and assist you._
 
@@ -40,7 +42,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 *Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
-	<version>1.4.2</version>
+	<version>1.4.3</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
