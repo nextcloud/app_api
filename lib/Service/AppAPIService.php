@@ -652,7 +652,31 @@ class AppAPIService {
 				'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 			];
 
-			if (count($params) > 0) {
+			$isMultipart = false;
+			$multipartData = [];
+			if ($method === 'POST' || $method === 'PUT') {
+				foreach ($params as $key => $value) {
+					if (is_a($value, 'CURLStringFile')) {
+						$isMultipart = true;
+						$multipartData[] = [
+							'name' => $key,
+							'contents' => $value->data,
+							'filename' => $value->postname,
+							'headers' => ['Content-Type' => $value->mime]
+						];
+					} else {
+						$multipartData[] = [
+							'name' => $key,
+							'contents' => $value
+						];
+					}
+				}
+				if ($isMultipart) {
+					$options['multipart'] = $multipartData;
+				}
+			}
+
+			if ((!array_key_exists('multipart', $options)) && (count($params)) > 0) {
 				if ($method === 'GET') {
 					$url .= '?' . $this->getUriEncodedParams($params);
 				} else {
@@ -710,7 +734,9 @@ class AppAPIService {
 
 	public function buildExAppHost(array $deployConfig): string {
 		if (isset($deployConfig['net'])) {
-			if (($deployConfig['net'] === 'host') && ($this->isAppHostNameLocal($deployConfig['host']))) {
+			if (($deployConfig['net'] === 'host') &&
+				(isset($deployConfig['host']) && $this->isAppHostNameLocal($deployConfig['host']))
+			) {
 				return '127.0.0.1';  # ExApp using host network, it is visible for Nextcloud on loop-back adapter
 			}
 			return '0.0.0.0';
