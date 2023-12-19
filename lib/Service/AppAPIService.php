@@ -652,7 +652,30 @@ class AppAPIService {
 				'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 			];
 
-			if (count($params) > 0) {
+			$isMultipart = false;
+			$multipartData = [];
+			if ($method === 'POST' || $method === 'PUT') {
+				foreach ($params as $key => $value) {
+					if (is_a($value, 'CURLStringFile')) {
+						$isMultipart = true;
+						$multipartData[] = [
+							'name' => $key,
+							'contents' => $value->data,
+							'filename' => $value->postname,
+							'headers' => ['Content-Type' => $value->mime]
+						];
+					} else {
+						$multipartData[] = [
+							'name' => $key,
+							'contents' => $value
+						];
+					}
+				}
+			}
+
+			if ($isMultipart) {
+				$options['multipart'] = $multipartData;
+			} elseif (count($params) > 0) {
 				if ($method === 'GET') {
 					$url .= '?' . $this->getUriEncodedParams($params);
 				} else {
