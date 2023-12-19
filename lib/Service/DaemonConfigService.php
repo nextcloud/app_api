@@ -39,6 +39,7 @@ class DaemonConfigService {
 				return null;
 			}
 		}
+		$params['deploy_config']['nextcloud_url'] = rtrim($params['deploy_config']['nextcloud_url'], '/');
 		try {
 			$daemonConfig = $this->mapper->insert(new DaemonConfig([
 				'name' => $params['name'],
