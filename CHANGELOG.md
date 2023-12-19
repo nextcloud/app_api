@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - links to new apps that uses AppAPI. #158
+- added ability for `requestToExApp` and `aeRequestToExApp` methods, to send `multipart` requests. #168
 
 ### Fixed
 
