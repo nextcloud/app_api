@@ -17,8 +17,8 @@ def register_daemon(nextcloud_url: str):
 
 
 def unregister_daemon():
-	run(
-    	"php occ app_api:daemon:unregister docker_local_sock".split(),
+    run(
+        "php occ app_api:daemon:unregister docker_local_sock".split(),
         stderr=DEVNULL,
         stdout=DEVNULL,
         check=True,
@@ -43,14 +43,14 @@ def deploy_register():
 if __name__ == "__main__":
     # nextcloud_url should be without slash at the end
     register_daemon("http://127.0.0.1:8080/")
-	r = run("php occ app_api:daemon:list".split(), stdout=PIPE, stderr=PIPE, check=True)
+    r = run("php occ app_api:daemon:list".split(), stdout=PIPE, stderr=PIPE, check=True)
     assert not r.stderr.decode("UTF-8")
     r_output = r.stdout.decode("UTF-8")
     assert r_output.find("http://127.0.0.1:8080/") == -1
     assert r_output.find("http://127.0.0.1:8080") != -1
     unregister_daemon()
     # nextcloud_url should be without slash at the end but with "index.php"
-	register_daemon("http://127.0.0.1:8080/index.php/")
+    register_daemon("http://127.0.0.1:8080/index.php/")
     r = run("php occ app_api:daemon:list".split(), stdout=PIPE, stderr=PIPE, check=True)
     assert not r.stderr.decode("UTF-8")
     r_output = r.stdout.decode("UTF-8")
