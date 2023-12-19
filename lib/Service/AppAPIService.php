@@ -737,7 +737,7 @@ class AppAPIService {
 			if (($deployConfig['net'] === 'host') &&
 				(isset($deployConfig['host']) && $this->isAppHostNameLocal($deployConfig['host']))
 			) {
-				return '127.0.0.1';  # ExApp using host network, it is visible for Nextcloud on loop-back adapter
+				return '127.0.0.1';  # ExApp using this host network, it is visible for Nextcloud on loop-back adapter
 			}
 			return '0.0.0.0';
 		}
