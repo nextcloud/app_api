@@ -671,11 +671,12 @@ class AppAPIService {
 						];
 					}
 				}
+				if ($isMultipart) {
+					$options['multipart'] = $multipartData;
+				}
 			}
 
-			if ($isMultipart) {
-				$options['multipart'] = $multipartData;
-			} elseif (count($params) > 0) {
+			if ((!array_key_exists('multipart', $options)) && (count($params)) > 0) {
 				if ($method === 'GET') {
 					$url .= '?' . $this->getUriEncodedParams($params);
 				} else {
