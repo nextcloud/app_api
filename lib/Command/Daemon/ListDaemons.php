@@ -43,11 +43,18 @@ class ListDaemons extends Command {
 
 		$output->writeln('Registered ExApp daemon configs:');
 		$table = new Table($output);
-		$table->setHeaders(['Default', 'Name', 'Display name', 'Accepts Deploy ID', 'Protocol', 'Host']);
+		$table->setHeaders(['Def', 'Name', 'Display name', 'Deploy ID', 'Protocol', 'Host', 'NC Url']);
 		$rows = [];
 
 		foreach ($daemonConfigs as $daemon) {
-			$rows[] = [$daemon->getName() === $defaultDaemonName ? '*' : '', $daemon->getName(), $daemon->getDisplayName(), $daemon->getAcceptsDeployId(), $daemon->getProtocol(), $daemon->getHost()];
+			$rows[] = [
+				$daemon->getName() === $defaultDaemonName ? '*' : '',
+				$daemon->getName(), $daemon->getDisplayName(),
+				$daemon->getAcceptsDeployId(),
+				$daemon->getProtocol(),
+				$daemon->getHost(),
+				$daemon->getDeployConfig()['nextcloud_url']
+			];
 		}
 
 		$table->setRows($rows);

@@ -168,7 +168,8 @@ export default {
 			protocol: 'unix-socket',
 			protocols: ['unix-socket', 'http', 'https'],
 			host: '/var/run/docker.sock',
-			nextcloud_url: window.location.origin + generateUrl(''),
+			// replace last slash with empty string
+			nextcloud_url: window.location.origin + generateUrl('').slice(0, -1),
 			deployConfigSettingsOpened: false,
 			deployConfig: {
 				net: 'host',

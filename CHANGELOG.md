@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.4 - 2023-12-xx]
+
+### Fixed
+
+- invalid default Nextcloud URL, incorrect url with slash at the end processing. #169  
+
 ## [1.4.3 - 2023-12-18]
 
 ### Added
