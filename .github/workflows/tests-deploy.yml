@@ -170,6 +170,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_local_sock \
@@ -251,6 +252,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
             --net=master_bridge --ssl_cert /client/cert.pem --ssl_key /client/key.pem
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
@@ -331,6 +333,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:8443 http://localhost:8080/index.php \
             --net=host --hostname=host.docker.internal --ssl_cert /client/cert.pem --ssl_key /client/key.pem
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
@@ -468,6 +471,7 @@ jobs:
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:list
           ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:register skeleton docker_local_sock \
@@ -589,6 +593,7 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+          ./occ app_api:daemon:list
           ./occ app_api:app:deploy skeleton \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:register skeleton \
