@@ -72,6 +72,10 @@ class Register extends Command {
 
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
+			if (array_key_exists('error', $exAppInfo)) {
+				$output->writeln(sprintf('%sDid application was deployed before registration?', $exAppInfo['error']));
+				return 2;
+			}
 		} elseif ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
 			$exAppJson = $input->getOption('json-info');
 			if ($exAppJson === null) {

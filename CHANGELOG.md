@@ -9,20 +9,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.4.4 - 2023-12-xx]
 
+### Added
+
+- Added ability for `requestToExApp` and `aeRequestToExApp` methods, to send `multipart` requests. #168
+
 ### Fixed
 
-- invalid default Nextcloud URL, incorrect url with slash at the end processing. #169  
+- Processing of invalid default Nextcloud URL/incorrect url with slash at the end. #169
+- `occ app_api:app:register` error message in case of missing deploy of ExApp. #172
 
 ## [1.4.3 - 2023-12-18]
 
 ### Added
 
-- links to new apps that uses AppAPI. #158
-- added ability for `requestToExApp` and `aeRequestToExApp` methods, to send `multipart` requests. #168
+- Links to new apps that uses AppAPI. #158
 
 ### Fixed
 
-- invalid timeout condition check for `/init` endpoint. #155
+- Invalid timeout condition check for `/init` endpoint. #155
 
 ## [1.4.2 - 2023-12-13]
 
