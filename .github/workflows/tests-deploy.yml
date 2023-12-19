@@ -383,15 +383,7 @@ jobs:
 
   nc-host-app-docker-redis:
     runs-on: ubuntu-22.04
-    name: NC In Host(Redis) • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: [ '8.1' ]
-        server-version: [ 'stable27' ]
-        include:
-          - server-version: "master"
-            php-version: "8.2"
+    name: NC In Host(Redis) • stable27 • 🐘8.1
 
     services:
       postgres:
@@ -412,7 +404,7 @@ jobs:
           --health-retries 5
           --name redis
         ports:
-         - 6379:6379
+          - 6379:6379
 
     steps:
       - name: Set app env
@@ -423,17 +415,17 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ matrix.server-version }}
+          ref: stable27
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php ${{ matrix.php-version }}
+      - name: Set up php 8.1
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: 8.1
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql, redis
           coverage: none
           ini-file: development
@@ -510,7 +502,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+          name: nc_host_app_docker_redis_stable27_8.1_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -518,7 +510,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+          name: nc_host_app_docker_redis_stable27_8.1_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -526,7 +518,124 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          name: nc_host_app_docker_redis_stable27_8.1_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
+  nc-host-network-host:
+    runs-on: ubuntu-22.04
+    name: NC In Host(network=host)  • master • 🐘8.2
+
+    services:
+      postgres:
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        ports:
+          - 4444:5432/tcp
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: nextcloud
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
+
+    steps:
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: master
+
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php 8.2
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        with:
+          php-version: 8.2
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql, redis
+          coverage: none
+          ini-file: development
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
+            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
+          ./occ config:system:set loglevel --value=0 --type=integer
+          ./occ config:system:set debug --value=true --type=boolean
+          ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Test deploy
+        run: |
+          PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+          ./occ app_api:app:deploy skeleton \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          ./occ app_api:app:register skeleton \
+            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
+          ./occ app_api:app:enable skeleton
+          ./occ app_api:app:disable skeleton
+
+      - name: Check logs
+        run: |
+          grep -q 'Hello from skeleton :)' data/nextcloud.log || error
+          grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
+
+      - name: Save container ingo & logs
+        if: always()
+        run: |
+          docker inspect nc_app_skeleton | json_pp > container.json
+          docker logs nc_app_skeleton > container.log 2>&1
+
+      - name: Unregister Skeleton & Daemon
+        run: |
+          ./occ app_api:app:unregister skeleton
+          ./occ app_api:daemon:unregister docker_socket_local
+
+      - name: Test OCC commands(docker)
+        run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
+
+      - name: Upload Container info
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_host_network_host_master_8.2_container.json
+          path: container.json
+          if-no-files-found: warn
+
+      - name: Upload Container logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_host_network_host_master_8.2_container.log
+          path: container.log
+          if-no-files-found: warn
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nc_host_network_host_master_8.2_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -535,7 +644,7 @@ jobs:
       contents: none
     runs-on: ubuntu-22.04
     needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-app-docker-by-port,
-            nc-docker-app-host-by-hostname, nc-host-app-docker-redis]
+            nc-docker-app-host-by-hostname, nc-host-app-docker-redis, nc-host-network-host]
     name: Tests-Deploy-OK
     steps:
       - run: echo "Tests-Deploy passed successfully"
