@@ -17,7 +17,7 @@
 				<input v-if="app.active"
 					class="enable"
 					type="button"
-					:value="t('settings','Disable')"
+					:value="disableButtonText"
 					:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
 					@click="disable(app.id)">
 				<input v-if="!app.active && (app.canInstall || app.isCompatible)"

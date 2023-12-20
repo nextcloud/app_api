@@ -18,7 +18,7 @@
 					</template>
 					{{ !isDefault ? t('app_api', 'Set as default') : t('app_api', 'Default') }}
 				</NcActionButton>
-				<NcActionButton icon="icon-delete" @click="deleteDaemonConfig(daemon)">
+				<NcActionButton icon="icon-delete" :close-after-click="true" @click="deleteDaemonConfig(daemon)">
 					{{ t('app_api', 'Delete') }}
 					<template #icon>
 						<NcLoadingIcon v-if="deleting" :size="20" />
@@ -31,6 +31,35 @@
 			:show.sync="showDetailsModal"
 			:daemon="daemon"
 			:is-default="isDefault" />
+		<NcDialog
+			v-show="showDeleteDialog"
+			style="padding: 20px;"
+			:open.sync="showDeleteDialog"
+			:content-classes="'confirm-delete-dialog'"
+			:name="t('app_api', 'Confirm deletion')">
+			<template #actions>
+				<NcDialogButton :label="t('app_api', 'Cancel')" :callback="() => showDeleteDialog = false">
+					<template #icon>
+						<Cancel :size="20" />
+					</template>
+				</NcDialogButton>
+				<NcDialogButton :label="t('app_api', 'Ok')" :callback="() => _deleteDaemonConfig(daemon)">
+					<template #icon>
+						<Check :size="20" />
+					</template>
+				</NcDialogButton>
+			</template>
+			<template #default>
+				<div class="confirm-delete-dialog">
+					<p>{{ t('app_api', 'Are you sure you want delete Deploy Daemon?') }}</p>
+					<NcNoteCard>
+						<template #default>
+							{{ t('app_api', 'This action will not remove installed ExApps on this daemon') }}
+						</template>
+					</NcNoteCard>
+				</div>
+			</template>
+		</NcDialog>
 	</div>
 </template>
 
@@ -39,6 +68,11 @@ import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import NcListItem from '@nextcloud/vue/dist/Components/NcListItem.js'
+import NcDialog from '@nextcloud/vue/dist/Components/NcDialog.js'
+import NcDialogButton from '@nextcloud/vue/dist/Components/NcDialogButton.js'
+import Cancel from 'vue-material-design-icons/Cancel.vue'
+import Check from 'vue-material-design-icons/Check.vue'
+import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 
@@ -53,6 +87,11 @@ export default {
 		NcActionButton,
 		NcLoadingIcon,
 		CheckBold,
+		NcDialog,
+		NcDialogButton,
+		Cancel,
+		Check,
+		NcNoteCard,
 		DaemonConfigDetailsModal,
 	},
 	props: {
@@ -80,6 +119,7 @@ export default {
 			showDetailsModal: false,
 			settingDefault: false,
 			deleting: false,
+			showDeleteDialog: false,
 		}
 	},
 	computed: {
@@ -109,16 +149,7 @@ export default {
 				})
 		},
 		deleteDaemonConfig(daemon) {
-			const self = this
-			OC.dialogs.confirm(
-				t('app_api', 'Are you sure you want delete Deploy Daemon?'),
-				t('app_api', 'Confirm Deploy daemon deletion'),
-				function(success) {
-					if (success) {
-						self._deleteDaemonConfig(daemon)
-					}
-				},
-			)
+			this.showDeleteDialog = true
 		},
 		_deleteDaemonConfig(daemon) {
 			this.deleting = true
@@ -128,10 +159,12 @@ export default {
 						this.getAllDaemons()
 					}
 					this.deleting = false
+					this.showDetailsModal = false
 				})
 				.catch(err => {
 					console.debug(err)
 					this.deleting = false
+					this.showDetailsModal = false
 				})
 		},
 	},
@@ -142,5 +175,9 @@ export default {
 .daemon-default {
 	background-color: var(--color-background-dark);
 	border-radius: var(--border-radius-pill);
+}
+
+.confirm-delete-dialog {
+	padding: 20px;
 }
 </style>

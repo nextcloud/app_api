@@ -21,6 +21,12 @@ export default {
 			}
 			return t('app_api', 'Enable')
 		},
+		disableButtonText() {
+			if (this.app && Object.hasOwn(this.app?.status, 'progress')) {
+				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.progress })
+			}
+			return t('app_api', 'Disable')
+		},
 		forceEnableButtonText() {
 			if (this.app.needsDownload) {
 				return t('app_api', 'Allow untested app')
@@ -44,7 +50,13 @@ export default {
 			return base
 		},
 		defaultDeployDaemonAccessible() {
-			return this.$store.getters.getDaemonAccessible || false
+			if (this.app?.daemon && this.app?.daemon?.accepts_deploy_id === 'manual-install') {
+				return true
+			}
+			if (this.app?.daemon?.accepts_deploy_id === 'docker-install') {
+				return this.$store.getters.getDaemonAccessible === true
+			}
+			return this.$store.getters.getDaemonAccessible
 		},
 	},
 

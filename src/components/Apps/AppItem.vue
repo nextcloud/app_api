@@ -84,7 +84,7 @@
 			<NcButton v-if="app.active"
 				:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
 				@click.stop="disable(app.id)">
-				{{ t('settings','Disable') }}
+				{{ disableButtonText }}
 			</NcButton>
 			<NcButton v-if="!app.active && (app.canInstall || app.isCompatible)"
 				:title="enableButtonTooltip"

@@ -62,7 +62,7 @@ const mutations = {
 		app.error = null
 	},
 
-	enableApp(state, { appId, groups, daemon, systemApp, exAppUrl, status }) {
+	enableApp(state, { appId, groups, daemon, systemApp, exAppUrl, status, scopes }) {
 		const app = state.apps.find(app => app.id === appId)
 		if (daemon) {
 			app.installed = true
@@ -76,11 +76,17 @@ const mutations = {
 			app.exAppUrl = exAppUrl
 		}
 		if (status) {
-			app.status = status
+			app.status = {
+				progress: 0,
+			}
+		}
+		if (scopes) {
+			app.scopes = scopes
 		}
 		app.active = true
 		app.groups = groups
 		app.canUnInstall = false
+		app.removable = true
 	},
 
 	disableApp(state, appId) {
@@ -100,13 +106,15 @@ const mutations = {
 		state.apps.find(app => app.id === appId).canUnInstall = false
 		state.apps.find(app => app.id === appId).canInstall = true
 		state.apps.find(app => app.id === appId).daemon = null
+		state.apps.find(app => app.id === appId).status = {}
+		state.apps.find(app => app.id === appId).scopes = null
 		if (state.apps.find(app => app.id === appId).update !== null) {
 			state.updateCount--
 		}
 		state.apps.find(app => app.id === appId).update = null
 	},
 
-	updateApp(state, { appId, systemApp, exAppUrl, status }) {
+	updateApp(state, { appId, systemApp, exAppUrl, status, scopes }) {
 		const app = state.apps.find(app => app.id === appId)
 		const version = app.update
 		app.update = null
@@ -114,6 +122,7 @@ const mutations = {
 		app.systemApp = systemApp
 		app.exAppUrl = exAppUrl
 		app.status = status
+		app.scopes = scopes
 		state.updateCount--
 	},
 
@@ -220,6 +229,7 @@ const actions = {
 							systemApp: response.data.data?.systemApp,
 							exAppUrl: response.data.data?.exAppUrl,
 							status: response.data.data?.status,
+							scopes: response.data.data?.scopes,
 						})
 					})
 
@@ -341,6 +351,7 @@ const actions = {
 						systemApp: response.data.data?.systemApp,
 						exAppUrl: response.data.data?.exAppUrl,
 						status: response.data.data?.status,
+						scopes: response.data.data?.scopes,
 					})
 					context.dispatch('updateAppsStatus')
 					return true
