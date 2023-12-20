@@ -9,6 +9,7 @@ use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Exceptions\AppAPIAuthNotValidException;
 use OCA\AppAPI\Service\AppAPIService;
 
+use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\Response;
@@ -43,6 +44,10 @@ class AppAPIAuthMiddleware extends Middleware {
 	/**
 	 * If an AEAuthNotValidException is being caught
 	 *
+	 * @param Controller $controller the controller that is being called
+	 * @param string $methodName the name of the method that will be called on
+	 *                           the controller
+	 * @param Exception $exception the thrown exception
 	 * @return Response a Response object or null in case that the exception could not be handled
 	 * @throws Exception the passed in exception if it can't handle it
 	 */
