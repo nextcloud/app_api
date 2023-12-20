@@ -1,0 +1,27 @@
+{ "translations": {
+    "Update to {version}" : "Оновити до {version}",
+    "Disable" : "Вимкнути",
+    "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Для цього застосунку не визначено найвищу версію Nextcloud. Це може викликати помилку в майбутньому.",
+    "This app cannot be installed because the following dependencies are not fulfilled:" : "Цей застосунок не буде встановлено, оскільки такі залежності неможливо виконати:",
+    "View in store" : "Переглянути у крамниці застосунків",
+    "User documentation" : "Користувацька документація",
+    "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Пропоновані програми розробляються спільнотою та в її рамках. Вони пропонують центральну функціональність і готові до продуктового використання.",
+    "Icon" : "Значок",
+    "Version" : "Версія",
+    "Level" : "Рівень",
+    "Actions" : "Дії",
+    "Results from other categories" : "Результати з інших категорій",
+    "_Update_::_Update all_" : ["Оновити","Оновити все","Оновити все","Оновити все"],
+    "Type" : "Тип",
+    "Required" : "Обов'язкове",
+    "Display name" : "Ім'я для показу",
+    "Network" : "Мережа",
+    "Register" : "Зареєструватися",
+    "Your apps" : "Ваші застосунки",
+    "Active apps" : "Активні застосунки",
+    "Featured apps" : "Функціональне",
+    "Supported apps" : "Застосунки, що підтримуються",
+    "An error occurred during the request. Unable to proceed." : "Під час запиту сталася помилка. Неможливо продовжити.",
+    "Error: This app cannot be enabled because it makes the server unstable" : "Помилка: цю програму неможливо ввімкнути, оскільки вона робить сервер нестабільним"
+},"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);"
+}

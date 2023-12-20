@@ -1,0 +1,27 @@
+OC.L10N.register(
+    "app_api",
+    {
+    "Update to {version}" : "Ажурирај на верзију {version}",
+    "Disable" : "Искључи",
+    "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Ова апликација нема дефинисану максималну верзију Некстклауда на којој ради. Ово ће у будућности постати грешка.",
+    "This app cannot be installed because the following dependencies are not fulfilled:" : "Апликација се не може инсталирати јер следеће зависности нису испуњене:",
+    "View in store" : "Погледај у продавници",
+    "User documentation" : "Корисничка документација",
+    "Icon" : "Икона",
+    "Version" : "Верзија",
+    "Level" : "Ниво",
+    "Actions" : "Радње",
+    "Results from other categories" : "Резултати из других категорија",
+    "_Update_::_Update all_" : ["Ажурирај","Ажурирај све","Ажурирај све"],
+    "Type" : "Тип",
+    "Required" : "Обавезно",
+    "Network" : "Мрежа",
+    "Register" : "Региструј се",
+    "Your apps" : "Ваше апликације",
+    "Active apps" : "Активне апликације",
+    "Featured apps" : "Препоручене апликације",
+    "Supported apps" : "Подржане апликације",
+    "An error occurred during the request. Unable to proceed." : "Током захтева је дошло до грешке. Не може да се настави.",
+    "Error: This app cannot be enabled because it makes the server unstable" : "Грешка: Ова апликација не може да се обрише јер ће сервер постати нестабилан"
+},
+"nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

@@ -1,0 +1,24 @@
+{ "translations": {
+    "Update to {version}" : "Обновление до версии {version}",
+    "Disable" : "Отключить",
+    "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Для этого приложения не указана максимальная поддерживаемая версия Nextcloud, в будущем это будет считаться ошибкой.",
+    "This app cannot be installed because the following dependencies are not fulfilled:" : "Приложение не может быть установлено, следующие зависимости не удовлетворены:",
+    "View in store" : "Перейти в магазин приложений",
+    "Icon" : "Значок",
+    "Version" : "Версия",
+    "Level" : "Уровень",
+    "Actions" : "Действия",
+    "Results from other categories" : "Результаты из других категорий",
+    "_Update_::_Update all_" : ["Обновить","Обновить все","Обновить все","Обновить все"],
+    "Type" : "Тип",
+    "Required" : "Обязательно",
+    "Network" : "Сеть",
+    "Register" : "Регистрация",
+    "Your apps" : "Ваши приложения",
+    "Active apps" : "Активные приложения",
+    "Featured apps" : "Рекомендуемые приложения",
+    "Supported apps" : "Поддерживаемые приложения",
+    "An error occurred during the request. Unable to proceed." : "Во время запроса произошла ошибка. Продолжение невозможно.",
+    "Error: This app cannot be enabled because it makes the server unstable" : "Ошибка: это приложение не может быть включено, так как оно сделает сервер нестабильным"
+},"pluralForm" :"nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);"
+}
