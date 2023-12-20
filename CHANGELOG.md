@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.4.4 - 2023-12-xx]
+## [1.4.4 - 2023-12-2x]
 
 ### Added
 
@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Processing of invalid default Nextcloud URL/incorrect url with slash at the end. #169
 - `occ app_api:app:register` error message in case of missing deploy of ExApp. #172
+- Default Docker Daemon(`not for AIO`) configuration should be better now. #173
 
 ## [1.4.3 - 2023-12-18]
 
