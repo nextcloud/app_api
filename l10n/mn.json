@@ -1,0 +1,11 @@
+{ "translations": {
+    "Update to {version}" : "{version} хувилбар руу шинэчлэх",
+    "Icon" : "Тэмдэгт ",
+    "Version" : "төрөл",
+    "Level" : "түвшин",
+    "Actions" : "Үйл ажиллагаа",
+    "Type" : "Төрөл",
+    "Required" : "Шаардлагатай",
+    "Your apps" : "Таны аппликэйшнүүд"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}
