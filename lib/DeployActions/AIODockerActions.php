@@ -25,8 +25,6 @@ class AIODockerActions {
 
 	/**
 	 * Detecting AIO instance by config setting or AIO_TOKEN env as fallback
-	 *
-	 * @return bool
 	 */
 	public function isAIO(): bool {
 		return filter_var(getenv('THIS_IS_AIO'), FILTER_VALIDATE_BOOL);
@@ -34,8 +32,6 @@ class AIODockerActions {
 
 	/**
 	 * Registers DaemonConfig with default params to use AIO Docker Socket Proxy
-	 *
-	 * @return DaemonConfig|null
 	 */
 	public function registerAIODaemonConfig(): ?DaemonConfig {
 		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
@@ -79,8 +75,6 @@ class AIODockerActions {
 
 	/**
 	 * Registers DaemonConfig with default params to use AIO Docker Socket Proxy with GPU
-	 *
-	 * @return DaemonConfig|null
 	 */
 	private function registerAIODaemonConfigWithGPU(): ?DaemonConfig {
 		$daemonConfigWithGPU = $this->daemonConfigService->getDaemonConfigByName(self::AIO_DAEMON_CONFIG_NAME_GPU);
@@ -114,8 +108,6 @@ class AIODockerActions {
 	/**
 	 * Check if /dev/dri folder mounted to the container.
 	 * In AIO this means that NEXTCLOUD_ENABLE_DRI_DEVICE=true
-	 *
-	 * @return bool
 	 */
 	private function isGPUsEnabled(): bool {
 		$devDri = '/dev/dri';

@@ -23,14 +23,6 @@ class ExAppConfigService {
 	) {
 	}
 
-	/**
-	 * Get app_config_ex values
-	 *
-	 * @param string $appId
-	 * @param array $configKeys
-	 *
-	 * @return array|null
-	 */
 	public function getAppConfigValues(string $appId, array $configKeys): ?array {
 		try {
 			return array_map(function (ExAppConfig $exAppConfig) {
@@ -44,16 +36,6 @@ class ExAppConfigService {
 		}
 	}
 
-	/**
-	 * Set appconfig_ex value
-	 *
-	 * @param string $appId
-	 * @param string $configKey
-	 * @param mixed $configValue
-	 * @param int|null $sensitive
-	 *
-	 * @return ExAppConfig|null
-	 */
 	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, ?int $sensitive = null): ?ExAppConfig {
 		$appConfigEx = $this->getAppConfig($appId, $configKey);
 		if ($appConfigEx === null) {
@@ -81,14 +63,6 @@ class ExAppConfigService {
 		return $appConfigEx;
 	}
 
-	/**
-	 * Delete appconfig_ex values
-	 *
-	 * @param array $configKeys
-	 * @param string $appId
-	 *
-	 * @return int
-	 */
 	public function deleteAppConfigValues(array $configKeys, string $appId): int {
 		try {
 			return $this->mapper->deleteByAppidConfigkeys($appId, $configKeys);
@@ -98,8 +72,6 @@ class ExAppConfigService {
 	}
 
 	/**
-	 * @param string $appId
-	 *
 	 * @return ExAppConfig[]
 	 */
 	public function getAllAppConfig(string $appId): array {
@@ -110,12 +82,6 @@ class ExAppConfigService {
 		}
 	}
 
-	/**
-	 * @param string $appId
-	 * @param string $configKey
-	 *
-	 * @return ExAppConfig|null
-	 */
 	public function getAppConfig(mixed $appId, mixed $configKey): ?ExAppConfig {
 		try {
 			return $this->mapper->findByAppConfigKey($appId, $configKey);
@@ -124,11 +90,6 @@ class ExAppConfigService {
 		}
 	}
 
-	/**
-	 * @param ExAppConfig $exAppConfig
-	 *
-	 * @return ExAppConfig|null
-	 */
 	public function updateAppConfigValue(ExAppConfig $exAppConfig): ?ExAppConfig {
 		try {
 			return $this->mapper->update($exAppConfig);
@@ -137,11 +98,6 @@ class ExAppConfigService {
 		}
 	}
 
-	/**
-	 * @param ExAppConfig $exAppConfig
-	 *
-	 * @return int|null
-	 */
 	public function deleteAppConfig(ExAppConfig $exAppConfig): ?int {
 		try {
 			return $this->mapper->deleteByAppidConfigkeys($exAppConfig->getAppid(), [$exAppConfig->getConfigkey()]);

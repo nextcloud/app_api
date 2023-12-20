@@ -47,12 +47,7 @@ class ExAppFetcher extends AppAPIFetcher {
 	/**
 	 * Only returns the latest compatible app release in the releases array
 	 *
-	 * @param string $ETag
-	 * @param string $content
-	 * @param bool $allowUnstable [$allowUnstable] Allow unstable releases
-	 *
 	 * @throws Exception
-	 * @return array
 	 */
 	protected function fetch(string $ETag, string $content, bool $allowUnstable = false): array {
 		/** @var mixed[] $response */
@@ -142,11 +137,6 @@ class ExAppFetcher extends AppAPIFetcher {
 		return $response;
 	}
 
-	/**
-	 * @param string $version
-	 * @param string $fileName
-	 * @param bool $ignoreMaxVersion
-	 */
 	public function setVersion(string $version, string $fileName = 'appapi_apps.json', bool $ignoreMaxVersion = true): void {
 		parent::setVersion($version);
 		$this->fileName = $fileName;

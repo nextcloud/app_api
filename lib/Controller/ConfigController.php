@@ -25,9 +25,6 @@ class ConfigController extends Controller {
 	 * @NoCSRFRequired
 	 *
 	 * Set Admin config values
-	 *
-	 * @param array $values
-	 * @return DataResponse
 	 */
 	public function setAdminConfig(array $values): DataResponse {
 		foreach ($values as $key => $value) {

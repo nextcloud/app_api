@@ -112,14 +112,6 @@ class ExAppScopesService {
 		}
 	}
 
-	/**
-	 * Update ExApp scopes (setup new, remove old)
-	 *
-	 * @param ExApp $exApp
-	 * @param array $newExAppScopes
-	 *
-	 * @return bool
-	 */
 	public function updateExAppScopes(ExApp $exApp, array $newExAppScopes): bool {
 		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
 			return $exAppScope->getScopeGroup();

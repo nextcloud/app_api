@@ -25,10 +25,6 @@ class ExAppArchiveFetcher {
 	/**
 	 * Based on regular app download algorithm.
 	 * Download ExApp release archive, verify signature extract info.xml and return its object
-	 *
-	 * @param array $exAppAppstoreData
-	 *
-	 * @return SimpleXMLElement|null
 	 */
 	public function downloadInfoXml(array $exAppAppstoreData): ?SimpleXMLElement {
 		// 1. Signature check
@@ -78,10 +74,6 @@ class ExAppArchiveFetcher {
 
 	/**
 	 * @psalm-suppress UndefinedClass
-	 *
-	 * @param array $exAppAppstoreData
-	 *
-	 * @return bool
 	 */
 	private function checkExAppSignature(array $exAppAppstoreData): bool {
 		$appId = $exAppAppstoreData['id'];
@@ -150,7 +142,6 @@ class ExAppArchiveFetcher {
 	/**
 	 * Split the certificate file in individual certs
 	 *
-	 * @param string $cert
 	 * @return string[]
 	 */
 	private function splitCerts(string $cert): array {

@@ -30,9 +30,6 @@ class Admin implements ISettings {
 	) {
 	}
 
-	/**
-	 * @return TemplateResponse
-	 */
 	public function getForm(): TemplateResponse {
 		$exApps = $this->service->getExAppsList('all');
 		$daemonsExAppsCount = [];

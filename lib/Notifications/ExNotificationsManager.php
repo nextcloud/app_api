@@ -18,12 +18,6 @@ class ExNotificationsManager {
 
 	/**
 	 * Create a notification for ExApp and notify the user
-	 *
-	 * @param string $appId
-	 * @param string|null $userId
-	 * @param array $params
-	 *
-	 * @return INotification
 	 */
 	public function sendNotification(string $appId, ?string $userId = null, array $params = []): INotification {
 		$notification = $this->notificationManager->createNotification();

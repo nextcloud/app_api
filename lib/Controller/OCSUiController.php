@@ -40,14 +40,6 @@ class OCSUiController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $name
-	 * @param string $displayName
-	 * @param string $actionHandler
-	 * @param string $icon
-	 * @param string $mime
-	 * @param int $permissions
-	 * @param int $order
-	 * @return DataResponse
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -68,10 +60,7 @@ class OCSUiController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @param string $name
-	 *
 	 * @throws OCSNotFoundException
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]

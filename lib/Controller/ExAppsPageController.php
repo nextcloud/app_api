@@ -93,8 +93,6 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * @NoCSRFRequired
-	 *
-	 * @return TemplateResponse
 	 */
 	#[NoCSRFRequired]
 	public function viewApps(): TemplateResponse {
@@ -140,9 +138,6 @@ class ExAppsPageController extends Controller {
 	/**
 	 * Using the same algorithm of ExApps listing as for regular apps.
 	 * Returns all apps for a category from the App Store
-	 *
-	 * @param string $requestedCategory
-	 * @return array
 	 *
 	 * @throws Exception
 	 */
@@ -272,8 +267,6 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
 	 */
 	public function listApps(): JSONResponse {
 		$apps = $this->getAppsForCategory('');
@@ -431,9 +424,6 @@ class ExAppsPageController extends Controller {
 	 * Deploy ExApp if it was not deployed yet.
 	 *
 	 * @PasswordConfirmationRequired
-	 * @param array $appIds
-	 * @param array $groups
-	 * @return JSONResponse
 	 */
 	public function enableApps(array $appIds, array $groups = []): JSONResponse {
 		try {
@@ -584,10 +574,6 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * @PasswordConfirmationRequired
-	 *
-	 * @param string $appId
-	 *
-	 * @return JSONResponse
 	 */
 	#[PasswordConfirmationRequired]
 	public function disableApp(string $appId): JSONResponse {
@@ -596,10 +582,6 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * @PasswordConfirmationRequired
-	 *
-	 * @param array $appIds
-	 *
-	 * @return JSONResponse
 	 */
 	#[PasswordConfirmationRequired]
 	public function disableApps(array $appIds): JSONResponse {
@@ -705,12 +687,6 @@ class ExAppsPageController extends Controller {
 		]);
 	}
 
-	/**
-	 * @param ExApp $exApp
-	 * @param SimpleXMLElement $infoXml
-	 *
-	 * @return void
-	 */
 	private function upgradeExAppScopes(ExApp $exApp, SimpleXMLElement $infoXml): void {
 		$newExAppScopes = $this->service->getExAppRequestedScopes($exApp, $infoXml);
 
@@ -751,9 +727,6 @@ class ExAppsPageController extends Controller {
 	 * Using default force mechanism for ExApps
 	 *
 	 * @PasswordConfirmationRequired
-	 *
-	 * @param string $appId
-	 * @return JSONResponse
 	 */
 	#[PasswordConfirmationRequired]
 	public function force(string $appId): JSONResponse {
@@ -764,8 +737,6 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * Get all available categories
-	 *
-	 * @return JSONResponse
 	 */
 	public function listCategories(): JSONResponse {
 		return new JSONResponse($this->getAllCategories());
@@ -773,8 +744,6 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * Get ExApp status, that includes initialization information
-	 *
-	 * @return JSONResponse
 	 */
 	public function getAppStatus(string $appId): JSONResponse {
 		$exApp = $this->service->getExApp($appId);
