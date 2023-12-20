@@ -27,10 +27,7 @@ class OCSExAppController extends OCSController {
 	/**
 	 * @NoCSRFRequired
 	 *
-	 * @param string $list
-	 *
 	 * @throws OCSBadRequestException
-	 * @return DataResponse
 	 */
 	#[NoCSRFRequired]
 	public function getExAppsList(string $list = 'enabled'): DataResponse {
@@ -43,12 +40,8 @@ class OCSExAppController extends OCSController {
 	/**
 	 * @NoCSRFRequired
 	 *
-	 * @param string $appId
-	 * @param int $enabled
-	 *
 	 * @throws OCSNotFoundException
 	 * @throws OCSBadRequestException
-	 * @return DataResponse
 	 */
 	#[NoCSRFRequired]
 	public function setExAppEnabled(string $appId, int $enabled): DataResponse {

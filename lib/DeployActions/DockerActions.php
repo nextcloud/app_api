@@ -56,11 +56,6 @@ class DockerActions implements IDeployActions {
 
 	/**
 	 * Pull image, create and start container
-	 *
-	 * @param DaemonConfig $daemonConfig
-	 * @param array $params
-	 *
-	 * @return array
 	 */
 	public function deployExApp(DaemonConfig $daemonConfig, array $params = []): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
@@ -432,13 +427,6 @@ class DockerActions implements IDeployActions {
 		return $autoEnvs;
 	}
 
-	/**
-	 * @param string $appId
-	 * @param DaemonConfig $daemonConfig
-	 * @param array $params
-	 *
-	 * @return array
-	 */
 	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array {
 		$this->initGuzzleClient($daemonConfig);
 		$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $this->buildExAppContainerName($appId));
@@ -521,12 +509,6 @@ class DockerActions implements IDeployActions {
 		$this->guzzleClient = new Client($guzzleParams);
 	}
 
-	/**
-	 * @param array $guzzleParams
-	 * @param array $deployConfig
-	 *
-	 * @return array
-	 */
 	private function setupCerts(array $guzzleParams, array $deployConfig): array {
 		if (!$this->config->getSystemValueBool('installed', false)) {
 			$certs = \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
@@ -557,9 +539,6 @@ class DockerActions implements IDeployActions {
 	/**
 	 * Build default volume for ExApp.
 	 * For now only one volume created per ExApp.
-	 *
-	 * @param string $appId
-	 * @return array
 	 */
 	private function buildDefaultExAppVolume(string $appId): array {
 		return [
@@ -572,13 +551,6 @@ class DockerActions implements IDeployActions {
 		];
 	}
 
-	/**
-	 * Build ExApp container name (prefix + appid)
-	 *
-	 * @param string $appId
-	 *
-	 * @return string
-	 */
 	public function buildExAppContainerName(string $appId): string {
 		return self::EX_APP_CONTAINER_PREFIX . $appId;
 	}
@@ -640,10 +612,8 @@ class DockerActions implements IDeployActions {
 	 * Return default GPU device requests for container.
 	 * For now only NVIDIA GPUs supported.
 	 * TODO: Add support for other GPU vendors
-	 *
-	 * @return array[]
 	 */
-	private function buildDefaultGPUDeviceRequests() {
+	private function buildDefaultGPUDeviceRequests(): array {
 		return [
 			[
 				'Driver' => 'nvidia', // Currently only NVIDIA GPU vendor

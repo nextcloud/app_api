@@ -27,8 +27,6 @@ class ExAppUsersService {
 	}
 
 	/**
-	 * @param ExApp $exApp
-	 *
 	 * @throws Exception
 	 */
 	public function setupSystemAppFlag(ExApp $exApp): void {
@@ -39,9 +37,6 @@ class ExAppUsersService {
 	}
 
 	/**
-	 * @param ExApp $exApp
-	 * @param string|null $userId
-	 *
 	 * @throws Exception
 	 */
 	public function setupExAppUser(ExApp $exApp, ?string $userId): void {

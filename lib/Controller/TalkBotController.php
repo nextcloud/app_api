@@ -58,10 +58,7 @@ class TalkBotController extends OCSController {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 *
-	 * @param string $route
-	 *
 	 * @throws OCSNotFoundException
-	 * @return Response
 	 */
 	#[AppAPIAuth]
 	#[NoCSRFRequired]

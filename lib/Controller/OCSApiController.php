@@ -37,11 +37,7 @@ class OCSApiController extends OCSController {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 *
-	 * @param int $level
-	 * @param string $message
-	 *
 	 * @throws OCSBadRequestException
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
@@ -74,7 +70,6 @@ class OCSApiController extends OCSController {
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 *
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
@@ -89,7 +84,6 @@ class OCSApiController extends OCSController {
 	 *
 	 * Get ExApp status, that required during initialization step with progress information
 	 *
-	 * @return DataResponse
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]

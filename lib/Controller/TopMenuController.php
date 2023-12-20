@@ -42,9 +42,7 @@ class TopMenuController extends Controller {
 	/**
 	 * @NoCSRFRequired
 	 * @NoAdminRequired
-	 * @param string $appId
-	 * @param string $name
-	 * @return TemplateResponse
+	 *
 	 * @throws Exception
 	 */
 	#[NoAdminRequired]

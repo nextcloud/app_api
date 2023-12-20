@@ -129,10 +129,6 @@ class AppAPIService {
 	/**
 	 * Unregister ExApp.
 	 * Removes ExApp from database and cache.
-	 *
-	 * @param string $appId
-	 *
-	 * @return ExApp|null
 	 */
 	public function unregisterExApp(string $appId): ?ExApp {
 		$exApp = $this->getExApp($appId);
@@ -181,10 +177,6 @@ class AppAPIService {
 	 * Enable ExApp. Sends request to ExApp to update enabled state.
 	 * If request fails, ExApp will be disabled.
 	 * Removes ExApp from cache.
-	 *
-	 * @param ExApp $exApp
-	 *
-	 * @return bool
 	 */
 	public function enableExApp(ExApp $exApp): bool {
 		try {
@@ -224,10 +216,6 @@ class AppAPIService {
 	 * Disable ExApp. Sends request to ExApp to update enabled state.
 	 * If request fails, ExApp keep disabled in database.
 	 * Removes ExApp from cache.
-	 *
-	 * @param ExApp $exApp
-	 *
-	 * @return bool
 	 */
 	public function disableExApp(ExApp $exApp): bool {
 		try {
@@ -259,11 +247,6 @@ class AppAPIService {
 
 	/**
 	 * Update ExApp info (version, name, system app flag changes after update)
-	 *
-	 * @param ExApp $exApp
-	 * @param array $exAppInfo
-	 *
-	 * @return bool
 	 */
 	public function updateExAppInfo(ExApp $exApp, array $exAppInfo): bool {
 		$cacheKey = '/exApp_' . $exApp->getAppid();
@@ -292,14 +275,6 @@ class AppAPIService {
 	/**
 	 * Update ExApp status during initialization step.
 	 * Active status is set when progress reached 100%.
-	 *
-	 * @param string $appId
-	 * @param int $progress
-	 * @param string $error
-	 * @param bool $update
-	 * @param bool $init
-	 *
-	 * @return void
 	 */
 	public function setAppInitProgress(string $appId, int $progress, string $error = '', bool $update = false, bool $init = false): void {
 		$exApp = $this->getExApp($appId);
@@ -398,9 +373,6 @@ class AppAPIService {
 
 	/**
 	 * Dispatch ExApp initialization step, that may take a long time to display the progress of initialization.
-	 *
-	 * @param ExApp $exApp
-	 * @return bool
 	 */
 	public function dispatchExAppInit(ExApp $exApp, bool $update = false): bool {
 		$this->setAppInitProgress($exApp->getAppid(), 0, '', $update, true);
@@ -487,10 +459,6 @@ class AppAPIService {
 
 	/**
 	 * Get info from App Store releases for specific ExApp and its current version
-	 *
-	 * @param ExApp $exApp
-	 *
-	 * @return SimpleXMLElement|null
 	 */
 	public function getExAppInfoFromAppstore(ExApp $exApp): ?SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
@@ -507,10 +475,6 @@ class AppAPIService {
 
 	/**
 	 * Get latest ExApp release info by ExApp appid (in case of first installation or update)
-	 *
-	 * @param string $appId
-	 *
-	 * @return SimpleXMLElement|null
 	 */
 	public function getLatestExAppInfoFromAppstore(string $appId): ?SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
@@ -527,16 +491,6 @@ class AppAPIService {
 
 	/**
 	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
-	 *
-	 * @param ExApp $exApp
-	 * @param string $route
-	 * @param string $userId
-	 * @param string $method
-	 * @param array $params
-	 * @param array $options
-	 * @param IRequest|null $request
-	 *
-	 * @return array|IResponse
 	 */
 	public function aeRequestToExApp(
 		ExApp $exApp,
@@ -558,16 +512,6 @@ class AppAPIService {
 
 	/**
 	 * Request to ExApp by appId with AppAPI auth headers and ExApp user initialization
-	 *
-	 * @param string $appId
-	 * @param string $route
-	 * @param string $userId
-	 * @param string $method
-	 * @param array $params
-	 * @param array $options
-	 * @param IRequest|null $request
-	 *
-	 * @return array|IResponse
 	 */
 	public function aeRequestToExAppById(
 		string $appId,
@@ -587,16 +531,6 @@ class AppAPIService {
 
 	/**
 	 * Request to ExApp by appId with AppAPI auth headers
-	 *
-	 * @param string $appId
-	 * @param string $route
-	 * @param string|null $userId
-	 * @param string $method
-	 * @param array $params
-	 * @param array $options
-	 * @param IRequest|null $request
-	 *
-	 * @return array|IResponse
 	 */
 	public function requestToExAppById(
 		string $appId,
@@ -616,16 +550,6 @@ class AppAPIService {
 
 	/**
 	 * Request to ExApp with AppAPI auth headers
-	 *
-	 * @param ExApp $exApp
-	 * @param string $route
-	 * @param string|null $userId
-	 * @param string $method
-	 * @param array $params
-	 * @param array $options
-	 * @param IRequest|null $request
-	 *
-	 * @return array|IResponse
 	 */
 	public function requestToExApp(
 		ExApp $exApp,
@@ -717,13 +641,6 @@ class AppAPIService {
 		];
 	}
 
-	/**
-	 * @param string $protocol
-	 * @param string $host
-	 * @param int $port
-	 *
-	 * @return string
-	 */
 	public static function getExAppUrl(string $protocol, string $host, int $port): string {
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
@@ -766,10 +683,6 @@ class AppAPIService {
 	 *
 	 * More info in docs: https://cloud-py-api.github.io/app_api/authentication.html
 	 *
-	 * @param IRequest $request
-	 * @param bool $isDav
-	 *
-	 * @return bool
 	 */
 	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
 		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
@@ -860,10 +773,6 @@ class AppAPIService {
 	 *  - sets active user (null if not a user context)
 	 *  - updates ExApp last response time
 	 *
-	 * @param string $userId
-	 * @param IRequest $request
-	 *
-	 * @return bool
 	 */
 	private function finalizeRequestToNC(string $userId, IRequest $request): bool {
 		if ($userId !== '') {
@@ -920,10 +829,6 @@ class AppAPIService {
 	 * Ref: https://github.com/cloud-py-api/app_api/pull/29
 	 * TODO: Add link to docs with warning and mark as not-recommended
 	 *
-	 * @param IRequest $request
-	 * @param ExApp $exApp
-	 *
-	 * @return bool
 	 */
 	public function handleExAppVersionChange(IRequest $request, ExApp $exApp): bool {
 		$requestExAppVersion = $request->getHeader('EX-APP-VERSION');

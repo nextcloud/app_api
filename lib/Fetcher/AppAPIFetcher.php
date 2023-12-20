@@ -43,11 +43,7 @@ abstract class AppAPIFetcher {
 	/**
 	 * Fetches the response from the server
 	 *
-	 * @param string $ETag
-	 * @param string $content
-	 *
 	 * @throws Exception
-	 * @return array
 	 */
 	protected function fetch(string $ETag, string $content): array {
 		$appstoreenabled = $this->config->getSystemValueBool('appstoreenabled', true);
@@ -98,12 +94,8 @@ abstract class AppAPIFetcher {
 	/**
 	 * Returns the array with the categories on the appstore server
 	 *
-	 * @param bool $allowUnstable [$allowUnstable] Allow unstable releases
-	 *
 	 * @throws NotFoundException
 	 * @throws NotPermittedException
-	 *
-	 * @return array
 	 */
 	public function get(bool $allowUnstable = false): array {
 		$appstoreenabled = $this->config->getSystemValueBool('appstoreenabled', true);
@@ -172,8 +164,6 @@ abstract class AppAPIFetcher {
 
 	/**
 	 * Get the currently Nextcloud version
-	 *
-	 * @return ?string
 	 */
 	protected function getVersion(): ?string {
 		if ($this->version === null) {
@@ -184,10 +174,6 @@ abstract class AppAPIFetcher {
 
 	/**
 	 * Set the current Nextcloud version
-	 *
-	 * @param string $version
-	 *
-	 * @return void
 	 */
 	public function setVersion(string $version): void {
 		$this->version = $version;
@@ -195,8 +181,6 @@ abstract class AppAPIFetcher {
 
 	/**
 	 * Get the currently Nextcloud update channel
-	 *
-	 * @return string
 	 */
 	protected function getChannel(): string {
 		if ($this->channel === null) {
@@ -207,10 +191,6 @@ abstract class AppAPIFetcher {
 
 	/**
 	 * Set the current Nextcloud update channel
-	 *
-	 * @param string $channel
-	 *
-	 * @return void
 	 */
 	public function setChannel(string $channel): void {
 		$this->channel = $channel;
@@ -218,8 +198,6 @@ abstract class AppAPIFetcher {
 
 	/**
 	 * Get appstore api endpoint (default or custom one)
-	 *
-	 * @return string
 	 */
 	protected function getEndpoint(): string {
 		return $this->config->getSystemValueString('appstoreurl', 'https://apps.nextcloud.com/api/v1') . '/' . $this->endpointName;

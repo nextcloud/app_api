@@ -68,10 +68,6 @@ class ExAppApiScopeService {
 
 	/**
 	 * Check if the given route has ocs prefix and cut it off
-	 *
-	 * @param string $route
-	 *
-	 * @return string
 	 */
 	private function sanitizeOcsRoute(string $route): string {
 		if (preg_match("/\/ocs\/v(1|2)\.php/", $route, $matches)) {

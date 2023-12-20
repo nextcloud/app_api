@@ -32,10 +32,6 @@ class NotificationsController extends OCSController {
 	/**
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 *
-	 * @param array $params
-	 *
-	 * @return Response
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
