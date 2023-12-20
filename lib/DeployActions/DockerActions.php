@@ -588,6 +588,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function registerDefaultDaemonConfig(): ?DaemonConfig {
+		# default config means that NC is installed into host, and all ExApps are installed in the hosts network.
 		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
 		if ($defaultDaemonConfig !== '') {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfig);
@@ -598,7 +599,7 @@ class DockerActions implements IDeployActions {
 
 		$deployConfig = [
 			'net' => 'host', // TODO: Add ExApp skeleton heartbeat check to verify default configuration works or manual configuration required
-			'host' => null,
+			'host' => 'localhost',
 			'nextcloud_url' => str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL('/index.php')),
 			'ssl_key' => null,
 			'ssl_key_password' => null,
