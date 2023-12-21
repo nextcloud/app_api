@@ -87,6 +87,7 @@ const mutations = {
 		app.groups = groups
 		app.canUnInstall = false
 		app.removable = true
+		app.error = null
 	},
 
 	disableApp(state, appId) {
@@ -123,6 +124,7 @@ const mutations = {
 		app.exAppUrl = exAppUrl
 		app.status = status
 		app.scopes = scopes
+		app.error = null
 		state.updateCount--
 	},
 
