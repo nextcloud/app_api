@@ -1,16 +1,32 @@
 { "translations": {
     "Update to {version}" : "Actualizare la {version}",
+    "Remove" : "Elimină",
     "Disable" : "Dezactivează",
     "View in store" : "Vezi în magazin",
+    "Visit website" : "Viziteaza pagina web",
+    "Report a bug" : "Raportează un defect",
+    "User documentation" : "Documentație utilizator",
+    "Admin documentation" : "Documentație pentru administrare",
+    "Developer documentation" : "Documentație pentru dezvoltatori",
+    "Featured" : "Recomandată",
     "Icon" : "Pictogramă",
+    "Name" : "Nume",
     "Version" : "Versiune",
     "Level" : "Nivel",
     "Actions" : "Acțiuni",
     "Type" : "Tip",
     "Required" : "Necesar",
+    "Optional" : "Opțional",
     "Default" : "Implicită",
+    "Delete" : "Șterge",
+    "Display name" : "Nume afișat",
     "Register" : "Înregistrează-te",
     "Your apps" : "Aplicațiile tale",
-    "Featured apps" : "Aplicații recomandate"
+    "Details" : "Detalii",
+    "Changelog" : "Listă modificări",
+    "Disabled apps" : "Aplicații inactive",
+    "Updates" : "Actualizări",
+    "Featured apps" : "Aplicații recomandate",
+    "Enable" : "Activare"
 },"pluralForm" :"nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));"
 }

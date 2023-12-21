@@ -2,10 +2,26 @@ OC.L10N.register(
     "app_api",
     {
     "Update to {version}" : "Atjaunināts uz {version}",
+    "Remove" : "Izņemt",
+    "Disable" : "Deaktivēt",
+    "Visit website" : "Apmeklējiet vietni",
+    "Report a bug" : "Ziņot par kļūdu",
+    "User documentation" : "Lietotāja dokumentācija",
+    "Admin documentation" : "Administratora dokumentācija",
+    "Developer documentation" : "Izstrādātāja dokumentācija",
     "Icon" : "Ikona",
+    "Name" : "Vārds",
     "Version" : "Versija",
     "Actions" : "Darbības",
     "Type" : "Tips",
-    "Required" : "Nepieciešams"
+    "Display Name" : "Ekrāna vārds",
+    "Required" : "Nepieciešams",
+    "Optional" : "Neobligāts",
+    "Delete" : "Dzēst",
+    "Network" : "Tīkls",
+    "Details" : "Detaļas",
+    "Changelog" : "Izmaiņu žurnāls",
+    "Updates" : "Atjauninājumi",
+    "Enable" : "Iespējot"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");
