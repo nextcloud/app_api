@@ -380,14 +380,14 @@ class ExAppsPageController extends Controller {
 					'level' => 100,
 					'missingMaxOwnCloudVersion' => false,
 					'missingMinOwnCloudVersion' => false,
-					'canInstall' => true,
-					'canUnInstall' => false,
+					'canInstall' => true, // to allow "remove" command for manual-install
+					'canUnInstall' => !($exApp->getEnabled() === 1),
 					'isCompatible' => true,
 					'screenshot' => '',
 					'score' => 0,
 					'ratingNumOverall' => 0,
 					'ratingNumThresholdReached' => false,
-					'removable' => false,
+					'removable' => true, // to allow "remove" command for manual-install
 					'active' => $exApp->getEnabled() === 1,
 					'needsDownload' => false,
 					'groups' => [],
@@ -468,15 +468,16 @@ class ExAppsPageController extends Controller {
 						], Http::STATUS_INTERNAL_SERVER_ERROR);
 					}
 
-					//if (!$this->service->enableExApp($exApp)) {
-					//	return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
-					//}
+					$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
+						return $exAppScope->getScopeGroup();
+					}, $this->exAppScopeService->getExAppScopes($exApp)));
 					return new JSONResponse([
 						'data' => [
 							'daemon_config' => $daemonConfig,
 							'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 							'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
 							'status' => json_decode($exApp->getStatus(), true),
+							'scopes' => $scopes,
 						]
 					]);
 				}
@@ -662,12 +663,16 @@ class ExAppsPageController extends Controller {
 			}
 		}
 
+		$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
+			return $exAppScope->getScopeGroup();
+		}, $this->exAppScopeService->getExAppScopes($exApp)));
 		return new JSONResponse([
 			'data' => [
 				'appid' => $appId,
 				'status' => ['progress' => 0],
 				'systemApp' => filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN),
 				'exAppUrl' => AppAPIService::getExAppUrl($exAppInfo['protocol'], $exAppInfo['host'], (int) $exAppInfo['port']),
+				'scopes' => $scopes,
 			]
 		]);
 	}

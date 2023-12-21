@@ -71,7 +71,7 @@
 						:placeholder="t('app_api', 'Set daemon as default')"
 						:aria-label="t('app_api', 'Set daemon as default')"
 						style="margin-top: 1rem;">
-						{{ t('app_api', 'Default daemon') }}
+						{{ t('app_api', 'Set as default daemon') }}
 					</NcCheckboxRadioSwitch>
 					<template v-if="acceptsDeployId !== 'manual-install'">
 						<NcButton :aria-label="t('app_api', 'Deploy config')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
@@ -87,9 +87,19 @@
 								<NcInputField
 									id="deploy-config-net"
 									:value.sync="deployConfig.net"
-									:placeholder="t('app_api', 'Docker network name (default: host)')"
-									:aria-label="t('app_api', 'Docker network name (default: host)')"
-									:helper-text="t('app_api', 'Docker network name (default: host)')" />
+									:placeholder="t('app_api', 'Docker network name')"
+									:aria-label="t('app_api', 'Docker network name')"
+									:helper-text="t('app_api', 'Docker network name')" />
+							</div>
+							<div class="external-label">
+								<label for="deploy-config-host">{{ t('app_api', 'Host') }}</label>
+								<NcInputField
+									v-if="deployConfig.net === 'host'"
+									id="deploy-config-host"
+									:value.sync="deployConfig.host"
+									:placeholder="t('app_api', 'Hostname to reach ExApp (optional)')"
+									:aria-label="t('app_api', 'Hostname to reach ExApp (optional)')"
+									:helper-text="t('app_api', 'Hostname to reach ExApp (optional)')" />
 							</div>
 							<NcCheckboxRadioSwitch
 								id="deploy-config-gpus"
@@ -97,7 +107,7 @@
 								:placeholder="t('app_api', 'Enable gpus support (attach gpu to ExApp containers)')"
 								:aria-label="t('app_api', 'Enable gpus support (attach gpu to ExApp containers))')"
 								style="margin-top: 1rem;">
-								{{ t('app_api', 'GPUs support') }}
+								{{ t('app_api', 'Enable GPUs support') }}
 							</NcCheckboxRadioSwitch>
 							<p v-if="deployConfig.gpu" class="hint">
 								{{ t('app_api', 'All GPU devices will be requested to be enabled in ExApp containers') }}
@@ -173,7 +183,7 @@ export default {
 			deployConfigSettingsOpened: false,
 			deployConfig: {
 				net: 'host',
-				host: '',
+				host: 'localhost',
 				ssl_key: '',
 				ssl_key_password: '',
 				ssl_cert: '',
@@ -203,6 +213,13 @@ export default {
 			} else {
 				this.name = 'docker_local'
 				this.displayName = 'Docker Local'
+			}
+		},
+		'deployConfig.net'(newNet) {
+			if (newNet === 'host') {
+				this.deployConfig.host = 'localhost'
+			} else {
+				this.deployConfig.host = ''
 			}
 		},
 	},
@@ -269,7 +286,7 @@ export default {
 			this.deployConfigSettingsOpened = false
 			this.deployConfig = {
 				net: 'host',
-				host: '',
+				host: 'localhost',
 				ssl_key: '',
 				ssl_key_password: '',
 				ssl_cert: '',
