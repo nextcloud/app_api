@@ -339,7 +339,7 @@ class DockerActions implements IDeployActions {
 			$secret = $oldEnvs['APP_SECRET'];
 			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
 			// Preserve previous device requests (GPU)
-			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'];
+			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'] ?? [];
 		} else {
 			$port = $this->service->getExAppRandomPort();
 			if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
