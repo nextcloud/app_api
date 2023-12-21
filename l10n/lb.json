@@ -1,5 +1,13 @@
 { "translations": {
+    "Disable" : "Ofschalten",
+    "Report a bug" : "E Feeler melden",
+    "Name" : "Numm",
     "Actions" : "Aktiounen",
-    "Required" : "Noutwendeg"
+    "Type" : "Typ",
+    "Required" : "Noutwendeg",
+    "Optional" : "Fräiwëlleg",
+    "Delete" : "Läschen",
+    "Details" : "Detailer",
+    "Updates" : "Updates"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -1,0 +1,15 @@
+{ "translations": {
+    "Developer documentation" : "Documentación pa desendolcadores",
+    "Icon" : "Iconu",
+    "Name" : "Nome",
+    "Version" : "Versión",
+    "Actions" : "Aiciones",
+    "Type" : "Triba",
+    "Delete" : "Desaniciar",
+    "Your apps" : "Les tos aplicaciones",
+    "Details" : "Detalles",
+    "Changelog" : "Rexistru de cambeos",
+    "Disabled apps" : "Aplicaciones deshabilitaes",
+    "Featured apps" : "Aplicaciones destacaes"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}
