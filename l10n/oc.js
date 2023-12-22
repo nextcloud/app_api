@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Metre a jorn cap a {version}",
     "Remove" : "Suprimir",
-    "Disable" : "Desactivar",
     "View in store" : "Veire a la botiga",
     "Visit website" : "Veire lo site web",
     "Report a bug" : "Raportar un bug",
@@ -17,6 +16,8 @@ OC.L10N.register(
     "Type" : "Tipe",
     "Optional" : "Opcional",
     "Delete" : "Suprimir",
+    "Cancel" : "Anullar",
+    "Host" : "Òste",
     "Register" : "S'inscriure",
     "Your apps" : "Vòstras aplicacions",
     "Details" : "Per lo Menut",
@@ -24,6 +25,7 @@ OC.L10N.register(
     "by {author}\n{license}" : "per {author}\n{license}",
     "Active apps" : "Aplicacions activas",
     "Disabled apps" : "Aplicacions desactivadas",
-    "Updates" : "Mesas a jorn"
+    "Updates" : "Mesas a jorn",
+    "Disable" : "Desactivar"
 },
 "nplurals=2; plural=(n > 1);");

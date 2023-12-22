@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Ενημέρωση στην έκδοση {version}",
     "Remove" : "Αφαίρεση",
-    "Disable" : "Απενεργοποίηση",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Αυτή η εφαρμογή δεν έχει ελάχιστη έκδοση του Nextcloud ανατεθειμένη. Αυτό θα αποτελεί σφάλμα στο μέλλον.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Αυτή η εφαρμογή δεν έχει μέγιστη έκδοση του Nextcloud ανατεθειμένη. Αυτό θα αποτελεί σφάλμα στο μέλλον.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Αυτή η εφαρμογή δεν μπορεί να εγκατασταθεί διότι δεν εκπληρώνονται οι ακόλουθες εξαρτήσεις:",
@@ -43,6 +42,7 @@ OC.L10N.register(
     "Disabled apps" : "Απενεργοποιημένες εφαρμογές",
     "Updates" : "Ενημερώσεις",
     "Featured apps" : "Προτεινόμενες εφαρμογές",
+    "Disable" : "Απενεργοποίηση",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Η εφαρμογή δεν είναι συμβατή με την έκδοση Nextcloud σας. Εάν συνεχίσετε μπορείτε να εγκαταστήσετε την εφαρμογή. Η εφαρμογή ίσως να μην λειτουργεί σωστά.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Σφάλμα: Αυτή η εφαρμογή δεν μπορεί να ενεργοποιηθεί γιατί θα καταστήσει ασταθή τον διακομιστή."
 },

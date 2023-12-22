@@ -1,7 +1,6 @@
 OC.L10N.register(
     "app_api",
     {
-    "Disable" : "Disactivar",
     "Visit website" : "Visitar sito web",
     "Report a bug" : "Reportar un defecto",
     "User documentation" : "Documentation de usator",
@@ -13,6 +12,8 @@ OC.L10N.register(
     "Required" : "Requirite",
     "Optional" : "Optional",
     "Delete" : "Deler",
-    "Details" : "Detalios"
+    "Host" : "Hospite",
+    "Details" : "Detalios",
+    "Disable" : "Disactivar"
 },
 "nplurals=2; plural=(n != 1);");

@@ -2,7 +2,6 @@ OC.L10N.register(
     "app_api",
     {
     "Update to {version}" : "Werk by na {version}",
-    "Disable" : "Deaktiveer",
     "View in store" : "Bekyk in winkel",
     "Visit website" : "Besoek webwerf",
     "User documentation" : "Gebruikerdokumentasie",
@@ -20,6 +19,7 @@ OC.L10N.register(
     "Details" : "Besonderhede",
     "Changelog" : "Veranderingslog",
     "Disabled apps" : "Gedeaktiveerde toeps",
-    "Updates" : "Bywerkings"
+    "Updates" : "Bywerkings",
+    "Disable" : "Deaktiveer"
 },
 "nplurals=2; plural=(n != 1);");

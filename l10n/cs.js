@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Aktualizovat na {version}",
     "Remove" : "Odebrat",
-    "Disable" : "Vypnout",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Tato aplikace nemá nastavený žádný požadavek na minimální verzi Nextcloud. To v budoucnu bude hodnoceno jako chyba.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Tato aplikace nemá nastavenou žádnou nejvyšší podporovanou verzi Nextcloud. To v budoucnu bude hodnoceno jako chyba.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Tuto aplikaci nelze nainstalovat, protože nejsou splněny následující závislosti:",
@@ -46,6 +45,7 @@ OC.L10N.register(
     "Featured apps" : "Doporučené aplikace",
     "Supported apps" : "Podporované aplikace",
     "Enable" : "Povolit",
+    "Disable" : "Vypnout",
     "Allow untested app" : "Umožnit nevyzkoušenou aplikaci",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Tato aplikace není označena jako kompatibilní s vámi používanou verzí Nexcloud. Pokud budete pokračovat, pořád budete moci aplikaci nainstalovat. Uvědomte si ale, že aplikace nemusí fungovat, jak je očekáváno.",
     "An error occurred during the request. Unable to proceed." : "Během požadavku došlo k chybě. Nelze pokračovat.",

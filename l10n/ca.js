@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Actualització a la versió {version}",
     "Remove" : "Suprimeix",
-    "Disable" : "Inhabilita",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Aquesta aplicació no té cap versió mínima de Nextcloud assignada. Això serà un error en el futur.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Aquesta aplicació no té cap versió màxima de Nextcloud assignada. Això serà un error en el futur.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Aquesta aplicació no es pot instal·lar perquè les següents dependències no es compleixen:",
@@ -45,6 +44,8 @@ OC.L10N.register(
     "Featured apps" : "Aplicacions destacades",
     "Supported apps" : "Aplicacions compatibles",
     "Enable" : "Activa",
+    "Disable" : "Inhabilita",
+    "Allow untested app" : "Permet l'aplicació no provada",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Aquesta aplicació no està marcada com a compatible amb la vostra versió de Nextcloud. Si continueu, encara podreu instal·lar l’aplicació. Tingueu en compte que pot ser que l’aplicació no funcioni correctament.",
     "An error occurred during the request. Unable to proceed." : "S'ha produït un error durant la sol·licitud. No es pot continuar.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Error: aquesta aplicació no es pot habilitar perquè fa que el servidor sigui inestable"

@@ -2,7 +2,6 @@ OC.L10N.register(
     "app_api",
     {
     "Update to {version}" : "Oppdater til {version}",
-    "Disable" : "Deaktiver",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Denne appen har ingen minimumversjon av Nextcloud definert. Dette vil være en feil i fremtiden.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Denne appen har ingen høyeste versjon av Nextcloud definert. Dette vil være en feil i fremtiden.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Denne appen kan ikke installeres fordi følgende avhengigheter ikke er tilfredsstilt:",
@@ -31,7 +30,10 @@ OC.L10N.register(
     "Default" : "Forvalg",
     "{license}-licensed" : "{license}-lisensiert",
     "Delete" : "Slett",
+    "Cancel" : "Avbryt",
+    "Ok" : "Ok",
     "Network" : "Nettverk",
+    "Host" : "Server",
     "Register" : "Registrer",
     "Your apps" : "Dine apper",
     "Details" : "Detaljer",
@@ -40,6 +42,7 @@ OC.L10N.register(
     "Active apps" : "Aktive apper",
     "Disabled apps" : "Deaktiverte apper",
     "Updates" : "Oppdateringer",
-    "Featured apps" : "Fremhevede apper"
+    "Featured apps" : "Fremhevede apper",
+    "Disable" : "Deaktiver"
 },
 "nplurals=2; plural=(n != 1);");

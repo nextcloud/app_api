@@ -1,7 +1,6 @@
 OC.L10N.register(
     "app_api",
     {
-    "Disable" : "Slå av",
     "Visit website" : "Besøk nettstaden",
     "Report a bug" : "Rapporter feil",
     "User documentation" : "Brukardokumentasjon",
@@ -13,7 +12,10 @@ OC.L10N.register(
     "Required" : "Nødvendig",
     "Optional" : "Valfritt",
     "Delete" : "Slett",
+    "Ok" : "Greitt",
+    "Host" : "Tenar",
     "Details" : "Detaljar",
-    "Enable" : "SLå på"
+    "Enable" : "SLå på",
+    "Disable" : "Slå av"
 },
 "nplurals=2; plural=(n != 1);");

@@ -15,6 +15,9 @@ OC.L10N.register(
     "Required" : "Шаардлагатай",
     "Optional" : "Сайн дурын",
     "Delete" : "Устгах",
+    "Cancel" : "Цуцлах",
+    "Ok" : "За",
+    "Host" : "хост",
     "Your apps" : "Таны аппликэйшнүүд",
     "Details" : "Дэлгэрэнгүй",
     "Disabled apps" : "Идэвхижээгүй аппликэйшнүүд"

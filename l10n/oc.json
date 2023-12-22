@@ -1,7 +1,6 @@
 { "translations": {
     "Update to {version}" : "Metre a jorn cap a {version}",
     "Remove" : "Suprimir",
-    "Disable" : "Desactivar",
     "View in store" : "Veire a la botiga",
     "Visit website" : "Veire lo site web",
     "Report a bug" : "Raportar un bug",
@@ -15,6 +14,8 @@
     "Type" : "Tipe",
     "Optional" : "Opcional",
     "Delete" : "Suprimir",
+    "Cancel" : "Anullar",
+    "Host" : "Òste",
     "Register" : "S'inscriure",
     "Your apps" : "Vòstras aplicacions",
     "Details" : "Per lo Menut",
@@ -22,6 +23,7 @@
     "by {author}\n{license}" : "per {author}\n{license}",
     "Active apps" : "Aplicacions activas",
     "Disabled apps" : "Aplicacions desactivadas",
-    "Updates" : "Mesas a jorn"
+    "Updates" : "Mesas a jorn",
+    "Disable" : "Desactivar"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

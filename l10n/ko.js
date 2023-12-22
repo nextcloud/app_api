@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "{version}(으)로 업데이트",
     "Remove" : "삭제",
-    "Disable" : "사용 안함",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "이 앱은 Nextcloud 최소 버전을 지정하지 않았습니다. 차후 버전에서는 오류로 처리됩니다.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "이 앱은 Nextcloud 최대 버전을 지정하지 않았습니다. 차후 버전에서는 오류로 처리됩니다.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "다음 의존성을 만족할 수 없기 때문에 이 앱을 설치할 수 없습니다:",
@@ -30,8 +29,11 @@ OC.L10N.register(
     "Optional" : "선택적",
     "{license}-licensed" : "{license} 라이선스",
     "Delete" : "삭제",
+    "Cancel" : "취소",
+    "Ok" : "확인",
     "Display name" : "표시 이름",
     "Network" : "네트워크",
+    "Host" : "호스트",
     "Register" : "등록",
     "Your apps" : "내 앱",
     "Details" : "세부사항",
@@ -41,6 +43,7 @@ OC.L10N.register(
     "Updates" : "업데이트",
     "Featured apps" : "추천 앱 - ",
     "Enable" : "활성화",
+    "Disable" : "사용 안함",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "이 앱은 현재 Nextcloud 버젼과 호환되지 않습니다.  이 앱을 설치하면, 제대로 작동하지 않을 수 있습니다.",
     "An error occurred during the request. Unable to proceed." : "요청을 보내는 도중 에러가 발생하였습니다. 더 이상 진행할 수 없습니다.",
     "Error: This app cannot be enabled because it makes the server unstable" : "오류: 이 앱은 서버를 불안정하게 만들 수 있어서 활성화할 수 없습니다."

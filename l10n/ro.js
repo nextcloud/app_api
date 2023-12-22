@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Actualizare la {version}",
     "Remove" : "Elimină",
-    "Disable" : "Dezactivează",
     "View in store" : "Vezi în magazin",
     "Visit website" : "Viziteaza pagina web",
     "Report a bug" : "Raportează un defect",
@@ -21,7 +20,10 @@ OC.L10N.register(
     "Optional" : "Opțional",
     "Default" : "Implicită",
     "Delete" : "Șterge",
+    "Cancel" : "Anulare",
+    "Ok" : "Ok",
     "Display name" : "Nume afișat",
+    "Host" : "Gazdă",
     "Register" : "Înregistrează-te",
     "Your apps" : "Aplicațiile tale",
     "Details" : "Detalii",
@@ -29,6 +31,7 @@ OC.L10N.register(
     "Disabled apps" : "Aplicații inactive",
     "Updates" : "Actualizări",
     "Featured apps" : "Aplicații recomandate",
-    "Enable" : "Activare"
+    "Enable" : "Activare",
+    "Disable" : "Dezactivează"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

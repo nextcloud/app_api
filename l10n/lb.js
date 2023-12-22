@@ -1,7 +1,6 @@
 OC.L10N.register(
     "app_api",
     {
-    "Disable" : "Ofschalten",
     "Report a bug" : "E Feeler melden",
     "Name" : "Numm",
     "Actions" : "Aktiounen",
@@ -9,7 +8,10 @@ OC.L10N.register(
     "Required" : "Noutwendeg",
     "Optional" : "Fräiwëlleg",
     "Delete" : "Läschen",
+    "Ok" : "OK",
+    "Host" : "Host",
     "Details" : "Detailer",
-    "Updates" : "Updates"
+    "Updates" : "Updates",
+    "Disable" : "Ofschalten"
 },
 "nplurals=2; plural=(n != 1);");

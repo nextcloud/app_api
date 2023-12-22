@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Përditëso në {version}",
     "Remove" : "Hiqe",
-    "Disable" : "Çaktivizoje",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Ky aplikacion nuk ka të caktuar një minimum versioni të Nextcloud. Ky do të jetë një gabim në të ardhmen.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Ky aplikacion nuk ka të caktuar një maksimum versioni të Nextcloud. Ky do të jetë një gabim në të ardhmen.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Ky aplikacion s’mund të instalohet, ngaqë për të nuk plotësohen varësitë vijuese:",
@@ -25,6 +24,9 @@ OC.L10N.register(
     "Optional" : "Jo i detyrueshëm",
     "Default" : "Paraprake",
     "Delete" : "Fshi",
+    "Cancel" : "Anuloje",
+    "Ok" : "Në rregull",
+    "Host" : "Strehë",
     "Register" : "Regjistrohu",
     "Your apps" : "Aplikacionet tuaja ",
     "Details" : "Detajet",
@@ -32,6 +34,7 @@ OC.L10N.register(
     "Active apps" : "Aplikacionet aktive",
     "Disabled apps" : "Aplikacionet pa aftësi ",
     "Updates" : "Përditësime",
-    "Enable" : "Aktivizoje"
+    "Enable" : "Aktivizoje",
+    "Disable" : "Çaktivizoje"
 },
 "nplurals=2; plural=(n != 1);");

@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Ažuriraj na {version}",
     "Remove" : "Ukloni",
-    "Disable" : "Onemogući",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Ovoj aplikaciji nije dodijeljena najmanja inačica Nextclouda. To će biti pogreška u budućnosti.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Ovoj aplikaciji nije dodijeljena najveća inačica Nextclouda. To će biti pogreška u budućnosti.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Aplikaciju nije moguće instalirati jer nisu ispunjene sljedeće ovisnosti:",
@@ -32,7 +31,10 @@ OC.L10N.register(
     "Default" : "Zadani",
     "{license}-licensed" : "Licencirano prema {license}",
     "Delete" : "Izbriši",
+    "Cancel" : "Odustani",
+    "Ok" : "U redu",
     "Network" : "Mreža",
+    "Host" : "Glavno računalo",
     "Register" : "Registriraj se",
     "Your apps" : "Vaše aplikacije",
     "Details" : "Pojedinosti",
@@ -43,6 +45,7 @@ OC.L10N.register(
     "Updates" : "Ažuriranja",
     "Featured apps" : "Istaknute aplikacije",
     "Enable" : "Omogućite",
+    "Disable" : "Onemogući",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Ova aplikacija nije označena kao kompatibilna s vašom inačicom Nextclouda. Ako odlučite nastaviti, moći ćete instalirati aplikaciju. Imajte na umu da aplikacija možda neće raditi kako očekujete.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Pogreška: ova aplikacija ne može biti omogućena jer čini poslužitelj nestabilnim"
 },

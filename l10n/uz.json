@@ -1,7 +1,6 @@
 { "translations": {
     "Update to {version}" : "Update to {version}",
     "Remove" : "Remove",
-    "Disable" : "Oʻchirish",
     "Visit website" : "Visit website",
     "User documentation" : "Foydalanuvchi hujjatlari",
     "Admin documentation" : "Admin documentation",
@@ -9,7 +8,9 @@
     "Name" : "Name",
     "Actions" : "Actions",
     "Delete" : "Delete",
+    "Cancel" : "Cancel",
     "Details" : "Details",
-    "Enable" : "Enable"
+    "Enable" : "Enable",
+    "Disable" : "Oʻchirish"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

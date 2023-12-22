@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Atnaujinti į versiją {version}",
     "Remove" : "Šalinti",
-    "Disable" : "Išjungti",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Ši programėlė neturi priskirtos žemiausios „Nextcloud“ versijos. Ateityje tai bus klaida.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Ši programėlė neturi priskirtos aukščiausios „Nextcloud“ versijos. Ateityje tai bus klaida.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Ši programėlė negali būti įdiegta, nes nėra patenkintos žemiau išvardintos priklausomybės:",
@@ -33,7 +32,10 @@ OC.L10N.register(
     "Default" : "Numatytasis",
     "{license}-licensed" : "Licencijuota pagal {license}",
     "Delete" : "Ištrinti",
+    "Cancel" : "Atsisakyti",
+    "Ok" : "Gerai",
     "Network" : "Tinklas",
+    "Host" : "Serveris",
     "Register" : "Registruotis",
     "Your apps" : "Jūsų programėlės",
     "Details" : "Išsamiau",
@@ -44,6 +46,7 @@ OC.L10N.register(
     "Updates" : "Atnaujinimai",
     "Featured apps" : "Siūlomos programėlės",
     "Enable" : "Aktyvuoti",
+    "Disable" : "Išjungti",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Ši programėlė nėra pažymėta kaip suderinama su jūsų Nextcloud versija. Jei tęsite, vis tiek galėsite įdiegti programėlę. Turėkite omenyje, kad programėlė gali neveikti taip, kaip tikimasi.",
     "An error occurred during the request. Unable to proceed." : "Užklausos metu įvyko klaida. Nepavyksta tęsti.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Klaida: Ši programėlė negali būti įjungta, nes ji neigiamai veikia serverio stabilumą"

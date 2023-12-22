@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Aktualizovať na {version}",
     "Remove" : "Odobrať",
-    "Disable" : "Zakázať",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Pre túto aplikáciu nie je zadaná minimálna verzia Nextcloudu. Toto v budúcnosti spôsobí chybu.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Pre túto aplikáciu nie je zadaná maximálna verzia Nextcloudu. Toto v budúcnosti spôsobí chybu.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Túto aplikáciu nemožno nainštalovať, pretože nie sú splnené nasledovné závislosti:",
@@ -32,8 +31,11 @@ OC.L10N.register(
     "Optional" : "Voliteľné",
     "{license}-licensed" : "{license}-licencovaný",
     "Delete" : "Vymazať",
+    "Cancel" : "Zrušiť",
+    "Ok" : "Neutrálne",
     "Display name" : "Zobrazované meno",
     "Network" : "Sieť",
+    "Host" : "Adresa servera",
     "Register" : "Registrovať",
     "Your apps" : "Vaše aplikácie",
     "Details" : "Podrobnosti",
@@ -44,6 +46,7 @@ OC.L10N.register(
     "Updates" : "Aktualizácie",
     "Featured apps" : "Odporúčané aplikácie",
     "Enable" : "Povoliť",
+    "Disable" : "Zakázať",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Táto aplikácia nie je označená ako kompatibilná s vašou verziou Nextcloud. Ak budete pokračovať, aplikáciu budete môcť stále nainštalovať. Aplikácia nemusí fungovať podľa očakávania.",
     "An error occurred during the request. Unable to proceed." : "Počas vykonania požiadavky nastala chyba.  Nie je možné pokračovať.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Chyba: aplikáciu nie je možné povoliť, lebo naruší stabilitu servera"

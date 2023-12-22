@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Actualizar para {version}",
     "Remove" : "Remover",
-    "Disable" : "Desativar",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Esta app não tem a versão mínima do Nextcloud atribuída. Isto será um erro no futuro.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Esta app não tem a versão máxima do Nextcloud atribuída. Isto será um erro no futuro.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Esta aplicação não pode ser instalada porque as seguintes dependências não podem ser realizadas:",
@@ -26,14 +25,18 @@ OC.L10N.register(
     "Optional" : "Opcional ",
     "Default" : "Predefinido",
     "Delete" : "Eliminar",
+    "Cancel" : "Cancelar",
+    "Ok" : "CONFIRMAR",
     "Display name" : "Nome a exibir",
     "Network" : "Rede",
+    "Host" : "Anfitrião",
     "Register" : "Registar",
     "Your apps" : "As suas apps",
     "Details" : "Detalhes",
     "Changelog" : "Registo de alterações",
     "Disabled apps" : "Apps desativadas",
     "Updates" : "Actualizações",
-    "Enable" : "Activar"
+    "Enable" : "Activar",
+    "Disable" : "Desativar"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

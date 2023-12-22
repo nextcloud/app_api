@@ -1,5 +1,4 @@
 { "translations": {
-    "Disable" : "Ofschalten",
     "Report a bug" : "E Feeler melden",
     "Name" : "Numm",
     "Actions" : "Aktiounen",
@@ -7,7 +6,10 @@
     "Required" : "Noutwendeg",
     "Optional" : "Fräiwëlleg",
     "Delete" : "Läschen",
+    "Ok" : "OK",
+    "Host" : "Host",
     "Details" : "Detailer",
-    "Updates" : "Updates"
+    "Updates" : "Updates",
+    "Disable" : "Ofschalten"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

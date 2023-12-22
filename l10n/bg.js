@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Актуализирай до {version}",
     "Remove" : "Премахване",
-    "Disable" : "Изключване",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Това приложение няма присвоена минимална версия на Nextcloud. В бъдеще това ще бъде грешка.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Това приложение няма зададена максимална версия на Nextcloud. В бъдеще това ще бъде грешка.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Приложението не може да бъде инсталирано, защото следните зависимости не са удовлетворени:",
@@ -44,6 +43,7 @@ OC.L10N.register(
     "Updates" : "Актуализации",
     "Featured apps" : "Представени приложения",
     "Enable" : "Включена",
+    "Disable" : "Изключване",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Приложението не е маркирано като съвместимо с вашата версия на Nextcloud. Можете да инсталирате приложението, но е вероятно да не работи безпроблемно.",
     "An error occurred during the request. Unable to proceed." : "Възникна грешка по време на заявката. Не може да се продължи.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Грешка: Това приложение не може да бъде активирано, защото прави сървъра нестабилен"

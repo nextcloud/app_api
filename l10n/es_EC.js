@@ -2,7 +2,6 @@ OC.L10N.register(
     "app_api",
     {
     "Update to {version}" : "Actualizar a {version}",
-    "Disable" : "Deshabilitar",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Esta aplicación no cuenta con una versión mínima de Nextcloud asignada. Esto será un error en el futuro.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Esta aplicación no cuenta con una versión máxima de Nextcloud asignada. Esto será un error en el futuro.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Esta aplicación no puede ser instalada porque las siguientes dependencias no están satisfechas:",
@@ -31,8 +30,11 @@ OC.L10N.register(
     "Optional" : "Opcional",
     "{license}-licensed" : "Licenciado con {license}",
     "Delete" : "Borrar",
+    "Cancel" : "Cancelar",
+    "Ok" : "Ok",
     "Display name" : "Nombre para mostrar",
     "Network" : "Red",
+    "Host" : "Servidor",
     "Register" : "Registrar",
     "Your apps" : "Tus aplicaciones",
     "Details" : "Detalles",
@@ -43,6 +45,7 @@ OC.L10N.register(
     "Updates" : "Actualizaciones",
     "Featured apps" : "Aplicaciones destacadas",
     "Enable" : "Habilitar",
+    "Disable" : "Deshabilitar",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Esta aplicación no está marcada como compatible con tu versión de Nextcloud. Si continúas, aún podrás instalar la aplicación. Ten en cuenta que es posible que la aplicación no funcione como se espera.",
     "An error occurred during the request. Unable to proceed." : "Ocurrió un error durante la solicitud. No se puede continuar.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Error: Esta aplicación no se puede habilitar porque hace que el servidor sea inestable"

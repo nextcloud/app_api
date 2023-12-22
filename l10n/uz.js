@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Update to {version}",
     "Remove" : "Remove",
-    "Disable" : "Oʻchirish",
     "Visit website" : "Visit website",
     "User documentation" : "Foydalanuvchi hujjatlari",
     "Admin documentation" : "Admin documentation",
@@ -11,7 +10,9 @@ OC.L10N.register(
     "Name" : "Name",
     "Actions" : "Actions",
     "Delete" : "Delete",
+    "Cancel" : "Cancel",
     "Details" : "Details",
-    "Enable" : "Enable"
+    "Enable" : "Enable",
+    "Disable" : "Oʻchirish"
 },
 "nplurals=1; plural=0;");

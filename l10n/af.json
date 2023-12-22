@@ -1,6 +1,5 @@
 { "translations": {
     "Update to {version}" : "Werk by na {version}",
-    "Disable" : "Deaktiveer",
     "View in store" : "Bekyk in winkel",
     "Visit website" : "Besoek webwerf",
     "User documentation" : "Gebruikerdokumentasie",
@@ -18,6 +17,7 @@
     "Details" : "Besonderhede",
     "Changelog" : "Veranderingslog",
     "Disabled apps" : "Gedeaktiveerde toeps",
-    "Updates" : "Bywerkings"
+    "Updates" : "Bywerkings",
+    "Disable" : "Deaktiveer"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

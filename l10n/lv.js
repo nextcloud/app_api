@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Update to {version}" : "Atjaunināts uz {version}",
     "Remove" : "Izņemt",
-    "Disable" : "Deaktivēt",
     "Visit website" : "Apmeklējiet vietni",
     "Report a bug" : "Ziņot par kļūdu",
     "User documentation" : "Lietotāja dokumentācija",
@@ -18,10 +17,13 @@ OC.L10N.register(
     "Required" : "Nepieciešams",
     "Optional" : "Neobligāts",
     "Delete" : "Dzēst",
+    "Ok" : "Labi",
     "Network" : "Tīkls",
+    "Host" : "Resursdators",
     "Details" : "Detaļas",
     "Changelog" : "Izmaiņu žurnāls",
     "Updates" : "Atjauninājumi",
-    "Enable" : "Iespējot"
+    "Enable" : "Iespējot",
+    "Disable" : "Deaktivēt"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");
