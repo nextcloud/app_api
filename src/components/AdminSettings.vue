@@ -9,7 +9,7 @@
 		</div>
 		<NcSettingsSection
 			:name="t('app_api', 'ExApps')"
-			:description="t('app_api', 'ExApps management similar to default apps and available by the link below or .')">
+			:description="t('app_api', 'ExApps management similar to default apps and available by the link below.')">
 			<NcButton
 				type="primary"
 				:href="linkToExAppsManagement()"
