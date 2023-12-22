@@ -31,5 +31,12 @@ class RegisterDeclarativeSettingsListener implements IEventListener {
 		$this->logger->info('Registering declarative settings form');
 		// TODO: Rewrite to go through registered ExApps forms and register them
 		$event->registerSchema(Application::APP_ID, $this->form->getSchema());
+		$secondSchema = $this->form->getSchema();
+		$secondSchema['id'] = Application::APP_ID . '_dup';
+		$secondSchema['fields'] = array_map(function (array $field): array {
+			$field['id'] = $field['id'] . '_dup';
+			return $field;
+		}, $secondSchema['fields']);
+		$event->registerSchema(Application::APP_ID, $secondSchema);
 	}
 }

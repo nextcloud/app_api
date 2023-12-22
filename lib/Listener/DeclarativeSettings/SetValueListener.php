@@ -28,6 +28,9 @@ class SetValueListener implements IEventListener {
 			return;
 		}
 
+		// TODO: Retrieve form data to check where to store the value (admin or personal)
+		// TODO: We need identifier which for is used
+
 		$this->config->setUserValue($event->getUser()->getUID(), $event->getApp(), $event->getFieldId(), $event->getValue());
 	}
 }
