@@ -12,21 +12,21 @@
 					{{ t('app_api', 'Manual install daemon usually used for development. It cannot be set as default daemon.') }}
 				</NcNoteCard>
 
-				<p><b>{{ t('app_api', 'Name: ') }}</b>{{ daemon.name }}</p>
-				<p><b>{{ t('app_api', 'Protocol: ') }}</b>{{ daemon.protocol }}</p>
-				<p><b>{{ t('app_api', 'Host: ') }}</b>{{ daemon.host }}</p>
+				<p><b>{{ t('app_api', 'Name:') }} </b>{{ daemon.name }}</p>
+				<p><b>{{ t('app_api', 'Protocol:') }} </b>{{ daemon.protocol }}</p>
+				<p><b>{{ t('app_api', 'Host:') }} </b>{{ daemon.host }}</p>
 
 				<h3>{{ t('app_api', 'Deploy config') }}</h3>
-				<p><b>{{ t('app_api', 'Docker network: ') }}</b>{{ daemon.deploy_config.net }}</p>
-				<p><b>{{ t('app_api', 'Host: ') }}</b>{{ daemon.deploy_config.host || 'null' }}</p>
-				<p><b>{{ t('app_api', 'Nextcloud url: ') }}</b>{{ daemon.deploy_config.nextcloud_url }}</p>
+				<p><b>{{ t('app_api', 'Docker network:') }} </b>{{ daemon.deploy_config.net }}</p>
+				<p><b>{{ t('app_api', 'Host:') }} </b>{{ daemon.deploy_config.host || 'null' }}</p>
+				<p><b>{{ t('app_api', 'Nextcloud URL:') }} </b>{{ daemon.deploy_config.nextcloud_url }}</p>
 
 				<h3>{{ t('app_api', 'SSL params') }}</h3>
-				<p><b>{{ t('app_api', 'SSL key: ') }}</b>{{ daemon.deploy_config.ssl_key || 'null' }}</p>
-				<p><b>{{ t('app_api', 'SSL key pass: ') }}</b>{{ daemon.deploy_config.ssl_key_password || 'null' }}</p>
-				<p><b>{{ t('app_api', 'SSL cert: ') }}</b>{{ daemon.deploy_config.ssl_cert || 'null' }}</p>
-				<p><b>{{ t('app_api', 'SSL cert pass: ') }}</b>{{ daemon.deploy_config.ssl_cert_password || 'null' }}</p>
-				<p><b>{{ t('app_api', 'GPUs support: ') }}</b>{{ daemon.deploy_config?.gpu || 'false' }}</p>
+				<p><b>{{ t('app_api', 'SSL key:') }} </b>{{ daemon.deploy_config.ssl_key || 'null' }}</p>
+				<p><b>{{ t('app_api', 'SSL key pass:') }} </b>{{ daemon.deploy_config.ssl_key_password || 'null' }}</p>
+				<p><b>{{ t('app_api', 'SSL cert:') }} </b>{{ daemon.deploy_config.ssl_cert || 'null' }}</p>
+				<p><b>{{ t('app_api', 'SSL cert pass:') }} </b>{{ daemon.deploy_config.ssl_cert_password || 'null' }}</p>
+				<p><b>{{ t('app_api', 'GPUs support:') }} </b>{{ daemon.deploy_config?.gpu || 'false' }}</p>
 
 				<div class="actions">
 					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install'" @click="verifyConnection">
