@@ -57,12 +57,12 @@
 							:helper-text="daemonHostHelperText" />
 					</div>
 					<div v-if="acceptsDeployId !== 'manual-install'" class="external-label">
-						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud url') }}</label>
+						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
 						<NcInputField
 							id="nextcloud-url"
 							:value.sync="nextcloud_url"
-							:placeholder="t('app_api', 'Nextcloud url')"
-							:aria-label="t('app_api', 'Nextcloud url')" />
+							:placeholder="t('app_api', 'Nextcloud URL')"
+							:aria-label="t('app_api', 'Nextcloud URL')" />
 					</div>
 					<NcCheckboxRadioSwitch
 						v-if="acceptsDeployId !== 'manual-install'"
@@ -105,7 +105,7 @@
 								id="deploy-config-gpus"
 								:checked.sync="deployConfig.gpu"
 								:placeholder="t('app_api', 'Enable gpus support (attach gpu to ExApp containers)')"
-								:aria-label="t('app_api', 'Enable gpus support (attach gpu to ExApp containers))')"
+								:aria-label="t('app_api', 'Enable gpus support (attach gpu to ExApp containers)')"
 								style="margin-top: 1rem;">
 								{{ t('app_api', 'Enable GPUs support') }}
 							</NcCheckboxRadioSwitch>
