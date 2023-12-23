@@ -133,7 +133,7 @@ export default {
 		},
 		setDaemonDefault(daemon) {
 			if (this.daemon.accepts_deploy_id === 'manual-install') {
-				showError(t('app_api', '"manual-install" Deploy Daemon can not be set as default'))
+				showError(t('app_api', '"manual-install" Deploy Daemon cannot be set as default'))
 				return
 			}
 			this.settingDefault = true
