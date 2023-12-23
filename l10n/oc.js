@@ -17,6 +17,7 @@ OC.L10N.register(
     "Optional" : "Opcional",
     "Delete" : "Suprimir",
     "Cancel" : "Anullar",
+    "Nextcloud URL" : "URL Nextcloud",
     "Host" : "Òste",
     "Register" : "S'inscriure",
     "Your apps" : "Vòstras aplicacions",

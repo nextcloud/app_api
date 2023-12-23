@@ -8,6 +8,8 @@ OC.L10N.register(
     "Actions" : "Aiciones",
     "Type" : "Triba",
     "Delete" : "Desaniciar",
+    "Cancel" : "Encaboxar",
+    "Ok" : "Aceutar",
     "Your apps" : "Les tos aplicaciones",
     "Details" : "Detalles",
     "Changelog" : "Rexistru de cambeos",

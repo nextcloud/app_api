@@ -14,6 +14,7 @@ OC.L10N.register(
     "Required" : "Vereis",
     "Optional" : "Opsioneel",
     "Delete" : "Skrap",
+    "Host" : "Gasheer",
     "Register" : "Registreer",
     "Your apps" : "U toeps",
     "Details" : "Besonderhede",

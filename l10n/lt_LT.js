@@ -34,6 +34,8 @@ OC.L10N.register(
     "Delete" : "Ištrinti",
     "Cancel" : "Atsisakyti",
     "Ok" : "Gerai",
+    "Name:" : "Pavadinimas:",
+    "Nextcloud URL" : "Nextcloud URL",
     "Network" : "Tinklas",
     "Host" : "Serveris",
     "Register" : "Registruotis",

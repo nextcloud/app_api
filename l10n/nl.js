@@ -32,6 +32,8 @@ OC.L10N.register(
     "Delete" : "Verwijder",
     "Cancel" : "Annuleren",
     "Ok" : "Ok",
+    "Name:" : "Naam:",
+    "Nextcloud URL" : "Nextcloud URL",
     "Network" : "Netwerk",
     "Host" : "Host",
     "Register" : "Aanmelden",

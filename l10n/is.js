@@ -32,6 +32,7 @@ OC.L10N.register(
     "Delete" : "Eyða",
     "Cancel" : "Hætta við",
     "Ok" : "Í lagi",
+    "Name:" : "Nafn:",
     "Display name" : "Birtingarnafn",
     "Network" : "Netkerfi",
     "Host" : "Þjónn",

@@ -33,6 +33,8 @@ OC.L10N.register(
     "Delete" : "מחיקה",
     "Cancel" : "ביטול",
     "Ok" : "אישור",
+    "Name:" : "שם:",
+    "Nextcloud URL" : "כתובת Nextcloud",
     "Network" : "רשת",
     "Host" : "מארח",
     "Register" : "רישום",

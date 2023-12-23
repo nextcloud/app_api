@@ -31,6 +31,8 @@ OC.L10N.register(
     "Delete" : "Xóa",
     "Cancel" : "Hủy",
     "Ok" : "Đồng ý",
+    "Name:" : "Tên:",
+    "Nextcloud URL" : "vWorkspace URL",
     "Host" : "Máy chủ",
     "Register" : "Đăng ký",
     "Your apps" : "Ứng dụng của bạn",

@@ -33,6 +33,8 @@ OC.L10N.register(
     "Delete" : "Izbriši",
     "Cancel" : "Odustani",
     "Ok" : "U redu",
+    "Name:" : "Naziv:",
+    "Nextcloud URL" : "Nextcloud URL",
     "Network" : "Mreža",
     "Host" : "Glavno računalo",
     "Register" : "Registriraj se",

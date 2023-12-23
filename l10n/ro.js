@@ -22,6 +22,7 @@ OC.L10N.register(
     "Delete" : "Șterge",
     "Cancel" : "Anulare",
     "Ok" : "Ok",
+    "Name:" : "Nume:",
     "Display name" : "Nume afișat",
     "Host" : "Gazdă",
     "Register" : "Înregistrează-te",

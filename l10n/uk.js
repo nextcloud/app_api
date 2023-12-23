@@ -32,6 +32,7 @@ OC.L10N.register(
     "Delete" : "Вилучати",
     "Cancel" : "Скасувати",
     "Ok" : "Гаразд",
+    "Name:" : "Ім'я:",
     "Display name" : "Ім'я для показу",
     "Network" : "Мережа",
     "Host" : "Хост",

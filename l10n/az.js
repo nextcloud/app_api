@@ -15,7 +15,10 @@ OC.L10N.register(
     "Version" : "Versiya",
     "Actions" : "İşlər",
     "Delete" : "Sil",
+    "Ok" : "Oldu",
+    "Host" : "Şəbəkədə ünvan",
     "Details" : "Detallar",
+    "Changelog" : "Dəyişikliklər jurnalı",
     "Updates" : "Yenilənmələr",
     "Disable" : "Dayandır"
 },

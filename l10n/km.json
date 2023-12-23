@@ -1,0 +1,12 @@
+{ "translations": {
+    "Name" : "ឈ្មោះ",
+    "Version" : "កំណែ",
+    "Type" : "ប្រភេទ",
+    "Delete" : "លុប",
+    "Cancel" : "លើកលែង",
+    "Ok" : "ព្រម",
+    "Host" : "ម៉ាស៊ីន​ផ្ទុក",
+    "Details" : "ព័ត៌មាន​លម្អិត",
+    "Disable" : "បិទ"
+},"pluralForm" :"nplurals=1; plural=0;"
+}

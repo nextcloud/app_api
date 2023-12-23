@@ -13,7 +13,10 @@
     "Version" : "Versiya",
     "Actions" : "İşlər",
     "Delete" : "Sil",
+    "Ok" : "Oldu",
+    "Host" : "Şəbəkədə ünvan",
     "Details" : "Detallar",
+    "Changelog" : "Dəyişikliklər jurnalı",
     "Updates" : "Yenilənmələr",
     "Disable" : "Dayandır"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

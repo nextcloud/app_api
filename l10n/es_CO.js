@@ -24,6 +24,7 @@ OC.L10N.register(
     "Optional" : "Opcional",
     "Delete" : "Borrar",
     "Ok" : "Ok",
+    "Host" : "Servidor",
     "Register" : "Registrar",
     "Your apps" : "Tus aplicaciones",
     "Details" : "Detalles",

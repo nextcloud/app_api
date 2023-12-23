@@ -26,6 +26,7 @@ OC.L10N.register(
     "Delete" : "Lemel",
     "Display name" : "Anv ardivink",
     "Network" : "Rouedad",
+    "Host" : "Ostiz",
     "Your apps" : "Ho meziantoù",
     "Details" : "Munudoù",
     "by {author}\n{license}" : "great gant {author}\n{license}",

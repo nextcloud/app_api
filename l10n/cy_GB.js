@@ -12,6 +12,7 @@ OC.L10N.register(
     "Required" : "Angen",
     "Optional" : "Dewisol",
     "Delete" : "Dileu",
+    "Ok" : "Iawn",
     "Register" : "Cofrestru",
     "Details" : "Manylion",
     "Changelog" : "Cofnod newid",

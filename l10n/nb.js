@@ -32,6 +32,7 @@ OC.L10N.register(
     "Delete" : "Slett",
     "Cancel" : "Avbryt",
     "Ok" : "Ok",
+    "Name:" : "Navn:",
     "Network" : "Nettverk",
     "Host" : "Server",
     "Register" : "Registrer",
