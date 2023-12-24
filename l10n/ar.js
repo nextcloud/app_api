@@ -4,6 +4,7 @@ OC.L10N.register(
     "External Apps" : "تطبيقات خارجية",
     "Only docker-install is supported for now" : "التثبيت عبر دوكر docker هو فقط المدعوم حاليّاً",
     "Failed to register ExApp" : "تعذّر تسجيل تطبيق خارجي ExApp",
+    "Failed to deploy ExApp" : "تعذّر نشر التطبيق الخارجي ExApp",
     "Failed to send \"init\" event to ExApp." : "تعذّر إرسال الحدث \"init\" إلى تطبيق خارجي ExApp",
     "Failed to enable ExApp" : "تعذّر تمكين تطبيق خارجي ExApp",
     "Failed to disable ExApp" : "تعذّر تعطيل تطبيق خارجي ExApp",
@@ -16,6 +17,7 @@ OC.L10N.register(
     "### Boost your Nextcloud with AppAPI and its specially designed applications.\n\n\nThe AppAPI is a project within the Nextcloud ecosystem designed to streamline and enhance the process of\napplication development, deployment, and management.\n\nIt introduces a new methodology that allows developers to create\napplications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.\n\n\n### List of applications that require AppAPI:\n\n- [talk_bot_ai_example](https://github.com/cloud-py-api/talk_bot_ai_example)\n- [upscaler_example](https://github.com/cloud-py-api/upscaler_example)\n- [image_to_text_example](https://github.com/cloud-py-api/file_to_text_example)\n- [ai_image_generator_bot](https://github.com/cloud-py-api/ai_image_generator_bot)\n\n_If you wish to develop an application, we will gladly help and assist you._\n\n### Support\n\nWe appreciate any support for this project:\n\n- ⭐ Star our work on GitHub\n- ❗ Create an Issue or feature request\n- 💁 Resolve an Issue and create a Pull Request\n- 🧑‍💻 Develop your own application using AppAPI\n\nWe are genuinely excited about the future of the AppAPI project and its potential to transform\nthe way applications are developed and experienced within Nextcloud.\n\nAs we embark on this journey, we warmly invite you - developers, thinkers, creators, and visionaries -\nto join us in shaping a more versatile, stable, and secure app landscape.\n\n*Your insights, suggestions, and contributions are invaluable to us.*" : "### عزز نكست كلاود خاصّتك باستعمال واجهات AppAPI و تطبيقاته المصممة خصيصاً. \n\nAppAPI هو مشروع ضمن بيئة نكست كلاود؛ مُصمَّم لتبسيط و تعزيز عملية تطوير التطبيقات و نشرها و إدارتها. وهو يُقدِّم منهجية جديدة تسمح للمطورين بإنشاء التطبيقات التي تستخدِم مجموعة متنوعة من لغات البرمجة غير مقتصرةٍ على PHP التي كانت تستخدم تقليديًا في تطوير نكست كلاود. \n\n### قائمة بالتطبيقات التي تتطلب AppAPI:\n- [talk_bot_ai_example](https://github.com/cloud-py-api/talk_bot_ai_example)- [upscaler_example](https://github.com/cloud-py-api/upscaler_example)- [image_to_text_example](https://github.com/cloud-py-api/file_to_text_example)- [ai_image_generator_bot](https://github.com/cloud-py-api/ai_image_generator_bot)\n\n_  إذا كنت ترغب في تطوير تطبيق، فسيكون من دواعي سرورنا مساعدتك على ذلك.\n\n### الدعم \n\nسنكون ممتنين لأي دعم يُقدَّم لهذا المشروع عبر أيٍّ من المساهمات التالية: \n- ⭐ تمييز عملنا على GitHub \n- ❗ الإبلاغ عن مشكلة برمجية أو طلب ميزة \n- 💁 حل المشكلة البرمجية \n- 🧑‍💻 تطوير تطبيقك الخاص باستخدام AppAPI \n\nنحن متحمسون حقًا لمستقبل مشروع AppAPI و قدرته على تحسين طريقة تطوير التطبيقات داخل نكست كلاود. \n\nبينما نبدأ هذه الرحلة، ندعوكم بحرارة - أيها المطورون والمفكرون والمبدعون وأصحاب الرؤى - للانضمام إلينا في تشكيل مشهد للتطبيقات أكثر تنوعاً واستقراراً وأماناً. \n\n*نُثمِّن عاليّاً أفكارك واقتراحاتك ومساهماتك.*",
     "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud." : "مشروع AppAPI هو مبادرة مثيرة تهدف لتثوير طريقة تطوير التطبيقات في نكست كلاود.",
     "ExApps" : "التطبيقات الخارجية ExApps",
+    "ExApps management similar to default apps and available by the link below." : "إدارة التطبيقات الخارجية مماثلة للتطبيقات الافتراضية و هي متاحة عبر الرابط أدناه.",
     "External Apps management" : "إدارة التطبيقات الخارجية",
     "Deploy Daemons" : "نشر البرامج الخفيّة Daemons",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Deploy Daemon (أو DaemonConfig) هو برنامج خفي لتنسيق التطبيقات الخارجية ExApps.",
@@ -73,11 +75,22 @@ OC.L10N.register(
     "Ok" : "موافق",
     "Are you sure you want delete Deploy Daemon?" : "هل أنت متأكد أنك ترغب في حذف البرنامج الخفي للنشر؟",
     "This action will not remove installed ExApps on this daemon" : "هذا الإجراء لن يؤدي إلى حذف البرامج الخارجية المثبتة على هذا البرنامج الخفي",
+    "\"manual-install\" Deploy Daemon cannot be set as default" : "تطبيق النشر الخارجي \"التثبيت اليدوي\" \"manual-install\" لا يمكن تعيينه كافتراضي",
     "Failed to save admin options. Check the logs" : "تعذّر حفظ خيارات المشرف. راجع سجل الحركات",
     "Default daemon. ExApps will be installed on it" : "البرنامج الخفي التلقائي. سوف يتم تثبيت التطبيقات الخارجية عليه.",
     "Manual install daemon usually used for development. It cannot be set as default daemon." : "البرنامج الخفي للتثبيت اليدوي يُستعمل عادةً في مرحلة التطوير؛ و لا يمكن تعيينه كبرنامج خفي تلقائي.",
+    "Name:" : "الاسم:",
+    "Protocol:" : "البروتوكول:",
+    "Host:" : "المُضِيف:",
     "Deploy config" : "تهيئة النشر",
+    "Docker network:" : "شبكة \"الدوكر\" Docker:",
+    "Nextcloud URL:" : "عنوان url لنكست كلاود:",
     "SSL params" : "بارامترات SSL:",
+    "SSL key:" : "مفتاح SSL: ",
+    "SSL key pass:" : "مفتاح المرور لـ SSL:",
+    "SSL cert:" : "شهادة SSL:",
+    "SSL cert pass:" : "كلمة مرور شهادة SSL:",
+    "GPUs support:" : "دعم لوحات المعالجة الرسومية GPU:",
     "Verify connection" : "تحقّق من الاتصال",
     "Daemon connection successful" : "تمّ الاتصال بنجاحٍ مع البرنامج الخفي",
     "Failed to connect to Daemon. Check the logs" : "تعذّر الاتصال مع البرنامج الخفي",
@@ -99,6 +112,7 @@ OC.L10N.register(
     "Select protocol" : "إختّر البروتوكول",
     "Daemon host" : "مُضِيف البرنامج الخفي",
     "Daemon host (e.g. /var/run/docker.sock, proxy-domain.com:2375)" : "مُضِيف البرنامج الخفي (مثال: /var/run/docker.sock, proxy-domain.com:2375)",
+    "Nextcloud URL" : "رابط الخادم السحابي نكست كلاود",
     "Set daemon as default" : "إختَر البرنامج الخفي كقيمة تلقائية",
     "Set as default daemon" : "عيِّنه كبرنامج خفي تلقائي",
     "Show deploy config" : "أظهِر تهيئة النشر deploy config",
