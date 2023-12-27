@@ -100,5 +100,9 @@ return [
 		['name' => 'OCSUi#setExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'POST'],
 		['name' => 'OCSUi#deleteExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'GET'],
+
+		// Speech-To-Text
+		['name' => 'speechToText#registerProvider', 'url' => '/api/v1/speech_to_text', 'verb' => 'POST'],
+		['name' => 'speechToText#unregisterProvider', 'url' => '/api/v1/speech_to_text', 'verb' => 'DELETE'],
 	],
 ];
