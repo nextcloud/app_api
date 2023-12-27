@@ -25,8 +25,6 @@ class OCSExAppController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSBadRequestException
 	 */
 	#[NoCSRFRequired]
@@ -38,8 +36,6 @@ class OCSExAppController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSNotFoundException
 	 * @throws OCSBadRequestException
 	 */

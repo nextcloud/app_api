@@ -33,9 +33,6 @@ class PreferencesController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -54,10 +51,6 @@ class PreferencesController extends OCSController {
 		throw new OCSBadRequestException('Failed to set user config value');
 	}
 
-	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
@@ -69,9 +62,6 @@ class PreferencesController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSBadRequestException
 	 * @throws OCSNotFoundException
 	 */

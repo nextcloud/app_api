@@ -37,9 +37,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -57,9 +54,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -75,8 +69,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -92,8 +84,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -111,8 +101,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -128,8 +116,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -145,8 +131,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -162,8 +146,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -179,8 +161,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -196,8 +176,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -213,8 +191,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -230,8 +206,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -247,8 +221,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -264,8 +236,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
@@ -281,8 +251,6 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]

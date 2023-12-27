@@ -30,9 +30,6 @@ class DaemonConfigController extends ApiController {
 		parent::__construct(Application::APP_ID, $request);
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
 	#[NoCSRFRequired]
 	public function getAllDaemonConfigs(): Response {
 		$daemonConfigs = $this->daemonConfigService->getRegisteredDaemonConfigs();
@@ -42,9 +39,6 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
 	#[NoCSRFRequired]
 	public function registerDaemonConfig(array $daemonConfigParams, bool $defaultDaemon = false): Response {
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
@@ -57,9 +51,6 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
 	#[NoCSRFRequired]
 	public function updateDaemonConfig(string $name, array $params): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
@@ -72,9 +63,6 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
 	#[NoCSRFRequired]
 	public function unregisterDaemonConfig(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
@@ -89,9 +77,6 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
 	#[NoCSRFRequired]
 	public function verifyDaemonConnection(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);

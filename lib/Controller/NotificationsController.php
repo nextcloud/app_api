@@ -29,10 +29,6 @@ class NotificationsController extends OCSController {
 		$this->request = $request;
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]

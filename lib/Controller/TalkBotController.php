@@ -31,9 +31,6 @@ class TalkBotController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 *
 	 * @param string $name bot display name
 	 * @param string $route ExApp route to post messages
 	 * @param string $description
@@ -55,9 +52,6 @@ class TalkBotController extends OCSController {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 *
 	 * @throws OCSNotFoundException
 	 */
 	#[AppAPIAuth]
