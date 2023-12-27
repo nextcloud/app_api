@@ -78,3 +78,14 @@ AppAPIAuth
 
 AppAPI provides ``AppAPIAuth`` attribute with middleware to validate requests from ExApps.
 In your API controllers you can use it as an PHP attribute.
+
+AppAPI session keys
+^^^^^^^^^^^^^^^^^^^
+
+After successful authentication AppAPI sets `app_api` session key to ``true``.
+
+.. code-block:: php
+
+	$this->session->set('app_api', true);
+
+.. note:: The Nextcloud server checks this session key and disables **CORS protection** and **Two-Factor Auth** for requests coming from ExApps.
