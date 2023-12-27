@@ -109,8 +109,11 @@ class SpeechToTextService {
 		}
 	}
 
+	/**
+	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
+	 */
 	private function getAnonymousExAppProvider(ExAppSpeechToTextProvider $provider, string $class): ?ISpeechToTextProviderWithId {
-		return new class ($this->service, $provider, $this->userId, $class) implements ISpeechToTextProviderWithId {
+		return new class($this->service, $provider, $this->userId, $class) implements ISpeechToTextProviderWithId {
 			public function __construct(
 				private AppAPIService             $service,
 				private ExAppSpeechToTextProvider $sttProvider,

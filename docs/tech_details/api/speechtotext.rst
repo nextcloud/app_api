@@ -14,11 +14,14 @@ Request data
 ************
 
 .. code-block:: json
+
 	{
 		"name": "unique_provider_name",
 		"display_name": "Provider Display Name",
 		"action_handler_route": "/handler_route_on_ex_app",
 	}
+
+
 Response
 ********
 
@@ -33,9 +36,12 @@ Request data
 ************
 
 .. code-block:: json
+
 	{
 		"name": "unique_provider_name",
 	}
+
+
 Response
 ********
 
