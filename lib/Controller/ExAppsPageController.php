@@ -91,9 +91,6 @@ class ExAppsPageController extends Controller {
 		$this->exAppUsersService = $exAppUsersService;
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
 	#[NoCSRFRequired]
 	public function viewApps(): TemplateResponse {
 		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
@@ -265,9 +262,7 @@ class ExAppsPageController extends Controller {
 		return $formattedApps;
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
+	#[NoCSRFRequired]
 	public function listApps(): JSONResponse {
 		$apps = $this->getAppsForCategory('');
 		$appsWithUpdate = $this->getExAppsWithUpdates();
@@ -573,17 +568,11 @@ class ExAppsPageController extends Controller {
 		return true;
 	}
 
-	/**
-	 * @PasswordConfirmationRequired
-	 */
 	#[PasswordConfirmationRequired]
 	public function disableApp(string $appId): JSONResponse {
 		return $this->disableApps([$appId]);
 	}
 
-	/**
-	 * @PasswordConfirmationRequired
-	 */
 	#[PasswordConfirmationRequired]
 	public function disableApps(array $appIds): JSONResponse {
 		try {
@@ -604,11 +593,9 @@ class ExAppsPageController extends Controller {
 	 * Default forced ExApp update process.
 	 * Update approval via password confirmation.
 	 * Scopes approval does not applied in UI for now.
-	 *
-	 * @PasswordConfirmationRequired
-	 * @NoCSRFRequired
 	 */
 	#[PasswordConfirmationRequired]
+	#[NoCSRFRequired]
 	public function updateApp(string $appId): JSONResponse {
 		$appsWithUpdate = $this->getExAppsWithUpdates();
 		$appIdsWithUpdate = array_map(function (array $appWithUpdate) {
@@ -705,8 +692,6 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * Unregister ExApp, remove container and volume by default
-	 *
-	 * @PasswordConfirmationRequired
 	 */
 	#[PasswordConfirmationRequired]
 	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
@@ -730,8 +715,6 @@ class ExAppsPageController extends Controller {
 
 	/**
 	 * Using default force mechanism for ExApps
-	 *
-	 * @PasswordConfirmationRequired
 	 */
 	#[PasswordConfirmationRequired]
 	public function force(string $appId): JSONResponse {

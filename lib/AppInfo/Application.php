@@ -85,11 +85,8 @@ class Application extends App implements IBootstrap {
 	/**
 	 * Register ExApps management navigation entry right after default Apps management link.
 	 *
-	 * @param IUserSession $userSession
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
-	 *
-	 * @return void
 	 */
 	private function registerExAppsManagementNavigation(IUserSession $userSession): void {
 		$container = $this->getContainer();

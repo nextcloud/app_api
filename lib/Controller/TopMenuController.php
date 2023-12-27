@@ -40,9 +40,6 @@ class TopMenuController extends Controller {
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 * @NoAdminRequired
-	 *
 	 * @throws Exception
 	 */
 	#[NoAdminRequired]

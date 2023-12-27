@@ -33,10 +33,6 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -66,11 +62,6 @@ class OCSApiController extends OCSController {
 		}
 	}
 
-	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
-	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
@@ -79,11 +70,7 @@ class OCSApiController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * Get ExApp status, that required during initialization step with progress information
-	 *
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]

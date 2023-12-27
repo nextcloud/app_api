@@ -31,9 +31,6 @@ class AppConfigController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -51,10 +48,6 @@ class AppConfigController extends OCSController {
 		throw new OCSBadRequestException('Error setting app config value');
 	}
 
-	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
@@ -65,9 +58,6 @@ class AppConfigController extends OCSController {
 	}
 
 	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 *
 	 * @throws OCSBadRequestException
 	 * @throws OCSNotFoundException
 	 */
