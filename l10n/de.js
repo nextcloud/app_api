@@ -36,6 +36,7 @@ OC.L10N.register(
     "Ok" : "Ok",
     "Name:" : "Name:",
     "Display name" : "Anzeigename",
+    "Nextcloud URL" : "Nextcloud-URL",
     "Network" : "Netzwerk",
     "Host" : "Host",
     "Register" : "Registrieren",

@@ -35,6 +35,7 @@ OC.L10N.register(
     "Cancel" : "Ακύρωση",
     "Ok" : "ΟΚ",
     "Name:" : "Όνομα:",
+    "Nextcloud URL" : "Διεύθυνση URL του Nextcloud",
     "Network" : "Δίκτυο",
     "Host" : "Διακομιστής",
     "Register" : "Εγγραφή",
