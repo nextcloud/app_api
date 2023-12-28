@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\AppInfo;
 
-use OC\Server;
 use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
