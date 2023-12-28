@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\AppInfo;
 
+use OC\Server;
 use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
@@ -65,7 +66,7 @@ class Application extends App implements IBootstrap {
 		try {
 			/** @var SpeechToTextService $speechToTextService */
 			$speechToTextService = $container->get(SpeechToTextService::class);
-			$speechToTextService->registerExAppSpeechToTextProviders($context);
+			$speechToTextService->registerExAppSpeechToTextProviders($context, $container->getServer());
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 	}

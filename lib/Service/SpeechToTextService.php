@@ -14,6 +14,7 @@ use OCP\DB\Exception;
 use OCP\Files\File;
 use OCP\ICache;
 use OCP\ICacheFactory;
+use OCP\IServerContainer;
 use OCP\SpeechToText\ISpeechToTextProviderWithId;
 use Psr\Log\LoggerInterface;
 
@@ -22,7 +23,6 @@ class SpeechToTextService {
 
 	public function __construct(
 		ICacheFactory $cacheFactory,
-		private readonly AppAPIService $service,
 		private readonly ExAppSpeechToTextProviderMapper $speechToTextProviderMapper,
 		private readonly LoggerInterface $logger,
 		private readonly ?string $userId,
@@ -96,12 +96,12 @@ class SpeechToTextService {
 	 *
 	 * @return void
 	 */
-	public function registerExAppSpeechToTextProviders(IRegistrationContext &$context): void {
+	public function registerExAppSpeechToTextProviders(IRegistrationContext &$context, IServerContainer $serverContainer): void {
 		$exAppsProviders = $this->getSpeechToTextProviders();
 		/** @var ExAppSpeechToTextProvider $exAppProvider */
 		foreach ($exAppsProviders as $exAppProvider) {
-			$class = '\\OCA\\AppAPI\\' . $exAppProvider->getAppid() . '_' . $exAppProvider->getName();
-			$sttProvider = $this->getAnonymousExAppProvider($exAppProvider, $class);
+			$class = '\\OCA\\AppAPI\\' . $exAppProvider->getAppid() . '\\' . $exAppProvider->getName();
+			$sttProvider = $this->getAnonymousExAppProvider($exAppProvider, $serverContainer, $class);
 			$context->registerService($class, function () use ($sttProvider) {
 				return $sttProvider;
 			});
@@ -112,11 +112,12 @@ class SpeechToTextService {
 	/**
 	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
 	 */
-	private function getAnonymousExAppProvider(ExAppSpeechToTextProvider $provider, string $class): ?ISpeechToTextProviderWithId {
-		return new class($this->service, $provider, $this->userId, $class) implements ISpeechToTextProviderWithId {
+	private function getAnonymousExAppProvider(ExAppSpeechToTextProvider $provider, IServerContainer $serverContainer, string $class): ?ISpeechToTextProviderWithId {
+		return new class($provider, $serverContainer, $this->userId, $class) implements ISpeechToTextProviderWithId {
 			public function __construct(
-				private AppAPIService             $service,
 				private ExAppSpeechToTextProvider $sttProvider,
+				// We need this to delay the instantiation of AppAPIService during registration to avoid conflicts
+				private IServerContainer          $serverContainer, // TODO: Extract needed methods from AppAPIService to be able to use it everytime
 				private readonly ?string          $userId,
 				private readonly string           $class,
 			) {
@@ -132,9 +133,10 @@ class SpeechToTextService {
 
 			public function transcribeFile(File $file): string {
 				$route = $this->sttProvider->getActionHandlerRoute();
-				$exApp = $this->service->getExApp($this->sttProvider->getAppid());
+				$service = $this->serverContainer->get(AppAPIService::class);
+				$exApp = $service->getExApp($this->sttProvider->getAppid());
 
-				$response = $this->service->requestToExApp($exApp, $route, $this->userId, 'POST', [
+				$response = $service->requestToExApp($exApp, $route, $this->userId, 'POST', [
 					'fileid' => $file->getId(),
 				]);
 
