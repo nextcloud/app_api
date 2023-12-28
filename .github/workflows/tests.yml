@@ -76,7 +76,7 @@ jobs:
 
       - name: Checkout Notes
         uses: actions/checkout@v4
-        if: ${{ !startsWith(matrix.nextcloud, 'master') }}
+        if: ${{ !startsWith(matrix.server-version, 'master') }}
         with:
           repository: nextcloud/notes
           ref: "main"
@@ -115,7 +115,7 @@ jobs:
           ./occ app:enable --force ${{ env.APP_NAME }}
 
       - name: Enable Notes
-        if: ${{ !startsWith(matrix.nextcloud, 'master') }}
+        if: ${{ !startsWith(matrix.server-version, 'master') }}
         run: ./occ app:enable notes
 
       - name: Run Nextcloud
