@@ -102,7 +102,7 @@ return [
 		['name' => 'OCSUi#getExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'GET'],
 
 		// Speech-To-Text
-		['name' => 'speechToText#registerProvider', 'url' => '/api/v1/provider/speech_to_text', 'verb' => 'POST'],
-		['name' => 'speechToText#unregisterProvider', 'url' => '/api/v1/provider/speech_to_text', 'verb' => 'DELETE'],
+		['name' => 'speechToText#registerProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'POST'],
+		['name' => 'speechToText#unregisterProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'DELETE'],
 	],
 ];

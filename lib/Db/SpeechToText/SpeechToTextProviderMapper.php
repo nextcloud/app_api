@@ -16,7 +16,7 @@ use OCP\IDBConnection;
  */
 class SpeechToTextProviderMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_apps_speech_to_text');
+		parent::__construct($db, 'ex_speech_to_text');
 	}
 
 	/**
@@ -25,13 +25,13 @@ class SpeechToTextProviderMapper extends QBMapper {
 	public function findAllEnabled(): array {
 		$qb = $this->db->getQueryBuilder();
 		$result = $qb->select(
-			'ex_apps_speech_to_text.appid',
-			'ex_apps_speech_to_text.name',
-			'ex_apps_speech_to_text.display_name',
-			'ex_apps_speech_to_text.action_handler',
+			'ex_speech_to_text.appid',
+			'ex_speech_to_text.name',
+			'ex_speech_to_text.display_name',
+			'ex_speech_to_text.action_handler',
 		)
-			->from($this->tableName, 'ex_apps_speech_to_text')
-			->innerJoin('ex_apps_speech_to_text', 'ex_apps', 'exa', 'exa.appid = ex_apps_speech_to_text.appid')
+			->from($this->tableName, 'ex_speech_to_text')
+			->innerJoin('ex_speech_to_text', 'ex_apps', 'exa', 'exa.appid = ex_speech_to_text.appid')
 			->where(
 				$qb->expr()->eq('exa.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT))
 			)

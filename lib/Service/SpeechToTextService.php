@@ -170,16 +170,38 @@ class SpeechToTextService {
 			public function transcribeFile(File $file): string {
 				$route = $this->sttProvider->getActionHandler();
 				$service = $this->serverContainer->get(AppAPIService::class);
-				$exApp = $service->getExApp($this->sttProvider->getAppid());
 
-				$response = $service->requestToExApp($exApp, $route, $this->userId, 'POST', [
-					'fileid' => $file->getId(),
-				]);
-
-				if ($response->getStatusCode() !== Http::STATUS_OK) {
-					throw new \Exception('Failed to transcribe file');
+				try {
+					$fileHandle = $file->fopen('r');
+					$response = $service->requestToExAppById($this->sttProvider->getAppid(),
+						$route,
+						$this->userId,
+						'POST',
+						options: [
+							'multipart' => [
+								'name' => 'data',
+								'contents' => $fileHandle,
+								'filename' => $file->getName(),
+								'headers' => [
+									'Content-Type' => $file->getMimeType(),
+								]
+							],
+						]);
+				} catch (Exception $e) {
+					$this->logger->error(
+						sprintf('Failed to transcribe file: %s with %s:%s. Error: %s',
+							$file->getName(),
+							$this->sttProvider->getAppid(),
+							$this->sttProvider->getName(),
+							$e->getMessage()
+						), ['exception' => $e]
+					);
+					return '';
 				}
 
+				if ($response->getStatusCode() !== Http::STATUS_OK) {
+					throw new \Exception(sprintf('Failed to transcribe file, status: %s.', $response->getStatusCode()));
+				}
 				return $response->getBody();
 			}
 		};
