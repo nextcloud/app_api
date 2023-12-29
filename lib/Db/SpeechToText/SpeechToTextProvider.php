@@ -9,7 +9,7 @@ use OCP\AppFramework\Db\Entity;
 /**
  * Class ExAppSpeechToTextProvider
  *
- * @package OCA\AppAPI\Db
+ * @package OCA\AppAPI\Db\SpeechToText
  *
  * @method string getAppid()
  * @method string getName()

@@ -167,18 +167,22 @@ class SpeechToTextService {
 				return $this->sttProvider->getDisplayName();
 			}
 
-			public function transcribeFile(File $file): string {
+			public function transcribeFile(File $file, float $maxWaitTime=0): string {
 				$route = $this->sttProvider->getActionHandler();
 				$service = $this->serverContainer->get(AppAPIService::class);
 
 				try {
 					$fileHandle = $file->fopen('r');
-					$response = $service->requestToExAppById($this->sttProvider->getAppid(),
-						$route,
-						$this->userId,
-						'POST',
-						options: [
-							'multipart' => [
+				} catch (Exception $e) {
+					throw new \Exception(sprintf('Failed to open file: %s. Error: %s', $file->getName(), $e->getMessage()));
+				}
+				$response = $service->requestToExAppById($this->sttProvider->getAppid(),
+					$route,
+					$this->userId,
+					'POST',
+					options: [
+						'multipart' => [
+							[
 								'name' => 'data',
 								'contents' => $fileHandle,
 								'filename' => $file->getName(),
@@ -186,21 +190,18 @@ class SpeechToTextService {
 									'Content-Type' => $file->getMimeType(),
 								]
 							],
-						]);
-				} catch (Exception $e) {
-					$this->logger->error(
-						sprintf('Failed to transcribe file: %s with %s:%s. Error: %s',
-							$file->getName(),
-							$this->sttProvider->getAppid(),
-							$this->sttProvider->getName(),
-							$e->getMessage()
-						), ['exception' => $e]
-					);
-					return '';
-				}
-
-				if ($response->getStatusCode() !== Http::STATUS_OK) {
-					throw new \Exception(sprintf('Failed to transcribe file, status: %s.', $response->getStatusCode()));
+						],
+						'timeout' => $maxWaitTime,
+					]);
+				if (is_array($response)) {
+					throw new \Exception(sprintf('Failed to transcribe file: %s with %s:%s. Error: %s',
+						$file->getName(),
+						$this->sttProvider->getAppid(),
+						$this->sttProvider->getName(),
+						$response['error']
+					));
+				} else if ($response->getStatusCode() !== Http::STATUS_OK) {
+					throw new \Exception(sprintf('ExApp failed to transcribe file, status: %s.', $response->getStatusCode()));
 				}
 				return $response->getBody();
 			}

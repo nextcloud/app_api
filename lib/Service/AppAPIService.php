@@ -567,7 +567,12 @@ class AppAPIService {
 			$url = self::getExAppUrl(
 				$exApp->getProtocol(),
 				$exApp->getHost(),
-				$exApp->getPort()) . $route;
+				$exApp->getPort());
+			if (str_starts_with($route, '/')) {
+				$url = $url.$route;
+			} else {
+				$url = $url.'/'.$route;
+			}
 
 			if (isset($options['headers']) && is_array($options['headers'])) {
 				$options['headers'] = [...$options['headers'], ...$this->buildAppAPIAuthHeaders($request, $userId, $exApp)];
