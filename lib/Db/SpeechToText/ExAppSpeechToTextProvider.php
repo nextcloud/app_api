@@ -14,25 +14,23 @@ use OCP\AppFramework\Db\Entity;
  * @method string getAppid()
  * @method string getName()
  * @method string getDisplayName()
- * @method string getDescription()
- * @method string getActionHandlerRoute()
+ * @method string getActionHandler()
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
- * @method void setDescription(string $description)
- * @method void setActionHandlerRoute(string $actionHandlerRoute)
+ * @method void setActionHandler(string $actionHandler)
  */
 class ExAppSpeechToTextProvider extends Entity implements \JsonSerializable {
 	protected $appid;
 	protected $name;
 	protected $displayName;
-	protected $actionHandlerRoute;
+	protected $actionHandler;
 
 	public function __construct(array $params = []) {
 		$this->addType('appid', 'string');
 		$this->addType('name', 'string');
 		$this->addType('displayName', 'string');
-		$this->addType('actionHandlerRoute', 'string');
+		$this->addType('actionHandler', 'string');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
@@ -46,8 +44,8 @@ class ExAppSpeechToTextProvider extends Entity implements \JsonSerializable {
 		if (isset($params['display_name'])) {
 			$this->setDisplayName($params['display_name']);
 		}
-		if (isset($params['action_handler_route'])) {
-			$this->setActionHandlerRoute($params['action_handler_route']);
+		if (isset($params['action_handler'])) {
+			$this->setActionHandler($params['action_handler']);
 		}
 	}
 
@@ -57,7 +55,7 @@ class ExAppSpeechToTextProvider extends Entity implements \JsonSerializable {
 			'appid' => $this->getAppid(),
 			'name' => $this->getName(),
 			'display_name' => $this->getDisplayName(),
-			'action_handler_route' => $this->getActionHandlerRoute(),
+			'action_handler' => $this->getActionHandler(),
 		];
 	}
 }

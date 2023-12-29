@@ -8,11 +8,11 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\SpeechToTextService;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
-use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
@@ -29,14 +29,6 @@ class SpeechToTextController extends OCSController {
 		$this->request = $request;
 	}
 
-	/**
-	 * @param string $name
-	 * @param string $displayName
-	 * @param string $actionHandlerRoute
-	 *
-	 * @throws OCSBadRequestException
-	 * @return Response
-	 */
 	#[NoCSRFRequired]
 	#[PublicPage]
 	#[AppAPIAuth]
@@ -45,20 +37,12 @@ class SpeechToTextController extends OCSController {
 		$exApp = $this->service->getExApp($appId);
 
 		$provider = $this->speechToTextService->registerSpeechToTextProvider($exApp, $name, $displayName, $actionHandlerRoute);
-
 		if ($provider === null) {
-			throw new OCSBadRequestException('Failed to register STT provider');
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
 		}
-
 		return new DataResponse();
 	}
 
-	/**
-	 * @param string $name
-	 *
-	 * @throws OCSBadRequestException
-	 * @return Response
-	 */
 	#[NoCSRFRequired]
 	#[PublicPage]
 	#[AppAPIAuth]
@@ -66,11 +50,9 @@ class SpeechToTextController extends OCSController {
 		$appId = $this->request->getHeader('EX-APP-ID');
 		$exApp = $this->service->getExApp($appId);
 		$unregistered = $this->speechToTextService->unregisterSpeechToTextProvider($exApp, $name);
-
 		if ($unregistered === null) {
-			throw new OCSBadRequestException('Failed to unregister STT provider');
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
 		}
-
 		return new DataResponse();
 	}
 }

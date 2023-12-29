@@ -22,8 +22,8 @@ class Version1005Date202312271744 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		if (!$schema->hasTable('ex_apps_speech_to_text')) {
-			$table = $schema->createTable('ex_apps_speech_to_text');
+		if (!$schema->hasTable('ex_speech_to_text')) {
+			$table = $schema->createTable('ex_speech_to_text');
 
 			$table->addColumn('id', Types::BIGINT, [
 				'autoincrement' => true,
@@ -41,14 +41,13 @@ class Version1005Date202312271744 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 64,
 			]);
-			// ExApp route to forward the action
-			$table->addColumn('action_handler_route', Types::STRING, [
+			$table->addColumn('action_handler', Types::STRING, [
 				'notnull' => true,
-				'length' => 64,
+				'length' => 410,
 			]);
 
-			$table->setPrimaryKey(['id'], 'ex_apps_speech_to_text_id');
-			$table->addUniqueIndex(['appid', 'name'], 'speech_to_text_appid_name');
+			$table->setPrimaryKey(['id']);
+			$table->addUniqueIndex(['appid', 'name'], 'speech_to_text__idx');
 		}
 
 		return $schema;
