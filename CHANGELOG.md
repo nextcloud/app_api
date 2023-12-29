@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.5 - 202x-xx-xx]
+
+### Fixed
+
+- Fixed incorrect DeployConfig SSL params parsing. #188 (Thanks to @raudraido)
+
 ## [1.4.4 - 2023-12-21]
 
 ### Added
