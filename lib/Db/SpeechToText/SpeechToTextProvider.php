@@ -20,7 +20,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setDisplayName(string $displayName)
  * @method void setActionHandler(string $actionHandler)
  */
-class ExAppSpeechToTextProvider extends Entity implements \JsonSerializable {
+class SpeechToTextProvider extends Entity implements \JsonSerializable {
 	protected $appid;
 	protected $name;
 	protected $displayName;
