@@ -1,6 +1,8 @@
 OC.L10N.register(
     "app_api",
     {
+    "User documentation" : "Documentación pa usuarios",
+    "Admin documentation" : "Documentación p'alministradores",
     "Developer documentation" : "Documentación pa desendolcadores",
     "Icon" : "Iconu",
     "Name" : "Nome",
