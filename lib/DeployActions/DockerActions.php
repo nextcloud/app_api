@@ -517,13 +517,13 @@ class DockerActions implements IDeployActions {
 		}
 
 		$guzzleParams['verify'] = $certs;
-		if (isset($deployConfig['ssl_key'])) {
-			$guzzleParams['ssl_key'] = !isset($deployConfig['ssl_key_password'])
+		if (!empty($deployConfig['ssl_key'])) {
+			$guzzleParams['ssl_key'] = empty($deployConfig['ssl_key_password'])
 				? $deployConfig['ssl_key']
 				: [$deployConfig['ssl_key'], $deployConfig['ssl_key_password']];
 		}
-		if (isset($deployConfig['ssl_cert'])) {
-			$guzzleParams['cert'] = !isset($deployConfig['ssl_cert_password'])
+		if (!empty($deployConfig['ssl_cert'])) {
+			$guzzleParams['cert'] = empty($deployConfig['ssl_cert_password'])
 				? $deployConfig['ssl_cert']
 				: [$deployConfig['ssl_cert'], $deployConfig['ssl_cert_password']];
 		}

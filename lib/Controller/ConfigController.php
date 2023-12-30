@@ -7,6 +7,7 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IConfig;
 use OCP\IRequest;
@@ -21,11 +22,7 @@ class ConfigController extends Controller {
 		parent::__construct($appName, $request);
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 *
-	 * Set Admin config values
-	 */
+	#[NoCSRFRequired]
 	public function setAdminConfig(array $values): DataResponse {
 		foreach ($values as $key => $value) {
 			$this->config->setAppValue(Application::APP_ID, $key, $value);
