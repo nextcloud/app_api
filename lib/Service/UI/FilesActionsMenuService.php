@@ -91,23 +91,21 @@ class FilesActionsMenuService {
 	/**
 	 * Get list of registered file actions (only for enabled ExApps)
 	 *
-	 * @return FilesActionsMenu[]|null
+	 * @return FilesActionsMenu[]
 	 */
-	public function getRegisteredFileActions(): ?array {
+	public function getRegisteredFileActions(): array {
 		try {
 			$cacheKey = '/ex_ui_files_actions';
-			$cached = $this->cache->get($cacheKey);
-			if ($cached !== null) {
-				return array_map(function ($cacheEntry) {
-					return $cacheEntry instanceof FilesActionsMenu ? $cacheEntry : new FilesActionsMenu($cacheEntry);
-				}, $cached);
+			$records = $this->cache->get($cacheKey);
+			if ($records === null) {
+				$records = $this->mapper->findAllEnabled();
+				$this->cache->set($cacheKey, $records);
 			}
-
-			$fileActions = $this->mapper->findAllEnabled();
-			$this->cache->set($cacheKey, $fileActions);
-			return $fileActions;
+			return array_map(function ($record) {
+				return new FilesActionsMenu($record);
+			}, $records);
 		} catch (Exception) {
-			return null;
+			return [];
 		}
 	}
 
