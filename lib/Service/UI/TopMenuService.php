@@ -142,18 +142,22 @@ class TopMenuService {
 		return $menuEntry;
 	}
 
+	/**
+	 * Get list of registered TopMenu entries (only for enabled ExApps)
+	 *
+	 * @return TopMenu[]
+	 */
 	public function getExAppMenuEntries(): array {
 		try {
 			$cacheKey = '/ex_top_menus';
-			$cached = $this->cache->get($cacheKey);
-			if ($cached !== null) {
-				return array_map(function ($cacheEntry) {
-					return $cacheEntry instanceof TopMenu ? $cacheEntry : new TopMenu($cacheEntry);
-				}, $cached);
+			$records = $this->cache->get($cacheKey);
+			if ($records === null) {
+				$records = $this->mapper->findAllEnabled();
+				$this->cache->set($cacheKey, $records);
 			}
-			$menuEntries = $this->mapper->findAllEnabled();
-			$this->cache->set($cacheKey, $menuEntries);
-			return $menuEntries;
+			return array_map(function ($record) {
+				return new TopMenu($record);
+			}, $records);
 		} catch (Exception) {
 			return [];
 		}
