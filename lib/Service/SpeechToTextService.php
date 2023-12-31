@@ -44,7 +44,7 @@ class SpeechToTextService {
 				'action_handler' => ltrim($actionHandler, '/'),
 			]);
 			if ($speechToTextProvider !== null) {
-				$speechToTextProvider->setId($speechToTextProvider->getId());
+				$newSpeechToTextProvider->setId($speechToTextProvider->getId());
 			}
 			$speechToTextProvider = $this->mapper->insertOrUpdate($newSpeechToTextProvider);
 			$this->cache->set('/ex_speech_to_text_providers_' . $appId . '_' . $name, $speechToTextProvider);
