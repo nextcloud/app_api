@@ -75,7 +75,7 @@ class SpeechToTextService {
 	}
 
 	/**
-	 * Get list of registered file actions (only for enabled ExApps)
+	 * Get list of registered SpeechToText providers (only for enabled ExApps)
 	 *
 	 * @return SpeechToTextProvider[]
 	 */
