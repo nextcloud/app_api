@@ -29,6 +29,7 @@ The following API groups are currently supported:
 * ``33``  WEATHER_STATUS
 * ``50``  TALK
 * ``60``  TALK_BOT
+* ``61``  AI_PROVIDERS
 * ``110`` ACTIVITIES
 * ``120`` NOTES
 

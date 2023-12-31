@@ -45,9 +45,9 @@ class AppAPIService {
 	private IClient $client;
 
 	public function __construct(
-		private readonly LoggerInterface          $logger,
-		private readonly ILogFactory              $logFactory,
-		ICacheFactory                              $cacheFactory,
+		private readonly LoggerInterface         $logger,
+		private readonly ILogFactory             $logFactory,
+		ICacheFactory                            $cacheFactory,
 		private readonly IThrottler              $throttler,
 		private readonly IConfig                 $config,
 		IClientService                           $clientService,
@@ -61,6 +61,7 @@ class AppAPIService {
 		private readonly ScriptsService          $scriptsService,
 		private readonly StylesService           $stylesService,
 		private readonly FilesActionsMenuService $filesActionsMenuService,
+		private readonly SpeechToTextService	 $speechToTextService,
 		private readonly ISecureRandom           $random,
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
@@ -149,6 +150,7 @@ class AppAPIService {
 			$this->initialStateService->deleteExAppInitialStates($appId);
 			$this->scriptsService->deleteExAppScripts($appId);
 			$this->stylesService->deleteExAppStyles($appId);
+			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
 			$this->cache->remove('/exApp_' . $appId);
 			return $exApp;
 		} catch (Exception $e) {
@@ -565,7 +567,12 @@ class AppAPIService {
 			$url = self::getExAppUrl(
 				$exApp->getProtocol(),
 				$exApp->getHost(),
-				$exApp->getPort()) . $route;
+				$exApp->getPort());
+			if (str_starts_with($route, '/')) {
+				$url = $url.$route;
+			} else {
+				$url = $url.'/'.$route;
+			}
 
 			if (isset($options['headers']) && is_array($options['headers'])) {
 				$options['headers'] = [...$options['headers'], ...$this->buildAppAPIAuthHeaders($request, $userId, $exApp)];

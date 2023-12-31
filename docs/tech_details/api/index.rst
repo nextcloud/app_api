@@ -18,4 +18,5 @@ AppAPI Nextcloud APIs
 	topmenu
 	notifications
 	talkbots
+	speechtotext
 	other_ocs
