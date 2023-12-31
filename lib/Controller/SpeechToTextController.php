@@ -36,8 +36,8 @@ class SpeechToTextController extends OCSController {
 		if (version_compare($ncVersion, '29.0', '<')) {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$provider = $this->speechToTextService->registerSpeechToTextProvider($appId, $name, $displayName, $actionHandler);
+		$provider = $this->speechToTextService->registerSpeechToTextProvider(
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler);
 		if ($provider === null) {
 			return new DataResponse([], Http::STATUS_BAD_REQUEST);
 		}
@@ -52,11 +52,27 @@ class SpeechToTextController extends OCSController {
 		if (version_compare($ncVersion, '29.0', '<')) {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$unregistered = $this->speechToTextService->unregisterSpeechToTextProvider($appId, $name);
+		$unregistered = $this->speechToTextService->unregisterSpeechToTextProvider(
+			$this->request->getHeader('EX-APP-ID'), $name);
 		if ($unregistered === null) {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 		return new DataResponse();
+	}
+
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function getProvider(string $name): DataResponse {
+		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
+		if (version_compare($ncVersion, '29.0', '<')) {
+			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
+		}
+		$result = $this->speechToTextService->getExAppSpeechToTextProvider(
+			$this->request->getHeader('EX-APP-ID'), $name);
+		if (!$result) {
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
+		}
+		return new DataResponse($result, Http::STATUS_OK);
 	}
 }

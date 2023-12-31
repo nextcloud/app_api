@@ -10,7 +10,6 @@ use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderMapper;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\AppFramework\Http;
 use OCP\DB\Exception;
 use OCP\Files\File;
 use OCP\ICache;
@@ -83,16 +82,14 @@ class SpeechToTextService {
 	public function getRegisteredSpeechToTextProviders(): array {
 		try {
 			$cacheKey = '/ex_speech_to_text_providers';
-			$cached = $this->cache->get($cacheKey);
-			if ($cached !== null) {
-				return array_map(function ($cacheEntry) {
-					return $cacheEntry instanceof SpeechToTextProvider ? $cacheEntry : new SpeechToTextProvider($cacheEntry);
-				}, $cached);
+			$records = $this->cache->get($cacheKey);
+			if ($records === null) {
+				$records = $this->mapper->findAllEnabled();
+				$this->cache->set($cacheKey, $records);
 			}
-
-			$speechToTextProviders = $this->mapper->findAllEnabled();
-			$this->cache->set($cacheKey, $speechToTextProviders);
-			return $speechToTextProviders;
+			return array_map(function ($record) {
+				return new SpeechToTextProvider($record);
+			}, $records);
 		} catch (Exception) {
 			return [];
 		}
@@ -167,7 +164,7 @@ class SpeechToTextService {
 				return $this->sttProvider->getDisplayName();
 			}
 
-			public function transcribeFile(File $file, float $maxWaitTime=0): string {
+			public function transcribeFile(File $file, float $maxExecutionTime = 0): string {
 				$route = $this->sttProvider->getActionHandler();
 				$service = $this->serverContainer->get(AppAPIService::class);
 
@@ -180,6 +177,7 @@ class SpeechToTextService {
 					$route,
 					$this->userId,
 					'POST',
+					params: ['max_execution_time' => $$maxExecutionTime],
 					options: [
 						'multipart' => [
 							[
@@ -191,7 +189,8 @@ class SpeechToTextService {
 								]
 							],
 						],
-						'timeout' => $maxWaitTime,
+						'query' => ['max_execution_time' => $maxExecutionTime],
+						'timeout' => $maxExecutionTime,
 					]);
 				if (is_array($response)) {
 					throw new \Exception(sprintf('Failed to transcribe file: %s with %s:%s. Error: %s',
@@ -200,8 +199,6 @@ class SpeechToTextService {
 						$this->sttProvider->getName(),
 						$response['error']
 					));
-				} else if ($response->getStatusCode() !== Http::STATUS_OK) {
-					throw new \Exception(sprintf('ExApp failed to transcribe file, status: %s.', $response->getStatusCode()));
 				}
 				return $response->getBody();
 			}
