@@ -96,17 +96,6 @@
       <code>IEventListener</code>
     </MissingTemplateParam>
   </file>
-  <file src="lib/Middleware/AppAPIAuthMiddleware.php">
-    <TypeDoesNotContainType>
-      <code>$exception instanceof AppAPIAuth</code>
-    </TypeDoesNotContainType>
-    <UndefinedMethod>
-      <code>getCode</code>
-      <code>getMessage</code>
-      <code>getMessage</code>
-      <code>getMessage</code>
-    </UndefinedMethod>
-  </file>
   <file src="lib/Profiler/AppAPIDataCollector.php">
     <UndefinedClass>
       <code>Request</code>

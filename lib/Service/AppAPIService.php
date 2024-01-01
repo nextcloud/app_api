@@ -38,7 +38,6 @@ use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
 class AppAPIService {
-	public const BASIC_API_SCOPE = 1;
 	public const CACHE_TTL = 60 * 60; // 1 hour
 
 	private ICache $cache;
@@ -737,21 +736,27 @@ class AppAPIService {
 			} else {
 				$path = '/dav/';
 			}
+
+			$allScopesFlag = (bool)$this->exAppScopesService->getByScope($exApp, ExAppApiScopeService::ALL_API_SCOPE);
 			$apiScope = $this->exAppApiScopeService->getApiScopeByRoute($path);
 
-			if ($apiScope === null) {
-				$this->logger->error(sprintf('Failed to check apiScope %s', $path));
-				return false;
-			}
-			// BASIC ApiScope is granted to all ExApps (all Api routes with BASIC scope group).
-			if ($apiScope->getScopeGroup() !== self::BASIC_API_SCOPE) {
-				if (!$this->exAppScopesService->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
-					$this->logger->error(sprintf('ExApp %s not passed scope group check %s', $exApp->getAppid(), $path));
+			if (!$allScopesFlag) {
+				if ($apiScope === null) {
+					$this->logger->error(sprintf('Failed to check apiScope %s', $path));
 					return false;
 				}
+
+				// BASIC ApiScope is granted to all ExApps (all API routes with BASIC scope group).
+				if ($apiScope->getScopeGroup() !== ExAppApiScopeService::BASIC_API_SCOPE) {
+					if (!$this->exAppScopesService->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
+						$this->logger->error(sprintf('ExApp %s not passed scope group check %s', $exApp->getAppid(), $path));
+						return false;
+					}
+				}
 			}
+
 			// For APIs that not assuming work under user context we do not check ExApp users
-			if ($apiScope->getUserCheck()) {
+			if (($apiScope === null) or ($apiScope->getUserCheck())) {
 				try {
 					if (!$this->exAppUsersService->exAppUserExists($exApp->getAppid(), $userId)) {
 						$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));

@@ -116,8 +116,8 @@ jobs:
           cd ..
           sleep 5s
           php occ app_api:daemon:register manual_install "Manual Install" manual-install 0 0 0
-          php occ app_api:app:register nc_py_api manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\"],\"optional\":[\"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"]},\"protocol\":\"http\",\"system_app\":1}" \
+          php occ app_api:app:register $APP_ID manual_install --json-info \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"NOTIFICATIONS\"],\"optional\":[\"USER_INFO\"]},\"protocol\":\"http\",\"system_app\":1}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
@@ -134,9 +134,9 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
-  no-init-endpoint:
+  auth-tests-no-init:
     runs-on: ubuntu-22.04
-    name: Without Init Endpoint
+    name: Auth tests (no Init endpoint)
 
     services:
       postgres:
@@ -163,13 +163,6 @@ jobs:
           submodules: true
           repository: nextcloud/server
           ref: 'stable27'
-
-      - name: Checkout Notifications
-        uses: actions/checkout@v3
-        with:
-          repository: nextcloud/notifications
-          ref: ${{ matrix.server-version }}
-          path: apps/notifications
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -205,7 +198,6 @@ jobs:
           ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
             --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
             --admin-user admin --admin-pass admin
-          ./occ app:enable notifications
           ./occ app:enable --force ${{ env.APP_NAME }}
 
       - name: Run Nextcloud
@@ -221,17 +213,53 @@ jobs:
         working-directory: nc_py_api
         run: python3 -m pip -v install ".[dev]"
 
-      - name: Register NcPyApi
+      - name: Register App
         run: |
           python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
           echo $! > /tmp/_install.pid
           sleep 5s
           php occ app_api:daemon:register manual_install "Manual Install" manual-install 0 0 0
-          php occ app_api:app:register nc_py_api manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\"],\"optional\":[\"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"]},\"protocol\":\"http\",\"system_app\":1}" \
+          php occ app_api:app:register $APP_ID manual_install --json-info \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"ALL\"],\"optional\":[]},\"protocol\":\"http\",\"system_app\":1}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Check logs
+        run: grep -q 'Hello from ' data/nextcloud.log || error
+
+      - name: Test ALL Scope, System App
+        run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 0
+
+      - name: Re-Register App
+        run: |
+          php occ app_api:app:unregister $APP_ID --silent || true
+          python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
+          echo $! > /tmp/_install.pid
+          sleep 5s
+          php occ app_api:app:register $APP_ID manual_install --json-info \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\"],\"optional\":[]},\"protocol\":\"http\",\"system_app\":1}" \
+            --force-scopes --wait-finish
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Test NO ALL Scope, System App
+        run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 1
+
+      - name: Re-Register App
+        run: |
+          php occ app_api:app:unregister $APP_ID --silent || true
+          python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
+          echo $! > /tmp/_install.pid
+          sleep 5s
+          php occ app_api:app:register $APP_ID manual_install --json-info \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"ALL\"],\"optional\":[]},\"protocol\":\"http\",\"system_app\":0}" \
+            --force-scopes --wait-finish
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Test NO ALL Scope, NO System App
+        run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 2
 
       - name: Upload NC logs
         if: always()
@@ -245,7 +273,7 @@ jobs:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [app-version-higher, no-init-endpoint]
+    needs: [app-version-higher, auth-tests-no-init]
     name: TestsSpecial-OK
     steps:
       - run: echo "Tests special passed successfully"

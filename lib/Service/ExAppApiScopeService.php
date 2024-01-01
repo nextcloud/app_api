@@ -16,6 +16,8 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class ExAppApiScopeService {
+	public const BASIC_API_SCOPE = 1;
+	public const ALL_API_SCOPE = 9999;
 	private ICache $cache;
 
 	public function __construct(
@@ -115,6 +117,9 @@ class ExAppApiScopeService {
 			['api_route' => '/apps/spreed/api/', 'scope_group' => 50, 'name' => 'TALK', 'user_check' => 1],
 			['api_route' => '/apps/activity/api/', 'scope_group' => 110, 'name' => 'ACTIVITIES', 'user_check' => 1],
 			['api_route' => '/apps/notes/api/', 'scope_group' => 120, 'name' => 'NOTES', 'user_check' => 1],
+
+			//ALL Scope
+			['api_route' => 'non-exist-all-api-route', 'scope_group' => self::ALL_API_SCOPE, 'name' => 'ALL', 'user_check' => 1],
 		];
 
 		$this->cache->clear('/all_api_scopes');
