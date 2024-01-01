@@ -56,7 +56,7 @@ On successful unregister response with status code 200 is returned.
 
 
 Get list of supported Text-Processing task types (capabilities)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There are limited number of Task Types that can be used for Text-Processing.
 You can get list of supported Text-Processing task types from OCS capabilities.
