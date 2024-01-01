@@ -177,20 +177,31 @@ class TextProcessingService {
 				return $this->provider->getDisplayName();
 			}
 
-			public function process(string $prompt): string {
+			public function process(string $prompt, float $maxExecutionTime = 0): string {
 				/** @var AppAPIService $service */
 				$service = $this->serverContainer->get(AppAPIService::class);
-				$exApp = $service->getExApp($this->provider->getAppid());
 				$route = $this->provider->getActionHandler();
 
-				$response = $service->requestToExApp($exApp, $route, $this->userId, 'POST', [
-					'prompt' => $prompt,
-				]);
-
-				if ($response->getStatusCode() !== 200) {
-					throw new \Exception('Failed to process prompt');
+				$response = $service->requestToExAppById($this->provider->getAppid(),
+					$route,
+					$this->userId,
+					'POST',
+					params: [
+						'prompt' => $prompt,
+						'max_execution_time' => $maxExecutionTime,
+					],
+					options: [
+						'timeout' => $maxExecutionTime,
+					],
+				);
+				if (is_array($response)) {
+					throw new \Exception(sprintf('Failed process text task: %s:%s:%s. Error: %s',
+						$this->provider->getAppid(),
+						$this->provider->getName(),
+						$this->provider->getTaskType(),
+						$response['error']
+					));
 				}
-
 				return $response->getBody();
 			}
 
