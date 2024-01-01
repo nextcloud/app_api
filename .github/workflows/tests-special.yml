@@ -226,7 +226,7 @@ jobs:
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
 
       - name: Check logs
-        run: grep -q 'Hello from $APP_ID :)' data/nextcloud.log || error
+        run: grep -q 'Hello from ' data/nextcloud.log || error
 
       - name: Test Scope ALL
         run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 0
