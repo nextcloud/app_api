@@ -10,7 +10,6 @@ if __name__ == "__main__":
         nc.ocs("GET", "/ocs/v2.php/core/whatsnew")
     else:
         with pytest.raises(nc_py_api.NextcloudException) as e:
-			nc.ocs("GET", "/ocs/v2.php/core/whatsnew")
+            nc.ocs("GET", "/ocs/v2.php/core/whatsnew")
         assert e.value.status_code == 401
     assert nc.users_list()
-    exit(0)
