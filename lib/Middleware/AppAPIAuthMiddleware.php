@@ -23,12 +23,16 @@ class AppAPIAuthMiddleware extends Middleware {
 
 	public function __construct(
 		private AppAPIService   $service,
-		protected IRequest        $request,
+		protected IRequest      $request,
 		private IL10N           $l,
 		private LoggerInterface $logger,
 	) {
 	}
 
+	/**
+	 * @throws AppAPIAuthNotValidException when a security check fails
+	 * @throws \ReflectionException
+	 */
 	public function beforeController($controller, $methodName) {
 		$reflectionMethod = new ReflectionMethod($controller, $methodName);
 
@@ -42,7 +46,7 @@ class AppAPIAuthMiddleware extends Middleware {
 	}
 
 	/**
-	 * If an AEAuthNotValidException is being caught
+	 * If an AppAPIAuthNotValidException is being caught
 	 *
 	 * @param Controller $controller the controller that is being called
 	 * @param string $methodName the name of the method that will be called on
@@ -52,19 +56,14 @@ class AppAPIAuthMiddleware extends Middleware {
 	 * @throws Exception the passed in exception if it can't handle it
 	 */
 	public function afterException($controller, $methodName, Exception $exception): Response {
-		if ($exception instanceof AppAPIAuth) {
+		if ($exception instanceof AppAPIAuthNotValidException) {
 			$response = new JSONResponse([
 				'message' => $exception->getMessage(),
+				$exception->getCode()
 			]);
-			if (stripos($this->request->getHeader('Accept'), 'html') === false) {
-				$response = new JSONResponse(
-					['message' => $exception->getMessage()],
-					$exception->getCode()
-				);
-			}
-
 			$this->logger->debug($exception->getMessage(), [
 				'exception' => $exception,
+				$exception->getCode()
 			]);
 			return $response;
 		}

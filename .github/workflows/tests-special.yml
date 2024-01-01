@@ -259,7 +259,7 @@ jobs:
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
 
       - name: Test NO ALL Scope, NO System App
-        run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 1
+        run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 2
 
       - name: Upload NC logs
         if: always()
