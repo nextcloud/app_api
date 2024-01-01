@@ -9,6 +9,7 @@ use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppScopesService;
 
+use OCA\AppAPI\Service\TextProcessingService;
 use OCP\App\IAppManager;
 use OCP\Capabilities\ICapability;
 use OCP\IConfig;
@@ -29,6 +30,9 @@ class Capabilities implements ICapability {
 		$capabilities = [
 			'loglevel' => intval($this->config->getSystemValue('loglevel', 2)),
 			'version' => $this->appManager->getAppVersion(Application::APP_ID),
+			'text_processing' => [
+				'task_types' => array_keys(TextProcessingService::TASK_TYPES),
+			]
 		];
 		$this->attachExAppScopes($capabilities);
 		return [
