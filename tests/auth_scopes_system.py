@@ -4,7 +4,7 @@ import nc_py_api
 
 
 if __name__ == "__main__":
-    nc = nc_py_api.NextcloudApp()
+    nc = nc_py_api.NextcloudApp(user="admin")
     assert nc.capabilities
     if int(sys.argv[1]) == 0:
         assert nc.ocs("GET", "/ocs/v2.php/core/whatsnew")

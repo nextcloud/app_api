@@ -119,7 +119,7 @@ class ExAppApiScopeService {
 			['api_route' => '/apps/notes/api/', 'scope_group' => 120, 'name' => 'NOTES', 'user_check' => 1],
 
 			//ALL Scope
-			['api_route' => 'non-exist-all-route-z', 'scope_group' => self::ALL_API_SCOPE, 'name' => 'ALL', 'user_check' => 1],
+			['api_route' => 'non-exist-all-api-route', 'scope_group' => self::ALL_API_SCOPE, 'name' => 'ALL', 'user_check' => 1],
 		];
 
 		$this->cache->clear('/all_api_scopes');
