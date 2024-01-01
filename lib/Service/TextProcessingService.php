@@ -91,7 +91,7 @@ class TextProcessingService {
 				'appid' => $appId,
 				'name' => $name,
 				'display_name' => $displayName,
-				'action_handler' => $actionHandler,
+				'action_handler' => ltrim($actionHandler, '/'),
 				'task_type' => $taskType,
 			]);
 

@@ -68,7 +68,7 @@ class TextProcessingController extends OCSController {
 		);
 
 		if ($unregistered === null) {
-			return new DataResponse([], Http::STATUS_BAD_REQUEST);
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		return new DataResponse();
