@@ -57,4 +57,16 @@ class TextProcessingProviderMapper extends QBMapper {
 			->andWhere($qb->expr()->eq('name', $qb->createNamedParameter($name), IQueryBuilder::PARAM_STR))
 		);
 	}
+
+	/**
+	 * @throws Exception
+	 */
+	public function removeAllByAppId(string $appId): int {
+		$qb = $this->db->getQueryBuilder();
+		$qb->delete($this->tableName)
+			->where(
+				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+			);
+		return $qb->executeStatement();
+	}
 }

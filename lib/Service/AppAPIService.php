@@ -62,6 +62,7 @@ class AppAPIService {
 		private readonly StylesService           $stylesService,
 		private readonly FilesActionsMenuService $filesActionsMenuService,
 		private readonly SpeechToTextService	 $speechToTextService,
+		private readonly TextProcessingService	 $textProcessingService,
 		private readonly ISecureRandom           $random,
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
@@ -151,6 +152,7 @@ class AppAPIService {
 			$this->scriptsService->deleteExAppScripts($appId);
 			$this->stylesService->deleteExAppStyles($appId);
 			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
+			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
 			$this->cache->remove('/exApp_' . $appId);
 			return $exApp;
 		} catch (Exception $e) {

@@ -208,4 +208,15 @@ class TextProcessingService {
 	private function resetCacheEnabled(): void {
 		$this->cache->remove('/ex_text_processing_providers');
 	}
+
+	public function unregisterExAppTextProcessingProviders(string $appId): int {
+		try {
+			$result = $this->mapper->removeAllByAppId($appId);
+		} catch (Exception) {
+			$result = -1;
+		}
+		$this->cache->clear('/ex_text_processing_providers_' . $appId);
+		$this->resetCacheEnabled();
+		return $result;
+	}
 }
