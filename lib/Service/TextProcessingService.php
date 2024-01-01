@@ -119,6 +119,9 @@ class TextProcessingService {
 				return null;
 			}
 			$this->mapper->delete($textProcessingProvider);
+			$this->cache->remove('/ex_text_processing_providers_' . $appId . '_' . $name);
+			$this->resetCacheEnabled();
+			return $textProcessingProvider;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s TextProcessingProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
 			return null;
@@ -150,6 +153,9 @@ class TextProcessingService {
 		}
 	}
 
+	/**
+	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
+	 */
 	private function getAnonymousExAppProvider(
 		TextProcessingProvider $provider,
 		string $className,
