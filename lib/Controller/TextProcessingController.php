@@ -36,7 +36,7 @@ class TextProcessingController extends OCSController {
 		string $name,
 		string $displayName,
 		string $actionHandler,
-		string $actionType
+		string $taskType
 	): DataResponse {
 		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
 		if (version_compare($ncVersion, '29.0', '<')) {
@@ -44,7 +44,7 @@ class TextProcessingController extends OCSController {
 		}
 
 		$provider = $this->textProcessingService->registerTextProcessingProvider(
-			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $actionType,
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $taskType,
 		);
 
 		if ($provider === null) {

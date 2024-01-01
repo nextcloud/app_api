@@ -21,9 +21,8 @@ Request data
 	{
 		"name": "unique_provider_name",
 		"display_name": "Provider Display Name",
-		"description": "Provider Description",
-		"action_handler_route": "/handler_route_on_ex_app",
-		"action_type": "available_action_type_class",
+		"action_handler": "/handler_route_on_ex_app",
+		"task_type": "supported_task_type",
 	}
 
 .. note::
