@@ -4,6 +4,10 @@ Speech-To-Text
 
 AppAPI provides a Speech-To-Text (STT) provider registration API for the ExApps.
 
+.. note::
+
+	Available since Nextcloud 29.
+
 Registering ExApp STT provider (OCS)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

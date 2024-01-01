@@ -165,8 +165,9 @@ class SpeechToTextService {
 			}
 
 			public function transcribeFile(File $file, float $maxExecutionTime = 0): string {
-				$route = $this->sttProvider->getActionHandler();
+				/** @var AppAPIService $service */
 				$service = $this->serverContainer->get(AppAPIService::class);
+				$route = $this->sttProvider->getActionHandler();
 
 				try {
 					$fileHandle = $file->fopen('r');
