@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.4.5 - 202x-xx-xx]
+## [1.4.5 - 2024-01-02]
+
+### Added
+
+- Support for `ALL` API scope, that allows to call anyNextcloud endpoints bypassing API Scope check. #190
 
 ### Fixed
 
 - Fixed incorrect DeployConfig SSL params parsing. #188 (Thanks to @raudraido)
+- Incorrect HTTP status during invalid auth. #190
 
 ## [1.4.4 - 2023-12-21]
 

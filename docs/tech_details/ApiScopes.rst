@@ -20,18 +20,19 @@ but a subsequent version does, you can effortlessly specify the new API groups i
 
 The following API groups are currently supported:
 
-* ``2``   SYSTEM
-* ``10``  FILES
-* ``11``  FILES_SHARING
-* ``30``  USER_INFO
-* ``31``  USER_STATUS
-* ``32``  NOTIFICATIONS
-* ``33``  WEATHER_STATUS
-* ``50``  TALK
-* ``60``  TALK_BOT
-* ``61``  AI_PROVIDERS
-* ``110`` ACTIVITIES
-* ``120`` NOTES
+* ``2``     SYSTEM
+* ``10``    FILES
+* ``11``    FILES_SHARING
+* ``30``    USER_INFO
+* ``31``    USER_STATUS
+* ``32``    NOTIFICATIONS
+* ``33``    WEATHER_STATUS
+* ``50``    TALK
+* ``60``    TALK_BOT
+* ``61``    AI_PROVIDERS
+* ``110``   ACTIVITIES
+* ``120``   NOTES
+* ``9999``  ALL
 
 These groups are identified using names. As time progresses,
 the list will steadily expand, comprehensively encompassing all potential APIs provided by Nextcloud.
