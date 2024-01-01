@@ -14,7 +14,6 @@ use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IServerContainer;
-use OCP\TextProcessing\IProvider;
 use OCP\TextProcessing\IProviderWithId;
 use Psr\Log\LoggerInterface;
 
@@ -160,7 +159,7 @@ class TextProcessingService {
 		TextProcessingProvider $provider,
 		string $className,
 		IServerContainer $serverContainer
-	): IProvider {
+	): IProviderWithId {
 		return new class($provider, $serverContainer, $className, $this->userId) implements IProviderWithId {
 			public function __construct(
 				private readonly TextProcessingProvider $provider,
