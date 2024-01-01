@@ -15,6 +15,7 @@ use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IServerContainer;
 use OCP\TextProcessing\IProviderWithId;
+use OCP\TextProcessing\IProviderWithUserId;
 use Psr\Log\LoggerInterface;
 
 class TextProcessingService {
@@ -160,12 +161,12 @@ class TextProcessingService {
 		string $className,
 		IServerContainer $serverContainer
 	): IProviderWithId {
-		return new class($provider, $serverContainer, $className, $this->userId) implements IProviderWithId {
+		return new class($provider, $serverContainer, $className, $this->userId) implements IProviderWithId, IProviderWithUserId {
 			public function __construct(
 				private readonly TextProcessingProvider $provider,
 				private readonly IServerContainer       $serverContainer,
 				private readonly string                 $className,
-				private readonly ?string                $userId,
+				private ?string                         $userId,
 			) {
 			}
 
@@ -207,6 +208,10 @@ class TextProcessingService {
 
 			public function getTaskType(): string {
 				return TextProcessingService::TASK_TYPES[$this->provider->getTaskType()];
+			}
+
+			public function setUserId(?string $userId): void {
+				$this->userId = $userId;
 			}
 		};
 	}
