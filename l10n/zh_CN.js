@@ -8,7 +8,6 @@ OC.L10N.register(
     "Failed to enable ExApp" : "无法启用外部程序",
     "Failed to disable ExApp" : "无法禁用外部程序",
     "Could not update ExApp" : "无法更新外部程序",
-    "AppAPIAuth authentication failed" : "AppAPIAuth 验证失败",
     "AppAPI ExApp version update notifier" : "AppAPI 外部程序版本更新通知",
     "AppAPI ExApp notifier" : "AppAPI 外部程序通知",
     "AppAPI" : "AppAPI",

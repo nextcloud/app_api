@@ -7,7 +7,6 @@
     "Failed to enable ExApp" : "Dış uygulama etkinleştirilemedi",
     "Failed to disable ExApp" : "Dış uygulama devre dışı bırakılamadı",
     "Could not update ExApp" : "Dış uygulama güncellenemedi",
-    "AppAPIAuth authentication failed" : "AppAPIAuth kimliği doğrulanamadı ",
     "AppAPI ExApp version update notifier" : "AppAPI dış uygulama sürümü güncelleme bildirimi",
     "AppAPI ExApp notifier" : "AppAPI dış uygulama bildirimi",
     "AppAPI" : "AppAPI",

@@ -9,7 +9,6 @@ OC.L10N.register(
     "Failed to enable ExApp" : "تعذّر تمكين تطبيق خارجي ExApp",
     "Failed to disable ExApp" : "تعذّر تعطيل تطبيق خارجي ExApp",
     "Could not update ExApp" : "تعذّر تحديث تطبيق خارجي ExApp",
-    "AppAPIAuth authentication failed" : "فشل تصديق الهُويّة عبر AppAPIAuth",
     "AppAPI ExApp version update notifier" : "المُنبِّه لتحديث إصدار واجهة AppAPI التطبيق الخارجي ExApp",
     "AppAPI ExApp notifier" : "مُنبِّه واجهة AppAPI التطبيق الخارجي ExApp",
     "AppAPI" : "واجهة AppAPO",

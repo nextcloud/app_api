@@ -9,7 +9,6 @@ OC.L10N.register(
     "Failed to enable ExApp" : "Fehler beim Aktivieren von ExApp",
     "Failed to disable ExApp" : "Fehler beim Deaktivieren von ExApp",
     "Could not update ExApp" : "Konnte ExApp nicht aktualisieren.",
-    "AppAPIAuth authentication failed" : "AppAPIAuth-Authentifizierung fehlgeschlagen",
     "AppAPI ExApp version update notifier" : "AppAPI ExApp Version Update Benachrichtigung",
     "AppAPI ExApp notifier" : "AppAPI ExApp Benachrichtigung",
     "AppAPI" : "AppAPI",

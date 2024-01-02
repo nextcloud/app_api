@@ -8,7 +8,6 @@ OC.L10N.register(
     "Failed to enable ExApp" : "Није успело укључивање ExApp",
     "Failed to disable ExApp" : "Није успело искључивање ExApp",
     "Could not update ExApp" : "Није успело ажурирање ExApp",
-    "AppAPIAuth authentication failed" : "Није успела AppAPIAuth провера идентитета",
     "AppAPI ExApp version update notifier" : "AppAPI ExApp обавештавач о ажурираној верзији",
     "AppAPI ExApp notifier" : "AppAPI ExApp обавештавач",
     "AppAPI" : "AppAPI",
