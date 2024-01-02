@@ -106,6 +106,7 @@ class ExAppApiScopeService {
 			['api_route' => '/cloud/capabilities', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => '/cloud/apps', 'scope_group' => 2, 'name' => 'SYSTEM', 'user_check' => 1],
 			['api_route' => '/apps/provisioning_api/api/', 'scope_group' => 2, 'name' => 'SYSTEM', 'user_check' => 1],
+			['api_route' => '/settings/admin/log/', 'scope_group' => 2, 'name' => 'SYSTEM', 'user_check' => 0],
 			['api_route' => '/dav/', 'scope_group' => 10, 'name' => 'FILES', 'user_check' => 1],
 			['api_route' => '/apps/files/ajax/', 'scope_group' => 10, 'name' => 'FILES', 'user_check' => 1],
 			['api_route' => '/apps/files_sharing/api/', 'scope_group' => 11, 'name' => 'FILES_SHARING', 'user_check' => 1],
