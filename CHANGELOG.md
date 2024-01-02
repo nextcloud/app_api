@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Support for `ALL` API scope, that allows to call anyNextcloud endpoints bypassing API Scope check. #190
+- Support for `ALL` APIs scope, that allows to call any Nextcloud endpoints bypassing the API Scope check. #190
 
 ### Fixed
 
