@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.6 - 2024-01-0x]
+
+### Fixed
+
+- TopMenuAPI: support of params in styles/js ExApp URLs. #193 (Thanks to @splitt3r)
+
 ## [1.4.5 - 2024-01-02]
 
 ### Added
