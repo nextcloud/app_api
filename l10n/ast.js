@@ -1,6 +1,7 @@
 OC.L10N.register(
     "app_api",
     {
+    "View in store" : "Ver na tienda",
     "User documentation" : "Documentación pa usuarios",
     "Admin documentation" : "Documentación p'alministradores",
     "Developer documentation" : "Documentación pa desendolcadores",

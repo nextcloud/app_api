@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "External Apps" : "Applications externes",
     "Only docker-install is supported for now" : "Seule l'installation par Docker est actuellement compatible",
+    "Failed to deploy ExApp" : "Échec du déploiement d'ExApp",
+    "AppAPI authentication failed" : "Échec de l'authentification AppAPI",
     "Nextcloud AppAPI" : "AppAPI Nextcloud",
     "Update to {version}" : "Mettre à jour vers {version}",
     "Remove" : "Retirer",

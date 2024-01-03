@@ -9,6 +9,7 @@ OC.L10N.register(
     "Failed to enable ExApp" : "無法啟用 ExApp",
     "Failed to disable ExApp" : "無法停用 ExApp",
     "Could not update ExApp" : "無法更新 ExApp",
+    "AppAPI authentication failed" : "AppAPI 驗證失敗",
     "AppAPI ExApp version update notifier" : "AppAPI ExApp 版本更新通知",
     "AppAPI ExApp notifier" : "AppAPI ExApp 通知器",
     "AppAPI" : "AppAPI",

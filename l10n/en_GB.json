@@ -7,6 +7,7 @@
     "Failed to enable ExApp" : "Failed to enable ExApp",
     "Failed to disable ExApp" : "Failed to disable ExApp",
     "Could not update ExApp" : "Could not update ExApp",
+    "AppAPI authentication failed" : "AppAPI authentication failed",
     "AppAPI ExApp version update notifier" : "AppAPI ExApp version update notifier",
     "AppAPI ExApp notifier" : "AppAPI ExApp notifier",
     "AppAPI" : "AppAPI",
