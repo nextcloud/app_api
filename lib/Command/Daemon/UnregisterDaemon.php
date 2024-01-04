@@ -29,11 +29,6 @@ class UnregisterDaemon extends Command {
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
-			$output->writeln('Daemon config not found.');
-			return 1;
-		}
-
-		if ($this->daemonConfigService->unregisterDaemonConfig($daemonConfig) === null) {
 			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
 			return 1;
 		}
