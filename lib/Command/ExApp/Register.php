@@ -73,7 +73,8 @@ class Register extends Command {
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
 			if (array_key_exists('error', $exAppInfo)) {
-				$output->writeln(sprintf('%sDid application was deployed before registration?', $exAppInfo['error']));
+				$output->writeln($exAppInfo['error']);
+				$output->writeln('Did application was deployed before registration?');
 				return 2;
 			}
 		} elseif ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
@@ -131,6 +132,10 @@ class Register extends Command {
 		$infoXml = null;
 		if ($pathToInfoXml !== null) {
 			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
+			if ($infoXml === false) {
+				$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
+				return 2;
+			}
 		}
 
 		$requestedExAppScopeGroups = $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
