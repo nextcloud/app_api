@@ -154,7 +154,6 @@ class SpeechToTextService {
 				private IServerContainer     $serverContainer, // TODO: Extract needed methods from AppAPIService to be able to use it everytime
 				private readonly string      $class,
 			) {
-				$this->userId = $this->serverContainer->get('userId');
 			}
 
 			public function getId(): string {
@@ -203,6 +202,10 @@ class SpeechToTextService {
 					));
 				}
 				return $response->getBody();
+			}
+
+			public function setUserId(?string $userId): void {
+				$this->userId = $userId;
 			}
 		};
 	}

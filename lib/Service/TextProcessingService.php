@@ -168,7 +168,6 @@ class TextProcessingService {
 				private readonly IServerContainer       $serverContainer,
 				private readonly string                 $className,
 			) {
-				$this->userId = $this->serverContainer->get('userId');
 			}
 
 			public function getId(): string {
