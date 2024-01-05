@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.4.6 - 2024-01-0x]
+## [1.4.6 - 2024-01-05]
 
 ### Fixed
 
 - TopMenuAPI: support of params in styles/js ExApp URLs. #193 (Thanks to @splitt3r)
+- NC28: FileActionsAPI wasn't working without specifying an icon. #198
+- Bug introduced in the previous version, when the `userId` for some part of AppAPI became `null`. #199
 
 ## [1.4.5 - 2024-01-02]
 
