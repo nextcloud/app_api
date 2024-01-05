@@ -25,7 +25,6 @@ class SpeechToTextService {
 		ICacheFactory                               $cacheFactory,
 		private readonly SpeechToTextProviderMapper $mapper,
 		private readonly LoggerInterface            $logger,
-		private readonly ?string                    $userId,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_speech_to_text_providers');
 	}
@@ -146,14 +145,16 @@ class SpeechToTextService {
 	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
 	 */
 	private function getAnonymousExAppProvider(SpeechToTextProvider $provider, IServerContainer $serverContainer, string $class): ?ISpeechToTextProviderWithId {
-		return new class($provider, $serverContainer, $this->userId, $class) implements ISpeechToTextProviderWithId {
+		return new class($provider, $serverContainer, $class) implements ISpeechToTextProviderWithId {
+			private ?string $userId;
+
 			public function __construct(
 				private SpeechToTextProvider $sttProvider,
 				// We need this to delay the instantiation of AppAPIService during registration to avoid conflicts
 				private IServerContainer     $serverContainer, // TODO: Extract needed methods from AppAPIService to be able to use it everytime
-				private readonly ?string     $userId,
 				private readonly string      $class,
 			) {
+				$this->userId = $this->serverContainer->get('userId');
 			}
 
 			public function getId(): string {

@@ -32,7 +32,6 @@ class TextProcessingService {
 	public function __construct(
 		ICacheFactory                                 $cacheFactory,
 		private readonly TextProcessingProviderMapper $mapper,
-		private readonly ?string                      $userId,
 		private readonly LoggerInterface              $logger,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex__text_processing_providers');
@@ -161,13 +160,15 @@ class TextProcessingService {
 		string $className,
 		IServerContainer $serverContainer
 	): IProviderWithId {
-		return new class($provider, $serverContainer, $className, $this->userId) implements IProviderWithId, IProviderWithUserId {
+		return new class($provider, $serverContainer, $className) implements IProviderWithId, IProviderWithUserId {
+			private ?string $userId;
+
 			public function __construct(
 				private readonly TextProcessingProvider $provider,
 				private readonly IServerContainer       $serverContainer,
 				private readonly string                 $className,
-				private ?string                         $userId,
 			) {
+				$this->userId = $this->serverContainer->get('userId');
 			}
 
 			public function getId(): string {
