@@ -70,9 +70,9 @@ class DaemonConfigService {
 	}
 
 	/**
-	 * @return DaemonConfig[]|null
+	 * @return DaemonConfig[]
 	 */
-	public function getRegisteredDaemonConfigs(): ?array {
+	public function getRegisteredDaemonConfigs(): array {
 		try {
 			$cacheKey = '/daemon_configs';
 			$cached = $this->cache->get($cacheKey);
@@ -86,8 +86,8 @@ class DaemonConfigService {
 			$this->cache->set($cacheKey, $daemonConfigs, self::CACHE_TTL);
 			return $daemonConfigs;
 		} catch (Exception $e) {
-			$this->logger->error('Failed to get registered daemon configs. Error: ' . $e->getMessage(), ['exception' => $e]);
-			return null;
+			$this->logger->debug('Failed to get registered daemon configs. Error: ' . $e->getMessage(), ['exception' => $e]);
+			return [];
 		}
 	}
 

@@ -29,11 +29,6 @@ class ListDaemons extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$daemonConfigs = $this->daemonConfigService->getRegisteredDaemonConfigs();
-		if ($daemonConfigs === null) {
-			$output->writeln('<error>Failed to get list of daemons.</error>');
-			return 1;
-		}
-
 		if (count($daemonConfigs) === 0) {
 			$output->writeln('No registered daemon configs.');
 			return 0;
