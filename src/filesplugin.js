@@ -20,7 +20,7 @@ function loadExAppInlineSvgIcon(appId, route) {
 		}
 		return response.data
 	}).catch((error) => {
-		console.error('error', error)
+		console.error('Failed to load ExApp FileAction icon inline svg', error)
 		return null
 	})
 }
@@ -29,7 +29,7 @@ function generateAppAPIProxyUrl(appId, route) {
 	return generateUrl(`/apps/app_api/proxy/${appId}/${route}`)
 }
 
-if (OCA.Files && OCA.Files.fileActions) {
+if (OCA.Files && OCA.Files.fileActions) { // NC 27
 	state.fileActions.forEach(fileAction => {
 		const mimes = fileAction.mime.split(',').map(mime => mime.trim()) // multiple mimes are separated by comma
 		mimes.forEach((mimeType) => {
@@ -78,10 +78,12 @@ if (OCA.Files && OCA.Files.fileActions) {
 			OCA.Files.fileActions.registerAction(action)
 		})
 	})
-} else {
+} else { // NC 28+
 	state.fileActions.forEach(fileAction => {
-		let inlineSvg = loadStaticAppAPIInlineSvgIcon()
-		if (fileAction.icon !== '') {
+		if (fileAction.icon === '') {
+			const inlineSvgIcon = loadStaticAppAPIInlineSvgIcon()
+			registerFileAction28(fileAction, inlineSvgIcon)
+		} else {
 			loadExAppInlineSvgIcon(fileAction.appid, fileAction.icon).then((svg) => {
 				if (svg !== null) {
 					// Set css filter for theming
@@ -89,64 +91,67 @@ if (OCA.Files && OCA.Files.fileActions) {
 					const icon = parser.parseFromString(svg, 'image/svg+xml')
 					icon.documentElement.setAttribute('style', 'filter: var(--background-invert-if-dark);')
 					// Convert back to inline string
-					inlineSvg = icon.documentElement.outerHTML
+					const inlineSvgIcon = icon.documentElement.outerHTML
+					registerFileAction28(fileAction, inlineSvgIcon)
 				}
-			}).finally(() => {
-				const action = new FileAction({
-					id: fileAction.name,
-					displayName: () => fileAction.display_name,
-					iconSvgInline: () => inlineSvg,
-					order: Number(fileAction.order),
-					enabled(files, view) {
-						if (files.length !== 1) {
-							return false
-						}
-
-						// Check for multiple mimes separated by comma
-						let isMimeMatch = false
-						fileAction.mime.split(',').forEach((mime) => {
-							if (files[0].mime.indexOf(mime.trim()) !== -1) {
-								isMimeMatch = true
-							}
-						})
-
-						return isMimeMatch
-					},
-					async exec(node) {
-						const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-						axios.post(exAppFileActionHandler, {
-							fileId: node.fileid,
-							name: node.basename,
-							directory: node.dirname,
-							etag: node.attributes.etag,
-							mime: node.mime,
-							favorite: Boolean(node.attributes.favorite).toString(),
-							permissions: node.permissions,
-							fileType: node.type,
-							size: Number(node.size),
-							mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
-							shareTypes: node.attributes.shareTypes || null,
-							shareAttributes: node.attributes.shareAttributes || null,
-							sharePermissions: node.attributes.sharePermissions || null,
-							shareOwner: node.attributes.ownerDisplayName || null,
-							shareOwnerId: node.attributes.ownerId || null,
-							userId: getCurrentUser().uid,
-							instanceId: state.instanceId,
-						}).then((response) => {
-							if (response.status === 200) {
-								OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
-							} else {
-								OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
-							}
-						}).catch((error) => {
-							console.error('error', error)
-							OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
-						})
-						return null
-					},
-				})
-				registerFileAction(action)
 			})
 		}
 	})
+}
+
+function registerFileAction28(fileAction, inlineSvgIcon) {
+	const action = new FileAction({
+		id: fileAction.name,
+		displayName: () => fileAction.display_name,
+		iconSvgInline: () => inlineSvgIcon,
+		order: Number(fileAction.order),
+		enabled(files, view) {
+			if (files.length !== 1) {
+				return false
+			}
+
+			// Check for multiple mimes separated by comma
+			let isMimeMatch = false
+			fileAction.mime.split(',').forEach((mime) => {
+				if (files[0].mime.indexOf(mime.trim()) !== -1) {
+					isMimeMatch = true
+				}
+			})
+
+			return isMimeMatch
+		},
+		async exec(node) {
+			const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
+			axios.post(exAppFileActionHandler, {
+				fileId: node.fileid,
+				name: node.basename,
+				directory: node.dirname,
+				etag: node.attributes.etag,
+				mime: node.mime,
+				favorite: Boolean(node.attributes.favorite).toString(),
+				permissions: node.permissions,
+				fileType: node.type,
+				size: Number(node.size),
+				mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
+				shareTypes: node.attributes.shareTypes || null,
+				shareAttributes: node.attributes.shareAttributes || null,
+				sharePermissions: node.attributes.sharePermissions || null,
+				shareOwner: node.attributes.ownerDisplayName || null,
+				shareOwnerId: node.attributes.ownerId || null,
+				userId: getCurrentUser().uid,
+				instanceId: state.instanceId,
+			}).then((response) => {
+				if (response.status === 200) {
+					OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
+				} else {
+					OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
+				}
+			}).catch((error) => {
+				console.error('Failed to send FileAction request to ExApp', error)
+				OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
+			})
+			return null
+		},
+	})
+	registerFileAction(action)
 }
