@@ -12,7 +12,7 @@
 						<a href="https://cloud-py-api.github.io/app_api/tech_details/Deployment.html#manual-install-for-development" target="_blank">manual-install</a>
 					</b>
 				</NcNoteCard>
-				<p>{{ t('app_api', 'This is default settings for regular DaemonConfig. You can change it as you wish, more info on that in docs.') }}</p>
+				<p>{{ t('app_api', 'These are the default settings for a regular DaemonConfig. You can change them as you wish; more info on that is in the docs.') }}</p>
 				<form class="daemon-register-form">
 					<div class="external-label">
 						<label for="daemon-name">{{ t('app_api', 'Name') }}</label>
