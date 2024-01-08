@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.7 - 2024-01-xx]
+
+### Added
+
+- Added filesplugin batch actions implementation. #203
+
+
 ## [1.4.6 - 2024-01-05]
 
 ### Fixed
