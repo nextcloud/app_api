@@ -101,7 +101,6 @@
     "Failed to register DaemonConfig. Check the logs" : "تعذّر تسجيل إعداد لبرنامج خفي DaemonConfig. راجع سجل الحركات",
     "Register Deploy Daemon" : "تسجيل برنامج خفي للنشر",
     "Supported daemon accepts-deploy-id:" : "البرنامج الخفي المدعوم accepts-deploy-id \"يَقبَل مُعرِّف النشر\":",
-    "This is default settings for regular DaemonConfig. You can change it as you wish, more info on that in docs." : "هذه هي الإعدادات التلقائية لتهيئة اعتيادية لبرنامج خفي regular DaemonConfig. يمكنك تغييرها متى شئت. المزيد من المعلومات في توثيق النظام.",
     "Unique Deploy Daemon Name" : "الاسم الفريد للبرنامج الخفي للنشر",
     "Display name" : "الاسم المعروض",
     "Accepts deploy ID" : "يَقبَل مُعرِّف النشر deploy ID",

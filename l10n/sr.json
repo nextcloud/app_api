@@ -88,7 +88,6 @@
     "Failed to register DaemonConfig. Check the logs" : "Није успело регистровање DaemonConfig. Погледајте дневнике",
     "Register Deploy Daemon" : "Региструје Даемон за постављање",
     "Supported daemon accepts-deploy-id:" : "Подржани даемон accepts-deploy-id:",
-    "This is default settings for regular DaemonConfig. You can change it as you wish, more info on that in docs." : "Ово су подразумевана подешавања за обичну DaemonConfig. Ако желите, можете да је промените, више о томе се налази у документацији.",
     "Unique Deploy Daemon Name" : "Јединствено име Даемона за постављање",
     "Display name" : "Име за приказ",
     "Accepts deploy ID" : "Прихвата ID постављања",

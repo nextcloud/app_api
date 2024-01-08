@@ -86,7 +86,6 @@
     "Failed to register DaemonConfig. Check the logs" : "Falha ao registrar o DaemonConfig. Verifique os logs.",
     "Register Deploy Daemon" : "Registrar Daemon de Deploy",
     "Supported daemon accepts-deploy-id:" : "accepts-deploy-id suportados pelo Daemon:",
-    "This is default settings for regular DaemonConfig. You can change it as you wish, more info on that in docs." : "Esta é a configuração padrão para o DaemonConfig regular. Você pode alterá-la como desejar, mais informações sobre isso na documentação.",
     "Unique Deploy Daemon Name" : "Nome exclusivo do Daemon de Deploy",
     "Display name" : "Nome de exibição",
     "Accepts deploy ID" : "Aceita ID de deploy",

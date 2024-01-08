@@ -101,7 +101,6 @@
     "Failed to register DaemonConfig. Check the logs" : "註冊 DaemonConfig 失敗。請檢查紀錄檔",
     "Register Deploy Daemon" : "註冊部署幕後程式",
     "Supported daemon accepts-deploy-id:" : "支援的幕後程式 accepts-deploy-id：",
-    "This is default settings for regular DaemonConfig. You can change it as you wish, more info on that in docs." : "這是一般 DaemonConfig 的預設設定。您可以根據需求更改它，更多資訊請參閱文件。",
     "Unique Deploy Daemon Name" : "獨一無二的部署幕後程式名稱",
     "Display name" : "顯示名稱",
     "Accepts deploy ID" : "接受部署 ID",
