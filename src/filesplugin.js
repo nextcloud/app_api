@@ -106,23 +106,32 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 		iconSvgInline: () => inlineSvgIcon,
 		order: Number(fileAction.order),
 		enabled(files, view) {
-			if (files.length !== 1) {
-				return false
+			if (files.length === 1) {
+				// Check for multiple mimes separated by comma
+				let isMimeMatch = false
+				fileAction.mime.split(',').forEach((mime) => {
+					if (files[0].mime.indexOf(mime.trim()) !== -1) {
+						isMimeMatch = true
+					}
+				})
+				return isMimeMatch
+			} else if (files.length > 1) {
+				// Check all files match fileAction mime
+				return files.every((file) => {
+					// Check for multiple mimes separated by comma
+					let isMimeMatch = false
+					fileAction.mime.split(',').forEach((mime) => {
+						if (file.mime.indexOf(mime.trim()) !== -1) {
+							isMimeMatch = true
+						}
+					})
+					return isMimeMatch
+				})
 			}
-
-			// Check for multiple mimes separated by comma
-			let isMimeMatch = false
-			fileAction.mime.split(',').forEach((mime) => {
-				if (files[0].mime.indexOf(mime.trim()) !== -1) {
-					isMimeMatch = true
-				}
-			})
-
-			return isMimeMatch
 		},
-		async exec(node) {
+		async exec(node, view, dir) {
 			const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-			axios.post(exAppFileActionHandler, {
+			return axios.post(exAppFileActionHandler, {
 				fileId: node.fileid,
 				name: node.basename,
 				directory: node.dirname,
@@ -141,16 +150,16 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 				userId: getCurrentUser().uid,
 				instanceId: state.instanceId,
 			}).then((response) => {
-				if (response.status === 200) {
-					OC.dialogs.info(t('app_api', 'Action request sent to ExApp'), t(fileAction.appid, fileAction.display_name))
-				} else {
-					OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
-				}
+				return true
 			}).catch((error) => {
 				console.error('Failed to send FileAction request to ExApp', error)
-				OC.dialogs.info(t('app_api', 'Error while sending File action request to ExApp'), t(fileAction.appid, fileAction.display_name))
+				return false
 			})
-			return null
+		},
+		async execBatch(nodes, view, dir) {
+			return Promise.all(nodes.map((node) => {
+				return this.exec(node, view, dir)
+			}))
 		},
 	})
 	registerFileAction(action)
