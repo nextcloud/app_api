@@ -28,13 +28,14 @@ class GetValueListener implements IEventListener {
 		}
 
 		// TODO: Get list of ExApps that have registered declarative settings
-		if ($event->getApp() !== Application::APP_ID) {
+		if ($event->getApp() !== Application::APP_ID && $event->getApp() !== Application::APP_ID . '_dup') {
 			return;
 		}
 
 		try {
 			foreach ($this->form->getSchema()['fields'] as $field) {
-				if (isset($field['default'])) {
+				if (isset($field['default']) && $field['id'] === $event->getFieldId()
+					|| isset($field['default']) && $field['id'] . '_dup' === $event->getFieldId()) {
 					if (is_array($field['default']) || is_numeric($field['default'])) {
 						$default = json_encode($field['default']);
 					} else {
@@ -43,7 +44,7 @@ class GetValueListener implements IEventListener {
 				}
 			}
 			$value = $this->config->getUserValue($event->getUser()->getUID(), $event->getApp(), $event->getFieldId(), $default ?? null);
-			$event->setValue($value ?? null);
+			$event->setValue($value);
 		} catch (Exception) {
 		}
 	}

@@ -8,7 +8,6 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\DeclarativeSettings\DeclarativeSettingsForm;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\IConfig;
 use OCP\Settings\RegisterDeclarativeSettingsFormEvent;
 use Psr\Log\LoggerInterface;
 
@@ -17,7 +16,6 @@ use Psr\Log\LoggerInterface;
  */
 class RegisterDeclarativeSettingsListener implements IEventListener {
 	public function __construct(
-		private readonly IConfig $config,
 		private readonly DeclarativeSettingsForm $form,
 		private readonly LoggerInterface $logger,
 	) {
