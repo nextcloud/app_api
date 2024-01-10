@@ -148,7 +148,7 @@ export default {
 			return this.apps.filter(app => app.update).length > 0
 		},
 		showUpdateAll() {
-			return this.hasPendingUpdate && this.useListView
+			return this.hasPendingUpdate && this.useListView && !this.apps.every(app => app?.daemon?.accepts_deploy_id !== 'manual_install')
 		},
 		apps() {
 			const apps = this.$store.getters.getAllApps
@@ -219,7 +219,7 @@ export default {
 		updateAll() {
 			const limit = pLimit(1)
 			this.apps
-				.filter(app => app.update)
+				.filter(app => app.update && app.daemon.accepts_deploy_id !== 'manual_install')
 				.map(app => limit(() => this.$store.dispatch('updateApp', { appId: app.id })),
 				)
 		},
