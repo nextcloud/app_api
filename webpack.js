@@ -22,6 +22,7 @@ webpackConfig.entry = {
 	main: { import: path.join(__dirname, 'src', 'main.js'), filename: appId + '-main.js' },
 	adminSettings: { import: path.join(__dirname, 'src', 'adminSettings.js'), filename: appId + '-adminSettings.js' },
 	filesplugin: { import: path.join(__dirname, 'src', 'filesplugin.js'), filename: appId + '-filesplugin.js' },
+	filesplugin28: { import: path.join(__dirname, 'src', 'filesplugin28.js'), filename: appId + '-filesplugin28.js' },
 }
 
 webpackConfig.plugins.push(
