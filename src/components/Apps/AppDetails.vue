@@ -6,7 +6,8 @@
 					class="update primary"
 					type="button"
 					:value="t('settings', 'Update to {version}', { version: app.update })"
-					:disabled="installing || isLoading"
+					:disabled="installing || isLoading || isManualInstall"
+					:title="updateButtonText"
 					@click="update(app.id)">
 				<input v-if="app.canUnInstall"
 					class="uninstall"
