@@ -12,6 +12,15 @@ export default {
 		isInitializing() {
 			return this.app && Object.hasOwn(this.app?.status, 'progress') && this.app.status.progress < 100
 		},
+		isManualInstall() {
+			return this.app?.daemon?.accepts_deploy_id === 'manual-install'
+		},
+		updateButtonText() {
+			if (this.app?.daemon?.accepts_deploy_id === 'manual-install') {
+				return t('app_api', 'manual-install apps cannot be updated')
+			}
+			return ''
+		},
 		enableButtonText() {
 			if (this.app && Object.hasOwn(this.app?.status, 'progress')) {
 				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.progress })
