@@ -6,13 +6,17 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
 use OCA\AppAPI\Service\TextProcessingService;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCSController;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
 
@@ -20,9 +24,10 @@ class TextProcessingController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                               $request,
-		private readonly IConfig               $config,
-		private readonly TextProcessingService $textProcessingService,
+		IRequest                               			   $request,
+		private readonly IConfig               			   $config,
+		private readonly TextProcessingService			   $textProcessingService,
+		private readonly TextProcessingProviderQueueMapper $mapper,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -89,5 +94,31 @@ class TextProcessingController extends OCSController {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 		return new DataResponse($result, Http::STATUS_OK);
+	}
+
+	#[NoCSRFRequired]
+	#[PublicPage]
+	#[AppAPIAuth]
+	public function reportResult(int $taskId, string $result, string $error = ""): DataResponse {
+		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
+		if (version_compare($ncVersion, '29.0', '<')) {
+			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
+		}
+		try {
+			$taskResult = $this->mapper->getById($taskId);
+		} catch (DoesNotExistException) {
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
+		} catch (MultipleObjectsReturnedException | Exception) {
+			return new DataResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+		$taskResult->setResult($result);
+		$taskResult->setError($error);
+		$taskResult->setFinished(1);
+		try {
+			$this->mapper->update($taskResult);
+		} catch (Exception) {
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
+		}
+		return new DataResponse([], Http::STATUS_OK);
 	}
 }
