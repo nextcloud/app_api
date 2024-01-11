@@ -191,7 +191,6 @@ class TextProcessingService {
 				$response = $service->requestToExAppById($this->provider->getAppid(),
 					$route,
 					$this->userId,
-					'GET',
 					params: [
 						'prompt' => $prompt,
 						'task_id' => $taskId,
