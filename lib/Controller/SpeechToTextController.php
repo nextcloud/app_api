@@ -6,12 +6,16 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
-use OCA\AppAPI\Service\SpeechToTextService;
+use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueueMapper;
+use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
 
@@ -22,6 +26,7 @@ class SpeechToTextController extends OCSController {
 		IRequest $request,
 		private readonly SpeechToTextService $speechToTextService,
 		private readonly IConfig             $config,
+		private readonly SpeechToTextProviderQueueMapper $mapper,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -74,5 +79,31 @@ class SpeechToTextController extends OCSController {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 		return new DataResponse($result, Http::STATUS_OK);
+	}
+
+	#[NoCSRFRequired]
+	#[PublicPage]
+	#[AppAPIAuth]
+	public function reportResult(int $taskId, string $result, string $error = ""): DataResponse {
+		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
+		if (version_compare($ncVersion, '29.0', '<')) {
+			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
+		}
+		try {
+			$taskResult = $this->mapper->getById($taskId);
+		} catch (DoesNotExistException) {
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
+		} catch (MultipleObjectsReturnedException | Exception) {
+			return new DataResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+		$taskResult->setResult($result);
+		$taskResult->setError($error);
+		$taskResult->setFinished(1);
+		try {
+			$this->mapper->update($taskResult);
+		} catch (Exception) {
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
+		}
+		return new DataResponse([], Http::STATUS_OK);
 	}
 }

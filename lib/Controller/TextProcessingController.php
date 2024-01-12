@@ -7,7 +7,7 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
-use OCA\AppAPI\Service\TextProcessingService;
+use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;

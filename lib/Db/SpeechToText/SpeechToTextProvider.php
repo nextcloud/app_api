@@ -7,7 +7,7 @@ namespace OCA\AppAPI\Db\SpeechToText;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Class ExAppSpeechToTextProvider
+ * Class SpeechToTextProvider
  *
  * @package OCA\AppAPI\Db\SpeechToText
  *

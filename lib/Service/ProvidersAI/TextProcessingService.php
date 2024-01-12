@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\ProvidersAI;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProvider;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderMapper;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueue;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
+use OCA\AppAPI\Service\AppAPIService;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;

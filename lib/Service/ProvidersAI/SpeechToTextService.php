@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\ProvidersAI;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProvider;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderMapper;
+use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueue;
+use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueueMapper;
+use OCA\AppAPI\Service\AppAPIService;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -149,11 +152,12 @@ class SpeechToTextService {
 			private ?string $userId;
 
 			public function __construct(
-				private SpeechToTextProvider $sttProvider,
+				private SpeechToTextProvider $provider,
 				// We need this to delay the instantiation of AppAPIService during registration to avoid conflicts
 				private IServerContainer     $serverContainer, // TODO: Extract needed methods from AppAPIService to be able to use it everytime
 				private readonly string      $class,
 			) {
+				$this->userId = null;
 			}
 
 			public function getId(): string {
@@ -161,24 +165,25 @@ class SpeechToTextService {
 			}
 
 			public function getName(): string {
-				return $this->sttProvider->getDisplayName();
+				return $this->provider->getDisplayName();
 			}
 
 			public function transcribeFile(File $file, float $maxExecutionTime = 0): string {
 				/** @var AppAPIService $service */
 				$service = $this->serverContainer->get(AppAPIService::class);
-				$route = $this->sttProvider->getActionHandler();
+				$mapper = $this->serverContainer->get(SpeechToTextProviderQueueMapper::class);
+				$route = $this->provider->getActionHandler();
+				$queueRecord = $mapper->insert(new SpeechToTextProviderQueue(['created_time' => time()]));
+				$taskId = $queueRecord->getId();
 
 				try {
 					$fileHandle = $file->fopen('r');
 				} catch (Exception $e) {
 					throw new \Exception(sprintf('Failed to open file: %s. Error: %s', $file->getName(), $e->getMessage()));
 				}
-				$response = $service->requestToExAppById($this->sttProvider->getAppid(),
+				$response = $service->requestToExAppById($this->provider->getAppid(),
 					$route,
 					$this->userId,
-					'POST',
-					params: ['max_execution_time' => $$maxExecutionTime],
 					options: [
 						'multipart' => [
 							[
@@ -190,18 +195,33 @@ class SpeechToTextService {
 								]
 							],
 						],
-						'query' => ['max_execution_time' => $maxExecutionTime],
+						'query' => ['max_execution_time' => $maxExecutionTime, 'task_id' => $taskId],
 						'timeout' => $maxExecutionTime,
 					]);
 				if (is_array($response)) {
-					throw new \Exception(sprintf('Failed to transcribe file: %s with %s:%s. Error: %s',
+					$mapper->delete($mapper->getById($taskId));
+					throw new \Exception(sprintf('Failed to process transcribe task: %s with %s:%s. Error: %s',
 						$file->getName(),
-						$this->sttProvider->getAppid(),
-						$this->sttProvider->getName(),
+						$this->provider->getAppid(),
+						$this->provider->getName(),
 						$response['error']
 					));
 				}
-				return $response->getBody();
+
+				do {
+					$taskResults = $mapper->getById($taskId);
+					usleep(300000); // 0.3s
+				} while ($taskResults->getFinished() === 0);
+
+				$mapper->delete($taskResults);
+				if (!empty($taskResults->getError())) {
+					throw new \Exception(sprintf('Transcribe task returned error: %s:%s. Error: %s',
+						$this->provider->getAppid(),
+						$this->provider->getName(),
+						$taskResults->getError(),
+					));
+				}
+				return $taskResults->getResult();
 			}
 
 			public function setUserId(?string $userId): void {

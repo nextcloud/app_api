@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\BackgroundJob;
 
+use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueueMapper;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJob;
@@ -17,6 +18,7 @@ class ProvidersAICleanUpJob extends TimedJob {
 	public function __construct(
 		ITimeFactory $time,
 		private readonly TextProcessingProviderQueueMapper $mapperTextProcessing,
+		private readonly SpeechToTextProviderQueueMapper   $mapperSpeechToText,
 	) {
 		parent::__construct($time);
 
@@ -29,6 +31,7 @@ class ProvidersAICleanUpJob extends TimedJob {
 		// This is reinsurance job, if everything is without errors, then each provider cleans up the garbage itself.
 		try {
 			$this->mapperTextProcessing->removeAllOlderThenThat(self::overdueTime);
+			$this->mapperSpeechToText->removeAllOlderThenThat(self::overdueTime);
 		} catch (Exception) {
 		}
 	}
