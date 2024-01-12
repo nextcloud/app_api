@@ -15,6 +15,7 @@ use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
+use OCA\AppAPI\Service\ProvidersAI\MachineTranslationService;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
 use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
 use OCA\AppAPI\Service\UI\TopMenuService;
@@ -71,6 +72,10 @@ class Application extends App implements IBootstrap {
 			/** @var TextProcessingService $textProcessingService */
 			$textProcessingService = $container->get(TextProcessingService::class);
 			$textProcessingService->registerExAppTextProcessingProviders($context, $container->getServer());
+
+			/** @var MachineTranslationService $machineTranslationService */
+			$machineTranslationService = $container->get(MachineTranslationService::class);
+			$machineTranslationService->registerExAppMachineTranslationProviders($context, $container->getServer());
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 	}
