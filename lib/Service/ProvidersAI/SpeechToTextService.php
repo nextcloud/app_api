@@ -15,11 +15,9 @@ use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\Files\File;
-use OCP\Files\NotPermittedException;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IServerContainer;
-use OCP\Lock\LockedException;
 use OCP\SpeechToText\ISpeechToTextProviderWithId;
 use Psr\Log\LoggerInterface;
 
@@ -154,11 +152,12 @@ class SpeechToTextService {
 			private ?string $userId;
 
 			public function __construct(
-				private SpeechToTextProvider $sttProvider,
+				private SpeechToTextProvider $provider,
 				// We need this to delay the instantiation of AppAPIService during registration to avoid conflicts
 				private IServerContainer     $serverContainer, // TODO: Extract needed methods from AppAPIService to be able to use it everytime
 				private readonly string      $class,
 			) {
+				$this->userId = null;
 			}
 
 			public function getId(): string {
@@ -166,26 +165,25 @@ class SpeechToTextService {
 			}
 
 			public function getName(): string {
-				return $this->sttProvider->getDisplayName();
+				return $this->provider->getDisplayName();
 			}
 
 			public function transcribeFile(File $file, float $maxExecutionTime = 0): string {
 				/** @var AppAPIService $service */
 				$service = $this->serverContainer->get(AppAPIService::class);
 				$mapper = $this->serverContainer->get(SpeechToTextProviderQueueMapper::class);
-				$route = $this->sttProvider->getActionHandler();
+				$route = $this->provider->getActionHandler();
 				$queueRecord = $mapper->insert(new SpeechToTextProviderQueue(['created_time' => time()]));
 				$taskId = $queueRecord->getId();
 
 				try {
 					$fileHandle = $file->fopen('r');
-				} catch (NotPermittedException | LockedException $e) {
+				} catch (Exception $e) {
 					throw new \Exception(sprintf('Failed to open file: %s. Error: %s', $file->getName(), $e->getMessage()));
 				}
-				$response = $service->requestToExAppById($this->sttProvider->getAppid(),
+				$response = $service->requestToExAppById($this->provider->getAppid(),
 					$route,
 					$this->userId,
-					params: ['max_execution_time' => $$maxExecutionTime],
 					options: [
 						'multipart' => [
 							[
@@ -204,8 +202,8 @@ class SpeechToTextService {
 					$mapper->delete($mapper->getById($taskId));
 					throw new \Exception(sprintf('Failed to process transcribe task: %s with %s:%s. Error: %s',
 						$file->getName(),
-						$this->sttProvider->getAppid(),
-						$this->sttProvider->getName(),
+						$this->provider->getAppid(),
+						$this->provider->getName(),
 						$response['error']
 					));
 				}
