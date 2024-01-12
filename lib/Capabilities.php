@@ -8,8 +8,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppScopesService;
-
-use OCA\AppAPI\Service\TextProcessingService;
+use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
 use OCP\App\IAppManager;
 use OCP\Capabilities\ICapability;
 use OCP\IConfig;

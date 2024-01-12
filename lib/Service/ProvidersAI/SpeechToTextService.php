@@ -2,19 +2,24 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\ProvidersAI;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProvider;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderMapper;
+use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueue;
+use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueueMapper;
+use OCA\AppAPI\Service\AppAPIService;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\Files\File;
+use OCP\Files\NotPermittedException;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IServerContainer;
+use OCP\Lock\LockedException;
 use OCP\SpeechToText\ISpeechToTextProviderWithId;
 use Psr\Log\LoggerInterface;
 
@@ -167,17 +172,19 @@ class SpeechToTextService {
 			public function transcribeFile(File $file, float $maxExecutionTime = 0): string {
 				/** @var AppAPIService $service */
 				$service = $this->serverContainer->get(AppAPIService::class);
+				$mapper = $this->serverContainer->get(SpeechToTextProviderQueueMapper::class);
 				$route = $this->sttProvider->getActionHandler();
+				$queueRecord = $mapper->insert(new SpeechToTextProviderQueue(['created_time' => time()]));
+				$taskId = $queueRecord->getId();
 
 				try {
 					$fileHandle = $file->fopen('r');
-				} catch (Exception $e) {
+				} catch (NotPermittedException | LockedException $e) {
 					throw new \Exception(sprintf('Failed to open file: %s. Error: %s', $file->getName(), $e->getMessage()));
 				}
 				$response = $service->requestToExAppById($this->sttProvider->getAppid(),
 					$route,
 					$this->userId,
-					'POST',
 					params: ['max_execution_time' => $$maxExecutionTime],
 					options: [
 						'multipart' => [
@@ -190,18 +197,33 @@ class SpeechToTextService {
 								]
 							],
 						],
-						'query' => ['max_execution_time' => $maxExecutionTime],
+						'query' => ['max_execution_time' => $maxExecutionTime, 'task_id' => $taskId],
 						'timeout' => $maxExecutionTime,
 					]);
 				if (is_array($response)) {
-					throw new \Exception(sprintf('Failed to transcribe file: %s with %s:%s. Error: %s',
+					$mapper->delete($mapper->getById($taskId));
+					throw new \Exception(sprintf('Failed to process transcribe task: %s with %s:%s. Error: %s',
 						$file->getName(),
 						$this->sttProvider->getAppid(),
 						$this->sttProvider->getName(),
 						$response['error']
 					));
 				}
-				return $response->getBody();
+
+				do {
+					$taskResults = $mapper->getById($taskId);
+					usleep(300000); // 0.3s
+				} while ($taskResults->getFinished() === 0);
+
+				$mapper->delete($taskResults);
+				if (!empty($taskResults->getError())) {
+					throw new \Exception(sprintf('Transcribe task returned error: %s:%s. Error: %s',
+						$this->provider->getAppid(),
+						$this->provider->getName(),
+						$taskResults->getError(),
+					));
+				}
+				return $taskResults->getResult();
 			}
 
 			public function setUserId(?string $userId): void {

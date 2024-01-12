@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Db\TextProcessing;
+namespace OCA\AppAPI\Db\SpeechToText;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -12,11 +12,11 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<TextProcessingProviderQueue>
+ * @template-extends QBMapper<SpeechToTextProviderQueue>
  */
-class TextProcessingProviderQueueMapper extends QBMapper {
+class SpeechToTextProviderQueueMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
-		parent::__construct($db, 'ex_text_processing_q');
+		parent::__construct($db, 'ex_speech_to_text_q');
 	}
 
 	/**
@@ -26,9 +26,9 @@ class TextProcessingProviderQueueMapper extends QBMapper {
 	 * @throws MultipleObjectsReturnedException if more than one result
 	 * @throws Exception
 	 *
-	 * @return TextProcessingProviderQueue
+	 * @return SpeechToTextProviderQueue
 	 */
-	public function getById(int $id): TextProcessingProviderQueue {
+	public function getById(int $id): SpeechToTextProviderQueue {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)

@@ -105,6 +105,7 @@ return [
 		['name' => 'speechToText#registerProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'POST'],
 		['name' => 'speechToText#unregisterProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'DELETE'],
 		['name' => 'speechToText#getProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'GET'],
+		['name' => 'speechToText#reportResult', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'PUT'],
 
 		// Text-Processing
 		['name' => 'textProcessing#registerProvider', 'url' => '/api/v1/ai_provider/text_processing', 'verb' => 'POST'],
