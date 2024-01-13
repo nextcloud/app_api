@@ -140,6 +140,7 @@ OC.L10N.register(
     "Supported apps" : "التطبيقات المدعومة",
     "Action request sent to ExApp" : "طلب بالإجراء تمّ إرساله إلى التطبيق الخارجي ExApp",
     "Error while sending File action request to ExApp" : "حدث خطأ أثناء إرسال إجراء على الملفات إلى التطبيق الخارجي ExApp",
+    "manual-install apps cannot be updated" : "التطبيقات المثبية يدويّاً لا يمكن تحديثها",
     "{progress}% Initializing" : "{progress}% تحت التحضير",
     "Deploy and Enable" : "قُم بالنشر و التمكين",
     "Enable" : "تمكين",

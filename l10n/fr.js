@@ -81,6 +81,7 @@ OC.L10N.register(
     "Updates" : "Mises à jour",
     "Featured apps" : "Applications mises en avant",
     "Supported apps" : "Applications supportées",
+    "manual-install apps cannot be updated" : "les applications installées manuellement ne peuvent pas être mises à jour",
     "{progress}% Initializing" : "{progress}% Initialisation",
     "Enable" : "Activer",
     "Disable" : "Désactiver",
