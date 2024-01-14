@@ -41,13 +41,11 @@ class Version1008Date202401121205 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 64,
 			]);
-			$table->addColumn('from_languages', Types::STRING, [
+			$table->addColumn('from_languages', Types::JSON, [
 				'notnull' => true,
-				'length' => 1024,
 			]);
-			$table->addColumn('to_languages', Types::STRING, [
+			$table->addColumn('to_languages', Types::JSON, [
 				'notnull' => true,
-				'length' => 1024,
 			]);
 			$table->addColumn('action_handler', Types::STRING, [
 				'notnull' => true,

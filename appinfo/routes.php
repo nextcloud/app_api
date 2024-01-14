@@ -114,9 +114,9 @@ return [
 		['name' => 'textProcessing#reportResult', 'url' => '/api/v1/ai_provider/text_processing', 'verb' => 'PUT'],
 
 		// Machine-Translation
-		['name' => 'machineTranslation#registerProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'POST'],
-		['name' => 'machineTranslation#unregisterProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'DELETE'],
-		['name' => 'machineTranslation#getProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'GET'],
-		['name' => 'machineTranslation#reportResult', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'PUT'],
+		['name' => 'Translation#registerProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'POST'],
+		['name' => 'Translation#unregisterProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'DELETE'],
+		['name' => 'Translation#getProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'GET'],
+		['name' => 'Translation#reportResult', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'PUT'],
 	],
 ];

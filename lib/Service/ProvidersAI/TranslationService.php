@@ -26,9 +26,9 @@ class TranslationService {
 	private ICache $cache;
 
 	public function __construct(
-		ICacheFactory                                     $cacheFactory,
+		ICacheFactory                              $cacheFactory,
 		private readonly TranslationProviderMapper $mapper,
-		private readonly LoggerInterface                  $logger,
+		private readonly LoggerInterface           $logger,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_translation_providers');
 	}
@@ -42,32 +42,32 @@ class TranslationService {
 		string $actionHandler
 	): ?TranslationProvider {
 		try {
-			$speechToTextProvider = $this->mapper->findByAppidName($appId, $name);
+			$translationProvider = $this->mapper->findByAppidName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$speechToTextProvider = null;
+			$translationProvider = null;
 		}
 		try {
-			$newSpeechToTextProvider = new TranslationProvider([
+			$newTranslationProvider = new TranslationProvider([
 				'appid' => $appId,
 				'name' => $name,
 				'display_name' => $displayName,
-				'from_languages' => json_encode($fromLanguages),
-				'to_languages' => json_encode($toLanguages),
+				'from_languages' => $fromLanguages,
+				'to_languages' => $toLanguages,
 				'action_handler' => ltrim($actionHandler, '/'),
 			]);
-			if ($speechToTextProvider !== null) {
-				$newSpeechToTextProvider->setId($speechToTextProvider->getId());
+			if ($translationProvider !== null) {
+				$newTranslationProvider->setId($translationProvider->getId());
 			}
-			$speechToTextProvider = $this->mapper->insertOrUpdate($newSpeechToTextProvider);
-			$this->cache->set('/ex_translation_providers_' . $appId . '_' . $name, $speechToTextProvider);
+			$translationProvider = $this->mapper->insertOrUpdate($newTranslationProvider);
+			$this->cache->set('/ex_translation_providers_' . $appId . '_' . $name, $translationProvider);
 			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
-				sprintf('Failed to register ExApp %s SpeechToTextProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]
+				sprintf('Failed to register ExApp %s TranslationProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]
 			);
 			return null;
 		}
-		return $speechToTextProvider;
+		return $translationProvider;
 	}
 
 	public function unregisterTranslationProvider(string $appId, string $name): ?TranslationProvider {
@@ -81,7 +81,7 @@ class TranslationService {
 			$this->resetCacheEnabled();
 			return $TranslationProvider;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to unregister ExApp %s SpeechToTextProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to unregister ExApp %s TranslationProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
 			return null;
 		}
 	}
@@ -150,7 +150,7 @@ class TranslationService {
 			$context->registerService($class, function () use ($provider) {
 				return $provider;
 			});
-			$context->registerSpeechToTextProvider($class);
+			$context->registerTranslationProvider($class);
 		}
 	}
 
@@ -163,8 +163,8 @@ class TranslationService {
 
 			public function __construct(
 				private TranslationProvider $provider,
-				private IServerContainer     $serverContainer,
-				private readonly string      $class,
+				private IServerContainer    $serverContainer,
+				private readonly string     $class,
 			) {
 			}
 
@@ -178,8 +178,8 @@ class TranslationService {
 
 			public function getAvailableLanguages(): array {
 				// $fromLanguages and $toLanguages are JSON objects with lang_code => lang_label paris { "language_code": "language_label" }
-				$fromLanguages = json_decode($this->provider->getFromLanguages(), true);
-				$toLanguages = json_decode($this->provider->getToLanguages(), true);
+				$fromLanguages = $this->provider->getFromLanguages();
+				$toLanguages = $this->provider->getToLanguages();
 				// Convert JSON objects to array of all possible LanguageTuple pairs
 				$availableLanguages = [];
 				foreach ($fromLanguages as $fromLanguageCode => $fromLanguageLabel) {

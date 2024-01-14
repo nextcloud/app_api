@@ -14,14 +14,14 @@ use OCP\AppFramework\Db\Entity;
  * @method string getAppid()
  * @method string getName()
  * @method string getDisplayName()
- * @method string getFromLanguages()
- * @method string getToLanguages()
+ * @method array getFromLanguages()
+ * @method array getToLanguages()
  * @method string getActionHandler()
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
- * @method void setFromLanguages(string $fromLanguages)
- * @method void setToLanguages(string $toLanguages)
+ * @method void setFromLanguages(array $fromLanguages)
+ * @method void setToLanguages(array $toLanguages)
  * @method void setActionHandler(string $actionHandler)
  */
 class TranslationProvider extends Entity implements \JsonSerializable {
@@ -36,8 +36,8 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 		$this->addType('appid', 'string');
 		$this->addType('name', 'string');
 		$this->addType('displayName', 'string');
-		$this->addType('fromLanguages', 'string');
-		$this->addType('toLanguages', 'string');
+		$this->addType('fromLanguages', 'json');
+		$this->addType('toLanguages', 'json');
 		$this->addType('actionHandler', 'string');
 
 		if (isset($params['id'])) {
