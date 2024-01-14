@@ -12,6 +12,7 @@ use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
 use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
+use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
 use OCA\AppAPI\Service\UI\ScriptsService;
@@ -62,8 +63,9 @@ class AppAPIService {
 		private readonly ScriptsService          $scriptsService,
 		private readonly StylesService           $stylesService,
 		private readonly FilesActionsMenuService $filesActionsMenuService,
-		private readonly SpeechToTextService	 $speechToTextService,
-		private readonly TextProcessingService	 $textProcessingService,
+		private readonly SpeechToTextService     $speechToTextService,
+		private readonly TextProcessingService   $textProcessingService,
+		private readonly TranslationService      $translationService,
 		private readonly ISecureRandom           $random,
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
@@ -154,6 +156,7 @@ class AppAPIService {
 			$this->stylesService->deleteExAppStyles($appId);
 			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
+			$this->translationService->unregisterExAppTranslationProviders($appId);
 			$this->cache->remove('/exApp_' . $appId);
 			return $exApp;
 		} catch (Exception $e) {

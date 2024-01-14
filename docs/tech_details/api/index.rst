@@ -20,4 +20,5 @@ AppAPI Nextcloud APIs
 	talkbots
 	speechtotext
 	textprocessing
+	machinetranslation
 	other_ocs

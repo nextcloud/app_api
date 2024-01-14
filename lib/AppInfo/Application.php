@@ -17,6 +17,7 @@ use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
 use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
+use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCA\AppAPI\Service\UI\TopMenuService;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
@@ -71,6 +72,10 @@ class Application extends App implements IBootstrap {
 			/** @var TextProcessingService $textProcessingService */
 			$textProcessingService = $container->get(TextProcessingService::class);
 			$textProcessingService->registerExAppTextProcessingProviders($context, $container->getServer());
+
+			/** @var TranslationService $translationService */
+			$translationService = $container->get(TranslationService::class);
+			$translationService->registerExAppTranslationProviders($context, $container->getServer());
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 	}
