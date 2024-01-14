@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Db\MachineTranslation;
+namespace OCA\AppAPI\Db\Translation;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -12,9 +12,9 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<MachineTranslationProvider>
+ * @template-extends QBMapper<TranslationProvider>
  */
-class MachineTranslationProviderMapper extends QBMapper {
+class TranslationProviderMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_translation');
 	}
@@ -29,12 +29,10 @@ class MachineTranslationProviderMapper extends QBMapper {
 			'ex_translation.name',
 			'ex_translation.display_name',
 			'ex_translation.from_languages',
-			'ex_translation.from_languages_labels',
 			'ex_translation.to_languages',
-			'ex_translation.to_languages_labels',
 			'ex_translation.action_handler',
 		)
-			->from($this->tableName, 'ex_machine_translation')
+			->from($this->tableName, 'ex_translation')
 			->innerJoin('ex_translation', 'ex_apps', 'exa', 'exa.appid = ex_translation.appid')
 			->where(
 				$qb->expr()->eq('exa.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT))
@@ -47,13 +45,12 @@ class MachineTranslationProviderMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $name
 	 *
-	 * @return MachineTranslationProvider
 	 * @throws Exception
 	 * @throws MultipleObjectsReturnedException
 	 *
 	 * @throws DoesNotExistException
 	 */
-	public function findByAppidName(string $appId, string $name): MachineTranslationProvider {
+	public function findByAppidName(string $appId, string $name): TranslationProvider {
 		$qb = $this->db->getQueryBuilder();
 		return $this->findEntity($qb->select('*')
 			->from($this->tableName)

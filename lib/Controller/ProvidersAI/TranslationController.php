@@ -6,8 +6,8 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
-use OCA\AppAPI\Db\MachineTranslation\MachineTranslationQueueMapper;
-use OCA\AppAPI\Service\ProvidersAI\MachineTranslationService;
+use OCA\AppAPI\Db\Translation\TranslationQueueMapper;
+use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
@@ -20,14 +20,14 @@ use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
 
-class MachineTranslationController extends OCSController {
+class TranslationController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                                           $request,
-		private readonly IConfig                           $config,
-		private readonly MachineTranslationService         $machineTranslationService,
-		private readonly MachineTranslationQueueMapper     $mapper,
+		IRequest                                $request,
+		private readonly IConfig                $config,
+		private readonly TranslationService     $translationService,
+		private readonly TranslationQueueMapper $mapper,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -40,10 +40,8 @@ class MachineTranslationController extends OCSController {
 	public function registerProvider(
 		string $name,
 		string $displayName,
-		string $fromLanguages,
-		string $fromLanguagesLabels,
-		string $toLanguages,
-		string $toLanguagesLabels,
+		array $fromLanguages,
+		array $toLanguages,
 		string $actionHandler,
 	): DataResponse {
 		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
@@ -51,10 +49,9 @@ class MachineTranslationController extends OCSController {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
 
-		$provider = $this->machineTranslationService->registerMachineTranslationProvider(
+		$provider = $this->translationService->registerTranslationProvider(
 			$this->request->getHeader('EX-APP-ID'), $name, $displayName,
-			$fromLanguages, $fromLanguagesLabels, $toLanguages, $toLanguagesLabels,
-			$actionHandler
+			$fromLanguages,$toLanguages, $actionHandler
 		);
 
 		if ($provider === null) {
@@ -73,7 +70,7 @@ class MachineTranslationController extends OCSController {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
 
-		$unregistered = $this->machineTranslationService->unregisterMachineTranslationProvider(
+		$unregistered = $this->translationService->unregisterTranslationProvider(
 			$this->request->getHeader('EX-APP-ID'), $name
 		);
 
@@ -92,7 +89,7 @@ class MachineTranslationController extends OCSController {
 		if (version_compare($ncVersion, '29.0', '<')) {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
-		$result = $this->machineTranslationService->getExAppMachineTranslationProvider(
+		$result = $this->translationService->getExAppTranslationProvider(
 			$this->request->getHeader('EX-APP-ID'), $name
 		);
 		if (!$result) {

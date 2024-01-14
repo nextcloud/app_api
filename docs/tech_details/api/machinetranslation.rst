@@ -22,16 +22,19 @@ Request data
 		"name": "unique_provider_name",
 		"display_name": "Provider Display Name",
 		"action_handler": "/handler_route_on_ex_app",
-		"from_languages": "en,de,fr",
-		"from_languages_labels": "English,German,French",
-		"to_languages": "fr,en,de",
-		"to_languages_labels": "French,English,German,",
+		"from_languages": {
+			"en": "English",
+			"fr": "French",
+		},
+		"to_languages": {
+			"en": "English",
+			"fr": "French",
+		},
 	}
 
 .. note::
 
-	``from_languages`` and ``to_languages`` are comma separated language codes.
-	``from_languages_labels`` and ``to_languages_labels`` are comma separated language labels.
+	``from_languages`` and ``to_languages`` are JSON object with language code as key and language name as value.
 
 
 Response

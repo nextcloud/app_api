@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Db\MachineTranslation;
+namespace OCA\AppAPI\Db\Translation;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -12,9 +12,9 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<MachineTranslationQueue>
+ * @template-extends QBMapper<TranslationQueue>
  */
-class MachineTranslationQueueMapper extends QBMapper {
+class TranslationQueueMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_translation_q');
 	}
@@ -26,9 +26,9 @@ class MachineTranslationQueueMapper extends QBMapper {
 	 * @throws MultipleObjectsReturnedException if more than one result
 	 * @throws Exception
 	 *
-	 * @return MachineTranslationQueue
+	 * @return TranslationQueue
 	 */
-	public function getById(int $id): MachineTranslationQueue {
+	public function getById(int $id): TranslationQueue {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
 			->from($this->tableName)

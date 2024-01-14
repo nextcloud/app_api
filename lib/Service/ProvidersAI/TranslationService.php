@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service\ProvidersAI;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\MachineTranslation\MachineTranslationProvider;
-use OCA\AppAPI\Db\MachineTranslation\MachineTranslationProviderMapper;
-use OCA\AppAPI\Db\MachineTranslation\MachineTranslationQueue;
-use OCA\AppAPI\Db\MachineTranslation\MachineTranslationQueueMapper;
+use OCA\AppAPI\Db\Translation\TranslationProvider;
+use OCA\AppAPI\Db\Translation\TranslationProviderMapper;
+use OCA\AppAPI\Db\Translation\TranslationQueue;
+use OCA\AppAPI\Db\Translation\TranslationQueueMapper;
 use OCA\AppAPI\Service\AppAPIService;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -22,48 +22,44 @@ use OCP\Translation\ITranslationProviderWithUserId;
 use OCP\Translation\LanguageTuple;
 use Psr\Log\LoggerInterface;
 
-class MachineTranslationService {
+class TranslationService {
 	private ICache $cache;
 
 	public function __construct(
 		ICacheFactory                                     $cacheFactory,
-		private readonly MachineTranslationProviderMapper $mapper,
+		private readonly TranslationProviderMapper $mapper,
 		private readonly LoggerInterface                  $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_machine_translation_providers');
+		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_translation_providers');
 	}
 
-	public function registerMachineTranslationProvider(
+	public function registerTranslationProvider(
 		string $appId,
 		string $name,
 		string $displayName,
-		string $fromLanguages,
-		string $fromLanguagesLabels,
-		string $toLanguages,
-		string $toLanguagesLabels,
+		array $fromLanguages,
+		array $toLanguages,
 		string $actionHandler
-	): ?MachineTranslationProvider {
+	): ?TranslationProvider {
 		try {
 			$speechToTextProvider = $this->mapper->findByAppidName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			$speechToTextProvider = null;
 		}
 		try {
-			$newSpeechToTextProvider = new MachineTranslationProvider([
+			$newSpeechToTextProvider = new TranslationProvider([
 				'appid' => $appId,
 				'name' => $name,
 				'display_name' => $displayName,
-				'from_languages' => $fromLanguages,
-				'from_languages_labels' => $fromLanguagesLabels,
-				'to_languages' => $toLanguages,
-				'to_languages_labels' => $toLanguagesLabels,
+				'from_languages' => json_encode($fromLanguages),
+				'to_languages' => json_encode($toLanguages),
 				'action_handler' => ltrim($actionHandler, '/'),
 			]);
 			if ($speechToTextProvider !== null) {
 				$newSpeechToTextProvider->setId($speechToTextProvider->getId());
 			}
 			$speechToTextProvider = $this->mapper->insertOrUpdate($newSpeechToTextProvider);
-			$this->cache->set('/ex_machine_translation_providers_' . $appId . '_' . $name, $speechToTextProvider);
+			$this->cache->set('/ex_translation_providers_' . $appId . '_' . $name, $speechToTextProvider);
 			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
@@ -74,16 +70,16 @@ class MachineTranslationService {
 		return $speechToTextProvider;
 	}
 
-	public function unregisterMachineTranslationProvider(string $appId, string $name): ?MachineTranslationProvider {
+	public function unregisterTranslationProvider(string $appId, string $name): ?TranslationProvider {
 		try {
-			$machineTranslationProvider = $this->getExAppMachineTranslationProvider($appId, $name);
-			if ($machineTranslationProvider === null) {
+			$TranslationProvider = $this->getExAppTranslationProvider($appId, $name);
+			if ($TranslationProvider === null) {
 				return null;
 			}
-			$this->mapper->delete($machineTranslationProvider);
-			$this->cache->remove('/ex_machine_translation_providers_' . $appId . '_' . $name);
+			$this->mapper->delete($TranslationProvider);
+			$this->cache->remove('/ex_translation_providers_' . $appId . '_' . $name);
 			$this->resetCacheEnabled();
-			return $machineTranslationProvider;
+			return $TranslationProvider;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s SpeechToTextProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
 			return null;
@@ -91,63 +87,63 @@ class MachineTranslationService {
 	}
 
 	/**
-	 * Get list of registered MachineTranslation providers (only for enabled ExApps)
+	 * Get list of registered Translation providers (only for enabled ExApps)
 	 *
-	 * @return MachineTranslationProvider[]
+	 * @return TranslationProvider[]
 	 */
-	public function getRegisteredMachineTranslationProviders(): array {
+	public function getRegisteredTranslationProviders(): array {
 		try {
-			$cacheKey = '/ex_machine_translation_providers';
+			$cacheKey = '/ex_translation_providers';
 			$records = $this->cache->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
 				$this->cache->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
-				return new MachineTranslationProvider($record);
+				return new TranslationProvider($record);
 			}, $records);
 		} catch (Exception) {
 			return [];
 		}
 	}
 
-	public function getExAppMachineTranslationProvider(string $appId, string $name): ?MachineTranslationProvider {
-		$cacheKey = '/ex_machine_translation_providers_' . $appId . '_' . $name;
+	public function getExAppTranslationProvider(string $appId, string $name): ?TranslationProvider {
+		$cacheKey = '/ex_translation_providers_' . $appId . '_' . $name;
 		$cache = $this->cache->get($cacheKey);
 		if ($cache !== null) {
-			return $cache instanceof MachineTranslationProvider ? $cache : new MachineTranslationProvider($cache);
+			return $cache instanceof TranslationProvider ? $cache : new TranslationProvider($cache);
 		}
 
 		try {
-			$machineTranslationProvider = $this->mapper->findByAppIdName($appId, $name);
+			$TranslationProvider = $this->mapper->findByAppIdName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
-		$this->cache->set($cacheKey, $machineTranslationProvider);
-		return $machineTranslationProvider;
+		$this->cache->set($cacheKey, $TranslationProvider);
+		return $TranslationProvider;
 	}
 
-	public function unregisterExAppMachineTranslationProviders(string $appId): int {
+	public function unregisterExAppTranslationProviders(string $appId): int {
 		try {
 			$result = $this->mapper->removeAllByAppId($appId);
 		} catch (Exception) {
 			$result = -1;
 		}
-		$this->cache->clear('/ex_machine_translation_providers_' . $appId);
+		$this->cache->clear('/ex_translation_providers_' . $appId);
 		$this->resetCacheEnabled();
 		return $result;
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_machine_translation_providers');
+		$this->cache->remove('/ex_translation_providers');
 	}
 
 	/**
 	 * Register ExApp anonymous providers implementations of ITranslationProviderWithId and ITranslationProviderWithUserId
 	 * so that they can be used as regular providers in DI container.
 	 */
-	public function registerExAppMachineTranslationProviders(IRegistrationContext &$context, IServerContainer $serverContainer): void {
-		$exAppsProviders = $this->getRegisteredMachineTranslationProviders();
+	public function registerExAppTranslationProviders(IRegistrationContext &$context, IServerContainer $serverContainer): void {
+		$exAppsProviders = $this->getRegisteredTranslationProviders();
 		foreach ($exAppsProviders as $exAppProvider) {
 			$class = '\\OCA\\AppAPI\\' . $exAppProvider->getAppid() . '\\' . $exAppProvider->getName();
 			$provider = $this->getAnonymousExAppProvider($exAppProvider, $serverContainer, $class);
@@ -161,12 +157,12 @@ class MachineTranslationService {
 	/**
 	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
 	 */
-	private function getAnonymousExAppProvider(MachineTranslationProvider $provider, IServerContainer $serverContainer, string $class): ?ITranslationProviderWithId {
+	private function getAnonymousExAppProvider(TranslationProvider $provider, IServerContainer $serverContainer, string $class): ?ITranslationProviderWithId {
 		return new class($provider, $serverContainer, $class) implements ITranslationProviderWithId, ITranslationProviderWithUserId {
 			private ?string $userId;
 
 			public function __construct(
-				private MachineTranslationProvider $provider,
+				private TranslationProvider $provider,
 				private IServerContainer     $serverContainer,
 				private readonly string      $class,
 			) {
@@ -181,18 +177,23 @@ class MachineTranslationService {
 			}
 
 			public function getAvailableLanguages(): array {
-				$fromLanguages = explode(',', $this->provider->getFromLanguages());
-				$fromLanguagesLabels = explode(',', $this->provider->getFromLanguagesLabels());
-				$toLanguages = explode(',', $this->provider->getToLanguages());
-				$toLanguagesLabels = explode(',', $this->provider->getToLanguagesLabels());
+				// $fromLanguages and $toLanguages are JSON objects with lang_code => lang_label paris { "language_code": "language_label" }
+				$fromLanguages = json_decode($this->provider->getFromLanguages(), true);
+				$toLanguages = json_decode($this->provider->getToLanguages(), true);
+				// Convert JSON objects to array of all possible LanguageTuple pairs
 				$availableLanguages = [];
-				foreach ($fromLanguages as $index => $fromLanguage) {
-					$availableLanguages[] = LanguageTuple::fromArray([
-						'from' => $fromLanguage,
-						'fromLabel' => $fromLanguagesLabels[$index],
-						'to' => $toLanguages[$index],
-						'toLabel' => $toLanguagesLabels[$index],
-					]);
+				foreach ($fromLanguages as $fromLanguageCode => $fromLanguageLabel) {
+					foreach ($toLanguages as $toLanguageCode => $toLanguageLabel) {
+						if ($fromLanguageCode === $toLanguageCode) {
+							continue;
+						}
+						$availableLanguages[] = LanguageTuple::fromArray([
+							'from' => $fromLanguageCode,
+							'fromLabel' => $fromLanguageLabel,
+							'to' => $toLanguageCode,
+							'toLabel' => $toLanguageLabel,
+						]);
+					}
 				}
 				return $availableLanguages;
 			}
@@ -200,10 +201,10 @@ class MachineTranslationService {
 			public function translate(?string $fromLanguage, string $toLanguage, string $text): string {
 				/** @var AppAPIService $service */
 				$service = $this->serverContainer->get(AppAPIService::class);
-				/** @var MachineTranslationQueueMapper $mapper */
-				$mapper = $this->serverContainer->get(MachineTranslationQueueMapper::class);
+				/** @var TranslationQueueMapper $mapper */
+				$mapper = $this->serverContainer->get(TranslationQueueMapper::class);
 				$route = $this->provider->getActionHandler();
-				$queueRecord = $mapper->insert(new MachineTranslationQueue(['created_time' => time()]));
+				$queueRecord = $mapper->insert(new TranslationQueue(['created_time' => time()]));
 				$taskId = $queueRecord->getId();
 
 				$response = $service->requestToExAppById($this->provider->getAppid(),

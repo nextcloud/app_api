@@ -45,15 +45,7 @@ class Version1008Date202401121205 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 1024,
 			]);
-			$table->addColumn('from_languages_labels', Types::STRING, [
-				'notnull' => true,
-				'length' => 1024,
-			]);
 			$table->addColumn('to_languages', Types::STRING, [
-				'notnull' => true,
-				'length' => 1024,
-			]);
-			$table->addColumn('to_languages_labels', Types::STRING, [
 				'notnull' => true,
 				'length' => 1024,
 			]);

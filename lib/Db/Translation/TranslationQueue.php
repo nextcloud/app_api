@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Db\MachineTranslation;
+namespace OCA\AppAPI\Db\Translation;
 
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Class MachineTranslationQueue
+ * Class TranslationQueue
  *
- * @package OCA\AppAPI\Db\MachineTranslation
+ * @package OCA\AppAPI\Db\Translation
  *
  * @method string getResult()
  * @method string getError()
@@ -20,7 +20,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setFinished(int $finished)
  * @method void setCreatedTime(int $createdTime)
  */
-class MachineTranslationQueue extends Entity implements \JsonSerializable {
+class TranslationQueue extends Entity implements \JsonSerializable {
 	protected $result;
 	protected $error;
 	protected $finished;

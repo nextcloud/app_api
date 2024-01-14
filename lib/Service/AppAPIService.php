@@ -10,7 +10,7 @@ use OCA\AppAPI\Db\ExAppMapper;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
-use OCA\AppAPI\Service\ProvidersAI\MachineTranslationService;
+use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
 use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
@@ -47,34 +47,34 @@ class AppAPIService {
 	private IClient $client;
 
 	public function __construct(
-		private readonly LoggerInterface           $logger,
-		private readonly ILogFactory               $logFactory,
-		ICacheFactory                              $cacheFactory,
-		private readonly IThrottler                $throttler,
-		private readonly IConfig                   $config,
-		IClientService                             $clientService,
-		private readonly ExAppMapper               $exAppMapper,
-		private readonly IAppManager               $appManager,
-		private readonly ExAppUsersService         $exAppUsersService,
-		private readonly ExAppApiScopeService      $exAppApiScopeService,
-		private readonly ExAppScopesService        $exAppScopesService,
-		private readonly TopMenuService            $topMenuService,
-		private readonly InitialStateService       $initialStateService,
-		private readonly ScriptsService            $scriptsService,
-		private readonly StylesService             $stylesService,
-		private readonly FilesActionsMenuService   $filesActionsMenuService,
-		private readonly SpeechToTextService       $speechToTextService,
-		private readonly TextProcessingService     $textProcessingService,
-		private readonly MachineTranslationService $machineTranslationService,
-		private readonly ISecureRandom             $random,
-		private readonly IUserSession              $userSession,
-		private readonly ISession                  $session,
-		private readonly IUserManager              $userManager,
-		private readonly ExAppConfigService        $exAppConfigService,
-		private readonly ExNotificationsManager    $exNotificationsManager,
-		private readonly TalkBotsService           $talkBotsService,
-		private readonly ExAppFetcher              $exAppFetcher,
-		private readonly ExAppArchiveFetcher       $exAppArchiveFetcher,
+		private readonly LoggerInterface         $logger,
+		private readonly ILogFactory             $logFactory,
+		ICacheFactory                            $cacheFactory,
+		private readonly IThrottler              $throttler,
+		private readonly IConfig                 $config,
+		IClientService                           $clientService,
+		private readonly ExAppMapper             $exAppMapper,
+		private readonly IAppManager             $appManager,
+		private readonly ExAppUsersService       $exAppUsersService,
+		private readonly ExAppApiScopeService    $exAppApiScopeService,
+		private readonly ExAppScopesService      $exAppScopesService,
+		private readonly TopMenuService          $topMenuService,
+		private readonly InitialStateService     $initialStateService,
+		private readonly ScriptsService          $scriptsService,
+		private readonly StylesService           $stylesService,
+		private readonly FilesActionsMenuService $filesActionsMenuService,
+		private readonly SpeechToTextService     $speechToTextService,
+		private readonly TextProcessingService   $textProcessingService,
+		private readonly TranslationService      $translationService,
+		private readonly ISecureRandom           $random,
+		private readonly IUserSession            $userSession,
+		private readonly ISession                $session,
+		private readonly IUserManager            $userManager,
+		private readonly ExAppConfigService      $exAppConfigService,
+		private readonly ExNotificationsManager  $exNotificationsManager,
+		private readonly TalkBotsService         $talkBotsService,
+		private readonly ExAppFetcher            $exAppFetcher,
+		private readonly ExAppArchiveFetcher     $exAppArchiveFetcher,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 		$this->client = $clientService->newClient();
@@ -156,7 +156,7 @@ class AppAPIService {
 			$this->stylesService->deleteExAppStyles($appId);
 			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
-			$this->machineTranslationService->unregisterExAppMachineTranslationProviders($appId);
+			$this->translationService->unregisterExAppTranslationProviders($appId);
 			$this->cache->remove('/exApp_' . $appId);
 			return $exApp;
 		} catch (Exception $e) {
