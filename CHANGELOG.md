@@ -12,8 +12,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added filesplugin batch actions implementation. #203
-- Added MachineTranslation API. #210
+- Added MachineTranslation providers API. #210
 
+### Changed
+
+- Changed TextProcessing providers API flow to asynchronous. #208
+- Changed SpeechToText providers API flow to asynchronous. #209
 
 ## [1.4.6 - 2024-01-05]
 
