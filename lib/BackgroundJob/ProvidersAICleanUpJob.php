@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\BackgroundJob;
 
-use OCA\AppAPI\Db\MachineTranslation\MachineTranslationQueueMapper;
+use OCA\AppAPI\Db\Translation\TranslationQueueMapper;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueueMapper;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -17,10 +17,10 @@ class ProvidersAICleanUpJob extends TimedJob {
 	private const overdueTime = 7 * 24 * 60 * 60;
 
 	public function __construct(
-		ITimeFactory $time,
+		ITimeFactory                                       $time,
 		private readonly TextProcessingProviderQueueMapper $mapperTextProcessing,
 		private readonly SpeechToTextProviderQueueMapper   $mapperSpeechToText,
-		private readonly MachineTranslationQueueMapper     $mapperMachineTranslation,
+		private readonly TranslationQueueMapper            $mapperTranslation,
 	) {
 		parent::__construct($time);
 
@@ -34,7 +34,7 @@ class ProvidersAICleanUpJob extends TimedJob {
 		try {
 			$this->mapperTextProcessing->removeAllOlderThenThat(self::overdueTime);
 			$this->mapperSpeechToText->removeAllOlderThenThat(self::overdueTime);
-			$this->mapperMachineTranslation->removeAllOlderThenThat(self::overdueTime);
+			$this->mapperTranslation->removeAllOlderThenThat(self::overdueTime);
 		} catch (Exception) {
 		}
 	}
