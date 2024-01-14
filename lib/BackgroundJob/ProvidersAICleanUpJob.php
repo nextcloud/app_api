@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\BackgroundJob;
 
-use OCA\AppAPI\Db\Translation\TranslationQueueMapper;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueueMapper;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
+use OCA\AppAPI\Db\Translation\TranslationQueueMapper;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJob;
 use OCP\BackgroundJob\TimedJob;

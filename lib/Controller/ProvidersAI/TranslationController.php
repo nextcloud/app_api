@@ -51,7 +51,7 @@ class TranslationController extends OCSController {
 
 		$provider = $this->translationService->registerTranslationProvider(
 			$this->request->getHeader('EX-APP-ID'), $name, $displayName,
-			$fromLanguages,$toLanguages, $actionHandler
+			$fromLanguages, $toLanguages, $actionHandler
 		);
 
 		if ($provider === null) {
