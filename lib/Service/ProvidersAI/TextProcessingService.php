@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\ProvidersAI;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProvider;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderMapper;
+use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueue;
+use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
+use OCA\AppAPI\Service\AppAPIService;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -164,9 +167,9 @@ class TextProcessingService {
 			private ?string $userId;
 
 			public function __construct(
-				private readonly TextProcessingProvider $provider,
-				private readonly IServerContainer       $serverContainer,
-				private readonly string                 $className,
+				private readonly TextProcessingProvider 		   $provider,
+				private readonly IServerContainer       		   $serverContainer,
+				private readonly string                 		   $className,
 			) {
 			}
 
@@ -181,14 +184,17 @@ class TextProcessingService {
 			public function process(string $prompt, float $maxExecutionTime = 0): string {
 				/** @var AppAPIService $service */
 				$service = $this->serverContainer->get(AppAPIService::class);
+				$mapper = $this->serverContainer->get(TextProcessingProviderQueueMapper::class);
 				$route = $this->provider->getActionHandler();
+				$queueRecord = $mapper->insert(new TextProcessingProviderQueue(['created_time' => time()]));
+				$taskId = $queueRecord->getId();
 
 				$response = $service->requestToExAppById($this->provider->getAppid(),
 					$route,
 					$this->userId,
-					'POST',
 					params: [
 						'prompt' => $prompt,
+						'task_id' => $taskId,
 						'max_execution_time' => $maxExecutionTime,
 					],
 					options: [
@@ -196,6 +202,7 @@ class TextProcessingService {
 					],
 				);
 				if (is_array($response)) {
+					$mapper->delete($mapper->getById($taskId));
 					throw new \Exception(sprintf('Failed process text task: %s:%s:%s. Error: %s',
 						$this->provider->getAppid(),
 						$this->provider->getName(),
@@ -203,7 +210,22 @@ class TextProcessingService {
 						$response['error']
 					));
 				}
-				return $response->getBody();
+
+				do {
+					$taskResults = $mapper->getById($taskId);
+					usleep(300000); // 0.3s
+				} while ($taskResults->getFinished() === 0);
+
+				$mapper->delete($taskResults);
+				if (!empty($taskResults->getError())) {
+					throw new \Exception(sprintf('Text task returned error: %s:%s:%s. Error: %s',
+						$this->provider->getAppid(),
+						$this->provider->getName(),
+						$this->provider->getTaskType(),
+						$taskResults->getError(),
+					));
+				}
+				return $taskResults->getResult();
 			}
 
 			public function getTaskType(): string {

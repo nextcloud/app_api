@@ -6,8 +6,8 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
-use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
-use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
+use OCA\AppAPI\Db\Translation\TranslationQueueMapper;
+use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
@@ -20,14 +20,14 @@ use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
 
-class TextProcessingController extends OCSController {
+class TranslationController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                               			   $request,
-		private readonly IConfig               			   $config,
-		private readonly TextProcessingService			   $textProcessingService,
-		private readonly TextProcessingProviderQueueMapper $mapper,
+		IRequest                                $request,
+		private readonly IConfig                $config,
+		private readonly TranslationService     $translationService,
+		private readonly TranslationQueueMapper $mapper,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -40,16 +40,18 @@ class TextProcessingController extends OCSController {
 	public function registerProvider(
 		string $name,
 		string $displayName,
+		array $fromLanguages,
+		array $toLanguages,
 		string $actionHandler,
-		string $taskType
 	): DataResponse {
 		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
 		if (version_compare($ncVersion, '29.0', '<')) {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
 
-		$provider = $this->textProcessingService->registerTextProcessingProvider(
-			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $taskType,
+		$provider = $this->translationService->registerTranslationProvider(
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName,
+			$fromLanguages, $toLanguages, $actionHandler
 		);
 
 		if ($provider === null) {
@@ -68,7 +70,7 @@ class TextProcessingController extends OCSController {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
 
-		$unregistered = $this->textProcessingService->unregisterTextProcessingProvider(
+		$unregistered = $this->translationService->unregisterTranslationProvider(
 			$this->request->getHeader('EX-APP-ID'), $name
 		);
 
@@ -87,7 +89,7 @@ class TextProcessingController extends OCSController {
 		if (version_compare($ncVersion, '29.0', '<')) {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
-		$result = $this->textProcessingService->getExAppTextProcessingProvider(
+		$result = $this->translationService->getExAppTranslationProvider(
 			$this->request->getHeader('EX-APP-ID'), $name
 		);
 		if (!$result) {

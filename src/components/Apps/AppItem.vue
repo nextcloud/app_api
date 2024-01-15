@@ -70,7 +70,8 @@
 			<div v-if="isLoading || isInitializing" class="icon icon-loading-small" />
 			<NcButton v-if="app.update"
 				type="primary"
-				:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
+				:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isManualInstall"
+				:title="updateButtonText"
 				@click.stop="update(app.id)">
 				{{ t('settings', 'Update to {update}', {update:app.update}) }}
 			</NcButton>

@@ -33,7 +33,7 @@ class ExAppInitStatusCheckJob extends TimedJob {
 			$exApps = $this->mapper->findAll();
 			$initTimeoutMinutes = intval($this->config->getAppValue(Application::APP_ID, 'ex_app_init_timeout', '40'));
 			foreach ($exApps as $exApp) {
-				$status = json_decode($exApp->getStatus(), true);
+				$status = $exApp->getStatus();
 				if (!isset($status['init_start_time'])) {
 					continue;
 				}

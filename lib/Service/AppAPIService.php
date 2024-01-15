@@ -10,6 +10,9 @@ use OCA\AppAPI\Db\ExAppMapper;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
+use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
+use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
+use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
 use OCA\AppAPI\Service\UI\ScriptsService;
@@ -60,8 +63,9 @@ class AppAPIService {
 		private readonly ScriptsService          $scriptsService,
 		private readonly StylesService           $stylesService,
 		private readonly FilesActionsMenuService $filesActionsMenuService,
-		private readonly SpeechToTextService	 $speechToTextService,
-		private readonly TextProcessingService	 $textProcessingService,
+		private readonly SpeechToTextService     $speechToTextService,
+		private readonly TextProcessingService   $textProcessingService,
+		private readonly TranslationService      $translationService,
 		private readonly ISecureRandom           $random,
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
@@ -152,6 +156,7 @@ class AppAPIService {
 			$this->stylesService->deleteExAppStyles($appId);
 			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
+			$this->translationService->unregisterExAppTranslationProviders($appId);
 			$this->cache->remove('/exApp_' . $appId);
 			return $exApp;
 		} catch (Exception $e) {
@@ -283,7 +288,7 @@ class AppAPIService {
 		$exApp = $this->getExApp($appId);
 		$cacheKey = '/exApp_' . $exApp->getAppid();
 
-		$status = json_decode($exApp->getStatus(), true);
+		$status = $exApp->getStatus();
 
 		if ($init) {
 			$status['init_start_time'] = time();
@@ -313,7 +318,7 @@ class AppAPIService {
 			}
 			$status['active'] = $progress === 100;
 		}
-		$exApp->setStatus(json_encode($status));
+		$exApp->setStatus($status);
 
 		try {
 			$exApp = $this->exAppMapper->update($exApp);
@@ -720,7 +725,7 @@ class AppAPIService {
 		if ($authValid) {
 			if (!$exApp->getEnabled()) {
 				// If ExApp is in initializing state, it is disabled yet, so we allow requests in such case
-				if (!isset(json_decode($exApp->getStatus(), true)['progress'])) {
+				if (!isset($exApp->getStatus()['progress'])) {
 					$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
 					return false;
 				}

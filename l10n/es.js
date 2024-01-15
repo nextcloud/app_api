@@ -103,6 +103,7 @@ OC.L10N.register(
     "Failed to register DaemonConfig. Check the logs" : "Fallo al registrar DaemonConfig. Chequee los registros",
     "Register Deploy Daemon" : "Registrar Daemon de despliegue",
     "Supported daemon accepts-deploy-id:" : "El daemon soportado accepts-deploy-id:",
+    "These are the default settings for a regular DaemonConfig. You can change them as you wish; more info on that is in the docs." : "Estos son los ajustes predeterminados para el DaemonConfig regular. Puede cambiarlos como desee; Más información sobre esto en la documentación.",
     "Unique Deploy Daemon Name" : "Nombre único del Daemon de despliegue",
     "Display name" : "Nombre para mostrar",
     "Accepts deploy ID" : "Acepta deploy ID",
