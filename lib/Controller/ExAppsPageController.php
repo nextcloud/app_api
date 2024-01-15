@@ -255,7 +255,7 @@ class ExAppsPageController extends Controller {
 				'daemon' => $daemon,
 				'systemApp' => $exApp !== null && $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 				'exAppUrl' => $exApp !== null ? AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) : '',
-				'status' => $exApp !== null ? json_decode($exApp->getStatus(), true) : [],
+				'status' => $exApp !== null ? $exApp->getStatus() : [],
 			];
 		}
 
@@ -394,7 +394,7 @@ class ExAppsPageController extends Controller {
 					'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
 					'releases' => [],
 					'update' => null,
-					'status' => json_decode($exApp->getStatus(), true),
+					'status' => $exApp->getStatus(),
 				];
 			}
 		}
@@ -471,7 +471,7 @@ class ExAppsPageController extends Controller {
 							'daemon_config' => $daemonConfig,
 							'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 							'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
-							'status' => json_decode($exApp->getStatus(), true),
+							'status' => $exApp->getStatus(),
 							'scopes' => $scopes,
 						]
 					]);
@@ -735,7 +735,7 @@ class ExAppsPageController extends Controller {
 	 */
 	public function getAppStatus(string $appId): JSONResponse {
 		$exApp = $this->service->getExApp($appId);
-		return new JSONResponse(json_decode($exApp->getStatus(), true));
+		return new JSONResponse($exApp->getStatus());
 	}
 
 	/**

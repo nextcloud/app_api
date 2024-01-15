@@ -16,7 +16,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getType()
  * @method string getName()
  * @method string getKey()
- * @method string getValue()
+ * @method array getValue()
  * @method void setAppid(string $appid)
  * @method void setType(string $type)
  * @method void setName(string $name)

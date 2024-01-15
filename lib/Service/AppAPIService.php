@@ -288,7 +288,7 @@ class AppAPIService {
 		$exApp = $this->getExApp($appId);
 		$cacheKey = '/exApp_' . $exApp->getAppid();
 
-		$status = json_decode($exApp->getStatus(), true);
+		$status = $exApp->getStatus();
 
 		if ($init) {
 			$status['init_start_time'] = time();
@@ -318,7 +318,7 @@ class AppAPIService {
 			}
 			$status['active'] = $progress === 100;
 		}
-		$exApp->setStatus(json_encode($status));
+		$exApp->setStatus($status);
 
 		try {
 			$exApp = $this->exAppMapper->update($exApp);
@@ -725,7 +725,7 @@ class AppAPIService {
 		if ($authValid) {
 			if (!$exApp->getEnabled()) {
 				// If ExApp is in initializing state, it is disabled yet, so we allow requests in such case
-				if (!isset(json_decode($exApp->getStatus(), true)['progress'])) {
+				if (!isset($exApp->getStatus()['progress'])) {
 					$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
 					return false;
 				}
