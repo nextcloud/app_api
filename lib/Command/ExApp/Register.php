@@ -192,7 +192,7 @@ class Register extends Command {
 		if ($waitFinish) {
 			do {
 				$exApp = $this->service->getExApp($appId);
-				$status = json_decode($exApp->getStatus(), true);
+				$status = $exApp->getStatus();
 				if (isset($status['error'])) {
 					$output->writeln(sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']));
 					return 1;

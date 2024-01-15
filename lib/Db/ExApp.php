@@ -20,7 +20,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getHost()
  * @method int getPort()
  * @method string getSecret()
- * @method string getStatus()
+ * @method array getStatus()
  * @method int getEnabled()
  * @method int getCreatedTime()
  * @method int getLastCheckTime()
@@ -32,7 +32,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setHost(string $host)
  * @method void setPort(int $port)
  * @method void setSecret(string $secret)
- * @method void setStatus(string $status)
+ * @method void setStatus(array $status)
  * @method void setEnabled(int $enabled)
  * @method void setCreatedTime(int $createdTime)
  * @method void setLastCheckTime(int $lastCheckTime)
@@ -63,7 +63,7 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('host', 'string');
 		$this->addType('port', 'int');
 		$this->addType('secret', 'string');
-		$this->addType('status', 'string');
+		$this->addType('status', 'json');
 		$this->addType('enabled', 'int');
 		$this->addType('createdTime', 'int');
 		$this->addType('lastCheckTime', 'int');
