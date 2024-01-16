@@ -46,10 +46,7 @@ class AIODockerActions {
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
 			'host' => null,
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
-			'ssl_key' => null,
-			'ssl_key_password' => null,
-			'ssl_cert' => null,
-			'ssl_cert_password' => null,
+			'haproxy_password' => null,
 			'gpu' => false,
 		];
 
@@ -86,10 +83,7 @@ class AIODockerActions {
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
 			'host' => null,
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
-			'ssl_key' => null,
-			'ssl_key_password' => null,
-			'ssl_cert' => null,
-			'ssl_cert_password' => null,
+			'haproxy_password' => null,
 			'gpu' => true,
 		];
 

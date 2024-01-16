@@ -9,6 +9,7 @@ The Deploy Daemon (DaemonConfig) is used to orchestrate the deployment of ExApps
 
 	Currently only Docker (``accepts-deploy-id: docker-install``) is supported as a Deploy Daemon.
 
+The recommended daemon configuration is using `AppAPI Docker Socket Proxy <https://github.com/cloud-py-api/docker-socket-proxy>`_.
 
 Default Deploy Daemon
 ^^^^^^^^^^^^^^^^^^^^^
@@ -47,10 +48,7 @@ Options
 
 	* ``--net [network-name]``  - ``[required]`` network name to bind docker container to (default: ``host``)
 	* ``--hostname HOST`` - ``[required]`` host to expose daemon to (defaults to ExApp appid)
-	* ``--ssl_key SSL_KEY`` - ``[optional]`` path to SSL key file (local absolute path)
-	* ``--ssl_password SSL_PASSWORD`` - ``[optional]`` SSL key password
-	* ``--ssl_cert SSL_CERT`` - ``[optional]`` path to SSL cert file (local absolute path)
-	* ``--ssl_cert_password SSL_CERT_PASSWORD`` - ``[optional]`` SSL cert password
+	* ``--haproxy_password HAPROXY_PASSWORD`` - ``[optional]`` password for AppAPI Docker Socket Proxy
 	* ``--gpu GPU`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``/dev/dri``)
 	* ``--set-default`` - ``[optional]`` set created daemon as default for ExApps installation
 
@@ -79,10 +77,7 @@ DeployConfig options
 	* ``net`` **[required]** - network name to bind docker container to (default: ``host``)
 	* ``host`` *[optional]* - in case Docker is on remote host, this should be a hostname of remote machine
 	* ``nextcloud_url`` **[required]** - Nextcloud URL (e.g. ``https://nextcloud.local``)
-	* ``ssl_key`` *[optional]* - path to SSL key file (local absolute path)
-	* ``ssl_key_password`` *[optional]* - SSL key password
-	* ``ssl_cert`` *[optional]* - path to SSL cert file (local absolute path)
-	* ``ssl_cert_password`` *[optional]* - SSL cert password
+	* ``haproxy_password`` *[optional]* - password for AppAPI Docker Socket Proxy
 	* ``gpus`` *[optional]* - GPU device to attach to the daemon (e.g. ``/dev/dri``)
 
 Unregister

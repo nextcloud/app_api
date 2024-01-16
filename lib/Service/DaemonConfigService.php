@@ -119,8 +119,4 @@ class DaemonConfigService {
 			return null;
 		}
 	}
-
-	public function defaultDaemonConfigAccessible() {
-
-	}
 }

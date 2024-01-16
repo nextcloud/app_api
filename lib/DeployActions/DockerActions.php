@@ -36,6 +36,8 @@ class DockerActions implements IDeployActions {
 		'NEXTCLOUD_URL',
 	];
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
+	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
+
 	private Client $guzzleClient;
 
 	public function __construct(
@@ -517,15 +519,8 @@ class DockerActions implements IDeployActions {
 		}
 
 		$guzzleParams['verify'] = $certs;
-		if (!empty($deployConfig['ssl_key'])) {
-			$guzzleParams['ssl_key'] = empty($deployConfig['ssl_key_password'])
-				? $deployConfig['ssl_key']
-				: [$deployConfig['ssl_key'], $deployConfig['ssl_key_password']];
-		}
-		if (!empty($deployConfig['ssl_cert'])) {
-			$guzzleParams['cert'] = empty($deployConfig['ssl_cert_password'])
-				? $deployConfig['ssl_cert']
-				: [$deployConfig['ssl_cert'], $deployConfig['ssl_cert_password']];
+		if (!empty($deployConfig['haproxy_password'])) {
+			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
 		}
 		return $guzzleParams;
 	}
@@ -573,10 +568,7 @@ class DockerActions implements IDeployActions {
 			'net' => 'host', // TODO: Add ExApp skeleton heartbeat check to verify default configuration works or manual configuration required
 			'host' => 'localhost',
 			'nextcloud_url' => str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL('/index.php')),
-			'ssl_key' => null,
-			'ssl_key_password' => null,
-			'ssl_cert' => null,
-			'ssl_cert_password' => null,
+			'haproxy_password' => null,
 			'gpu' => false,
 		];
 

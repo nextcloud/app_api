@@ -14,7 +14,8 @@ Orchestrates the deployment of applications as Docker containers.
 .. warning::
 
 	The administrator is responsible for the security actions taken to configure the Docker daemon connected to Nextcloud.
-	For example, look at the Docker Socket Proxy protected by strict rules (`like in AIO <#nextcloud-in-docker-aio-all-in-one>`_)
+	We recommend that you use the `AppAPI Docker Socket Proxy <https://github.com/cloud-py-api/docker-socket-proxy>`_ as the Deploy Daemon,
+	it has stringent security rules and is easy to configure, `like in AIO <#nextcloud-in-docker-aio-all-in-one>`_.
 
 There are several Docker Daemon Deploy configurations (example schemes):
 

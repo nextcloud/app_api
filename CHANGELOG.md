@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added filesplugin batch actions implementation. #203
 - Added MachineTranslation providers API. #210
+- Added daemon configuration templates.
 
 ### Changed
 

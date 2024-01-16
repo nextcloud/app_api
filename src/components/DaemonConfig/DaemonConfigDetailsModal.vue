@@ -20,13 +20,10 @@
 				<p><b>{{ t('app_api', 'Docker network:') }} </b>{{ daemon.deploy_config.net }}</p>
 				<p><b>{{ t('app_api', 'Host:') }} </b>{{ daemon.deploy_config.host || 'null' }}</p>
 				<p><b>{{ t('app_api', 'Nextcloud URL:') }} </b>{{ daemon.deploy_config.nextcloud_url }}</p>
-
-				<h3>{{ t('app_api', 'SSL params') }}</h3>
-				<p><b>{{ t('app_api', 'SSL key:') }} </b>{{ daemon.deploy_config.ssl_key || 'null' }}</p>
-				<p><b>{{ t('app_api', 'SSL key pass:') }} </b>{{ daemon.deploy_config.ssl_key_password || 'null' }}</p>
-				<p><b>{{ t('app_api', 'SSL cert:') }} </b>{{ daemon.deploy_config.ssl_cert || 'null' }}</p>
-				<p><b>{{ t('app_api', 'SSL cert pass:') }} </b>{{ daemon.deploy_config.ssl_cert_password || 'null' }}</p>
-				<p><b>{{ t('app_api', 'GPUs support:') }} </b>{{ daemon.deploy_config?.gpu || 'false' }}</p>
+				<p v-if="daemon.deploy_config.haproxy_password">
+					<b>{{ t('app_api', 'HaProxy password:') }} </b>
+					{{ daemon.deploy_config?.haproxy_password }}
+				</p>
 
 				<div class="actions">
 					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install'" @click="verifyConnection">
