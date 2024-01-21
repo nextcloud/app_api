@@ -8,20 +8,6 @@
 			<p>{{ t('app_api', 'The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud.') }}</p>
 		</div>
 		<NcSettingsSection
-			:name="t('app_api', 'ExApps')"
-			:description="t('app_api', 'ExApps management similar to default apps and available by the link below.')">
-			<NcButton
-				type="primary"
-				:href="linkToExAppsManagement()"
-				:aria-label="t('app_api', 'External Apps management')"
-				style="margin: 20px 0;">
-				{{ exAppsManagementButtonText }}
-				<template #icon>
-					<OpenInNew :size="20" />
-				</template>
-			</NcButton>
-		</NcSettingsSection>
-		<NcSettingsSection
 			:name="t('app_api', 'Deploy Daemons')"
 			:description="t('app_api', 'Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon.')"
 			:doc-url="'https://cloud-py-api.github.io/app_api/CreationOfDeployDaemon.html'">
@@ -41,10 +27,7 @@ import { delay } from '../utils.js'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 
 import NcSettingsSection from '@nextcloud/vue/dist/Components/NcSettingsSection.js'
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-
-import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
 
 import AppAPIIcon from './icons/AppAPIIcon.vue'
 import DaemonConfigList from './DaemonConfig/DaemonConfigList.vue'
@@ -53,8 +36,6 @@ export default {
 	name: 'AdminSettings',
 	components: {
 		NcSettingsSection,
-		NcButton,
-		OpenInNew,
 		DaemonConfigList,
 		AppAPIIcon,
 		NcNoteCard,
@@ -64,7 +45,6 @@ export default {
 			state: loadState('app_api', 'admin-initial-data'),
 			daemons: [],
 			default_daemon_config: '',
-			docker_socket_accessible: false,
 		}
 	},
 	computed: {
@@ -80,7 +60,6 @@ export default {
 			const state = loadState('app_api', 'admin-initial-data')
 			this.daemons = state.daemons
 			this.default_daemon_config = state.default_daemon_config
-			this.docker_socket_accessible = state.docker_socket_accessible
 		},
 		onInput() {
 			delay(() => {

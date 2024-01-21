@@ -22,10 +22,10 @@ use OCP\IRequest;
 class DaemonConfigController extends ApiController {
 
 	public function __construct(
-		IRequest $request,
-		private IConfig $config,
-		private DaemonConfigService $daemonConfigService,
-		private DockerActions $dockerActions,
+		IRequest                             $request,
+		private readonly IConfig             $config,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly DockerActions       $dockerActions,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -64,7 +64,8 @@ class DaemonConfigController extends ApiController {
 	}
 
 	#[NoCSRFRequired]
-	public function unregisterDaemonConfig(string $name): Response {
+	public function unregisterDaemonConfig(string $name, bool $removeExApps = false): Response {
+		// TODO: Add removal of ExApps if $removeExApps is set to true
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
 		if ($daemonConfig->getName() === $defaultDaemonConfig) {
@@ -80,6 +81,28 @@ class DaemonConfigController extends ApiController {
 	#[NoCSRFRequired]
 	public function verifyDaemonConnection(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
+			return new JSONResponse([
+				'error' => sprintf('Only "%s" is supported', $this->dockerActions->getAcceptsDeployId()),
+			]);
+		}
+		$this->dockerActions->initGuzzleClient($daemonConfig);
+		$dockerDaemonAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
+		return new JSONResponse([
+			'success' => $dockerDaemonAccessible,
+		]);
+	}
+
+	#[NoCSRFRequired]
+	public function checkDaemonConnection(array $daemonParams): Response {
+		$daemonConfig = new DaemonConfig([
+			'name' => $daemonParams['name'],
+			'display_name' => $daemonParams['display_name'],
+			'accepts_deploy_id' => $daemonParams['accepts_deploy_id'],
+			'protocol' => $daemonParams['protocol'],
+			'host' => $daemonParams['host'],
+			'deploy_config' => $daemonParams['deploy_config'],
+		]);
 		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
 			return new JSONResponse([
 				'error' => sprintf('Only "%s" is supported', $this->dockerActions->getAcceptsDeployId()),

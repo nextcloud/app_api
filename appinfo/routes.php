@@ -47,6 +47,7 @@ return [
 		['name' => 'DaemonConfig#registerDaemonConfig', 'url' => '/daemons', 'verb' => 'POST'],
 		['name' => 'DaemonConfig#unregisterDaemonConfig', 'url' => '/daemons/{name}', 'verb' => 'DELETE'],
 		['name' => 'DaemonConfig#verifyDaemonConnection', 'url' => '/daemons/{name}/check', 'verb' => 'POST'],
+		['name' => 'DaemonConfig#checkDaemonConnection', 'url' => '/daemons/verify_connection', 'verb' => 'POST'],
 		['name' => 'DaemonConfig#updateDaemonConfig', 'url' => '/daemons', 'verb' => 'PUT'],
 	],
 	'ocs' => [

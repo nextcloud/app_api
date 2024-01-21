@@ -36,7 +36,7 @@
 			style="padding: 20px;"
 			:open.sync="showDeleteDialog"
 			:content-classes="'confirm-delete-dialog'"
-			:name="t('app_api', 'Confirm deletion')">
+			:name="t('app_api', 'Confirm Deploy daemon deletion')">
 			<template #actions>
 				<NcDialogButton :label="t('app_api', 'Cancel')" :callback="() => showDeleteDialog = false">
 					<template #icon>
@@ -52,11 +52,13 @@
 			<template #default>
 				<div class="confirm-delete-dialog">
 					<p>{{ t('app_api', 'Are you sure you want delete Deploy Daemon?') }}</p>
-					<NcNoteCard>
+					<NcCheckboxRadioSwitch :checked.sync="removeExAppsOnDaemonDelete"
+						:placeholder="t('app_api', 'Remove all ExApps installed on this daemon')"
+						:aria-label="t('app_api', 'Remove all ExApps installed on this daemon')">
 						<template #default>
-							{{ t('app_api', 'This action will not remove installed ExApps on this daemon') }}
+							{{ t('app_api', 'Remove all ExApps installed on this daemon') }}
 						</template>
-					</NcNoteCard>
+					</NcCheckboxRadioSwitch>
 				</div>
 			</template>
 		</NcDialog>
@@ -72,9 +74,9 @@ import NcDialog from '@nextcloud/vue/dist/Components/NcDialog.js'
 import NcDialogButton from '@nextcloud/vue/dist/Components/NcDialogButton.js'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Check from 'vue-material-design-icons/Check.vue'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
 
 import CheckBold from 'vue-material-design-icons/CheckBold.vue'
 
@@ -91,8 +93,8 @@ export default {
 		NcDialogButton,
 		Cancel,
 		Check,
-		NcNoteCard,
 		DaemonConfigDetailsModal,
+		NcCheckboxRadioSwitch,
 	},
 	props: {
 		daemon: {
@@ -120,6 +122,7 @@ export default {
 			settingDefault: false,
 			deleting: false,
 			showDeleteDialog: false,
+			removeExAppsOnDaemonDelete: false,
 		}
 	},
 	computed: {
@@ -153,7 +156,7 @@ export default {
 		},
 		_deleteDaemonConfig(daemon) {
 			this.deleting = true
-			return axios.delete(generateUrl(`/apps/app_api/daemons/${daemon.name}`))
+			return axios.delete(generateUrl(`/apps/app_api/daemons/${daemon.name}?removeExApps=${this.removeExAppsOnDaemonDelete}`))
 				.then(res => {
 					if (res.data.success) {
 						this.getAllDaemons()
@@ -179,5 +182,9 @@ export default {
 
 .confirm-delete-dialog {
 	padding: 20px;
+
+	p {
+		margin-bottom: 10px;
+	}
 }
 </style>
