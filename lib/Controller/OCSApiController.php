@@ -16,6 +16,8 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
+use OCP\IUser;
+use OCP\IUserManager;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
@@ -23,9 +25,10 @@ class OCSApiController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest        $request,
-		private AppAPIService   $service,
-		private LoggerInterface $logger,
+		IRequest                         $request,
+		private readonly AppAPIService   $service,
+		private readonly LoggerInterface $logger,
+		private readonly IUserManager    $userManager,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -66,7 +69,12 @@ class OCSApiController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getNCUsersList(): DataResponse {
-		return new DataResponse($this->service->getNCUsersList(), Http::STATUS_OK);
+		return new DataResponse(
+			array_map(function (IUser $user) {
+				return $user->getUID();
+			}, $this->userManager->searchDisplayName('')),
+			Http::STATUS_OK
+		);
 	}
 
 	/**

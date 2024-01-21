@@ -18,8 +18,8 @@ class AIODockerActions {
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
 
 	public function __construct(
-		private IConfig $config,
-		private DaemonConfigService $daemonConfigService
+		private readonly IConfig    $config,
+		private readonly DaemonConfigService $daemonConfigService
 	) {
 	}
 
@@ -44,7 +44,6 @@ class AIODockerActions {
 
 		$deployConfig = [
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
-			'host' => null,
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
 			'haproxy_password' => null,
 			'gpu' => false,
@@ -81,7 +80,6 @@ class AIODockerActions {
 
 		$deployConfig = [
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
-			'host' => null,
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
 			'haproxy_password' => null,
 			'gpu' => true,

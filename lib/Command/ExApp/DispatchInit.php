@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp;
 
+use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\AppAPIService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class DispatchInit extends Command {
 
 	public function __construct(
-		private AppAPIService        $service,
+		private readonly AppAPIService $service,
 	) {
 		parent::__construct();
 	}

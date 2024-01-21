@@ -510,14 +510,18 @@ class ExAppsPageController extends Controller {
 			return false;
 		}
 
-		if (!$this->service->heartbeatExApp([
-			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
-			'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
-			'port' => explode('=', $deployParams['container_params']['env'][7])[1],
-		])) {
+		$auth = [];
+		$exAppUrl = $this->dockerActions->resolveExAppUrl(
+			$appId,
+			$daemonConfig->getProtocol(),
+			$daemonConfig->getHost(),
+			$daemonConfig->getDeployConfig(),
+			(int) explode('=', $deployParams['container_params']['env'][7])[1],
+			$auth,
+		);
+		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
 			return false;
 		}
-
 		return true;
 	}
 
@@ -529,7 +533,6 @@ class ExAppsPageController extends Controller {
 			'version' => $exAppInfo['version'],
 			'name' => $exAppInfo['name'],
 			'daemon_config_name' => $daemonConfig->getName(),
-			'protocol' => $exAppInfo['protocol'] ?? 'http',
 			'port' => (int) $exAppInfo['port'],
 			'host' => $exAppInfo['host'],
 			'secret' => $exAppInfo['secret'],
@@ -540,9 +543,14 @@ class ExAppsPageController extends Controller {
 		}
 
 		// Setup system flag
-		$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
-		if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
-			$this->exAppUsersService->setupSystemAppFlag($exApp);
+		try {
+			$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
+			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
+				$this->exAppUsersService->setupSystemAppFlag($exApp);
+			}
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while setting app system flag: %s', $e->getMessage()));
+			return false;
 		}
 
 		// Register ExApp ApiScopes
@@ -635,11 +643,27 @@ class ExAppsPageController extends Controller {
 
 		$exApp = $this->service->getExApp($appId);
 		// 5. Heartbeat ExApp
-		if ($this->service->heartbeatExApp([
-			'protocol' => $exAppInfo['protocol'],
-			'host' => $exAppInfo['host'],
-			'port' => (int) $exAppInfo['port'],
-		])) {
+		$exAppProtocol = $this->dockerActions->resolveExAppProtocol(
+			$daemonConfig->getProtocol(),
+			$daemonConfig->getHost(),
+			$daemonConfig->getDeployConfig(),
+		);
+		$exAppHost = $this->dockerActions->resolveExAppHost(
+			$appId,
+			$daemonConfig->getProtocol(),
+			$daemonConfig->getHost(),
+			$daemonConfig->getDeployConfig(),
+		);
+		if ($this->service->heartbeatExApp(
+			$exAppProtocol,
+			$exAppHost,
+			(int) $exAppInfo['port'],
+			$this->dockerActions->getAdditionalAuth(
+				$daemonConfig->getProtocol(),
+				$daemonConfig->getHost(),
+				$daemonConfig->getDeployConfig(),
+			),
+		)) {
 			// 6. Dispatch init step on ExApp side
 			if (!$this->service->dispatchExAppInit($exApp, true)) {
 				return new JSONResponse([
@@ -658,7 +682,7 @@ class ExAppsPageController extends Controller {
 				'appid' => $appId,
 				'status' => ['progress' => 0],
 				'systemApp' => filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN),
-				'exAppUrl' => AppAPIService::getExAppUrl($exAppInfo['protocol'], $exAppInfo['host'], (int) $exAppInfo['port']),
+				'exAppUrl' => AppAPIService::getExAppUrl($exAppProtocol, $exAppHost, (int) $exAppInfo['port']),
 				'scopes' => $scopes,
 			]
 		]);

@@ -36,7 +36,6 @@ class RegisterDaemon extends Command {
 
 		// daemon-config settings
 		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'DeployConfig, the name of the docker network to attach App to');
-		$this->addOption('hostname', null, InputOption::VALUE_REQUIRED, 'DeployConfig, hostname to reach App (only when "--net=host")');
 		$this->addOption('haproxy_password', null, InputOption::VALUE_REQUIRED, 'AppAPI Docker Socket Proxy password for HAProxy Basic auth');
 
 		$this->addOption('gpu', null, InputOption::VALUE_NONE, 'Enable support of GPUs for containers');
@@ -56,7 +55,6 @@ class RegisterDaemon extends Command {
 
 		$deployConfig = [
 			'net' => $input->getOption('net') ?? 'host',
-			'host' => $input->getOption('hostname'),
 			'nextcloud_url' => $nextcloudUrl,
 			'haproxy_password' => $input->getOption('haproxy_password'),
 			'gpu' => $input->getOption('gpu') ?? false,

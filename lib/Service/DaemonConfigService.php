@@ -23,9 +23,9 @@ class DaemonConfigService {
 	private ICache $cache;
 
 	public function __construct(
-		private LoggerInterface $logger,
-		ICacheFactory $cacheFactory,
-		private DaemonConfigMapper $mapper,
+		private readonly LoggerInterface    $logger,
+		ICacheFactory                       $cacheFactory,
+		private readonly DaemonConfigMapper $mapper,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/daemon_configs');
 	}

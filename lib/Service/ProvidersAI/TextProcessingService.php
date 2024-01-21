@@ -242,7 +242,7 @@ class TextProcessingService {
 		return in_array($getActionType, array_keys(self::TASK_TYPES));
 	}
 
-	private function resetCacheEnabled(): void {
+	public function resetCacheEnabled(): void {
 		$this->cache->remove('/ex_text_processing_providers');
 	}
 

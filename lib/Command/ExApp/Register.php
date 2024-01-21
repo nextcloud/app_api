@@ -27,14 +27,14 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class Register extends Command {
 
 	public function __construct(
-		private AppAPIService        $service,
-		private DaemonConfigService  $daemonConfigService,
-		private ExAppApiScopeService $exAppApiScopeService,
-		private ExAppScopesService   $exAppScopesService,
-		private ExAppUsersService    $exAppUsersService,
-		private DockerActions        $dockerActions,
-		private ManualActions        $manualActions,
-		private IConfig              $config,
+		private readonly AppAPIService        $service,
+		private readonly DaemonConfigService  $daemonConfigService,
+		private readonly ExAppApiScopeService $exAppApiScopeService,
+		private readonly ExAppScopesService   $exAppScopesService,
+		private readonly ExAppUsersService    $exAppUsersService,
+		private readonly DockerActions        $dockerActions,
+		private readonly ManualActions        $manualActions,
+		private readonly IConfig              $config,
 	) {
 		parent::__construct();
 	}
@@ -88,7 +88,16 @@ class Register extends Command {
 				'json-info' => $exAppJson,
 			]);
 
-			if (!$this->manualActions->healthcheck($exAppInfo)) {
+			$auth = [];
+			$exAppUrl = $this->dockerActions->resolveExAppUrl(
+				$appId,
+				$daemonConfig->getProtocol(),
+				$daemonConfig->getHost(),
+				$daemonConfig->getDeployConfig(),
+				(int) $exAppInfo['port'],
+				$auth,
+			);
+			if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
 				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure ExApp was started and initialized manually.', $appId));
 				return 2;
 			}
@@ -100,17 +109,13 @@ class Register extends Command {
 		$appId = $exAppInfo['appid'];
 		$version = $exAppInfo['version'];
 		$name = $exAppInfo['name'];
-		$protocol = $exAppInfo['protocol'] ?? 'http';
 		$port = (int) $exAppInfo['port'];
-		$host = $exAppInfo['host'];
 		$secret = $exAppInfo['secret'];
 
 		$exApp = $this->service->registerExApp($appId, [
 			'version' => $version,
 			'name' => $name,
 			'daemon_config_name' => $daemonConfigName,
-			'protocol' => $protocol,
-			'host' => $host,
 			'port' => $port,
 			'secret' => $secret,
 		]);

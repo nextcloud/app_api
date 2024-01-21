@@ -41,14 +41,14 @@ class DockerActions implements IDeployActions {
 	private Client $guzzleClient;
 
 	public function __construct(
-		private LoggerInterface     $logger,
-		private IConfig             $config,
-		private  ICertificateManager $certificateManager,
-		private IAppManager         $appManager,
-		private ISecureRandom       $random,
-		private IURLGenerator       $urlGenerator,
-		private AppAPIService       $service,
-		private DaemonConfigService $daemonConfigService,
+		private readonly LoggerInterface     $logger,
+		private readonly IConfig             $config,
+		private readonly ICertificateManager $certificateManager,
+		private readonly IAppManager         $appManager,
+		private readonly ISecureRandom       $random,
+		private readonly IURLGenerator       $urlGenerator,
+		private readonly AppAPIService       $service,
+		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}
 
@@ -454,21 +454,30 @@ class DockerActions implements IDeployActions {
 			'name' => $aeEnvs['APP_DISPLAY_NAME'],
 			'version' => $aeEnvs['APP_VERSION'],
 			'secret' => $aeEnvs['APP_SECRET'],
-			'host' => $this->resolveDeployExAppHost($appId, $daemonConfig),
 			'port' => $aeEnvs['APP_PORT'],
-			'protocol' => $aeEnvs['APP_PROTOCOL'],
 			'system_app' => $aeEnvs['IS_SYSTEM_APP'] ?? false,
 		];
 	}
 
-	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string {
-		$deployConfig = $daemonConfig->getDeployConfig();
-		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
-			$host = $deployConfig['host'] ?? 'localhost';
-		} else {
-			$host = $appId;
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	): string {
+		if ($protocol == 'https') {
+			$exAppHost = $host;
 		}
-		return $host;
+		elseif (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
+			$exAppHost = 'localhost';
+		}
+		else {
+			$exAppHost = $appId;
+		}
+		if (empty($deployConfig['haproxy_password'])) {
+			$auth = [];
+		}
+		else {
+			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
+		}
+		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);
 	}
 
 	public function containerStateHealthy(array $containerInfo): bool {
@@ -566,7 +575,6 @@ class DockerActions implements IDeployActions {
 
 		$deployConfig = [
 			'net' => 'host', // TODO: Add ExApp skeleton heartbeat check to verify default configuration works or manual configuration required
-			'host' => 'localhost',
 			'nextcloud_url' => str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL('/index.php')),
 			'haproxy_password' => null,
 			'gpu' => false,

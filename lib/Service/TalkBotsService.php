@@ -13,9 +13,9 @@ use OCP\Security\ISecureRandom;
 class TalkBotsService {
 
 	public function __construct(
-		private ExAppConfigService $exAppConfigService,
-		private IEventDispatcher   $dispatcher,
-		private ISecureRandom      $random,
+		private readonly ExAppConfigService $exAppConfigService,
+		private readonly IEventDispatcher   $dispatcher,
+		private readonly ISecureRandom      $random,
 	) {
 	}
 
@@ -61,6 +61,7 @@ class TalkBotsService {
 	}
 
 	private function getExAppTalkBotConfig(ExApp $exApp, string $route): array {
+		$auth = [];
 		$url = AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
 		$id = $this->getExAppTalkBotHash($exApp, $route);
 

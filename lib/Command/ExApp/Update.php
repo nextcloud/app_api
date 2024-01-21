@@ -20,18 +20,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Update extends Command {
-	private AppAPIService $service;
 
 	public function __construct(
-		AppAPIService        $service,
-		private ExAppScopesService   $exAppScopeService,
-		private ExAppApiScopeService $exAppApiScopeService,
-		private DaemonConfigService  $daemonConfigService,
-		private DockerActions        $dockerActions,
+		private readonly AppAPIService        $service,
+		private readonly ExAppScopesService   $exAppScopeService,
+		private readonly ExAppApiScopeService $exAppApiScopeService,
+		private readonly DaemonConfigService  $daemonConfigService,
+		private readonly DockerActions        $dockerActions,
 	) {
 		parent::__construct();
-
-		$this->service = $service;
 	}
 
 	protected function configure(): void {
@@ -137,13 +134,16 @@ class Update extends Command {
 					return 1;
 				}
 
-				$exAppUrlParams = [
-					'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
-					'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
-					'port' => $deployParams['container_params']['port'],
-				];
-
-				if (!$this->service->heartbeatExApp($exAppUrlParams)) {
+				$auth = [];
+				$exAppUrl = $this->dockerActions->resolveExAppUrl(
+					$appId,
+					$daemonConfig->getProtocol(),
+					$daemonConfig->getHost(),
+					$daemonConfig->getDeployConfig(),
+					(int) $deployParams['container_params']['port'],
+					$auth,
+				);
+				if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
 					$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and configured correctly to be reachable by Nextcloud.', $appId));
 					return 1;
 				}
