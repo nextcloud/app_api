@@ -14,8 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class DispatchInit extends Command {
 
 	public function __construct(
-		private readonly AppAPIService $service,
-		private readonly ExAppService  $exAppService,
+		private readonly AppAPIService 		 $service,
+		private readonly ExAppService        $exAppService,
 	) {
 		parent::__construct();
 	}

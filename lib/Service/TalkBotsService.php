@@ -8,15 +8,16 @@ use OCA\AppAPI\Db\ExApp;
 use OCA\Talk\Events\BotInstallEvent;
 use OCA\Talk\Events\BotUninstallEvent;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\IURLGenerator;
 use OCP\Security\ISecureRandom;
 
 class TalkBotsService {
 
 	public function __construct(
-		private readonly ExAppConfigService $exAppConfigService,
-		private readonly IEventDispatcher   $dispatcher,
-		private readonly ISecureRandom      $random,
-		private readonly AppAPIService		$service,
+		private readonly ExAppConfigService  $exAppConfigService,
+		private readonly IEventDispatcher    $dispatcher,
+		private readonly ISecureRandom       $random,
+		private readonly IURLGenerator       $urlGenerator,
 	) {
 	}
 
@@ -57,13 +58,11 @@ class TalkBotsService {
 		if ($this->exAppConfigService->deleteAppConfigValues([$id], $exApp->getAppid()) !== 1) {
 			return null;
 		}
-
 		return true;
 	}
 
 	private function getExAppTalkBotConfig(ExApp $exApp, string $route): array {
-		$auth = [];
-		$url = $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth) . $route;
+		$url = $this->getProxyUrl($exApp, $route);
 		$id = $this->getExAppTalkBotHash($exApp, $route);
 
 		$exAppConfig = $this->exAppConfigService->getAppConfig($exApp->getAppid(), $id);
@@ -92,5 +91,11 @@ class TalkBotsService {
 
 	private function getExAppTalkBotHash(ExApp $exApp, string $route): string {
 		return sha1($exApp->getAppid() . '_' . $route);
+	}
+
+	private function getProxyUrl(ExApp $exApp, string $route): string {
+		return sprintf(
+			$this->urlGenerator->getAbsoluteURL('') . '/index.php/apps/app_api/proxy/%s%s', $exApp->getAppid(), $route
+		);
 	}
 }

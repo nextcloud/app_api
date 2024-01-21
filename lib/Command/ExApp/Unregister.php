@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\DeployActions\DockerActions;
-use OCA\AppAPI\Service\AppAPIService;
 
+use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
@@ -18,10 +18,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Unregister extends Command {
 
 	public function __construct(
-		private readonly AppAPIService       $service,
+		private readonly AppAPIService 		 $service,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions       $dockerActions,
-		private readonly ExAppService		 $exAppService,
+		private readonly ExAppService        $exAppService,
 	) {
 		parent::__construct();
 	}

@@ -20,8 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Deploy extends Command {
 
 	public function __construct(
-		private readonly AppAPIService       $service,
-		private readonly ExAppService		 $exAppService,
+		private readonly AppAPIService 		 $service,
+		private readonly ExAppService        $exAppService,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions       $dockerActions,
 		private readonly IConfig             $config,

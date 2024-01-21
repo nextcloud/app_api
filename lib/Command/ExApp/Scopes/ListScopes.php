@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp\Scopes;
 
 use OCA\AppAPI\Db\ExAppScope;
-use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppScopesService;
 

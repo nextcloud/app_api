@@ -9,7 +9,7 @@ use GuzzleHttp\Exception\GuzzleException;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
-use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\AppAPICommonService;
 
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
@@ -48,8 +48,8 @@ class DockerActions implements IDeployActions {
 		private readonly IAppManager         $appManager,
 		private readonly ISecureRandom       $random,
 		private readonly IURLGenerator       $urlGenerator,
-		private readonly AppAPIService       $service,
-		private readonly ExAppService		 $exAppService,
+		private readonly AppAPICommonService $service,
+		private readonly ExAppService        $exAppService,
 		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}

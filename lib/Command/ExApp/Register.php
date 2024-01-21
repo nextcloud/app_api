@@ -28,7 +28,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class Register extends Command {
 
 	public function __construct(
-		private readonly AppAPIService        $service,
+		private readonly AppAPIService  	  $service,
 		private readonly DaemonConfigService  $daemonConfigService,
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly ExAppScopesService   $exAppScopesService,
@@ -36,7 +36,7 @@ class Register extends Command {
 		private readonly DockerActions        $dockerActions,
 		private readonly ManualActions        $manualActions,
 		private readonly IConfig              $config,
-		private readonly ExAppService		  $exAppService,
+		private readonly ExAppService         $exAppService,
 	) {
 		parent::__construct();
 	}

@@ -9,7 +9,6 @@ use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
-use OCP\App\IAppManager;
 use OCP\AppFramework\Http;
 use OCP\DB\Exception;
 use OCP\Http\Client\IClient;
@@ -37,7 +36,6 @@ class AppAPIService {
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
 		private readonly IUserManager            $userManager,
-		private readonly IAppManager             $appManager,
 		private readonly ExNotificationsManager  $exNotificationsManager,
 		private readonly ExAppService			 $exAppService,
 		private readonly ExAppUsersService       $exAppUsersService,
@@ -46,6 +44,7 @@ class AppAPIService {
 		private readonly ExAppConfigService      $exAppConfigService,
 		private readonly DockerActions        	 $dockerActions,
 		private readonly ManualActions        	 $manualActions,
+		private readonly AppAPICommonService	 $commonService,
 	) {
 		$this->client = $clientService->newClient();
 	}
@@ -94,9 +93,9 @@ class AppAPIService {
 			}
 
 			if (isset($options['headers']) && is_array($options['headers'])) {
-				$options['headers'] = [...$options['headers'], ...$this->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret())];
+				$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret())];
 			} else {
-				$options['headers'] = $this->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret());
+				$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret());
 			}
 			$options['nextcloud'] = [
 				'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
@@ -171,22 +170,6 @@ class AppAPIService {
 			}
 		}
 		return $paramsContent . http_build_query($params);
-	}
-
-	public function isAppHostNameLocal(string $hostname): bool {
-		return $hostname === '127.0.0.1' || $hostname === 'localhost' || $hostname === '::1';
-	}
-
-	public function buildExAppHost(array $deployConfig): string {
-		if (isset($deployConfig['net'])) {
-			if (($deployConfig['net'] === 'host') &&
-				(isset($deployConfig['host']) && $this->isAppHostNameLocal($deployConfig['host']))
-			) {
-				return '127.0.0.1';  # ExApp using this host network, it is visible for Nextcloud on loop-back adapter
-			}
-			return '0.0.0.0';
-		}
-		return '127.0.0.1';  # fallback to loop-back adapter
 	}
 
 	/**
@@ -314,16 +297,6 @@ class AppAPIService {
 		return true;
 	}
 
-	private function buildAppAPIAuthHeaders(?IRequest $request, ?string $userId, string $appId, string $appVersion, string $appSecret): array {
-		return [
-			'AA-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
-			'EX-APP-ID' => $appId,
-			'EX-APP-VERSION' => $appVersion,
-			'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $appSecret),
-			'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
-		];
-	}
-
 	private function buildRequestInfo(IRequest $request): array {
 		$headers = [];
 		$aeHeadersList = [
@@ -421,7 +394,7 @@ class AppAPIService {
 		$auth = [];
 		$initUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth) . '/init';
 		$options = [
-			'headers' => $this->buildAppAPIAuthHeaders(null, null, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret()),
+			'headers' => $this->commonService->buildAppAPIAuthHeaders(null, null, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret()),
 			'nextcloud' => [
 				'allow_local_address' => true,
 			],

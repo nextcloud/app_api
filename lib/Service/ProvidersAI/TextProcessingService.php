@@ -9,7 +9,7 @@ use OCA\AppAPI\Db\TextProcessing\TextProcessingProvider;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderMapper;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueue;
 use OCA\AppAPI\Db\TextProcessing\TextProcessingProviderQueueMapper;
-use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\AppAPICommonService;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -182,8 +182,8 @@ class TextProcessingService {
 			}
 
 			public function process(string $prompt, float $maxExecutionTime = 0): string {
-				/** @var AppAPIService $service */
-				$service = $this->serverContainer->get(AppAPIService::class);
+				/** @var AppAPICommonService $service */
+				$service = $this->serverContainer->get(AppAPICommonService::class);
 				$mapper = $this->serverContainer->get(TextProcessingProviderQueueMapper::class);
 				$route = $this->provider->getActionHandler();
 				$queueRecord = $mapper->insert(new TextProcessingProviderQueue(['created_time' => time()]));

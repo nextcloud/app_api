@@ -23,8 +23,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class Update extends Command {
 
 	public function __construct(
-		private readonly AppAPIService        $service,
-		private readonly ExAppService		  $exAppService,
+		private readonly AppAPIService  	  $service,
+		private readonly ExAppService         $exAppService,
 		private readonly ExAppScopesService   $exAppScopeService,
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DaemonConfigService  $daemonConfigService,
