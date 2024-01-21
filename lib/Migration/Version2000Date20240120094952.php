@@ -22,10 +22,19 @@ class Version2000Date20240120094952 extends SimpleMigrationStep {
 		$schema = $schemaClosure();
 
 		$table = $schema->getTable('ex_apps');
-		$table->dropColumn('protocol');
-		$table->dropColumn('host');
+		if ($table->hasColumn('protocol')) {
+			$table->dropColumn('protocol');
+		}
+		if ($table->hasColumn('host')) {
+			$table->dropColumn('host');
+		}
 		$table->dropIndex('ex_apps_c_port__idx');
 		$table->addUniqueIndex(['daemon_config_name', 'port'], 'ex_apps_c_port__idx');
+
+		$table = $schema->getTable('ex_apps_daemons');
+		$table->changeColumn('deploy_config', [
+			'notnull' => true,
+		]);
 
 		return $schema;
 	}

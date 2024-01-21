@@ -117,8 +117,6 @@ class ExApp extends Entity implements JsonSerializable {
 		}
 		if (isset($params['deploy_config'])) {
 			$this->setDeployConfig($params['deploy_config']);
-		} else {
-			$this->setDeployConfig([]);
 		}
 		if (isset($params['accepts_deploy_id'])) {
 			$this->setAcceptsDeployId($params['accepts_deploy_id']);

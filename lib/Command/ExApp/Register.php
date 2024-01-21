@@ -91,7 +91,7 @@ class Register extends Command {
 			]);
 
 			$auth = [];
-			$exAppUrl = $this->dockerActions->resolveExAppUrl(
+			$exAppUrl = $this->manualActions->resolveExAppUrl(
 				$appId,
 				$daemonConfig->getProtocol(),
 				$daemonConfig->getHost(),
