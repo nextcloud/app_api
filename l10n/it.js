@@ -48,7 +48,7 @@ OC.L10N.register(
     "Disabled apps" : "Applicazioni disabilitate",
     "Updates" : "Aggiornamenti",
     "Featured apps" : "Applicazioni in evidenza",
-    "Supported apps" : "App supportate",
+    "Supported apps" : "Applicazioni supportate",
     "Disable" : "Disabilita",
     "Allow untested app" : "Consenti applicazione non verificata",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Questa applicazione non è marcata come compatibile con la tua versione di Nextcloud. Se continui sarai ancora in grado di installare l'applicazione. Nota che l'applicazione potrebbe non funzionare come previsto.",
