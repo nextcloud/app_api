@@ -12,6 +12,7 @@ use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Service\AppAPIService;
 
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
@@ -48,6 +49,7 @@ class DockerActions implements IDeployActions {
 		private readonly ISecureRandom       $random,
 		private readonly IURLGenerator       $urlGenerator,
 		private readonly AppAPIService       $service,
+		private readonly ExAppService		 $exAppService,
 		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}
@@ -337,13 +339,13 @@ class DockerActions implements IDeployActions {
 		if (isset($params['container_info'])) {
 			$containerInfo = $params['container_info'];
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
-			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
+			$port = $oldEnvs['APP_PORT'] ?? $this->exAppService->getExAppRandomPort();
 			$secret = $oldEnvs['APP_SECRET'];
 			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
 			// Preserve previous device requests (GPU)
 			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'] ?? [];
 		} else {
-			$port = $this->service->getExAppRandomPort();
+			$port = $this->exAppService->getExAppRandomPort();
 			if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
 				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
 			} else {
@@ -464,17 +466,14 @@ class DockerActions implements IDeployActions {
 	): string {
 		if ($protocol == 'https') {
 			$exAppHost = $host;
-		}
-		elseif (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
+		} elseif (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
 			$exAppHost = 'localhost';
-		}
-		else {
+		} else {
 			$exAppHost = $appId;
 		}
 		if (empty($deployConfig['haproxy_password'])) {
 			$auth = [];
-		}
-		else {
+		} else {
 			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
 		}
 		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);

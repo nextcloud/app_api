@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExAppConfig;
 
-use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppConfigService;
 
+use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,7 +17,10 @@ class ListConfig extends Command {
 
 	private const SENSITIVE_VALUE = '***REMOVED SENSITIVE VALUE***';
 
-	public function __construct(private AppAPIService $service, private ExAppConfigService $appConfigService) {
+	public function __construct(
+		private readonly ExAppService       $service,
+		private readonly ExAppConfigService $appConfigService
+	) {
 		parent::__construct();
 	}
 

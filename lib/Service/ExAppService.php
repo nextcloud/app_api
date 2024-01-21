@@ -22,6 +22,8 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
+use OCP\IUser;
+use OCP\IUserManager;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
@@ -34,6 +36,7 @@ class ExAppService {
 		private readonly LoggerInterface         $logger,
 		ICacheFactory                            $cacheFactory,
 		private readonly ISecureRandom           $random,
+		private readonly IUserManager    		 $userManager,
 		private readonly ExAppFetcher            $exAppFetcher,
 		private readonly ExAppArchiveFetcher     $exAppArchiveFetcher,
 		private readonly ExAppMapper             $exAppMapper,
@@ -214,6 +217,12 @@ class ExAppService {
 		return $exApps;
 	}
 
+	public function getNCUsersList(): ?array {
+		return array_map(function (IUser $user) {
+			return $user->getUID();
+		}, $this->userManager->searchDisplayName(''));
+	}
+
 	/**
 	 * Update ExApp info (version, name, system app flag changes after update)
 	 */
@@ -333,8 +342,8 @@ class ExAppService {
 		$exApps = $this->exAppFetcher->get();
 		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($exApp) {
 			return $exAppItem['id'] === $exApp->getAppid() && count(array_filter($exAppItem['releases'], function (array $release) use ($exApp) {
-					return $release['version'] === $exApp->getVersion();
-				})) === 1;
+				return $release['version'] === $exApp->getVersion();
+			})) === 1;
 		});
 		if (count($exAppAppstoreData) === 1) {
 			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);

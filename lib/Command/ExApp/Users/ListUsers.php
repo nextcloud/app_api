@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp\Users;
 
-use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ExAppUsersService;
 
 use Symfony\Component\Console\Command\Command;
@@ -15,8 +15,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ListUsers extends Command {
 
 	public function __construct(
-		private AppAPIService     $service,
-		private ExAppUsersService $exAppUserService,
+		private readonly ExAppService      $service,
+		private readonly ExAppUsersService $exAppUserService,
 	) {
 		parent::__construct();
 	}

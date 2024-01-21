@@ -16,6 +16,7 @@ class TalkBotsService {
 		private readonly ExAppConfigService $exAppConfigService,
 		private readonly IEventDispatcher   $dispatcher,
 		private readonly ISecureRandom      $random,
+		private readonly AppAPIService		$service,
 	) {
 	}
 
@@ -62,7 +63,7 @@ class TalkBotsService {
 
 	private function getExAppTalkBotConfig(ExApp $exApp, string $route): array {
 		$auth = [];
-		$url = AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) . $route;
+		$url = $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth) . $route;
 		$id = $this->getExAppTalkBotHash($exApp, $route);
 
 		$exAppConfig = $this->exAppConfigService->getAppConfig($exApp->getAppid(), $id);

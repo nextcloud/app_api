@@ -9,6 +9,7 @@ use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 
+use OCA\AppAPI\Service\ExAppService;
 use OCP\IConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,6 +21,7 @@ class Deploy extends Command {
 
 	public function __construct(
 		private readonly AppAPIService       $service,
+		private readonly ExAppService		 $exAppService,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions       $dockerActions,
 		private readonly IConfig             $config,
@@ -41,7 +43,7 @@ class Deploy extends Command {
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp !== null) {
 			$output->writeln(sprintf('ExApp %s already registered.', $appId));
 			return 2;
@@ -51,7 +53,7 @@ class Deploy extends Command {
 		if ($pathToInfoXml !== null) {
 			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
 		} else {
-			$infoXml = $this->service->getLatestExAppInfoFromAppstore($appId);
+			$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
 			// TODO: Add default release signature check and use of release archive download and info.xml file extraction
 		}
 

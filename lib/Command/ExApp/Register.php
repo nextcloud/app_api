@@ -12,6 +12,7 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppScopesService;
+use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ExAppUsersService;
 
 use OCP\DB\Exception;
@@ -35,6 +36,7 @@ class Register extends Command {
 		private readonly DockerActions        $dockerActions,
 		private readonly ManualActions        $manualActions,
 		private readonly IConfig              $config,
+		private readonly ExAppService		  $exAppService,
 	) {
 		parent::__construct();
 	}
@@ -55,7 +57,7 @@ class Register extends Command {
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 
-		if ($this->service->getExApp($appId) !== null) {
+		if ($this->exAppService->getExApp($appId) !== null) {
 			$output->writeln(sprintf('ExApp %s already registered.', $appId));
 			return 2;
 		}
@@ -112,7 +114,7 @@ class Register extends Command {
 		$port = (int) $exAppInfo['port'];
 		$secret = $exAppInfo['secret'];
 
-		$exApp = $this->service->registerExApp($appId, [
+		$exApp = $this->exAppService->registerExApp($appId, [
 			'version' => $version,
 			'name' => $name,
 			'daemon_config_name' => $daemonConfigName,
@@ -143,10 +145,10 @@ class Register extends Command {
 			}
 		}
 
-		$requestedExAppScopeGroups = $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
+		$requestedExAppScopeGroups = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
 		if (isset($requestedExAppScopeGroups['error'])) {
 			$output->writeln($requestedExAppScopeGroups['error']);
-			$this->service->unregisterExApp($exApp->getAppid());
+			$this->exAppService->unregisterExApp($exApp->getAppid());
 			return 2;
 		}
 
@@ -177,7 +179,7 @@ class Register extends Command {
 
 		if (!$confirmRequiredScopes && count($requestedExAppScopeGroups['required']) > 0) {
 			$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
-			$this->service->unregisterExApp($exApp->getAppid());
+			$this->exAppService->unregisterExApp($exApp->getAppid());
 			return 1;
 		}
 
@@ -190,13 +192,13 @@ class Register extends Command {
 
 		if (!$this->service->dispatchExAppInit($exApp)) {
 			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
-			$this->service->unregisterExApp($exApp->getAppid());
+			$this->exAppService->unregisterExApp($exApp->getAppid());
 			return 1;
 		}
 		$waitFinish = (bool) $input->getOption('wait-finish');
 		if ($waitFinish) {
 			do {
-				$exApp = $this->service->getExApp($appId);
+				$exApp = $this->exAppService->getExApp($appId);
 				$status = $exApp->getStatus();
 				if (isset($status['error'])) {
 					$output->writeln(sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']));

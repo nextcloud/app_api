@@ -11,6 +11,7 @@ use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppScopesService;
 
+use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,6 +24,7 @@ class Update extends Command {
 
 	public function __construct(
 		private readonly AppAPIService        $service,
+		private readonly ExAppService		  $exAppService,
 		private readonly ExAppScopesService   $exAppScopeService,
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DaemonConfigService  $daemonConfigService,
@@ -49,7 +51,7 @@ class Update extends Command {
 		if ($pathToInfoXml !== null) {
 			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
 		} else {
-			$infoXml = $this->service->getLatestExAppInfoFromAppstore($appId);
+			$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
 		}
 
 		if ($infoXml === false) {
@@ -61,7 +63,7 @@ class Update extends Command {
 			return 2;
 		}
 
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found.', $appId));
 			return 1;
@@ -153,7 +155,7 @@ class Update extends Command {
 		}
 
 		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-		if (!$this->service->updateExAppInfo($exApp, $exAppInfo)) {
+		if (!$this->exAppService->updateExAppInfo($exApp, $exAppInfo)) {
 			$output->writeln(sprintf('Failed to update ExApp %s info', $appId));
 			return 1;
 		}
@@ -162,7 +164,7 @@ class Update extends Command {
 		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
 			return $exAppScope->getScopeGroup();
 		}, $this->exAppScopeService->getExAppScopes($exApp));
-		$newExAppScopes = $this->service->getExAppRequestedScopes($exApp, $infoXml);
+		$newExAppScopes = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml);
 		if (isset($newExAppScopes['error'])) {
 			$output->writeln($newExAppScopes['error']);
 		}

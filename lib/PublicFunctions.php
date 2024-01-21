@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI;
 
+use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\Http\Client\IResponse;
 use OCP\IRequest;
@@ -11,8 +12,10 @@ use OCP\IRequest;
 class PublicFunctions {
 
 	public function __construct(
-		private readonly ExAppService			 $exAppService,
-	) {}
+		private readonly ExAppService  $exAppService,
+		private readonly AppAPIService $service,
+	) {
+	}
 
 	/**
 	 * Request to ExApp with AppAPI auth headers
@@ -30,7 +33,7 @@ class PublicFunctions {
 		if ($exApp === null) {
 			return ['error' => sprintf('ExApp `%s` not found', $appId)];
 		}
-		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		return $this->service->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 
 	/**
@@ -49,6 +52,6 @@ class PublicFunctions {
 		if ($exApp === null) {
 			return ['error' => sprintf('ExApp `%s` not found', $appId)];
 		}
-		return $this->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		return $this->service->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 }

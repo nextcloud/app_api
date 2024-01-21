@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,6 +15,7 @@ class DispatchInit extends Command {
 
 	public function __construct(
 		private readonly AppAPIService $service,
+		private readonly ExAppService  $exAppService,
 	) {
 		parent::__construct();
 	}
@@ -29,7 +30,7 @@ class DispatchInit extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found. Failed to dispatch init.', $appId));
 			return 1;

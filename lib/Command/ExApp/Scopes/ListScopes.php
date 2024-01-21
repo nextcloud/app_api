@@ -9,6 +9,7 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppScopesService;
 
+use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,9 +18,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ListScopes extends Command {
 
 	public function __construct(
-		private AppAPIService        $service,
-		private ExAppScopesService   $exAppScopeService,
-		private ExAppApiScopeService $exAppApiScopeService,
+		private readonly ExAppService         $service,
+		private readonly ExAppScopesService   $exAppScopeService,
+		private readonly ExAppApiScopeService $exAppApiScopeService,
 	) {
 		parent::__construct();
 	}

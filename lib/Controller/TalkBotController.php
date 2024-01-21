@@ -6,7 +6,7 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
-use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\TalkBotsService;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
@@ -21,9 +21,9 @@ class TalkBotController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest        $request,
-		private AppAPIService   $service,
-		private TalkBotsService $talkBotsService,
+		IRequest                         $request,
+		private readonly ExAppService    $service,
+		private readonly TalkBotsService $talkBotsService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 

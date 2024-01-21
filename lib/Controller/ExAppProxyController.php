@@ -8,6 +8,7 @@ use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\ProxyResponse;
 use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -20,11 +21,12 @@ use OCP\IRequest;
 class ExAppProxyController extends Controller {
 
 	public function __construct(
-		IRequest                                  $request,
-		private AppAPIService                     $service,
-		private IMimeTypeDetector                 $mimeTypeHelper,
-		private ContentSecurityPolicyNonceManager $nonceManager,
-		private ?string                           $userId,
+		IRequest                                           $request,
+		private readonly AppAPIService                     $service,
+		private readonly ExAppService					   $exAppService,
+		private readonly IMimeTypeDetector                 $mimeTypeHelper,
+		private readonly ContentSecurityPolicyNonceManager $nonceManager,
+		private readonly ?string                           $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -72,7 +74,7 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppGet(string $appId, string $other): Response {
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
@@ -93,7 +95,7 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppPost(string $appId, string $other): Response {
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
@@ -116,7 +118,7 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppPut(string $appId, string $other): Response {
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
@@ -139,7 +141,7 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppDelete(string $appId, string $other): Response {
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}

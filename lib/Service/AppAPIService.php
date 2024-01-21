@@ -74,7 +74,7 @@ class AppAPIService {
 	/**
 	 * Request to ExApp with AppAPI auth headers
 	 */
-	private function requestToExApp(
+	public function requestToExApp(
 		ExApp $exApp,
 		string $route,
 		?string $userId = null,
@@ -509,8 +509,7 @@ class AppAPIService {
 		return false;
 	}
 
-	public function getExAppUrl(ExApp $exApp, int $port, array &$auth): string
-	{
+	public function getExAppUrl(ExApp $exApp, int $port, array &$auth): string {
 		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			return $this->dockerActions->resolveExAppUrl(
 				$exApp->getAppid(),
@@ -520,8 +519,7 @@ class AppAPIService {
 				$port,
 				$auth,
 			);
-		}
-		else {
+		} else {
 			return $this->manualActions->resolveExAppUrl(
 				$exApp->getAppid(),
 				$exApp->getProtocol(),

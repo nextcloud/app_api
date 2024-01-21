@@ -8,6 +8,7 @@ use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\AppAPIService;
 
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,9 +18,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Unregister extends Command {
 
 	public function __construct(
-		private AppAPIService       $service,
-		private DaemonConfigService $daemonConfigService,
-		private DockerActions       $dockerActions,
+		private readonly AppAPIService       $service,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly DockerActions       $dockerActions,
+		private readonly ExAppService		 $exAppService,
 	) {
 		parent::__construct();
 	}
@@ -54,7 +56,7 @@ class Unregister extends Command {
 		$force = $input->getOption('force');
 		$keep_data = $input->getOption('keep-data');
 
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			if ($silent) {
 				return 0;
@@ -117,7 +119,7 @@ class Unregister extends Command {
 			}
 		}
 
-		if ($this->service->unregisterExApp($appId) === null) {
+		if ($this->exAppService->unregisterExApp($appId) === null) {
 			if (!$silent) {
 				$output->writeln(sprintf('Failed to unregister ExApp %s.', $appId));
 			}
