@@ -1,7 +1,7 @@
 <template>
 	<div class="daemon-config">
 		<div class="daemon-config-list">
-			<ul v-if="daemons.length > 0">
+			<ul v-if="daemons.length > 0" :aria-label="t('app_api', 'Registered Deploy daemons list')">
 				<DaemonConfig
 					v-for="daemon in daemons"
 					:key="daemon.id"

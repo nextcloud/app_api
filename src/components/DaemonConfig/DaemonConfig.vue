@@ -52,7 +52,8 @@
 			<template #default>
 				<div class="confirm-delete-dialog">
 					<p>{{ t('app_api', 'Are you sure you want delete Deploy Daemon?') }}</p>
-					<NcCheckboxRadioSwitch :checked.sync="removeExAppsOnDaemonDelete"
+					<NcCheckboxRadioSwitch v-if="daemon.accepts_deploy_id !== 'manual-install'"
+						:checked.sync="removeExAppsOnDaemonDelete"
 						:placeholder="t('app_api', 'Remove all ExApps installed on this daemon')"
 						:aria-label="t('app_api', 'Remove all ExApps installed on this daemon')">
 						<template #default>

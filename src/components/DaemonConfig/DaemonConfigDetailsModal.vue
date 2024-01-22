@@ -1,7 +1,7 @@
 <template>
 	<div class="daemon-config-modal">
 		<NcModal :show="show" @close="closeModal">
-			<div class="daemon-config-modal-details">
+			<div class="daemon-config-modal-details" :aria-label="t('app_api', 'Deploy daemon config details')">
 				<h2>{{ t('app_api', 'Deploy Daemon') }} - {{ daemon.display_name }}</h2>
 
 				<NcNoteCard v-if="isDefault" type="success">
