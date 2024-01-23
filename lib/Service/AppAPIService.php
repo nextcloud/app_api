@@ -371,23 +371,22 @@ class AppAPIService {
 			if (!$this->exAppService->updateExApp($exApp, ['version'])) {
 				return false;
 			}
-			if ($this->disableExApp($exApp)) {
-				$this->exNotificationsManager->sendAdminsNotification($exApp->getAppid(), [
-					'object' => 'ex_app_update',
-					'object_id' => $exApp->getAppid(),
-					'subject_type' => 'ex_app_version_update',
-					'subject_params' => [
-						'rich_subject' => 'ExApp updated, action required!',
-						'rich_subject_params' => [],
-						'rich_message' => sprintf(
-							'ExApp %s disabled due to update from %s to %s. Manual re-enable required.',
-							$exApp->getAppid(),
-							$oldVersion,
-							$exApp->getVersion()),
-						'rich_message_params' => [],
-					],
-				]);
-			}
+			$this->disableExApp($exApp);
+			$this->exNotificationsManager->sendAdminsNotification($exApp->getAppid(), [
+				'object' => 'ex_app_update',
+				'object_id' => $exApp->getAppid(),
+				'subject_type' => 'ex_app_version_update',
+				'subject_params' => [
+					'rich_subject' => 'ExApp updated, action required!',
+					'rich_subject_params' => [],
+					'rich_message' => sprintf(
+						'ExApp %s disabled due to update from %s to %s. Manual re-enable required.',
+						$exApp->getAppid(),
+						$oldVersion,
+						$exApp->getVersion()),
+					'rich_message_params' => [],
+				],
+			]);
 			return false;
 		}
 		return true;

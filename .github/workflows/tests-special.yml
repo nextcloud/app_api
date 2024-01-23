@@ -119,13 +119,12 @@ jobs:
           php occ app_api:app:register $APP_ID manual_install --json-info \
             "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"NOTIFICATIONS\"],\"optional\":[\"USER_INFO\"]},\"system_app\":1}" \
             --force-scopes --wait-finish
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
 
       - name: Run Manual App Update test
         working-directory: apps/${{ env.APP_NAME }}
-        run: |
-          python3 tests/app_version_higher.py
-          kill -15 $(cat /tmp/_install.pid)
-          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+        run: python3 tests/app_version_higher.py
 
       - name: Upload NC logs
         if: always()
