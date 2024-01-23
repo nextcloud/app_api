@@ -499,20 +499,18 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
-		$dockerUrl = 'http://localhost';
-		if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
-			$dockerUrl = $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		if (file_exists($daemonConfig->getHost())) {
+			return 'http://localhost';
 		}
-		return $dockerUrl;
+		return $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
 	}
 
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
 		$guzzleParams = [];
-		$dockerPath = $daemonConfig->getHost();
-		if (file_exists($dockerPath)) {
+		if (file_exists($daemonConfig->getHost())) {
 			$guzzleParams = [
 				'curl' => [
-					CURLOPT_UNIX_SOCKET_PATH => $dockerPath,
+					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
 				],
 			];
 		} elseif ($daemonConfig->getProtocol() === 'https') {
