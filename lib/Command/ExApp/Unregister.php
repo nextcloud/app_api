@@ -119,7 +119,7 @@ class Unregister extends Command {
 			}
 		}
 
-		if ($this->exAppService->unregisterExApp($appId) === null) {
+		if (!$this->exAppService->unregisterExApp($appId)) {
 			if (!$silent) {
 				$output->writeln(sprintf('Failed to unregister ExApp %s.', $appId));
 			}

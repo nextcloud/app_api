@@ -62,7 +62,7 @@ class AppAPIService {
 		?IRequest $request = null,
 	): array|IResponse {
 		try {
-			$this->exAppUsersService->setupExAppUser($exApp, $userId);
+			$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
 		} catch (\Exception $e) {
 			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
@@ -368,7 +368,7 @@ class AppAPIService {
 			// Update ExApp version
 			$oldVersion = $exApp->getVersion();
 			$exApp->setVersion($requestExAppVersion);
-			if (!$this->exAppService->updateExAppVersion($exApp)) {
+			if (!$this->exAppService->updateExApp($exApp, ['version'])) {
 				return false;
 			}
 			if ($this->disableExApp($exApp)) {
@@ -379,7 +379,11 @@ class AppAPIService {
 					'subject_params' => [
 						'rich_subject' => 'ExApp updated, action required!',
 						'rich_subject_params' => [],
-						'rich_message' => sprintf('ExApp %s disabled due to update from %s to %s. Manual re-enable required.', $exApp->getAppid(), $oldVersion, $exApp->getVersion()),
+						'rich_message' => sprintf(
+							'ExApp %s disabled due to update from %s to %s. Manual re-enable required.',
+							$exApp->getAppid(),
+							$oldVersion,
+							$exApp->getVersion()),
 						'rich_message_params' => [],
 					],
 				]);
@@ -418,14 +422,14 @@ class AppAPIService {
 	/**
 	 * Dispatch ExApp initialization step, that may take a long time to display the progress of initialization.
 	 */
-	public function dispatchExAppInit(ExApp $exApp, bool $update = false): bool {
-		$this->setAppInitProgress($exApp->getAppid(), 0, '', $update, true);
+	public function dispatchExAppInit(string $appId, bool $update = false): bool {
+		$this->setAppInitProgress($appId, 0, '', $update, true);
 		$descriptors = [
 			0 => ['pipe', 'r'],
 			1 => ['pipe', 'w'],
 			2 => ['pipe', 'w'],
 		];
-		$args = ['app_api:app:dispatch_init', $exApp->getAppid()];
+		$args = ['app_api:app:dispatch_init', $appId];
 		$args = array_map(function ($arg) {
 			return escapeshellarg($arg);
 		}, $args);
@@ -514,8 +518,8 @@ class AppAPIService {
 			$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT');
 			if ($exAppEnabled instanceof IResponse) {
 				$response = json_decode($exAppEnabled->getBody(), true);
-				if (isset($response['error']) && strlen($response['error']) === 0) {
-					$this->exAppService->updateExAppLastCheckTime($exApp);
+				if (empty($response['error'])) {
+					$this->exAppService->updateExApp($exApp, ['last_check_time']);
 				} else {
 					$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
 					$this->exAppService->disableExAppInternal($exApp);
@@ -536,16 +540,20 @@ class AppAPIService {
 	 * Removes ExApp from cache.
 	 */
 	public function disableExApp(ExApp $exApp): bool {
+		$result = true;
 		$exAppDisabled = $this->requestToExApp($exApp, '/enabled?enabled=0', null, 'PUT');
 		if ($exAppDisabled instanceof IResponse) {
 			$response = json_decode($exAppDisabled->getBody(), true);
 			if (isset($response['error']) && strlen($response['error']) !== 0) {
 				$this->logger->error(sprintf('Failed to disable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
+				$result = false;
 			}
 		} elseif (isset($exAppDisabled['error'])) {
 			$this->logger->error(sprintf('Failed to disable ExApp %s. Error: %s', $exApp->getAppid(), $exAppDisabled['error']));
+			$result = false;
 		}
-		return $this->exAppService->disableExAppInternal($exApp);
+		$this->exAppService->disableExAppInternal($exApp);
+		return $result;
 	}
 
 	/**

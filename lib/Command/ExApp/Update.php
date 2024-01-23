@@ -216,7 +216,7 @@ class Update extends Command {
 			return 1;
 		}
 
-		if (!$this->service->dispatchExAppInit($exApp, true)) {
+		if (!$this->service->dispatchExAppInit($exApp->getAppid(), true)) {
 			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
 			return 1;
 		}

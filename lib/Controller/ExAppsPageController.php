@@ -461,7 +461,7 @@ class ExAppsPageController extends Controller {
 					$exApp = $this->exAppService->getExApp($appId);
 
 					// Start ExApp initialization step (to download dynamic content, e.g. models)
-					if (!$this->service->dispatchExAppInit($exApp)) {
+					if (!$this->service->dispatchExAppInit($exApp->getAppid())) {
 						return new JSONResponse([
 							'data' => [
 								'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),
@@ -553,7 +553,7 @@ class ExAppsPageController extends Controller {
 		try {
 			$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
 			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
-				$this->exAppUsersService->setupSystemAppFlag($exApp);
+				$this->exAppUsersService->setupSystemAppFlag($exApp->getAppid());
 			}
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while setting app system flag: %s', $e->getMessage()));
@@ -661,7 +661,7 @@ class ExAppsPageController extends Controller {
 		);
 		if ($this->service->heartbeatExApp($exAppUrl, $auth)) {
 			// 6. Dispatch init step on ExApp side
-			if (!$this->service->dispatchExAppInit($exApp, true)) {
+			if (!$this->service->dispatchExAppInit($exApp->getAppid(), true)) {
 				return new JSONResponse([
 					'data' => [
 						'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),

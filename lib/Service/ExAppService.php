@@ -66,9 +66,10 @@ class ExAppService {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 			return $exApp;
-		} catch (DoesNotExistException) {
-		} catch (MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->debug(sprintf('Failed to get ExApp %s. Error: %s', $appId, $e->getMessage()), ['exception' => $e]);
+		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
+			$this->logger->debug(
+				sprintf('Failed to get ExApp %s. Error: %s', $appId, $e->getMessage()), ['exception' => $e]
+			);
 		}
 		return null;
 	}
@@ -93,10 +94,9 @@ class ExAppService {
 			'last_check_time' => time(),
 		]);
 		try {
-			$cacheKey = '/exApp_' . $appId;
 			$this->exAppMapper->insert($exApp);
 			$exApp = $this->exAppMapper->findByAppId($appId);
-			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+			$this->cache->set('/exApp_' . $appId, $exApp, self::CACHE_TTL);
 			return $exApp;
 		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
 			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appId, $e->getMessage()));
@@ -104,23 +104,15 @@ class ExAppService {
 		}
 	}
 
-	/**
-	 * Unregister ExApp.
-	 * Removes ExApp from database and cache.
-	 */
-	public function unregisterExApp(string $appId): ?ExApp {
+	public function unregisterExApp(string $appId): bool {
 		$exApp = $this->getExApp($appId);
 		if ($exApp === null) {
-			return null;
+			return false;
 		}
 		try {
-			if ($this->exAppMapper->deleteExApp($exApp) !== 1) {
-				$this->logger->error(sprintf('Error while unregistering ExApp: %s', $appId));
-				return null;
-			}
 			// TODO: Do we need to remove app_config_ex, app_preferences_ex too
-			$this->exAppScopesService->removeExAppScopes($exApp);
-			$this->exAppUsersService->removeExAppUsers($exApp);
+			$this->exAppScopesService->removeExAppScopes($appId);
+			$this->exAppUsersService->removeExAppUsers($appId);
 			$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
 			$this->filesActionsMenuService->unregisterExAppFileActions($appId);
 			$this->topMenuService->unregisterExAppMenuEntries($appId);
@@ -130,12 +122,15 @@ class ExAppService {
 			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
 			$this->translationService->unregisterExAppTranslationProviders($appId);
-			$this->cache->remove('/exApp_' . $appId);
-			return $exApp;
+			if ($this->exAppMapper->deleteExApp($appId) === 1) {
+				$this->cache->remove('/exApp_' . $appId);
+				return true;
+			}
+			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()), ['exception' => $e]);
-			return null;
 		}
+		return false;
 	}
 
 	public function getExAppsByPort(int $port): array {
@@ -155,39 +150,17 @@ class ExAppService {
 	}
 
 	public function enableExAppInternal(ExApp $exApp): bool {
-		try {
-			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), true) === 1) {
-				$cacheKey = '/exApp_' . $exApp->getAppid();
-				$exApp->setEnabled(1);
-				$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
-				return true;
-			}
-		} catch (Exception $e) {
-			$this->logger->error(sprintf('Error while enabling ExApp: %s', $e->getMessage()));
-		}
-		return false;
+		$exApp->setEnabled(1);
+		$result = $this->updateExApp($exApp);
+		$this->resetCaches();
+		return $result;
 	}
 
-	public function disableExAppInternal(ExApp $exApp): bool {
-		try {
-			if ($this->exAppMapper->updateExAppEnabled($exApp->getAppid(), false) !== 1) {
-				$this->logger->error(sprintf('Error updating state of ExApp %s.', $exApp->getAppid()));
-				return false;
-			}
-			$this->updateExAppLastCheckTime($exApp);
-			$cacheKey = '/exApp_' . $exApp->getAppid();
-			$exApp->setEnabled(0);
-			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
-			$this->topMenuService->resetCacheEnabled();
-			$this->filesActionsMenuService->resetCacheEnabled();
-			$this->textProcessingService->resetCacheEnabled();
-			$this->speechToTextService->resetCacheEnabled();
-			$this->translationService->resetCacheEnabled();
-			return true;
-		} catch (Exception $e) {
-			$this->logger->error(sprintf('Error while disabling ExApp: %s', $e->getMessage()));
-			return false;
-		}
+	public function disableExAppInternal(ExApp $exApp): void {
+		$exApp->setEnabled(0);
+		$exApp->setLastCheckTime(time());
+		$this->updateExApp($exApp);
+		$this->resetCaches();
 	}
 
 	public function getExAppsList(string $list = 'enabled'): array {
@@ -227,14 +200,9 @@ class ExAppService {
 	 * Update ExApp info (version, name, system app flag changes after update)
 	 */
 	public function updateExAppInfo(ExApp $exApp, array $exAppInfo): bool {
-		$cacheKey = '/exApp_' . $exApp->getAppid();
-
 		$exApp->setVersion($exAppInfo['version']);
-		if (!$this->updateExAppVersion($exApp)) {
-			return false;
-		}
 		$exApp->setName($exAppInfo['name']);
-		if (!$this->updateExAppName($exApp)) {
+		if (!$this->updateExApp($exApp)) {
 			return false;
 		}
 
@@ -242,65 +210,27 @@ class ExAppService {
 		try {
 			$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
 			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
-				$this->exAppUsersService->setupSystemAppFlag($exApp);
+				$this->exAppUsersService->setupSystemAppFlag($exApp->getAppid());
 			} else {
-				$this->exAppUsersService->removeExAppUser($exApp, '');
+				$this->exAppUsersService->removeExAppUser($exApp->getAppid(), '');
 			}
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while setting app system flag: %s', $e->getMessage()));
 			return false;
 		}
-
-		$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 		return true;
 	}
 
-	public function updateExAppLastCheckTime(ExApp $exApp): void {
-		$exApp->setLastCheckTime(time());
+	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time']): bool {
 		try {
-			$this->exAppMapper->updateLastCheckTime($exApp);
+			$this->exAppMapper->updateExApp($exApp, $fields);
+			$this->cache->set('/exApp_' . $exApp->getAppid(), $exApp, self::CACHE_TTL);
+			return true;
 		} catch (Exception $e) {
-			$this->logger->error(
-				sprintf('Error while updating ExApp last check time for ExApp: %s. Error: %s',
-					$exApp->getAppid(),
-					$e->getMessage()
-				), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to update "%s" ExApp info.', $exApp->getAppid(), ), ['exception' => $e]);
+			$this->resetCaches();
 		}
-	}
-
-	public function updateExAppVersion(ExApp $exApp): bool {
-		try {
-			return $this->exAppMapper->updateExAppVersion($exApp) === 1;
-		} catch (Exception $e) {
-			$this->logger->error(
-				sprintf('Failed to update ExApp %s version to %s',
-					$exApp->getAppid(),
-					$exApp->getVersion()
-				), ['exception' => $e]);
-			return false;
-		}
-	}
-
-	public function updateExAppName(ExApp $exApp): bool {
-		try {
-			return $this->exAppMapper->updateExAppName($exApp) === 1;
-		} catch (Exception $e) {
-			$this->logger->error(
-				sprintf('Failed to update ExApp %s name to %s',
-					$exApp->getAppid(),
-					$exApp->getName()
-				), ['exception' => $e]);
-			return false;
-		}
-	}
-
-	public function updateExApp(ExApp $exApp): void {
-		$cacheKey = '/exApp_' . $exApp->getAppid();
-		try {
-			$exApp = $this->exAppMapper->update($exApp);
-		} catch (Exception) {
-		}
-		$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
+		return false;
 	}
 
 	public function getExAppRequestedScopes(ExApp $exApp, ?SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
@@ -365,5 +295,13 @@ class ExAppService {
 			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
 		}
 		return null;
+	}
+
+	private function resetCaches(): void {
+		$this->topMenuService->resetCacheEnabled();
+		$this->filesActionsMenuService->resetCacheEnabled();
+		$this->textProcessingService->resetCacheEnabled();
+		$this->speechToTextService->resetCacheEnabled();
+		$this->translationService->resetCacheEnabled();
 	}
 }

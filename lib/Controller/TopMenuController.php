@@ -64,7 +64,7 @@ class TopMenuController extends Controller {
 		$this->stylesService->applyExAppStyles($appId, 'top_menu', $menuEntry->getName());
 
 		$this->postprocess = true;
-		$this->exAppUsersService->setupExAppUser($exApp, $this->userId);
+		$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $this->userId);
 		return new TemplateResponse(Application::APP_ID, 'embedded');
 	}
 }

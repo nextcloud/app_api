@@ -128,7 +128,7 @@ class Register extends Command {
 
 		if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
 			try {
-				$this->exAppUsersService->setupSystemAppFlag($exApp);
+				$this->exAppUsersService->setupSystemAppFlag($exApp->getAppid());
 			} catch (Exception $e) {
 				$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
 				return 1;
@@ -190,7 +190,7 @@ class Register extends Command {
 			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], 'optional');
 		}
 
-		if (!$this->service->dispatchExAppInit($exApp)) {
+		if (!$this->service->dispatchExAppInit($exApp->getAppid())) {
 			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
 			$this->exAppService->unregisterExApp($exApp->getAppid());
 			return 1;

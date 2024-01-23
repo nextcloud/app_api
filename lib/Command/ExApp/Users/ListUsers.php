@@ -36,7 +36,7 @@ class ListUsers extends Command {
 			return 2;
 		}
 
-		$exAppUsers = $this->exAppUserService->getExAppUsers($exApp);
+		$exAppUsers = $this->exAppUserService->getExAppUsers($appId);
 		if (empty($exAppUsers)) {
 			$output->writeln(sprintf('ExApp %s has no authorized users.', $appId));
 			return 0;
