@@ -25,10 +25,6 @@ class AppAPICommonService {
 		];
 	}
 
-	public function isAppHostNameLocal(string $hostname): bool {
-		return $hostname === '127.0.0.1' || $hostname === 'localhost' || $hostname === '::1';
-	}
-
 	public function buildExAppHost(array $deployConfig): string {
 		if (isset($deployConfig['net'])) {
 			if ($deployConfig['net'] === 'host') {

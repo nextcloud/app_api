@@ -93,7 +93,7 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:register skeleton docker_local_sock \
@@ -168,7 +168,7 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php \
+            docker_local_sock Docker docker-install http /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_local_sock \
@@ -470,7 +470,7 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:daemon:list
           ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml

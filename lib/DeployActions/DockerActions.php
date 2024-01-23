@@ -508,13 +508,14 @@ class DockerActions implements IDeployActions {
 
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
 		$guzzleParams = [];
-		if ($daemonConfig->getProtocol() === 'unix-socket') {
+		$dockerPath = $daemonConfig->getHost();
+		if (file_exists($dockerPath)) {
 			$guzzleParams = [
 				'curl' => [
-					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
+					CURLOPT_UNIX_SOCKET_PATH => $dockerPath,
 				],
 			];
-		} elseif (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
+		} elseif ($daemonConfig->getProtocol() === 'https') {
 			$guzzleParams = $this->setupCerts($guzzleParams, $daemonConfig->getDeployConfig());
 		}
 		$this->guzzleClient = new Client($guzzleParams);
@@ -588,7 +589,7 @@ class DockerActions implements IDeployActions {
 			'name' => 'docker_socket_local',
 			'display_name' => 'Docker Socket Local',
 			'accepts_deploy_id' => 'docker-install',
-			'protocol' => 'unix-socket',
+			'protocol' => 'http',
 			'host' => '/var/run/docker.sock',
 			'deploy_config' => $deployConfig,
 		];
