@@ -541,7 +541,6 @@ class ExAppsPageController extends Controller {
 			'name' => $exAppInfo['name'],
 			'daemon_config_name' => $daemonConfig->getName(),
 			'port' => (int) $exAppInfo['port'],
-			'host' => $exAppInfo['host'],
 			'secret' => $exAppInfo['secret'],
 		]);
 
