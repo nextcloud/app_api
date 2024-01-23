@@ -42,7 +42,7 @@ class RegisterDaemon extends Command {
 
 		$this->addOption('set-default', null, InputOption::VALUE_NONE, 'Set DaemonConfig as default');
 
-		$this->addUsage('local_docker "Docker local" "docker-install" "unix-socket" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
+		$this->addUsage('local_docker "Docker local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -59,6 +59,15 @@ class RegisterDaemon extends Command {
 			'haproxy_password' => $input->getOption('haproxy_password'),
 			'gpu' => $input->getOption('gpu') ?? false,
 		];
+
+		if (($protocol !== 'http') && ($protocol !== 'https')) {
+			$output->writeln('Value error: The protocol must be `http` or `https`.');
+			return 1;
+		}
+		if (($acceptsDeployId === 'manual-install') && ($protocol !== 'http')) {
+			$output->writeln('Value error: Manual-install daemon supports only `http` protocol.');
+			return 1;
+		}
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
 			'name' => $name,
