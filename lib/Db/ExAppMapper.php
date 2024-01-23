@@ -76,31 +76,19 @@ class ExAppMapper extends QBMapper {
 	}
 
 	/**
-	 * @param int $port
-	 *
-	 * @throws Exception
-	 *
 	 * @return array
+	 * @throws Exception
 	 */
-	public function findByPort(int $port): array {
+	public function getUsedPorts(): array {
 		$qb = $this->db->getQueryBuilder();
-		$qb->select(
-			'ex_apps.*',
-			'ex_apps_daemons.protocol',
-			'ex_apps_daemons.host',
-			'ex_apps_daemons.deploy_config',
-			'ex_apps_daemons.accepts_deploy_id',
-		)
-			->from($this->tableName, 'ex_apps')
-			->leftJoin(
-				'ex_apps',
-				'ex_apps_daemons',
-				'ex_apps_daemons',
-				'ex_apps_daemons.name = ex_apps.daemon_config_name')
-			->where(
-				$qb->expr()->eq('ex_apps.port', $qb->createNamedParameter($port))
-			);
-		return $this->findEntities($qb);
+		$qb->select('port')->from($this->tableName, 'ex_apps');
+		$result = $qb->executeQuery();
+		$ports = [];
+		while ($row = $result->fetch()) {
+			$ports[] = $row['port'];
+		}
+		$result->closeCursor();
+		return $ports;
 	}
 
 	/**

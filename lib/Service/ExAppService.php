@@ -133,20 +133,17 @@ class ExAppService {
 		return false;
 	}
 
-	public function getExAppsByPort(int $port): array {
+	public function getExAppFreePort(): int {
 		try {
-			return $this->exAppMapper->findByPort($port);
+			$ports = $this->exAppMapper->getUsedPorts();
+			for ($port = 23000; $port <= 23999; $port++) {
+				if (!in_array($port, $ports)) {
+					return $port;
+				}
+			}
 		} catch (Exception) {
-			return [];
 		}
-	}
-
-	public function getExAppRandomPort(): int {
-		$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
-		while ($this->getExAppsByPort($port) !== []) {
-			$port = 10000 + (int) $this->random->generate(4, ISecureRandom::CHAR_DIGITS);
-		}
-		return $port;
+		return 0;
 	}
 
 	public function enableExAppInternal(ExApp $exApp): bool {

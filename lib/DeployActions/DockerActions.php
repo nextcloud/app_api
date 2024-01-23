@@ -339,13 +339,13 @@ class DockerActions implements IDeployActions {
 		if (isset($params['container_info'])) {
 			$containerInfo = $params['container_info'];
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
-			$port = $oldEnvs['APP_PORT'] ?? $this->exAppService->getExAppRandomPort();
+			$port = $oldEnvs['APP_PORT'] ?? $this->exAppService->getExAppFreePort();
 			$secret = $oldEnvs['APP_SECRET'];
 			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
 			// Preserve previous device requests (GPU)
 			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'] ?? [];
 		} else {
-			$port = $this->exAppService->getExAppRandomPort();
+			$port = $this->exAppService->getExAppFreePort();
 			if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
 				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
 			} else {
@@ -464,6 +464,7 @@ class DockerActions implements IDeployActions {
 	public function resolveExAppUrl(
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
+		$host = explode(':', $host)[0];
 		if ($protocol == 'https') {
 			$exAppHost = $host;
 		} elseif (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {

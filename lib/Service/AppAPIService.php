@@ -455,7 +455,6 @@ class AppAPIService {
 			'headers' => [
 				'Accept' => 'application/json',
 				'Content-Type' => 'application/json',
-
 			],
 			'nextcloud' => [
 				'allow_local_address' => true,

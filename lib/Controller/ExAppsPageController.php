@@ -450,7 +450,7 @@ class ExAppsPageController extends Controller {
 							return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to register ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 						}
 					} else {
-						$this->logger->error(sprintf('Failed to Deploy %s ExApp', $appId));
+						$this->logger->error(sprintf('Failed to deploy %s ExApp', $appId));
 						return new JSONResponse([
 							'data' => [
 								'message' => $this->l10n->t('Failed to deploy ExApp'),
