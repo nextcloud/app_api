@@ -56,7 +56,7 @@ class RegisterDaemon extends Command {
 		$deployConfig = [
 			'net' => $input->getOption('net') ?? 'host',
 			'nextcloud_url' => $nextcloudUrl,
-			'haproxy_password' => $input->getOption('haproxy_password'),
+			'haproxy_password' => $input->getOption('haproxy_password') ?? '',
 			'gpu' => $input->getOption('gpu') ?? false,
 		];
 
