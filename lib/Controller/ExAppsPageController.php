@@ -592,8 +592,10 @@ class ExAppsPageController extends Controller {
 		try {
 			foreach ($appIds as $appId) {
 				$exApp = $this->exAppService->getExApp($appId);
-				if (!$this->service->disableExApp($exApp)) {
-					return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+				if ($exApp->getEnabled()) {
+					if (!$this->service->disableExApp($exApp)) {
+						return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+					}
 				}
 			}
 			return new JSONResponse([]);
@@ -623,7 +625,9 @@ class ExAppsPageController extends Controller {
 		// TODO: Add error messages on each step failure as in CLI
 
 		// 1. Disable ExApp
-		$this->service->disableExApp($exApp);
+		if ($exApp->getEnabled()) {
+			$this->service->disableExApp($exApp);
+		}
 
 		$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
@@ -716,7 +720,9 @@ class ExAppsPageController extends Controller {
 	#[PasswordConfirmationRequired]
 	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
-		$this->service->disableExApp($exApp);
+		if ($exApp->getEnabled()) {
+			$this->service->disableExApp($exApp);
+		}
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
