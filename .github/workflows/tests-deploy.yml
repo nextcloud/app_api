@@ -338,7 +338,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost/index.php \
-            --net=host
+            --net=host --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
