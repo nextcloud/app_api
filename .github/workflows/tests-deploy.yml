@@ -656,8 +656,8 @@ jobs:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-app-docker-dsp-http,
-            nc-docker-app-host-by-hostname, nc-host-app-docker-redis, nc-host-network-host]
+    needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-dsp-http,
+            nc-docker-dsp-https, nc-host-app-docker-redis, nc-host-network-host]
     name: Tests-Deploy-OK
     steps:
       - run: echo "Tests-Deploy passed successfully"
