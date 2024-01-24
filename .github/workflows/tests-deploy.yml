@@ -248,7 +248,7 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install http host.docker.internal:2375 http://nextcloud/index.php \
+            docker_by_port Docker docker-install http aa-docker-socket-proxy:2375 http://nextcloud/index.php \
             --net=master_bridge --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
