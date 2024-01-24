@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
-use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
@@ -53,7 +51,6 @@ class ExAppService {
 		private readonly TextProcessingService   $textProcessingService,
 		private readonly TranslationService      $translationService,
 		private readonly TalkBotsService         $talkBotsService,
-
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 	}
@@ -161,6 +158,17 @@ class ExAppService {
 		$exApp->setLastCheckTime(time());
 		$this->updateExApp($exApp);
 		$this->resetCaches();
+	}
+
+	public function getExAppsByDaemonName(string $daemonName): array {
+		try {
+			return array_filter($this->exAppMapper->findAll(), function (ExApp $exApp) use ($daemonName) {
+				return $exApp->getDaemonConfigName() === $daemonName;
+			});
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while getting ExApps list. Error: %s', $e->getMessage()), ['exception' => $e]);
+			return [];
+		}
 	}
 
 	public function getExAppsList(string $list = 'enabled'): array {
@@ -303,25 +311,5 @@ class ExAppService {
 		$this->textProcessingService->resetCacheEnabled();
 		$this->speechToTextService->resetCacheEnabled();
 		$this->translationService->resetCacheEnabled();
-	}
-
-	public function removeExAppsByDaemonConfigName(DaemonConfig $daemonConfig, DockerActions $dockerActions): void {
-		try {
-			$targetDaemonExApps = array_filter($this->exAppMapper->findAll(), function (ExApp $exApp) use ($daemonConfig) {
-				return $exApp->getDaemonConfigName() === $daemonConfig->getName();
-			});
-			if (count($targetDaemonExApps) === 0) {
-				return;
-			}
-
-			$dockerActions->initGuzzleClient($daemonConfig);
-			foreach ($targetDaemonExApps as $exApp) {
-				$this->disableExAppInternal($exApp);
-				$dockerActions->removePrevExAppContainer($dockerActions->buildDockerUrl($daemonConfig), $dockerActions->buildExAppContainerName($exApp->getAppid()));
-				$dockerActions->removeVolume($dockerActions->buildDockerUrl($daemonConfig), $dockerActions->buildExAppVolumeName($exApp->getAppid()));
-				$this->unregisterExApp($exApp->getAppid());
-			}
-		} catch (Exception) {
-		}
 	}
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
@@ -594,6 +595,25 @@ class AppAPIService {
 		$this->exAppService->updateExApp($exApp);
 		if ($progress === 100) {
 			$this->enableExApp($exApp);
+		}
+	}
+
+	public function removeExAppsByDaemonConfigName(DaemonConfig $daemonConfig): void {
+		try {
+			$targetDaemonExApps = $this->exAppService->getExAppsByDaemonName($daemonConfig->getName());
+			if (count($targetDaemonExApps) === 0) {
+				return;
+			}
+			foreach ($targetDaemonExApps as $exApp) {
+				$this->disableExApp($exApp);
+				if ($daemonConfig->getAcceptsDeployId() === 'docker-install') {
+					$this->dockerActions->initGuzzleClient($daemonConfig);
+					$this->dockerActions->removePrevExAppContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+					$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));
+				}
+				$this->exAppService->unregisterExApp($exApp->getAppid());
+			}
+		} catch (Exception) {
 		}
 	}
 }
