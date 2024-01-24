@@ -562,43 +562,6 @@ class DockerActions implements IDeployActions {
 		return self::EX_APP_CONTAINER_PREFIX . $appId . '_data';
 	}
 
-	public function registerDefaultDaemonConfig(): ?DaemonConfig {
-		# default config means that NC is installed into host, and all ExApps are installed in the hosts network.
-		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
-		if ($defaultDaemonConfig !== '') {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfig);
-			if ($daemonConfig !== null) {
-				return $daemonConfig;
-			}
-		}
-
-		$deployConfig = [
-			'net' => 'host', // TODO: Add ExApp skeleton heartbeat check to verify default configuration works or manual configuration required
-			'nextcloud_url' => str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL('/index.php')),
-			'haproxy_password' => null,
-			'gpu' => false,
-		];
-
-		if ($this->isGPUAvailable()) {
-			$deployConfig['gpus'] = ['/dev/dri'];
-		}
-
-		$daemonConfigParams = [
-			'name' => 'docker_socket_local',
-			'display_name' => 'Docker Socket Local',
-			'accepts_deploy_id' => 'docker-install',
-			'protocol' => 'http',
-			'host' => '/var/run/docker.sock',
-			'deploy_config' => $deployConfig,
-		];
-
-		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
-		if ($daemonConfig !== null) {
-			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
-		}
-		return $daemonConfig;
-	}
-
 	private function isGPUAvailable(): bool {
 		$gpusDir = '/dev/dri';
 		if (is_dir($gpusDir) && is_readable($gpusDir)) {
