@@ -106,7 +106,7 @@ jobs:
           grep -q 'Hello from skeleton :)' data/nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -179,6 +179,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
       - name: Copy NC log to host
+        if: always()
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
@@ -186,7 +187,7 @@ jobs:
           grep -q 'Hello from skeleton :)' nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -259,6 +260,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
       - name: Copy NC log to host
+        if: always()
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
@@ -266,7 +268,7 @@ jobs:
           grep -q 'Hello from skeleton :)' nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -348,6 +350,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
       - name: Copy NC log to host
+        if: always()
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
@@ -355,7 +358,11 @@ jobs:
           grep -q 'Hello from skeleton :)' nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save HaProxy logs
+        if: always()
+        run: docker logs aa-docker-socket-proxy > haproxy.log 2>&1
+
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -365,6 +372,14 @@ jobs:
         run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
+
+      - name: Upload HaProxy logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: dsp_https_haproxy.log
+          path: haproxy.log
+          if-no-files-found: warn
 
       - name: Upload Container info
         if: always()
@@ -490,7 +505,7 @@ jobs:
           grep -q 'Hello from skeleton :)' data/nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -616,7 +631,7 @@ jobs:
           grep -q 'Hello from skeleton :)' data/nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
