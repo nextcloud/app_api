@@ -325,6 +325,7 @@ jobs:
             -v `pwd`/certs/cert.pem:/certs/cert.pem \
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             -e BIND_ADDRESS="172.17.0.1" \
+            -e EX_APPS_NET_FOR_HTTPS="ipv4@localhost" \
             --net host --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
             --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
           sudo docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
