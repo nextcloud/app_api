@@ -69,7 +69,9 @@ class DaemonConfigController extends ApiController {
 	public function unregisterDaemonConfig(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
-		$this->exAppService->removeExAppsByDaemonConfigName($name);
+		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$this->exAppService->removeExAppsByDaemonConfigName($daemonConfig, $this->dockerActions);
+		}
 		if ($daemonConfig->getName() === $defaultDaemonConfig) {
 			$this->config->deleteAppValue(Application::APP_ID, 'default_daemon_config');
 		}

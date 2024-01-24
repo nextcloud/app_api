@@ -43,9 +43,10 @@
 						<Cancel :size="20" />
 					</template>
 				</NcDialogButton>
-				<NcDialogButton :disabled="!removeExAppsOnDaemonDelete" :label="t('app_api', 'Ok')" :callback="() => _deleteDaemonConfig(daemon)">
+				<NcDialogButton :disabled="(!removeExAppsOnDaemonDelete || deleting) && daemon.accepts_deploy_id !== 'manual-install'" :label="t('app_api', 'Ok')" :callback="() => _deleteDaemonConfig(daemon)">
 					<template #icon>
-						<Check :size="20" />
+						<NcLoadingIcon v-if="deleting" :size="20" />
+						<Check v-else :size="20" />
 					</template>
 				</NcDialogButton>
 			</template>
