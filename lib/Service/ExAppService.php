@@ -301,4 +301,17 @@ class ExAppService {
 		$this->speechToTextService->resetCacheEnabled();
 		$this->translationService->resetCacheEnabled();
 	}
+
+	public function removeExAppsByDaemonConfigName(string $name): void {
+		try {
+			$targetDaemonExApps = array_filter($this->exAppMapper->findAll(), function (ExApp $exApp) use ($name) {
+				return $exApp->getDaemonConfigName() === $name;
+			});
+			foreach ($targetDaemonExApps as $exApp) {
+				$this->disableExAppInternal($exApp);
+				$this->unregisterExApp($exApp->getAppid());
+			}
+		} catch (Exception) {
+		}
+	}
 }

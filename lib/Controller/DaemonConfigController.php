@@ -9,6 +9,7 @@ use OCA\AppAPI\Db\DaemonConfig;
 
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\JSONResponse;
@@ -26,6 +27,7 @@ class DaemonConfigController extends ApiController {
 		private readonly IConfig             $config,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions       $dockerActions,
+		private readonly ExAppService        $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -64,10 +66,10 @@ class DaemonConfigController extends ApiController {
 	}
 
 	#[NoCSRFRequired]
-	public function unregisterDaemonConfig(string $name, bool $removeExApps = false): Response {
-		// TODO: Add removal of ExApps if $removeExApps is set to true
+	public function unregisterDaemonConfig(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$this->exAppService->removeExAppsByDaemonConfigName($name);
 		if ($daemonConfig->getName() === $defaultDaemonConfig) {
 			$this->config->deleteAppValue(Application::APP_ID, 'default_daemon_config');
 		}

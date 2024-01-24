@@ -43,7 +43,7 @@
 						<Cancel :size="20" />
 					</template>
 				</NcDialogButton>
-				<NcDialogButton :label="t('app_api', 'Ok')" :callback="() => _deleteDaemonConfig(daemon)">
+				<NcDialogButton :disabled="!removeExAppsOnDaemonDelete" :label="t('app_api', 'Ok')" :callback="() => _deleteDaemonConfig(daemon)">
 					<template #icon>
 						<Check :size="20" />
 					</template>
@@ -54,10 +54,10 @@
 					<p>{{ t('app_api', 'Are you sure you want delete Deploy Daemon?') }}</p>
 					<NcCheckboxRadioSwitch v-if="daemon.accepts_deploy_id !== 'manual-install'"
 						:checked.sync="removeExAppsOnDaemonDelete"
-						:placeholder="t('app_api', 'Remove all ExApps installed on this daemon')"
-						:aria-label="t('app_api', 'Remove all ExApps installed on this daemon')">
+						:placeholder="t('app_api', 'All ExApps on this daemon will be removed')"
+						:aria-label="t('app_api', 'All ExApps on this daemon will be removed')">
 						<template #default>
-							{{ t('app_api', 'Remove all ExApps installed on this daemon') }}
+							{{ t('app_api', 'All ExApps installed on this daemon will be removed') }}
 						</template>
 					</NcCheckboxRadioSwitch>
 				</div>
