@@ -221,7 +221,7 @@ jobs:
           path: nextcloud.log
           if-no-files-found: warn
 
-  nc-docker-app-docker-dsp-http:
+  nc-docker-dsp-http:
     runs-on: ubuntu-22.04
     name: NC In Julius Docker(DSP-HTTP) • 🐘8.1
     env:
