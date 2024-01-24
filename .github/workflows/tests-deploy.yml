@@ -335,7 +335,7 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker cp ./certs/cert.pem nextcloud:/
-          docker exec nextcloud sudo -u www-data php occ security:certificates:import cert.pem
+          docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost/index.php \
             --net=host
