@@ -239,7 +239,7 @@ jobs:
             --net master_bridge --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
             --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-          sleep 40s
+          sleep 60s
 
       - name: Install AppAPI
         run: |
@@ -319,15 +319,14 @@ jobs:
 
       - name: Create containers
         run: |
-          docker network create master_bridge
           docker run -v /var/run/docker.sock:/var/run/docker.sock \
             -v `pwd`/certs/cert.pem:/certs/cert.pem \
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             -e BIND_ADDRESS="172.17.0.1" \
             --net host --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
             --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
-          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }} -p 8080:84
-          sleep 40s
+          docker run --name nextcloud --rm -d ${{ env.docker-image }} -p 8080:80
+          sleep 60s
 
       - name: Install AppAPI
         run: |
@@ -338,7 +337,7 @@ jobs:
           docker cp ./certs/cert.pem nextcloud:/
           docker exec nextcloud sudo -u www-data php occ security:certificates:import cert.pem
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost:84/index.php \
+            docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost/index.php \
             --net=host
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
@@ -601,6 +600,9 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+          ./occ app_api:daemon:register \
+            docker_socket_local Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php \
+            --net=host --set-default
           ./occ app_api:daemon:list
           ./occ app_api:app:deploy skeleton \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
