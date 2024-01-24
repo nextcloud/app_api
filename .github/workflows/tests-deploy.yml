@@ -325,7 +325,7 @@ jobs:
             -e BIND_ADDRESS="172.17.0.1" \
             --net host --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
             --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
-          docker run --name nextcloud --rm -d ${{ env.docker-image }} -p 8080:80
+          docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
           sleep 60s
 
       - name: Install AppAPI
