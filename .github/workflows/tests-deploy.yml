@@ -321,10 +321,11 @@ jobs:
 
       - name: Create containers
         run: |
+          hostname -I
           docker run -v /var/run/docker.sock:/var/run/docker.sock \
             -v `pwd`/certs/cert.pem:/certs/cert.pem \
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
-            -e BIND_ADDRESS="172.17.0.1" \
+            -e BIND_ADDRESS="$(ip route get 1.2.3.4 | awk '{print $7}' | head -n 1)" \
             --net host --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
             --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
           docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
