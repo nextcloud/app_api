@@ -221,9 +221,9 @@ jobs:
           path: nextcloud.log
           if-no-files-found: warn
 
-  nc-docker-app-docker-by-port:
+  nc-docker-app-docker-dsp-http:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker(Docker by port) • 🐘8.1
+    name: NC In Julius Docker(DSP-HTTP) • 🐘8.1
     env:
       docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
 
@@ -234,12 +234,12 @@ jobs:
       - name: Create containers
         run: |
           docker network create master_bridge
+          docker run -v /var/run/docker.sock:/var/run/docker.sock \
+            -e NC_HAPROXY_PASSWORD="some_secure_password" \
+            --net master_bridge --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
+            --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-          docker pull kekru/docker-remote-api-tls:master
-          docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
-            -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
-          sleep 60s
+          sleep 40s
 
       - name: Install AppAPI
         run: |
@@ -247,11 +247,9 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker cp ./certs/client/ nextcloud:/
-          docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
-            --net=master_bridge --ssl_cert /client/cert.pem --ssl_key /client/key.pem
+            docker_by_port Docker docker-install http host.docker.internal:2375 http://nextcloud/index.php \
+            --net=master_bridge --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
@@ -649,7 +647,7 @@ jobs:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-app-docker-by-port,
+    needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-app-docker-dsp-http,
             nc-docker-app-host-by-hostname, nc-host-app-docker-redis, nc-host-network-host]
     name: Tests-Deploy-OK
     steps:
