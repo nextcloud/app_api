@@ -321,40 +321,40 @@ jobs:
 
       - name: Create containers
         run: |
-          sudo docker run -v /var/run/docker.sock:/var/run/docker.sock \
+          docker run -v /var/run/docker.sock:/var/run/docker.sock \
             -v `pwd`/certs/cert.pem:/certs/cert.pem \
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             -e BIND_ADDRESS="172.17.0.1" \
             -e EX_APPS_NET_FOR_HTTPS="ipv4@localhost" \
             --net host --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
             --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
-          sudo docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
+          docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
           sleep 60s
           hostname -I
-          sudo docker exec aa-docker-socket-proxy ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
+          docker exec aa-docker-socket-proxy ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
 
       - name: Install AppAPI
         run: |
-          sudo docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
-          sudo docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
-          sudo docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          sudo docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          sudo docker cp ./certs/cert.pem nextcloud:/
-          sudo docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
-          sudo docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost/index.php \
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
+          docker exec nextcloud sudo -u www-data php occ app:enable app_api
+          docker cp ./certs/cert.pem nextcloud:/
+          docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
+            docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost:8080/index.php \
             --net=host --haproxy_password=some_secure_password
-          sudo docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          sudo docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
+          docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          sudo docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
+          docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
-          sudo docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
-          sudo docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
       - name: Copy NC log to host
         if: always()
-        run: sudo docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
+        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
         run: |
@@ -363,18 +363,18 @@ jobs:
 
       - name: Save HaProxy logs
         if: always()
-        run: sudo docker logs aa-docker-socket-proxy > haproxy.log 2>&1
+        run: docker logs aa-docker-socket-proxy > haproxy.log 2>&1
 
       - name: Save container info & logs
         if: always()
         run: |
-          sudo docker inspect nc_app_skeleton | json_pp > container.json
-          sudo docker logs nc_app_skeleton > container.log 2>&1
+          docker inspect nc_app_skeleton | json_pp > container.json
+          docker logs nc_app_skeleton > container.log 2>&1
 
       - name: Unregister Skeleton & Daemon
         run: |
-          sudo docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton
-          sudo docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
+          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
 
       - name: Upload HaProxy logs
         if: always()
