@@ -514,12 +514,15 @@ class DockerActions implements IDeployActions {
 				],
 			];
 		} elseif ($daemonConfig->getProtocol() === 'https') {
-			$guzzleParams = $this->setupCerts($guzzleParams, $daemonConfig->getDeployConfig());
+			$guzzleParams = $this->setupCerts($guzzleParams);
+		}
+		if (!empty($daemonConfig->getDeployConfig()['haproxy_password'])) {
+			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $daemonConfig->getDeployConfig()['haproxy_password']];
 		}
 		$this->guzzleClient = new Client($guzzleParams);
 	}
 
-	private function setupCerts(array $guzzleParams, array $deployConfig): array {
+	private function setupCerts(array $guzzleParams): array {
 		if (!$this->config->getSystemValueBool('installed', false)) {
 			$certs = \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
 		} else {
@@ -527,9 +530,6 @@ class DockerActions implements IDeployActions {
 		}
 
 		$guzzleParams['verify'] = $certs;
-		if (!empty($deployConfig['haproxy_password'])) {
-			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
-		}
 		return $guzzleParams;
 	}
 

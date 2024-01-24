@@ -86,16 +86,20 @@
 							</template>
 						</NcButton>
 						<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy config')">
-							<div class="external-label" :aria-label="t('app_api', 'Network')">
+							<div class="external-label"
+								:aria-label="t('app_api', 'Network')">
 								<label for="deploy-config-net">{{ t('app_api', 'Network') }}</label>
 								<NcInputField
 									id="deploy-config-net"
 									:value.sync="deployConfig.net"
+									:disabled="daemonProtocol === 'https'"
 									:placeholder="t('app_api', 'Docker network name')"
 									:aria-label="t('app_api', 'Docker network name')"
-									:helper-text="t('app_api', 'Docker network name')" />
+									:helper-text="networkHelperText" />
 							</div>
-							<div v-if="['http', 'https'].includes(daemonProtocol)" class="external-label" :aria-label="t('app_api', 'HaProxy password')">
+							<div v-if="['http', 'https'].includes(daemonProtocol)"
+								class="external-label"
+								:aria-label="t('app_api', 'HaProxy password')">
 								<label for="deploy-config-haproxy-password">{{ t('app_api', 'HaProxy password') }}</label>
 								<NcInputField
 									id="deploy-config-haproxy-password"
@@ -124,7 +128,7 @@
 					<div class="row">
 						<NcButton
 							type="primary"
-							:disabled="isDaemonNameValid === true && isHaProxyPasswordValid === true"
+							:disabled="canRegister"
 							@click="registerDaemon">
 							{{ t('app_api', 'Register') }}
 							<template #icon>
@@ -248,10 +252,20 @@ export default {
 			if (this.daemonProtocol === 'https') {
 				return this.deployConfig.haproxy_password !== null && this.deployConfig.haproxy_password.length >= 12
 			}
+			// HaProxy password required only for https
 			return true
 		},
 		haProxyPasswordHelperText() {
 			return this.isHaProxyPasswordValid ? t('app_api', 'AppAPI Docker Socket Proxy authentication password') : t('app_api', 'Password must be at least 12 characters long')
+		},
+		networkHelperText() {
+			if (this.httpsEnabled) {
+				return t('app_api', 'With https enabled network is set to host')
+			}
+			return t('app_api', 'Docker network name')
+		},
+		canRegister() {
+			return this.isDaemonNameValid === true || this.isHaProxyPasswordValid === false
 		},
 	},
 	watch: {
@@ -266,6 +280,14 @@ export default {
 			} else {
 				// Restore current configurationTab template
 				this.configurationTab = { id: this.configurationTab.id, label: this.configurationTab.label }
+			}
+		},
+		httpsEnabled(newHttpsEnabled) {
+			if (newHttpsEnabled) {
+				this.prevNet = this.deployConfig.net
+				this.deployConfig.net = 'host'
+			} else {
+				this.deployConfig.net = this.prevNet
 			}
 		},
 	},
@@ -352,7 +374,7 @@ export default {
 			}
 		},
 		closeModal() {
-			const customTemplate = DAEMON_TEMPLATES.find(template => template.name === this.configurationTab.id)
+			const customTemplate = DAEMON_TEMPLATES.find(template => template.id === 'custom')
 			this.configurationTab = { id: customTemplate.id, label: customTemplate.displayName }
 			this.$emit('update:show', false)
 		},
