@@ -1,6 +1,5 @@
 export const DAEMON_TEMPLATES = [
 	{
-		id: 'custom',
 		name: 'custom',
 		displayName: 'Custom default',
 		acceptsDeployId: 'docker-install',
@@ -16,7 +15,6 @@ export const DAEMON_TEMPLATES = [
 		defaultDaemon: true,
 	},
 	{
-		id: 'docker-socket-proxy',
 		name: 'docker_socket_proxy',
 		displayName: 'Docker Socket Proxy',
 		acceptsDeployId: 'docker-install',
@@ -32,7 +30,6 @@ export const DAEMON_TEMPLATES = [
 		defaultDaemon: true,
 	},
 	{
-		id: 'aio',
 		name: 'docker_aio',
 		displayName: 'All-in-One',
 		acceptsDeployId: 'docker-install',
@@ -48,7 +45,6 @@ export const DAEMON_TEMPLATES = [
 		defaultDaemon: true,
 	},
 	{
-		id: 'manual-install',
 		name: 'manual_install',
 		displayName: 'Manual install',
 		acceptsDeployId: 'manual-install',

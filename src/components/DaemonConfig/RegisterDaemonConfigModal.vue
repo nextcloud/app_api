@@ -38,6 +38,7 @@
 						<NcSelect
 							id="daemon-deploy-id"
 							v-model="acceptsDeployId"
+							:disabled="configurationTab.id === 'manual_install'"
 							:options="deployMethods"
 							:placeholder="t('app_api', 'Select daemon deploy method')" />
 					</div>
@@ -364,8 +365,8 @@ export default {
 			}
 		},
 		closeModal() {
-			const customTemplate = DAEMON_TEMPLATES.find(template => template.id === 'custom')
-			this.configurationTab = { id: customTemplate.id, label: customTemplate.displayName }
+			const customTemplate = DAEMON_TEMPLATES.find(template => template.name === 'custom')
+			this.configurationTab = { id: customTemplate.name, label: customTemplate.displayName }
 			this.$emit('update:show', false)
 		},
 	},
