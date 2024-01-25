@@ -35,7 +35,7 @@ class ExAppMapper extends QBMapper {
 			'd.accepts_deploy_id',
 		)
 			->from($this->tableName, 'a')
-			->leftJoin('a','ex_apps_daemons','d','a.daemon_config_name = d.name')
+			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 		return $this->findEntities($qb);
@@ -60,7 +60,7 @@ class ExAppMapper extends QBMapper {
 			'd.accepts_deploy_id',
 		)
 			->from($this->tableName, 'a')
-			->leftJoin('a','ex_apps_daemons','d','a.daemon_config_name = d.name')
+			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
 			->where(
 				$qb->expr()->eq('a.appid', $qb->createNamedParameter($appId))
 			);
