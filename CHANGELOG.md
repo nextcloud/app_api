@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.1 - 2024-01-25]
+
+### Fixed
+
+- MalformedUriException: Unable to parse URI exception - when the daemon has invalid URL. #216
+
 ## [2.0.0 - 2024-01-25]
 
 AppAPI 2.0.

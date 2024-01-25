@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\DeployActions;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -283,7 +284,7 @@ class DockerActions implements IDeployActions {
 			if ($response->getStatusCode() === 200) {
 				return true;
 			}
-		} catch (GuzzleException $e) {
+		} catch (Exception $e) {
 			$this->logger->error('Could not connect to Docker daemon', ['exception' => $e]);
 			error_log($e->getMessage());
 		}
