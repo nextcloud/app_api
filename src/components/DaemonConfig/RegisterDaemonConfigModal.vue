@@ -272,16 +272,6 @@ export default {
 		configurationTab(newConfigurationTab) {
 			this.setupFormConfiguration(newConfigurationTab)
 		},
-		acceptsDeployId(newAcceptsDeployId) {
-			if (newAcceptsDeployId === 'manual-install') {
-				this.name = 'manual_install'
-				this.displayName = 'Manual install'
-				this.host = 'host.docker.internal'
-			} else {
-				// Restore current configurationTab template
-				this.configurationTab = { id: this.configurationTab.id, label: this.configurationTab.label }
-			}
-		},
 		httpsEnabled(newHttpsEnabled) {
 			if (newHttpsEnabled) {
 				this.prevNet = this.deployConfig.net
