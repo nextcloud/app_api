@@ -28,14 +28,14 @@ class ExAppMapper extends QBMapper {
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select(
-			'apps.*',
-			'apps.protocol',
-			'apps.host',
-			'apps.deploy_config',
-			'apps.accepts_deploy_id',
+			'a.*',
+			'd.protocol',
+			'd.host',
+			'd.deploy_config',
+			'd.accepts_deploy_id',
 		)
-			->from($this->tableName, 'apps')
-			->leftJoin('apps','ex_apps_daemons','daemons','apps.daemon_config_name = daemons.name')
+			->from($this->tableName, 'a')
+			->leftJoin('a','ex_apps_daemons','d','a.daemon_config_name = d.name')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 		return $this->findEntities($qb);
@@ -53,16 +53,16 @@ class ExAppMapper extends QBMapper {
 	public function findByAppId(string $appId): Entity {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select(
-			'apps.*',
-			'apps.protocol',
-			'apps.host',
-			'apps.deploy_config',
-			'apps.accepts_deploy_id',
+			'a.*',
+			'd.protocol',
+			'd.host',
+			'd.deploy_config',
+			'd.accepts_deploy_id',
 		)
-			->from($this->tableName, 'apps')
-			->leftJoin('apps','ex_apps_daemons','daemons','apps.daemon_config_name = daemons.name')
+			->from($this->tableName, 'a')
+			->leftJoin('a','ex_apps_daemons','d','a.daemon_config_name = d.name')
 			->where(
-				$qb->expr()->eq('apps.appid', $qb->createNamedParameter($appId))
+				$qb->expr()->eq('a.appid', $qb->createNamedParameter($appId))
 			);
 		return $this->findEntity($qb);
 	}
