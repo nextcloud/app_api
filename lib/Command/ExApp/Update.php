@@ -11,6 +11,7 @@ use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppScopesService;
 
+use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,18 +21,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Update extends Command {
-	private AppAPIService $service;
 
 	public function __construct(
-		AppAPIService        $service,
-		private ExAppScopesService   $exAppScopeService,
-		private ExAppApiScopeService $exAppApiScopeService,
-		private DaemonConfigService  $daemonConfigService,
-		private DockerActions        $dockerActions,
+		private readonly AppAPIService  	  $service,
+		private readonly ExAppService         $exAppService,
+		private readonly ExAppScopesService   $exAppScopeService,
+		private readonly ExAppApiScopeService $exAppApiScopeService,
+		private readonly DaemonConfigService  $daemonConfigService,
+		private readonly DockerActions        $dockerActions,
 	) {
 		parent::__construct();
-
-		$this->service = $service;
 	}
 
 	protected function configure(): void {
@@ -52,7 +51,7 @@ class Update extends Command {
 		if ($pathToInfoXml !== null) {
 			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
 		} else {
-			$infoXml = $this->service->getLatestExAppInfoFromAppstore($appId);
+			$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
 		}
 
 		if ($infoXml === false) {
@@ -64,7 +63,7 @@ class Update extends Command {
 			return 2;
 		}
 
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			$output->writeln(sprintf('ExApp %s not found.', $appId));
 			return 1;
@@ -137,13 +136,16 @@ class Update extends Command {
 					return 1;
 				}
 
-				$exAppUrlParams = [
-					'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
-					'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
-					'port' => $deployParams['container_params']['port'],
-				];
-
-				if (!$this->service->heartbeatExApp($exAppUrlParams)) {
+				$auth = [];
+				$exAppUrl = $this->dockerActions->resolveExAppUrl(
+					$appId,
+					$daemonConfig->getProtocol(),
+					$daemonConfig->getHost(),
+					$daemonConfig->getDeployConfig(),
+					(int) $deployParams['container_params']['port'],
+					$auth,
+				);
+				if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
 					$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and configured correctly to be reachable by Nextcloud.', $appId));
 					return 1;
 				}
@@ -153,7 +155,7 @@ class Update extends Command {
 		}
 
 		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-		if (!$this->service->updateExAppInfo($exApp, $exAppInfo)) {
+		if (!$this->exAppService->updateExAppInfo($exApp, $exAppInfo)) {
 			$output->writeln(sprintf('Failed to update ExApp %s info', $appId));
 			return 1;
 		}
@@ -162,7 +164,7 @@ class Update extends Command {
 		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
 			return $exAppScope->getScopeGroup();
 		}, $this->exAppScopeService->getExAppScopes($exApp));
-		$newExAppScopes = $this->service->getExAppRequestedScopes($exApp, $infoXml);
+		$newExAppScopes = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml);
 		if (isset($newExAppScopes['error'])) {
 			$output->writeln($newExAppScopes['error']);
 		}
@@ -214,7 +216,7 @@ class Update extends Command {
 			return 1;
 		}
 
-		if (!$this->service->dispatchExAppInit($exApp, true)) {
+		if (!$this->service->dispatchExAppInit($exApp->getAppid(), true)) {
 			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
 			return 1;
 		}

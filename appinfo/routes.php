@@ -47,6 +47,7 @@ return [
 		['name' => 'DaemonConfig#registerDaemonConfig', 'url' => '/daemons', 'verb' => 'POST'],
 		['name' => 'DaemonConfig#unregisterDaemonConfig', 'url' => '/daemons/{name}', 'verb' => 'DELETE'],
 		['name' => 'DaemonConfig#verifyDaemonConnection', 'url' => '/daemons/{name}/check', 'verb' => 'POST'],
+		['name' => 'DaemonConfig#checkDaemonConnection', 'url' => '/daemons/verify_connection', 'verb' => 'POST'],
 		['name' => 'DaemonConfig#updateDaemonConfig', 'url' => '/daemons', 'verb' => 'PUT'],
 	],
 	'ocs' => [
@@ -78,6 +79,8 @@ return [
 		// Talk bots
 		['name' => 'TalkBot#registerExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'POST'],
 		['name' => 'TalkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'DELETE'],
+		['name' => 'TalkBot#proxyTalkMessage',
+			'url' => '/api/v1/talk_proxy/{appId}/{route}', 'verb' => 'POST' , 'requirements' => ['route' => '.+']],
 
 		// --- UI ---
 		// File Actions Menu

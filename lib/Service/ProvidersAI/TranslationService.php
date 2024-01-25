@@ -9,7 +9,7 @@ use OCA\AppAPI\Db\Translation\TranslationProvider;
 use OCA\AppAPI\Db\Translation\TranslationProviderMapper;
 use OCA\AppAPI\Db\Translation\TranslationQueue;
 use OCA\AppAPI\Db\Translation\TranslationQueueMapper;
-use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\AppAPICommonService;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -199,8 +199,8 @@ class TranslationService {
 			}
 
 			public function translate(?string $fromLanguage, string $toLanguage, string $text): string {
-				/** @var AppAPIService $service */
-				$service = $this->serverContainer->get(AppAPIService::class);
+				/** @var AppAPICommonService $service */
+				$service = $this->serverContainer->get(AppAPICommonService::class);
 				/** @var TranslationQueueMapper $mapper */
 				$mapper = $this->serverContainer->get(TranslationQueueMapper::class);
 				$route = $this->provider->getActionHandler();

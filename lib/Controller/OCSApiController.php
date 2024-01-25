@@ -8,6 +8,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Service\AppAPIService;
 
+use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -23,9 +24,10 @@ class OCSApiController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest        $request,
-		private AppAPIService   $service,
-		private LoggerInterface $logger,
+		IRequest                         $request,
+		private readonly LoggerInterface $logger,
+		private readonly AppAPIService   $service,
+		private readonly ExAppService	 $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -42,7 +44,7 @@ class OCSApiController extends OCSController {
 	public function log(int $level, string $message): DataResponse {
 		try {
 			$appId = $this->request->getHeader('EX-APP-ID');
-			$exApp = $this->service->getExApp($appId);
+			$exApp = $this->exAppService->getExApp($appId);
 			if ($exApp === null) {
 				$this->logger->error('ExApp ' . $appId . ' not found');
 				throw new OCSBadRequestException('ExApp not found');
@@ -66,7 +68,7 @@ class OCSApiController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getNCUsersList(): DataResponse {
-		return new DataResponse($this->service->getNCUsersList(), Http::STATUS_OK);
+		return new DataResponse($this->exAppService->getNCUsersList(), Http::STATUS_OK);
 	}
 
 	/**

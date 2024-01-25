@@ -5,36 +5,27 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Migration;
 
 use OCA\AppAPI\DeployActions\AIODockerActions;
-use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
 class DataInitializationStep implements IRepairStep {
-	private ExAppApiScopeService $service;
-	private DockerActions $dockerActions;
-	private AIODockerActions $AIODockerActions;
-
 	public function __construct(
-		ExAppApiScopeService $service,
-		DockerActions $dockerActions,
-		AIODockerActions $AIODockerActions,
+		private readonly ExAppApiScopeService $service,
+		private readonly AIODockerActions     $AIODockerActions,
 	) {
-		$this->service = $service;
-		$this->dockerActions = $dockerActions;
-		$this->AIODockerActions = $AIODockerActions;
 	}
 
 	public function getName(): string {
-		return 'Initializing data for App Ecosystem V2';
+		return 'Initializing data for AppAPI';
 	}
 
 	public function run(IOutput $output): void {
 		if ($this->service->registerInitScopes()) {
-			$output->info('Successfully initialized data for App Ecosystem V2');
+			$output->info('API scopes successfully initialized');
 		} else {
-			$output->warning('Failed to initialize data for App Ecosystem V2');
+			$output->warning('Failed to initialize API scopes');
 		}
 
 		// If in AIO - automatically register default DaemonConfig
@@ -42,10 +33,6 @@ class DataInitializationStep implements IRepairStep {
 			$output->info('AIO installation detected. Registering default daemon');
 			if ($this->AIODockerActions->registerAIODaemonConfig() !== null) {
 				$output->info('AIO DaemonConfig successfully registered');
-			}
-		} else { // register default DaemonConfig for local Docker socket
-			if ($this->dockerActions->registerDefaultDaemonConfig()) {
-				$output->info('Default DaemonConfig successfully registered');
 			}
 		}
 	}

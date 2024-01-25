@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace OCA\AppAPI\DeployActions;
 
 use OCA\AppAPI\Db\DaemonConfig;
-use OCA\AppAPI\Service\AppAPIService;
 
 /**
  * Manual deploy actions for development.
  */
 class ManualActions implements IDeployActions {
 
-	public function __construct(
-		private AppAPIService $service,
-	) {
+	public function __construct() {
 	}
 
 	public function getAcceptsDeployId(): string {
@@ -47,25 +44,17 @@ class ManualActions implements IDeployActions {
 			'appid' => $jsonInfo['appid'],
 			'version' => $jsonInfo['version'],
 			'name' => $jsonInfo['name'],
-			'protocol' => $jsonInfo['protocol'],
 			'port' => $jsonInfo['port'],
-			'host' => $jsonInfo['host'],
 			'secret' => $jsonInfo['secret'],
 			'system_app' => $jsonInfo['system_app'],
 			'scopes' => $jsonInfo['scopes'],
 		];
 	}
 
-	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string {
-		$jsonInfo = json_decode($params['json-info'], true);
-		return $jsonInfo['host'];
-	}
-
-	public function healthcheck(array $jsonInfo): bool {
-		return $this->service->heartbeatExApp([
-			'protocol' => $jsonInfo['protocol'],
-			'host' => $jsonInfo['host'],
-			'port' => $jsonInfo['port'],
-		]);
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	): string {
+		$auth = [];
+		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 }

@@ -36,19 +36,13 @@ class RegisterDaemon extends Command {
 
 		// daemon-config settings
 		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'DeployConfig, the name of the docker network to attach App to');
-		$this->addOption('hostname', null, InputOption::VALUE_REQUIRED, 'DeployConfig, hostname to reach App (only when "--net=host")');
-
-		// ssl settings
-		$this->addOption('ssl_key', null, InputOption::VALUE_REQUIRED, 'SSL key for daemon connection (local absolute path)');
-		$this->addOption('ssl_key_password', null, InputOption::VALUE_REQUIRED, 'SSL key password for daemon connection(optional)');
-		$this->addOption('ssl_cert', null, InputOption::VALUE_REQUIRED, 'SSL cert for daemon connection (local absolute path)');
-		$this->addOption('ssl_cert_password', null, InputOption::VALUE_REQUIRED, 'SSL cert password for daemon connection(optional)');
+		$this->addOption('haproxy_password', null, InputOption::VALUE_REQUIRED, 'AppAPI Docker Socket Proxy password for HAProxy Basic auth');
 
 		$this->addOption('gpu', null, InputOption::VALUE_NONE, 'Enable support of GPUs for containers');
 
 		$this->addOption('set-default', null, InputOption::VALUE_NONE, 'Set DaemonConfig as default');
 
-		$this->addUsage('local_docker "Docker local" "docker-install" "unix-socket" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
+		$this->addUsage('local_docker "Docker local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -61,14 +55,24 @@ class RegisterDaemon extends Command {
 
 		$deployConfig = [
 			'net' => $input->getOption('net') ?? 'host',
-			'host' => $input->getOption('hostname'),
 			'nextcloud_url' => $nextcloudUrl,
-			'ssl_key' => $input->getOption('ssl_key'),
-			'ssl_key_password' => $input->getOption('ssl_key_password'),
-			'ssl_cert' => $input->getOption('ssl_cert'),
-			'ssl_cert_password' => $input->getOption('ssl_cert_password'),
+			'haproxy_password' => $input->getOption('haproxy_password') ?? '',
 			'gpu' => $input->getOption('gpu') ?? false,
 		];
+
+		if (($protocol !== 'http') && ($protocol !== 'https')) {
+			$output->writeln('Value error: The protocol must be `http` or `https`.');
+			return 1;
+		}
+		if (($acceptsDeployId === 'manual-install') && ($protocol !== 'http')) {
+			$output->writeln('Value error: Manual-install daemon supports only `http` protocol.');
+			return 1;
+		}
+
+		if ($this->daemonConfigService->getDaemonConfigByName($name) !== null) {
+			$output->writeln(sprintf('Skip registration, as daemon config `%s` already registered.', $name));
+			return 0;
+		}
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
 			'name' => $name,

@@ -9,9 +9,10 @@ use GuzzleHttp\Exception\GuzzleException;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
-use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\AppAPICommonService;
 
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
@@ -36,17 +37,20 @@ class DockerActions implements IDeployActions {
 		'NEXTCLOUD_URL',
 	];
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
+	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
+
 	private Client $guzzleClient;
 
 	public function __construct(
-		private LoggerInterface     $logger,
-		private IConfig             $config,
-		private  ICertificateManager $certificateManager,
-		private IAppManager         $appManager,
-		private ISecureRandom       $random,
-		private IURLGenerator       $urlGenerator,
-		private AppAPIService       $service,
-		private DaemonConfigService $daemonConfigService,
+		private readonly LoggerInterface     $logger,
+		private readonly IConfig             $config,
+		private readonly ICertificateManager $certificateManager,
+		private readonly IAppManager         $appManager,
+		private readonly ISecureRandom       $random,
+		private readonly IURLGenerator       $urlGenerator,
+		private readonly AppAPICommonService $service,
+		private readonly ExAppService        $exAppService,
+		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}
 
@@ -335,13 +339,13 @@ class DockerActions implements IDeployActions {
 		if (isset($params['container_info'])) {
 			$containerInfo = $params['container_info'];
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
-			$port = $oldEnvs['APP_PORT'] ?? $this->service->getExAppRandomPort();
+			$port = $oldEnvs['APP_PORT'] ?? $this->exAppService->getExAppFreePort();
 			$secret = $oldEnvs['APP_SECRET'];
 			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
 			// Preserve previous device requests (GPU)
 			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'] ?? [];
 		} else {
-			$port = $this->service->getExAppRandomPort();
+			$port = $this->exAppService->getExAppFreePort();
 			if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
 				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
 			} else {
@@ -452,21 +456,28 @@ class DockerActions implements IDeployActions {
 			'name' => $aeEnvs['APP_DISPLAY_NAME'],
 			'version' => $aeEnvs['APP_VERSION'],
 			'secret' => $aeEnvs['APP_SECRET'],
-			'host' => $this->resolveDeployExAppHost($appId, $daemonConfig),
 			'port' => $aeEnvs['APP_PORT'],
-			'protocol' => $aeEnvs['APP_PROTOCOL'],
 			'system_app' => $aeEnvs['IS_SYSTEM_APP'] ?? false,
 		];
 	}
 
-	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string {
-		$deployConfig = $daemonConfig->getDeployConfig();
-		if (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
-			$host = $deployConfig['host'] ?? 'localhost';
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	): string {
+		$host = explode(':', $host)[0];
+		if ($protocol == 'https') {
+			$exAppHost = $host;
+		} elseif (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
+			$exAppHost = 'localhost';
 		} else {
-			$host = $appId;
+			$exAppHost = $appId;
 		}
-		return $host;
+		if (empty($deployConfig['haproxy_password'])) {
+			$auth = [];
+		} else {
+			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
+		}
+		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);
 	}
 
 	public function containerStateHealthy(array $containerInfo): bool {
@@ -488,28 +499,30 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
-		$dockerUrl = 'http://localhost';
-		if (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
-			$dockerUrl = $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		if (file_exists($daemonConfig->getHost())) {
+			return 'http://localhost';
 		}
-		return $dockerUrl;
+		return $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
 	}
 
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
 		$guzzleParams = [];
-		if ($daemonConfig->getProtocol() === 'unix-socket') {
+		if (file_exists($daemonConfig->getHost())) {
 			$guzzleParams = [
 				'curl' => [
 					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
 				],
 			];
-		} elseif (in_array($daemonConfig->getProtocol(), ['http', 'https'])) {
-			$guzzleParams = $this->setupCerts($guzzleParams, $daemonConfig->getDeployConfig());
+		} elseif ($daemonConfig->getProtocol() === 'https') {
+			$guzzleParams = $this->setupCerts($guzzleParams);
+		}
+		if (!empty($daemonConfig->getDeployConfig()['haproxy_password'])) {
+			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $daemonConfig->getDeployConfig()['haproxy_password']];
 		}
 		$this->guzzleClient = new Client($guzzleParams);
 	}
 
-	private function setupCerts(array $guzzleParams, array $deployConfig): array {
+	private function setupCerts(array $guzzleParams): array {
 		if (!$this->config->getSystemValueBool('installed', false)) {
 			$certs = \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
 		} else {
@@ -517,16 +530,6 @@ class DockerActions implements IDeployActions {
 		}
 
 		$guzzleParams['verify'] = $certs;
-		if (!empty($deployConfig['ssl_key'])) {
-			$guzzleParams['ssl_key'] = empty($deployConfig['ssl_key_password'])
-				? $deployConfig['ssl_key']
-				: [$deployConfig['ssl_key'], $deployConfig['ssl_key_password']];
-		}
-		if (!empty($deployConfig['ssl_cert'])) {
-			$guzzleParams['cert'] = empty($deployConfig['ssl_cert_password'])
-				? $deployConfig['ssl_cert']
-				: [$deployConfig['ssl_cert'], $deployConfig['ssl_cert_password']];
-		}
 		return $guzzleParams;
 	}
 
@@ -557,47 +560,6 @@ class DockerActions implements IDeployActions {
 
 	public function buildExAppVolumeName(string $appId): string {
 		return self::EX_APP_CONTAINER_PREFIX . $appId . '_data';
-	}
-
-	public function registerDefaultDaemonConfig(): ?DaemonConfig {
-		# default config means that NC is installed into host, and all ExApps are installed in the hosts network.
-		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
-		if ($defaultDaemonConfig !== '') {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfig);
-			if ($daemonConfig !== null) {
-				return $daemonConfig;
-			}
-		}
-
-		$deployConfig = [
-			'net' => 'host', // TODO: Add ExApp skeleton heartbeat check to verify default configuration works or manual configuration required
-			'host' => 'localhost',
-			'nextcloud_url' => str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL('/index.php')),
-			'ssl_key' => null,
-			'ssl_key_password' => null,
-			'ssl_cert' => null,
-			'ssl_cert_password' => null,
-			'gpu' => false,
-		];
-
-		if ($this->isGPUAvailable()) {
-			$deployConfig['gpus'] = ['/dev/dri'];
-		}
-
-		$daemonConfigParams = [
-			'name' => 'docker_socket_local',
-			'display_name' => 'Docker Socket Local',
-			'accepts_deploy_id' => 'docker-install',
-			'protocol' => 'unix-socket',
-			'host' => '/var/run/docker.sock',
-			'deploy_config' => $deployConfig,
-		];
-
-		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
-		if ($daemonConfig !== null) {
-			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
-		}
-		return $daemonConfig;
 	}
 
 	private function isGPUAvailable(): bool {

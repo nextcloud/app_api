@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppUser;
 use OCA\AppAPI\Db\ExAppUserMapper;
 
@@ -19,9 +18,9 @@ class ExAppUsersService {
 	private ICache $cache;
 
 	public function __construct(
-		private LoggerInterface $logger,
-		ICacheFactory $cacheFactory,
-		private ExAppUserMapper $mapper,
+		private readonly LoggerInterface $logger,
+		ICacheFactory                    $cacheFactory,
+		private readonly ExAppUserMapper $mapper,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_apps_users');
 	}
@@ -29,9 +28,9 @@ class ExAppUsersService {
 	/**
 	 * @throws Exception
 	 */
-	public function setupSystemAppFlag(ExApp $exApp): void {
+	public function setupSystemAppFlag(string $appId): void {
 		$this->mapper->insert(new ExAppUser([
-			'appid' => $exApp->getAppid(),
+			'appid' => $appId,
 			'userid' => '',
 		]));
 	}
@@ -39,20 +38,20 @@ class ExAppUsersService {
 	/**
 	 * @throws Exception
 	 */
-	public function setupExAppUser(ExApp $exApp, ?string $userId): void {
+	public function setupExAppUser(string $appId, ?string $userId): void {
 		if (!empty($userId)) {
-			if (!$this->exAppUserExists($exApp->getAppid(), $userId)) {
+			if (!$this->exAppUserExists($appId, $userId)) {
 				$this->mapper->insert(new ExAppUser([
-					'appid' => $exApp->getAppid(),
+					'appid' => $appId,
 					'userid' => $userId,
 				]));
 			}
 		}
 	}
 
-	public function getExAppUsers(ExApp $exApp): array {
+	public function getExAppUsers(string $appId): array {
 		try {
-			$cacheKey = '/ex_apps_users_' . $exApp->getAppid();
+			$cacheKey = '/ex_apps_users_' . $appId;
 			$cached = $this->cache->get($cacheKey);
 			if ($cached !== null) {
 				array_map(function ($cashedEntry) {
@@ -60,37 +59,37 @@ class ExAppUsersService {
 				}, $cached);
 			}
 
-			$exAppUser = $this->mapper->findByAppid($exApp->getAppid());
+			$exAppUser = $this->mapper->findByAppid($appId);
 			$this->cache->set($cacheKey, $exAppUser, self::CACHE_TLL);
 			return $exAppUser;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to get ex_app_users for ExApp %s. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to get ex_app_users for ExApp %s. Error: %s', $appId, $e->getMessage()), ['exception' => $e]);
 			return [];
 		}
 	}
 
-	public function removeExAppUsers(ExApp $exApp): bool {
+	public function removeExAppUsers(string $appId): bool {
 		try {
-			$result = $this->mapper->deleteByAppid($exApp->getAppid()) !== 0;
+			$result = $this->mapper->deleteByAppid($appId) !== 0;
 			if ($result) {
-				$this->cache->clear('/ex_apps_users_' . $exApp->getAppid());
+				$this->cache->clear('/ex_apps_users_' . $appId);
 			}
 			return $result;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to remove ex_app_users for ExApp %s. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to remove ex_app_users for ExApp %s. Error: %s', $appId, $e->getMessage()), ['exception' => $e]);
 			return false;
 		}
 	}
 
-	public function removeExAppUser(ExApp $exApp, string $userId): bool {
+	public function removeExAppUser(string $appId, string $userId): bool {
 		try {
-			$result = $this->mapper->deleteByAppid($exApp->getAppid()) !== 0;
+			$result = $this->mapper->deleteByAppid($appId) !== 0;
 			if ($result) {
-				$this->cache->clear('/ex_apps_users_' . $exApp->getAppid());
+				$this->cache->clear('/ex_apps_users_' . $appId);
 			}
 			return $result;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to remove ex_app_user %s for ExApp %s. Error: %s', $userId, $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to remove ex_app_user %s for ExApp %s. Error: %s', $userId, $appId, $e->getMessage()), ['exception' => $e]);
 			return false;
 		}
 	}

@@ -93,7 +93,7 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:register skeleton docker_local_sock \
@@ -106,7 +106,7 @@ jobs:
           grep -q 'Hello from skeleton :)' data/nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -168,7 +168,7 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://nextcloud/index.php \
+            docker_local_sock Docker docker-install http /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_local_sock \
@@ -179,6 +179,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
       - name: Copy NC log to host
+        if: always()
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
@@ -186,7 +187,7 @@ jobs:
           grep -q 'Hello from skeleton :)' nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -221,9 +222,9 @@ jobs:
           path: nextcloud.log
           if-no-files-found: warn
 
-  nc-docker-app-docker-by-port:
+  nc-docker-dsp-http:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker(Docker by port) • 🐘8.1
+    name: NC In Julius Docker(DSP-HTTP) • 🐘8.1
     env:
       docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
 
@@ -234,11 +235,11 @@ jobs:
       - name: Create containers
         run: |
           docker network create master_bridge
+          docker run -v /var/run/docker.sock:/var/run/docker.sock \
+            -e NC_HAPROXY_PASSWORD="some_secure_password" \
+            --net master_bridge --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
+            --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-          docker pull kekru/docker-remote-api-tls:master
-          docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
-            -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
           sleep 60s
 
       - name: Install AppAPI
@@ -247,11 +248,9 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker cp ./certs/client/ nextcloud:/
-          docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install https host.docker.internal:8443 http://nextcloud/index.php \
-            --net=master_bridge --ssl_cert /client/cert.pem --ssl_key /client/key.pem
+            docker_by_port Docker docker-install http aa-docker-socket-proxy:2375 http://nextcloud/index.php \
+            --net=master_bridge --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
@@ -261,6 +260,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
       - name: Copy NC log to host
+        if: always()
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
@@ -268,7 +268,7 @@ jobs:
           grep -q 'Hello from skeleton :)' nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -283,7 +283,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_by_port_container.json
+          name: dsp_http_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -291,7 +291,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_by_port_container.log
+          name: dsp_http_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -299,13 +299,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_docker_by_port_nextcloud.log
+          name: dsp_http_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
 
-  nc-docker-app-host-by-hostname:
+  nc-docker-dsp-https:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker(APP by hostname) • 🐘8.1
+    name: NC In Julius Docker(DSP-HTTPS) • 🐘8.1
     env:
       docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
 
@@ -313,14 +313,25 @@ jobs:
       - name: Set app env
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
+      - name: Create certificates
+        run: |
+          mkdir certs
+          openssl req -nodes -new -x509 -subj '/CN=host.docker.internal' -sha256 -keyout certs/privkey.pem -out certs/fullchain.pem -days 365000 > /dev/null 2>&1
+          cat certs/fullchain.pem certs/privkey.pem | tee certs/cert.pem > /dev/null 2>&1
+
       - name: Create containers
         run: |
+          docker run -v /var/run/docker.sock:/var/run/docker.sock \
+            -v `pwd`/certs/cert.pem:/certs/cert.pem \
+            -e NC_HAPROXY_PASSWORD="some_secure_password" \
+            -e BIND_ADDRESS="172.17.0.1" \
+            -e EX_APPS_NET_FOR_HTTPS="ipv4@localhost" \
+            --net host --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
+            --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
           docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
-          docker pull kekru/docker-remote-api-tls:master
-          docker run -d -p 8443:443 -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            --env CREATE_CERTS_WITH_PW=supersecret --env CERT_HOSTNAME=host.docker.internal \
-            -v `pwd`/certs:/data/certs kekru/docker-remote-api-tls:master
           sleep 60s
+          hostname -I
+          docker exec aa-docker-socket-proxy ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
 
       - name: Install AppAPI
         run: |
@@ -328,11 +339,11 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker cp ./certs/client/ nextcloud:/
-          docker exec nextcloud sudo -u www-data php occ security:certificates:import /client/ca.pem
+          docker cp ./certs/cert.pem nextcloud:/
+          docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install https host.docker.internal:8443 http://localhost:8080/index.php \
-            --net=host --hostname=host.docker.internal --ssl_cert /client/cert.pem --ssl_key /client/key.pem
+            docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost:8080/index.php \
+            --net=host --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
@@ -342,6 +353,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
       - name: Copy NC log to host
+        if: always()
         run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
@@ -349,7 +361,11 @@ jobs:
           grep -q 'Hello from skeleton :)' nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save HaProxy logs
+        if: always()
+        run: docker logs aa-docker-socket-proxy > haproxy.log 2>&1
+
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -360,11 +376,19 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:app:unregister skeleton
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
 
+      - name: Upload HaProxy logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: dsp_https_haproxy.log
+          path: haproxy.log
+          if-no-files-found: warn
+
       - name: Upload Container info
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_host_by_hostname_container.json
+          name: dsp_https_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -372,7 +396,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_host_by_hostname_container.log
+          name: dsp_https_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -380,7 +404,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_docker_app_host_by_hostname_nextcloud.log
+          name: dsp_https_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
 
@@ -470,7 +494,7 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install unix-socket /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:daemon:list
           ./occ app_api:app:deploy skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
@@ -484,7 +508,7 @@ jobs:
           grep -q 'Hello from skeleton :)' data/nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -594,6 +618,9 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+          ./occ app_api:daemon:register \
+            docker_socket_local Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php \
+            --net=host --set-default
           ./occ app_api:daemon:list
           ./occ app_api:app:deploy skeleton \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
@@ -607,7 +634,7 @@ jobs:
           grep -q 'Hello from skeleton :)' data/nextcloud.log || error
           grep -q 'Bye bye from skeleton :(' data/nextcloud.log || error
 
-      - name: Save container ingo & logs
+      - name: Save container info & logs
         if: always()
         run: |
           docker inspect nc_app_skeleton | json_pp > container.json
@@ -649,8 +676,8 @@ jobs:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-app-docker-by-port,
-            nc-docker-app-host-by-hostname, nc-host-app-docker-redis, nc-host-network-host]
+    needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-dsp-http,
+            nc-docker-dsp-https, nc-host-app-docker-redis, nc-host-network-host]
     name: Tests-Deploy-OK
     steps:
       - run: echo "Tests-Deploy passed successfully"

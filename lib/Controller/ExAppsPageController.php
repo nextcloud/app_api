@@ -20,6 +20,7 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppScopesService;
+use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ExAppUsersService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
@@ -72,6 +73,7 @@ class ExAppsPageController extends Controller {
 		IL10N $l10n,
 		LoggerInterface $logger,
 		IAppManager $appManager,
+		private readonly ExAppService $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -125,7 +127,7 @@ class ExAppsPageController extends Controller {
 	private function getExAppsWithUpdates(): array {
 		$apps = $this->exAppFetcher->get();
 		$appsWithUpdates = array_filter($apps, function (array $app) {
-			$exApp = $this->service->getExApp($app['id']);
+			$exApp = $this->exAppService->getExApp($app['id']);
 			$newestVersion = $app['releases'][0]['version'];
 			return $exApp !== null && isset($app['releases'][0]['version']) && version_compare($newestVersion, $exApp->getVersion(), '>');
 		});
@@ -143,7 +145,7 @@ class ExAppsPageController extends Controller {
 		$formattedApps = [];
 		$apps = $this->exAppFetcher->get();
 		foreach ($apps as $app) {
-			$exApp = $this->service->getExApp($app['id']);
+			$exApp = $this->exAppService->getExApp($app['id']);
 
 			// Skip all apps not in the requested category
 			if ($requestedCategory !== '') {
@@ -205,12 +207,15 @@ class ExAppsPageController extends Controller {
 
 			$scopes = null;
 			$daemon = null;
+			$exAppUrl = '';
 
 			if ($exApp !== null) {
 				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
 					return $exAppScope->getScopeGroup();
 				}, $this->exAppScopeService->getExAppScopes($exApp)));
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+				$auth = [];
+				$exAppUrl = $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth);
 			}
 
 			$formattedApps[] = [
@@ -254,7 +259,7 @@ class ExAppsPageController extends Controller {
 				'scopes' => $scopes,
 				'daemon' => $daemon,
 				'systemApp' => $exApp !== null && $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-				'exAppUrl' => $exApp !== null ? AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()) : '',
+				'exAppUrl' => $exAppUrl,
 				'status' => $exApp !== null ? $exApp->getStatus() : [],
 			];
 		}
@@ -267,7 +272,7 @@ class ExAppsPageController extends Controller {
 		$apps = $this->getAppsForCategory('');
 		$appsWithUpdate = $this->getExAppsWithUpdates();
 
-		$exApps = $this->service->getExAppsList('all');
+		$exApps = $this->exAppService->getExAppsList('all');
 		$dependencyAnalyzer = new DependencyAnalyzer(new Platform($this->config), $this->l10n);
 
 		$ignoreMaxApps = $this->config->getSystemValue('app_install_overwrite', []);
@@ -343,9 +348,10 @@ class ExAppsPageController extends Controller {
 			return $app['id'];
 		}, $apps);
 		$formattedLocalApps = [];
+		$auth = [];
 		foreach ($exApps as $app) {
 			if (!in_array($app['id'], $registeredAppsIds)) {
-				$exApp = $this->service->getExApp($app['id']);
+				$exApp = $this->exAppService->getExApp($app['id']);
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
 					return $exAppScope->getScopeGroup();
@@ -391,7 +397,7 @@ class ExAppsPageController extends Controller {
 					'scopes' => $scopes,
 					'daemon' => $daemon,
 					'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-					'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
+					'exAppUrl' => $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth),
 					'releases' => [],
 					'update' => null,
 					'status' => $exApp->getStatus(),
@@ -426,11 +432,11 @@ class ExAppsPageController extends Controller {
 
 			foreach ($appIds as $appId) {
 				// If ExApp is not null, assuming it was already deployed, therefore it could be registered
-				$exApp = $this->service->getExApp($appId);
+				$exApp = $this->exAppService->getExApp($appId);
 
 				// If ExApp not registered - then it's a "Deploy and Enable" action. Get default_daemon_config, deploy ExApp, register and finally enable
 				if ($exApp === null) {
-					$infoXml = $this->service->getLatestExAppInfoFromAppstore($appId);
+					$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
 					$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
 					$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
 					if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
@@ -440,11 +446,11 @@ class ExAppsPageController extends Controller {
 					if ($this->deployExApp($appId, $infoXml, $daemonConfig)) {
 						// 2. Register ExApp (container must be already initialized successfully)
 						if (!$this->registerExApp($appId, $infoXml, $daemonConfig)) {
-							$this->service->unregisterExApp($appId); // Fallback unregister if failure
+							$this->exAppService->unregisterExApp($appId); // Fallback unregister if failure
 							return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to register ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 						}
 					} else {
-						$this->logger->error(sprintf('Failed to Deploy %s ExApp', $appId));
+						$this->logger->error(sprintf('Failed to deploy %s ExApp', $appId));
 						return new JSONResponse([
 							'data' => [
 								'message' => $this->l10n->t('Failed to deploy ExApp'),
@@ -452,10 +458,10 @@ class ExAppsPageController extends Controller {
 						], Http::STATUS_INTERNAL_SERVER_ERROR);
 					}
 
-					$exApp = $this->service->getExApp($appId);
+					$exApp = $this->exAppService->getExApp($appId);
 
 					// Start ExApp initialization step (to download dynamic content, e.g. models)
-					if (!$this->service->dispatchExAppInit($exApp)) {
+					if (!$this->service->dispatchExAppInit($exApp->getAppid())) {
 						return new JSONResponse([
 							'data' => [
 								'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),
@@ -466,11 +472,12 @@ class ExAppsPageController extends Controller {
 					$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
 						return $exAppScope->getScopeGroup();
 					}, $this->exAppScopeService->getExAppScopes($exApp)));
+					$auth = [];
 					return new JSONResponse([
 						'data' => [
 							'daemon_config' => $daemonConfig,
 							'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-							'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
+							'exAppUrl' => $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth),
 							'status' => $exApp->getStatus(),
 							'scopes' => $scopes,
 						]
@@ -510,28 +517,30 @@ class ExAppsPageController extends Controller {
 			return false;
 		}
 
-		if (!$this->service->heartbeatExApp([
-			'protocol' => (string) ($infoXml->xpath('ex-app/protocol')[0] ?? 'http'),
-			'host' => $this->dockerActions->resolveDeployExAppHost($appId, $daemonConfig),
-			'port' => explode('=', $deployParams['container_params']['env'][7])[1],
-		])) {
+		$auth = [];
+		$exAppUrl = $this->dockerActions->resolveExAppUrl(
+			$appId,
+			$daemonConfig->getProtocol(),
+			$daemonConfig->getHost(),
+			$daemonConfig->getDeployConfig(),
+			(int) explode('=', $deployParams['container_params']['env'][7])[1],
+			$auth,
+		);
+		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
 			return false;
 		}
-
 		return true;
 	}
 
 	private function registerExApp(string $appId, SimpleXMLElement $infoXml, DaemonConfig $daemonConfig): bool {
 		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
 
-		$exApp = $this->service->registerExApp($appId, [
+		$exApp = $this->exAppService->registerExApp($appId, [
 			'appid' => $exAppInfo['appid'],
 			'version' => $exAppInfo['version'],
 			'name' => $exAppInfo['name'],
 			'daemon_config_name' => $daemonConfig->getName(),
-			'protocol' => $exAppInfo['protocol'] ?? 'http',
 			'port' => (int) $exAppInfo['port'],
-			'host' => $exAppInfo['host'],
 			'secret' => $exAppInfo['secret'],
 		]);
 
@@ -540,13 +549,18 @@ class ExAppsPageController extends Controller {
 		}
 
 		// Setup system flag
-		$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
-		if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
-			$this->exAppUsersService->setupSystemAppFlag($exApp);
+		try {
+			$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
+			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
+				$this->exAppUsersService->setupSystemAppFlag($exApp->getAppid());
+			}
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while setting app system flag: %s', $e->getMessage()));
+			return false;
 		}
 
 		// Register ExApp ApiScopes
-		$requestedExAppScopeGroups = $this->service->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
+		$requestedExAppScopeGroups = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
 		if (!$this->registerApiScopes($exApp, $requestedExAppScopeGroups, 'required')) {
 			return false;
 		}
@@ -577,9 +591,11 @@ class ExAppsPageController extends Controller {
 	public function disableApps(array $appIds): JSONResponse {
 		try {
 			foreach ($appIds as $appId) {
-				$exApp = $this->service->getExApp($appId);
-				if (!$this->service->disableExApp($exApp)) {
-					return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+				$exApp = $this->exAppService->getExApp($appId);
+				if ($exApp->getEnabled()) {
+					if (!$this->service->disableExApp($exApp)) {
+						return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+					}
 				}
 			}
 			return new JSONResponse([]);
@@ -604,14 +620,16 @@ class ExAppsPageController extends Controller {
 		if (!in_array($appId, $appIdsWithUpdate)) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not update ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 
 		// TODO: Add error messages on each step failure as in CLI
 
 		// 1. Disable ExApp
-		$this->service->disableExApp($exApp);
+		if ($exApp->getEnabled()) {
+			$this->service->disableExApp($exApp);
+		}
 
-		$infoXml = $this->service->getLatestExAppInfoFromAppstore($appId);
+		$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Only docker-install is supported for now')]], Http::STATUS_INTERNAL_SERVER_ERROR);
@@ -628,20 +646,25 @@ class ExAppsPageController extends Controller {
 
 		// 3. Update ExApp info on NC side
 		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-		$this->service->updateExAppInfo($exApp, $exAppInfo);
+		$this->exAppService->updateExAppInfo($exApp, $exAppInfo);
 
 		// 4. Update ExApp ApiScopes
 		$this->upgradeExAppScopes($exApp, $infoXml);
 
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		// 5. Heartbeat ExApp
-		if ($this->service->heartbeatExApp([
-			'protocol' => $exAppInfo['protocol'],
-			'host' => $exAppInfo['host'],
-			'port' => (int) $exAppInfo['port'],
-		])) {
+		$auth = [];
+		$exAppUrl = $this->dockerActions->resolveExAppUrl(
+			$appId,
+			$daemonConfig->getProtocol(),
+			$daemonConfig->getHost(),
+			$daemonConfig->getDeployConfig(),
+			(int) $exAppInfo['port'],
+			$auth
+		);
+		if ($this->service->heartbeatExApp($exAppUrl, $auth)) {
 			// 6. Dispatch init step on ExApp side
-			if (!$this->service->dispatchExAppInit($exApp, true)) {
+			if (!$this->service->dispatchExAppInit($exApp->getAppid(), true)) {
 				return new JSONResponse([
 					'data' => [
 						'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),
@@ -658,29 +681,30 @@ class ExAppsPageController extends Controller {
 				'appid' => $appId,
 				'status' => ['progress' => 0],
 				'systemApp' => filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN),
-				'exAppUrl' => AppAPIService::getExAppUrl($exAppInfo['protocol'], $exAppInfo['host'], (int) $exAppInfo['port']),
+				'exAppUrl' => $exAppUrl,
 				'scopes' => $scopes,
 			]
 		]);
 	}
 
 	public function enableExApp(string $appId): JSONResponse {
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if (!$this->service->enableExApp($exApp)) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]]);
 		}
 
+		$auth = [];
 		return new JSONResponse([
 			'data' => [
 				'appid' => $appId,
 				'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-				'exAppUrl' => AppAPIService::getExAppUrl($exApp->getProtocol(), $exApp->getHost(), $exApp->getPort()),
+				'exAppUrl' => $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth),
 			]
 		]);
 	}
 
 	private function upgradeExAppScopes(ExApp $exApp, SimpleXMLElement $infoXml): void {
-		$newExAppScopes = $this->service->getExAppRequestedScopes($exApp, $infoXml);
+		$newExAppScopes = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml);
 
 		$newExAppScopes = array_merge(
 			$this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes['required']),
@@ -695,8 +719,10 @@ class ExAppsPageController extends Controller {
 	 */
 	#[PasswordConfirmationRequired]
 	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
-		$exApp = $this->service->getExApp($appId);
-		$this->service->disableExApp($exApp);
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp->getEnabled()) {
+			$this->service->disableExApp($exApp);
+		}
 
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
@@ -709,7 +735,7 @@ class ExAppsPageController extends Controller {
 			}
 		}
 
-		$this->service->unregisterExApp($appId);
+		$this->exAppService->unregisterExApp($appId);
 		return new JSONResponse();
 	}
 
@@ -734,7 +760,7 @@ class ExAppsPageController extends Controller {
 	 * Get ExApp status, that includes initialization information
 	 */
 	public function getAppStatus(string $appId): JSONResponse {
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		return new JSONResponse($exApp->getStatus());
 	}
 

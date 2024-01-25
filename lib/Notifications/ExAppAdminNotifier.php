@@ -6,7 +6,7 @@ namespace OCA\AppAPI\Notifications;
 
 use InvalidArgumentException;
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppService;
 use OCP\IURLGenerator;
 use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
@@ -15,9 +15,9 @@ use OCP\Notification\INotifier;
 class ExAppAdminNotifier implements INotifier {
 
 	public function __construct(
-		private IFactory      $factory,
-		private IURLGenerator $url,
-		private AppAPIService $service,
+		private readonly IFactory      $factory,
+		private readonly IURLGenerator $url,
+		private readonly ExAppService  $service,
 	) {
 	}
 

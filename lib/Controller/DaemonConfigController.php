@@ -8,6 +8,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -22,10 +23,11 @@ use OCP\IRequest;
 class DaemonConfigController extends ApiController {
 
 	public function __construct(
-		IRequest $request,
-		private IConfig $config,
-		private DaemonConfigService $daemonConfigService,
-		private DockerActions $dockerActions,
+		IRequest                             $request,
+		private readonly IConfig             $config,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly DockerActions       $dockerActions,
+		private readonly AppAPIService       $service,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -67,6 +69,7 @@ class DaemonConfigController extends ApiController {
 	public function unregisterDaemonConfig(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$this->service->removeExAppsByDaemonConfigName($daemonConfig);
 		if ($daemonConfig->getName() === $defaultDaemonConfig) {
 			$this->config->deleteAppValue(Application::APP_ID, 'default_daemon_config');
 		}
@@ -80,6 +83,28 @@ class DaemonConfigController extends ApiController {
 	#[NoCSRFRequired]
 	public function verifyDaemonConnection(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
+			return new JSONResponse([
+				'error' => sprintf('Only "%s" is supported', $this->dockerActions->getAcceptsDeployId()),
+			]);
+		}
+		$this->dockerActions->initGuzzleClient($daemonConfig);
+		$dockerDaemonAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
+		return new JSONResponse([
+			'success' => $dockerDaemonAccessible,
+		]);
+	}
+
+	#[NoCSRFRequired]
+	public function checkDaemonConnection(array $daemonParams): Response {
+		$daemonConfig = new DaemonConfig([
+			'name' => $daemonParams['name'],
+			'display_name' => $daemonParams['display_name'],
+			'accepts_deploy_id' => $daemonParams['accepts_deploy_id'],
+			'protocol' => $daemonParams['protocol'],
+			'host' => $daemonParams['host'],
+			'deploy_config' => $daemonParams['deploy_config'],
+		]);
 		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
 			return new JSONResponse([
 				'error' => sprintf('Only "%s" is supported', $this->dockerActions->getAcceptsDeployId()),

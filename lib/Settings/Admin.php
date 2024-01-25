@@ -8,9 +8,8 @@ use OCA\AppAPI\AppInfo\Application;
 
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\DeployActions\DockerActions;
-use OCA\AppAPI\Fetcher\ExAppFetcher;
-use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\IConfig;
@@ -20,13 +19,12 @@ use Psr\Log\LoggerInterface;
 class Admin implements ISettings {
 
 	public function __construct(
-		private IInitialState $initialStateService,
-		private DaemonConfigService $daemonConfigService,
-		private IConfig $config,
-		private DockerActions $dockerActions,
-		private ExAppFetcher $exAppFetcher,
-		private AppAPIService $service,
-		private LoggerInterface $logger,
+		private readonly IInitialState       $initialStateService,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly IConfig             $config,
+		private readonly DockerActions       $dockerActions,
+		private readonly ExAppService        $service,
+		private readonly LoggerInterface     $logger,
 	) {
 	}
 
@@ -49,7 +47,6 @@ class Admin implements ISettings {
 		$adminInitialData = [
 			'daemons' => $daemons,
 			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config'),
-			'updates_count' => count($this->getExAppsWithUpdates()),
 		];
 
 		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
@@ -75,15 +72,5 @@ class Admin implements ISettings {
 
 	public function getPriority(): int {
 		return 10;
-	}
-
-	private function getExAppsWithUpdates(): array {
-		$apps = $this->exAppFetcher->get();
-		$appsWithUpdates = array_filter($apps, function (array $app) {
-			$exApp = $this->service->getExApp($app['id']);
-			$newestVersion = $app['releases'][0]['version'];
-			return $exApp !== null && isset($app['releases'][0]['version']) && version_compare($newestVersion, $exApp->getVersion(), '>');
-		});
-		return array_values($appsWithUpdates);
 	}
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExAppConfig;
 
-use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppConfigService;
 
+use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,7 +15,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SetConfig extends Command {
 
-	public function __construct(private AppAPIService $service, private ExAppConfigService $exAppConfigService) {
+	public function __construct(
+		private readonly ExAppService		$service,
+		private readonly ExAppConfigService $exAppConfigService
+	) {
 		parent::__construct();
 	}
 

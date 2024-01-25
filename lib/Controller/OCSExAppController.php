@@ -7,6 +7,7 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\AppAPIService;
 
+use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
@@ -18,8 +19,9 @@ use OCP\IRequest;
 class OCSExAppController extends OCSController {
 
 	public function __construct(
-		IRequest      $request,
-		private AppAPIService $service,
+		IRequest                       $request,
+		private readonly AppAPIService $service,
+		private readonly ExAppService  $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -32,7 +34,7 @@ class OCSExAppController extends OCSController {
 		if (!in_array($list, ['all', 'enabled'])) {
 			throw new OCSBadRequestException();
 		}
-		return new DataResponse($this->service->getExAppsList($list), Http::STATUS_OK);
+		return new DataResponse($this->exAppService->getExAppsList($list), Http::STATUS_OK);
 	}
 
 	/**
@@ -41,7 +43,7 @@ class OCSExAppController extends OCSController {
 	 */
 	#[NoCSRFRequired]
 	public function setExAppEnabled(string $appId, int $enabled): DataResponse {
-		$exApp = $this->service->getExApp($appId);
+		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			throw new OCSNotFoundException('ExApp not found');
 		}

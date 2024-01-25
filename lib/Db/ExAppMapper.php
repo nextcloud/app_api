@@ -27,8 +27,15 @@ class ExAppMapper extends QBMapper {
 	 */
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
+		$qb->select(
+			'a.*',
+			'd.protocol',
+			'd.host',
+			'd.deploy_config',
+			'd.accepts_deploy_id',
+		)
+			->from($this->tableName, 'a')
+			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 		return $this->findEntities($qb);
@@ -45,49 +52,43 @@ class ExAppMapper extends QBMapper {
 	 */
 	public function findByAppId(string $appId): Entity {
 		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
+		$qb->select(
+			'a.*',
+			'd.protocol',
+			'd.host',
+			'd.deploy_config',
+			'd.accepts_deploy_id',
+		)
+			->from($this->tableName, 'a')
+			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
 			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId))
+				$qb->expr()->eq('a.appid', $qb->createNamedParameter($appId))
 			);
 		return $this->findEntity($qb);
 	}
 
 	/**
-	 * @param int $port
-	 *
-	 * @throws Exception
-	 *
 	 * @return array
+	 * @throws Exception
 	 */
-	public function findByPort(int $port): array {
+	public function getUsedPorts(): array {
 		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from($this->tableName)
-			->where(
-				$qb->expr()->eq('port', $qb->createNamedParameter($port))
-			);
-		return $this->findEntities($qb);
+		$qb->select('port')->from($this->tableName);
+		$result = $qb->executeQuery();
+		$ports = [];
+		while ($row = $result->fetch()) {
+			$ports[] = $row['port'];
+		}
+		$result->closeCursor();
+		return $ports;
 	}
 
 	/**
 	 * @throws Exception
 	 */
-	public function deleteExApp(ExApp $exApp): int {
+	public function deleteExApp(string $appId): int {
 		$qb = $this->db->getQueryBuilder();
 		return $qb->delete($this->tableName)
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid(), IQueryBuilder::PARAM_STR))
-			)->executeStatement();
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function updateExAppEnabled(string $appId, bool $enabled): int {
-		$qb = $this->db->getQueryBuilder();
-		return $qb->update($this->tableName)
-			->set('enabled', $qb->createNamedParameter($enabled, IQueryBuilder::PARAM_INT))
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
 			)->executeStatement();
@@ -96,36 +97,24 @@ class ExAppMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function updateLastCheckTime(ExApp $exApp): int {
+	public function updateExApp(ExApp $exApp, array $fields): int {
 		$qb = $this->db->getQueryBuilder();
-		return $qb->update($this->tableName)
-			->set('last_check_time', $qb->createNamedParameter($exApp->getLastCheckTime(), IQueryBuilder::PARAM_INT))
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid()))
-			)->executeStatement();
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function updateExAppVersion(ExApp $exApp): int {
-		$qb = $this->db->getQueryBuilder();
-		return $qb->update($this->tableName)
-			->set('version', $qb->createNamedParameter($exApp->getVersion(), IQueryBuilder::PARAM_STR))
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid()))
-			)->executeStatement();
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function updateExAppName(ExApp $exApp): int {
-		$qb = $this->db->getQueryBuilder();
-		return $qb->update($this->tableName)
-			->set('name', $qb->createNamedParameter($exApp->getName(), IQueryBuilder::PARAM_STR))
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid()))
-			)->executeStatement();
+		$qb = $qb->update($this->tableName);
+		foreach ($fields as $field) {
+			if ($field === 'version') {
+				$qb = $qb->set('version', $qb->createNamedParameter($exApp->getVersion()));
+			} elseif ($field === 'name') {
+				$qb = $qb->set('name', $qb->createNamedParameter($exApp->getName()));
+			} elseif ($field === 'port') {
+				$qb = $qb->set('port', $qb->createNamedParameter($exApp->getPort(), IQueryBuilder::PARAM_INT));
+			} elseif ($field === 'status') {
+				$qb = $qb->set('status', $qb->createNamedParameter($exApp->getStatus(), IQueryBuilder::PARAM_JSON));
+			} elseif ($field === 'enabled') {
+				$qb = $qb->set('enabled', $qb->createNamedParameter($exApp->getEnabled(), IQueryBuilder::PARAM_INT));
+			} elseif ($field === 'last_check_time') {
+				$qb = $qb->set('last_check_time', $qb->createNamedParameter($exApp->getLastCheckTime(), IQueryBuilder::PARAM_INT));
+			}
+		}
+		return $qb->where($qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid())))->executeStatement();
 	}
 }

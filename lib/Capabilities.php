@@ -6,8 +6,8 @@ namespace OCA\AppAPI;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExAppScope;
-use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppScopesService;
+use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
 use OCP\App\IAppManager;
 use OCP\Capabilities\ICapability;
@@ -19,7 +19,7 @@ class Capabilities implements ICapability {
 	public function __construct(
 		private IConfig            $config,
 		private IAppManager        $appManager,
-		private AppAPIService      $service,
+		private ExAppService       $service,
 		private ExAppScopesService $exAppScopesService,
 		private IRequest           $request,
 	) {
