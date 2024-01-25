@@ -28,18 +28,14 @@ class ExAppMapper extends QBMapper {
 	public function findAll(int $limit = null, int $offset = null): array {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select(
-			'ex_apps.*',
-			'ex_apps_daemons.protocol',
-			'ex_apps_daemons.host',
-			'ex_apps_daemons.deploy_config',
-			'ex_apps_daemons.accepts_deploy_id',
+			'apps.*',
+			'apps.protocol',
+			'apps.host',
+			'apps.deploy_config',
+			'apps.accepts_deploy_id',
 		)
-			->from($this->tableName, 'ex_apps')
-			->leftJoin(
-				'ex_apps',
-				'ex_apps_daemons',
-				'ex_apps_daemons',
-				'ex_apps_daemons.name = ex_apps.daemon_config_name')
+			->from($this->tableName, 'apps')
+			->leftJoin('apps','ex_apps_daemons','daemons','apps.daemon_config_name = daemons.name')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 		return $this->findEntities($qb);
@@ -57,20 +53,16 @@ class ExAppMapper extends QBMapper {
 	public function findByAppId(string $appId): Entity {
 		$qb = $this->db->getQueryBuilder();
 		$qb->select(
-			'ex_apps.*',
-			'ex_apps_daemons.protocol',
-			'ex_apps_daemons.host',
-			'ex_apps_daemons.deploy_config',
-			'ex_apps_daemons.accepts_deploy_id',
+			'apps.*',
+			'apps.protocol',
+			'apps.host',
+			'apps.deploy_config',
+			'apps.accepts_deploy_id',
 		)
-			->from($this->tableName, 'ex_apps')
-			->leftJoin(
-				'ex_apps',
-				'ex_apps_daemons',
-				'ex_apps_daemons',
-				'ex_apps_daemons.name = ex_apps.daemon_config_name')
+			->from($this->tableName, 'apps')
+			->leftJoin('apps','ex_apps_daemons','daemons','apps.daemon_config_name = daemons.name')
 			->where(
-				$qb->expr()->eq('ex_apps.appid', $qb->createNamedParameter($appId))
+				$qb->expr()->eq('apps.appid', $qb->createNamedParameter($appId))
 			);
 		return $this->findEntity($qb);
 	}
@@ -81,7 +73,7 @@ class ExAppMapper extends QBMapper {
 	 */
 	public function getUsedPorts(): array {
 		$qb = $this->db->getQueryBuilder();
-		$qb->select('port')->from($this->tableName, 'ex_apps');
+		$qb->select('port')->from($this->tableName);
 		$result = $qb->executeQuery();
 		$ports = [];
 		while ($row = $result->fetch()) {
