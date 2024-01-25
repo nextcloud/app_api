@@ -7,13 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.5.0 - 2024-01-xx]
+## [2.0.0 - 2024-01-25]
+
+AppAPI 2.0.
+Breaking changes to Deploy daemons configuration and ExApps networking.
+AppAPI Docker Socket Proxy.
 
 ### Added
 
 - Added filesplugin batch actions implementation. #203
 - Added MachineTranslation providers API. #210
-- Added daemon configuration templates.
+- Deploy daemons management improvements and configuration templates. #212
+- Added removal of ExApps on Deploy daemon deletion. #212
 
 ### Changed
 
