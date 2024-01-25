@@ -33,6 +33,7 @@ OC.L10N.register(
     "Cancel" : "Avbryt",
     "Ok" : "Ok",
     "Name:" : "Navn:",
+    "Nextcloud URL" : "Nextcloud URL",
     "Network" : "Nettverk",
     "Host" : "Server",
     "Register" : "Registrer",
@@ -44,6 +45,7 @@ OC.L10N.register(
     "Disabled apps" : "Deaktiverte apper",
     "Updates" : "Oppdateringer",
     "Featured apps" : "Fremhevede apper",
+    "Enable" : "Aktiver",
     "Disable" : "Deaktiver"
 },
 "nplurals=2; plural=(n != 1);");

@@ -31,6 +31,7 @@
     "Cancel" : "Avbryt",
     "Ok" : "Ok",
     "Name:" : "Navn:",
+    "Nextcloud URL" : "Nextcloud URL",
     "Network" : "Nettverk",
     "Host" : "Server",
     "Register" : "Registrer",
@@ -42,6 +43,7 @@
     "Disabled apps" : "Deaktiverte apper",
     "Updates" : "Oppdateringer",
     "Featured apps" : "Fremhevede apper",
+    "Enable" : "Aktiver",
     "Disable" : "Deaktiver"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
