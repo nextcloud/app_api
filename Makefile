@@ -32,42 +32,36 @@ help:
 .PHONY: dock-sock27
 dock-sock27:
 	@echo "creating daemon for nextcloud 'stable27' container"
-	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev Docker docker-install http /var/run/docker.sock http://stable27.local/index.php --net=master_default
 
 .PHONY: dock-sock27-gpu
 dock-sock27-gpu:
 	@echo "creating daemon with NVIDIA gpu for nextcloud 'stable27' container"
-	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev_nvidia || true
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev_gpu "Docker with GPU" docker-install http /var/run/docker.sock http://stable27.local/index.php --net=master_default --gpu --set-default
 
 .PHONY: dock-sock28
 dock-sock28:
 	@echo "creating daemon for nextcloud 'stable28' container"
-	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev Docker docker-install http /var/run/docker.sock http://stable28.local/index.php --net=master_default
 
 .PHONY: dock-sock28-gpu
 dock-sock28-gpu:
 	@echo "creating daemon with NVIDIA gpu for nextcloud 'stable28' container"
-	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev_nvidia || true
 	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev_gpu "Docker with GPU" docker-install http /var/run/docker.sock http://stable28.local/index.php --net=master_default --gpu --set-default
 
 .PHONY: dock-sock
 dock-sock:
 	@echo "creating daemon for nextcloud 'master' container"
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev Docker docker-install http /var/run/docker.sock http://nextcloud.local/index.php --net=master_default
 
 .PHONY: dock-sock-gpu
 dock-sock-gpu:
 	@echo "creating daemon with NVIDIA gpu for nextcloud 'master' container"
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev_nvidia || true
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
 		docker_dev_gpu "Docker with GPU" docker-install http /var/run/docker.sock http://nextcloud.local/index.php --net=master_default --gpu --set-default
 
@@ -83,7 +77,6 @@ dock2port:
 .PHONY: dock-port27
 dock-port27:
 	@echo "creating daemon for nextcloud '27' container"
-	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
         docker_dev Docker docker-install http aa-docker-socket-proxy:2375 http://stable27.local/index.php \
         --net=master_default --haproxy_password="some_secure_password"
@@ -91,7 +84,6 @@ dock-port27:
 .PHONY: dock-port28
 dock-port28:
 	@echo "creating daemon for nextcloud '27' container"
-	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:register \
         docker_dev Docker docker-install http aa-docker-socket-proxy:2375 http://stable28.local/index.php \
         --net=master_default --haproxy_password="some_secure_password"
@@ -99,7 +91,6 @@ dock-port28:
 .PHONY: dock-port
 dock-port:
 	@echo "creating daemon for nextcloud 'master' container"
-	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:unregister docker_dev || true
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
     	docker_dev Docker docker-install http aa-docker-socket-proxy:2375 http://nextcloud.local/index.php \
     	--net=master_default --haproxy_password="some_secure_password"

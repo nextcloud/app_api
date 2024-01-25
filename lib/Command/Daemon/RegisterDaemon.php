@@ -69,6 +69,11 @@ class RegisterDaemon extends Command {
 			return 1;
 		}
 
+		if ($this->daemonConfigService->getDaemonConfigByName($name) !== null) {
+			$output->writeln(sprintf('Skip registration, as daemon config `%s` already registered.', $name));
+			return 0;
+		}
+
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
 			'name' => $name,
 			'display_name' => $displayName,
