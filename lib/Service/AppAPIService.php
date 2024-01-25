@@ -105,30 +105,6 @@ class AppAPIService {
 				$options['auth'] = $auth;
 			}
 
-			$isMultipart = false;
-			$multipartData = [];
-			if ($method === 'POST' || $method === 'PUT') {
-				foreach ($params as $key => $value) {
-					if (is_a($value, 'CURLStringFile')) {
-						$isMultipart = true;
-						$multipartData[] = [
-							'name' => $key,
-							'contents' => $value->data,
-							'filename' => $value->postname,
-							'headers' => ['Content-Type' => $value->mime]
-						];
-					} else {
-						$multipartData[] = [
-							'name' => $key,
-							'contents' => $value
-						];
-					}
-				}
-				if ($isMultipart) {
-					$options['multipart'] = $multipartData;
-				}
-			}
-
 			if ((!array_key_exists('multipart', $options)) && (count($params)) > 0) {
 				if ($method === 'GET') {
 					$url .= '?' . $this->getUriEncodedParams($params);
