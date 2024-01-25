@@ -140,6 +140,7 @@ OC.L10N.register(
     "Supported apps" : "Apps soportadas",
     "Action request sent to ExApp" : "Solicitud de acción enviada a ExApp",
     "Error while sending File action request to ExApp" : "Error al enviar solicitud de acción de Archivo a ExApp",
+    "manual-install apps cannot be updated" : "Las aplicaciones instaladas manualmente no pueden ser actualizadas",
     "{progress}% Initializing" : "{progress}% Inicializando",
     "Deploy and Enable" : "Desplegar y habilitar",
     "Enable" : "Habilitar",

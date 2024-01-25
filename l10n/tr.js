@@ -140,6 +140,7 @@ OC.L10N.register(
     "Supported apps" : "Desteklenen uygulamalar",
     "Action request sent to ExApp" : "İşlem isteği ExApp üzerine gönderildi",
     "Error while sending File action request to ExApp" : "İşlem isteği ExApp üzerine gönderilemedi",
+    "manual-install apps cannot be updated" : "el ile kurulmuş uygulamalar güncellenemez",
     "{progress}% Initializing" : "%{progress} hazırlandı",
     "Deploy and Enable" : "Dağıt ve etkinleştir",
     "Enable" : "Etkinleştir",
