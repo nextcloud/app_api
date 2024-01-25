@@ -70,6 +70,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<repair-steps>
 		<install>
 			<step>OCA\AppAPI\Migration\DataInitializationStep</step>
+			<step>OCA\AppAPI\Migration\DaemonUpdateV2RepairStep</step>
 		</install>
 	</repair-steps>
 	<commands>

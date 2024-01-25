@@ -11,26 +11,21 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
 class DataInitializationStep implements IRepairStep {
-	private ExAppApiScopeService $service;
-	private AIODockerActions $AIODockerActions;
-
 	public function __construct(
-		ExAppApiScopeService $service,
-		AIODockerActions $AIODockerActions,
+		private readonly ExAppApiScopeService $service,
+		private readonly AIODockerActions     $AIODockerActions,
 	) {
-		$this->service = $service;
-		$this->AIODockerActions = $AIODockerActions;
 	}
 
 	public function getName(): string {
-		return 'Initializing data for App Ecosystem V2';
+		return 'Initializing data for AppAPI';
 	}
 
 	public function run(IOutput $output): void {
 		if ($this->service->registerInitScopes()) {
-			$output->info('Successfully initialized data for App Ecosystem V2');
+			$output->info('API scopes successfully initialized');
 		} else {
-			$output->warning('Failed to initialize data for App Ecosystem V2');
+			$output->warning('Failed to initialize API scopes');
 		}
 
 		// If in AIO - automatically register default DaemonConfig
