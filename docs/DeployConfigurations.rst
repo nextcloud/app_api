@@ -123,39 +123,6 @@ Distributed configuration occurs when Nextcloud is installed on one host and Doc
 
 Benefit: no performance impact on Nextcloud host.
 
-.. mermaid::
-
-	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/nextcloud.svg) no-repeat center center / contain
-		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
-
-		Direction LR
-
-			Host1 --> Host2 : by port
-
-		state Host1 {
-			Nextcloud
-		}
-
-		state Host2 {
-			Daemon --> Containers
-
-			state Containers {
-				ExApp1
-				--
-				ExApp2
-				--
-				ExApp3
-			}
-		}
-
-		class Nextcloud nextcloud
-		class Daemon docker
-		class ExApp1 python
-		class ExApp2 python
-		class ExApp3 python
-
 In this case, the AppAPI (Nextcloud) uses ``port`` to interact with remote Docker, which also could be a Docker Socket Proxy exposed with TLS.
 
 .. mermaid::
@@ -195,33 +162,6 @@ NC & ExApps in the same Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Applications are deployed in the same docker where Nextcloud resides.
-
-.. mermaid::
-
-	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/nextcloud.svg) no-repeat center center / contain
-		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
-
-		Host
-
-		state Host {
-			Daemon --> Containers
-
-			state Containers {
-				[*] --> Nextcloud : /var/run/docker.sock
-				--
-				ExApp1
-				--
-				ExApp2
-			}
-		}
-
-		class Nextcloud nextcloud
-		class Daemon docker
-		class ExApp1 python
-		class ExApp2 python
-		class ExApp3 python
 
 Suggested way to communicate with Docker: via ``docker-socket-proxy``.
 
@@ -311,20 +251,14 @@ It has `fixed parameters <https://github.com/cloud-py-api/app_api/blob/main/lib/
 * Accepts Deploy ID: ``docker-install``
 * Protocol: ``http``
 * Host: ``nextcloud-aio-docker-socket-proxy:2375``
-* GPUs support: If enabled during AIO setup (``NEXTCLOUD_ENABLE_DRI_DEVICE=true``)
+* GPUs support: ``false``
 * Network: ``nextcloud-aio``
 * Nextcloud URL (passed to ExApps): ``https://$NC_DOMAIN``
+
+.. note::
+	If ``NEXTCLOUD_ENABLE_DRI_DEVICE=true`` is set - separate DaemonConfig (``docker_aio_gpu``) will be created with ``gpus=true``.
 
 Docker Socket Proxy security
 ****************************
 
 AIO Docker Socket Proxy has strictly limited access to the Docker APIs described in `HAProxy configuration <https://github.com/nextcloud/all-in-one/blob/main/Containers/docker-socket-proxy/haproxy.cfg>`_.
-
-Network configurations
-----------------------
-
-When GUI will support all command line options like: ``hostname``, ``ssl_key``... they will be described here.
-
-If you want to run ExApp on the remote host, see :ref:`occ cli commands <occ_daemon_config_registration>` for it.
-
-.. note:: AppAPI does not currently support automatic configuration for applications to use **https**, but we have plans for this in the future.
