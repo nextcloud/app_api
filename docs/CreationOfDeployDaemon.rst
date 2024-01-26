@@ -14,7 +14,9 @@ The recommended daemon configuration is using `AppAPI Docker Socket Proxy <https
 .. image:: ../screenshots/app_api_3.png
 
 
-You can choose one of basic configuration templates and adjust to your needs.
+You can choose one of the basic configuration templates and adjust to your needs.
+
+.. note:: We highly recommend to use UI to create Deploy Daemons.
 
 OCC CLI
 ^^^^^^^
@@ -38,7 +40,8 @@ Arguments
 	* ``name`` - unique name of the daemon (e.g. ``docker_local_sock``)
 	* ``display-name`` - name of the daemon (e.g. ``My Local Docker``, will be displayed in the UI)
 	* ``accepts-deploy-id`` - type of deployment (``docker-install`` or ``manual-install``)
-	* ``protocol`` - protocol used to connect to the daemon (``unix-socket``, ``http`` or ``https``)
+	* ``host`` - **path to docker-socket**  or the Docker Socket Proxy: ``address:port``
+	* ``protocol`` - protocol used to communicate with the Daemon/ExApps (``http`` or ``https``)
 	* ``nextcloud_url`` - Nextcloud URL, Daemon config required option (e.g. ``https://nextcloud.local``)
 
 Options

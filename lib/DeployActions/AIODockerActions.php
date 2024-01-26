@@ -86,7 +86,7 @@ class AIODockerActions {
 		];
 
 		$daemonConfigParams = [
-			'name' => self::AIO_DAEMON_CONFIG_NAME,
+			'name' => self::AIO_DAEMON_CONFIG_NAME_GPU,
 			'display_name' => 'AIO Docker Socket Proxy with GPU',
 			'accepts_deploy_id' => 'docker-install',
 			'protocol' => 'http',
