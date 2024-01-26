@@ -13,9 +13,11 @@ Orchestrates the deployment of applications as Docker containers.
 
 .. warning::
 
-	The administrator is responsible for the security actions taken to configure the Docker daemon connected to Nextcloud.
-	We recommend that you use the `AppAPI Docker Socket Proxy <https://github.com/cloud-py-api/docker-socket-proxy>`_ as the Deploy Daemon,
-	it has stringent security rules and is easy to configure, `like in AIO <#nextcloud-in-docker-aio-all-in-one>`_.
+	The administrator is responsible for the security actions taken to configure the Docker daemon connected to the Nextcloud instance.
+
+	These schemes are only examples of possible configurations.
+
+	We recommend that you use the `AppAPI Docker Socket Proxy <https://github.com/cloud-py-api/docker-socket-proxy>`_ or `AIO Docker Socket Proxy <#nextcloud-in-docker-aio-all-in-one>`_ container.
 
 There are several Docker Daemon Deploy configurations (example schemes):
 
@@ -24,12 +26,6 @@ There are several Docker Daemon Deploy configurations (example schemes):
 	* Nextcloud and **ExApps** in the **same Docker** (via DockerSocketProxy)
 	* Nextcloud in AIO Docker and **ExApps** in the **same Docker** (via AIO DockerSocketProxy)
 
-In the case of remote access to the Daemon, make certain that it's configured with **strong HaProxy password**.
-
-.. note::
-
-	These schemes are only examples of possible configurations.
-	We recommend that you use the Docker Socket Proxy container as the Deploy Daemon.
 
 NC & Docker on the Same-Host
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -72,7 +68,7 @@ Suggested config values(template *Custom default*):
 
 ---
 
-Suggested way to communicate with Docker via `Docker Socket Proxy container <https://github.com/nextcloud/all-in-one/tree/main/Containers/docker-socket-proxy>`_.
+Suggested way to communicate with Docker via `Docker Socket Proxy container <https://github.com/cloud-py-api/docker-socket-proxy>`_.
 
 .. mermaid::
 
@@ -123,7 +119,7 @@ Distributed configuration occurs when Nextcloud is installed on one host and Doc
 
 Benefit: no performance impact on Nextcloud host.
 
-In this case, the AppAPI (Nextcloud) uses ``port`` to interact with remote Docker, which also could be a Docker Socket Proxy exposed with TLS.
+In this case, the AppAPI uses a Docker Socket Proxy deployed on remote host to access docker socket and ExApps.
 
 .. mermaid::
 
@@ -158,6 +154,12 @@ In this case, the AppAPI (Nextcloud) uses ``port`` to interact with remote Docke
 		class ExApp2 python
 		class ExApp3 python
 
+Suggested config values(template *Docker Socket Proxy*):
+	1. Daemon host: ADDRESS_OF_REMOTE_MACHINE (e.g. **server_name.com:2375**)
+	2. HTTPS checkbox: ``enabled``
+	3. Network: ``host``
+	4. HaProxy password: ``your chosen password``
+
 NC & ExApps in the same Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -191,6 +193,17 @@ Suggested way to communicate with Docker: via ``docker-socket-proxy``.
 		class ExApp1 python
 		class ExApp2 python
 		class ExApp3 python
+
+Suggested config values(template *Docker Socket Proxy*):
+	1. Daemon host: aa-docker-socket-proxy:2375
+	2. HTTPS checkbox: ``disabled``
+	3. Network: `user defined network <https://docs.docker.com/network/#user-defined-networks>`_
+	4. HaProxy password: ``optional``
+
+.. note::
+	Network **should not be the default docker's bridge** as it does not support DNS resolving by container names.
+
+	This means that **Docker Socket Proxy**, **Nextcloud** and **ExApps** containers should all be in the same docker network, different from the default **bridge**.
 
 Nextcloud in Docker AIO (all-in-one)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
