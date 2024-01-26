@@ -19,12 +19,12 @@ Orchestrates the deployment of applications as Docker containers.
 
 There are several Docker Daemon Deploy configurations (example schemes):
 
-	* Nextcloud and Docker on the **same host** (via socket or port)
-	* Nextcloud on the host and Docker on a **remote** host (via port)
-	* Nextcloud and **ExApps** in the **same Docker** (via socket or port)
-	* Nextcloud in AIO Docker and **ExApps** in the **same Docker** (via socket proxy)
+	* Nextcloud and Docker on the **same host** (via socket or DockerSocketProxy)
+	* Nextcloud on the host and Docker on a **remote** host (via DockerSocketProxy with HTTPS)
+	* Nextcloud and **ExApps** in the **same Docker** (via DockerSocketProxy)
+	* Nextcloud in AIO Docker and **ExApps** in the **same Docker** (via AIO DockerSocketProxy)
 
-In the case of remote access to the Daemon, make certain that it's configured with **ssl_key**, **ssl_cert**, and **ca.cert**, and that the latter is imported into Nextcloud.
+In the case of remote access to the Daemon, make certain that it's configured with **strong HaProxy password**.
 
 .. note::
 
@@ -64,7 +64,15 @@ The simplest configuration is when Nextcloud is installed on the host and Docker
 		class ExApp2 python
 		class ExApp3 python
 
-Suggested way to communicate with Docker: via ``docker-socket-proxy``.
+Suggested config values(template *Custom default*):
+	1. Daemon host: ???
+	2. HTTPS checkbox: *not supported using docker socket*
+	3. Network: ???
+	4. HaProxy password: *not supported using docker socket*
+
+---
+
+Suggested way to communicate with Docker via `Docker Socket Proxy container <https://github.com/nextcloud/all-in-one/tree/main/Containers/docker-socket-proxy>`_.
 
 .. mermaid::
 
@@ -93,8 +101,12 @@ Suggested way to communicate with Docker: via ``docker-socket-proxy``.
 		class ExApp2 python
 		class ExApp3 python
 
+Suggested config values(template *Docker Socket Proxy*):
+	1. Daemon host: ???
+	2. HTTPS checkbox: **disabled**
+	3. Network: ???
+	4. HaProxy password: **empty**
 
-`Docker Socket Proxy container <https://github.com/nextcloud/all-in-one/tree/main/Containers/docker-socket-proxy>`_ can be used for that.
 
 Docker on a remote host
 ^^^^^^^^^^^^^^^^^^^^^^^
