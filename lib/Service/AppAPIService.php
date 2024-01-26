@@ -411,9 +411,14 @@ class AppAPIService {
 		}, $args);
 		$args[] = '--no-ansi --no-warnings';
 		$args = implode(' ', $args);
-		$occDirectory = dirname(__FILE__, 5);
+		$occDirectory = null;
+		if (!file_exists("console.php")) {
+			$occDirectory = dirname(__FILE__, 5);
+		}
+		$this->logger->info(sprintf('Calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
 		$process = proc_open('php console.php ' . $args, $descriptors, $pipes, $occDirectory);
 		if (!is_resource($process)) {
+			$this->logger->error(sprintf('ExApp %s dispatch_init failed(occDirectory=%s).', $appId, $occDirectory ?? 'null'));
 			return false;
 		}
 		fclose($pipes[0]);
@@ -439,25 +444,34 @@ class AppAPIService {
 		if (!empty($auth)) {
 			$options['auth'] = $auth;
 		}
+		$this->logger->info(sprintf('Performing heartbeat on: %s', $exAppUrl . '/heartbeat'));
 
+		$failedHeartbeatCount = 0;
 		while ($heartbeatAttempts < $maxHeartbeatAttempts) {
 			$heartbeatAttempts++;
+			$errorMsg = '';
+			$statusCode = 0;
 			try {
 				$heartbeatResult = $this->client->get($exAppUrl . '/heartbeat', $options);
-			} catch (\Exception) {
-				sleep($delay);
-				continue;
-			}
-			$statusCode = $heartbeatResult->getStatusCode();
-			if ($statusCode === 200) {
-				$result = json_decode($heartbeatResult->getBody(), true);
-				if (isset($result['status']) && $result['status'] === 'ok') {
-					return true;
+				$statusCode = $heartbeatResult->getStatusCode();
+				if ($statusCode === 200) {
+					$result = json_decode($heartbeatResult->getBody(), true);
+					if (isset($result['status']) && $result['status'] === 'ok') {
+						$this->logger->info(sprintf('Successful heartbeat on: %s', $exAppUrl . '/heartbeat'));
+						return true;
+					}
 				}
+			} catch (\Exception $e) {
+				$errorMsg = $e->getMessage();
+			}
+			$failedHeartbeatCount++;  // Log every 10th failed heartbeat
+			if ($failedHeartbeatCount % 10 == 0) {
+				$this->logger->warning(
+					sprintf('Failed heartbeat on %s for %d times. Most recent status=%d, error: %s', $exAppUrl, $failedHeartbeatCount, $statusCode, $errorMsg)
+				);
 			}
 			sleep($delay);
 		}
-
 		return false;
 	}
 

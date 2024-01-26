@@ -126,7 +126,7 @@ class ExAppService {
 				$this->cache->remove('/exApp_' . $appId);
 				return true;
 			}
-			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
+			$this->logger->warning(sprintf('Error while unregistering %s ExApp from the database.', $appId));
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()), ['exception' => $e]);
 		}
