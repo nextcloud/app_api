@@ -191,6 +191,9 @@ class DockerActions implements IDeployActions {
 			$response = $this->guzzleClient->delete($url);
 			return ['success' => $response->getStatusCode() === 204];
 		} catch (GuzzleException $e) {
+			if ($e->getCode() === 409) {  // "removal of container ... is already in progress"
+				return ['success' => true];
+			}
 			$this->logger->error('Failed to stop container', ['exception' => $e]);
 			error_log($e->getMessage());
 			return ['error' => 'Failed to stop container'];

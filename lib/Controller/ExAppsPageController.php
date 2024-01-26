@@ -761,6 +761,9 @@ class ExAppsPageController extends Controller {
 	 */
 	public function getAppStatus(string $appId): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
+		if (is_null($exApp)) {
+			return new JSONResponse(['error' => $this->l10n->t('ExApp not found, failed to get status')], Http::STATUS_NOT_FOUND);
+		}
 		return new JSONResponse($exApp->getStatus());
 	}
 
