@@ -65,9 +65,9 @@ The simplest configuration is when Nextcloud is installed on the host and Docker
 		class ExApp3 python
 
 Suggested config values(template *Custom default*):
-	1. Daemon host: ???
+	1. Daemon host: ``/var/run/docker.sock``
 	2. HTTPS checkbox: *not supported using docker socket*
-	3. Network: ???
+	3. Network: ``host``
 	4. HaProxy password: *not supported using docker socket*
 
 ---
@@ -102,10 +102,18 @@ Suggested way to communicate with Docker via `Docker Socket Proxy container <htt
 		class ExApp3 python
 
 Suggested config values(template *Docker Socket Proxy*):
-	1. Daemon host: ???
+	1. Daemon host: ``localhost:2375``
+		Choose **A** or **B** option:
+			A. Docker Socket Proxy should be deployed with ``network=host`` and ``BIND_ADDRESS=127.0.0.1``
+			B. Docker Socket Proxy should be deployed with ``network=bridge`` and it's port should be published to host's 127.0.0.1(e.g. **-p 127.0.0.1:2375:2375**)
 	2. HTTPS checkbox: **disabled**
-	3. Network: ???
-	4. HaProxy password: **empty**
+	3. Network: ``host``
+	4. HaProxy password: **can be empty**
+
+.. warning::
+
+	Be careful with option ``A``, by default **Docker Socket Proxy** binds to ``*`` if ``BIND_ADDRESS`` is not specified during container creation.
+	Check opened ports after finishing configuration(*or set HaProxy password*).
 
 
 Docker on a remote host
