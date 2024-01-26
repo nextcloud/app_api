@@ -16,7 +16,6 @@ OC.L10N.register(
     "Actions" : "İşlər",
     "Delete" : "Sil",
     "Ok" : "Oldu",
-    "Name:" : "Ad:",
     "Host" : "Şəbəkədə ünvan",
     "Details" : "Detallar",
     "Changelog" : "Dəyişikliklər jurnalı",

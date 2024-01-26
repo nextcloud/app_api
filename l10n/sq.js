@@ -26,7 +26,6 @@ OC.L10N.register(
     "Delete" : "Fshi",
     "Cancel" : "Anuloje",
     "Ok" : "Në rregull",
-    "Name:" : "Emri",
     "Host" : "Strehë",
     "Register" : "Regjistrohu",
     "Your apps" : "Aplikacionet tuaja ",

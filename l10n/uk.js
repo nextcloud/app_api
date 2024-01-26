@@ -1,6 +1,7 @@
 OC.L10N.register(
     "app_api",
     {
+    "External Apps" : "Зовнішні застосунки",
     "Update to {version}" : "Оновити до {version}",
     "Remove" : "Видалити",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Цей застосунок не має обмежень щодо мінімальної версії Nextcloud. В майбутньому це може викликати певні помилки.",
@@ -32,10 +33,9 @@ OC.L10N.register(
     "Delete" : "Вилучати",
     "Cancel" : "Скасувати",
     "Ok" : "Гаразд",
-    "Name:" : "Ім'я:",
+    "Host" : "Хост",
     "Display name" : "Ім'я для показу",
     "Network" : "Мережа",
-    "Host" : "Хост",
     "Register" : "Зареєструватися",
     "Your apps" : "Ваші застосунки",
     "Details" : "Деталі",
