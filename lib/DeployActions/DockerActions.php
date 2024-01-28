@@ -201,16 +201,11 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function pullContainer(string $dockerUrl, array $params): array {
-		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', $this->buildImageName($params)));
+		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($this->buildImageName($params))));
+		$this->logger->debug(sprintf('Pulling ExApp Image with: %s', $url));
 		try {
-			$xRegistryAuth = json_encode([
-				'https://' . $params['image_src'] => []
-			], JSON_UNESCAPED_SLASHES);
-			$response = $this->guzzleClient->post($url, [
-				'headers' => [
-					'X-Registry-Auth' => base64_encode($xRegistryAuth),
-				],
-			]);
+			$response = $this->guzzleClient->post($url);
+			$this->logger->debug(sprintf('Pull image result=%d for %s', $response->getStatusCode(), $url));
 			return ['success' => $response->getStatusCode() === 200];
 		} catch (GuzzleException $e) {
 			$this->logger->error('Failed to pull image', ['exception' => $e]);

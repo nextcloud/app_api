@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - More correct handling of the ExApps installation process when Nextcloud has a non-default directory location(e.g. `Unraid`). #217
 - Correct handling of the action of stopping a Docker container when the action is already in progress. #217
 - Correct handling of the ExApp deletion action, when during deletion you refresh the page and click delete again. #217
+- Correct handling of the installation(deploy) process of ExApp. #220
 
 ## [2.0.1 - 2024-01-25]
 
