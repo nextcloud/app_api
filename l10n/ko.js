@@ -41,6 +41,7 @@ OC.L10N.register(
     "Your apps" : "내 앱",
     "Details" : "세부사항",
     "Changelog" : "변경 기록",
+    "by {author}\n{license}" : "{author} 님이 작성\n{license}",
     "Active apps" : "활성화된 앱",
     "Disabled apps" : "비활성화된 앱",
     "Updates" : "업데이트",

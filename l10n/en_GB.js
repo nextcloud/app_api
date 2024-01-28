@@ -9,6 +9,7 @@ OC.L10N.register(
     "Failed to enable ExApp" : "Failed to enable ExApp",
     "Failed to disable ExApp" : "Failed to disable ExApp",
     "Could not update ExApp" : "Could not update ExApp",
+    "ExApp not found, failed to get status" : "ExApp not found, failed to get status",
     "AppAPI authentication failed" : "AppAPI authentication failed",
     "AppAPI ExApp version update notifier" : "AppAPI ExApp version update notifier",
     "AppAPI ExApp notifier" : "AppAPI ExApp notifier",
