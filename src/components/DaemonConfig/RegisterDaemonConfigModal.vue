@@ -231,9 +231,9 @@ export default {
 		daemonHostHelperText() {
 			if (['http', 'https'].includes(this.daemonProtocol)) {
 				if (this.acceptsDeployId === 'manual-install') {
-					return t('app_api', 'Host name to access ExApps')
+					return t('app_api', 'Hostname to access ExApps')
 				}
-				return t('app_api', 'Host name or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
+				return t('app_api', 'Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
 			}
 			return ''
 		},
