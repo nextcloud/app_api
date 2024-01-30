@@ -27,7 +27,7 @@ This can be done by ``occ`` CLI command **app_api:daemon:register**:
 
 .. code-block:: bash
 
-	app_api:daemon:register <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url> [--net NET] [--host HOST] [--ssl_key SSL_KEY] [--ssl_key_password SSL_KEY_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [--]
+	app_api:daemon:register <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url> [--net NET] [--haproxy_password PASSWORD] [--]
 
 Arguments
 *********
@@ -35,51 +35,16 @@ Arguments
 	* ``name`` - unique name of the daemon (e.g. ``docker_local_sock``)
 	* ``display-name`` - name of the daemon (e.g. ``My Local Docker``, will be displayed in the UI)
 	* ``accepts-deploy-id`` - type of deployment (``docker-install`` or ``manual-install``)
-	* ``protocol`` - protocol used to connect to the daemon (``unix-socket``, ``http`` or ``https``)
-	* ``host`` - host of the daemon (e.g. ``/var/run/docker.sock`` for ``unix-socket`` protocol or ``host:port`` for ``http(s)`` protocol)
+	* ``protocol`` - protocol used to connect to the daemon (``http`` or ``https``)
+	* ``host`` - host of the daemon (e.g. ``/var/run/docker.sock`` or ``host:port``)
 	* ``nextcloud_url`` - Nextcloud URL, Daemon config required option (e.g. ``https://nextcloud.local``)
-	* ``--gpu`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``/dev/dri``)
 
 Options
 *******
 
 	* ``--net [network-name]``  - ``[required]`` network name to bind docker container to (default: ``host``)
-	* ``--hostname HOST`` - ``[required]`` host to expose daemon to (defaults to ExApp appid)
-	* ``--ssl_key SSL_KEY`` - ``[optional]`` path to SSL key file (local absolute path)
-	* ``--ssl_password SSL_PASSWORD`` - ``[optional]`` SSL key password
-	* ``--ssl_cert SSL_CERT`` - ``[optional]`` path to SSL cert file (local absolute path)
-	* ``--ssl_cert_password SSL_CERT_PASSWORD`` - ``[optional]`` SSL cert password
-
-DeployConfig
-************
-
-DeployConfig is a set of additional options in Daemon config, which are used in deployment algorithms to configure
-ExApp container.
-
-.. code-block:: json
-
-	{
-		"net": "nextcloud",
-		"host": null,
-		"nextcloud_url": "https://nextcloud.local",
-		"ssl_key": "/path/to/ssl/key.pem",
-		"ssl_key_password": "ssl_key_password",
-		"ssl_cert": "/path/to/ssl/cert.pem",
-		"ssl_cert_password": "ssl_cert_password",
-		"gpus": ["/dev/dri"],
-	}
-
-
-DeployConfig options
-""""""""""""""""""""
-
-	* ``net`` **[required]** - network name to bind docker container to (default: ``host``)
-	* ``host`` *[optional]* - in case Docker is on remote host, this should be a hostname of remote machine
-	* ``nextcloud_url`` **[required]** - Nextcloud URL (e.g. ``https://nextcloud.local``)
-	* ``ssl_key`` *[optional]* - path to SSL key file (local absolute path)
-	* ``ssl_key_password`` *[optional]* - SSL key password
-	* ``ssl_cert`` *[optional]* - path to SSL cert file (local absolute path)
-	* ``ssl_cert_password`` *[optional]* - SSL cert password
+	* ``--haproxy_password PASSWORD`` - ``[optional]`` password if ``AppAPI Docker Socket Proxy`` is used
+	* ``--gpu`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``/dev/dri``)
 
 .. note::
 	Common configurations are tested by CI in our repository, see `workflows on github <https://github.com/cloud-py-api/app_api/blob/main/.github/workflows/tests-deploy.yml>`_.
@@ -91,7 +56,7 @@ Example of ``occ`` **app_api:daemon:register** command:
 
 .. code-block:: bash
 
-	sudo -u www-data php occ app_api:daemon:register docker_local_sock "My Local Docker" docker-install unix-socket /var/run/docker.sock "https://nextcloud.local" --net nextcloud
+	sudo -u www-data php occ app_api:daemon:register docker_local_sock "My Local Docker" docker-install http /var/run/docker.sock "https://nextcloud.local" --net nextcloud
 
 
 ExApp deployment
@@ -156,7 +121,7 @@ For all examples and applications we release we usually add manual_install comma
 .. code-block::
 
 	php occ app_api:app:register nc_py_api manual_install --json-info \
-            "{\"appid\":\"nc_py_api\",\"name\":\"nc_py_api\",\"daemon_config_name\":\"manual_install\",\"version\":\"1.0.0\",\"secret\":\"12345\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\"],\"optional\":[\"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"]},\"protocol\":\"http\",\"system_app\":1}" \
+            "{\"appid\":\"nc_py_api\",\"name\":\"nc_py_api\",\"daemon_config_name\":\"manual_install\",\"version\":\"1.0.0\",\"secret\":\"12345\",\"port\":$APP_PORT,\"scopes\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\", \"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"],\"system_app\":1}" \
             --force-scopes
 
 .. note:: **Deployment/Startup of App should be done by developer when manual_install DeployConfig type is used.**
@@ -172,7 +137,6 @@ The following env variables are required and built automatically:
 	* ``APP_ID`` - ExApp appid
 	* ``APP_DISPLAY_NAME`` - ExApp display name
 	* ``APP_VERSION`` - ExApp version
-	* ``APP_PROTOCOL`` - protocol ExApp is listening on (http|https)
 	* ``APP_HOST`` - host ExApp is listening on
 	* ``APP_PORT`` - port ExApp is listening on (randomly selected by AppAPI)
 	* ``APP_PERSISTENT_STORAGE`` - path to mounted volume for persistent data storage between ExApp updates
@@ -181,19 +145,6 @@ The following env variables are required and built automatically:
 
 .. note::
 	Additional envs can be passed using multiple ``--env ENV_NAME=ENV_VAL`` options
-
-Docker daemon remote
-********************
-
-If you want to connect to remote docker daemon with TLS enabled, you need to provide SSL key and cert by provided options.
-Important: before deploy you need to import ca.pem file using `occ security <https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#security>`_ command:
-
-``php occ security:certificates:import /path/to/ca.pem``
-
-The daemon must be configured with ``protocol=http|https``, ``host=https://dockerapihost``, ``port=8443``.
-DaemonConfig deploy options ``ssl_key`` and ``ssl_cert`` must be provided with local absolute paths to SSL key and cert files.
-In case of password protected key or cert, you can provide ``ssl_key_password`` and ``ssl_cert_password`` options.
-More info about how to configure daemon will be added soon.
 
 ExApp registration
 ------------------
@@ -250,14 +201,9 @@ It has the same structure as Nextcloud appinfo/info.xml file, but with some addi
 			<image-tag>latest</image-tag>
 		</docker-install>
 		<scopes>
-			<required>
-				<value>TALK</value>
-				<value>TALK_BOT</value>
-			</required>
-			<optional>
-			</optional>
+			<value>TALK</value>
+			<value>TALK_BOT</value>
 		</scopes>
-		<protocol>http</protocol>
 		<system>0</system>
 	</ex-app>
 	...

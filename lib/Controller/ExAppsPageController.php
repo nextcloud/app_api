@@ -560,26 +560,18 @@ class ExAppsPageController extends Controller {
 		}
 
 		// Register ExApp ApiScopes
-		$requestedExAppScopeGroups = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
-		if (!$this->registerApiScopes($exApp, $requestedExAppScopeGroups, 'required')) {
-			return false;
-		}
-		$this->registerApiScopes($exApp, $requestedExAppScopeGroups, 'optional');
-
-		return true;
+		$requestedExAppScopeGroups = $this->exAppService->getExAppScopes($exApp, $infoXml, $exAppInfo);
+		return $this->registerApiScopes($exApp, $requestedExAppScopeGroups);
 	}
 
-	private function registerApiScopes(ExApp $exApp, array $requestedExAppScopeGroups, string $scopeType): bool {
+	private function registerApiScopes(ExApp $exApp, array $requestedExAppScopeGroups): bool {
 		$registeredScopeGroups = [];
-		foreach ($this->exAppApiScopeService->mapScopeNamesToNumbers($requestedExAppScopeGroups[$scopeType]) as $scopeGroup) {
+		foreach ($this->exAppApiScopeService->mapScopeNamesToNumbers($requestedExAppScopeGroups) as $scopeGroup) {
 			if ($this->exAppScopeService->setExAppScopeGroup($exApp, $scopeGroup)) {
 				$registeredScopeGroups[] = $scopeGroup;
 			}
 		}
-		if (count($registeredScopeGroups) !== count($requestedExAppScopeGroups['required'])) {
-			return false;
-		}
-		return true;
+		return count($registeredScopeGroups) === count($requestedExAppScopeGroups);
 	}
 
 	#[PasswordConfirmationRequired]
@@ -704,13 +696,8 @@ class ExAppsPageController extends Controller {
 	}
 
 	private function upgradeExAppScopes(ExApp $exApp, SimpleXMLElement $infoXml): void {
-		$newExAppScopes = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml);
-
-		$newExAppScopes = array_merge(
-			$this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes['required']),
-			$this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes['optional'])
-		);
-
+		$newExAppScopes = $this->exAppService->getExAppScopes($exApp, $infoXml);
+		$newExAppScopes = $this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes);
 		$this->exAppScopeService->updateExAppScopes($exApp, $newExAppScopes);
 	}
 
