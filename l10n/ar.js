@@ -118,8 +118,6 @@ OC.L10N.register(
     "Only NVIDIA GPUs are supported for now." : "وحدات المعالجة الرسومية GPU من NVIDIA هي الوحيدة المدعومة في الوقت الحاضر.",
     "Register" : "تسجيل",
     "Check connection" : "تحقَّق من الاتصال",
-    "Host name to access ExApps" : "إسم المُضيف للوصول إلى التطبيقات الخارجية ExApps",
-    "Host name or path to access Docker daemon (e.g. aa-docker-socket-proxy:2375, /var/run/docker.sock)" : "إسم المضيف أو مسار الوصول إلى البرنامج الخفي لـ\"دوكر\" Docker (مثلاً: aa-docker-socket-proxy:2375, /var/run/docker.sock)",
     "Daemon with this name already exists" : "برنامج خفي آخر بنفس هذا الاسم موجود سلفاً",
     "Password must be at least 12 characters long" : "يجب ألّا يقل طول كلمة المرور عن 12 حرفاً",
     "With https enabled network is set to host" : "مع تعيين شبكة للمضيف يكون فيها بروتوكول https مٌمكّناً",
