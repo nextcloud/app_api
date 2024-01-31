@@ -259,11 +259,13 @@ class ExAppService {
 		if (isset($infoXml)) {
 			$oldFormatScopes = $infoXml->xpath('external-app/scopes/required');
 			if ($oldFormatScopes !== false) {
-				return [array_values($oldFormatScopes[0])];  // Will be removed in AppAPI 2.2.0 version
+				$scopes = (array) $oldFormatScopes[0]->value;
+				return array_values($scopes);  // Will be removed in AppAPI 2.2.0 version
 			}
 			$scopes = $infoXml->xpath('external-app/scopes');
 			if ($scopes !== false) {
-				return [array_values($scopes[0])];
+				$scopes = (array) $scopes[0];
+				return array_values($scopes);
 			}
 		}
 
