@@ -4,7 +4,7 @@ export const DAEMON_TEMPLATES = [
 		displayName: 'Custom default',
 		acceptsDeployId: 'docker-install',
 		httpsEnabled: false,
-		host: 'nextcloud_appapi_dsp:2375',
+		host: 'nextcloud-appapi-dsp:2375',
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',
@@ -19,7 +19,7 @@ export const DAEMON_TEMPLATES = [
 		displayName: 'Docker Socket Proxy',
 		acceptsDeployId: 'docker-install',
 		httpsEnabled: false,
-		host: 'nextcloud_appapi_dsp:2375',
+		host: 'nextcloud-appapi-dsp:2375',
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',

@@ -195,7 +195,7 @@ Suggested way to communicate with Docker: via ``docker-socket-proxy``.
 		class ExApp3 python
 
 Suggested config values(template *Docker Socket Proxy*):
-	1. Daemon host: nextcloud_appapi_dsp:2375
+	1. Daemon host: nextcloud-appapi-dsp:2375
 	2. HTTPS checkbox: ``disabled``
 	3. Network: `user defined network <https://docs.docker.com/network/#user-defined-networks>`_
 	4. HaProxy password: ``optional``
