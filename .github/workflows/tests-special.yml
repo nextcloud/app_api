@@ -117,7 +117,7 @@ jobs:
           sleep 5s
           php occ app_api:daemon:register manual_install "Manual Install" manual-install http localhost 0
           php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"NOTIFICATIONS\"],\"optional\":[\"USER_INFO\"]},\"system_app\":1}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"SYSTEM\", \"NOTIFICATIONS\", \"USER_INFO\"],\"system_app\":1}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
@@ -220,7 +220,7 @@ jobs:
           sleep 5s
           php occ app_api:daemon:register manual_install "Manual Install" manual-install http localhost 0
           php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"ALL\"],\"optional\":[]},\"system_app\":1}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"ALL\"],\"system_app\":1}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
@@ -238,7 +238,7 @@ jobs:
           echo $! > /tmp/_install.pid
           sleep 5s
           php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\"],\"optional\":[]},\"system_app\":1}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"SYSTEM\"],\"system_app\":1}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
@@ -253,7 +253,7 @@ jobs:
           echo $! > /tmp/_install.pid
           sleep 5s
           php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"ALL\"],\"optional\":[]},\"system_app\":0}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"ALL\"],\"system_app\":0}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
