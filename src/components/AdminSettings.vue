@@ -17,6 +17,27 @@
 			</NcNoteCard>
 			<DaemonConfigList :daemons.sync="daemons" :default-daemon.sync="default_daemon_config" :save-options="saveOptions" />
 		</NcSettingsSection>
+		<NcSettingsSection
+			:name="t('app_api', 'ExApp init timeout (minutes)')"
+			:description="t('app_api', 'ExApp initialization process timeout after which AppAPI will mark it as failed')"
+			:aria-label="t('app_api', 'ExApp initialization process timeout after which AppAPI will mark it as failed')">
+			<NcInputField :value.sync="state.init_timeout"
+				class="setting"
+				type="number"
+				:placeholder="t('app_api', 'ExApp init timeout')"
+				@update:value="onInput" />
+		</NcSettingsSection>
+		<NcSettingsSection
+			:name="t('app_api', 'ExApp container restart policy')"
+			:description="t('app_api', 'Specify container restart policy, e.g. \'always\' to ensure ExApp running after daemon server reboot')"
+			:aria-label="t('app_api', 'ExApp container restart policy')">
+			<NcSelect
+				v-model="state.container_restart_policy"
+				:options="['no', 'always', 'unless-stopped']"
+				:placeholder="t('app_api', 'ExApp container restart policy')"
+				:aria-label="t('app_api', 'ExApp container restart policy')"
+				@input="onInput" />
+		</NcSettingsSection>
 	</div>
 </template>
 
@@ -28,6 +49,8 @@ import { delay } from '../utils.js'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 
 import NcSettingsSection from '@nextcloud/vue/dist/Components/NcSettingsSection.js'
+import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
+import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
 import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
 
 import AppAPIIcon from './icons/AppAPIIcon.vue'
@@ -40,6 +63,8 @@ export default {
 		DaemonConfigList,
 		AppAPIIcon,
 		NcNoteCard,
+		NcInputField,
+		NcSelect,
 	},
 	data() {
 		return {
@@ -65,7 +90,8 @@ export default {
 		onInput() {
 			delay(() => {
 				this.saveOptions({
-					file_actions_menu: this.state.file_actions_menu,
+					ex_app_init_timeout: this.state.init_timeout,
+					container_restart_policy: this.state.container_restart_policy,
 				})
 			}, 2000)()
 		},
@@ -102,6 +128,11 @@ export default {
 		.app-api-icon {
 			margin-right: 12px;
 		}
+	}
+
+	.setting {
+		width: fit-content;
+		max-width: 400px;
 	}
 }
 </style>

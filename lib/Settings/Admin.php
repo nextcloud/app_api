@@ -47,6 +47,8 @@ class Admin implements ISettings {
 		$adminInitialData = [
 			'daemons' => $daemons,
 			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config'),
+			'init_timeout' => $this->config->getAppValue(Application::APP_ID, 'init_timeout', '40'),
+			'container_restart_policy' => $this->config->getAppValue(Application::APP_ID, 'container_restart_policy', 'unless-stopped'),
 		];
 
 		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
