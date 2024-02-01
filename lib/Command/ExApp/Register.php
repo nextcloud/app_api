@@ -145,7 +145,7 @@ class Register extends Command {
 			}
 		}
 
-		$requestedExAppScopeGroups = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml, $exAppInfo);
+		$requestedExAppScopeGroups = $this->exAppService->getExAppScopes($exApp, $infoXml, $exAppInfo);
 		if (isset($requestedExAppScopeGroups['error'])) {
 			$output->writeln($requestedExAppScopeGroups['error']);
 			$this->exAppService->unregisterExApp($exApp->getAppid());
@@ -154,40 +154,29 @@ class Register extends Command {
 
 		$forceScopes = (bool) $input->getOption('force-scopes');
 		$confirmRequiredScopes = $forceScopes;
-		$confirmOptionalScopes = $forceScopes;
 
 		if (!$forceScopes && $input->isInteractive()) {
 			/** @var QuestionHelper $helper */
 			$helper = $this->getHelper('question');
 
 			// Prompt to approve required ExApp scopes
-			if (count($requestedExAppScopeGroups['required']) > 0) {
-				$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups['required'])));
+			if (count($requestedExAppScopeGroups) > 0) {
+				$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups)));
 				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 				$confirmRequiredScopes = $helper->ask($input, $output, $question);
 			} else {
 				$confirmRequiredScopes = true;
 			}
-
-			// Prompt to approve optional ExApp scopes
-			if ($confirmRequiredScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-				$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups['optional'])));
-				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-				$confirmOptionalScopes = $helper->ask($input, $output, $question);
-			}
 		}
 
-		if (!$confirmRequiredScopes && count($requestedExAppScopeGroups['required']) > 0) {
+		if (!$confirmRequiredScopes && count($requestedExAppScopeGroups) > 0) {
 			$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
 			$this->exAppService->unregisterExApp($exApp->getAppid());
 			return 1;
 		}
 
-		if (count($requestedExAppScopeGroups['required']) > 0) {
-			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['required'], 'required');
-		}
-		if ($confirmOptionalScopes && count($requestedExAppScopeGroups['optional']) > 0) {
-			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups['optional'], 'optional');
+		if (count($requestedExAppScopeGroups) > 0) {
+			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups);
 		}
 
 		if (!$this->service->dispatchExAppInit($exApp->getAppid())) {
@@ -212,17 +201,17 @@ class Register extends Command {
 		return 0;
 	}
 
-	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups, string $scopeType): void {
+	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups): void {
 		$registeredScopeGroups = [];
 		foreach ($this->exAppApiScopeService->mapScopeNamesToNumbers($requestedExAppScopeGroups) as $scopeGroup) {
 			if ($this->exAppScopesService->setExAppScopeGroup($exApp, $scopeGroup)) {
 				$registeredScopeGroups[] = $scopeGroup;
 			} else {
-				$output->writeln(sprintf('Failed to set %s ExApp scope group: %s', $scopeType, $scopeGroup));
+				$output->writeln(sprintf('Failed to set %s ExApp scope group: %s', $exApp->getAppid(), $scopeGroup));
 			}
 		}
 		if (count($registeredScopeGroups) > 0) {
-			$output->writeln(sprintf('ExApp %s %s scope groups successfully set: %s', $exApp->getAppid(), $scopeType, implode(', ',
+			$output->writeln(sprintf('ExApp %s scope groups successfully set: %s', $exApp->getAppid(), implode(', ',
 				$this->exAppApiScopeService->mapScopeGroupsToNames($registeredScopeGroups))));
 		}
 	}

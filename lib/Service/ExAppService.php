@@ -241,8 +241,11 @@ class ExAppService {
 		return false;
 	}
 
-	public function getExAppRequestedScopes(ExApp $exApp, ?SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
+	public function getExAppScopes(ExApp $exApp, ?SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
 		if (isset($jsonInfo['scopes'])) {
+			if (isset($jsonInfo['scopes']['required'])) {
+				return $jsonInfo['scopes']['required'];  // Will be removed in AppAPI 2.1.0 version
+			}
 			return $jsonInfo['scopes'];
 		}
 
@@ -254,19 +257,15 @@ class ExAppService {
 		}
 
 		if (isset($infoXml)) {
+			$oldFormatScopes = $infoXml->xpath('external-app/scopes/required');
+			if ($oldFormatScopes !== false) {
+				$scopes = (array) $oldFormatScopes[0]->value;
+				return array_values($scopes);  // Will be removed in AppAPI 2.2.0 version
+			}
 			$scopes = $infoXml->xpath('external-app/scopes');
 			if ($scopes !== false) {
 				$scopes = (array) $scopes[0];
-				$required = array_map(function (string $scopeGroup) {
-					return $scopeGroup;
-				}, (array) $scopes['required']->value);
-				$optional = array_map(function (string $scopeGroup) {
-					return $scopeGroup;
-				}, (array) $scopes['optional']->value);
-				return [
-					'required' => array_values($required),
-					'optional' => array_values($optional),
-				];
+				return array_values($scopes);
 			}
 		}
 

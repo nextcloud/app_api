@@ -101,7 +101,7 @@ class Deploy extends Command {
 				$daemonConfig->getProtocol(),
 				$daemonConfig->getHost(),
 				$daemonConfig->getDeployConfig(),
-				(int)explode('=', $deployParams['container_params']['env'][7])[1],
+				(int)explode('=', $deployParams['container_params']['env'][6])[1],
 				$auth,
 			);
 			if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {

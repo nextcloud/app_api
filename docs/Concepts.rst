@@ -4,9 +4,7 @@ Concepts
 API Access Control Mechanism
 ----------------------------
 
-Each application defines required and an optional list of API groups it intends to access.
-
-Administrators can permit or deny an application's access to any API from the **optional** list.
+Each application defines list of API groups it intends to access.
 
 This system easily allows you to increase the level of trust in applications.
 Even prior to installation, it's possible to ascertain the API groups to which an application will gain access.

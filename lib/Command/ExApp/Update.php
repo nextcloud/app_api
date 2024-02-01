@@ -164,53 +164,36 @@ class Update extends Command {
 		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
 			return $exAppScope->getScopeGroup();
 		}, $this->exAppScopeService->getExAppScopes($exApp));
-		$newExAppScopes = $this->exAppService->getExAppRequestedScopes($exApp, $infoXml);
+		$newExAppScopes = $this->exAppService->getExAppScopes($exApp, $infoXml);
 		if (isset($newExAppScopes['error'])) {
 			$output->writeln($newExAppScopes['error']);
 		}
 		// Prepare for prompt of newly requested ExApp scopes
-		$requiredScopes = $this->compareExAppScopes($currentExAppScopes, $newExAppScopes, 'required');
-		$optionalScopes = $this->compareExAppScopes($currentExAppScopes, $newExAppScopes, 'optional');
+		$requiredScopes = $this->compareExAppScopes($currentExAppScopes, $newExAppScopes);
 
 		$forceScopes = (bool) $input->getOption('force-scopes');
-		$confirmRequiredScopes = $forceScopes;
-		$confirmOptionalScopes = $forceScopes;
+		$confirmScopes = $forceScopes;
 
 		if (!$forceScopes && $input->isInteractive()) {
 			/** @var QuestionHelper $helper */
 			$helper = $this->getHelper('question');
 
 			if (count($requiredScopes) > 0) {
-				$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ',
+				$output->writeln(sprintf('ExApp %s requested scopes: %s', $appId, implode(', ',
 					$this->exAppApiScopeService->mapScopeGroupsToNames($requiredScopes))));
 				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-				$confirmRequiredScopes = $helper->ask($input, $output, $question);
+				$confirmScopes = $helper->ask($input, $output, $question);
 			} else {
-				$confirmRequiredScopes = true;
-			}
-
-			if ($confirmRequiredScopes && count($optionalScopes) > 0) {
-				$output->writeln(sprintf('ExApp %s requested optional scopes: %s', $appId, implode(', ',
-					$this->exAppApiScopeService->mapScopeGroupsToNames($optionalScopes))));
-				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-				$confirmOptionalScopes = $helper->ask($input, $output, $question);
+				$confirmScopes = true;
 			}
 		}
 
-		if (!$confirmRequiredScopes && count($requiredScopes) > 0) {
+		if (!$confirmScopes && count($requiredScopes) > 0) {
 			$output->writeln(sprintf('ExApp %s required scopes not approved. Failed to finish ExApp update.', $appId));
 			return 1;
 		}
 
-		if (!$confirmOptionalScopes && count($optionalScopes) > 0) {
-			// Remove optional scopes from the list so that they will be removed
-			$newExAppScopes['optional'] = [];
-		}
-
-		$newExAppScopes = array_merge(
-			$this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes['required']),
-			$this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes['optional'])
-		);
+		$newExAppScopes = $this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes);
 		if (!$this->exAppScopeService->updateExAppScopes($exApp, $newExAppScopes)) {
 			$output->writeln(sprintf('Failed to update ExApp %s scopes.', $appId));
 			return 1;
@@ -230,10 +213,9 @@ class Update extends Command {
 	 *
 	 * @param array $currentExAppScopes
 	 * @param array $newExAppScopes
-	 * @param string $type
 	 * @return array
 	 */
-	private function compareExAppScopes(array $currentExAppScopes, array $newExAppScopes, string $type): array {
-		return array_values(array_diff($this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes[$type]), $currentExAppScopes));
+	private function compareExAppScopes(array $currentExAppScopes, array $newExAppScopes): array {
+		return array_values(array_diff($this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes), $currentExAppScopes));
 	}
 }

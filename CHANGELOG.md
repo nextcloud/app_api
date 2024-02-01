@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.3 - 2024-02-01]
+
+### Added
+
+- Added RestartPolicy option (Admin settings) #220
+- Added ExApp init timeout option (Admin settings) #220
+
+### Changed
+
+- Removed support of `Optional` API scopes. #220
+
 ## [2.0.2 - 2024-01-28]
 
 ### Fixed

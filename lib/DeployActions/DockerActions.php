@@ -30,7 +30,6 @@ class DockerActions implements IDeployActions {
 		'APP_ID',
 		'APP_DISPLAY_NAME',
 		'APP_VERSION',
-		'APP_PROTOCOL',
 		'APP_HOST',
 		'APP_PORT',
 		'APP_PERSISTENT_STORAGE',
@@ -124,6 +123,9 @@ class DockerActions implements IDeployActions {
 			'HostConfig' => [
 				'NetworkMode' => $params['net'],
 				'Mounts' => $this->buildDefaultExAppVolume($params['hostname']),
+				'RestartPolicy' => [
+					'Name' => $this->config->getAppValue(Application::APP_ID, 'container_restart_policy', 'unless-stopped'),
+				],
 			],
 			'Env' => $params['env'],
 		];
@@ -201,16 +203,12 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function pullContainer(string $dockerUrl, array $params): array {
-		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', $this->buildImageName($params)));
+		$imageId = $this->buildImageName($params);
+		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($imageId)));
+		$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
 		try {
-			$xRegistryAuth = json_encode([
-				'https://' . $params['image_src'] => []
-			], JSON_UNESCAPED_SLASHES);
-			$response = $this->guzzleClient->post($url, [
-				'headers' => [
-					'X-Registry-Auth' => base64_encode($xRegistryAuth),
-				],
-			]);
+			$response = $this->guzzleClient->post($url);
+			$this->logger->info(sprintf('Pull ExApp image result=%d for %s', $response->getStatusCode(), $imageId));
 			return ['success' => $response->getStatusCode() === 200];
 		} catch (GuzzleException $e) {
 			$this->logger->error('Failed to pull image', ['exception' => $e]);
@@ -368,7 +366,6 @@ class DockerActions implements IDeployActions {
 			'appid' => $appId,
 			'name' => (string) $infoXml->name,
 			'version' => (string) $infoXml->version,
-			'protocol' => (string) ($infoXml->xpath('external-app/protocol')[0] ?? 'http'),
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $port,
 			'storage' => $storage,
@@ -410,7 +407,6 @@ class DockerActions implements IDeployActions {
 			sprintf('APP_ID=%s', $params['appid']),
 			sprintf('APP_DISPLAY_NAME=%s', $params['name']),
 			sprintf('APP_VERSION=%s', $params['version']),
-			sprintf('APP_PROTOCOL=%s', $params['protocol']),
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
 			sprintf('APP_PERSISTENT_STORAGE=%s', $params['storage']),

@@ -209,7 +209,7 @@ export default {
 			acceptsDeployId: 'docker-install',
 			deployMethods: ['docker-install', 'manual-install'],
 			httpsEnabled: false,
-			host: 'aa-docker-socket-proxy:2375',
+			host: 'nextcloud-appapi-dsp:2375',
 			// replace last slash with empty string
 			nextcloud_url: window.location.origin + generateUrl('').slice(0, -1),
 			deployConfigSettingsOpened: false,
@@ -233,7 +233,7 @@ export default {
 				if (this.acceptsDeployId === 'manual-install') {
 					return t('app_api', 'Hostname to access ExApps')
 				}
-				return t('app_api', 'Hostname or path to access Docker daemon (e.g. aa-docker-socket-proxy:2375, /var/run/docker.sock)')
+				return t('app_api', 'Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
 			}
 			return ''
 		},
