@@ -31,6 +31,9 @@
 			:name="t('app_api', 'ExApp container restart policy')"
 			:description="t('app_api', 'Specify container restart policy, e.g. \'always\' to ensure ExApp running after daemon server reboot')"
 			:aria-label="t('app_api', 'ExApp container restart policy')">
+			<NcNoteCard type="info">
+				{{ t('app_api', 'This settings changes are reflected only for newly created containers') }}
+			</NcNoteCard>
 			<NcSelect
 				v-model="state.container_restart_policy"
 				:options="['no', 'always', 'unless-stopped']"
