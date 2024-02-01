@@ -116,6 +116,8 @@
     "Only NVIDIA GPUs are supported for now." : "目前僅支援 NVIDIA GPU。",
     "Register" : "註冊",
     "Check connection" : "檢查連線",
+    "Hostname to access ExApps" : "用來存取外部應用程式的主機名稱",
+    "Hostname or path to access Docker daemon (e.g. aa-docker-socket-proxy:2375, /var/run/docker.sock)" : "存取 Docker 幕後程式的主機名稱或路徑（例如 aa-docker-socket-proxy:2375、/var/run/docker.sock）",
     "Daemon with this name already exists" : "同名幕後程式已存在",
     "Password must be at least 12 characters long" : "密碼必須至少 12 個字元長",
     "With https enabled network is set to host" : "啟用 https 後，網路設定為主機",
