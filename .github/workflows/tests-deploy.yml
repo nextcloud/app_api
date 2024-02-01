@@ -237,8 +237,8 @@ jobs:
           docker network create master_bridge
           docker run -v /var/run/docker.sock:/var/run/docker.sock \
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
-            --net master_bridge --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
-            --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
+            --net master_bridge --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
+            --privileged -d ghcr.io/cloud-py-api/nextcloud-appapi-dsp:latest
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
           sleep 60s
 
@@ -249,7 +249,7 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install http aa-docker-socket-proxy:2375 http://nextcloud/index.php \
+            docker_by_port Docker docker-install http nextcloud-appapi-dsp:2375 http://nextcloud/index.php \
             --net=master_bridge --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
@@ -326,12 +326,12 @@ jobs:
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             -e BIND_ADDRESS="172.17.0.1" \
             -e EX_APPS_NET_FOR_HTTPS="ipv4@localhost" \
-            --net host --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
-            --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
+            --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
+            --privileged -d ghcr.io/cloud-py-api/nextcloud-appapi-dsp:latest
           docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
           sleep 60s
           hostname -I
-          docker exec aa-docker-socket-proxy ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
+          docker exec nextcloud-appapi-dsp ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
 
       - name: Install AppAPI
         run: |
@@ -363,7 +363,7 @@ jobs:
 
       - name: Save HaProxy logs
         if: always()
-        run: docker logs aa-docker-socket-proxy > haproxy.log 2>&1
+        run: docker logs nextcloud-appapi-dsp > haproxy.log 2>&1
 
       - name: Save container info & logs
         if: always()
