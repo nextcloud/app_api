@@ -123,6 +123,9 @@ class DockerActions implements IDeployActions {
 			'HostConfig' => [
 				'NetworkMode' => $params['net'],
 				'Mounts' => $this->buildDefaultExAppVolume($params['hostname']),
+				'RestartPolicy' => [
+					'Name' => $this->config->getAppValue(Application::APP_ID, 'container_restart_policy', 'unless-stopped'),
+				],
 			],
 			'Env' => $params['env'],
 		];
