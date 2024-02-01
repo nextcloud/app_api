@@ -116,6 +116,8 @@
     "Only NVIDIA GPUs are supported for now." : "За сада су подржани само NVIDIA GPU.",
     "Register" : "Региструј се",
     "Check connection" : "Провера везе",
+    "Hostname to access ExApps" : "Име хоста за приступ ExApps",
+    "Hostname or path to access Docker daemon (e.g. aa-docker-socket-proxy:2375, /var/run/docker.sock)" : "Име хоста или путања за приступ Docker даемону (нпр. aa-docker-socket-proxy:2375, /var/run/docker.sock)",
     "Daemon with this name already exists" : "Даемон са овим именом већ постоји",
     "Password must be at least 12 characters long" : "Дужина лозинке мора да буде барем 12 карактера",
     "With https enabled network is set to host" : "Са укљученим https мрежа се поставља на хост",
