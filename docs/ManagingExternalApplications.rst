@@ -25,7 +25,7 @@ There are several commands to work with ExApps:
 Deploy
 ------
 
-Command: ``app_api:app:deploy [--info-xml INFO-XML] [-e|--env ENV] [--] <appid> <daemon-config-name>``
+Command: ``app_api:app:deploy [--info-xml INFO-XML] [--] <appid> <daemon-config-name>``
 
 The deploy command is the first ExApp installation step.
 
@@ -39,7 +39,6 @@ Options
 *******
 
     * ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
-    * ``-e|--env ENV`` *[optional]* - additional environment variables (e.g. ``-e "MY_VAR=123" -e "MY_VAR2=456"``)
 
 Register
 --------

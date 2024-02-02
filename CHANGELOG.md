@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.x.x - 2024-02-xx]
+
+### Changed
+
+- Removed not needed `-e` parameter for `occ:app_api:app:deploy`. #
+
 ## [2.0.3 - 2024-02-01]
 
 ### Added
