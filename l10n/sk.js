@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Aktualizovať všetko","Aktualizovať všetko","Aktualizovať všetko","Aktualizovať všetko"],
     "Type" : "Typ",
     "Display Name" : "Zobrazované meno",
-    "Required" : "Vyžadovaný",
-    "Optional" : "Voliteľné",
     "{license}-licensed" : "{license}-licencovaný",
     "Delete" : "Vymazať",
     "Cancel" : "Zrušiť",

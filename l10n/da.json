@@ -23,8 +23,6 @@
     "Results from other categories" : "Resultater fra andre kategorier",
     "_Update_::_Update all_" : ["Opdatér","Opdatér alle"],
     "Display Name" : "Vist navn",
-    "Required" : "Påkrævet",
-    "Optional" : "Valgfri",
     "{license}-licensed" : "{license}-licenseret",
     "Delete" : "Slet",
     "Cancel" : "Annullér",

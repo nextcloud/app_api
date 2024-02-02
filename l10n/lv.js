@@ -14,8 +14,6 @@ OC.L10N.register(
     "Actions" : "Darbības",
     "Type" : "Tips",
     "Display Name" : "Ekrāna vārds",
-    "Required" : "Nepieciešams",
-    "Optional" : "Neobligāts",
     "Delete" : "Dzēst",
     "Ok" : "Labi",
     "Host" : "Resursdators",

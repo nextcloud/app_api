@@ -26,8 +26,6 @@ OC.L10N.register(
     "Results from other categories" : "Resultaten van andere categorieën",
     "Type" : "Type",
     "Display Name" : "Weergavenaam",
-    "Required" : "Vereist",
-    "Optional" : "Optioneel",
     "{license}-licensed" : "{license}-gelicenseerd",
     "Delete" : "Verwijder",
     "Cancel" : "Annuleren",

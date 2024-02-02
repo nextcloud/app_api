@@ -23,8 +23,6 @@ OC.L10N.register(
     "Actions" : "Agoj",
     "Results from other categories" : "Rezultoj el aliaj kategorioj",
     "Type" : "Tipo",
-    "Required" : "Nepra",
-    "Optional" : "Malnepra",
     "{license}-licensed" : "Permesilo: {license}",
     "Delete" : "Forigi",
     "Ok" : "Bone",

@@ -44,8 +44,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Actualitza","Actualitza-les totes"],
     "Type" : "Tipus",
     "Display Name" : "Nom d'usuari",
-    "Required" : "Obligatori",
-    "Optional" : "Opcional",
     "{license}-licensed" : "sota la llicència - {license}",
     "Delete" : "Suprimir",
     "Cancel" : "Cancelar",

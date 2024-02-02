@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Uppdatera","Uppdatera alla"],
     "Type" : "Typ",
     "Display Name" : "Visningsnamn",
-    "Required" : "Krävs",
-    "Optional" : "Valfritt",
     "Default" : "Förvald",
     "{license}-licensed" : "{license}-licensierad",
     "Delete" : "Radera",

@@ -22,8 +22,6 @@ OC.L10N.register(
     "Actions" : "การกระทำ",
     "Results from other categories" : "ผลลัพธ์จากหมวดหมู่อื่น ๆ",
     "Type" : "ประเภท",
-    "Required" : "จำเป็น",
-    "Optional" : "ไม่จำเป็น",
     "{license}-licensed" : "สัญญาอนุญาต {license}",
     "Delete" : "ลบ",
     "Cancel" : "ยกเลิก",

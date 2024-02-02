@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Atnaujinti","Atnaujinti visas","Atnaujinti visas","Atnaujinti visas"],
     "Type" : "Tipas",
     "Display Name" : "Rodomas vardas",
-    "Required" : "Privalomas",
-    "Optional" : "Nebūtina",
     "Default" : "Numatytasis",
     "{license}-licensed" : "Licencijuota pagal {license}",
     "Delete" : "Ištrinti",

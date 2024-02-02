@@ -18,8 +18,6 @@ OC.L10N.register(
     "Actions" : "Tegevused",
     "Type" : "Tüüp",
     "Display Name" : "Kuvatav nimi",
-    "Required" : "Kohustuslik",
-    "Optional" : "Valikuline",
     "{license}-licensed" : "{license} litsents",
     "Delete" : "Kustuta",
     "Cancel" : "Tühista",

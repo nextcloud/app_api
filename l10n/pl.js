@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Zaktualizuj","Zaktualizuj","Zaktualizuj","Zaktualizuj wszystko"],
     "Type" : "Rodzaj",
     "Display Name" : "Wyświetlana nazwa",
-    "Required" : "Wymagany",
-    "Optional" : "Opcjonalnie",
     "Default" : "Domyślny",
     "{license}-licensed" : "na licencji {license}",
     "Delete" : "Usuń",

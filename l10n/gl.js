@@ -36,8 +36,6 @@ OC.L10N.register(
     "Type" : "Escribir",
     "Display Name" : "Nome para amosar",
     "System: " : "Sistema:",
-    "Required" : "Obrigatorio",
-    "Optional" : "Opcional",
     "Default" : "Predeterminado",
     "{license}-licensed" : "Licenciado baixo a {license}",
     "Set as default" : "Definir como predeterminado",

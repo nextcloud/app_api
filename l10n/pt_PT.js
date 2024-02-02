@@ -21,8 +21,6 @@ OC.L10N.register(
     "Results from other categories" : "Resultados de outras categorias",
     "_Update_::_Update all_" : ["Atualizar","Atualizar todos","Atualizar todos"],
     "Type" : "Tipo",
-    "Required" : "Obrigatório",
-    "Optional" : "Opcional ",
     "Default" : "Predefinido",
     "Delete" : "Eliminar",
     "Cancel" : "Cancelar",

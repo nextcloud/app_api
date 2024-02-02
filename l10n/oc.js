@@ -14,7 +14,6 @@ OC.L10N.register(
     "Version" : "Version",
     "Actions" : "Accions",
     "Type" : "Tipe",
-    "Optional" : "Opcional",
     "Delete" : "Suprimir",
     "Cancel" : "Anullar",
     "Host" : "Òste",

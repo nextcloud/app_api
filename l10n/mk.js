@@ -25,8 +25,6 @@ OC.L10N.register(
     "Results from other categories" : "Резултати од други категории",
     "_Update_::_Update all_" : ["Ажурирај","Ажурирај ги сите"],
     "Type" : "Вид",
-    "Required" : "Задолжително",
-    "Optional" : "Опционално",
     "Default" : "Предефиниран",
     "{license}-licensed" : "{license}-лиценца",
     "Delete" : "Избриши",

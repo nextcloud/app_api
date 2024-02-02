@@ -26,8 +26,6 @@ OC.L10N.register(
     "Results from other categories" : "תוצאות מקטגוריות אחרות",
     "Type" : "סוג",
     "Display Name" : "שם תצוגה",
-    "Required" : "נדרש",
-    "Optional" : "אופציונלי",
     "Default" : "ברירת מחדל",
     "{license}-licensed" : "ברישיון {license}",
     "Delete" : "מחיקה",

@@ -39,8 +39,6 @@ OC.L10N.register(
     "GPUs support" : "Prise en charge des cartes graphiques",
     "External App URL: " : "URL de l'application externe :",
     "System: " : "Système :",
-    "Required" : "Obligatoire",
-    "Optional" : "Facultatif",
     "Default" : "Défaut",
     "{license}-licensed" : "Sous licence {license}",
     "Set as default" : "Définir comme valeur par défaut",

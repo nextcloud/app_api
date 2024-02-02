@@ -20,8 +20,6 @@ OC.L10N.register(
     "Actions" : "Veprimet",
     "Type" : "Tipi",
     "Display Name" : "Trego Emrin",
-    "Required" : "E domosdoshme",
-    "Optional" : "Jo i detyrueshëm",
     "Default" : "Paraprake",
     "Delete" : "Fshi",
     "Cancel" : "Anuloje",

@@ -9,8 +9,6 @@ OC.L10N.register(
     "Version" : "Version",
     "Actions" : "Actiones",
     "Type" : "Typo",
-    "Required" : "Requirite",
-    "Optional" : "Optional",
     "Delete" : "Deler",
     "Host" : "Hospite",
     "Details" : "Detalios",

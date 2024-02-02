@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Обновить","Обновить все","Обновить все","Обновить все"],
     "Type" : "Тип",
     "Display Name" : "Отображаемое имя",
-    "Required" : "Обязательно",
-    "Optional" : "Необязательно",
     "Default" : "По умолчанию",
     "{license}-licensed" : "Лицензия: {license}",
     "Set as default" : "Использовать по умолчанию",

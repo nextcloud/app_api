@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Ενημέρωση","Ενημέρωση όλων"],
     "Type" : "Τύπος",
     "Display Name" : "Εμφανιζόμενο όνομα",
-    "Required" : "Απαιτείται",
-    "Optional" : "Προαιρετικό",
     "Default" : "Προεπιλογή",
     "{license}-licensed" : "{license}-αδειοδοτημένο",
     "Delete" : "Διαγραφή",

@@ -26,8 +26,6 @@ OC.L10N.register(
     "Results from other categories" : "Rezultati iz drugih kategorija",
     "Type" : "Vrsta",
     "Display Name" : "Ime",
-    "Required" : "Obvezno",
-    "Optional" : "Neobavezno",
     "Default" : "Zadani",
     "{license}-licensed" : "Licencirano prema {license}",
     "Delete" : "Izbriši",

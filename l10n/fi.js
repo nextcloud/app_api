@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Päivitä","Päivitä kaikki"],
     "Type" : "Tyyppi",
     "Display Name" : "Näyttönimi",
-    "Required" : "Vaadittu",
-    "Optional" : "Vapaaehtoinen",
     "{license}-licensed" : "{license}-lisensoitu",
     "Delete" : "Poista",
     "Cancel" : "Peruuta",

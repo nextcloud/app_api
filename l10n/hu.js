@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Frissítés","Összes frissítése"],
     "Type" : "Típus",
     "Display Name" : "Megjelenített név",
-    "Required" : "Kötelező",
-    "Optional" : "Nem kötelező",
     "{license}-licensed" : "{license}-licencelt",
     "Delete" : "Törlés",
     "Cancel" : "Mégse",

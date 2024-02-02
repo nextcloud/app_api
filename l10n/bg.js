@@ -26,8 +26,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Актуализиране на всички","Актуализиране на всички"],
     "Type" : "Тип",
     "Display Name" : "Име за визуализация",
-    "Required" : "Препоръчително",
-    "Optional" : "По избор",
     "Default" : "По подразбиране",
     "{license}-licensed" : "{license}-лицензиран",
     "Delete" : "Изтриване",

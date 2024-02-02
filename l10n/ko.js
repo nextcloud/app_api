@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["모두 업데이트"],
     "Type" : "종류",
     "Display Name" : "표시 이름",
-    "Required" : "필요함",
-    "Optional" : "선택적",
     "{license}-licensed" : "{license} 라이선스",
     "Delete" : "삭제",
     "Cancel" : "취소",

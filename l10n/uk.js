@@ -27,8 +27,6 @@ OC.L10N.register(
     "Results from other categories" : "Результати з інших категорій",
     "_Update_::_Update all_" : ["Оновити","Оновити все","Оновити все","Оновити все"],
     "Type" : "Тип",
-    "Required" : "Обов'язкове",
-    "Optional" : "Опціонально",
     "{license}-licensed" : "Ліцензія: {license}",
     "Delete" : "Вилучати",
     "Cancel" : "Скасувати",

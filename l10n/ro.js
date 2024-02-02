@@ -16,8 +16,6 @@ OC.L10N.register(
     "Level" : "Nivel",
     "Actions" : "Acțiuni",
     "Type" : "Tip",
-    "Required" : "Necesar",
-    "Optional" : "Opțional",
     "Default" : "Implicită",
     "Delete" : "Șterge",
     "Cancel" : "Anulare",

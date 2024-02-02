@@ -20,8 +20,6 @@ OC.L10N.register(
     "Actions" : "Acciones",
     "Type" : "Escribir",
     "Display Name" : "Nombre a desplegar",
-    "Required" : "Requerido",
-    "Optional" : "Opcional",
     "Delete" : "Eliminar",
     "Host" : "Servidor",
     "Register" : "Registrar",

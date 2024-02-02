@@ -26,8 +26,6 @@ OC.L10N.register(
     "Results from other categories" : "نتایج از دیگر دسته‌ها",
     "_Update_::_Update all_" : ["به‌روز رسانی","به‌روز رسانی همه"],
     "Type" : "نوع",
-    "Required" : "اجباری",
-    "Optional" : "اختیاری",
     "Default" : "پیش‌فرض",
     "{license}-licensed" : "دارای مجوز- {license}",
     "Delete" : "حذف",

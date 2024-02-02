@@ -20,8 +20,6 @@ OC.L10N.register(
     "Level" : "Nivel",
     "Actions" : "Acciones",
     "Display Name" : "Nombre a desplegar",
-    "Required" : "Requerido",
-    "Optional" : "Opcional",
     "Default" : "Por omisión",
     "Delete" : "Eliminar",
     "Host" : "Servidor",

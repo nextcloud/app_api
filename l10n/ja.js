@@ -27,8 +27,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["全て更新"],
     "Type" : "タイプ",
     "Display Name" : "表示名",
-    "Required" : "必須",
-    "Optional" : "オプション",
     "{license}-licensed" : "{license}-に許諾されています",
     "Delete" : "削除",
     "Cancel" : "キャンセル",

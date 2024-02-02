@@ -26,8 +26,6 @@ OC.L10N.register(
     "Results from other categories" : "Rezultati iskanja med drugimi kategorijami",
     "_Update_::_Update all_" : ["Posodobi","Posodobi","Posodobi","Posodobi vse"],
     "Type" : "Vrsta",
-    "Required" : "Zahtevano",
-    "Optional" : "Izbirno",
     "Default" : "privzeto",
     "{license}-licensed" : "dovoljenje {license}",
     "Delete" : "Izbriši",

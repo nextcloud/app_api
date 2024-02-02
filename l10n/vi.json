@@ -23,8 +23,6 @@
     "Results from other categories" : "Kết quả từ các danh mục khác",
     "_Update_::_Update all_" : ["Cập nhật tất cả"],
     "Type" : "Loại",
-    "Required" : "Bắt buộc",
-    "Optional" : "Tùy chọn",
     "{license}-licensed" : "{license}-được cấp phép",
     "Delete" : "Xóa",
     "Cancel" : "Hủy",

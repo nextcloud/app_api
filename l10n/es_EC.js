@@ -26,8 +26,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Actualizar","Actualizar todo","Actualizar todo"],
     "Type" : "Tipo",
     "Display Name" : "Nombre a desplegar",
-    "Required" : "Requerido",
-    "Optional" : "Opcional",
     "{license}-licensed" : "Licenciado con {license}",
     "Delete" : "Borrar",
     "Cancel" : "Cancelar",

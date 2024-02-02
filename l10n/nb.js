@@ -25,8 +25,6 @@ OC.L10N.register(
     "Results from other categories" : "Resultater fra andre kategorier",
     "_Update_::_Update all_" : ["Oppdater","Oppdater alle"],
     "Display Name" : "Visningsnavn",
-    "Required" : "Påkrevd",
-    "Optional" : "Valgfri",
     "Default" : "Forvalg",
     "{license}-licensed" : "{license}-lisensiert",
     "Delete" : "Slett",

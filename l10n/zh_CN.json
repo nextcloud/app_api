@@ -36,8 +36,6 @@
     "_Update_::_Update all_" : ["全部更新"],
     "Type" : "类型",
     "Display Name" : "显示名称",
-    "Required" : "必填",
-    "Optional" : "可选",
     "{license}-licensed" : "{license}-许可协议",
     "Delete" : "删除",
     "Cancel" : "取消",

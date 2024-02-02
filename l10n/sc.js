@@ -24,8 +24,6 @@ OC.L10N.register(
     "Actions" : "Atziones",
     "Results from other categories" : "Resurtados dae àteras categorias",
     "Type" : "Genia",
-    "Required" : "Rechertu",
-    "Optional" : "A praghere",
     "Default" : "Predefinidu",
     "{license}-licensed" : "suta lissèntzia {license}",
     "Delete" : "Cantzella",

@@ -9,8 +9,6 @@ OC.L10N.register(
     "Version" : "Utgåve",
     "Actions" : "Handlingar",
     "Type" : "Skriv",
-    "Required" : "Nødvendig",
-    "Optional" : "Valfritt",
     "Delete" : "Slett",
     "Ok" : "Greitt",
     "Host" : "Tenar",

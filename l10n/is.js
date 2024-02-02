@@ -26,8 +26,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Uppfæra","Uppfæra allt"],
     "Type" : "Tegund",
     "Display Name" : "Birtingarnafn",
-    "Required" : "þetta þarf",
-    "Optional" : "Valkvætt",
     "{license}-licensed" : "{license}-notkunarleyfi",
     "Delete" : "Eyða",
     "Cancel" : "Hætta við",
