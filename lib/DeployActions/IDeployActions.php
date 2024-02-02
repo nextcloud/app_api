@@ -52,12 +52,11 @@ interface IDeployActions {
 	 * Build required deploy environment variables
 	 *
 	 * @param array $params
-	 * @param array $envOptions
 	 * @param array $deployConfig
 	 *
 	 * @return mixed
 	 */
-	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array;
+	public function buildDeployEnvs(array $params, array $deployConfig): array;
 
 	/**
 	 * Load ExApp information from the target daemon.

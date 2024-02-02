@@ -33,7 +33,7 @@ class ManualActions implements IDeployActions {
 		return null;
 	}
 
-	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
+	public function buildDeployEnvs(array $params, array $deployConfig): array {
 		// Not implemented. Deploy is done manually.
 		return [];
 	}

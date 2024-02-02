@@ -67,7 +67,7 @@ This can be done by ``occ`` CLI command **app_api:app:deploy**:
 
 .. code-block:: bash
 
-	app_api:app:deploy <appid> <daemon-config-name> [--info-xml INFO-XML] [-e|--env ENV] [--]
+	app_api:app:deploy <appid> <daemon-config-name> [--info-xml INFO-XML] [--]
 
 .. note::
 	For development this step is skipped, as ExApp is deployed and started manually by developer.
@@ -85,7 +85,6 @@ Options
 *******
 
 	* ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
-	* ``-e|--env ENV`` *[optional]* - additional environment variables (e.g. ``-e "MY_VAR=123" -e "MY_VAR2=456"``)
 
 Deploy result JSON
 ******************

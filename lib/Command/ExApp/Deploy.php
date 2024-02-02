@@ -37,7 +37,6 @@ class Deploy extends Command {
 		$this->addArgument('daemon-config-name', InputArgument::OPTIONAL);
 
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
-		$this->addOption('env', 'e', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Docker container environment variables', []);
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -76,11 +75,7 @@ class Deploy extends Command {
 			return 2;
 		}
 
-		$envParams = $input->getOption('env');
-
-		$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
-			'env_options' => $envParams,
-		]);
+		$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml);
 
 		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $deployParams);
 

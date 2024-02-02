@@ -371,7 +371,7 @@ class DockerActions implements IDeployActions {
 			'storage' => $storage,
 			'system_app' => filter_var((string) $infoXml->xpath('external-app/system')[0], FILTER_VALIDATE_BOOLEAN),
 			'secret' => $secret ?? $this->random->generate(128),
-		], $params['env_options'] ?? [], $deployConfig);
+		], $deployConfig);
 
 		$containerParams = [
 			'name' => $appId,
@@ -400,7 +400,7 @@ class DockerActions implements IDeployActions {
 		return $deployEnvs;
 	}
 
-	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array {
+	public function buildDeployEnvs(array $params, array $deployConfig): array {
 		$autoEnvs = [
 			sprintf('AA_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
 			sprintf('APP_SECRET=%s', $params['secret']),
@@ -418,14 +418,6 @@ class DockerActions implements IDeployActions {
 		if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
 			$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
 			$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
-		}
-
-		foreach ($envOptions as $envOption) {
-			[$key, $value] = explode('=', $envOption, 2);
-			// Do not overwrite required auto generated envs
-			if (!in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
-				$autoEnvs[] = sprintf('%s=%s', $key, $value);
-			}
 		}
 
 		return $autoEnvs;
