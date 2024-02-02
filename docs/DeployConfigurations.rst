@@ -275,3 +275,82 @@ Docker Socket Proxy security
 ****************************
 
 AIO Docker Socket Proxy has strictly limited access to the Docker APIs described in `HAProxy configuration <https://github.com/nextcloud/all-in-one/blob/main/Containers/docker-socket-proxy/haproxy.cfg>`_.
+
+
+NC to ExApp Communication
+-------------------------
+
+Each type of DeployDaemon necessarily implements the ``resolveExAppUrl`` function.
+
+It has such prototype:
+
+.. code-block:: php
+
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	) {}
+
+where:
+
+* **protocol** is daemon protocol value
+* **host** is daemon host value, *can be DNS:port or IP:PORT or even path to docker socket*.
+* **port** is an integer with ExApp port
+* **deployConfig** can be custom for each Daemon type
+* **auth** is an optional array, with *Basic Authentication* data if needed to access ExApp
+
+The simplest implementation is in **Manual-Install** deploy type:
+
+.. code-block:: php
+
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	): string {
+		$auth = [];
+		return sprintf('%s://%s:%s', $protocol, $host, $port);
+	}
+
+Here we see that AppAPI always send requests to **host**:**port** specified during daemon creation.
+
+Now let's take a look at the Docker Daemon implementation of ``resolveExAppUrl``:
+
+.. code-block:: php
+
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	): string {
+		$host = explode(':', $host)[0];
+		if ($protocol == 'https') {
+			$exAppHost = $host;
+		} elseif (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
+			$exAppHost = 'localhost';
+		} else {
+			$exAppHost = $appId;
+		}
+		if (empty($deployConfig['haproxy_password'])) {
+			$auth = [];
+		} else {
+			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
+		}
+		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);
+	}
+
+Here we have much more complex algorithm of detecting to where requests should be send.
+
+First of all if protocol is set to ``https`` AppAPI always send requests to daemon host,
+and this is in case of ``https`` it is a HaProxy that will forward requests to ExApps that will be listen on ``localhost``
+
+Briefly it will look like this(*haproxy_host==daemon host value*):
+
+NC --> *https* --> ``haproxy_host:ex_app_port`` --> *http* --> ``localhost:ex_app_port``
+
+When protocol is not ``https`` but ``http``, then what will be the endpoint where to send requests is determined by ``$deployConfig['net']`` value.
+
+If ``net`` is defined and equal to ``host`` then AppAPI assumes that ExApp is installed somewhere in the current host network and will be available on ``localhost`` loop-back adapter.
+
+NC --> *http* --> ``localhost:ex_app_port``
+
+In all other cases ExApp should be available by it's name: e.g. when using docker **custom bridge** network all containers available by DNS.
+
+NC --> *http* --> ``app_container_name:ex_app_port``
+
+This three different types of communication covers all most popular configurations.
