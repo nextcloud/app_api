@@ -42,7 +42,12 @@ OC.L10N.register(
     "Disabled apps" : "Deaktiverte apper",
     "Updates" : "Oppdateringer",
     "Featured apps" : "Fremhevede apper",
+    "Supported apps" : "Støttede apper",
     "Enable" : "Aktiver",
-    "Disable" : "Deaktiver"
+    "Disable" : "Deaktiver",
+    "Allow untested app" : "Tillatt utestet app",
+    "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Denne appen er ikke merket som kompatibel med Nextcloud-versjonen. Hvis du fortsetter, vil du fortsatt kunne installere appen. Vær oppmerksom på at appen kanskje ikke fungerer som forventet.",
+    "An error occurred during the request. Unable to proceed." : "En feil oppsto under forespørselen. Kan ikke fortsette.",
+    "Error: This app cannot be enabled because it makes the server unstable" : "Feil: denne appen kan ikke aktiveres fordi det gjør serveren ustabil"
 },
 "nplurals=2; plural=(n != 1);");
