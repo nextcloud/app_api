@@ -43,19 +43,8 @@ class OCSApiController extends OCSController {
 	#[NoCSRFRequired]
 	public function log(int $level, string $message): DataResponse {
 		try {
-			$appId = $this->request->getHeader('EX-APP-ID');
-			$exApp = $this->exAppService->getExApp($appId);
-			if ($exApp === null) {
-				$this->logger->error('ExApp ' . $appId . ' not found');
-				throw new OCSBadRequestException('ExApp not found');
-			}
-			$exAppEnabled = $exApp->getEnabled();
-			if ($exAppEnabled !== 1) {
-				$this->logger->error('ExApp ' . $appId . ' is disabled');
-				throw new OCSBadRequestException('ExApp is disabled');
-			}
 			$this->logger->log($level, $message, [
-				'app' => $appId,
+				'app' => $this->request->getHeader('EX-APP-ID'),
 			]);
 			return new DataResponse();
 		} catch (InvalidArgumentException) {
