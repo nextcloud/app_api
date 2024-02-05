@@ -11,7 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Removed not needed `-e` parameter for `occ:app_api:app:deploy`. #
+- Removed not needed `-e` parameter for `occ:app_api:app:deploy`. #222
+
+### Fixed
+
+- OCS API `log` always fail during ExApp `init` state. #224
 
 ## [2.0.3 - 2024-02-01]
 

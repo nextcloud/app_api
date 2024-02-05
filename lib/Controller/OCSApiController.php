@@ -49,11 +49,6 @@ class OCSApiController extends OCSController {
 				$this->logger->error('ExApp ' . $appId . ' not found');
 				throw new OCSBadRequestException('ExApp not found');
 			}
-			$exAppEnabled = $exApp->getEnabled();
-			if ($exAppEnabled !== 1) {
-				$this->logger->error('ExApp ' . $appId . ' is disabled');
-				throw new OCSBadRequestException('ExApp is disabled');
-			}
 			$this->logger->log($level, $message, [
 				'app' => $appId,
 			]);
