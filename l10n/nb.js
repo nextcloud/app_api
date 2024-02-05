@@ -24,6 +24,7 @@ OC.L10N.register(
     "Actions" : "Handlinger",
     "Results from other categories" : "Resultater fra andre kategorier",
     "_Update_::_Update all_" : ["Oppdater","Oppdater alle"],
+    "Type" : "Type",
     "Display Name" : "Visningsnavn",
     "Default" : "Forvalg",
     "{license}-licensed" : "{license}-lisensiert",
