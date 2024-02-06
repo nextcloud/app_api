@@ -8,30 +8,38 @@
 			<p>{{ t('app_api', 'The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud.') }}</p>
 		</div>
 		<NcSettingsSection
-			:name="t('app_api', 'ExApps')"
-			:description="t('app_api', 'ExApps management similar to default apps and available by the link below.')">
-			<NcButton
-				type="primary"
-				:href="linkToExAppsManagement()"
-				:aria-label="t('app_api', 'External Apps management')"
-				style="margin: 20px 0;">
-				{{ exAppsManagementButtonText }}
-				<template #icon>
-					<OpenInNew :size="20" />
-				</template>
-			</NcButton>
-		</NcSettingsSection>
-		<NcSettingsSection
 			:name="t('app_api', 'Deploy Daemons')"
 			:description="t('app_api', 'Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon.')"
+			:aria-label="t('app_api', 'Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon.')"
 			:doc-url="'https://cloud-py-api.github.io/app_api/CreationOfDeployDaemon.html'">
-			<NcNoteCard type="warning">
-				<p>{{ t('app_api', 'Currently only Docker Daemon is supported.') }}</p>
-			</NcNoteCard>
 			<NcNoteCard v-if="state.default_daemon_config !== '' && !state?.daemon_config_accessible" type="error">
 				<p>{{ t('app_api', 'Default Deploy Daemon is not accessible. Please verify its configuration') }}</p>
 			</NcNoteCard>
 			<DaemonConfigList :daemons.sync="daemons" :default-daemon.sync="default_daemon_config" :save-options="saveOptions" />
+		</NcSettingsSection>
+		<NcSettingsSection
+			:name="t('app_api', 'ExApp init timeout (minutes)')"
+			:description="t('app_api', 'ExApp initialization process timeout after which AppAPI will mark it as failed')"
+			:aria-label="t('app_api', 'ExApp initialization process timeout after which AppAPI will mark it as failed')">
+			<NcInputField :value.sync="state.init_timeout"
+				class="setting"
+				type="number"
+				:placeholder="t('app_api', 'ExApp init timeout')"
+				@update:value="onInput" />
+		</NcSettingsSection>
+		<NcSettingsSection
+			:name="t('app_api', 'ExApp container restart policy')"
+			:description="t('app_api', 'Specify container restart policy, e.g. \'always\' to ensure ExApp running after daemon server reboot')"
+			:aria-label="t('app_api', 'ExApp container restart policy')">
+			<NcNoteCard type="info">
+				{{ t('app_api', 'This settings changes are reflected only for newly created containers') }}
+			</NcNoteCard>
+			<NcSelect
+				v-model="state.container_restart_policy"
+				:options="['no', 'always', 'unless-stopped']"
+				:placeholder="t('app_api', 'ExApp container restart policy')"
+				:aria-label="t('app_api', 'ExApp container restart policy')"
+				@input="onInput" />
 		</NcSettingsSection>
 	</div>
 </template>
@@ -44,10 +52,9 @@ import { delay } from '../utils.js'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 
 import NcSettingsSection from '@nextcloud/vue/dist/Components/NcSettingsSection.js'
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
+import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
+import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
 import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-
-import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
 
 import AppAPIIcon from './icons/AppAPIIcon.vue'
 import DaemonConfigList from './DaemonConfig/DaemonConfigList.vue'
@@ -56,18 +63,17 @@ export default {
 	name: 'AdminSettings',
 	components: {
 		NcSettingsSection,
-		NcButton,
-		OpenInNew,
 		DaemonConfigList,
 		AppAPIIcon,
 		NcNoteCard,
+		NcInputField,
+		NcSelect,
 	},
 	data() {
 		return {
 			state: loadState('app_api', 'admin-initial-data'),
 			daemons: [],
 			default_daemon_config: '',
-			docker_socket_accessible: false,
 		}
 	},
 	computed: {
@@ -83,12 +89,12 @@ export default {
 			const state = loadState('app_api', 'admin-initial-data')
 			this.daemons = state.daemons
 			this.default_daemon_config = state.default_daemon_config
-			this.docker_socket_accessible = state.docker_socket_accessible
 		},
 		onInput() {
 			delay(() => {
 				this.saveOptions({
-					file_actions_menu: this.state.file_actions_menu,
+					ex_app_init_timeout: this.state.init_timeout,
+					container_restart_policy: this.state.container_restart_policy,
 				})
 			}, 2000)()
 		},
@@ -125,6 +131,11 @@ export default {
 		.app-api-icon {
 			margin-right: 12px;
 		}
+	}
+
+	.setting {
+		width: fit-content;
+		max-width: 400px;
 	}
 }
 </style>

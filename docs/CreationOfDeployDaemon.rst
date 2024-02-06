@@ -1,4 +1,4 @@
-.. _create-deploy-daemon:
+ .. _create-deploy-daemon:
 
 Creation of Deploy Daemon
 =========================
@@ -7,14 +7,16 @@ The Deploy Daemon (DaemonConfig) is used to orchestrate the deployment of ExApps
 
 .. note::
 
-	Currently only Docker (``accepts-deploy-id: docker-install``) is supported as a Deploy Daemon.
+	Currently only ``docker-install`` and ``manual-install`` deployment methods are supported.
+
+The recommended daemon configuration is using `AppAPI Docker Socket Proxy <https://github.com/cloud-py-api/docker-socket-proxy>`_.
+
+.. image:: ../screenshots/app_api_3.png
 
 
-Default Deploy Daemon
-^^^^^^^^^^^^^^^^^^^^^
+You can choose one of the basic configuration templates and adjust to your needs.
 
-AppAPI will automatically register basic Deploy Daemon configured with default values to work with local Docker via socket (``/var/run/docker.sock``).
-You can set default Deploy daemon in Admin settings - AppAPI section.
+.. note:: We highly recommend to use UI to create Deploy Daemons.
 
 OCC CLI
 ^^^^^^^
@@ -30,7 +32,7 @@ Register
 
 Register Deploy Daemon (DaemonConfig).
 
-Command: ``app_api:daemon:register [--net NET] [--hostname HOSTNAME] [--ssl_key SSL_KEY] [--ssl_key_password SSL_KEY_PASSWORD] [--ssl_cert SSL_CERT] [--ssl_cert_password SSL_CERT_PASSWORD] [--gpu GPU] [--] <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url>``
+Command: ``app_api:daemon:register [--net NET] [--gpu] [--] <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url>``
 
 Arguments
 *********
@@ -38,19 +40,15 @@ Arguments
 	* ``name`` - unique name of the daemon (e.g. ``docker_local_sock``)
 	* ``display-name`` - name of the daemon (e.g. ``My Local Docker``, will be displayed in the UI)
 	* ``accepts-deploy-id`` - type of deployment (``docker-install`` or ``manual-install``)
-	* ``protocol`` - protocol used to connect to the daemon (``unix-socket``, ``http`` or ``https``)
-	* ``host`` - host of the daemon (e.g. ``/var/run/docker.sock`` for ``unix-socket`` protocol or ``host:port`` for ``http(s)`` protocol)
+	* ``host`` - **path to docker-socket**  or the Docker Socket Proxy: ``address:port``
+	* ``protocol`` - protocol used to communicate with the Daemon/ExApps (``http`` or ``https``)
 	* ``nextcloud_url`` - Nextcloud URL, Daemon config required option (e.g. ``https://nextcloud.local``)
 
 Options
 *******
 
 	* ``--net [network-name]``  - ``[required]`` network name to bind docker container to (default: ``host``)
-	* ``--hostname HOST`` - ``[required]`` host to expose daemon to (defaults to ExApp appid)
-	* ``--ssl_key SSL_KEY`` - ``[optional]`` path to SSL key file (local absolute path)
-	* ``--ssl_password SSL_PASSWORD`` - ``[optional]`` SSL key password
-	* ``--ssl_cert SSL_CERT`` - ``[optional]`` path to SSL cert file (local absolute path)
-	* ``--ssl_cert_password SSL_CERT_PASSWORD`` - ``[optional]`` SSL cert password
+	* ``--haproxy_password HAPROXY_PASSWORD`` - ``[optional]`` password for AppAPI Docker Socket Proxy
 	* ``--gpu GPU`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``/dev/dri``)
 	* ``--set-default`` - ``[optional]`` set created daemon as default for ExApps installation
 
@@ -63,26 +61,18 @@ ExApp container.
 .. code-block:: json
 
 	{
-		"net": "nextcloud",
-		"host": null,
+		"net": "host",
 		"nextcloud_url": "https://nextcloud.local",
-		"ssl_key": "/path/to/ssl/key.pem",
-		"ssl_key_password": "ssl_key_password",
-		"ssl_cert": "/path/to/ssl/cert.pem",
-		"ssl_cert_password": "ssl_cert_password",
-		"gpus": ["/dev/dri"],
+		"haproxy_password": "some_secure_password",
+		"gpus": true,
 	}
 
 DeployConfig options
 """"""""""""""""""""
 
 	* ``net`` **[required]** - network name to bind docker container to (default: ``host``)
-	* ``host`` *[optional]* - in case Docker is on remote host, this should be a hostname of remote machine
 	* ``nextcloud_url`` **[required]** - Nextcloud URL (e.g. ``https://nextcloud.local``)
-	* ``ssl_key`` *[optional]* - path to SSL key file (local absolute path)
-	* ``ssl_key_password`` *[optional]* - SSL key password
-	* ``ssl_cert`` *[optional]* - path to SSL cert file (local absolute path)
-	* ``ssl_cert_password`` *[optional]* - SSL cert password
+	* ``haproxy_password`` *[optional]* - password for AppAPI Docker Socket Proxy
 	* ``gpus`` *[optional]* - GPU device to attach to the daemon (e.g. ``/dev/dri``)
 
 Unregister
@@ -104,9 +94,3 @@ Nextcloud AIO
 
 In case of AppAPI installed in AIO, default Deploy Daemon is registered automatically.
 It is possible to register additional Deploy Daemons with the same ways as described above.
-
-
-DaemonConfig admin settings
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-There is AppAPI Admin settings where you can manage Deploy Daemons.

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ExAppUsersService;
 use OCA\AppAPI\Service\UI\InitialStateService;
 use OCA\AppAPI\Service\UI\ScriptsService;
@@ -26,15 +26,15 @@ class TopMenuController extends Controller {
 	public array $jsProxyMap = [];
 
 	public function __construct(
-		IRequest                    $request,
-		private IInitialState       $initialState,
-		private TopMenuService      $menuEntryService,
-		private InitialStateService $initialStateService,
-		private ScriptsService      $scriptsService,
-		private StylesService       $stylesService,
-		private ExAppUsersService   $exAppUsersService,
-		private AppAPIService       $service,
-		private ?string             $userId,
+		IRequest                             $request,
+		private readonly IInitialState       $initialState,
+		private readonly TopMenuService      $menuEntryService,
+		private readonly InitialStateService $initialStateService,
+		private readonly ScriptsService      $scriptsService,
+		private readonly StylesService       $stylesService,
+		private readonly ExAppUsersService   $exAppUsersService,
+		private readonly ExAppService        $service,
+		private readonly ?string             $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -64,7 +64,7 @@ class TopMenuController extends Controller {
 		$this->stylesService->applyExAppStyles($appId, 'top_menu', $menuEntry->getName());
 
 		$this->postprocess = true;
-		$this->exAppUsersService->setupExAppUser($exApp, $this->userId);
+		$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $this->userId);
 		return new TemplateResponse(Application::APP_ID, 'embedded');
 	}
 }

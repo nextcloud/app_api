@@ -115,9 +115,9 @@ jobs:
           echo $! > /tmp/_install.pid
           cd ..
           sleep 5s
-          php occ app_api:daemon:register manual_install "Manual Install" manual-install 0 0 0
+          php occ app_api:daemon:register manual_install "Manual Install" manual-install http localhost 0
           php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\", \"NOTIFICATIONS\"],\"optional\":[\"USER_INFO\"]},\"protocol\":\"http\",\"system_app\":1}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"SYSTEM\", \"NOTIFICATIONS\", \"USER_INFO\"],\"system_app\":1}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
@@ -218,9 +218,9 @@ jobs:
           python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
           echo $! > /tmp/_install.pid
           sleep 5s
-          php occ app_api:daemon:register manual_install "Manual Install" manual-install 0 0 0
+          php occ app_api:daemon:register manual_install "Manual Install" manual-install http localhost 0
           php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"ALL\"],\"optional\":[]},\"protocol\":\"http\",\"system_app\":1}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"ALL\"],\"system_app\":1}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
@@ -233,12 +233,12 @@ jobs:
 
       - name: Re-Register App
         run: |
-          php occ app_api:app:unregister $APP_ID --silent || true
+          php occ app_api:app:unregister $APP_ID --silent --force || true
           python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
           echo $! > /tmp/_install.pid
           sleep 5s
           php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"SYSTEM\"],\"optional\":[]},\"protocol\":\"http\",\"system_app\":1}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"SYSTEM\"],\"system_app\":1}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
@@ -248,12 +248,12 @@ jobs:
 
       - name: Re-Register App
         run: |
-          php occ app_api:app:unregister $APP_ID --silent || true
+          php occ app_api:app:unregister $APP_ID --silent --force || true
           python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
           echo $! > /tmp/_install.pid
           sleep 5s
           php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"host\":\"localhost\",\"port\":$APP_PORT,\"scopes\":{\"required\":[\"ALL\"],\"optional\":[]},\"protocol\":\"http\",\"system_app\":0}" \
+            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"ALL\"],\"system_app\":0}" \
             --force-scopes --wait-finish
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null

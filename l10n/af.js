@@ -11,8 +11,6 @@ OC.L10N.register(
     "Version" : "Weergawe",
     "Actions" : "Aksies",
     "Display Name" : "Vertoonnaam",
-    "Required" : "Vereis",
-    "Optional" : "Opsioneel",
     "Delete" : "Skrap",
     "Host" : "Gasheer",
     "Register" : "Registreer",

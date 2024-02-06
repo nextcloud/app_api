@@ -9,7 +9,7 @@ SKELETON_XML_URL = (
 def register_daemon(nextcloud_url: str):
     run(
         "php occ app_api:daemon:register docker_local_sock "
-        f"Docker docker-install unix-socket /var/run/docker.sock {nextcloud_url}".split(),
+        f"Docker docker-install http /var/run/docker.sock {nextcloud_url}".split(),
         stderr=DEVNULL,
         stdout=DEVNULL,
         check=True,

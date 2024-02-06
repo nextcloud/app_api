@@ -12,8 +12,6 @@ OC.L10N.register(
     "Level" : "түвшин",
     "Actions" : "Үйл ажиллагаа",
     "Type" : "Төрөл",
-    "Required" : "Шаардлагатай",
-    "Optional" : "Сайн дурын",
     "Delete" : "Устгах",
     "Cancel" : "Цуцлах",
     "Ok" : "За",

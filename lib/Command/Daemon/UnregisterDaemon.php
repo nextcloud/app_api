@@ -6,6 +6,7 @@ namespace OCA\AppAPI\Command\Daemon;
 
 use OCA\AppAPI\Service\DaemonConfigService;
 
+use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,7 +14,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class UnregisterDaemon extends Command {
 
-	public function __construct(private DaemonConfigService $daemonConfigService) {
+	public function __construct(
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly ExAppService		 $exAppService,
+	) {
 		parent::__construct();
 	}
 
@@ -30,6 +34,12 @@ class UnregisterDaemon extends Command {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
 			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
+			return 1;
+		}
+
+		$countExApps = count($this->exAppService->getExAppsByDaemonName($daemonConfigName));
+		if ($countExApps > 0) {
+			$output->writeln(sprintf('Error: %s daemon contains %d ExApps, please remove them first to proceed.', $daemonConfigName, $countExApps));
 			return 1;
 		}
 

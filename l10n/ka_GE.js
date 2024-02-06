@@ -20,8 +20,6 @@ OC.L10N.register(
     "Level" : "დონე",
     "Actions" : "მოქმედებები",
     "Display Name" : "დისპლეი სახელი",
-    "Required" : "სავალდებულო",
-    "Optional" : "არასავალდებულო",
     "Default" : "საწყისი პარამეტრები",
     "Delete" : "წაშლა",
     "Cancel" : "გაუქმება",

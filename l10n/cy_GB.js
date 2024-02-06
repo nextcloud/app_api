@@ -9,8 +9,6 @@ OC.L10N.register(
     "Version" : "Fersiwn",
     "Actions" : "Gweithredoedd",
     "Type" : "Math",
-    "Required" : "Angen",
-    "Optional" : "Dewisol",
     "Delete" : "Dileu",
     "Ok" : "Iawn",
     "Register" : "Cofrestru",

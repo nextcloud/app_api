@@ -52,12 +52,11 @@ interface IDeployActions {
 	 * Build required deploy environment variables
 	 *
 	 * @param array $params
-	 * @param array $envOptions
 	 * @param array $deployConfig
 	 *
 	 * @return mixed
 	 */
-	public function buildDeployEnvs(array $params, array $envOptions, array $deployConfig): array;
+	public function buildDeployEnvs(array $params, array $deployConfig): array;
 
 	/**
 	 * Load ExApp information from the target daemon.
@@ -71,14 +70,19 @@ interface IDeployActions {
 	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array;
 
 	/**
-	 * Resolve ExApp host depending on daemon configuration.
+	 * Resolve ExApp URL(protocol://url:port) depending on the daemon configuration.
 	 * Algorithm can be different for each deploy action (type).
+	 * "auth" is output and will contain if needed additional authentication data to reach ExApp.
 	 *
 	 * @param string $appId
-	 * @param DaemonConfig $daemonConfig
-	 * @param array $params
-	 *
+	 * @param string $protocol
+	 * @param string $host
+	 * @param array $deployConfig
+	 * @param int $port
+	 * @param array $auth
 	 * @return string
 	 */
-	public function resolveDeployExAppHost(string $appId, DaemonConfig $daemonConfig, array $params = []): string;
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	): string;
 }

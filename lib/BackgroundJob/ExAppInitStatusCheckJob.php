@@ -27,11 +27,11 @@ class ExAppInitStatusCheckJob extends TimedJob {
 	}
 
 	protected function run($argument): void {
-		// Iterate over all ExApp and check for status.init_start_time if it is older than ex_app_init_timeout minutes
+		// Iterate over all ExApp and check for status.init_start_time if it is older than init_timeout minutes
 		// set status.progress=0 and status.error message with timeout error
 		try {
 			$exApps = $this->mapper->findAll();
-			$initTimeoutMinutes = intval($this->config->getAppValue(Application::APP_ID, 'ex_app_init_timeout', '40'));
+			$initTimeoutMinutes = intval($this->config->getAppValue(Application::APP_ID, 'init_timeout', '40'));
 			foreach ($exApps as $exApp) {
 				$status = $exApp->getStatus();
 				if (!isset($status['init_start_time'])) {

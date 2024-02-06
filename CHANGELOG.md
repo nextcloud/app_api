@@ -7,12 +7,53 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.5.0 - 2024-01-xx]
+## [2.x.x - 2024-02-xx]
+
+### Changed
+
+- Removed not needed `-e` parameter for `occ:app_api:app:deploy`. #222
+
+### Fixed
+
+- OCS API `log` always fail during ExApp `init` state. #224
+
+## [2.0.3 - 2024-02-01]
+
+### Added
+
+- Added RestartPolicy option (Admin settings) #220
+- Added ExApp init timeout option (Admin settings) #220
+
+### Changed
+
+- Removed support of `Optional` API scopes. #220
+
+## [2.0.2 - 2024-01-28]
+
+### Fixed
+
+- More correct handling of the ExApps installation process when Nextcloud has a non-default directory location(e.g. `Unraid`). #217
+- Correct handling of the action of stopping a Docker container when the action is already in progress. #217
+- Correct handling of the ExApp deletion action, when during deletion you refresh the page and click delete again. #217
+
+## [2.0.1 - 2024-01-25]
+
+### Fixed
+
+- MalformedUriException: Unable to parse URI exception - when the daemon has invalid URL. #216
+
+## [2.0.0 - 2024-01-25]
+
+AppAPI 2.0.
+Breaking changes to Deploy daemons configuration and ExApps networking.
+AppAPI Docker Socket Proxy.
 
 ### Added
 
 - Added filesplugin batch actions implementation. #203
 - Added MachineTranslation providers API. #210
+- Deploy daemons management improvements and configuration templates. #212
+- Added removal of ExApps on Deploy daemon deletion. #212
 
 ### Changed
 

@@ -5,8 +5,6 @@ OC.L10N.register(
     "Name" : "Numm",
     "Actions" : "Aktiounen",
     "Type" : "Typ",
-    "Required" : "Noutwendeg",
-    "Optional" : "Fräiwëlleg",
     "Delete" : "Läschen",
     "Ok" : "OK",
     "Host" : "Host",

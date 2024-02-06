@@ -18,8 +18,8 @@ class AIODockerActions {
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
 
 	public function __construct(
-		private IConfig $config,
-		private DaemonConfigService $daemonConfigService
+		private readonly IConfig    $config,
+		private readonly DaemonConfigService $daemonConfigService
 	) {
 	}
 
@@ -44,12 +44,8 @@ class AIODockerActions {
 
 		$deployConfig = [
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
-			'host' => null,
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
-			'ssl_key' => null,
-			'ssl_key_password' => null,
-			'ssl_cert' => null,
-			'ssl_cert_password' => null,
+			'haproxy_password' => null,
 			'gpu' => false,
 		];
 
@@ -84,17 +80,13 @@ class AIODockerActions {
 
 		$deployConfig = [
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
-			'host' => null,
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
-			'ssl_key' => null,
-			'ssl_key_password' => null,
-			'ssl_cert' => null,
-			'ssl_cert_password' => null,
+			'haproxy_password' => null,
 			'gpu' => true,
 		];
 
 		$daemonConfigParams = [
-			'name' => self::AIO_DAEMON_CONFIG_NAME,
+			'name' => self::AIO_DAEMON_CONFIG_NAME_GPU,
 			'display_name' => 'AIO Docker Socket Proxy with GPU',
 			'accepts_deploy_id' => 'docker-install',
 			'protocol' => 'http',

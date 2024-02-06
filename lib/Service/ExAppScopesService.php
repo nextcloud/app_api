@@ -85,15 +85,15 @@ class ExAppScopesService {
 		return $exAppScope instanceof ExAppScope;
 	}
 
-	public function removeExAppScopes(ExApp $exApp): bool {
+	public function removeExAppScopes(string $appId): bool {
 		try {
-			$result = $this->mapper->deleteByAppid($exApp->getAppid()) > 0;
+			$result = $this->mapper->deleteByAppid($appId) > 0;
 			if ($result) {
-				$this->cache->clear('/ex_app_scopes_' . $exApp->getAppid());
+				$this->cache->clear('/ex_app_scopes_' . $appId);
 			}
 			return $result;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to delete all ExApp %s scopes. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to delete all ExApp %s scopes. Error: %s', $appId, $e->getMessage()), ['exception' => $e]);
 			return false;
 		}
 	}

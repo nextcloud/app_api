@@ -13,22 +13,19 @@ Orchestrates the deployment of applications as Docker containers.
 
 .. warning::
 
-	The administrator is responsible for the security actions taken to configure the Docker daemon connected to Nextcloud.
-	For example, look at the Docker Socket Proxy protected by strict rules (`like in AIO <#nextcloud-in-docker-aio-all-in-one>`_)
+	The administrator is responsible for the security actions taken to configure the Docker daemon connected to the Nextcloud instance.
+
+	These schemes are only examples of possible configurations.
+
+	We recommend that you use the `AppAPI Docker Socket Proxy <https://github.com/cloud-py-api/docker-socket-proxy>`_ or `AIO Docker Socket Proxy <#nextcloud-in-docker-aio-all-in-one>`_ container.
 
 There are several Docker Daemon Deploy configurations (example schemes):
 
-	* Nextcloud and Docker on the **same host** (via socket or port)
-	* Nextcloud on the host and Docker on a **remote** host (via port)
-	* Nextcloud and **ExApps** in the **same Docker** (via socket or port)
-	* Nextcloud in AIO Docker and **ExApps** in the **same Docker** (via socket proxy)
+	* Nextcloud and Docker on the **same host** (via socket or DockerSocketProxy)
+	* Nextcloud on the host and Docker on a **remote** host (via DockerSocketProxy with HTTPS)
+	* Nextcloud and **ExApps** in the **same Docker** (via DockerSocketProxy)
+	* Nextcloud in AIO Docker and **ExApps** in the **same Docker** (via AIO DockerSocketProxy)
 
-In the case of remote access to the Daemon, make certain that it's configured with **ssl_key**, **ssl_cert**, and **ca.cert**, and that the latter is imported into Nextcloud.
-
-.. note::
-
-	These schemes are only examples of possible configurations.
-	We recommend that you use the Docker Socket Proxy container as the Deploy Daemon.
 
 NC & Docker on the Same-Host
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -63,7 +60,15 @@ The simplest configuration is when Nextcloud is installed on the host and Docker
 		class ExApp2 python
 		class ExApp3 python
 
-Suggested way to communicate with Docker: via ``docker-socket-proxy``.
+Suggested config values(template *Custom default*):
+	1. Daemon host: ``/var/run/docker.sock``
+	2. HTTPS checkbox: *not supported using docker socket*
+	3. Network: ``host``
+	4. HaProxy password: *not supported using docker socket*
+
+---
+
+Suggested way to communicate with Docker via `Docker Socket Proxy container <https://github.com/cloud-py-api/docker-socket-proxy>`_.
 
 .. mermaid::
 
@@ -92,8 +97,20 @@ Suggested way to communicate with Docker: via ``docker-socket-proxy``.
 		class ExApp2 python
 		class ExApp3 python
 
+Suggested config values(template *Docker Socket Proxy*):
+	1. Daemon host: ``localhost:2375``
+		Choose **A** or **B** option:
+			A. Docker Socket Proxy should be deployed with ``network=host`` and ``BIND_ADDRESS=127.0.0.1``
+			B. Docker Socket Proxy should be deployed with ``network=bridge`` and it's port should be published to host's 127.0.0.1(e.g. **-p 127.0.0.1:2375:2375**)
+	2. HTTPS checkbox: **disabled**
+	3. Network: ``host``
+	4. HaProxy password: **can be empty**
 
-`Docker Socket Proxy container <https://github.com/nextcloud/all-in-one/tree/main/Containers/docker-socket-proxy>`_ can be used for that.
+.. warning::
+
+	Be careful with option ``A``, by default **Docker Socket Proxy** binds to ``*`` if ``BIND_ADDRESS`` is not specified during container creation.
+	Check opened ports after finishing configuration(*or set HaProxy password*).
+
 
 Docker on a remote host
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -102,40 +119,7 @@ Distributed configuration occurs when Nextcloud is installed on one host and Doc
 
 Benefit: no performance impact on Nextcloud host.
 
-.. mermaid::
-
-	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/nextcloud.svg) no-repeat center center / contain
-		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
-
-		Direction LR
-
-			Host1 --> Host2 : by port
-
-		state Host1 {
-			Nextcloud
-		}
-
-		state Host2 {
-			Daemon --> Containers
-
-			state Containers {
-				ExApp1
-				--
-				ExApp2
-				--
-				ExApp3
-			}
-		}
-
-		class Nextcloud nextcloud
-		class Daemon docker
-		class ExApp1 python
-		class ExApp2 python
-		class ExApp3 python
-
-In this case, the AppAPI (Nextcloud) uses ``port`` to interact with remote Docker, which also could be a Docker Socket Proxy exposed with TLS.
+In this case, the AppAPI uses a Docker Socket Proxy deployed on remote host to access docker socket and ExApps.
 
 .. mermaid::
 
@@ -170,37 +154,16 @@ In this case, the AppAPI (Nextcloud) uses ``port`` to interact with remote Docke
 		class ExApp2 python
 		class ExApp3 python
 
+Suggested config values(template *Docker Socket Proxy*):
+	1. Daemon host: ADDRESS_OF_REMOTE_MACHINE (e.g. **server_name.com:2375**)
+	2. HTTPS checkbox: ``enabled``
+	3. Network: ``host``
+	4. HaProxy password: ``your chosen password``
+
 NC & ExApps in the same Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Applications are deployed in the same docker where Nextcloud resides.
-
-.. mermaid::
-
-	stateDiagram-v2
-		classDef docker fill: #1f97ee, color: transparent, font-size: 34px, stroke: #364c53, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/docker.png) no-repeat center center / contain
-		classDef nextcloud fill: #006aa3, color: transparent, font-size: 34px, stroke: #045987, stroke-width: 1px, background: url(https://raw.githubusercontent.com/cloud-py-api/app_api/main/docs/img/nextcloud.svg) no-repeat center center / contain
-		classDef python fill: #1e415f, color: white, stroke: #364c53, stroke-width: 1px
-
-		Host
-
-		state Host {
-			Daemon --> Containers
-
-			state Containers {
-				[*] --> Nextcloud : /var/run/docker.sock
-				--
-				ExApp1
-				--
-				ExApp2
-			}
-		}
-
-		class Nextcloud nextcloud
-		class Daemon docker
-		class ExApp1 python
-		class ExApp2 python
-		class ExApp3 python
 
 Suggested way to communicate with Docker: via ``docker-socket-proxy``.
 
@@ -230,6 +193,17 @@ Suggested way to communicate with Docker: via ``docker-socket-proxy``.
 		class ExApp1 python
 		class ExApp2 python
 		class ExApp3 python
+
+Suggested config values(template *Docker Socket Proxy*):
+	1. Daemon host: nextcloud-appapi-dsp:2375
+	2. HTTPS checkbox: ``disabled``
+	3. Network: `user defined network <https://docs.docker.com/network/#user-defined-networks>`_
+	4. HaProxy password: ``optional``
+
+.. note::
+	Network **should not be the default docker's bridge** as it does not support DNS resolving by container names.
+
+	This means that **Docker Socket Proxy**, **Nextcloud** and **ExApps** containers should all be in the same docker network, different from the default **bridge**.
 
 Nextcloud in Docker AIO (all-in-one)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -290,20 +264,93 @@ It has `fixed parameters <https://github.com/cloud-py-api/app_api/blob/main/lib/
 * Accepts Deploy ID: ``docker-install``
 * Protocol: ``http``
 * Host: ``nextcloud-aio-docker-socket-proxy:2375``
-* GPUs support: If enabled during AIO setup (``NEXTCLOUD_ENABLE_DRI_DEVICE=true``)
+* GPUs support: ``false``
 * Network: ``nextcloud-aio``
 * Nextcloud URL (passed to ExApps): ``https://$NC_DOMAIN``
+
+.. note::
+	If ``NEXTCLOUD_ENABLE_DRI_DEVICE=true`` is set - separate DaemonConfig (``docker_aio_gpu``) will be created with ``gpus=true``.
 
 Docker Socket Proxy security
 ****************************
 
 AIO Docker Socket Proxy has strictly limited access to the Docker APIs described in `HAProxy configuration <https://github.com/nextcloud/all-in-one/blob/main/Containers/docker-socket-proxy/haproxy.cfg>`_.
 
-Network configurations
-----------------------
 
-When GUI will support all command line options like: ``hostname``, ``ssl_key``... they will be described here.
+NC to ExApp Communication
+-------------------------
 
-If you want to run ExApp on the remote host, see :ref:`occ cli commands <occ_daemon_config_registration>` for it.
+Each type of DeployDaemon necessarily implements the ``resolveExAppUrl`` function.
 
-.. note:: AppAPI does not currently support automatic configuration for applications to use **https**, but we have plans for this in the future.
+It has such prototype:
+
+.. code-block:: php
+
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	) {}
+
+where:
+
+* **protocol** is daemon protocol value
+* **host** is daemon host value, *can be DNS:port or IP:PORT or even path to docker socket*.
+* **port** is an integer with ExApp port
+* **deployConfig** can be custom for each Daemon type
+* **auth** is an optional array, with *Basic Authentication* data if needed to access ExApp
+
+The simplest implementation is in **Manual-Install** deploy type:
+
+.. code-block:: php
+
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	): string {
+		$auth = [];
+		return sprintf('%s://%s:%s', $protocol, $host, $port);
+	}
+
+Here we see that AppAPI always send requests to **host**:**port** specified during daemon creation.
+
+Now let's take a look at the Docker Daemon implementation of ``resolveExAppUrl``:
+
+.. code-block:: php
+
+	public function resolveExAppUrl(
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+	): string {
+		$host = explode(':', $host)[0];
+		if ($protocol == 'https') {
+			$exAppHost = $host;
+		} elseif (isset($deployConfig['net']) && $deployConfig['net'] === 'host') {
+			$exAppHost = 'localhost';
+		} else {
+			$exAppHost = $appId;
+		}
+		if (empty($deployConfig['haproxy_password'])) {
+			$auth = [];
+		} else {
+			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
+		}
+		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);
+	}
+
+Here we have much more complex algorithm of detecting to where requests should be send.
+
+First of all if protocol is set to ``https`` AppAPI always send requests to daemon host,
+and this is in case of ``https`` it is a HaProxy that will forward requests to ExApps that will be listen on ``localhost``
+
+Briefly it will look like this(*haproxy_host==daemon host value*):
+
+NC --> *https* --> ``haproxy_host:ex_app_port`` --> *http* --> ``localhost:ex_app_port``
+
+When protocol is not ``https`` but ``http``, then what will be the endpoint where to send requests is determined by ``$deployConfig['net']`` value.
+
+If ``net`` is defined and equal to ``host`` then AppAPI assumes that ExApp is installed somewhere in the current host network and will be available on ``localhost`` loop-back adapter.
+
+NC --> *http* --> ``localhost:ex_app_port``
+
+In all other cases ExApp should be available by it's name: e.g. when using docker **custom bridge** network all containers available by DNS.
+
+NC --> *http* --> ``app_container_name:ex_app_port``
+
+This three different types of communication covers all most popular configurations.
