@@ -12,29 +12,38 @@ use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Middleware;
 use OCP\INavigationManager;
 use OCP\IRequest;
+use OCP\IURLGenerator;
+use OCP\L10N\IFactory;
 
 class ExAppUiMiddleware extends Middleware {
 
 	public function __construct(
-		protected IRequest      $request,
-		private INavigationManager $navigationManager,
+		protected IRequest                  $request,
+		private readonly INavigationManager $navigationManager,
+		private readonly IFactory           $l10nFactory,
+		private readonly IURLGenerator      $urlGenerator,
 	) {
 	}
 
 	public function beforeOutput(Controller $controller, string $methodName, string $output) {
 		if (($controller instanceof TopMenuController) && ($controller->postprocess)) {
-			$correctedOutput = preg_replace(
+			$output = preg_replace(
 				'/(href=")(\/.*?)(\/app_api\/css\/)(proxy\/.*css.*")/',
 				'$1/index.php/apps/app_api/$4',
 				$output);
 			foreach ($controller->jsProxyMap as $key => $value) {
-				$correctedOutput = preg_replace(
+				$output = preg_replace(
 					'/(src=")(\/.*?)(\/app_api\/js\/)(proxy_js\/' . $key . '.js)(.*")/',
 					'$1/index.php/apps/app_api/proxy/' . $value . '.js$5',
-					$correctedOutput,
+					$output,
 					limit: 1);
 			}
-			return $correctedOutput;
+			// Attach current locale ExApp l10n
+			$appId = $this->request->getParam('appId');
+			$lang = $this->l10nFactory->findLanguage($appId);
+			$headPos = stripos($output, '</head>');
+			$l10nScriptSrc = $this->urlGenerator->linkToRoute('app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => 'js/' . $lang . '.js']);
+			$output = substr_replace($output, '<script nonce="" defer="" src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
 		}
 		return $output;
 	}
