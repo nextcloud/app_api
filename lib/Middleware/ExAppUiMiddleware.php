@@ -42,7 +42,7 @@ class ExAppUiMiddleware extends Middleware {
 			$appId = $this->request->getParam('appId');
 			$lang = $this->l10nFactory->findLanguage($appId);
 			$headPos = stripos($output, '</head>');
-			$l10nScriptSrc = $this->urlGenerator->linkToRoute('app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => 'js/' . $lang . '.js']);
+			$l10nScriptSrc = $this->urlGenerator->linkToRoute('app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => 'l10n/' . $lang . '.js']);
 			$output = substr_replace($output, '<script nonce="" defer="" src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
 		}
 		return $output;
