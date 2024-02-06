@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Middleware;
 
+use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Controller\TopMenuController;
 
+use OCA\AppAPI\Controller\TopMenuController;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Middleware;
@@ -22,6 +23,7 @@ class ExAppUiMiddleware extends Middleware {
 		private readonly INavigationManager $navigationManager,
 		private readonly IFactory           $l10nFactory,
 		private readonly IURLGenerator      $urlGenerator,
+		private readonly ContentSecurityPolicyNonceManager $nonceManager,
 	) {
 	}
 
@@ -43,7 +45,8 @@ class ExAppUiMiddleware extends Middleware {
 			$lang = $this->l10nFactory->findLanguage($appId);
 			$headPos = stripos($output, '</head>');
 			$l10nScriptSrc = $this->urlGenerator->linkToRoute('app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => 'l10n/' . $lang . '.js']);
-			$output = substr_replace($output, '<script nonce="" defer="" src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
+			$nonce = $this->nonceManager->getNonce();
+			$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
 		}
 		return $output;
 	}
