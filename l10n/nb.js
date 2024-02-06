@@ -2,6 +2,7 @@ OC.L10N.register(
     "app_api",
     {
     "Update to {version}" : "Oppdater til {version}",
+    "Remove" : "Fjern",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Denne appen har ingen minimumversjon av Nextcloud definert. Dette vil være en feil i fremtiden.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Denne appen har ingen høyeste versjon av Nextcloud definert. Dette vil være en feil i fremtiden.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Denne appen kan ikke installeres fordi følgende avhengigheter ikke er tilfredsstilt:",
