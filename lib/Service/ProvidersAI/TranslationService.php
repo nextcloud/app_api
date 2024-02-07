@@ -198,7 +198,7 @@ class TranslationService {
 				return $availableLanguages;
 			}
 
-			public function translate(?string $fromLanguage, string $toLanguage, string $text): string {
+			public function translate(?string $fromLanguage, string $toLanguage, string $text, float $maxExecutionTime = 0): string {
 				/** @var AppAPICommonService $service */
 				$service = $this->serverContainer->get(AppAPICommonService::class);
 				/** @var TranslationQueueMapper $mapper */
@@ -214,6 +214,11 @@ class TranslationService {
 						'from_language' => $fromLanguage,
 						'to_language' => $toLanguage,
 						'text' => $text,
+						'task_id' => $taskId,
+						'max_execution_time' => $maxExecutionTime,
+					],
+					options: [
+						'timeout' => $maxExecutionTime,
 					],
 				);
 
