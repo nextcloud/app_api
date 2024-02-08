@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [2.x.x - 2024-02-xx]
+## [2.0.4 - 2024-02-08]
 
 ### Changed
 
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - OCS API `log` always fail during ExApp `init` state. #224
+- AI providers: undefined method call to ExApp. #226
 
 ## [2.0.3 - 2024-02-01]
 
