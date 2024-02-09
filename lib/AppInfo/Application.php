@@ -13,6 +13,7 @@ use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Listener\UserDeletedListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
+use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
 use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
@@ -63,6 +64,7 @@ class Application extends App implements IBootstrap {
 		$context->registerCapability(PublicCapabilities::class);
 		$context->registerMiddleware(AppAPIAuthMiddleware::class);
 		$context->registerMiddleware(ExAppUiMiddleware::class);
+		$context->registerMiddleware(ExAppUIL10NMiddleware::class, true);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 		$context->registerEventListener(UserDeletedEvent::class, UserDeletedListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);

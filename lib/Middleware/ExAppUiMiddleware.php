@@ -8,12 +8,12 @@ use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
 
 use OCA\AppAPI\Controller\TopMenuController;
+use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Middleware;
 use OCP\INavigationManager;
 use OCP\IRequest;
-use OCP\IURLGenerator;
 use OCP\L10N\IFactory;
 
 class ExAppUiMiddleware extends Middleware {
@@ -22,8 +22,8 @@ class ExAppUiMiddleware extends Middleware {
 		protected IRequest                  $request,
 		private readonly INavigationManager $navigationManager,
 		private readonly IFactory           $l10nFactory,
-		private readonly IURLGenerator      $urlGenerator,
 		private readonly ContentSecurityPolicyNonceManager $nonceManager,
+		private readonly IAppManager        $appManager,
 	) {
 	}
 
@@ -43,10 +43,13 @@ class ExAppUiMiddleware extends Middleware {
 			// Attach current locale ExApp l10n
 			$appId = $this->request->getParam('appId');
 			$lang = $this->l10nFactory->findLanguage($appId);
-			$headPos = stripos($output, '</head>');
-			$l10nScriptSrc = $this->urlGenerator->linkToRoute('app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => 'l10n/' . $lang . '.js']);
-			$nonce = $this->nonceManager->getNonce();
-			$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
+			$availableLocales = $this->l10nFactory->findAvailableLanguages($appId);
+			if (in_array($lang, $availableLocales) && $lang !== 'en') {
+				$headPos = stripos($output, '</head>');
+				$l10nScriptSrc = $this->appManager->getAppWebPath($appId) . '/l10n/' . $lang . '.js';
+				$nonce = $this->nonceManager->getNonce();
+				$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
+			}
 		}
 		return $output;
 	}
