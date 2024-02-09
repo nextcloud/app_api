@@ -9,4 +9,5 @@ Technical details
    ApiScopes
    Deployment
    Authentication
+   Translations
    api/index.rst
