@@ -70,27 +70,27 @@ dock2port:
 	@echo "deploying Docker-Socket-Proxy.."
 	docker run -e NC_HAPROXY_PASSWORD="some_secure_password" \
       -v /var/run/docker.sock:/var/run/docker.sock \
-      --name aa-docker-socket-proxy -h aa-docker-socket-proxy \
+      --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
       --net=master_default \
-      --restart unless-stopped --privileged -d ghcr.io/cloud-py-api/aa-docker-socket-proxy:latest
+      --restart unless-stopped --privileged -d ghcr.io/cloud-py-api/nextcloud-appapi-dsp:latest
 
 .PHONY: dock-port27
 dock-port27:
 	@echo "creating daemon for nextcloud '27' container"
 	docker exec master-stable27-1 sudo -u www-data php occ app_api:daemon:register \
-        docker_dev Docker docker-install http aa-docker-socket-proxy:2375 http://stable27.local/index.php \
+        docker_dev Docker docker-install http nextcloud-appapi-dsp:2375 http://stable27.local/index.php \
         --net=master_default --haproxy_password="some_secure_password"
 
 .PHONY: dock-port28
 dock-port28:
 	@echo "creating daemon for nextcloud '27' container"
 	docker exec master-stable28-1 sudo -u www-data php occ app_api:daemon:register \
-        docker_dev Docker docker-install http aa-docker-socket-proxy:2375 http://stable28.local/index.php \
+        docker_dev Docker docker-install http nextcloud-appapi-dsp:2375 http://stable28.local/index.php \
         --net=master_default --haproxy_password="some_secure_password"
 
 .PHONY: dock-port
 dock-port:
 	@echo "creating daemon for nextcloud 'master' container"
 	docker exec master-nextcloud-1 sudo -u www-data php occ app_api:daemon:register \
-    	docker_dev Docker docker-install http aa-docker-socket-proxy:2375 http://nextcloud.local/index.php \
+    	docker_dev Docker docker-install http nextcloud-appapi-dsp:2375 http://nextcloud.local/index.php \
     	--net=master_default --haproxy_password="some_secure_password"
