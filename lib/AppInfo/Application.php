@@ -6,7 +6,6 @@ namespace OCA\AppAPI\AppInfo;
 
 use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
-use OCA\AppAPI\DeclarativeSettings\DeclarativeSettingsForm;
 use OCA\AppAPI\Listener\DeclarativeSettings\GetValueListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\RegisterDeclarativeSettingsListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
@@ -70,7 +69,6 @@ class Application extends App implements IBootstrap {
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 
 		// Declarative settings using registrationContext
-		//$context->registerDeclarativeSettings(DeclarativeSettingsForm::class);
 		$context->registerEventListener(RegisterDeclarativeSettingsFormEvent::class, RegisterDeclarativeSettingsListener::class);
 		$context->registerEventListener(GetDeclarativeSettingsValueEvent::class, GetValueListener::class);
 		$context->registerEventListener(SetDeclarativeSettingsValueEvent::class, SetValueListener::class);

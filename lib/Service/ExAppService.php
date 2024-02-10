@@ -51,6 +51,7 @@ class ExAppService {
 		private readonly TextProcessingService   $textProcessingService,
 		private readonly TranslationService      $translationService,
 		private readonly TalkBotsService         $talkBotsService,
+		private readonly ExAppSettingsService	 $settingsService,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 	}
@@ -122,6 +123,7 @@ class ExAppService {
 			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
 			$this->translationService->unregisterExAppTranslationProviders($appId);
+			$this->settingsService->unregisterExAppForms($appId);
 			if ($this->exAppMapper->deleteExApp($appId) === 1) {
 				$this->cache->remove('/exApp_' . $appId);
 				return true;
@@ -310,5 +312,6 @@ class ExAppService {
 		$this->textProcessingService->resetCacheEnabled();
 		$this->speechToTextService->resetCacheEnabled();
 		$this->translationService->resetCacheEnabled();
+		$this->settingsService->resetCacheEnabled();
 	}
 }

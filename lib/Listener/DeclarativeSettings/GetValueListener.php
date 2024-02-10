@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Listener\DeclarativeSettings;
 
-use Exception;
-use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\DeclarativeSettings\DeclarativeSettingsForm;
+use OCA\AppAPI\Service\ExAppConfigService;
+use OCA\AppAPI\Service\ExAppPreferenceService;
+use OCA\AppAPI\Service\ExAppSettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\IConfig;
+use OCP\Settings\DeclarativeSettingsTypes;
 use OCP\Settings\GetDeclarativeSettingsValueEvent;
 
 /**
@@ -17,8 +17,9 @@ use OCP\Settings\GetDeclarativeSettingsValueEvent;
  */
 class GetValueListener implements IEventListener {
 	public function __construct(
-		private readonly IConfig $config,
-		private DeclarativeSettingsForm $form,
+		private readonly ExAppSettingsService 	 $service,
+		private readonly ExAppPreferenceService  $preferenceService,
+		private readonly ExAppConfigService      $configService,
 	) {
 	}
 
@@ -27,25 +28,39 @@ class GetValueListener implements IEventListener {
 			return;
 		}
 
-		// TODO: Get list of ExApps that have registered declarative settings
-		if ($event->getApp() !== Application::APP_ID && $event->getApp() !== Application::APP_ID . '_dup') {
+		$settingsForm = $this->service->getForm($event->getApp(), $event->getFormId());
+		if ($settingsForm === null) {
 			return;
 		}
-
-		try {
-			foreach ($this->form->getSchema()['fields'] as $field) {
-				if (isset($field['default']) && $field['id'] === $event->getFieldId()
-					|| isset($field['default']) && $field['id'] . '_dup' === $event->getFieldId()) {
-					if (is_array($field['default']) || is_numeric($field['default'])) {
-						$default = json_encode($field['default']);
-					} else {
-						$default = $field['default'];
-					}
-				}
+		$formSchema = $settingsForm->getScheme();
+		if ($formSchema['section_type'] === DeclarativeSettingsTypes::SECTION_TYPE_ADMIN) {
+			$existingValue = $this->configService->getAppConfig($event->getApp(), $event->getFieldId());
+			if (!empty($existingValue)) {
+				$event->setValue($existingValue->getConfigvalue());
+				return;
 			}
-			$value = $this->config->getUserValue($event->getUser()->getUID(), $event->getApp(), $event->getFieldId(), $default ?? null);
-			$event->setValue($value);
-		} catch (Exception) {
+		} else {
+			$existingValue = $this->preferenceService->getUserConfigValues(
+				$event->getUser()->getUID(),
+				$event->getApp(),
+				[$event->getFieldId()],
+			);
+			if (!empty($existingValue)) {
+				$event->setValue($existingValue[0]['configvalue']);
+				return;
+			}
+		}
+
+		foreach ($formSchema['fields'] as $field) {
+			if (isset($field['default']) && $field['id'] === $event->getFieldId()) {
+				if (is_array($field['default']) || is_numeric($field['default'])) {
+					$default = json_encode($field['default']);
+				} else {
+					$default = $field['default'];
+				}
+				$event->setValue($default);
+				return;
+			}
 		}
 	}
 }

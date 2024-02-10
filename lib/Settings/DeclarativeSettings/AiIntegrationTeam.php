@@ -9,7 +9,7 @@ use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
 
-class DeclarativeSettingsSection implements IIconSection {
+class AiIntegrationTeam implements IIconSection {
 
 	public function __construct(
 		private IURLGenerator $urlGenerator,
@@ -21,21 +21,21 @@ class DeclarativeSettingsSection implements IIconSection {
 	 * @inheritDoc
 	 */
 	public function getID(): string {
-		return 'ex_apps_section';
+		return 'ai_integration_team';
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function getName(): string {
-		return $this->l->t('ExApps declarative');
+		return $this->l->t('AI Integration Team');
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function getPriority(): int {
-		return 1;
+		return 30;
 	}
 
 	/**
@@ -44,5 +44,4 @@ class DeclarativeSettingsSection implements IIconSection {
 	public function getIcon(): ?string {
 		return $this->urlGenerator->imagePath(Application::APP_ID, 'app-dark.svg');
 	}
-
 }

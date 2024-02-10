@@ -104,6 +104,11 @@ return [
 		['name' => 'OCSUi#deleteExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'GET'],
 
+		//Declarative settings
+		['name' => 'OCSSettings#registerForm', 'url' => '/api/v1/ui/declarative_settings', 'verb' => 'POST'],
+		['name' => 'OCSSettings#unregisterForm', 'url' => '/api/v1/ui/declarative_settings', 'verb' => 'DELETE'],
+		['name' => 'OCSSettings#getForm', 'url' => '/api/v1/ui/declarative_settings', 'verb' => 'GET'],
+
 		// Speech-To-Text
 		['name' => 'speechToText#registerProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'POST'],
 		['name' => 'speechToText#unregisterProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'DELETE'],
