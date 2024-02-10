@@ -101,4 +101,19 @@
       <code>Request</code>
     </UndefinedClass>
   </file>
+  <file src="lib/Listener/DeclarativeSettings/GetValueListener.php">
+    <UndefinedClass>
+      <code>GetDeclarativeSettingsValueEvent</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Listener/DeclarativeSettings/RegisterDeclarativeSettingsListener.php">
+    <UndefinedClass>
+      <code>RegisterDeclarativeSettingsFormEvent</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Listener/DeclarativeSettings/SetValueListener.php">
+    <UndefinedClass>
+      <code>SetDeclarativeSettingsValueEvent</code>
+    </UndefinedClass>
+  </file>
 </files>

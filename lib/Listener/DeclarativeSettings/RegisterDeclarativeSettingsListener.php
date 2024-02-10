@@ -10,7 +10,7 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\Settings\RegisterDeclarativeSettingsFormEvent;
 
 /**
- * @template-implements IEventListener<RegisterDeclarativeSettingsFormEvent>
+ * @template-implements IEventListener<Event>
  */
 class RegisterDeclarativeSettingsListener implements IEventListener {
 	public function __construct(

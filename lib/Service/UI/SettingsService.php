@@ -12,7 +12,6 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\Settings\DeclarativeSettingsTypes;
 use Psr\Log\LoggerInterface;
 
 class SettingsService {
@@ -31,7 +30,7 @@ class SettingsService {
 		array $formScheme,
 	): ?SettingsForm {
 		$formId = $formScheme['id'];
-		$formScheme['storage_type'] = DeclarativeSettingsTypes::STORAGE_TYPE_EXTERNAL;
+		$formScheme['storage_type'] = 'external';  // DeclarativeSettingsTypes::STORAGE_TYPE_EXTERNAL;
 		try {
 			$settingsForm = $this->mapper->findByAppidFormId($appId, $formId);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {

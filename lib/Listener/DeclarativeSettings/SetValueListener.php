@@ -13,7 +13,7 @@ use OCP\Settings\DeclarativeSettingsTypes;
 use OCP\Settings\SetDeclarativeSettingsValueEvent;
 
 /**
- * @template-implements IEventListener<SetDeclarativeSettingsValueEvent>
+ * @template-implements IEventListener<Event>
  */
 class SetValueListener implements IEventListener {
 	public function __construct(
