@@ -16,6 +16,7 @@ AppAPI Nextcloud APIs
 	utils
 	fileactionsmenu
 	topmenu
+	settings
 	notifications
 	talkbots
 	speechtotext
