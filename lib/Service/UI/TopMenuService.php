@@ -91,7 +91,6 @@ class TopMenuService {
 				$newMenuEntry->setId($menuEntry->getId());
 			}
 			$menuEntry = $this->mapper->insertOrUpdate($newMenuEntry);
-			$this->cache->set('/ex_top_menu_' . $appId . '_' . $name, $menuEntry);
 			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
@@ -107,7 +106,6 @@ class TopMenuService {
 		if (!$result) {
 			return false;
 		}
-		$this->cache->remove('/ex_top_menu_' . $appId . '_' . $name);
 		$this->resetCacheEnabled();
 		$this->initialStateService->deleteExAppInitialStatesByTypeName($appId, 'top_menu', $name);
 		$this->scriptsService->deleteExAppScriptsByTypeName($appId, 'top_menu', $name);
@@ -121,25 +119,21 @@ class TopMenuService {
 		} catch (Exception) {
 			$result = -1;
 		}
-		$this->cache->clear('/ex_top_menu_' . $appId);
 		$this->resetCacheEnabled();
 		return $result;
 	}
 
 	public function getExAppMenuEntry(string $appId, string $name): ?TopMenu {
-		$cacheKey = '/ex_top_menu_' . $appId . '_' . $name;
-		$cache = $this->cache->get($cacheKey);
-		if ($cache !== null) {
-			return $cache instanceof TopMenu ? $cache : new TopMenu($cache);
+		foreach ($this->getExAppMenuEntries() as $menuEntry) {
+			if (($menuEntry->getAppid() === $appId) && ($menuEntry->getName() === $name)) {
+				return $menuEntry;
+			}
 		}
-
 		try {
-			$menuEntry = $this->mapper->findByAppIdName($appId, $name);
+			return $this->mapper->findByAppIdName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
-		$this->cache->set($cacheKey, $menuEntry);
-		return $menuEntry;
 	}
 
 	/**
