@@ -59,7 +59,6 @@ class TranslationService {
 				$newTranslationProvider->setId($translationProvider->getId());
 			}
 			$translationProvider = $this->mapper->insertOrUpdate($newTranslationProvider);
-			$this->cache->set('/ex_translation_providers_' . $appId . '_' . $name, $translationProvider);
 			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
@@ -72,18 +71,16 @@ class TranslationService {
 
 	public function unregisterTranslationProvider(string $appId, string $name): ?TranslationProvider {
 		try {
-			$TranslationProvider = $this->getExAppTranslationProvider($appId, $name);
-			if ($TranslationProvider === null) {
-				return null;
+			$translationProvider = $this->getExAppTranslationProvider($appId, $name);
+			if ($translationProvider !== null) {
+				$this->mapper->delete($translationProvider);
+				$this->resetCacheEnabled();
+				return $translationProvider;
 			}
-			$this->mapper->delete($TranslationProvider);
-			$this->cache->remove('/ex_translation_providers_' . $appId . '_' . $name);
-			$this->resetCacheEnabled();
-			return $TranslationProvider;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s TranslationProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -108,19 +105,16 @@ class TranslationService {
 	}
 
 	public function getExAppTranslationProvider(string $appId, string $name): ?TranslationProvider {
-		$cacheKey = '/ex_translation_providers_' . $appId . '_' . $name;
-		$cache = $this->cache->get($cacheKey);
-		if ($cache !== null) {
-			return $cache instanceof TranslationProvider ? $cache : new TranslationProvider($cache);
+		foreach ($this->getRegisteredTranslationProviders() as $provider) {
+			if (($provider->getAppid() === $appId) && ($provider->getName() === $name)) {
+				return $provider;
+			}
 		}
-
 		try {
-			$TranslationProvider = $this->mapper->findByAppIdName($appId, $name);
+			return $this->mapper->findByAppIdName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
-		$this->cache->set($cacheKey, $TranslationProvider);
-		return $TranslationProvider;
 	}
 
 	public function unregisterExAppTranslationProviders(string $appId): int {
@@ -129,7 +123,6 @@ class TranslationService {
 		} catch (Exception) {
 			$result = -1;
 		}
-		$this->cache->clear('/ex_translation_providers_' . $appId);
 		$this->resetCacheEnabled();
 		return $result;
 	}
