@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Db;
+namespace OCA\AppAPI\Db\UI;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -12,9 +12,9 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
- * @template-extends QBMapper<ExAppSettingsForm>
+ * @template-extends QBMapper<SettingsForm>
  */
-class ExAppSettingsFormMapper extends QBMapper {
+class SettingsFormMapper extends QBMapper {
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, 'ex_settings_forms');
 	}
@@ -24,11 +24,7 @@ class ExAppSettingsFormMapper extends QBMapper {
 	 */
 	public function findAllEnabled(): array {
 		$qb = $this->db->getQueryBuilder();
-		$result = $qb->select(
-			'exs.appid',
-			'exs.formid',
-			'exs.scheme',
-		)
+		$result = $qb->select('exs.*')
 			->from($this->tableName, 'exs')
 			->innerJoin('exs', 'ex_apps', 'exa', 'exa.appid = exs.appid')
 			->where(
@@ -47,7 +43,7 @@ class ExAppSettingsFormMapper extends QBMapper {
 	 *
 	 * @throws DoesNotExistException
 	 */
-	public function findByAppidFormId(string $appId, string $formId): ExAppSettingsForm {
+	public function findByAppidFormId(string $appId, string $formId): SettingsForm {
 		$qb = $this->db->getQueryBuilder();
 		return $this->findEntity($qb->select('*')
 			->from($this->tableName)

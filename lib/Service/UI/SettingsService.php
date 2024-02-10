@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Service;
+namespace OCA\AppAPI\Service\UI;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\ExAppSettingsForm;
-use OCA\AppAPI\Db\ExAppSettingsFormMapper;
+use OCA\AppAPI\Db\UI\SettingsForm;
+use OCA\AppAPI\Db\UI\SettingsFormMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
@@ -15,13 +15,13 @@ use OCP\ICacheFactory;
 use OCP\Settings\DeclarativeSettingsTypes;
 use Psr\Log\LoggerInterface;
 
-class ExAppSettingsService {
+class SettingsService {
 	private ICache $cache;
 
 	public function __construct(
-		ICacheFactory                            $cacheFactory,
-		private readonly ExAppSettingsFormMapper $mapper,
-		private readonly LoggerInterface         $logger,
+		ICacheFactory                       $cacheFactory,
+		private readonly SettingsFormMapper $mapper,
+		private readonly LoggerInterface    $logger,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_settings_forms');
 	}
@@ -29,7 +29,7 @@ class ExAppSettingsService {
 	public function registerForm(
 		string $appId,
 		array $formScheme,
-	): ?ExAppSettingsForm {
+	): ?SettingsForm {
 		$formId = $formScheme['id'];
 		$formScheme['storage_type'] = DeclarativeSettingsTypes::STORAGE_TYPE_EXTERNAL;
 		try {
@@ -38,7 +38,7 @@ class ExAppSettingsService {
 			$settingsForm = null;
 		}
 		try {
-			$newSettingsForm = new ExAppSettingsForm([
+			$newSettingsForm = new SettingsForm([
 				'appid' => $appId,
 				'formid' => $formId,
 				'scheme' => $formScheme,
@@ -57,7 +57,7 @@ class ExAppSettingsService {
 		return $settingsForm;
 	}
 
-	public function unregisterForm(string $appId, string $formId): ?ExAppSettingsForm {
+	public function unregisterForm(string $appId, string $formId): ?SettingsForm {
 		try {
 			$settingsForm = $this->getForm($appId, $formId);
 			if ($settingsForm === null) {
@@ -75,7 +75,7 @@ class ExAppSettingsService {
 	/**
 	 * Get list of registered Settings Forms (only for enabled ExApps)
 	 *
-	 * @return ExAppSettingsForm[]
+	 * @return SettingsForm[]
 	 */
 	public function getRegisteredForms(): array {
 		try {
@@ -86,14 +86,14 @@ class ExAppSettingsService {
 				$this->cache->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
-				return new ExAppSettingsForm($record);
+				return new SettingsForm($record);
 			}, $records);
 		} catch (Exception) {
 			return [];
 		}
 	}
 
-	public function getForm(string $appId, string $formId): ?ExAppSettingsForm {
+	public function getForm(string $appId, string $formId): ?SettingsForm {
 		foreach ($this->getRegisteredForms() as $form) {
 			if (($form->getAppid() === $appId) && ($form->getFormid() === $formId)) {
 				return $form;

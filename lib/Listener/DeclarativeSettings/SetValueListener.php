@@ -6,7 +6,7 @@ namespace OCA\AppAPI\Listener\DeclarativeSettings;
 
 use OCA\AppAPI\Service\ExAppConfigService;
 use OCA\AppAPI\Service\ExAppPreferenceService;
-use OCA\AppAPI\Service\ExAppSettingsService;
+use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Settings\DeclarativeSettingsTypes;
@@ -17,9 +17,9 @@ use OCP\Settings\SetDeclarativeSettingsValueEvent;
  */
 class SetValueListener implements IEventListener {
 	public function __construct(
-		private readonly ExAppSettingsService 	 $service,
-		private readonly ExAppPreferenceService  $preferenceService,
-		private readonly ExAppConfigService      $configService,
+		private readonly SettingsService        $service,
+		private readonly ExAppPreferenceService $preferenceService,
+		private readonly ExAppConfigService     $configService,
 	) {
 	}
 

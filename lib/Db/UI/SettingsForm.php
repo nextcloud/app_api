@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AppAPI\Db;
+namespace OCA\AppAPI\Db\UI;
 
 use OCP\AppFramework\Db\Entity;
 
@@ -18,7 +18,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setFormid(string $appid)
  * @method void setScheme(array $scheme)
  */
-class ExAppSettingsForm extends Entity implements \JsonSerializable {
+class SettingsForm extends Entity implements \JsonSerializable {
 	protected $appid;
 	protected $formid;
 	protected $scheme;

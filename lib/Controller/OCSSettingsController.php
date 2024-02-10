@@ -6,8 +6,7 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
-
-use OCA\AppAPI\Service\ExAppSettingsService;
+use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
@@ -20,9 +19,9 @@ class OCSSettingsController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest $request,
-		private readonly ExAppSettingsService $settingsService,
-		private readonly IConfig              $config,
+		IRequest                         $request,
+		private readonly SettingsService $settingsService,
+		private readonly IConfig         $config,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -74,6 +73,6 @@ class OCSSettingsController extends OCSController {
 		if (!$result) {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
-		return new DataResponse($result, Http::STATUS_OK);
+		return new DataResponse($result->getScheme(), Http::STATUS_OK);
 	}
 }

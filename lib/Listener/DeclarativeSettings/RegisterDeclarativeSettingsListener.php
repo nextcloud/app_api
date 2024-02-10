@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Listener\DeclarativeSettings;
 
-use OCA\AppAPI\Service\ExAppSettingsService;
+use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Settings\RegisterDeclarativeSettingsFormEvent;
@@ -14,7 +14,7 @@ use OCP\Settings\RegisterDeclarativeSettingsFormEvent;
  */
 class RegisterDeclarativeSettingsListener implements IEventListener {
 	public function __construct(
-		private readonly ExAppSettingsService $service,
+		private readonly SettingsService $service,
 	) {
 	}
 
