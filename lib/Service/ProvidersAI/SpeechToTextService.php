@@ -9,7 +9,7 @@ use OCA\AppAPI\Db\SpeechToText\SpeechToTextProvider;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderMapper;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueue;
 use OCA\AppAPI\Db\SpeechToText\SpeechToTextProviderQueueMapper;
-use OCA\AppAPI\Service\AppAPICommonService;
+use OCA\AppAPI\PublicFunctions;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -169,8 +169,8 @@ class SpeechToTextService {
 			}
 
 			public function transcribeFile(File $file, float $maxExecutionTime = 0): string {
-				/** @var AppAPICommonService $service */
-				$service = $this->serverContainer->get(AppAPICommonService::class);
+				/** @var PublicFunctions $service */
+				$service = $this->serverContainer->get(PublicFunctions::class);
 				$mapper = $this->serverContainer->get(SpeechToTextProviderQueueMapper::class);
 				$route = $this->provider->getActionHandler();
 				$queueRecord = $mapper->insert(new SpeechToTextProviderQueue(['created_time' => time()]));
@@ -181,7 +181,7 @@ class SpeechToTextService {
 				} catch (Exception $e) {
 					throw new \Exception(sprintf('Failed to open file: %s. Error: %s', $file->getName(), $e->getMessage()));
 				}
-				$response = $service->requestToExAppById($this->provider->getAppid(),
+				$response = $service->exAppRequestWithUserInit($this->provider->getAppid(),
 					$route,
 					$this->userId,
 					options: [

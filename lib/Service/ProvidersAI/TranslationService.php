@@ -9,7 +9,7 @@ use OCA\AppAPI\Db\Translation\TranslationProvider;
 use OCA\AppAPI\Db\Translation\TranslationProviderMapper;
 use OCA\AppAPI\Db\Translation\TranslationQueue;
 use OCA\AppAPI\Db\Translation\TranslationQueueMapper;
-use OCA\AppAPI\Service\AppAPICommonService;
+use OCA\AppAPI\PublicFunctions;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -198,22 +198,27 @@ class TranslationService {
 				return $availableLanguages;
 			}
 
-			public function translate(?string $fromLanguage, string $toLanguage, string $text): string {
-				/** @var AppAPICommonService $service */
-				$service = $this->serverContainer->get(AppAPICommonService::class);
+			public function translate(?string $fromLanguage, string $toLanguage, string $text, float $maxExecutionTime = 0): string {
+				/** @var PublicFunctions $service */
+				$service = $this->serverContainer->get(PublicFunctions::class);
 				/** @var TranslationQueueMapper $mapper */
 				$mapper = $this->serverContainer->get(TranslationQueueMapper::class);
 				$route = $this->provider->getActionHandler();
 				$queueRecord = $mapper->insert(new TranslationQueue(['created_time' => time()]));
 				$taskId = $queueRecord->getId();
 
-				$response = $service->requestToExAppById($this->provider->getAppid(),
+				$response = $service->exAppRequestWithUserInit($this->provider->getAppid(),
 					$route,
 					$this->userId,
 					params: [
 						'from_language' => $fromLanguage,
 						'to_language' => $toLanguage,
 						'text' => $text,
+						'task_id' => $taskId,
+						'max_execution_time' => $maxExecutionTime,
+					],
+					options: [
+						'timeout' => $maxExecutionTime,
 					],
 				);
 
