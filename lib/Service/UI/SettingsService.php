@@ -59,16 +59,15 @@ class SettingsService {
 	public function unregisterForm(string $appId, string $formId): ?SettingsForm {
 		try {
 			$settingsForm = $this->getForm($appId, $formId);
-			if ($settingsForm === null) {
-				return null;
+			if ($settingsForm !== null) {
+				$this->mapper->delete($settingsForm);
+				$this->resetCacheEnabled();
+				return $settingsForm;
 			}
-			$this->mapper->delete($settingsForm);
-			$this->resetCacheEnabled();
-			return $settingsForm;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s Settings Form %s. Error: %s', $appId, $formId, $e->getMessage()), ['exception' => $e]);
-			return null;
 		}
+		return null;
 	}
 
 	/**
