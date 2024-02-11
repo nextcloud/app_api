@@ -24,15 +24,9 @@ class TopMenuMapper extends QBMapper {
 	 */
 	public function findAllEnabled(): array {
 		$qb = $this->db->getQueryBuilder();
-		$result = $qb->select(
-			'menu_entries.appid',
-			'menu_entries.name',
-			'menu_entries.display_name',
-			'menu_entries.icon',
-			'menu_entries.admin_required',
-		)
-			->from($this->tableName, 'menu_entries')
-			->innerJoin('menu_entries', 'ex_apps', 'exa', 'exa.appid = menu_entries.appid')
+		$result = $qb->select('exs.*')
+			->from($this->tableName, 'exs')
+			->innerJoin('exs', 'ex_apps', 'exa', 'exa.appid = exs.appid')
 			->where(
 				$qb->expr()->eq('exa.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT))
 			)

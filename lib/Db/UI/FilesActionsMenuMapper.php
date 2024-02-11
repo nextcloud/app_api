@@ -24,18 +24,9 @@ class FilesActionsMenuMapper extends QBMapper {
 	 */
 	public function findAllEnabled(): array {
 		$qb = $this->db->getQueryBuilder();
-		$result = $qb->select(
-			'ex_ui_files_actions.appid',
-			'ex_ui_files_actions.name',
-			'ex_ui_files_actions.display_name',
-			'ex_ui_files_actions.mime',
-			'ex_ui_files_actions.permissions',
-			'ex_ui_files_actions.order',
-			'ex_ui_files_actions.icon',
-			'ex_ui_files_actions.action_handler',
-		)
-			->from($this->tableName, 'ex_ui_files_actions')
-			->innerJoin('ex_ui_files_actions', 'ex_apps', 'exa', 'exa.appid = ex_ui_files_actions.appid')
+		$result = $qb->select('exs.*')
+			->from($this->tableName, 'exs')
+			->innerJoin('exs', 'ex_apps', 'exa', 'exa.appid = exs.appid')
 			->where(
 				$qb->expr()->eq('exa.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT))
 			)

@@ -24,15 +24,9 @@ class TextProcessingProviderMapper extends QBMapper {
 	 */
 	public function findAllEnabled(): array {
 		$qb = $this->db->getQueryBuilder();
-		$result = $qb->select(
-			'ex_text_processing.appid',
-			'ex_text_processing.name',
-			'ex_text_processing.display_name',
-			'ex_text_processing.action_handler',
-			'ex_text_processing.task_type',
-		)
-			->from($this->tableName, 'ex_text_processing')
-			->innerJoin('ex_text_processing', 'ex_apps', 'exa', 'exa.appid = ex_text_processing.appid')
+		$result = $qb->select('exs.*')
+			->from($this->tableName, 'exs')
+			->innerJoin('exs', 'ex_apps', 'exa', 'exa.appid = exs.appid')
 			->where(
 				$qb->expr()->eq('exa.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT))
 			)->executeQuery();

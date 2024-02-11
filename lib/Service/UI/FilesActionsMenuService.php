@@ -15,7 +15,6 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class FilesActionsMenuService {
-	public const ICON_CACHE_TTL = 60 * 60 * 24; // 1 day
 	private ICache $cache;
 
 	public function __construct(
@@ -61,7 +60,6 @@ class FilesActionsMenuService {
 				$newFileActionMenu->setId($fileActionMenu->getId());
 			}
 			$fileActionMenu = $this->mapper->insertOrUpdate($newFileActionMenu);
-			$this->cache->set('/ex_ui_files_actions_' . $appId . '_' . $name, $fileActionMenu);
 			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
@@ -75,17 +73,15 @@ class FilesActionsMenuService {
 	public function unregisterFileActionMenu(string $appId, string $name): ?FilesActionsMenu {
 		try {
 			$fileActionMenu = $this->getExAppFileAction($appId, $name);
-			if ($fileActionMenu === null) {
-				return null;
+			if ($fileActionMenu !== null) {
+				$this->mapper->delete($fileActionMenu);
+				$this->resetCacheEnabled();
+				return $fileActionMenu;
 			}
-			$this->mapper->delete($fileActionMenu);
-			$this->cache->remove('/ex_ui_files_actions_' . $appId . '_' . $name);
-			$this->resetCacheEnabled();
-			return $fileActionMenu;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s FileActionMenu %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -110,19 +106,16 @@ class FilesActionsMenuService {
 	}
 
 	public function getExAppFileAction(string $appId, string $fileActionName): ?FilesActionsMenu {
-		$cacheKey = '/ex_ui_files_actions_' . $appId . '_' . $fileActionName;
-		$cache = $this->cache->get($cacheKey);
-		if ($cache !== null) {
-			return $cache instanceof FilesActionsMenu ? $cache : new FilesActionsMenu($cache);
+		foreach ($this->getRegisteredFileActions() as $fileAction) {
+			if (($fileAction->getAppid() === $appId) && ($fileAction->getName() === $fileActionName)) {
+				return $fileAction;
+			}
 		}
-
 		try {
-			$fileAction = $this->mapper->findByAppIdName($appId, $fileActionName);
+			return $this->mapper->findByAppIdName($appId, $fileActionName);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
-		$this->cache->set($cacheKey, $fileAction);
-		return $fileAction;
 	}
 
 	public function unregisterExAppFileActions(string $appId): int {
@@ -131,7 +124,6 @@ class FilesActionsMenuService {
 		} catch (Exception) {
 			$result = -1;
 		}
-		$this->cache->clear('/ex_ui_files_actions_' . $appId);
 		$this->resetCacheEnabled();
 		return $result;
 	}
