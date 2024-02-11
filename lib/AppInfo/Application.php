@@ -68,12 +68,10 @@ class Application extends App implements IBootstrap {
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 
-		// Declarative settings using registrationContext
 		$context->registerEventListener(RegisterDeclarativeSettingsFormEvent::class, RegisterDeclarativeSettingsListener::class);
 		$context->registerEventListener(GetDeclarativeSettingsValueEvent::class, GetValueListener::class);
 		$context->registerEventListener(SetDeclarativeSettingsValueEvent::class, SetValueListener::class);
 
-		// Dynamic anonymous providers registration
 		$container = $this->getContainer();
 		try {
 			/** @var SpeechToTextService $speechToTextService */

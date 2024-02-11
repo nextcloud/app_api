@@ -104,7 +104,7 @@ return [
 		['name' => 'OCSUi#deleteExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getExAppStyle', 'url' => '/api/v1/ui/style', 'verb' => 'GET'],
 
-		//Declarative settings
+		// Declarative settings
 		['name' => 'OCSSettings#registerForm', 'url' => '/api/v1/ui/settings', 'verb' => 'POST'],
 		['name' => 'OCSSettings#unregisterForm', 'url' => '/api/v1/ui/settings', 'verb' => 'DELETE'],
 		['name' => 'OCSSettings#getForm', 'url' => '/api/v1/ui/settings', 'verb' => 'GET'],
