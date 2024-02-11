@@ -42,7 +42,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 *Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
-	<version>2.0.4</version>
+	<version>2.1.0</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
@@ -96,5 +96,9 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<settings>
 		<admin>OCA\AppAPI\Settings\Admin</admin>
 		<admin-section>OCA\AppAPI\Settings\AdminSection</admin-section>
+		<admin-section>OCA\AppAPI\Settings\DeclarativeSettings\AiIntegrationTeam</admin-section>
+		<admin-section>OCA\AppAPI\Settings\DeclarativeSettings\DeclarativeSettings</admin-section>
+		<personal-section>OCA\AppAPI\Settings\DeclarativeSettings\AiIntegrationTeam</personal-section>
+		<personal-section>OCA\AppAPI\Settings\DeclarativeSettings\DeclarativeSettings</personal-section>
 	</settings>
 </info>

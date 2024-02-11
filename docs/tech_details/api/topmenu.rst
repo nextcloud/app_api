@@ -40,7 +40,7 @@ Optional params
 Unregister Menu Entry
 ^^^^^^^^^^^^^^^^^^^^^
 
-OCS endpoint: ``DELETE /apps/app_api/api/v1/ui/files-actions-menu``
+OCS endpoint: ``DELETE /apps/app_api/api/v1/ui/top-menu``
 
 Params
 ******

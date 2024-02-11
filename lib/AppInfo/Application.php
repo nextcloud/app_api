@@ -6,6 +6,9 @@ namespace OCA\AppAPI\AppInfo;
 
 use OCA\AppAPI\Capabilities;
 use OCA\AppAPI\DavPlugin;
+use OCA\AppAPI\Listener\DeclarativeSettings\GetValueListener;
+use OCA\AppAPI\Listener\DeclarativeSettings\RegisterDeclarativeSettingsListener;
+use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Listener\UserDeletedListener;
@@ -34,6 +37,9 @@ use OCP\IUser;
 use OCP\IUserSession;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
+use OCP\Settings\GetDeclarativeSettingsValueEvent;
+use OCP\Settings\RegisterDeclarativeSettingsFormEvent;
+use OCP\Settings\SetDeclarativeSettingsValueEvent;
 use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -62,7 +68,10 @@ class Application extends App implements IBootstrap {
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 
-		// Dynamic anonymous providers registration
+		$context->registerEventListener(RegisterDeclarativeSettingsFormEvent::class, RegisterDeclarativeSettingsListener::class);
+		$context->registerEventListener(GetDeclarativeSettingsValueEvent::class, GetValueListener::class);
+		$context->registerEventListener(SetDeclarativeSettingsValueEvent::class, SetValueListener::class);
+
 		$container = $this->getContainer();
 		try {
 			/** @var SpeechToTextService $speechToTextService */

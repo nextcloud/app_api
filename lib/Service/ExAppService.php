@@ -15,6 +15,7 @@ use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
 use OCA\AppAPI\Service\UI\ScriptsService;
+use OCA\AppAPI\Service\UI\SettingsService;
 use OCA\AppAPI\Service\UI\StylesService;
 use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -51,6 +52,7 @@ class ExAppService {
 		private readonly TextProcessingService   $textProcessingService,
 		private readonly TranslationService      $translationService,
 		private readonly TalkBotsService         $talkBotsService,
+		private readonly SettingsService         $settingsService,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 	}
@@ -122,6 +124,7 @@ class ExAppService {
 			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
 			$this->translationService->unregisterExAppTranslationProviders($appId);
+			$this->settingsService->unregisterExAppForms($appId);
 			if ($this->exAppMapper->deleteExApp($appId) === 1) {
 				$this->cache->remove('/exApp_' . $appId);
 				return true;
@@ -310,5 +313,6 @@ class ExAppService {
 		$this->textProcessingService->resetCacheEnabled();
 		$this->speechToTextService->resetCacheEnabled();
 		$this->translationService->resetCacheEnabled();
+		$this->settingsService->resetCacheEnabled();
 	}
 }
