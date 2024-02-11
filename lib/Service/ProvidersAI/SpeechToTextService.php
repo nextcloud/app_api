@@ -49,7 +49,6 @@ class SpeechToTextService {
 				$newSpeechToTextProvider->setId($speechToTextProvider->getId());
 			}
 			$speechToTextProvider = $this->mapper->insertOrUpdate($newSpeechToTextProvider);
-			$this->cache->set('/ex_speech_to_text_providers_' . $appId . '_' . $name, $speechToTextProvider);
 			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
@@ -63,17 +62,15 @@ class SpeechToTextService {
 	public function unregisterSpeechToTextProvider(string $appId, string $name): ?SpeechToTextProvider {
 		try {
 			$speechToTextProvider = $this->getExAppSpeechToTextProvider($appId, $name);
-			if ($speechToTextProvider === null) {
-				return null;
+			if ($speechToTextProvider !== null) {
+				$this->mapper->delete($speechToTextProvider);
+				$this->resetCacheEnabled();
+				return $speechToTextProvider;
 			}
-			$this->mapper->delete($speechToTextProvider);
-			$this->cache->remove('/ex_speech_to_text_providers_' . $appId . '_' . $name);
-			$this->resetCacheEnabled();
-			return $speechToTextProvider;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s SpeechToTextProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -98,19 +95,16 @@ class SpeechToTextService {
 	}
 
 	public function getExAppSpeechToTextProvider(string $appId, string $name): ?SpeechToTextProvider {
-		$cacheKey = '/ex_speech_to_text_providers_' . $appId . '_' . $name;
-		$cache = $this->cache->get($cacheKey);
-		if ($cache !== null) {
-			return $cache instanceof SpeechToTextProvider ? $cache : new SpeechToTextProvider($cache);
+		foreach ($this->getRegisteredSpeechToTextProviders() as $provider) {
+			if (($provider->getAppid() === $appId) && ($provider->getName() === $name)) {
+				return $provider;
+			}
 		}
-
 		try {
-			$speechToTextProvider = $this->mapper->findByAppIdName($appId, $name);
+			return $this->mapper->findByAppIdName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
-		$this->cache->set($cacheKey, $speechToTextProvider);
-		return $speechToTextProvider;
 	}
 
 	public function unregisterExAppSpeechToTextProviders(string $appId): int {
@@ -119,7 +113,6 @@ class SpeechToTextService {
 		} catch (Exception) {
 			$result = -1;
 		}
-		$this->cache->clear('/ex_speech_to_text_providers_' . $appId);
 		$this->resetCacheEnabled();
 		return $result;
 	}

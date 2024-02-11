@@ -24,16 +24,9 @@ class TranslationProviderMapper extends QBMapper {
 	 */
 	public function findAllEnabled(): array {
 		$qb = $this->db->getQueryBuilder();
-		$result = $qb->select(
-			'ex_translation.appid',
-			'ex_translation.name',
-			'ex_translation.display_name',
-			'ex_translation.from_languages',
-			'ex_translation.to_languages',
-			'ex_translation.action_handler',
-		)
-			->from($this->tableName, 'ex_translation')
-			->innerJoin('ex_translation', 'ex_apps', 'exa', 'exa.appid = ex_translation.appid')
+		$result = $qb->select('exs.*')
+			->from($this->tableName, 'exs')
+			->innerJoin('exs', 'ex_apps', 'exa', 'exa.appid = exs.appid')
 			->where(
 				$qb->expr()->eq('exa.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT))
 			)
@@ -45,10 +38,10 @@ class TranslationProviderMapper extends QBMapper {
 	 * @param string $appId
 	 * @param string $name
 	 *
+	 * @return TranslationProvider
+	 * @throws DoesNotExistException
 	 * @throws Exception
 	 * @throws MultipleObjectsReturnedException
-	 *
-	 * @throws DoesNotExistException
 	 */
 	public function findByAppidName(string $appId, string $name): TranslationProvider {
 		$qb = $this->db->getQueryBuilder();

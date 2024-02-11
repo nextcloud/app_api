@@ -37,40 +37,42 @@ class TextProcessingService {
 		private readonly TextProcessingProviderMapper $mapper,
 		private readonly LoggerInterface              $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex__text_processing_providers');
+		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_text_processing_providers');
 	}
 
+	/**
+	 * Get list of registered TextProcessing providers (only for enabled ExApps)
+	 *
+	 * @return TextProcessingProvider[]
+	 */
 	public function getRegisteredTextProcessingProviders(): array {
 		try {
 			$cacheKey = '/ex_text_processing_providers';
-			$providers = $this->cache->get($cacheKey);
-			if ($providers === null) {
-				$providers = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $providers);
+			$records = $this->cache->get($cacheKey);
+			if ($records === null) {
+				$records = $this->mapper->findAllEnabled();
+				$this->cache->set($cacheKey, $records);
 			}
 
-			return array_map(function ($provider) {
-				return $provider instanceof TextProcessingProvider ? $provider : new TextProcessingProvider($provider);
-			}, $providers);
+			return array_map(function ($record) {
+				return new TextProcessingProvider($record);
+			}, $records);
 		} catch (Exception) {
 			return [];
 		}
 	}
 
 	public function getExAppTextProcessingProvider(string $appId, string $name): ?TextProcessingProvider {
-		$cacheKey = '/ex_text_processing_providers_' . $appId . '_' . $name;
-		$cached = $this->cache->get($cacheKey);
-		if ($cached !== null) {
-			return $cached instanceof TextProcessingProvider ? $cached : new TextProcessingProvider($cached);
+		foreach ($this->getRegisteredTextProcessingProviders() as $provider) {
+			if (($provider->getAppid() === $appId) && ($provider->getName() === $name)) {
+				return $provider;
+			}
 		}
-
 		try {
-			$textProcessingProvider = $this->mapper->findByAppidName($appId, $name);
+			return $this->mapper->findByAppIdName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
 			return null;
 		}
-		$this->cache->set($cacheKey, $textProcessingProvider);
-		return $textProcessingProvider;
 	}
 
 	public function registerTextProcessingProvider(
@@ -103,7 +105,6 @@ class TextProcessingService {
 			}
 
 			$textProcessingProvider = $this->mapper->insertOrUpdate($newTextProcessingProvider);
-			$this->cache->set('/ex_text_processing_providers_' . $appId . '_' . $name, $textProcessingProvider);
 			$this->resetCacheEnabled();
 		} catch (Exception $e) {
 			$this->logger->error(
@@ -117,17 +118,15 @@ class TextProcessingService {
 	public function unregisterTextProcessingProvider(string $appId, string $name): ?TextProcessingProvider {
 		try {
 			$textProcessingProvider = $this->getExAppTextProcessingProvider($appId, $name);
-			if ($textProcessingProvider === null) {
-				return null;
+			if ($textProcessingProvider !== null) {
+				$this->mapper->delete($textProcessingProvider);
+				$this->resetCacheEnabled();
+				return $textProcessingProvider;
 			}
-			$this->mapper->delete($textProcessingProvider);
-			$this->cache->remove('/ex_text_processing_providers_' . $appId . '_' . $name);
-			$this->resetCacheEnabled();
-			return $textProcessingProvider;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s TextProcessingProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -252,7 +251,6 @@ class TextProcessingService {
 		} catch (Exception) {
 			$result = -1;
 		}
-		$this->cache->clear('/ex_text_processing_providers_' . $appId);
 		$this->resetCacheEnabled();
 		return $result;
 	}
