@@ -42,4 +42,4 @@ Translation tool
 ****************
 
 TODO: Write notes about changes in ``nextcloud/docker-ci`` translationtool to extract translation strings and convert to NC format (js,json) - needs adjustments to the source code supported extensions.
-TODO: Also write about the changes needed for automated translation updates in CI/CD pipeline to include source *.mo, *.po files in repository to be handled differently by different programming languages.
+TODO: Also write about the changes needed for automated translation updates in CI/CD pipeline to include source ``*.mo``, ``*.po`` files in repository to be handled differently by different programming languages.
