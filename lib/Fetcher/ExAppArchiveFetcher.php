@@ -7,6 +7,7 @@ namespace OCA\AppAPI\Fetcher;
 use Exception;
 use OC\Archive\TAR;
 use OCP\Http\Client\IClientService;
+use OCP\IConfig;
 use OCP\ITempManager;
 use phpseclib\File\X509;
 use SimpleXMLElement;
@@ -17,8 +18,9 @@ use SimpleXMLElement;
 class ExAppArchiveFetcher {
 
 	public function __construct(
-		private ITempManager $tempManager,
-		private IClientService $clientService,
+		private readonly ITempManager   $tempManager,
+		private readonly IClientService $clientService,
+		private readonly IConfig        $config,
 	) {
 	}
 
@@ -26,7 +28,7 @@ class ExAppArchiveFetcher {
 	 * Based on regular app download algorithm.
 	 * Download ExApp release archive, verify signature extract info.xml and return its object
 	 */
-	public function downloadInfoXml(array $exAppAppstoreData): ?SimpleXMLElement {
+	public function downloadInfoXml(array $exAppAppstoreData, bool $extract_l10n = false): SimpleXMLElement|array|null {
 		// 1. Signature check
 		if (!$this->checkExAppSignature($exAppAppstoreData)) {
 			return null;
@@ -69,7 +71,64 @@ class ExAppArchiveFetcher {
 			return null;
 		}
 
+		if ($extract_l10n) {
+			$writableAppPath = $this->getExAppL10NPath($exAppAppstoreData['id']);
+
+			if ($writableAppPath !== null) {
+				$extractedL10NPath = $writableAppPath . '/' . $exAppAppstoreData['id'] . '/l10n';
+				// Remove old l10n folder and files if exists
+				if (file_exists($extractedL10NPath)) {
+					rmdir($extractedL10NPath);
+				}
+				// Move l10n folder from extracted temp to the app folder
+				rename($extractDir . '/' . $folders[0] . '/l10n', $extractedL10NPath);
+			}
+		}
+
 		return $infoXml;
+	}
+
+	public function getExAppL10NPath(string $appId): ?string {
+		$appsPaths = $this->config->getSystemValue('apps_paths');
+		$count = 0;
+		$appPaths = [];
+		foreach ($appsPaths as $appPath) {
+			if (file_exists($appPath['path'] . '/' . $appId)) {
+				$count++;
+				$appPaths[] = $appPath['path'];
+			}
+		}
+
+		// Check if there is already app folder with only l10n folder
+		// Ensure that there is only one app with the same id in all apps-paths folders
+		if ($count > 1) {
+			throw new Exception(
+				sprintf(
+					'App with id %s exists in more than one apps-paths folder (%s)',
+					$appId, json_encode($appPaths)
+				)
+			);
+		} elseif ($count === 1) {
+			return $appPaths[0] . '/' . $appId . '/l10n';
+		} else {
+			foreach ($appsPaths as $appPath) {
+				if ($appPath['writable']) {
+					return $appPath['path'] . '/' . $appId . '/l10n';
+				}
+			}
+		}
+
+		return null;
+	}
+
+	public function removeExAppL10NFolder(string $appId): void {
+		$appL10NPath = $this->getExAppL10NPath($appId);
+		if ($appL10NPath !== null) {
+			$extractedL10NPath = $appL10NPath . '/' . $appId . '/l10n';
+			if (file_exists($extractedL10NPath)) {
+				rmdir($extractedL10NPath);
+			}
+		}
 	}
 
 	/**

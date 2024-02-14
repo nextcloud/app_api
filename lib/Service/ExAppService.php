@@ -119,6 +119,7 @@ class ExAppService {
 			$this->translationService->unregisterExAppTranslationProviders($appId);
 			$this->settingsService->unregisterExAppForms($appId);
 			if ($this->exAppMapper->deleteExApp($appId) === 1) {
+				$this->removeExAppL10NFolder($appId);
 				$this->cache->remove('/exApp_' . $appId);
 				return true;
 			}
@@ -264,7 +265,7 @@ class ExAppService {
 	/**
 	 * Get latest ExApp release info by ExApp appid (in case of first installation or update)
 	 */
-	public function getLatestExAppInfoFromAppstore(string $appId): ?SimpleXMLElement {
+	public function getLatestExAppInfoFromAppstore(string $appId, bool $extract_l10n = false): SimpleXMLElement|array|null {
 		$exApps = $this->exAppFetcher->get();
 		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($appId) {
 			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;
@@ -272,9 +273,13 @@ class ExAppService {
 		$exAppAppstoreData = end($exAppAppstoreData);
 		$exAppReleaseInfo = end($exAppAppstoreData['releases']);
 		if ($exAppReleaseInfo !== false) {
-			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
+			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData, $extract_l10n);
 		}
 		return null;
+	}
+
+	public function removeExAppL10NFolder(string $appId): void {
+		$this->exAppArchiveFetcher->removeExAppL10NFolder($appId);
 	}
 
 	private function resetCaches(): void {
