@@ -265,7 +265,7 @@ class ExAppService {
 	/**
 	 * Get latest ExApp release info by ExApp appid (in case of first installation or update)
 	 */
-	public function getLatestExAppInfoFromAppstore(string $appId, bool $extract_l10n = false): SimpleXMLElement|array|null {
+	public function getLatestExAppInfoFromAppstore(string $appId, bool $extract_l10n = false): ?SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
 		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($appId) {
 			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;

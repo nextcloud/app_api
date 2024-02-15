@@ -28,7 +28,7 @@ class ExAppArchiveFetcher {
 	 * Based on regular app download algorithm.
 	 * Download ExApp release archive, verify signature extract info.xml and return its object
 	 */
-	public function downloadInfoXml(array $exAppAppstoreData, bool $extract_l10n = false): SimpleXMLElement|array|null {
+	public function downloadInfoXml(array $exAppAppstoreData, bool $extract_l10n = false): ?SimpleXMLElement {
 		// 1. Signature check
 		if (!$this->checkExAppSignature($exAppAppstoreData)) {
 			return null;
