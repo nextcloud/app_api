@@ -42,6 +42,7 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 		$this->addType('fromLanguages', 'json');
 		$this->addType('toLanguages', 'json');
 		$this->addType('actionHandler', 'string');
+		$this->addType('actionDetectLang', 'string');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
@@ -64,8 +65,8 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 		if (isset($params['action_handler'])) {
 			$this->setActionHandler($params['action_handler']);
 		}
-		if (isset($params['action_detect_lang_handler'])) {
-			$this->setActionDetectLang($params['action_detect_lang_handler']);
+		if (isset($params['action_detect_lang'])) {
+			$this->setActionDetectLang($params['action_detect_lang']);
 		}
 	}
 
@@ -78,7 +79,7 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 			'from_languages' => $this->getFromLanguages(),
 			'to_languages' => $this->getToLanguages(),
 			'action_handler' => $this->getActionHandler(),
-			'action_detect_lang_handler' => $this->getActionDetectLang(),
+			'action_detect_lang' => $this->getActionDetectLang(),
 		];
 	}
 }

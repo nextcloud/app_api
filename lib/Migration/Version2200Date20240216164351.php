@@ -25,7 +25,7 @@ class Version2200Date20240216164351 extends SimpleMigrationStep {
 		if ($schema->hasTable('ex_translation')) {
 			$table = $schema->getTable('ex_translation');
 
-			$table->addColumn('action_detect_lang_handler', Types::STRING, [
+			$table->addColumn('action_detect_lang', Types::STRING, [
 				'notnull' => false,
 				'length' => 410,
 				'default' => '',
