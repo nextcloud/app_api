@@ -40,7 +40,8 @@ class TranslationService {
 		string $displayName,
 		array $fromLanguages,
 		array $toLanguages,
-		string $actionHandler
+		string $actionHandler,
+		?string $actionDetectLang = null,
 	): ?TranslationProvider {
 		try {
 			$translationProvider = $this->mapper->findByAppidName($appId, $name);
@@ -55,6 +56,7 @@ class TranslationService {
 				'from_languages' => $fromLanguages,
 				'to_languages' => $toLanguages,
 				'action_handler' => ltrim($actionHandler, '/'),
+				'action_detect_lang' => ltrim($actionDetectLang, '/') ?? '',
 			]);
 			if ($translationProvider !== null) {
 				$newTranslationProvider->setId($translationProvider->getId());
