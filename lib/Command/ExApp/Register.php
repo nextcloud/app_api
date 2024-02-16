@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Service\AppAPIService;
@@ -17,6 +16,7 @@ use OCA\AppAPI\Service\ExAppUsersService;
 
 use OCP\DB\Exception;
 use OCP\IConfig;
+use OCP\Security\ISecureRandom;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -30,28 +30,29 @@ class Register extends Command {
 	public function __construct(
 		private readonly AppAPIService  	  $service,
 		private readonly DaemonConfigService  $daemonConfigService,
-		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly ExAppScopesService   $exAppScopesService,
+		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly ExAppUsersService    $exAppUsersService,
 		private readonly DockerActions        $dockerActions,
 		private readonly ManualActions        $manualActions,
 		private readonly IConfig              $config,
 		private readonly ExAppService         $exAppService,
+		private readonly ISecureRandom        $random,
 	) {
 		parent::__construct();
 	}
 
 	protected function configure(): void {
 		$this->setName('app_api:app:register');
-		$this->setDescription('Register external app');
+		$this->setDescription('Install external App');
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
 		$this->addArgument('daemon-config-name', InputArgument::OPTIONAL);
 
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
-		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
-		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp JSON deploy info');
-		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until the end of the "init" phase.');
+		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, 'Path to ExApp info.xml file (url or local absolute path)');
+		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp info.xml in JSON format');
+		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -59,8 +60,17 @@ class Register extends Command {
 
 		if ($this->exAppService->getExApp($appId) !== null) {
 			$output->writeln(sprintf('ExApp %s already registered.', $appId));
-			return 2;
+			return 3;
 		}
+
+		$appInfo = $this->exAppService->getAppInfo(
+			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
+		);
+		if (isset($appInfo['error'])) {
+			$output->writeln($appInfo['error']);
+			return 1;
+		}
+		$appId = $appInfo['id'];  # value from $appInfo should have higher priority
 
 		$daemonConfigName = $input->getArgument('daemon-config-name');
 		if (!isset($daemonConfigName)) {
@@ -72,96 +82,17 @@ class Register extends Command {
 			return 2;
 		}
 
-		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-			$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-			if (array_key_exists('error', $exAppInfo)) {
-				$output->writeln($exAppInfo['error']);
-				$output->writeln('Did application was deployed before registration?');
-				return 2;
-			}
-		} elseif ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
-			$exAppJson = $input->getOption('json-info');
-			if ($exAppJson === null) {
-				$output->writeln('ExApp JSON is required for manual deploy.');
-				return 2;
-			}
-
-			$exAppInfo = $this->manualActions->loadExAppInfo($appId, $daemonConfig, [
-				'json-info' => $exAppJson,
-			]);
-
-			$auth = [];
-			$exAppUrl = $this->manualActions->resolveExAppUrl(
-				$appId,
-				$daemonConfig->getProtocol(),
-				$daemonConfig->getHost(),
-				$daemonConfig->getDeployConfig(),
-				(int) $exAppInfo['port'],
-				$auth,
-			);
-			if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
-				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure ExApp was started and initialized manually.', $appId));
-				return 2;
-			}
-		} else {
-			$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfigName, $daemonConfig->getAcceptsDeployId()));
-			return 2;
-		}
-
-		$appId = $exAppInfo['appid'];
-		$version = $exAppInfo['version'];
-		$name = $exAppInfo['name'];
-		$port = (int) $exAppInfo['port'];
-		$secret = $exAppInfo['secret'];
-
-		$exApp = $this->exAppService->registerExApp($appId, [
-			'version' => $version,
-			'name' => $name,
-			'daemon_config_name' => $daemonConfigName,
-			'port' => $port,
-			'secret' => $secret,
-		]);
-		if ($exApp === null) {
-			$output->writeln(sprintf('Failed to register ExApp %s.', $appId));
-			return 1;
-		}
-
-		if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN)) {
-			try {
-				$this->exAppUsersService->setupSystemAppFlag($exApp->getAppid());
-			} catch (Exception $e) {
-				$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
-				return 1;
-			}
-		}
-
-		$pathToInfoXml = $input->getOption('info-xml');
-		$infoXml = null;
-		if ($pathToInfoXml !== null) {
-			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
-			if ($infoXml === false) {
-				$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
-				return 2;
-			}
-		}
-
-		$requestedExAppScopeGroups = $this->exAppService->getExAppScopes($exApp, $infoXml, $exAppInfo);
-		if (isset($requestedExAppScopeGroups['error'])) {
-			$output->writeln($requestedExAppScopeGroups['error']);
-			$this->exAppService->unregisterExApp($exApp->getAppid());
-			return 2;
-		}
-
 		$forceScopes = (bool) $input->getOption('force-scopes');
 		$confirmRequiredScopes = $forceScopes;
-
 		if (!$forceScopes && $input->isInteractive()) {
 			/** @var QuestionHelper $helper */
 			$helper = $this->getHelper('question');
 
 			// Prompt to approve required ExApp scopes
-			if (count($requestedExAppScopeGroups) > 0) {
-				$output->writeln(sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ', $requestedExAppScopeGroups)));
+			if (count($appInfo['external-app']['scopes']) > 0) {
+				$output->writeln(
+					sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ', $appInfo['external-app']['scopes']))
+				);
 				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
 				$confirmRequiredScopes = $helper->ask($input, $output, $question);
 			} else {
@@ -169,50 +100,100 @@ class Register extends Command {
 			}
 		}
 
-		if (!$confirmRequiredScopes && count($requestedExAppScopeGroups) > 0) {
+		if (!$confirmRequiredScopes && count($appInfo['external-app']['scopes']) > 0) {
 			$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
-			$this->exAppService->unregisterExApp($exApp->getAppid());
 			return 1;
 		}
 
-		if (count($requestedExAppScopeGroups) > 0) {
-			$this->registerExAppScopes($output, $exApp, $requestedExAppScopeGroups);
+		$appInfo['port'] = $appInfo['port'] ?? $this->exAppService->getExAppFreePort();
+		$appInfo['secret'] = $appInfo['secret'] ?? $this->random->generate(128);
+		$appInfo['daemon_config_name'] = $appInfo['daemon_config_name'] ?? $daemonConfigName;
+		$exApp = $this->exAppService->registerExApp($appInfo);
+		if (!$exApp) {
+			$output->writeln(sprintf('Error during registering ExApp %s.', $appId));
+			return 3;
 		}
-
-		if (!$this->service->dispatchExAppInit($exApp->getAppid())) {
-			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
-			$this->exAppService->unregisterExApp($exApp->getAppid());
-			return 1;
-		}
-		$waitFinish = (bool) $input->getOption('wait-finish');
-		if ($waitFinish) {
-			do {
-				$exApp = $this->exAppService->getExApp($appId);
-				$status = $exApp->getStatus();
-				if (isset($status['error'])) {
-					$output->writeln(sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']));
-					return 1;
-				}
-				usleep(100000); // 0.1s
-			} while (isset($status['progress']));
-		}
-
-		$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
-		return 0;
-	}
-
-	private function registerExAppScopes($output, ExApp $exApp, array $requestedExAppScopeGroups): void {
-		$registeredScopeGroups = [];
-		foreach ($this->exAppApiScopeService->mapScopeNamesToNumbers($requestedExAppScopeGroups) as $scopeGroup) {
-			if ($this->exAppScopesService->setExAppScopeGroup($exApp, $scopeGroup)) {
-				$registeredScopeGroups[] = $scopeGroup;
-			} else {
-				$output->writeln(sprintf('Failed to set %s ExApp scope group: %s', $exApp->getAppid(), $scopeGroup));
+		if (filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN)) {
+			# TO-DO: refactor in next version: move "system" to the "ex_apps" table as a separate field.
+			try {
+				$this->exAppUsersService->setupSystemAppFlag($appId);
+			} catch (Exception $e) {
+				$this->exAppService->unregisterExApp($appId);
+				$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
+				return 1;
 			}
 		}
-		if (count($registeredScopeGroups) > 0) {
-			$output->writeln(sprintf('ExApp %s scope groups successfully set: %s', $exApp->getAppid(), implode(', ',
-				$this->exAppApiScopeService->mapScopeGroupsToNames($registeredScopeGroups))));
+		if (count($appInfo['external-app']['scopes']) > 0) {
+			if (!$this->exAppScopesService->registerExAppScopes(
+				$exApp, $this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']))
+			) {
+				$this->exAppService->unregisterExApp($appId);
+				$output->writeln('Error while registering API scopes.');
+				return 1;
+			}
+			$output->writeln(
+				sprintf('ExApp %s scope groups successfully set: %s',
+					$exApp->getAppid(), implode(', ', $appInfo['external-app']['scopes'])
+				)
+			);
 		}
+
+		$auth = [];
+		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
+			[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $deployParams);
+			if (isset($pullResult['error'])) {
+				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $pullResult['error']));
+				return 1;
+			}
+
+			if (!isset($startResult['error']) && isset($createResult['Id'])) {
+				if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig)) {
+					$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, 'Container healthcheck failed.'));
+					return 1;
+				}
+
+				$exAppUrl = $this->dockerActions->resolveExAppUrl(
+					$appId,
+					$daemonConfig->getProtocol(),
+					$daemonConfig->getHost(),
+					$daemonConfig->getDeployConfig(),
+					(int)explode('=', $deployParams['container_params']['env'][6])[1],
+					$auth,
+				);
+			} else {
+				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
+				return 3;
+			}
+		} elseif ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
+			$exAppUrl = $this->manualActions->resolveExAppUrl(
+				$appId,
+				$daemonConfig->getProtocol(),
+				$daemonConfig->getHost(),
+				$daemonConfig->getDeployConfig(),
+				(int) $appInfo['port'],
+				$auth,
+			);
+		} else {
+			$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfigName, $daemonConfig->getAcceptsDeployId()));
+			return 2;
+		}
+
+		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
+			$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure ExApp was started and initialized manually.', $appId));
+			return 2;
+		}
+		$output->writeln(sprintf('ExApp %s deployed successfully.', $appId));
+
+		$this->service->dispatchExAppInitInternal($exApp);
+		if ($input->getOption('wait-finish')) {
+			$error = $this->exAppService->waitInitStepFinish($appId);
+			if ($error) {
+				$output->writeln($error);
+				return 1;
+			}
+		}
+		$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
+		return 0;
 	}
 }

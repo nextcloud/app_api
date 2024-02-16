@@ -41,12 +41,12 @@ interface IDeployActions {
 	 * Build required info for ExApp deployment
 	 *
 	 * @param DaemonConfig $daemonConfig
-	 * @param \SimpleXMLElement $infoXml
+	 * @param array $appInfo
 	 * @param array $params
 	 *
 	 * @return mixed
 	 */
-	public function buildDeployParams(DaemonConfig $daemonConfig, \SimpleXMLElement $infoXml, array $params = []): mixed;
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): mixed;
 
 	/**
 	 * Build required deploy environment variables

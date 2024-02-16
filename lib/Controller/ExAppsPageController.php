@@ -11,8 +11,6 @@ use OC\App\DependencyAnalyzer;
 use OC\App\Platform;
 use OC_App;
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\DaemonConfig;
-use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
@@ -36,7 +34,6 @@ use OCP\IL10N;
 use OCP\IRequest;
 use OCP\L10N\IFactory;
 use Psr\Log\LoggerInterface;
-use SimpleXMLElement;
 
 /**
  * ExApps actions controller similar to default one with project-specific changes and additions
@@ -407,194 +404,43 @@ class ExAppsPageController extends Controller {
 		$apps = array_merge($apps, $formattedLocalApps);
 		return $apps;
 	}
-
-	/**
-	 * @PasswordConfirmationRequired
-	 *
-	 * @param string $appId
-	 * @param array $groups // TODO: Add support of groups later if needed
-	 *
-	 * @return JSONResponse
-	 */
+	
+	#[PasswordConfirmationRequired]
 	public function enableApp(string $appId, array $groups = []): JSONResponse {
-		return $this->enableApps([$appId]);
-	}
-
-	/**
-	 * Enable one or more apps.
-	 * Deploy ExApp if it was not deployed yet.
-	 *
-	 * @PasswordConfirmationRequired
-	 */
-	public function enableApps(array $appIds, array $groups = []): JSONResponse {
-		try {
-			$updateRequired = false;
-
-			foreach ($appIds as $appId) {
-				// If ExApp is not null, assuming it was already deployed, therefore it could be registered
-				$exApp = $this->exAppService->getExApp($appId);
-
-				// If ExApp not registered - then it's a "Deploy and Enable" action. Get default_daemon_config, deploy ExApp, register and finally enable
-				if ($exApp === null) {
-					$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
-					$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
-					$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
-					if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
-						return new JSONResponse(['data' => ['message' => $this->l10n->t('Only docker-install is supported for now')]], Http::STATUS_INTERNAL_SERVER_ERROR);
-					}
-					// 1. Deploy ExApp
-					if ($this->deployExApp($appId, $infoXml, $daemonConfig)) {
-						// 2. Register ExApp (container must be already initialized successfully)
-						if (!$this->registerExApp($appId, $infoXml, $daemonConfig)) {
-							$this->exAppService->unregisterExApp($appId); // Fallback unregister if failure
-							return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to register ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
-						}
-					} else {
-						$this->logger->error(sprintf('Failed to deploy %s ExApp', $appId));
-						return new JSONResponse([
-							'data' => [
-								'message' => $this->l10n->t('Failed to deploy ExApp'),
-							]
-						], Http::STATUS_INTERNAL_SERVER_ERROR);
-					}
-
-					$exApp = $this->exAppService->getExApp($appId);
-
-					// Start ExApp initialization step (to download dynamic content, e.g. models)
-					if (!$this->service->dispatchExAppInit($exApp->getAppid())) {
-						return new JSONResponse([
-							'data' => [
-								'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),
-							]
-						], Http::STATUS_INTERNAL_SERVER_ERROR);
-					}
-
-					$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
-						return $exAppScope->getScopeGroup();
-					}, $this->exAppScopeService->getExAppScopes($exApp)));
-					$auth = [];
-					return new JSONResponse([
-						'data' => [
-							'daemon_config' => $daemonConfig,
-							'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-							'exAppUrl' => $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth),
-							'status' => $exApp->getStatus(),
-							'scopes' => $scopes,
-						]
-					]);
-				}
-
-				$appsWithUpdate = $this->getExAppsWithUpdates();
-				$appIdsWithUpdate = array_map(function (array $appWithUpdate) {
-					return $appWithUpdate['id'];
-				}, $appsWithUpdate);
-
-				if (in_array($appId, $appIdsWithUpdate)) {
-					$updateRequired = true;
-				}
-
-				if (!$this->service->enableExApp($exApp)) {
-					return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
-				}
+		$updateRequired = false;
+		$exApp = $this->exAppService->getExApp($appId);
+		// If ExApp is not registered - then it's a "Deploy and Enable" action.
+		if (!$exApp) {
+			if (!$this->service->runOccCommand(sprintf("app_api:app:register --force-scopes %s", $appId))) {
+				return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not update ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
-
-			return new JSONResponse(['data' => ['update_required' => $updateRequired]]);
-		} catch (Exception $e) {
-			$this->logger->error('Could not enable ExApps', ['exception' => $e]);
-			return new JSONResponse(['data' => ['message' => $e->getMessage()]], Http::STATUS_INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	private function deployExApp(string $appId, SimpleXMLElement $infoXml, DaemonConfig $daemonConfig): bool {
-		$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml);
-		[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($daemonConfig, $deployParams);
-
-		if (isset($pullResult['error']) || isset($createResult['error']) || isset($startResult['error'])) {
-			return false;
+			return new JSONResponse([]);
 		}
 
-		if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig)) {
-			return false;
+		$appsWithUpdate = $this->getExAppsWithUpdates();
+		$appIdsWithUpdate = array_map(function (array $appWithUpdate) {
+			return $appWithUpdate['id'];
+		}, $appsWithUpdate);
+
+		if (in_array($appId, $appIdsWithUpdate)) {
+			$updateRequired = true;
 		}
 
-		$auth = [];
-		$exAppUrl = $this->dockerActions->resolveExAppUrl(
-			$appId,
-			$daemonConfig->getProtocol(),
-			$daemonConfig->getHost(),
-			$daemonConfig->getDeployConfig(),
-			(int) explode('=', $deployParams['container_params']['env'][6])[1],
-			$auth,
-		);
-		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
-			return false;
+		if (!$this->service->enableExApp($exApp)) {
+			return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
-		return true;
-	}
-
-	private function registerExApp(string $appId, SimpleXMLElement $infoXml, DaemonConfig $daemonConfig): bool {
-		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-
-		$exApp = $this->exAppService->registerExApp($appId, [
-			'appid' => $exAppInfo['appid'],
-			'version' => $exAppInfo['version'],
-			'name' => $exAppInfo['name'],
-			'daemon_config_name' => $daemonConfig->getName(),
-			'port' => (int) $exAppInfo['port'],
-			'secret' => $exAppInfo['secret'],
-		]);
-
-		if ($exApp === null) {
-			return false;
-		}
-
-		// Setup system flag
-		try {
-			$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
-			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
-				$this->exAppUsersService->setupSystemAppFlag($exApp->getAppid());
-			}
-		} catch (Exception $e) {
-			$this->logger->error(sprintf('Error while setting app system flag: %s', $e->getMessage()));
-			return false;
-		}
-
-		// Register ExApp ApiScopes
-		$requestedExAppScopeGroups = $this->exAppService->getExAppScopes($exApp, $infoXml, $exAppInfo);
-		return $this->registerApiScopes($exApp, $requestedExAppScopeGroups);
-	}
-
-	private function registerApiScopes(ExApp $exApp, array $requestedExAppScopeGroups): bool {
-		$registeredScopeGroups = [];
-		foreach ($this->exAppApiScopeService->mapScopeNamesToNumbers($requestedExAppScopeGroups) as $scopeGroup) {
-			if ($this->exAppScopeService->setExAppScopeGroup($exApp, $scopeGroup)) {
-				$registeredScopeGroups[] = $scopeGroup;
-			}
-		}
-		return count($registeredScopeGroups) === count($requestedExAppScopeGroups);
+		return new JSONResponse(['data' => ['update_required' => $updateRequired]]);
 	}
 
 	#[PasswordConfirmationRequired]
 	public function disableApp(string $appId): JSONResponse {
-		return $this->disableApps([$appId]);
-	}
-
-	#[PasswordConfirmationRequired]
-	public function disableApps(array $appIds): JSONResponse {
-		try {
-			foreach ($appIds as $appId) {
-				$exApp = $this->exAppService->getExApp($appId);
-				if ($exApp->getEnabled()) {
-					if (!$this->service->disableExApp($exApp)) {
-						return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
-					}
-				}
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp->getEnabled()) {
+			if (!$this->service->disableExApp($exApp)) {
+				return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
-			return new JSONResponse([]);
-		} catch (Exception $e) {
-			$this->logger->error('Could not disable ExApp', ['exception' => $e]);
-			return new JSONResponse(['data' => ['message' => $e->getMessage()]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
+		return new JSONResponse([]);
 	}
 
 	/**
@@ -612,93 +458,11 @@ class ExAppsPageController extends Controller {
 		if (!in_array($appId, $appIdsWithUpdate)) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not update ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
-		$exApp = $this->exAppService->getExApp($appId);
 
-		// TODO: Add error messages on each step failure as in CLI
-
-		// 1. Disable ExApp
-		if ($exApp->getEnabled()) {
-			$this->service->disableExApp($exApp);
+		if (!$this->service->runOccCommand(sprintf("app_api:app:update --force-scopes %s", $appId))) {
+			return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not update ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
-
-		$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
-		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
-			return new JSONResponse(['data' => ['message' => $this->l10n->t('Only docker-install is supported for now')]], Http::STATUS_INTERNAL_SERVER_ERROR);
-		}
-
-		$this->dockerActions->initGuzzleClient($daemonConfig);
-		$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
-
-		$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
-			'container_info' => $containerInfo,
-		]);
-		// 2. Update ExApp container (deploy new version)
-		$this->dockerActions->updateExApp($daemonConfig, $deployParams);
-
-		// 3. Update ExApp info on NC side
-		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-		$this->exAppService->updateExAppInfo($exApp, $exAppInfo);
-
-		// 4. Update ExApp ApiScopes
-		$this->upgradeExAppScopes($exApp, $infoXml);
-
-		$exApp = $this->exAppService->getExApp($appId);
-		// 5. Heartbeat ExApp
-		$auth = [];
-		$exAppUrl = $this->dockerActions->resolveExAppUrl(
-			$appId,
-			$daemonConfig->getProtocol(),
-			$daemonConfig->getHost(),
-			$daemonConfig->getDeployConfig(),
-			(int) $exAppInfo['port'],
-			$auth
-		);
-		if ($this->service->heartbeatExApp($exAppUrl, $auth)) {
-			// 6. Dispatch init step on ExApp side
-			if (!$this->service->dispatchExAppInit($exApp->getAppid(), true)) {
-				return new JSONResponse([
-					'data' => [
-						'message' => $this->l10n->t('Failed to send "init" event to ExApp.'),
-					]
-				], Http::STATUS_INTERNAL_SERVER_ERROR);
-			}
-		}
-
-		$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
-			return $exAppScope->getScopeGroup();
-		}, $this->exAppScopeService->getExAppScopes($exApp)));
-		return new JSONResponse([
-			'data' => [
-				'appid' => $appId,
-				'status' => ['progress' => 0],
-				'systemApp' => filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN),
-				'exAppUrl' => $exAppUrl,
-				'scopes' => $scopes,
-			]
-		]);
-	}
-
-	public function enableExApp(string $appId): JSONResponse {
-		$exApp = $this->exAppService->getExApp($appId);
-		if (!$this->service->enableExApp($exApp)) {
-			return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to enable ExApp')]]);
-		}
-
-		$auth = [];
-		return new JSONResponse([
-			'data' => [
-				'appid' => $appId,
-				'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-				'exAppUrl' => $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth),
-			]
-		]);
-	}
-
-	private function upgradeExAppScopes(ExApp $exApp, SimpleXMLElement $infoXml): void {
-		$newExAppScopes = $this->exAppService->getExAppScopes($exApp, $infoXml);
-		$newExAppScopes = $this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes);
-		$this->exAppScopeService->updateExAppScopes($exApp, $newExAppScopes);
+		return new JSONResponse();
 	}
 
 	/**

@@ -28,7 +28,7 @@ class ManualActions implements IDeployActions {
 		return null;
 	}
 
-	public function buildDeployParams(DaemonConfig $daemonConfig, $infoXml, array $params = []): mixed {
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): mixed {
 		// Not implemented. Deploy is done manually.
 		return null;
 	}

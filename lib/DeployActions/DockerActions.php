@@ -20,7 +20,6 @@ use OCP\IConfig;
 use OCP\IURLGenerator;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
-use SimpleXMLElement;
 
 class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
@@ -333,21 +332,19 @@ class DockerActions implements IDeployActions {
 		return [$stopResult, $removeResult];
 	}
 
-	public function buildDeployParams(DaemonConfig $daemonConfig, SimpleXMLElement $infoXml, array $params = []): array {
-		$appId = (string) $infoXml->id;
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): array {
+		$appId = (string) $appInfo['id'];
+		$externalApp = $appInfo['external-app'];
 		$deployConfig = $daemonConfig->getDeployConfig();
 
 		// If update process
 		if (isset($params['container_info'])) {
 			$containerInfo = $params['container_info'];
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
-			$port = $oldEnvs['APP_PORT'] ?? $this->exAppService->getExAppFreePort();
-			$secret = $oldEnvs['APP_SECRET'];
 			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
 			// Preserve previous device requests (GPU)
 			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'] ?? [];
 		} else {
-			$port = $this->exAppService->getExAppFreePort();
 			if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
 				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
 			} else {
@@ -357,26 +354,26 @@ class DockerActions implements IDeployActions {
 		}
 
 		$imageParams = [
-			'image_src' => (string) ($infoXml->xpath('external-app/docker-install/registry')[0] ?? 'docker.io'),
-			'image_name' => (string) ($infoXml->xpath('external-app/docker-install/image')[0] ?? $appId),
-			'image_tag' => (string) ($infoXml->xpath('external-app/docker-install/image-tag')[0] ?? 'latest'),
+			'image_src' => (string) ($externalApp['docker-install']['registry'] ?? 'docker.io'),
+			'image_name' => (string) ($externalApp['docker-install']['image'] ?? $appId),
+			'image_tag' => (string) ($externalApp['docker-install']['image-tag'] ?? 'latest'),
 		];
 
 		$envs = $this->buildDeployEnvs([
 			'appid' => $appId,
-			'name' => (string) $infoXml->name,
-			'version' => (string) $infoXml->version,
+			'name' => (string) $appInfo['name'],
+			'version' => (string) $appInfo['version'],
 			'host' => $this->service->buildExAppHost($deployConfig),
-			'port' => $port,
+			'port' => $appInfo['port'],
 			'storage' => $storage,
-			'system_app' => filter_var((string) $infoXml->xpath('external-app/system')[0], FILTER_VALIDATE_BOOLEAN),
-			'secret' => $secret ?? $this->random->generate(128),
+			'system_app' => filter_var((string) $externalApp['system'], FILTER_VALIDATE_BOOLEAN),
+			'secret' => $appInfo['secret'],
 		], $deployConfig);
 
 		$containerParams = [
 			'name' => $appId,
 			'hostname' => $appId,
-			'port' => $port,
+			'port' => $appInfo['port'],
 			'net' => $deployConfig['net'] ?? 'host',
 			'env' => $envs,
 			'deviceRequests' => $deviceRequests,

@@ -21,9 +21,9 @@ class ExAppApiScopeService {
 	private ICache $cache;
 
 	public function __construct(
-		private LoggerInterface $logger,
-		private ExAppApiScopeMapper $mapper,
-		ICacheFactory $cacheFactory,
+		private readonly LoggerInterface     $logger,
+		private readonly ExAppApiScopeMapper $mapper,
+		ICacheFactory                        $cacheFactory,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_apps_api_scopes');
 	}

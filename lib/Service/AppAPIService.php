@@ -187,7 +187,7 @@ class AppAPIService {
 		if ($authValid) {
 			if (!$exApp->getEnabled()) {
 				// If ExApp is in initializing state, it is disabled yet, so we allow requests in such case
-				if (!isset($exApp->getStatus()['progress'])) {
+				if (!isset($exApp->getStatus()['init'])) {
 					$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
 					return false;
 				}
@@ -370,7 +370,6 @@ class AppAPIService {
 	}
 
 	public function dispatchExAppInitInternal(ExApp $exApp): void {
-		// start in background in a separate process
 		$auth = [];
 		$initUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth) . '/init';
 		$options = [
@@ -383,14 +382,16 @@ class AppAPIService {
 			$options['auth'] = $auth;
 		}
 
+		$this->setAppInitProgress($exApp, 0);
+		$this->exAppService->enableExAppInternal($exApp);
 		try {
 			$this->client->post($initUrl, $options);
 		} catch (\Exception $e) {
 			$statusCode = $e->getCode();
 			if (($statusCode === Http::STATUS_NOT_IMPLEMENTED) || ($statusCode === Http::STATUS_NOT_FOUND)) {
-				$this->setAppInitProgress($exApp->getAppid(), 100);
+				$this->setAppInitProgress($exApp, 100);
 			} else {
-				$this->setAppInitProgress($exApp->getAppid(), 0, $e->getMessage());
+				$this->setAppInitProgress($exApp, 0, $e->getMessage());
 			}
 		}
 	}
@@ -398,17 +399,15 @@ class AppAPIService {
 	/**
 	 * Dispatch ExApp initialization step, that may take a long time to display the progress of initialization.
 	 */
-	public function dispatchExAppInit(string $appId, bool $update = false): bool {
-		$this->setAppInitProgress($appId, 0, '', $update, true);
+	public function runOccCommand(string $command): bool {
 		$descriptors = [
 			0 => ['pipe', 'r'],
 			1 => ['pipe', 'w'],
 			2 => ['pipe', 'w'],
 		];
-		$args = ['app_api:app:dispatch_init', $appId];
 		$args = array_map(function ($arg) {
 			return escapeshellarg($arg);
-		}, $args);
+		}, [$command]);
 		$args[] = '--no-ansi --no-warnings';
 		$args = implode(' ', $args);
 		$occDirectory = null;
@@ -418,7 +417,7 @@ class AppAPIService {
 		$this->logger->info(sprintf('Calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
 		$process = proc_open('php console.php ' . $args, $descriptors, $pipes, $occDirectory);
 		if (!is_resource($process)) {
-			$this->logger->error(sprintf('ExApp %s dispatch_init failed(occDirectory=%s).', $appId, $occDirectory ?? 'null'));
+			$this->logger->error(sprintf('Error calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
 			return false;
 		}
 		fclose($pipes[0]);
@@ -549,36 +548,25 @@ class AppAPIService {
 	 * Update ExApp status during initialization step.
 	 * Active status is set when progress reached 100%.
 	 */
-	public function setAppInitProgress(string $appId, int $progress, string $error = '', bool $update = false, bool $init = false): void {
-		$exApp = $this->exAppService->getExApp($appId);
+	public function setAppInitProgress(ExApp $exApp, int $progress, string $error = ''): void {
 		$status = $exApp->getStatus();
-		if ($init) {
-			$status['init_start_time'] = time();
-		}
 
-		if ($update) {
-			// Set active=false during update action, for register it already false
-			$status['active'] = false;
+		if ($progress < 0 || $progress > 100) {
+			throw new \InvalidArgumentException('Invalid ExApp status progress value');
 		}
-
-		if ($status['active']) {
+		if (isset($status['init']) && $status['init'] === 100) {
 			return;
 		}
 
 		if ($error !== '') {
-			$this->logger->error(sprintf('ExApp %s initialization failed. Error: %s', $appId, $error));
+			$this->logger->error(sprintf('ExApp %s initialization failed. Error: %s', $exApp->getAppid(), $error));
 			$status['error'] = $error;
-			unset($status['progress']);
-			unset($status['init_start_time']);
 		} else {
-			if ($progress >= 0 && $progress < 100) {
-				$status['progress'] = $progress;
-			} elseif ($progress === 100) {
-				unset($status['progress']);
-			} else {
-				throw new \InvalidArgumentException('Invalid ExApp status progress value');
+			if ($progress === 0) {
+				$status['init_start_time'] = time();
+				unset($status['error']);
 			}
-			$status['active'] = $progress === 100;
+			$status['init'] = $progress;
 		}
 		$exApp->setStatus($status);
 		$exApp->setLastCheckTime(time());

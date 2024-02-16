@@ -39,29 +39,23 @@ class Update extends Command {
 
 		$this->addArgument('appid', InputArgument::REQUIRED);
 
-		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, '[required] Path to ExApp info.xml file (url or local absolute path)');
-		$this->addOption('force-update', null, InputOption::VALUE_NONE, 'Force ExApp update approval');
+		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, 'Path to ExApp info.xml file (url or local absolute path)');
+		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp info.xml in JSON format');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force new ExApp scopes approval');
+		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 
-		$pathToInfoXml = $input->getOption('info-xml');
-		if ($pathToInfoXml !== null) {
-			$infoXml = simplexml_load_string(file_get_contents($pathToInfoXml));
-		} else {
-			$infoXml = $this->exAppService->getLatestExAppInfoFromAppstore($appId);
+		$appInfo = $this->exAppService->getAppInfo(
+			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
+		);
+		if (isset($appInfo['error'])) {
+			$output->writeln($appInfo['error']);
+			return 1;
 		}
-
-		if ($infoXml === false) {
-			$output->writeln(sprintf('Failed to load info.xml from %s', $pathToInfoXml));
-			return 2;
-		}
-		if ($appId !== (string) $infoXml->id) {
-			$output->writeln(sprintf('ExApp appid %s does not match appid in info.xml (%s)', $appId, $infoXml->id));
-			return 2;
-		}
+		$appId = $appInfo['id'];  # value from $appInfo should have higher priority
 
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
@@ -69,53 +63,39 @@ class Update extends Command {
 			return 1;
 		}
 
-		$newVersion = (string) $infoXml->version;
-		if ($exApp->getVersion() === $newVersion) {
-			$output->writeln(sprintf('ExApp %s already updated (%s)', $appId, $newVersion));
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		if ($daemonConfig === null) {
+			$output->writeln(sprintf('Daemon config %s not found', $exApp->getDaemonConfigName()));
+		}
+		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {
+			$output->writeln('For "manual-install" deployId update is done manually');
+			return 1;
+		}
+
+		if ($exApp->getVersion() === $appInfo['version']) {
+			$output->writeln(sprintf('ExApp %s is already updated (%s)', $appId, $appInfo['version']));
 			return 2;
 		}
 
 		if ($exApp->getEnabled()) {
 			if (!$this->service->disableExApp($exApp)) {
-				$output->writeln(sprintf('Failed to disable ExApp %s.', $appId));
-				return 1;
+				$this->exAppService->disableExAppInternal($exApp);
 			} else {
 				$output->writeln(sprintf('ExApp %s disabled.', $appId));
 			}
 		}
 
-		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-		if ($daemonConfig === null) {
-			$output->writeln(sprintf('Daemon config %s not found', $exApp->getDaemonConfigName()));
-		}
-
-		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {
-			$output->writeln('For "manual-install" deployId update is done manually');
-			return 2;
-		}
-
+		$appInfo['port'] = $exApp->getPort();
+		$appInfo['secret'] = $exApp->getSecret();
+		$auth = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-			$forceApproval = $input->getOption('force-update');
-			$approveUpdate = $forceApproval;
-			if (!$forceApproval && $input->isInteractive()) {
-				/** @var QuestionHelper $helper */
-				$helper = $this->getHelper('question');
-				$question = new ConfirmationQuestion('Current ExApp version will be removed (persistent storage preserved). Continue? [y/N] ', false);
-				$approveUpdate = $helper->ask($input, $output, $question);
-			}
-
-			if (!$approveUpdate) {
-				$output->writeln(sprintf('ExApp %s update canceled', $appId));
-				return 0;
-			}
-
 			$this->dockerActions->initGuzzleClient($daemonConfig); // Required init
 			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
 			if (isset($containerInfo['error'])) {
 				$output->writeln(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
 				return 1;
 			}
-			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $infoXml, [
+			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo, [
 				'container_info' => $containerInfo,
 			]);
 			[$pullResult, $stopResult, $removeResult, $createResult, $startResult] = $this->dockerActions->updateExApp($daemonConfig, $deployParams);
@@ -131,12 +111,11 @@ class Update extends Command {
 			}
 
 			if (!isset($startResult['error']) && isset($createResult['Id'])) {
-				if (!$this->dockerActions->healthcheckContainer($createResult['Id'], $daemonConfig)) {
+				if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig)) {
 					$output->writeln(sprintf('ExApp %s update failed. Error: %s', $appId, 'Container healthcheck failed.'));
 					return 1;
 				}
 
-				$auth = [];
 				$exAppUrl = $this->dockerActions->resolveExAppUrl(
 					$appId,
 					$daemonConfig->getProtocol(),
@@ -145,14 +124,21 @@ class Update extends Command {
 					(int) $deployParams['container_params']['port'],
 					$auth,
 				);
-				if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
-					$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and configured correctly to be reachable by Nextcloud.', $appId));
-					return 1;
-				}
-
-				$output->writeln(sprintf('ExApp %s container successfully updated.', $appId));
+			} else {
+				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
+				return 3;
 			}
+		} else {
+			$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
+			return 2;
 		}
+
+		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
+			$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure container started and configured correctly to be reachable by Nextcloud.', $appId));
+			return 1;
+		}
+
+		$output->writeln(sprintf('ExApp %s container successfully updated.', $appId));
 
 		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
 		if (!$this->exAppService->updateExAppInfo($exApp, $exAppInfo)) {
@@ -164,12 +150,8 @@ class Update extends Command {
 		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
 			return $exAppScope->getScopeGroup();
 		}, $this->exAppScopeService->getExAppScopes($exApp));
-		$newExAppScopes = $this->exAppService->getExAppScopes($exApp, $infoXml);
-		if (isset($newExAppScopes['error'])) {
-			$output->writeln($newExAppScopes['error']);
-		}
 		// Prepare for prompt of newly requested ExApp scopes
-		$requiredScopes = $this->compareExAppScopes($currentExAppScopes, $newExAppScopes);
+		$requiredScopes = $this->compareExAppScopes($currentExAppScopes, $appInfo['external-app']['scopes']);
 
 		$forceScopes = (bool) $input->getOption('force-scopes');
 		$confirmScopes = $forceScopes;
@@ -193,17 +175,21 @@ class Update extends Command {
 			return 1;
 		}
 
-		$newExAppScopes = $this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes);
-		if (!$this->exAppScopeService->updateExAppScopes($exApp, $newExAppScopes)) {
+		if (!$this->exAppScopeService->registerExAppScopes(
+			$exApp, $this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']))
+		) {
 			$output->writeln(sprintf('Failed to update ExApp %s scopes.', $appId));
 			return 1;
 		}
 
-		if (!$this->service->dispatchExAppInit($exApp->getAppid(), true)) {
-			$output->writeln(sprintf('Dispatching init for ExApp %s fails.', $appId));
-			return 1;
+		$this->service->dispatchExAppInitInternal($exApp);
+		if ($input->getOption('wait-finish')) {
+			$error = $this->exAppService->waitInitStepFinish($appId);
+			if ($error) {
+				$output->writeln($error);
+				return 1;
+			}
 		}
-
 		$output->writeln(sprintf('ExApp %s successfully updated.', $appId));
 		return 0;
 	}

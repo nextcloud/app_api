@@ -17,14 +17,12 @@ use OCP\AppFramework\Db\Entity;
  * @method string getDisplayName()
  * @method string getProtocol()
  * @method string getHost()
- * @method string getPort()
  * @method array getDeployConfig()
  * @method void setAcceptsDeployId(string $acceptsDeployId)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
  * @method void setProtocol(string $protocol)
  * @method void setHost(string $host)
- * @method void setPort(string $port)
  * @method void setDeployConfig(array $deployConfig)
  */
 class DaemonConfig extends Entity implements JsonSerializable {
@@ -33,7 +31,6 @@ class DaemonConfig extends Entity implements JsonSerializable {
 	protected $acceptsDeployId;
 	protected $protocol;
 	protected $host;
-	protected $port;
 	protected $deployConfig;
 
 	/**
@@ -45,7 +42,6 @@ class DaemonConfig extends Entity implements JsonSerializable {
 		$this->addType('displayName', 'string');
 		$this->addType('protocol', 'string');
 		$this->addType('host', 'string');
-		$this->addType('port', 'string');
 		$this->addType('deployConfig', 'json');
 
 		if (isset($params['id'])) {

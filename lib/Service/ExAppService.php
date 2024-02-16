@@ -25,7 +25,6 @@ use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IUser;
 use OCP\IUserManager;
-use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
@@ -36,7 +35,6 @@ class ExAppService {
 	public function __construct(
 		private readonly LoggerInterface         $logger,
 		ICacheFactory                            $cacheFactory,
-		private readonly ISecureRandom           $random,
 		private readonly IUserManager    		 $userManager,
 		private readonly ExAppFetcher            $exAppFetcher,
 		private readonly ExAppArchiveFetcher     $exAppArchiveFetcher,
@@ -79,29 +77,28 @@ class ExAppService {
 	/**
 	 * Register ExApp or update if already exists
 	 *
-	 * @param string $appId
-	 * @param array $appData [version, name, daemon_config_id, protocol, host, port, secret]
+	 * @param array $appInfo [version, name, daemon_config_id, protocol, host, port, secret]
 	 * @return ExApp|null
 	 */
-	public function registerExApp(string $appId, array $appData): ?ExApp {
+	public function registerExApp(array $appInfo): ?ExApp {
 		$exApp = new ExApp([
-			'appid' => $appId,
-			'version' => $appData['version'],
-			'name' => $appData['name'],
-			'daemon_config_name' => $appData['daemon_config_name'],
-			'port' => $appData['port'],
-			'secret' => $appData['secret'] !== '' ? $appData['secret'] : $this->random->generate(128),
-			'status' => json_encode(['active' => false, 'progress' => 0]),
+			'appid' => $appInfo['id'],
+			'version' => $appInfo['version'],
+			'name' => $appInfo['name'],
+			'daemon_config_name' => $appInfo['daemon_config_name'],
+			'port' => $appInfo['port'],
+			'secret' => $appInfo['secret'],
+			'status' => json_encode(['deploy' => 0, 'init' => 0]),
 			'created_time' => time(),
 			'last_check_time' => time(),
 		]);
 		try {
 			$this->exAppMapper->insert($exApp);
-			$exApp = $this->exAppMapper->findByAppId($appId);
-			$this->cache->set('/exApp_' . $appId, $exApp, self::CACHE_TTL);
+			$exApp = $this->exAppMapper->findByAppId($appInfo['id']);
+			$this->cache->set('/exApp_' . $appInfo['id'], $exApp, self::CACHE_TTL);
 			return $exApp;
 		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
-			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appId, $e->getMessage()));
+			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appInfo['id'], $e->getMessage()));
 			return null;
 		}
 	}
@@ -238,41 +235,10 @@ class ExAppService {
 			$this->cache->set('/exApp_' . $exApp->getAppid(), $exApp, self::CACHE_TTL);
 			return true;
 		} catch (Exception $e) {
-			$this->logger->error(sprintf('Failed to update "%s" ExApp info.', $exApp->getAppid(), ), ['exception' => $e]);
+			$this->logger->error(sprintf('Failed to update "%s" ExApp info.', $exApp->getAppid()), ['exception' => $e]);
 			$this->resetCaches();
 		}
 		return false;
-	}
-
-	public function getExAppScopes(ExApp $exApp, ?SimpleXMLElement $infoXml = null, array $jsonInfo = []): ?array {
-		if (isset($jsonInfo['scopes'])) {
-			if (isset($jsonInfo['scopes']['required'])) {
-				return $jsonInfo['scopes']['required'];  // Will be removed in AppAPI 2.1.0 version
-			}
-			return $jsonInfo['scopes'];
-		}
-
-		if ($infoXml === null) {
-			$exAppInfo = $this->getExAppInfoFromAppstore($exApp);
-			if (isset($exAppInfo)) {
-				$infoXml = $exAppInfo;
-			}
-		}
-
-		if (isset($infoXml)) {
-			$oldFormatScopes = $infoXml->xpath('external-app/scopes/required');
-			if ($oldFormatScopes !== false) {
-				$scopes = (array) $oldFormatScopes[0]->value;
-				return array_values($scopes);  // Will be removed in AppAPI 2.2.0 version
-			}
-			$scopes = $infoXml->xpath('external-app/scopes');
-			if ($scopes !== false) {
-				$scopes = (array) $scopes[0];
-				return array_values($scopes);
-			}
-		}
-
-		return ['error' => 'Failed to get ExApp requested scopes.'];
 	}
 
 	/**
@@ -314,5 +280,48 @@ class ExAppService {
 		$this->speechToTextService->resetCacheEnabled();
 		$this->translationService->resetCacheEnabled();
 		$this->settingsService->resetCacheEnabled();
+	}
+
+	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo): array {
+		if ($jsonInfo !== null) {
+			$appInfo = json_decode($jsonInfo, true);
+			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
+			$appInfo['id'] = $appInfo['id'] ?? $appId;
+			# during manual install JSON can have all values at root level
+			foreach (['docker-install', 'scopes', 'system'] as $key) {
+				if (isset($appInfo[$key])) {
+					$appInfo['external-app'][$key] = $appInfo[$key];
+					unset($appInfo[$key]);
+				}
+			}
+			# TO-DO: remove this in AppAPI 2.4.0
+			if (isset($appInfo['system_app'])) {
+				$appInfo['external-app']['system'] = $appInfo['system_app'];
+				unset($appInfo['system_app']);
+			}
+		} else {
+			if ($infoXml !== null) {
+				$xmlAppInfo = simplexml_load_string(file_get_contents($infoXml));
+				if ($xmlAppInfo === false) {
+					return ['error' => sprintf('Failed to load info.xml from %s', $infoXml)];
+				}
+			} else {
+				$xmlAppInfo = $this->getLatestExAppInfoFromAppstore($appId);
+			}
+			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
+		}
+		return $appInfo;
+	}
+
+	public function waitInitStepFinish(string $appId): string {
+		do {
+			$exApp = $this->getExApp($appId);
+			$status = $exApp->getStatus();
+			if (isset($status['error'])) {
+				return sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']);
+			}
+			usleep(100000); // 0.1s
+		} while ($status['init'] !== 100);
+		return "";
 	}
 }
