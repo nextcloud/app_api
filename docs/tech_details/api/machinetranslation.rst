@@ -21,7 +21,6 @@ Request data
 	{
 		"name": "unique_provider_name",
 		"display_name": "Provider Display Name",
-		"action_handler": "/handler_route_on_ex_app",
 		"from_languages": {
 			"en": "English",
 			"fr": "French",
@@ -30,11 +29,14 @@ Request data
 			"en": "English",
 			"fr": "French",
 		},
+		"action_handler": "/handler_route_on_ex_app",
+		"action_detect_lang_handler": "/handler_route_on_ex_app_for_detect_lang",
 	}
 
 .. note::
 
 	``from_languages`` and ``to_languages`` are JSON object with language code as key and language name as value.
+	``action_detect_lang_handler`` is optional. If provided, translation manager will call this handler to detect language from text if no lang is provided.
 
 
 Response

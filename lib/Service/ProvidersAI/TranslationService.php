@@ -17,6 +17,7 @@ use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IServerContainer;
+use OCP\Translation\IDetectLanguageProvider;
 use OCP\Translation\ITranslationProviderWithId;
 use OCP\Translation\ITranslationProviderWithUserId;
 use OCP\Translation\LanguageTuple;
@@ -139,7 +140,12 @@ class TranslationService {
 		$exAppsProviders = $this->getRegisteredTranslationProviders();
 		foreach ($exAppsProviders as $exAppProvider) {
 			$class = '\\OCA\\AppAPI\\' . $exAppProvider->getAppid() . '\\' . $exAppProvider->getName();
-			$provider = $this->getAnonymousExAppProvider($exAppProvider, $serverContainer, $class);
+			// IDetectLanguageProvider implementation is optional if ExApp has action_detect_lang_handler
+			if ($exAppProvider->getActionDetectLang() !== '') {
+				$provider = $this->getAnonymousExAppIDetectLanguageProvider($exAppProvider, $serverContainer, $class);
+			} else {
+				$provider = $this->getAnonymousExAppProvider($exAppProvider, $serverContainer, $class);
+			}
 			$context->registerService($class, function () use ($provider) {
 				return $provider;
 			});
@@ -152,101 +158,159 @@ class TranslationService {
 	 */
 	private function getAnonymousExAppProvider(TranslationProvider $provider, IServerContainer $serverContainer, string $class): ?ITranslationProviderWithId {
 		return new class($provider, $serverContainer, $class) implements ITranslationProviderWithId, ITranslationProviderWithUserId {
-			private ?string $userId;
-
 			public function __construct(
-				private TranslationProvider $provider,
-				private IServerContainer    $serverContainer,
-				private readonly string     $class,
+				TranslationProvider $provider,
+				IServerContainer    $serverContainer,
+				string              $class,
 			) {
+				$this->provider = $provider;
+				$this->serverContainer = $serverContainer;
+				$this->class = $class;
 			}
 
-			public function getId(): string {
-				return $this->class;
+			use TranslationProviderWithIdAndUserId;
+		};
+	}
+
+	/**
+	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
+	 */
+	private function getAnonymousExAppIDetectLanguageProvider(TranslationProvider $provider, IServerContainer $serverContainer, string $class): ?IDetectLanguageProvider {
+		return new class($provider, $serverContainer, $class) implements ITranslationProviderWithId, ITranslationProviderWithUserId, IDetectLanguageProvider {
+			public function __construct(
+				TranslationProvider $provider,
+				IServerContainer    $serverContainer,
+				string              $class,
+			) {
+				$this->provider = $provider;
+				$this->serverContainer = $serverContainer;
+				$this->class = $class;
 			}
 
-			public function getName(): string {
-				return $this->provider->getDisplayName();
-			}
+			use TranslationProviderWithIdAndUserId;
 
-			public function getAvailableLanguages(): array {
-				// $fromLanguages and $toLanguages are JSON objects with lang_code => lang_label paris { "language_code": "language_label" }
-				$fromLanguages = $this->provider->getFromLanguages();
-				$toLanguages = $this->provider->getToLanguages();
-				// Convert JSON objects to array of all possible LanguageTuple pairs
-				$availableLanguages = [];
-				foreach ($fromLanguages as $fromLanguageCode => $fromLanguageLabel) {
-					foreach ($toLanguages as $toLanguageCode => $toLanguageLabel) {
-						if ($fromLanguageCode === $toLanguageCode) {
-							continue;
-						}
-						$availableLanguages[] = LanguageTuple::fromArray([
-							'from' => $fromLanguageCode,
-							'fromLabel' => $fromLanguageLabel,
-							'to' => $toLanguageCode,
-							'toLabel' => $toLanguageLabel,
-						]);
-					}
-				}
-				return $availableLanguages;
-			}
-
-			public function translate(?string $fromLanguage, string $toLanguage, string $text, float $maxExecutionTime = 0): string {
+			public function detectLanguage(string $text): ?string {
 				/** @var PublicFunctions $service */
 				$service = $this->serverContainer->get(PublicFunctions::class);
-				/** @var TranslationQueueMapper $mapper */
-				$mapper = $this->serverContainer->get(TranslationQueueMapper::class);
-				$route = $this->provider->getActionHandler();
-				$queueRecord = $mapper->insert(new TranslationQueue(['created_time' => time()]));
-				$taskId = $queueRecord->getId();
+				$logger = $this->serverContainer->get(LoggerInterface::class);
+				$route = $this->provider->getActionDetectLang();
+
+				if ($route === '') {
+					return null; // ExApp does not support language detection
+				}
 
 				$response = $service->exAppRequestWithUserInit($this->provider->getAppid(),
 					$route,
 					$this->userId,
 					params: [
-						'from_language' => $fromLanguage,
-						'to_language' => $toLanguage,
 						'text' => $text,
-						'task_id' => $taskId,
-						'max_execution_time' => $maxExecutionTime,
-					],
-					options: [
-						'timeout' => $maxExecutionTime,
 					],
 				);
+				$response = json_decode($response->getBody(), true);
 
-				if (is_array($response)) {
-					$mapper->delete($mapper->getById($taskId));
-					throw new \Exception(sprintf('Failed to process translation task: %s:%s:%s-%s. Error: %s',
-						$this->provider->getAppid(),
-						$this->provider->getName(),
-						$fromLanguage,
-						$toLanguage,
-						$response['error']
-					));
+				$logger->debug('Detect language response ' . json_encode($response));
+
+				if (isset($response['error'])) {
+					throw new \Exception(sprintf('Failed to detect language for text: %s. Error: %s', $text, $response['error']));
 				}
 
-				do {
-					$taskResults = $mapper->getById($taskId);
-					usleep(300000); // 0.3s
-				} while ($taskResults->getFinished() === 0);
-
-				$mapper->delete($taskResults);
-				if (!empty($taskResults->getError())) {
-					throw new \Exception(sprintf('Translation task returned error: %s:%s:%s-%s. Error: %s',
-						$this->provider->getAppid(),
-						$this->provider->getName(),
-						$fromLanguage,
-						$toLanguage,
-						$taskResults->getError(),
-					));
-				}
-				return $taskResults->getResult();
-			}
-
-			public function setUserId(?string $userId): void {
-				$this->userId = $userId;
+				return $response['detected_lang'] ?? null;
 			}
 		};
+	}
+}
+
+
+trait TranslationProviderWithIdAndUserId {
+	private ?string $userId;
+	private IServerContainer $serverContainer;
+	private TranslationProvider $provider;
+	private string $class;
+
+	public function getId(): string {
+		return $this->class;
+	}
+
+	public function getName(): string {
+		return $this->provider->getDisplayName();
+	}
+
+	public function getAvailableLanguages(): array {
+		// $fromLanguages and $toLanguages are JSON objects with lang_code => lang_label paris { "language_code": "language_label" }
+		$fromLanguages = $this->provider->getFromLanguages();
+		$toLanguages = $this->provider->getToLanguages();
+		// Convert JSON objects to array of all possible LanguageTuple pairs
+		$availableLanguages = [];
+		foreach ($fromLanguages as $fromLanguageCode => $fromLanguageLabel) {
+			foreach ($toLanguages as $toLanguageCode => $toLanguageLabel) {
+				if ($fromLanguageCode === $toLanguageCode) {
+					continue;
+				}
+				$availableLanguages[] = LanguageTuple::fromArray([
+					'from' => $fromLanguageCode,
+					'fromLabel' => $fromLanguageLabel,
+					'to' => $toLanguageCode,
+					'toLabel' => $toLanguageLabel,
+				]);
+			}
+		}
+		return $availableLanguages;
+	}
+
+	public function translate(?string $fromLanguage, string $toLanguage, string $text, float $maxExecutionTime = 0): string {
+		/** @var PublicFunctions $service */
+		$service = $this->serverContainer->get(PublicFunctions::class);
+		/** @var TranslationQueueMapper $mapper */
+		$mapper = $this->serverContainer->get(TranslationQueueMapper::class);
+		$route = $this->provider->getActionHandler();
+		$queueRecord = $mapper->insert(new TranslationQueue(['created_time' => time()]));
+		$taskId = $queueRecord->getId();
+
+		$response = $service->exAppRequestWithUserInit($this->provider->getAppid(),
+			$route,
+			$this->userId,
+			params: [
+				'from_language' => $fromLanguage,
+				'to_language' => $toLanguage,
+				'text' => $text,
+				'task_id' => $taskId,
+				'max_execution_time' => $maxExecutionTime,
+			],
+			options: [
+				'timeout' => $maxExecutionTime,
+			],
+		);
+
+		if (is_array($response)) {
+			$mapper->delete($mapper->getById($taskId));
+			throw new \Exception(sprintf('Failed to process translation task: %s:%s:%s-%s. Error: %s',
+				$this->provider->getAppid(),
+				$this->provider->getName(),
+				$fromLanguage,
+				$toLanguage,
+				$response['error']
+			));
+		}
+
+		do {
+			$taskResults = $mapper->getById($taskId);
+			usleep(300000); // 0.3s
+		} while ($taskResults->getFinished() === 0);
+
+		$mapper->delete($taskResults);
+		if (!empty($taskResults->getError())) {
+			throw new \Exception(sprintf('Translation task returned error: %s:%s:%s-%s. Error: %s',
+				$this->provider->getAppid(),
+				$this->provider->getName(),
+				$fromLanguage,
+				$toLanguage,
+				$taskResults->getError(),
+			));
+		}
+		return $taskResults->getResult();
+	}
+
+	public function setUserId(?string $userId): void {
+		$this->userId = $userId;
 	}
 }
