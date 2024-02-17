@@ -412,7 +412,7 @@ class ExAppsPageController extends Controller {
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
 			if (!$this->service->runOccCommand(sprintf("app_api:app:register --force-scopes %s", $appId))) {
-				return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not update ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+				return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not install ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
 			return new JSONResponse([]);
 		}

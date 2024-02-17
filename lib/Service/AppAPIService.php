@@ -554,10 +554,14 @@ class AppAPIService {
 			$status['error'] = $error;
 		} else {
 			if ($progress === 0) {
+				$status['action'] = 'init';
 				$status['init_start_time'] = time();
 				unset($status['error']);
 			}
 			$status['init'] = $progress;
+		}
+		if ($progress === 100) {
+			$status['action'] = '';
 		}
 		$exApp->setStatus($status);
 		$exApp->setLastCheckTime(time());

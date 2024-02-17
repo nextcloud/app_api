@@ -166,6 +166,7 @@ class Register extends Command {
 				return 3;
 			}
 		} elseif ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
+			$this->manualActions->deployExApp($exApp, $daemonConfig);
 			$exAppUrl = $this->manualActions->resolveExAppUrl(
 				$appId,
 				$daemonConfig->getProtocol(),

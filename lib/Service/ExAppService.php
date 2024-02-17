@@ -74,12 +74,6 @@ class ExAppService {
 		return null;
 	}
 
-	/**
-	 * Register ExApp or update if already exists
-	 *
-	 * @param array $appInfo [version, name, daemon_config_id, protocol, host, port, secret]
-	 * @return ExApp|null
-	 */
 	public function registerExApp(array $appInfo): ?ExApp {
 		$exApp = new ExApp([
 			'appid' => $appInfo['id'],
@@ -88,7 +82,7 @@ class ExAppService {
 			'daemon_config_name' => $appInfo['daemon_config_name'],
 			'port' => $appInfo['port'],
 			'secret' => $appInfo['secret'],
-			'status' => json_encode(['deploy' => 0, 'init' => 0]),
+			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '']),
 			'created_time' => time(),
 			'last_check_time' => time(),
 		]);
@@ -333,12 +327,16 @@ class ExAppService {
 			$status['error'] = $error;
 		} else {
 			if ($progress === 0) {
+				$status['action'] = 'deploy';
 				$status['deploy_start_time'] = time();
 				unset($status['error']);
 			}
 			$status['deploy'] = $progress;
 		}
 		unset($status['active']);  # TO-DO: Remove in AppAPI 2.4.0
+		if ($progress === 100) {
+			$status['action'] = '';
+		}
 		$exApp->setStatus($status);
 		$exApp->setLastCheckTime(time());
 		$this->updateExApp($exApp);
