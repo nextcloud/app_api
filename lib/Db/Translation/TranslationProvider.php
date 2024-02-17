@@ -17,12 +17,14 @@ use OCP\AppFramework\Db\Entity;
  * @method array getFromLanguages()
  * @method array getToLanguages()
  * @method string getActionHandler()
+ * @method string getActionDetectLang()
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
  * @method void setFromLanguages(array $fromLanguages)
  * @method void setToLanguages(array $toLanguages)
  * @method void setActionHandler(string $actionHandler)
+ * @method void setActionDetectLang(string $actionDetectLang)
  */
 class TranslationProvider extends Entity implements \JsonSerializable {
 	protected $appid;
@@ -31,6 +33,7 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 	protected $fromLanguages;
 	protected $toLanguages;
 	protected $actionHandler;
+	protected $actionDetectLang;
 
 	public function __construct(array $params = []) {
 		$this->addType('appid', 'string');
@@ -39,6 +42,7 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 		$this->addType('fromLanguages', 'json');
 		$this->addType('toLanguages', 'json');
 		$this->addType('actionHandler', 'string');
+		$this->addType('actionDetectLang', 'string');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
@@ -61,6 +65,9 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 		if (isset($params['action_handler'])) {
 			$this->setActionHandler($params['action_handler']);
 		}
+		if (isset($params['action_detect_lang'])) {
+			$this->setActionDetectLang($params['action_detect_lang']);
+		}
 	}
 
 	public function jsonSerialize(): array {
@@ -72,6 +79,7 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 			'from_languages' => $this->getFromLanguages(),
 			'to_languages' => $this->getToLanguages(),
 			'action_handler' => $this->getActionHandler(),
+			'action_detect_lang' => $this->getActionDetectLang(),
 		];
 	}
 }
