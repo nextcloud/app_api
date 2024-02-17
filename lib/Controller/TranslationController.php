@@ -43,6 +43,7 @@ class TranslationController extends OCSController {
 		array $fromLanguages,
 		array $toLanguages,
 		string $actionHandler,
+		string $actionDetectLang = '',
 	): DataResponse {
 		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
 		if (version_compare($ncVersion, '29.0', '<')) {
@@ -51,7 +52,7 @@ class TranslationController extends OCSController {
 
 		$provider = $this->translationService->registerTranslationProvider(
 			$this->request->getHeader('EX-APP-ID'), $name, $displayName,
-			$fromLanguages, $toLanguages, $actionHandler
+			$fromLanguages, $toLanguages, $actionHandler, $actionDetectLang,
 		);
 
 		if ($provider === null) {
