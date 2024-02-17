@@ -186,11 +186,8 @@ class AppAPIService {
 
 		if ($authValid) {
 			if (!$exApp->getEnabled()) {
-				// If ExApp is in initializing state, it is disabled yet, so we allow requests in such case
-				if (!isset($exApp->getStatus()['init'])) {
-					$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
-					return false;
-				}
+				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
+				return false;
 			}
 			if (!$this->handleExAppVersionChange($request, $exApp)) {
 				return false;
@@ -544,20 +541,14 @@ class AppAPIService {
 		return $result;
 	}
 
-	/**
-	 * Update ExApp status during initialization step.
-	 * Active status is set when progress reached 100%.
-	 */
 	public function setAppInitProgress(ExApp $exApp, int $progress, string $error = ''): void {
-		$status = $exApp->getStatus();
-
 		if ($progress < 0 || $progress > 100) {
-			throw new \InvalidArgumentException('Invalid ExApp status progress value');
+			throw new \InvalidArgumentException('Invalid ExApp init status progress value');
 		}
-		if (isset($status['init']) && $status['init'] === 100) {
+		$status = $exApp->getStatus();
+		if ($progress !== 0 && isset($status['init']) && $status['init'] === 100) {
 			return;
 		}
-
 		if ($error !== '') {
 			$this->logger->error(sprintf('ExApp %s initialization failed. Error: %s', $exApp->getAppid(), $error));
 			$status['error'] = $error;

@@ -309,8 +309,39 @@ class ExAppService {
 				$xmlAppInfo = $this->getLatestExAppInfoFromAppstore($appId);
 			}
 			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
+			if (isset($appInfo['external-app']['scopes']['value'])) {
+				$appInfo['external-app']['scopes'] = $appInfo['external-app']['scopes']['value'];
+			}
+			# TO-DO: remove this in AppAPI 2.3.0
+			if (isset($appInfo['external-app']['scopes']['required']['value'])) {
+				$appInfo['external-app']['scopes'] = $appInfo['external-app']['scopes']['required']['value'];
+			}
 		}
 		return $appInfo;
+	}
+
+	public function setAppDeployProgress(ExApp $exApp, int $progress, string $error = ''): void {
+		if ($progress < 0 || $progress > 100) {
+			throw new \InvalidArgumentException('Invalid ExApp deploy status progress value');
+		}
+		$status = $exApp->getStatus();
+		if ($progress !== 0 && isset($status['deploy']) && $status['deploy'] === 100) {
+			return;
+		}
+		if ($error !== '') {
+			$this->logger->error(sprintf('ExApp %s deploying failed. Error: %s', $exApp->getAppid(), $error));
+			$status['error'] = $error;
+		} else {
+			if ($progress === 0) {
+				$status['deploy_start_time'] = time();
+				unset($status['error']);
+			}
+			$status['deploy'] = $progress;
+		}
+		unset($status['active']);  # TO-DO: Remove in AppAPI 2.4.0
+		$exApp->setStatus($status);
+		$exApp->setLastCheckTime(time());
+		$this->updateExApp($exApp);
 	}
 
 	public function waitInitStepFinish(string $appId): string {

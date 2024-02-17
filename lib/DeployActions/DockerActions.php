@@ -10,15 +10,14 @@ use GuzzleHttp\Exception\GuzzleException;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
 
-use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
 use OCP\IURLGenerator;
-use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 
 class DockerActions implements IDeployActions {
@@ -45,11 +44,9 @@ class DockerActions implements IDeployActions {
 		private readonly IConfig             $config,
 		private readonly ICertificateManager $certificateManager,
 		private readonly IAppManager         $appManager,
-		private readonly ISecureRandom       $random,
 		private readonly IURLGenerator       $urlGenerator,
 		private readonly AppAPICommonService $service,
-		private readonly ExAppService        $exAppService,
-		private readonly DaemonConfigService $daemonConfigService,
+		private readonly ExAppService		 $exAppService,
 	) {
 	}
 
@@ -60,7 +57,7 @@ class DockerActions implements IDeployActions {
 	/**
 	 * Pull image, create and start container
 	 */
-	public function deployExApp(DaemonConfig $daemonConfig, array $params = []): array {
+	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): array {
 		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
 			return [['error' => 'Only docker-install is supported for now.'], null, null];
 		}
@@ -80,11 +77,13 @@ class DockerActions implements IDeployActions {
 		$dockerUrl = $this->buildDockerUrl($daemonConfig);
 		$this->initGuzzleClient($daemonConfig);
 
+		$this->exAppService->setAppDeployProgress($exApp, 0);
 		$pullResult = $this->pullContainer($dockerUrl, $imageParams);
 		if (isset($pullResult['error'])) {
 			return [$pullResult, null, null];
 		}
 
+		$this->exAppService->setAppDeployProgress($exApp, 95);
 		$containerInfo = $this->inspectContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($containerInfo['Id'])) {
 			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
@@ -99,6 +98,7 @@ class DockerActions implements IDeployActions {
 		}
 
 		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+		$this->exAppService->setAppDeployProgress($exApp, 100);
 		return [$pullResult, $createResult, $startResult];
 	}
 
@@ -292,19 +292,22 @@ class DockerActions implements IDeployActions {
 	}
 
 	/**
+	 * @param ExApp $exApp
 	 * @param DaemonConfig $daemonConfig
 	 * @param array $params Deploy params (image_params, container_params)
 	 *
 	 * @return array
 	 */
-	public function updateExApp(DaemonConfig $daemonConfig, array $params = []): array {
+	public function updateExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): array {
 		$dockerUrl = $this->buildDockerUrl($daemonConfig);
 
+		$this->exAppService->setAppDeployProgress($exApp, 0);
 		$pullResult = $this->pullContainer($dockerUrl, $params['image_params']);
 		if (isset($pullResult['error'])) {
 			return [$pullResult, null, null, null, null];
 		}
 
+		$this->exAppService->setAppDeployProgress($exApp, 95);
 		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($stopResult['error'])) {
 			return [$pullResult, $stopResult, null, null, null];
@@ -319,6 +322,7 @@ class DockerActions implements IDeployActions {
 		}
 
 		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+		$this->exAppService->setAppDeployProgress($exApp, 100);
 		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
 	}
 

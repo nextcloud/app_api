@@ -98,7 +98,7 @@ class Update extends Command {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo, [
 				'container_info' => $containerInfo,
 			]);
-			[$pullResult, $stopResult, $removeResult, $createResult, $startResult] = $this->dockerActions->updateExApp($daemonConfig, $deployParams);
+			[$pullResult, $stopResult, $removeResult, $createResult, $startResult] = $this->dockerActions->updateExApp($exApp, $daemonConfig, $deployParams);
 
 			if (isset($pullResult['error'])) {
 				$output->writeln(sprintf('ExApp %s update failed. Error: %s', $appId, $pullResult['error']));

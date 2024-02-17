@@ -404,7 +404,7 @@ class ExAppsPageController extends Controller {
 		$apps = array_merge($apps, $formattedLocalApps);
 		return $apps;
 	}
-	
+
 	#[PasswordConfirmationRequired]
 	public function enableApp(string $appId, array $groups = []): JSONResponse {
 		$updateRequired = false;
