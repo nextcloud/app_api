@@ -56,7 +56,7 @@ class TranslationService {
 				'from_languages' => $fromLanguages,
 				'to_languages' => $toLanguages,
 				'action_handler' => ltrim($actionHandler, '/'),
-				'action_detect_lang ' => ltrim($actionDetectLang, '/'),
+				'action_detect_lang' => ltrim($actionDetectLang, '/'),
 			]);
 			if ($translationProvider !== null) {
 				$newTranslationProvider->setId($translationProvider->getId());
@@ -142,7 +142,7 @@ class TranslationService {
 		$exAppsProviders = $this->getRegisteredTranslationProviders();
 		foreach ($exAppsProviders as $exAppProvider) {
 			$class = '\\OCA\\AppAPI\\' . $exAppProvider->getAppid() . '\\' . $exAppProvider->getName();
-			// IDetectLanguageProvider implementation is optional if ExApp has action_detect_lang_handler
+			// IDetectLanguageProvider implementation is optional if ExApp has action_detect_lang
 			if ($exAppProvider->getActionDetectLang() !== '') {
 				$provider = $this->getAnonymousExAppIDetectLanguageProvider($exAppProvider, $serverContainer, $class);
 			} else {

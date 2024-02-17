@@ -30,13 +30,14 @@ Request data
 			"fr": "French",
 		},
 		"action_handler": "/handler_route_on_ex_app",
-		"action_detect_lang_handler": "/handler_route_on_ex_app_for_detect_lang",
+		"action_detect_lang": "/detect_lang_fromt_text_handler",
 	}
 
 .. note::
 
 	``from_languages`` and ``to_languages`` are JSON object with language code as key and language name as value.
-	``action_detect_lang_handler`` is optional. If provided, translation manager will call this handler to detect language from text if no lang is provided.
+	``action_detect_lang`` is optional. If provided, server's translation manager will call this handler to detect language from text if no source lang provided,
+	for reference see `Providing Language detection <https://docs.nextcloud.com/server/latest/developer_manual/digging_deeper/translation.html#providing-language-detection>`_.
 
 
 Response
