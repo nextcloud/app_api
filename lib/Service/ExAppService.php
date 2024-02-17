@@ -82,7 +82,7 @@ class ExAppService {
 			'daemon_config_name' => $appInfo['daemon_config_name'],
 			'port' => $appInfo['port'],
 			'secret' => $appInfo['secret'],
-			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '']),
+			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install']),
 			'created_time' => time(),
 			'last_check_time' => time(),
 		]);
@@ -176,20 +176,25 @@ class ExAppService {
 			}
 
 			$exApps = array_map(function (ExApp $exApp) {
-				return [
-					'id' => $exApp->getAppid(),
-					'name' => $exApp->getName(),
-					'version' => $exApp->getVersion(),
-					'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
-					'last_check_time' => $exApp->getLastCheckTime(),
-					'system' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-				];
+				return $this->formatExAppInfo($exApp);
 			}, $exApps);
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while getting ExApps list. Error: %s', $e->getMessage()), ['exception' => $e]);
 			$exApps = [];
 		}
 		return $exApps;
+	}
+
+	public function formatExAppInfo(ExApp $exApp): array {
+		return [
+			'id' => $exApp->getAppid(),
+			'name' => $exApp->getName(),
+			'version' => $exApp->getVersion(),
+			'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
+			'last_check_time' => $exApp->getLastCheckTime(),
+			'system' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
+			'status' => $exApp->getStatus(),
+		];
 	}
 
 	public function getNCUsersList(): ?array {

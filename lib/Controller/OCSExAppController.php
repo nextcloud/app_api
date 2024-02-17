@@ -12,7 +12,6 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
-use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
@@ -26,26 +25,31 @@ class OCSExAppController extends OCSController {
 		parent::__construct(Application::APP_ID, $request);
 	}
 
-	/**
-	 * @throws OCSBadRequestException
-	 */
 	#[NoCSRFRequired]
 	public function getExAppsList(string $list = 'enabled'): DataResponse {
 		if (!in_array($list, ['all', 'enabled'])) {
-			throw new OCSBadRequestException();
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
 		}
 		return new DataResponse($this->exAppService->getExAppsList($list), Http::STATUS_OK);
 	}
 
+	#[NoCSRFRequired]
+	public function getExApp(string $appId): DataResponse {
+		$exApp = $this->exAppService->getExApp($appId);
+		if (!$exApp) {
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
+		}
+		return new DataResponse($this->exAppService->formatExAppInfo($exApp), Http::STATUS_OK);
+	}
+
 	/**
-	 * @throws OCSNotFoundException
 	 * @throws OCSBadRequestException
 	 */
 	#[NoCSRFRequired]
 	public function setExAppEnabled(string $appId, int $enabled): DataResponse {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null) {
-			throw new OCSNotFoundException('ExApp not found');
+		if (!$exApp) {
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		if (filter_var($enabled, FILTER_VALIDATE_BOOL)) {

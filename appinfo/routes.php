@@ -57,6 +57,7 @@ return [
 
 		// ExApps
 		['name' => 'OCSExApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
+		['name' => 'OCSExApp#getExApp', 'url' => '/api/v1/ex-app/{appId}', 'verb' => 'GET'],
 
 		// ExApps actions
 		['name' => 'OCSExApp#setExAppEnabled', 'url' => '/api/v1/ex-app/{appId}/enabled', 'verb' => 'PUT'],

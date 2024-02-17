@@ -562,6 +562,7 @@ class AppAPIService {
 		}
 		if ($progress === 100) {
 			$status['action'] = '';
+			$status['type'] = '';
 		}
 		$exApp->setStatus($status);
 		$exApp->setLastCheckTime(time());

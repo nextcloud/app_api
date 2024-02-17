@@ -77,6 +77,11 @@ class Update extends Command {
 			return 2;
 		}
 
+		$status = $exApp->getStatus();
+		$status['type'] = 'update';
+		$exApp->setStatus($status);
+		$this->exAppService->updateExApp($exApp);
+
 		if ($exApp->getEnabled()) {
 			if (!$this->service->disableExApp($exApp)) {
 				$this->exAppService->disableExAppInternal($exApp);
