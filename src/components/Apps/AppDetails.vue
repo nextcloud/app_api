@@ -19,7 +19,7 @@
 					class="enable"
 					type="button"
 					:value="disableButtonText"
-					:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
+					:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
 					@click="disable(app.id)">
 				<input v-if="!app.active && (app.canInstall || app.isCompatible)"
 					:title="enableButtonTooltip"
@@ -27,7 +27,7 @@
 					class="enable primary"
 					type="button"
 					:value="enableButtonText"
-					:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
+					:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
 					@click="enable(app.id)">
 				<input v-else-if="!app.active && !app.canInstall"
 					:title="forceEnableButtonTooltip"
@@ -117,12 +117,6 @@ export default {
 			type: Object,
 			required: true,
 		},
-	},
-
-	data() {
-		return {
-			groupCheckedAppsData: false,
-		}
 	},
 
 	computed: {

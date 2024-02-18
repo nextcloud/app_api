@@ -7,11 +7,7 @@
 		<p><b>{{ t('app_api', 'GPUs support') }}</b>: {{ daemon.deploy_config?.gpu || 'false' }}</p>
 		<div class="exappinfo">
 			<div class="exappinfo-row">
-				<b>{{ t('app_api', 'External App URL: ') }}</b>
-				<span>{{ app.exAppUrl }}</span>
-			</div>
-			<div class="exappinfo-row">
-				<b>{{ t('app_api', 'System: ') }}</b>
+				<b>{{ t('app_api', 'System app: ') }}</b>
 				<span>{{ app.systemApp }}</span>
 			</div>
 		</div>

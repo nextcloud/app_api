@@ -105,6 +105,8 @@ class ExAppsPageController extends Controller {
 				$this->dockerActions->initGuzzleClient($daemonConfig);
 				$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 				$appInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
+				$appInitialData['default_daemon_config'] = $daemonConfig->jsonSerialize();
+				unset($appInitialData['default_daemon_config']['deploy_config']['haproxy_password']); // do not expose password
 				if (!$daemonConfigAccessible) {
 					$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please verify its configuration', $daemonConfig->getName()));
 				}
@@ -190,11 +192,6 @@ class ExAppsPageController extends Controller {
 			}
 
 			$currentLanguage = substr(\OC::$server->getL10NFactory()->findLanguage(), 0, 2);
-			$enabledValue = $this->config->getAppValue($app['id'], 'enabled', 'no');
-			$groups = null;
-			if ($enabledValue !== 'no' && $enabledValue !== 'yes') {
-				$groups = $enabledValue;
-			}
 
 			if ($exApp !== null) {
 				$currentVersion = $exApp->getVersion();
@@ -204,15 +201,12 @@ class ExAppsPageController extends Controller {
 
 			$scopes = null;
 			$daemon = null;
-			$exAppUrl = '';
 
 			if ($exApp !== null) {
 				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
 					return $exAppScope->getScopeGroup();
 				}, $this->exAppScopeService->getExAppScopes($exApp)));
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-				$auth = [];
-				$exAppUrl = $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth);
 			}
 
 			$formattedApps[] = [
@@ -250,13 +244,11 @@ class ExAppsPageController extends Controller {
 				'removable' => $existsLocally,
 				'active' => $exApp !== null && $exApp->getEnabled() === 1,
 				'needsDownload' => !$existsLocally,
-				'groups' => $groups,
 				'fromAppStore' => true,
 				'appstoreData' => $app,
 				'scopes' => $scopes,
 				'daemon' => $daemon,
 				'systemApp' => $exApp !== null && $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
-				'exAppUrl' => $exAppUrl,
 				'status' => $exApp !== null ? $exApp->getStatus() : [],
 			];
 		}
@@ -296,12 +288,6 @@ class ExAppsPageController extends Controller {
 				}))[0]['releases'][0]['version'];
 			}
 
-			// fix groups to be an array
-			$groups = [];
-			if (is_string($appData['groups'])) {
-				$groups = json_decode($appData['groups']);
-			}
-			$appData['groups'] = $groups;
 			$appData['canUnInstall'] = !$appData['active'] && $appData['removable'];
 
 			// fix licence vs license
@@ -388,7 +374,6 @@ class ExAppsPageController extends Controller {
 					'removable' => true, // to allow "remove" command for manual-install
 					'active' => $exApp->getEnabled() === 1,
 					'needsDownload' => false,
-					'groups' => [],
 					'fromAppStore' => false,
 					'appstoreData' => $app,
 					'scopes' => $scopes,
@@ -401,12 +386,11 @@ class ExAppsPageController extends Controller {
 				];
 			}
 		}
-		$apps = array_merge($apps, $formattedLocalApps);
-		return $apps;
+		return array_merge($apps, $formattedLocalApps);
 	}
 
 	#[PasswordConfirmationRequired]
-	public function enableApp(string $appId, array $groups = []): JSONResponse {
+	public function enableApp(string $appId): JSONResponse {
 		$updateRequired = false;
 		$exApp = $this->exAppService->getExApp($appId);
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.

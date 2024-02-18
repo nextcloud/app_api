@@ -7,6 +7,7 @@ namespace OCA\AppAPI\Service;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
+use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
@@ -41,6 +42,7 @@ class ExAppService {
 		private readonly ExAppMapper             $exAppMapper,
 		private readonly ExAppUsersService       $exAppUsersService,
 		private readonly ExAppScopesService      $exAppScopesService,
+		private readonly ExAppApiScopeService    $exAppApiScopeService,
 		private readonly TopMenuService          $topMenuService,
 		private readonly InitialStateService     $initialStateService,
 		private readonly ScriptsService          $scriptsService,
@@ -194,6 +196,9 @@ class ExAppService {
 			'last_check_time' => $exApp->getLastCheckTime(),
 			'system' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 			'status' => $exApp->getStatus(),
+			'scopes' => $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
+				return $exAppScope->getScopeGroup();
+			}, $this->exAppScopesService->getExAppScopes($exApp))),
 		];
 	}
 

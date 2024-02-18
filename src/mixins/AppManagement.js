@@ -10,7 +10,10 @@ export default {
 			return this.app && this.$store.getters.loading(this.app.id)
 		},
 		isInitializing() {
-			return this.app && Object.hasOwn(this.app?.status, 'progress') && this.app.status.progress < 100
+			return this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'init'
+		},
+		isDeploying() {
+			return this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'deploy'
 		},
 		isManualInstall() {
 			return this.app?.daemon?.accepts_deploy_id === 'manual-install'
@@ -22,8 +25,11 @@ export default {
 			return ''
 		},
 		enableButtonText() {
-			if (this.app && Object.hasOwn(this.app?.status, 'progress')) {
-				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.progress })
+			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'deploy') {
+				return t('app_api', '{progress}% Deploying', { progress: this.app.status?.deploy })
+			}
+			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'init') {
+				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.init })
 			}
 			if (this.app.needsDownload) {
 				return t('app_api', 'Deploy and Enable')
@@ -31,8 +37,11 @@ export default {
 			return t('app_api', 'Enable')
 		},
 		disableButtonText() {
-			if (this.app && Object.hasOwn(this.app?.status, 'progress')) {
-				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.progress })
+			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'deploy') {
+				return t('app_api', '{progress}% Deploying', { progress: this.app.status?.deploy })
+			}
+			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'init') {
+				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.init })
 			}
 			return t('app_api', 'Disable')
 		},
@@ -69,26 +78,14 @@ export default {
 		},
 	},
 
-	data() {
-		return {
-			groupCheckedAppsData: false,
-		}
-	},
-
-	mounted() {
-		if (this.app && this.app.groups && this.app.groups.length > 0) {
-			this.groupCheckedAppsData = true
-		}
-	},
-
 	methods: {
 		forceEnable(appId) {
-			this.$store.dispatch('forceEnableApp', { appId, groups: [] })
+			this.$store.dispatch('forceEnableApp', { appId })
 				.then((response) => { rebuildNavigation() })
 				.catch((error) => { showError(error) })
 		},
 		enable(appId) {
-			this.$store.dispatch('enableApp', { appId, groups: [] })
+			this.$store.dispatch('enableApp', { appId })
 				.then((response) => { rebuildNavigation() })
 				.catch((error) => { showError(error) })
 		},

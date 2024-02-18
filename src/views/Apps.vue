@@ -304,6 +304,7 @@ export default {
 		this.$store.dispatch('getAllApps')
 		this.$store.commit('setUpdateCount', this.state.updateCount)
 		this.$store.commit('setDaemonAccessible', this.state.daemon_config_accessible)
+		this.$store.commit('setDefaultDaemon', this.state.default_daemon_config)
 		this.$store.dispatch('updateAppsStatus')
 	},
 
