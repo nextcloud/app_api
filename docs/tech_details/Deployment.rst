@@ -4,11 +4,10 @@ Deployment
 Overview
 --------
 
-AppAPI ExApps deployment process in short consists of 3 steps:
+AppAPI ExApps deployment process in short consists of 2 steps:
 
 1. `DaemonConfig registration`_
-2. `ExApp deployment`_
-3. `ExApp registration`_
+2. `ExApp registration`_
 
 .. _occ_daemon_config_registration:
 
@@ -59,68 +58,48 @@ Example of ``occ`` **app_api:daemon:register** command:
 	sudo -u www-data php occ app_api:daemon:register docker_local_sock "My Local Docker" docker-install http /var/run/docker.sock "https://nextcloud.local" --net nextcloud
 
 
-ExApp deployment
-----------------
+ExApp registration
+------------------
 
-Second step is to deploy ExApp on registered daemon.
-This can be done by ``occ`` CLI command **app_api:app:deploy**:
+Second and final step is to deploy and register ExApp in Nextcloud on previously registered daemon.
+This can be done by ``occ`` CLI command **app_api:app:register**:
 
 .. code-block:: bash
 
-	app_api:app:deploy <appid> <daemon-config-name> [--info-xml INFO-XML] [--]
-
-.. note::
-	For development this step is skipped, as ExApp is deployed and started manually by developer.
-
-.. warning::
-	After successful deployment (pull, create and start container), there is a heartbeat check with 90 seconds timeout (will be configurable).
+	app_api:app:register <appid> <daemon-config-name> [--force-scopes] [--]
 
 Arguments
 *********
 
-	* ``appid`` - unique name of the ExApp (e.g. ``app_python_skeleton``, must be the same as in ``info.xml``)
+	* ``appid`` - unique name of the ExApp (e.g. ``app_python_skeleton``, must be the same as in deployed container)
 	* ``daemon-config-name`` - unique name of the daemon (e.g. ``docker_local_sock``)
 
 Options
 *******
 
-	* ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
+	* ``--force-scopes`` *[optional]* - force scopes approval
+	* ``--info-xml INFO-XML`` **[optional]** - path to info.xml file with ExApp description (url or local absolute path)
+	* ``--json-info JSON-INFO`` **[optional]** - JSON with ExApp description
 
-Deploy result JSON
-******************
+.. note::
+	For ``manual-install`` type developer should perform start of ExApp and run **register** only after it.
 
-Example of deploy result JSON:
-
-.. code-block::
-
-	{
-		"appid": "app_python_skeleton",
-		"name":"App Python Skeleton",
-		"daemon_config_name": "local_docker_sock",
-		"version":"1.0.0",
-		"secret":"***generated-secret***",
-		"host":"app_python_skeleton",
-		"port":"9001",
-		"system_app": true
-	}
-
-This JSON structure is used in ExApp registration step for development.
-
+.. warning::
+	After successful deployment (pull, create and start container), there is a heartbeat check with 90 seconds timeout (will be configurable).
 
 Manual install for development
 ******************************
 
 For development purposes, you can install ExApp manually.
 There is a ``manual-install`` DeployConfig type, which can be used in case of development.
-For ExApp registration with it you need to provide JSON app info with structure described before
-using **app_api:app:register** ``--json-info`` option.
+For ExApp registration with it you need to provide JSON app info or a path to app XML file.
 
 For all examples and applications we release we usually add manual_install command in it's makefile for easier development.
 
 .. code-block::
 
 	php occ app_api:app:register nc_py_api manual_install --json-info \
-            "{\"appid\":\"nc_py_api\",\"name\":\"nc_py_api\",\"daemon_config_name\":\"manual_install\",\"version\":\"1.0.0\",\"secret\":\"12345\",\"port\":$APP_PORT,\"scopes\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\", \"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"],\"system_app\":1}" \
+            "{\"id\":\"nc_py_api\",\"name\":\"nc_py_api\",\"daemon_config_name\":\"manual_install\",\"version\":\"1.0.0\",\"secret\":\"12345\",\"port\":$APP_PORT,\"scopes\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\", \"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"],\"system\":1}" \
             --force-scopes
 
 .. note:: **Deployment/Startup of App should be done by developer when manual_install DeployConfig type is used.**
@@ -139,36 +118,7 @@ The following env variables are required and built automatically:
 	* ``APP_HOST`` - host ExApp is listening on
 	* ``APP_PORT`` - port ExApp is listening on (randomly selected by AppAPI)
 	* ``APP_PERSISTENT_STORAGE`` - path to mounted volume for persistent data storage between ExApp updates
-	* ``IS_SYSTEM_APP`` - ExApp system app flag (true|false)
 	* ``NEXTCLOUD_URL`` - Nextcloud URL to connect to
-
-.. note::
-	Additional envs can be passed using multiple ``--env ENV_NAME=ENV_VAL`` options
-
-ExApp registration
-------------------
-
-Final step is to register ExApp in Nextcloud.
-This can be done by ``occ`` CLI command **app_api:app:register**:
-
-.. code-block:: bash
-
-	app_api:app:register <appid> <daemon-config-name> [--force-scopes] [--]
-
-Arguments
-*********
-
-	* ``appid`` - unique name of the ExApp (e.g. ``app_python_skeleton``, must be the same as in deployed container)
-	* ``daemon-config-name`` - unique name of the daemon (e.g. ``docker_local_sock``)
-
-Options
-*******
-
-	* ``--force-scopes`` *[optional]* - force scopes approval
-	* ``--json-info JSON-INFO`` **[required]** - path to JSON file with deploy result (url or local absolute path)
-
-With provided ``appid`` and ``daemon-config-name``, Nextcloud will retrieve ExApp info from deployed container and register it.
-In case of ``manual-install`` DeployConfig type, ExApp info must be provided by ``--json-info`` option `as described before <#deploy-result-json-output>`_.
 
 Application installation scheme
 -------------------------------
