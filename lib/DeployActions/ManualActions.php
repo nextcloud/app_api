@@ -22,18 +22,11 @@ class ManualActions implements IDeployActions {
 		return 'manual-install';
 	}
 
-	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): mixed {
+	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): string {
 		// Not implemented. Deploy is done manually.
 		$this->exAppService->setAppDeployProgress($exApp, 0);
 		$this->exAppService->setAppDeployProgress($exApp, 100);
-		return null;
-	}
-
-	public function updateExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): mixed {
-		// Not implemented. Update is done manually.
-		$this->exAppService->setAppDeployProgress($exApp, 0);
-		$this->exAppService->setAppDeployProgress($exApp, 100);
-		return null;
+		return '';
 	}
 
 	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): mixed {

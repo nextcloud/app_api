@@ -54,52 +54,46 @@ class DockerActions implements IDeployActions {
 		return 'docker-install';
 	}
 
-	/**
-	 * Pull image, create and start container
-	 */
-	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): array {
-		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
-			return [['error' => 'Only docker-install is supported for now.'], null, null];
+	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): string {
+		if (!isset($params['image_params'])) {
+			return 'Missing image_params.';
 		}
+		$imageParams = $params['image_params'];
 
-		if (isset($params['image_params'])) {
-			$imageParams = $params['image_params'];
-		} else {
-			return [['error' => 'Missing image_params.'], null, null];
+		if (!isset($params['container_params'])) {
+			return 'Missing container_params.';
 		}
-
-		if (isset($params['container_params'])) {
-			$containerParams = $params['container_params'];
-		} else {
-			return [['error' => 'Missing container_params.'], null, null];
-		}
+		$containerParams = $params['container_params'];
 
 		$dockerUrl = $this->buildDockerUrl($daemonConfig);
 		$this->initGuzzleClient($daemonConfig);
 
 		$this->exAppService->setAppDeployProgress($exApp, 0);
-		$pullResult = $this->pullContainer($dockerUrl, $imageParams);
-		if (isset($pullResult['error'])) {
-			return [$pullResult, null, null];
+		$result = $this->pullContainer($dockerUrl, $imageParams);
+		if (isset($result['error'])) {
+			return $result['error'];
 		}
 
 		$this->exAppService->setAppDeployProgress($exApp, 95);
 		$containerInfo = $this->inspectContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($containerInfo['Id'])) {
-			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
-			if (isset($stopResult['error']) || isset($removeResult['error'])) {
-				return [$pullResult, $stopResult, $removeResult];
+			$removeResult = $this->removeContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+			if ($removeResult) {
+				return $removeResult;
 			}
 		}
-
-		$createResult = $this->createContainer($dockerUrl, $imageParams, $containerParams);
-		if (isset($createResult['error'])) {
-			return [null, $createResult, null];
+		$this->exAppService->setAppDeployProgress($exApp, 96);
+		$result = $this->createContainer($dockerUrl, $imageParams, $containerParams);
+		if (isset($result['error'])) {
+			return $result['error'];
 		}
-
-		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+		$this->exAppService->setAppDeployProgress($exApp, 97);
+		$result = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+		if (isset($result['error'])) {
+			return $result['error'];
+		}
 		$this->exAppService->setAppDeployProgress($exApp, 100);
-		return [$pullResult, $createResult, $startResult];
+		return '';
 	}
 
 	public function buildApiUrl(string $dockerUrl, string $route): string {
@@ -186,19 +180,22 @@ class DockerActions implements IDeployActions {
 		}
 	}
 
-	public function removeContainer(string $dockerUrl, string $containerId): array {
-		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s', $containerId));
+	public function removeContainer(string $dockerUrl, string $containerId): string {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s?force=true', $containerId));
 		try {
 			$response = $this->guzzleClient->delete($url);
-			return ['success' => $response->getStatusCode() === 204];
+			$this->logger->debug(sprintf('StatusCode of container removal: %d', $response->getStatusCode()));
+			if ($response->getStatusCode() === 200 || $response->getStatusCode() === 204) {
+				return '';
+			}
 		} catch (GuzzleException $e) {
 			if ($e->getCode() === 409) {  // "removal of container ... is already in progress"
-				return ['success' => true];
+				return '';
 			}
-			$this->logger->error('Failed to stop container', ['exception' => $e]);
+			$this->logger->error('Failed to remove container', ['exception' => $e]);
 			error_log($e->getMessage());
-			return ['error' => 'Failed to stop container'];
 		}
+		return sprintf('Failed to remove container: %s', $containerId);
 	}
 
 	public function pullContainer(string $dockerUrl, array $params): array {
@@ -289,51 +286,6 @@ class DockerActions implements IDeployActions {
 			error_log($e->getMessage());
 		}
 		return false;
-	}
-
-	/**
-	 * @param ExApp $exApp
-	 * @param DaemonConfig $daemonConfig
-	 * @param array $params Deploy params (image_params, container_params)
-	 *
-	 * @return array
-	 */
-	public function updateExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): array {
-		$dockerUrl = $this->buildDockerUrl($daemonConfig);
-
-		$this->exAppService->setAppDeployProgress($exApp, 0);
-		$pullResult = $this->pullContainer($dockerUrl, $params['image_params']);
-		if (isset($pullResult['error'])) {
-			return [$pullResult, null, null, null, null];
-		}
-
-		$this->exAppService->setAppDeployProgress($exApp, 95);
-		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
-		if (isset($stopResult['error'])) {
-			return [$pullResult, $stopResult, null, null, null];
-		}
-		if (isset($removeResult['error'])) {
-			return [$pullResult, $stopResult, $removeResult, null, null];
-		}
-
-		$createResult = $this->createContainer($dockerUrl, $params['image_params'], $params['container_params']);
-		if (isset($createResult['error'])) {
-			return [$pullResult, $stopResult, $removeResult, $createResult, null];
-		}
-
-		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
-		$this->exAppService->setAppDeployProgress($exApp, 100);
-		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
-	}
-
-	public function removePrevExAppContainer(string $dockerUrl, string $containerId): array {
-		$stopResult = $this->stopContainer($dockerUrl, $containerId);
-		if (isset($stopResult['error'])) {
-			return [$stopResult, null];
-		}
-
-		$removeResult = $this->removeContainer($dockerUrl, $containerId);
-		return [$stopResult, $removeResult];
 	}
 
 	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): array {

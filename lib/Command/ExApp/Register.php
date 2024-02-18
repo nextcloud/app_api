@@ -17,6 +17,7 @@ use OCA\AppAPI\Service\ExAppUsersService;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\Security\ISecureRandom;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -38,6 +39,7 @@ class Register extends Command {
 		private readonly IConfig              $config,
 		private readonly ExAppService         $exAppService,
 		private readonly ISecureRandom        $random,
+		private readonly LoggerInterface      $logger,
 	) {
 		parent::__construct();
 	}
@@ -53,13 +55,18 @@ class Register extends Command {
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, 'Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp info.xml in JSON format');
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
+		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Do not print to console');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
+		$outputConsole = !$input->getOption('silent');
 		$appId = $input->getArgument('appid');
 
 		if ($this->exAppService->getExApp($appId) !== null) {
-			$output->writeln(sprintf('ExApp %s already registered.', $appId));
+			$this->logger->error(sprintf('ExApp %s is already registered.', $appId));
+			if ($outputConsole) {
+				$output->writeln(sprintf('ExApp %s is already registered.', $appId));
+			}
 			return 3;
 		}
 
@@ -67,7 +74,10 @@ class Register extends Command {
 			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
 		);
 		if (isset($appInfo['error'])) {
-			$output->writeln($appInfo['error']);
+			$this->logger->error($appInfo['error']);
+			if ($outputConsole) {
+				$output->writeln($appInfo['error']);
+			}
 			return 1;
 		}
 		$appId = $appInfo['id'];  # value from $appInfo should have higher priority
@@ -78,7 +88,22 @@ class Register extends Command {
 		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {
-			$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
+			$this->logger->error(sprintf('Daemon config %s not found.', $daemonConfigName));
+			if ($outputConsole) {
+				$output->writeln(sprintf('Daemon config %s not found.', $daemonConfigName));
+			}
+			return 2;
+		}
+
+		$actionsDeployIds = [
+			$this->dockerActions->getAcceptsDeployId(),
+			$this->manualActions->getAcceptsDeployId(),
+		];
+		if (!in_array($daemonConfig->getAcceptsDeployId(), $actionsDeployIds)) {
+			$this->logger->error(sprintf('Daemon config %s actions for %s not found.', $daemonConfigName, $daemonConfig->getAcceptsDeployId()));
+			if ($outputConsole) {
+				$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfigName, $daemonConfig->getAcceptsDeployId()));
+			}
 			return 2;
 		}
 
@@ -110,11 +135,14 @@ class Register extends Command {
 		$appInfo['daemon_config_name'] = $appInfo['daemon_config_name'] ?? $daemonConfigName;
 		$exApp = $this->exAppService->registerExApp($appInfo);
 		if (!$exApp) {
-			$output->writeln(sprintf('Error during registering ExApp %s.', $appId));
+			$this->logger->error(sprintf('Error during registering ExApp %s.', $appId));
+			if ($outputConsole) {
+				$output->writeln(sprintf('Error during registering ExApp %s.', $appId));
+			}
 			return 3;
 		}
 		if (filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN)) {
-			# TO-DO: refactor in next version: move "system" to the "ex_apps" table as a separate field.
+			# TO-DO: refactor in next version: move "system" to the "ex_apps" table as a separate field, remove this.
 			try {
 				$this->exAppUsersService->setupSystemAppFlag($appId);
 			} catch (Exception $e) {
@@ -127,45 +155,54 @@ class Register extends Command {
 			if (!$this->exAppScopesService->registerExAppScopes(
 				$exApp, $this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']))
 			) {
+				$this->logger->error(sprintf('Error while registering API scopes for %s.', $appId));
+				if ($outputConsole) {
+					$output->writeln(sprintf('Error while registering API scopes for %s.', $appId));
+				}
 				$this->exAppService->unregisterExApp($appId);
-				$output->writeln('Error while registering API scopes.');
 				return 1;
 			}
-			$output->writeln(
-				sprintf('ExApp %s scope groups successfully set: %s',
-					$exApp->getAppid(), implode(', ', $appInfo['external-app']['scopes'])
-				)
+			$this->logger->info(
+				sprintf('ExApp %s scope groups successfully set: %s', $exApp->getAppid(), implode(', ', $appInfo['external-app']['scopes']))
 			);
+			if ($outputConsole) {
+				$output->writeln(
+					sprintf('ExApp %s scope groups successfully set: %s', $exApp->getAppid(), implode(', ', $appInfo['external-app']['scopes']))
+				);
+			}
 		}
 
 		$auth = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
-			[$pullResult, $createResult, $startResult] = $this->dockerActions->deployExApp($exApp, $daemonConfig, $deployParams);
-			if (isset($pullResult['error'])) {
-				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $pullResult['error']));
+			$deployResult = $this->dockerActions->deployExApp($exApp, $daemonConfig, $deployParams);
+			if ($deployResult) {
+				$this->logger->error(sprintf('ExApp %s deployment failed. Error: %s', $appId, $deployResult));
+				if ($outputConsole) {
+					$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $deployResult));
+				}
+				$this->exAppService->unregisterExApp($appId);
 				return 1;
 			}
 
-			if (!isset($startResult['error']) && isset($createResult['Id'])) {
-				if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig)) {
+			if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig)) {
+				$this->logger->error(sprintf('ExApp %s deployment failed. Error: %s', $appId, 'Container healthcheck failed.'));
+				if ($outputConsole) {
 					$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, 'Container healthcheck failed.'));
-					return 1;
 				}
-
-				$exAppUrl = $this->dockerActions->resolveExAppUrl(
-					$appId,
-					$daemonConfig->getProtocol(),
-					$daemonConfig->getHost(),
-					$daemonConfig->getDeployConfig(),
-					(int)explode('=', $deployParams['container_params']['env'][6])[1],
-					$auth,
-				);
-			} else {
-				$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $startResult['error'] ?? $createResult['error']));
-				return 3;
+				$this->exAppService->setStatusError($exApp, 'Container healthcheck failed');
+				return 1;
 			}
-		} elseif ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
+
+			$exAppUrl = $this->dockerActions->resolveExAppUrl(
+				$appId,
+				$daemonConfig->getProtocol(),
+				$daemonConfig->getHost(),
+				$daemonConfig->getDeployConfig(),
+				(int)explode('=', $deployParams['container_params']['env'][6])[1],
+				$auth,
+			);
+		} else {
 			$this->manualActions->deployExApp($exApp, $daemonConfig);
 			$exAppUrl = $this->manualActions->resolveExAppUrl(
 				$appId,
@@ -175,16 +212,20 @@ class Register extends Command {
 				(int) $appInfo['port'],
 				$auth,
 			);
-		} else {
-			$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfigName, $daemonConfig->getAcceptsDeployId()));
-			return 2;
 		}
 
 		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
-			$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure ExApp was started and initialized manually.', $appId));
-			return 2;
+			$this->logger->error(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
+			if ($outputConsole) {
+				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
+			}
+			$this->exAppService->setStatusError($exApp, 'Heartbeat check failed');
+			return 1;
 		}
-		$output->writeln(sprintf('ExApp %s deployed successfully.', $appId));
+		$this->logger->info(sprintf('ExApp %s deployed successfully.', $appId));
+		if ($outputConsole) {
+			$output->writeln(sprintf('ExApp %s deployed successfully.', $appId));
+		}
 
 		$this->service->dispatchExAppInitInternal($exApp);
 		if ($input->getOption('wait-finish')) {
@@ -194,7 +235,10 @@ class Register extends Command {
 				return 1;
 			}
 		}
-		$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
+		$this->logger->info(sprintf('ExApp %s successfully registered.', $appId));
+		if ($outputConsole) {
+			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
+		}
 		return 0;
 	}
 }

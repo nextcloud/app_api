@@ -404,7 +404,7 @@ class AppAPIService {
 		];
 		$args = array_map(function ($arg) {
 			return escapeshellarg($arg);
-		}, [$command]);
+		}, explode(' ', $command));
 		$args[] = '--no-ansi --no-warnings';
 		$args = implode(' ', $args);
 		$occDirectory = null;
@@ -521,8 +521,7 @@ class AppAPIService {
 
 	/**
 	 * Disable ExApp. Sends request to ExApp to update enabled state.
-	 * If request fails, ExApp keep disabled in database.
-	 * Removes ExApp from cache.
+	 * If request fails, disables ExApp in database, cache.
 	 */
 	public function disableExApp(ExApp $exApp): bool {
 		$result = true;
@@ -582,7 +581,7 @@ class AppAPIService {
 				$this->disableExApp($exApp);
 				if ($daemonConfig->getAcceptsDeployId() === 'docker-install') {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
-					$this->dockerActions->removePrevExAppContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+					$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
 					$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));
 				}
 				$this->exAppService->unregisterExApp($exApp->getAppid());

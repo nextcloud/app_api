@@ -358,4 +358,11 @@ class ExAppService {
 		} while ($status['init'] !== 100);
 		return "";
 	}
+
+	public function setStatusError(ExApp $exApp, string $error): void {
+		$status = $exApp->getStatus();
+		$status['error'] = $error;
+		$exApp->setStatus($status);
+		$this->updateExApp($exApp, ['status']);
+	}
 }

@@ -411,7 +411,7 @@ class ExAppsPageController extends Controller {
 		$exApp = $this->exAppService->getExApp($appId);
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
-			if (!$this->service->runOccCommand(sprintf("app_api:app:register --force-scopes %s", $appId))) {
+			if (!$this->service->runOccCommand(sprintf("app_api:app:register --force-scopes --silent %s", $appId))) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
 			$elapsedTime = 0;
@@ -468,7 +468,7 @@ class ExAppsPageController extends Controller {
 		}
 
 		$exAppOldVersion = $this->exAppService->getExApp($appId)->getVersion();
-		if (!$this->service->runOccCommand(sprintf("app_api:app:update --force-scopes %s", $appId))) {
+		if (!$this->service->runOccCommand(sprintf("app_api:app:update --force-scopes --silent %s", $appId))) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting update of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -501,7 +501,7 @@ class ExAppsPageController extends Controller {
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$this->dockerActions->initGuzzleClient($daemonConfig);
 			if ($removeContainer) {
-				$this->dockerActions->removePrevExAppContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
+				$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
 				if ($removeData) {
 					$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
 				}

@@ -27,18 +27,7 @@ interface IDeployActions {
 	 *
 	 * @return mixed
 	 */
-	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): mixed;
-
-	/**
-	 * Update existing deployed ExApp on target daemon
-	 *
-	 * @param ExApp $exApp
-	 * @param DaemonConfig $daemonConfig
-	 * @param array $params
-	 *
-	 * @return mixed
-	 */
-	public function updateExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): mixed;
+	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): string;
 
 	/**
 	 * Build required info for ExApp deployment
