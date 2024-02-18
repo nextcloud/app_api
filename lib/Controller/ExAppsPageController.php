@@ -416,8 +416,8 @@ class ExAppsPageController extends Controller {
 			}
 			$elapsedTime = 0;
 			while ($elapsedTime < 5000000 && !$this->exAppService->getExApp($appId)) {
-				usleep(300000); // 0.3
-				$elapsedTime += 300000;
+				usleep(150000); // 0.15
+				$elapsedTime += 150000;
 			}
 			if (!$this->exAppService->getExApp($appId)) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not perform installation of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
@@ -478,8 +478,8 @@ class ExAppsPageController extends Controller {
 			if ($exApp && ($exApp->getStatus()['type'] == 'update' || $exApp->getVersion() !== $exAppOldVersion)) {
 				break;
 			}
-			usleep(300000); // 0.3
-			$elapsedTime += 300000;
+			usleep(150000); // 0.15
+			$elapsedTime += 150000;
 		}
 		if ($elapsedTime >= 5000000) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not perform update of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
