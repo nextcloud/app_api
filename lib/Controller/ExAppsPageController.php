@@ -429,9 +429,11 @@ class ExAppsPageController extends Controller {
 	#[PasswordConfirmationRequired]
 	public function disableApp(string $appId): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp->getEnabled()) {
-			if (!$this->service->disableExApp($exApp)) {
-				return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+		if ($exApp) {
+			if ($exApp->getEnabled()) {
+				if (!$this->service->disableExApp($exApp)) {
+					return new JSONResponse(['data' => ['message' => $this->l10n->t('Failed to disable ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+				}
 			}
 		}
 		return new JSONResponse([]);
@@ -479,22 +481,23 @@ class ExAppsPageController extends Controller {
 	#[PasswordConfirmationRequired]
 	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp->getEnabled()) {
-			$this->service->disableExApp($exApp);
-		}
+		if ($exApp) {
+			if ($exApp->getEnabled()) {
+				$this->service->disableExApp($exApp);
+			}
 
-		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-			$this->dockerActions->initGuzzleClient($daemonConfig);
-			if ($removeContainer) {
-				$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
-				if ($removeData) {
-					$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
+			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+				$this->dockerActions->initGuzzleClient($daemonConfig);
+				if ($removeContainer) {
+					$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
+					if ($removeData) {
+						$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
+					}
 				}
 			}
+			$this->exAppService->unregisterExApp($appId);
 		}
-
-		$this->exAppService->unregisterExApp($appId);
 		return new JSONResponse();
 	}
 

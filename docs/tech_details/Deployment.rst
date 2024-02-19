@@ -77,12 +77,9 @@ Arguments
 Options
 *******
 
-	* ``--force-scopes`` *[optional]* - force scopes approval
+	* ``--force-scopes`` **[optional]** - force scopes approval
 	* ``--info-xml INFO-XML`` **[optional]** - path to info.xml file with ExApp description (url or local absolute path)
 	* ``--json-info JSON-INFO`` **[optional]** - JSON with ExApp description
-
-.. note::
-	For ``manual-install`` type developer should perform start of ExApp and run **register** only after it.
 
 .. warning::
 	After successful deployment (pull, create and start container), there is a heartbeat check with 90 seconds timeout (will be configurable).
@@ -102,7 +99,7 @@ For all examples and applications we release we usually add manual_install comma
             "{\"id\":\"nc_py_api\",\"name\":\"nc_py_api\",\"daemon_config_name\":\"manual_install\",\"version\":\"1.0.0\",\"secret\":\"12345\",\"port\":$APP_PORT,\"scopes\":[\"SYSTEM\", \"FILES\", \"FILES_SHARING\", \"USER_INFO\", \"USER_STATUS\", \"NOTIFICATIONS\", \"WEATHER_STATUS\", \"TALK\"],\"system\":1}" \
             --force-scopes
 
-.. note:: **Deployment/Startup of App should be done by developer when manual_install DeployConfig type is used.**
+.. note:: **Deployment/Startup of App should be done by developer when ``manual-install`` DeployConfig type is used.**
 
 Deploy env variables
 ********************
