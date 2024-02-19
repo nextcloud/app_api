@@ -20,9 +20,9 @@ class ExAppScopesService {
 	private ICache $cache;
 
 	public function __construct(
-		private LoggerInterface $logger,
-		private ExAppScopeMapper $mapper,
-		ICacheFactory $cacheFactory,
+		private readonly LoggerInterface  $logger,
+		private readonly ExAppScopeMapper $mapper,
+		ICacheFactory                     $cacheFactory,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_apps_scopes');
 	}
@@ -112,7 +112,7 @@ class ExAppScopesService {
 		}
 	}
 
-	public function updateExAppScopes(ExApp $exApp, array $newExAppScopes): bool {
+	public function registerExAppScopes(ExApp $exApp, array $newExAppScopes): bool {
 		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
 			return $exAppScope->getScopeGroup();
 		}, $this->getExAppScopes($exApp));

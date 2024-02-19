@@ -10,16 +10,6 @@
       <code>DavPlugin</code>
     </MissingDependency>
   </file>
-  <file src="lib/Command/ExApp/Deploy.php">
-    <ImplicitToStringCast>
-      <code><![CDATA[$infoXml->id]]></code>
-    </ImplicitToStringCast>
-  </file>
-  <file src="lib/Command/ExApp/Update.php">
-    <ImplicitToStringCast>
-      <code><![CDATA[$infoXml->id]]></code>
-    </ImplicitToStringCast>
-  </file>
   <file src="lib/Controller/ExAppsPageController.php">
     <UndefinedClass>
       <code><![CDATA[$this->categoryFetcher]]></code>

@@ -30,7 +30,7 @@ Request data
 			"fr": "French",
 		},
 		"action_handler": "/handler_route_on_ex_app",
-		"action_detect_lang": "/detect_lang_fromt_text_handler",
+		"action_detect_lang": "/detect_lang_from_text_handler",
 	}
 
 .. note::

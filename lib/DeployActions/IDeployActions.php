@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\DeployActions;
 
 use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Db\ExApp;
 
 /**
  * Base interface for AppAPI ExApp deploy actions
@@ -20,33 +21,24 @@ interface IDeployActions {
 	/**
 	 * Deploy ExApp to the target daemon
 	 *
+	 * @param ExApp $exApp
 	 * @param DaemonConfig $daemonConfig
 	 * @param array $params
 	 *
 	 * @return mixed
 	 */
-	public function deployExApp(DaemonConfig $daemonConfig, array $params = []): mixed;
-
-	/**
-	 * Update existing deployed ExApp on target daemon
-	 *
-	 * @param DaemonConfig $daemonConfig
-	 * @param array $params
-	 *
-	 * @return mixed
-	 */
-	public function updateExApp(DaemonConfig $daemonConfig, array $params = []): mixed;
+	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): string;
 
 	/**
 	 * Build required info for ExApp deployment
 	 *
 	 * @param DaemonConfig $daemonConfig
-	 * @param \SimpleXMLElement $infoXml
+	 * @param array $appInfo
 	 * @param array $params
 	 *
 	 * @return mixed
 	 */
-	public function buildDeployParams(DaemonConfig $daemonConfig, \SimpleXMLElement $infoXml, array $params = []): mixed;
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): mixed;
 
 	/**
 	 * Build required deploy environment variables

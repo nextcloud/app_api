@@ -10,17 +10,15 @@ use GuzzleHttp\Exception\GuzzleException;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
 
-use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
 use OCP\ICertificateManager;
 use OCP\IConfig;
 use OCP\IURLGenerator;
-use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
-use SimpleXMLElement;
 
 class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
@@ -40,17 +38,16 @@ class DockerActions implements IDeployActions {
 	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
 
 	private Client $guzzleClient;
+	private bool $useSocket = false;  # for `pullImage` function, to detect can be stream used or not.
 
 	public function __construct(
 		private readonly LoggerInterface     $logger,
 		private readonly IConfig             $config,
 		private readonly ICertificateManager $certificateManager,
 		private readonly IAppManager         $appManager,
-		private readonly ISecureRandom       $random,
 		private readonly IURLGenerator       $urlGenerator,
 		private readonly AppAPICommonService $service,
-		private readonly ExAppService        $exAppService,
-		private readonly DaemonConfigService $daemonConfigService,
+		private readonly ExAppService		 $exAppService,
 	) {
 	}
 
@@ -58,49 +55,46 @@ class DockerActions implements IDeployActions {
 		return 'docker-install';
 	}
 
-	/**
-	 * Pull image, create and start container
-	 */
-	public function deployExApp(DaemonConfig $daemonConfig, array $params = []): array {
-		if ($daemonConfig->getAcceptsDeployId() !== 'docker-install') {
-			return [['error' => 'Only docker-install is supported for now.'], null, null];
+	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): string {
+		if (!isset($params['image_params'])) {
+			return 'Missing image_params.';
 		}
+		$imageParams = $params['image_params'];
 
-		if (isset($params['image_params'])) {
-			$imageParams = $params['image_params'];
-		} else {
-			return [['error' => 'Missing image_params.'], null, null];
+		if (!isset($params['container_params'])) {
+			return 'Missing container_params.';
 		}
-
-		if (isset($params['container_params'])) {
-			$containerParams = $params['container_params'];
-		} else {
-			return [['error' => 'Missing container_params.'], null, null];
-		}
+		$containerParams = $params['container_params'];
 
 		$dockerUrl = $this->buildDockerUrl($daemonConfig);
 		$this->initGuzzleClient($daemonConfig);
 
-		$pullResult = $this->pullContainer($dockerUrl, $imageParams);
-		if (isset($pullResult['error'])) {
-			return [$pullResult, null, null];
+		$this->exAppService->setAppDeployProgress($exApp, 0);
+		$result = $this->pullImage($dockerUrl, $imageParams, $exApp, 0, 94);
+		if ($result) {
+			return $result;
 		}
 
+		$this->exAppService->setAppDeployProgress($exApp, 95);
 		$containerInfo = $this->inspectContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($containerInfo['Id'])) {
-			[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
-			if (isset($stopResult['error']) || isset($removeResult['error'])) {
-				return [$pullResult, $stopResult, $removeResult];
+			$result = $this->removeContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+			if ($result) {
+				return $result;
 			}
 		}
-
-		$createResult = $this->createContainer($dockerUrl, $imageParams, $containerParams);
-		if (isset($createResult['error'])) {
-			return [null, $createResult, null];
+		$this->exAppService->setAppDeployProgress($exApp, 96);
+		$result = $this->createContainer($dockerUrl, $imageParams, $containerParams);
+		if (isset($result['error'])) {
+			return $result['error'];
 		}
-
-		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
-		return [$pullResult, $createResult, $startResult];
+		$this->exAppService->setAppDeployProgress($exApp, 97);
+		$result = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+		if (isset($result['error'])) {
+			return $result['error'];
+		}
+		$this->exAppService->setAppDeployProgress($exApp, 100);
+		return '';
 	}
 
 	public function buildApiUrl(string $dockerUrl, string $route): string {
@@ -187,33 +181,100 @@ class DockerActions implements IDeployActions {
 		}
 	}
 
-	public function removeContainer(string $dockerUrl, string $containerId): array {
-		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s', $containerId));
+	public function removeContainer(string $dockerUrl, string $containerId): string {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s?force=true', $containerId));
 		try {
 			$response = $this->guzzleClient->delete($url);
-			return ['success' => $response->getStatusCode() === 204];
+			$this->logger->debug(sprintf('StatusCode of container removal: %d', $response->getStatusCode()));
+			if ($response->getStatusCode() === 200 || $response->getStatusCode() === 204) {
+				return '';
+			}
 		} catch (GuzzleException $e) {
 			if ($e->getCode() === 409) {  // "removal of container ... is already in progress"
-				return ['success' => true];
+				return '';
 			}
-			$this->logger->error('Failed to stop container', ['exception' => $e]);
+			$this->logger->error('Failed to remove container', ['exception' => $e]);
 			error_log($e->getMessage());
-			return ['error' => 'Failed to stop container'];
 		}
+		return sprintf('Failed to remove container: %s', $containerId);
 	}
 
-	public function pullContainer(string $dockerUrl, array $params): array {
+	public function pullImage(string $dockerUrl, array $params, ExApp $exApp, int $startPercent, int $maxPercent): string {
+		# docs: https://github.com/docker/compose/blob/main/pkg/compose/pull.go
+		$layerInProgress = ['preparing', 'waiting', 'pulling fs layer', 'download', 'extracting', 'verifying checksum'];
+		$layerFinished = ['already exists', 'pull complete'];
+		$disableProgressTracking = false;
 		$imageId = $this->buildImageName($params);
 		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($imageId)));
 		$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
 		try {
-			$response = $this->guzzleClient->post($url);
-			$this->logger->info(sprintf('Pull ExApp image result=%d for %s', $response->getStatusCode(), $imageId));
-			return ['success' => $response->getStatusCode() === 200];
+			if ($this->useSocket) {
+				$response = $this->guzzleClient->post($url);
+			} else {
+				$response = $this->guzzleClient->post($url, ['stream' => true]);
+			}
+			if ($response->getStatusCode() !== 200) {
+				return sprintf('Pulling ExApp Image: %s return status code: %d', $imageId, $response->getStatusCode());
+			}
+			if ($this->useSocket) {
+				return '';
+			}
+			$lastPercent = $startPercent;
+			$layers = [];
+			$buffer = '';
+			$responseBody = $response->getBody();
+			while (!$responseBody->eof()) {
+				$buffer .= $responseBody->read(1024);
+				try {
+					while (($newlinePos = strpos($buffer, "\n")) !== false) {
+						$line = substr($buffer, 0, $newlinePos);
+						$buffer = substr($buffer, $newlinePos + 1);
+						$jsonLine = json_decode(trim($line));
+						if ($jsonLine) {
+							if (isset($jsonLine->id) && isset($jsonLine->status)) {
+								$layerId = $jsonLine->id;
+								$status = strtolower($jsonLine->status);
+								foreach ($layerInProgress as $substring) {
+									if (str_contains($status, $substring)) {
+										$layers[$layerId] = false;
+										break;
+									}
+								}
+								foreach ($layerFinished as $substring) {
+									if (str_contains($status, $substring)) {
+										$layers[$layerId] = true;
+										break;
+									}
+								}
+							}
+						} else {
+							$this->logger->warning(
+								sprintf("Progress tracking of image pulling(%s) disabled, error: %d, data: %s", $exApp->getAppid(), json_last_error(), $line)
+							);
+							$disableProgressTracking = true;
+						}
+					}
+				} catch (Exception $e) {
+					$this->logger->warning(
+						sprintf("Progress tracking of image pulling(%s) disabled, exception: %s", $exApp->getAppid(), $e->getMessage()), ['exception' => $e]
+					);
+					$disableProgressTracking = true;
+				}
+				if (!$disableProgressTracking) {
+					$completedLayers = count(array_filter($layers));
+					$totalLayers = count($layers);
+					$newLastPercent = intval($totalLayers > 0 ? ($completedLayers / $totalLayers) * ($maxPercent - $startPercent) : 0);
+					if ($lastPercent != $newLastPercent) {
+						$this->exAppService->setAppDeployProgress($exApp, $newLastPercent);
+						$lastPercent = $newLastPercent;
+					}
+				}
+			}
+			return '';
 		} catch (GuzzleException $e) {
 			$this->logger->error('Failed to pull image', ['exception' => $e]);
 			error_log($e->getMessage());
-			return ['error' => 'Failed to pull image.'];
+			return 'Failed to pull image, GuzzleException occur.';
 		}
 	}
 
@@ -292,62 +353,19 @@ class DockerActions implements IDeployActions {
 		return false;
 	}
 
-	/**
-	 * @param DaemonConfig $daemonConfig
-	 * @param array $params Deploy params (image_params, container_params)
-	 *
-	 * @return array
-	 */
-	public function updateExApp(DaemonConfig $daemonConfig, array $params = []): array {
-		$dockerUrl = $this->buildDockerUrl($daemonConfig);
-
-		$pullResult = $this->pullContainer($dockerUrl, $params['image_params']);
-		if (isset($pullResult['error'])) {
-			return [$pullResult, null, null, null, null];
-		}
-
-		[$stopResult, $removeResult] = $this->removePrevExAppContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
-		if (isset($stopResult['error'])) {
-			return [$pullResult, $stopResult, null, null, null];
-		}
-		if (isset($removeResult['error'])) {
-			return [$pullResult, $stopResult, $removeResult, null, null];
-		}
-
-		$createResult = $this->createContainer($dockerUrl, $params['image_params'], $params['container_params']);
-		if (isset($createResult['error'])) {
-			return [$pullResult, $stopResult, $removeResult, $createResult, null];
-		}
-
-		$startResult = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
-		return [$pullResult, $stopResult, $removeResult, $createResult, $startResult];
-	}
-
-	public function removePrevExAppContainer(string $dockerUrl, string $containerId): array {
-		$stopResult = $this->stopContainer($dockerUrl, $containerId);
-		if (isset($stopResult['error'])) {
-			return [$stopResult, null];
-		}
-
-		$removeResult = $this->removeContainer($dockerUrl, $containerId);
-		return [$stopResult, $removeResult];
-	}
-
-	public function buildDeployParams(DaemonConfig $daemonConfig, SimpleXMLElement $infoXml, array $params = []): array {
-		$appId = (string) $infoXml->id;
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): array {
+		$appId = (string) $appInfo['id'];
+		$externalApp = $appInfo['external-app'];
 		$deployConfig = $daemonConfig->getDeployConfig();
 
 		// If update process
 		if (isset($params['container_info'])) {
 			$containerInfo = $params['container_info'];
 			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
-			$port = $oldEnvs['APP_PORT'] ?? $this->exAppService->getExAppFreePort();
-			$secret = $oldEnvs['APP_SECRET'];
 			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
 			// Preserve previous device requests (GPU)
 			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'] ?? [];
 		} else {
-			$port = $this->exAppService->getExAppFreePort();
 			if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
 				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
 			} else {
@@ -357,26 +375,26 @@ class DockerActions implements IDeployActions {
 		}
 
 		$imageParams = [
-			'image_src' => (string) ($infoXml->xpath('external-app/docker-install/registry')[0] ?? 'docker.io'),
-			'image_name' => (string) ($infoXml->xpath('external-app/docker-install/image')[0] ?? $appId),
-			'image_tag' => (string) ($infoXml->xpath('external-app/docker-install/image-tag')[0] ?? 'latest'),
+			'image_src' => (string) ($externalApp['docker-install']['registry'] ?? 'docker.io'),
+			'image_name' => (string) ($externalApp['docker-install']['image'] ?? $appId),
+			'image_tag' => (string) ($externalApp['docker-install']['image-tag'] ?? 'latest'),
 		];
 
 		$envs = $this->buildDeployEnvs([
 			'appid' => $appId,
-			'name' => (string) $infoXml->name,
-			'version' => (string) $infoXml->version,
+			'name' => (string) $appInfo['name'],
+			'version' => (string) $appInfo['version'],
 			'host' => $this->service->buildExAppHost($deployConfig),
-			'port' => $port,
+			'port' => $appInfo['port'],
 			'storage' => $storage,
-			'system_app' => filter_var((string) $infoXml->xpath('external-app/system')[0], FILTER_VALIDATE_BOOLEAN),
-			'secret' => $secret ?? $this->random->generate(128),
+			'system_app' => filter_var((string) $externalApp['system'], FILTER_VALIDATE_BOOLEAN),
+			'secret' => $appInfo['secret'],
 		], $deployConfig);
 
 		$containerParams = [
 			'name' => $appId,
 			'hostname' => $appId,
-			'port' => $port,
+			'port' => $appInfo['port'],
 			'net' => $deployConfig['net'] ?? 'host',
 			'env' => $envs,
 			'deviceRequests' => $deviceRequests,
@@ -505,6 +523,7 @@ class DockerActions implements IDeployActions {
 					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
 				],
 			];
+			$this->useSocket = true;
 		} elseif ($daemonConfig->getProtocol() === 'https') {
 			$guzzleParams = $this->setupCerts($guzzleParams);
 		}

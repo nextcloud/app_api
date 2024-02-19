@@ -33,9 +33,7 @@ return [
 		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}', 'verb' => 'POST' , 'root' => ''],
 		['name' => 'ExAppsPage#getAppStatus', 'url' => '/apps/status/{appId}', 'verb' => 'GET' , 'root' => ''],
-		['name' => 'ExAppsPage#enableApps', 'url' => '/apps/enable', 'verb' => 'POST' , 'root' => ''],
 		['name' => 'ExAppsPage#disableApp', 'url' => '/apps/disable/{appId}', 'verb' => 'GET' , 'root' => ''],
-		['name' => 'ExAppsPage#disableApps', 'url' => '/apps/disable', 'verb' => 'POST' , 'root' => ''],
 		['name' => 'ExAppsPage#updateApp', 'url' => '/apps/update/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#uninstallApp', 'url' => '/apps/uninstall/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#viewApps', 'url' => '/apps/{category}', 'verb' => 'GET', 'defaults' => ['category' => ''] , 'root' => ''],
@@ -55,10 +53,11 @@ return [
 		['name' => 'OCSApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
 
 		['name' => 'OCSApi#getNCUsersList', 'url' => '/api/v1/users', 'verb' => 'GET'],
-		['name' => 'OCSApi#setAppProgress', 'url' => '/apps/status/{appId}', 'verb' => 'PUT'],
+		['name' => 'OCSApi#setAppInitProgress', 'url' => '/apps/status/{appId}', 'verb' => 'PUT'],
 
 		// ExApps
 		['name' => 'OCSExApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
+		['name' => 'OCSExApp#getExApp', 'url' => '/api/v1/ex-app/info/{appId}', 'verb' => 'GET'],
 
 		// ExApps actions
 		['name' => 'OCSExApp#setExAppEnabled', 'url' => '/api/v1/ex-app/{appId}/enabled', 'verb' => 'PUT'],

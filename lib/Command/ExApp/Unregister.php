@@ -91,10 +91,10 @@ class Unregister extends Command {
 		}
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$this->dockerActions->initGuzzleClient($daemonConfig);
-			[$stopResult, $removeResult] = $this->dockerActions->removePrevExAppContainer(
+			$removeResult = $this->dockerActions->removeContainer(
 				$this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId)
 			);
-			if (isset($stopResult['error']) || isset($removeResult['error'])) {
+			if ($removeResult) {
 				if (!$silent) {
 					$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
 				}

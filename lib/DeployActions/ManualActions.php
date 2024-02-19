@@ -5,30 +5,31 @@ declare(strict_types=1);
 namespace OCA\AppAPI\DeployActions;
 
 use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Service\ExAppService;
 
 /**
  * Manual deploy actions for development.
  */
 class ManualActions implements IDeployActions {
 
-	public function __construct() {
+	public function __construct(
+		private readonly ExAppService		 $exAppService,
+	) {
 	}
 
 	public function getAcceptsDeployId(): string {
 		return 'manual-install';
 	}
 
-	public function deployExApp(DaemonConfig $daemonConfig, array $params = []): mixed {
+	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): string {
 		// Not implemented. Deploy is done manually.
-		return null;
+		$this->exAppService->setAppDeployProgress($exApp, 0);
+		$this->exAppService->setAppDeployProgress($exApp, 100);
+		return '';
 	}
 
-	public function updateExApp(DaemonConfig $daemonConfig, array $params = []): mixed {
-		// Not implemented. Update is done manually.
-		return null;
-	}
-
-	public function buildDeployParams(DaemonConfig $daemonConfig, $infoXml, array $params = []): mixed {
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): mixed {
 		// Not implemented. Deploy is done manually.
 		return null;
 	}

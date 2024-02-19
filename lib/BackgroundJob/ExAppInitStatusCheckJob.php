@@ -16,10 +16,10 @@ class ExAppInitStatusCheckJob extends TimedJob {
 	private const everyMinuteInterval = 60;
 
 	public function __construct(
-		ITimeFactory $time,
-		private ExAppMapper $mapper,
-		private AppAPIService $service,
-		private IConfig $config,
+		ITimeFactory                   $time,
+		private readonly ExAppMapper   $mapper,
+		private readonly AppAPIService $service,
+		private readonly IConfig       $config,
 	) {
 		parent::__construct($time);
 
@@ -34,13 +34,15 @@ class ExAppInitStatusCheckJob extends TimedJob {
 			$initTimeoutMinutes = intval($this->config->getAppValue(Application::APP_ID, 'init_timeout', '40'));
 			foreach ($exApps as $exApp) {
 				$status = $exApp->getStatus();
-				if (!isset($status['init_start_time'])) {
-					continue;
-				}
-				if (time() >= ($status['init_start_time'] + $initTimeoutMinutes * 60)) {
-					$this->service->setAppInitProgress(
-						$exApp->getAppid(), 0, sprintf('ExApp %s initialization timed out (%sm)', $exApp->getAppid(), $initTimeoutMinutes * 60)
-					);
+				if (isset($status['init']) && $status['init'] !== 100) {
+					if (!isset($status['init_start_time'])) {
+						continue;
+					}
+					if (time() >= ($status['init_start_time'] + $initTimeoutMinutes * 60)) {
+						$this->service->setAppInitProgress(
+							$exApp, 0, sprintf('ExApp %s initialization timed out (%sm)', $exApp->getAppid(), $initTimeoutMinutes * 60)
+						);
+					}
 				}
 			}
 		} catch (Exception) {

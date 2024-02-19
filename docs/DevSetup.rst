@@ -36,16 +36,15 @@ To see the complete list, execute ``make help``.
 Docker remote API
 *****************
 
-The Docker Engine remote API can be easily configured via ``make dock2port`` and ``make dock-certs`` commands.
-The first one will create a docker container to provide remote Docker Engine API.
-The second one will configure generated certificates for created container with Docker remote API in Nextcloud.
+The Docker Engine remote API can be easily configured via ``make dock2port`` command.
+The command will create a docker container to provide remote Docker Engine API.
 
 Afterward, register DaemonConfigs in Nextcloud using ``make dock-port`` command.
 
 Docker by socket
 ****************
 
-For Docker via socket, use the command ``make dock2sock``.
+For Docker via socket, use the command ``make dock-sock``.
 This registers DaemonConfigs in Nextcloud for the default socket connection (``/var/run/docker.sock``).
 
 Make sure that socket has enough permissions for Nextcloud and webserver user to access it

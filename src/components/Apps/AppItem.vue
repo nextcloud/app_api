@@ -83,7 +83,7 @@
 				{{ t('settings', 'Remove') }}
 			</NcButton>
 			<NcButton v-if="app.active"
-				:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
+				:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
 				@click.stop="disable(app.id)">
 				{{ disableButtonText }}
 			</NcButton>
@@ -91,7 +91,7 @@
 				:title="enableButtonTooltip"
 				:aria-label="enableButtonTooltip"
 				type="primary"
-				:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing"
+				:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
 				@click.stop="enable(app.id)">
 				{{ enableButtonText }}
 			</NcButton>

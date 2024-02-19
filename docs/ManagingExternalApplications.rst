@@ -12,40 +12,21 @@ OCC CLI
 
 There are several commands to work with ExApps:
 
-1. Deploy
-2. Register
-3. Unregister
-4. Update
-5. Enable
-6. Disable
-7. List ExApps
-8. List ExApp users
-9. List ExApp scopes
-
-Deploy
-------
-
-Command: ``app_api:app:deploy [--info-xml INFO-XML] [--] <appid> <daemon-config-name>``
-
-The deploy command is the first ExApp installation step.
-
-Arguments
-*********
-
-    * ``appid`` - unique name of the ExApp (e.g. ``app_python_skeleton``, must be the same as in ``info.xml``)
-    * ``daemon-config-name`` - unique name of the daemon (e.g. ``docker_local_sock``)
-
-Options
-*******
-
-    * ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
+1. Register
+2. Unregister
+3. Update
+4. Enable
+5. Disable
+6. List ExApps
+7. List ExApp users
+8. List ExApp scopes
 
 Register
 --------
 
 Command: ``app_api:app:register [--force-scopes] [--info-xml INFO-XML] [--json-info JSON-INFO] [--] <appid> <daemon-config-name>``
 
-The register command is the second ExApp installation step.
+The register command is the first ExApp installation step.
 
 Arguments
 *********
@@ -58,7 +39,7 @@ Options
 
     * ``--force-scopes`` *[optional]* - force scopes approval
     * ``--json-info JSON-INFO`` **[optional]** - ExApp deploy JSON info (json string)
-    * ``--info-xml INFO-XML`` **[required]** - path to info.xml file (url or local absolute path)
+    * ``--info-xml INFO-XML`` **[optional]** - path to info.xml file (url or local absolute path)
 
 
 Unregister
