@@ -250,6 +250,7 @@ class ExAppsPageController extends Controller {
 				'daemon' => $daemon,
 				'systemApp' => $exApp !== null && $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 				'status' => $exApp !== null ? $exApp->getStatus() : [],
+				'error' => $exApp !== null ? $exApp->getStatus()['error'] ?? '' : '',
 			];
 		}
 
@@ -288,7 +289,9 @@ class ExAppsPageController extends Controller {
 				}))[0]['releases'][0]['version'];
 			}
 
-			$appData['canUnInstall'] = !$appData['active'] && $appData['removable'];
+			$exApp = $this->exAppService->getExApp($appData['id']);
+			$appData['canUnInstall'] = !$appData['active'] && $appData['removable']
+				&& $exApp !== null && in_array($exApp->getStatus()['type'], ['install', 'update']) ?? false;
 
 			// fix licence vs license
 			if (isset($appData['license']) && !isset($appData['licence'])) {
@@ -383,6 +386,7 @@ class ExAppsPageController extends Controller {
 					'releases' => [],
 					'update' => null,
 					'status' => $exApp->getStatus(),
+					'error' => $exApp->getStatus()['error'] ?? '',
 				];
 			}
 		}

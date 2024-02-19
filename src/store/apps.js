@@ -136,7 +136,8 @@ const mutations = {
 
 	setAppStatus(state, { appId, status }) {
 		const app = state.apps.find(app => app.id === appId)
-		if (status.type === 'install' && status.deploy === 100) {
+		if (status.type === 'install' && status.deploy === 100 && status.action === '') {
+			console.debug('catching intermediate state deploying -> initializing')
 			// catching moment when app is deployed but initialization status not started yet
 			status.action = 'init'
 		}
@@ -367,27 +368,43 @@ const actions = {
 				context.commit('setAppStatus', { appId, status: response.data })
 				if (!Object.hasOwn(response.data, 'progress') || response.data?.progress === 100) {
 					const initializingOrDeployingApps = context.getters.getInitializingOrDeployingApps
+					console.debug('initializingOrDeployingApps after setAppStatus', initializingOrDeployingApps)
 					if (initializingOrDeployingApps.length === 0) {
+						console.debug('clearing interval')
+						clearInterval(context.getters.getStatusUpdater)
+						context.commit('setIntervalUpdater', null)
+					}
+					if (Object.hasOwn(response.data, 'error')
+						&& response.data.error !== ''
+						&& initializingOrDeployingApps.length === 1) {
 						clearInterval(context.getters.getStatusUpdater)
 						context.commit('setIntervalUpdater', null)
 					}
 				}
 			})
-			.catch((error) => context.commit('API_FAILURE', error))
+			.catch((error) => {
+				context.commit('API_FAILURE', error)
+				context.commit('unregisterApp', { appId })
+				context.dispatch('updateAppsStatus')
+			})
 	},
 
 	updateAppsStatus(context) {
 		clearInterval(context.getters.getStatusUpdater) // clear previous interval if exists
-		context.commit('setIntervalUpdater', setInterval(() => {
-			const initializingOrDeployingApps = context.getters.getInitializingOrDeployingApps
-			Array.from(initializingOrDeployingApps).forEach(app => {
-				context.dispatch('getAppStatus', { appId: app.id })
-				if ((app.status.deploy === 100 && app.status.init === 0) || app.status.type === 'update') {
-					// get ExApp info once app is deployed or during update
-					context.dispatch('getExAppInfo', { appId: app.id })
-				}
-			})
-		}, 2000))
+		if (context.getters.getInitializingOrDeployingApps.length > 0) {
+			context.commit('setIntervalUpdater', setInterval(() => {
+				const initializingOrDeployingApps = context.getters.getInitializingOrDeployingApps
+				console.debug('initializingOrDeployingApps', initializingOrDeployingApps)
+				Array.from(initializingOrDeployingApps).forEach(app => {
+					context.dispatch('getAppStatus', { appId: app.id })
+					if ((app.status.deploy === 100 && app.status.init === 0) || app.status.type === 'update') {
+						console.debug('getExAppInfo', app.id)
+						// get ExApp info once app is deployed or during update
+						context.dispatch('getExAppInfo', { appId: app.id })
+					}
+				})
+			}, 2000))
+		}
 	},
 
 }
