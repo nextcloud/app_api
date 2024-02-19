@@ -289,9 +289,7 @@ class ExAppsPageController extends Controller {
 				}))[0]['releases'][0]['version'];
 			}
 
-			$exApp = $this->exAppService->getExApp($appData['id']);
-			$appData['canUnInstall'] = !$appData['active'] && $appData['removable']
-				&& $exApp !== null && in_array($exApp->getStatus()['type'], ['install', 'update']) ?? false;
+			$appData['canUnInstall'] = !$appData['active'] && $appData['removable'] && !isset($appData['status']['type']);
 
 			// fix licence vs license
 			if (isset($appData['license']) && !isset($appData['licence'])) {

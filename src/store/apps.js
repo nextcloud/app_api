@@ -144,6 +144,11 @@ const mutations = {
 		if (status.error !== '') {
 			app.error = status.error
 		}
+		if (status.deploy === 100 && status.init === 100) {
+			app.active = true
+			app.canUnInstall = false
+			app.removable = true
+		}
 		app.status = status
 	},
 
@@ -366,20 +371,18 @@ const actions = {
 		return api.get(generateUrl(`/apps/app_api/apps/status/${appId}`))
 			.then((response) => {
 				context.commit('setAppStatus', { appId, status: response.data })
-				if (!Object.hasOwn(response.data, 'progress') || response.data?.progress === 100) {
-					const initializingOrDeployingApps = context.getters.getInitializingOrDeployingApps
-					console.debug('initializingOrDeployingApps after setAppStatus', initializingOrDeployingApps)
-					if (initializingOrDeployingApps.length === 0) {
-						console.debug('clearing interval')
-						clearInterval(context.getters.getStatusUpdater)
-						context.commit('setIntervalUpdater', null)
-					}
-					if (Object.hasOwn(response.data, 'error')
-						&& response.data.error !== ''
-						&& initializingOrDeployingApps.length === 1) {
-						clearInterval(context.getters.getStatusUpdater)
-						context.commit('setIntervalUpdater', null)
-					}
+				const initializingOrDeployingApps = context.getters.getInitializingOrDeployingApps
+				console.debug('initializingOrDeployingApps after setAppStatus', initializingOrDeployingApps)
+				if (initializingOrDeployingApps.length === 0) {
+					console.debug('clearing interval')
+					clearInterval(context.getters.getStatusUpdater)
+					context.commit('setIntervalUpdater', null)
+				}
+				if (Object.hasOwn(response.data, 'error')
+					&& response.data.error !== ''
+					&& initializingOrDeployingApps.length === 1) {
+					clearInterval(context.getters.getStatusUpdater)
+					context.commit('setIntervalUpdater', null)
 				}
 			})
 			.catch((error) => {
@@ -391,20 +394,18 @@ const actions = {
 
 	updateAppsStatus(context) {
 		clearInterval(context.getters.getStatusUpdater) // clear previous interval if exists
-		if (context.getters.getInitializingOrDeployingApps.length > 0) {
-			context.commit('setIntervalUpdater', setInterval(() => {
-				const initializingOrDeployingApps = context.getters.getInitializingOrDeployingApps
-				console.debug('initializingOrDeployingApps', initializingOrDeployingApps)
-				Array.from(initializingOrDeployingApps).forEach(app => {
-					context.dispatch('getAppStatus', { appId: app.id })
-					if ((app.status.deploy === 100 && app.status.init === 0) || app.status.type === 'update') {
-						console.debug('getExAppInfo', app.id)
-						// get ExApp info once app is deployed or during update
-						context.dispatch('getExAppInfo', { appId: app.id })
-					}
-				})
-			}, 2000))
-		}
+		context.commit('setIntervalUpdater', setInterval(() => {
+			const initializingOrDeployingApps = context.getters.getInitializingOrDeployingApps
+			console.debug('initializingOrDeployingApps', initializingOrDeployingApps)
+			Array.from(initializingOrDeployingApps).forEach(app => {
+				context.dispatch('getAppStatus', { appId: app.id })
+				if ((app.status.deploy === 100 && app.status.init === 0) || app.status.type === 'update') {
+					console.debug('getExAppInfo', app.id)
+					// get ExApp info once app is deployed or during update
+					context.dispatch('getExAppInfo', { appId: app.id })
+				}
+			})
+		}, 2000))
 	},
 
 }
