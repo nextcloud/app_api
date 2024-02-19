@@ -94,8 +94,6 @@ jobs:
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_api:app:deploy skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:register skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:enable skeleton
@@ -171,8 +169,6 @@ jobs:
             docker_local_sock Docker docker-install http /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
@@ -252,8 +248,6 @@ jobs:
             docker_by_port Docker docker-install http nextcloud-appapi-dsp:2375 http://nextcloud/index.php \
             --net=master_bridge --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
@@ -345,8 +339,6 @@ jobs:
             docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost:8080/index.php \
             --net=host --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          docker exec nextcloud sudo -u www-data php occ app_api:app:deploy skeleton docker_by_port \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
@@ -496,8 +488,6 @@ jobs:
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:daemon:list
-          ./occ app_api:app:deploy skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:register skeleton docker_local_sock \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:enable skeleton
@@ -622,8 +612,6 @@ jobs:
             docker_socket_local Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php \
             --net=host --set-default
           ./occ app_api:daemon:list
-          ./occ app_api:app:deploy skeleton \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:register skeleton \
             --info-xml https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml
           ./occ app_api:app:enable skeleton
