@@ -69,17 +69,17 @@ class DockerActions implements IDeployActions {
 		$this->initGuzzleClient($daemonConfig);
 
 		$this->exAppService->setAppDeployProgress($exApp, 0);
-		$result = $this->pullContainer($dockerUrl, $imageParams);
-		if (isset($result['error'])) {
-			return $result['error'];
+		$result = $this->pullImage($dockerUrl, $imageParams, $exApp, 0, 94);
+		if ($result) {
+			return $result;
 		}
 
 		$this->exAppService->setAppDeployProgress($exApp, 95);
 		$containerInfo = $this->inspectContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
 		if (isset($containerInfo['Id'])) {
-			$removeResult = $this->removeContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
-			if ($removeResult) {
-				return $removeResult;
+			$result = $this->removeContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+			if ($result) {
+				return $result;
 			}
 		}
 		$this->exAppService->setAppDeployProgress($exApp, 96);
@@ -198,18 +198,74 @@ class DockerActions implements IDeployActions {
 		return sprintf('Failed to remove container: %s', $containerId);
 	}
 
-	public function pullContainer(string $dockerUrl, array $params): array {
+	public function pullImage(string $dockerUrl, array $params, ExApp $exApp, int $startPercent, int $maxPercent): string {
+		# docs: https://github.com/docker/compose/blob/main/pkg/compose/pull.go
+		$layerInProgress = ['preparing', 'waiting', 'pulling fs layer', 'download', 'extracting', 'verifying checksum'];
+		$layerFinished = ['already exists', 'pull complete'];
+		$disableProgressTracking = false;
 		$imageId = $this->buildImageName($params);
 		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($imageId)));
 		$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
 		try {
-			$response = $this->guzzleClient->post($url);
-			$this->logger->info(sprintf('Pull ExApp image result=%d for %s', $response->getStatusCode(), $imageId));
-			return ['success' => $response->getStatusCode() === 200];
+			$response = $this->guzzleClient->post($url, ['stream' => true]);
+			if ($response->getStatusCode() !== 200) {
+				return sprintf('Pulling ExApp Image: %s return status code: %d', $imageId, $response->getStatusCode());
+			}
+			$lastPercent = $startPercent;
+			$layers = [];
+			$buffer = '';
+			while (!$response->getBody()->eof()) {
+				$buffer .= $response->getBody()->read(1024);
+				try {
+					while (($newlinePos = strpos($buffer, "\n")) !== false) {
+						$line = substr($buffer, 0, $newlinePos);
+						$buffer = substr($buffer, $newlinePos + 1);
+						$jsonLine = json_decode(trim($line));
+						if ($jsonLine) {
+							if (isset($jsonLine->id) && isset($jsonLine->status)) {
+								$layerId = $jsonLine->id;
+								$status = strtolower($jsonLine->status);
+								foreach ($layerInProgress as $substring) {
+									if (str_contains($status, $substring)) {
+										$layers[$layerId] = false;
+										break;
+									}
+								}
+								foreach ($layerFinished as $substring) {
+									if (str_contains($status, $substring)) {
+										$layers[$layerId] = true;
+										break;
+									}
+								}
+							}
+						} else {
+							$this->logger->warning(
+								sprintf("Progress tracking of image pulling(%s) disabled, error: %d, data: %s", $exApp->getAppid(), json_last_error(), $line)
+							);
+							$disableProgressTracking = true;
+						}
+					}
+				} catch (Exception $e) {
+					$this->logger->warning(
+						sprintf("Progress tracking of image pulling(%s) disabled, exception: %s", $exApp->getAppid(), $e->getMessage()), ['exception' => $e]
+					);
+					$disableProgressTracking = true;
+				}
+				if (!$disableProgressTracking) {
+					$completedLayers = count(array_filter($layers));
+					$totalLayers = count($layers);
+					$newLastPercent = intval($totalLayers > 0 ? ($completedLayers / $totalLayers) * ($maxPercent - $startPercent) : 0);
+					if ($lastPercent != $newLastPercent) {
+						$this->exAppService->setAppDeployProgress($exApp, $newLastPercent);
+						$lastPercent = $newLastPercent;
+					}
+				}
+			}
+			return '';
 		} catch (GuzzleException $e) {
 			$this->logger->error('Failed to pull image', ['exception' => $e]);
 			error_log($e->getMessage());
-			return ['error' => 'Failed to pull image.'];
+			return 'Failed to pull image, GuzzleException occur.';
 		}
 	}
 

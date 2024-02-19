@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [2.1.0 - 2024-02-19]
+
+### Changed
+
+- `deploy` command was deprecated, now `register` and `deploy` is one step. #233
+- Installation of ExApps algorithm has been rewritten to provide a more comfortable experience. #233
+
+### Fixed
+
+- Translation provider API correctly supports "language detection" feature. #232
 
 ## [2.0.4 - 2024-02-08]
 
