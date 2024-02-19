@@ -13,6 +13,7 @@ OC.L10N.register(
     "Delete" : "Desaniciar",
     "Cancel" : "Encaboxar",
     "Ok" : "Aceutar",
+    "Display name" : "Nome visible",
     "Your apps" : "Les tos aplicaciones",
     "Details" : "Detalles",
     "Changelog" : "Rexistru de cambeos",
