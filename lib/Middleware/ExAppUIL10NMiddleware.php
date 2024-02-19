@@ -7,11 +7,13 @@ namespace OCA\AppAPI\Middleware;
 use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 
 use OCA\AppAPI\Service\ExAppService;
+use OCP\App\AppPathNotFoundException;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Middleware;
 use OCP\IRequest;
 use OCP\L10N\IFactory;
+use Psr\Log\LoggerInterface;
 
 class ExAppUIL10NMiddleware extends Middleware {
 
@@ -26,6 +28,7 @@ class ExAppUIL10NMiddleware extends Middleware {
 		private readonly ContentSecurityPolicyNonceManager $nonceManager,
 		private readonly IAppManager        $appManager,
 		private readonly ExAppService       $exAppService,
+		private readonly LoggerInterface	$logger,
 	) {
 	}
 
@@ -50,9 +53,13 @@ class ExAppUIL10NMiddleware extends Middleware {
 			$availableLocales = $this->l10nFactory->findAvailableLanguages($appId);
 			if (in_array($lang, $availableLocales) && $lang !== 'en') {
 				$headPos = stripos($output, '</head>');
-				$l10nScriptSrc = $this->appManager->getAppWebPath($appId) . '/l10n/' . $lang . '.js';
-				$nonce = $this->nonceManager->getNonce();
-				$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
+				try {
+					$l10nScriptSrc = $this->appManager->getAppWebPath($appId) . '/l10n/' . $lang . '.js';
+					$nonce = $this->nonceManager->getNonce();
+					$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
+				} catch (AppPathNotFoundException) {
+					$this->logger->error(sprintf('Can not find translations for %s ExApp.', $appId));
+				}
 			}
 		}
 		return $output;

@@ -118,8 +118,8 @@ class ExAppService {
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
 			$this->translationService->unregisterExAppTranslationProviders($appId);
 			$this->settingsService->unregisterExAppForms($appId);
+			$this->exAppArchiveFetcher->removeExAppL10NFolder($appId);
 			if ($this->exAppMapper->deleteExApp($appId) === 1) {
-				$this->removeExAppL10NFolder($appId);
 				$this->cache->remove('/exApp_' . $appId);
 				return true;
 			}
@@ -276,10 +276,6 @@ class ExAppService {
 			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData, $extract_l10n);
 		}
 		return null;
-	}
-
-	public function removeExAppL10NFolder(string $appId): void {
-		$this->exAppArchiveFetcher->removeExAppL10NFolder($appId);
 	}
 
 	private function resetCaches(): void {
