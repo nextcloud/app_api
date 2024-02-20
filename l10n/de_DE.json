@@ -1,9 +1,5 @@
 { "translations": {
     "External Apps" : "Externe Apps",
-    "Only docker-install is supported for now" : "Aktuell wird nur docker-install unterstützt",
-    "Failed to register ExApp" : "Fehler bei der Registrierung von ExApp",
-    "Failed to deploy ExApp" : "Fehler beim Bereitstellen der ExApp",
-    "Failed to send \"init\" event to ExApp." : "\"init\" Vorgang nicht an ExApp gesendet.",
     "Failed to enable ExApp" : "Fehler beim Aktivieren von ExApp",
     "Failed to disable ExApp" : "Fehler beim Deaktivieren von ExApp",
     "Could not update ExApp" : "Konnte ExApp nicht aktualisieren.",
@@ -63,8 +59,6 @@
     "Type" : "Typ",
     "Display Name" : "Anzeigename",
     "GPUs support" : "GPUs Unterstützung",
-    "External App URL: " : "Externe App-URL:",
-    "System: " : "System: ",
     "Required scopes" : "Erforderliche Berechtigungsumfänge",
     "No scopes granted to this app" : "Keine Berechtigungsumfänge für diese App",
     "Default" : "Standard",

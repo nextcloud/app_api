@@ -1,9 +1,5 @@
 { "translations": {
     "External Apps" : "外部應用程式",
-    "Only docker-install is supported for now" : "目前僅支援 Docker 安裝",
-    "Failed to register ExApp" : "無法註冊 ExApp",
-    "Failed to deploy ExApp" : "無法部署 ExApp",
-    "Failed to send \"init\" event to ExApp." : "無法傳送「init」事件至 ExApp.。",
     "Failed to enable ExApp" : "無法啟用 ExApp",
     "Failed to disable ExApp" : "無法停用 ExApp",
     "Could not update ExApp" : "無法更新 ExApp",
@@ -63,8 +59,6 @@
     "Type" : "類型",
     "Display Name" : "顯示名稱",
     "GPUs support" : "GPUs 支援",
-    "External App URL: " : "外部應用程式 URL：",
-    "System: " : "系統：",
     "Required scopes" : "需要的範圍",
     "No scopes granted to this app" : "未授予範圍給此應用程式",
     "Default" : "默認",

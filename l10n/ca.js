@@ -2,9 +2,6 @@ OC.L10N.register(
     "app_api",
     {
     "External Apps" : "Apps externes",
-    "Failed to register ExApp" : "No s'ha pogut registrar ExApp",
-    "Failed to deploy ExApp" : "No s'ha pogut implementar ExApp",
-    "Failed to send \"init\" event to ExApp." : "No s'ha pogut enviar l'esdeveniment \"init\" a ExApp.",
     "Failed to enable ExApp" : "No s'ha pogut activar ExApp",
     "Failed to disable ExApp" : "No s'ha pogut desactivar ExApp",
     "Could not update ExApp" : "No s'ha pogut actualitzar ExApp",

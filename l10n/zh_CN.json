@@ -1,8 +1,5 @@
 { "translations": {
     "External Apps" : "外部程序",
-    "Only docker-install is supported for now" : "仅支持 Docker 安装",
-    "Failed to register ExApp" : "无法注册外部程序",
-    "Failed to send \"init\" event to ExApp." : "无法发送“初始化”事件至外部程序",
     "Failed to enable ExApp" : "无法启用外部程序",
     "Failed to disable ExApp" : "无法禁用外部程序",
     "Could not update ExApp" : "无法更新外部程序",
