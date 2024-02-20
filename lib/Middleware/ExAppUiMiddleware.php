@@ -54,7 +54,7 @@ class ExAppUiMiddleware extends Middleware {
 					$nonce = $this->nonceManager->getNonce();
 					$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
 				} catch (AppPathNotFoundException) {
-					$this->logger->error(sprintf('Can not find translations for %s ExApp.', $appId));
+					$this->logger->debug(sprintf('Can not find translations for %s ExApp.', $appId));
 				}
 			}
 		}

@@ -268,13 +268,14 @@ class ExAppService {
 		$this->settingsService->resetCacheEnabled();
 	}
 
-	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo, string &$extractedDir): array {
+	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo): array {
+		$extractedDir = '';
 		if ($jsonInfo !== null) {
 			$appInfo = json_decode($jsonInfo, true);
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'scopes', 'system'] as $key) {
+			foreach (['docker-install', 'scopes', 'system', 'translations_folder'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);
@@ -297,6 +298,13 @@ class ExAppService {
 			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
 			if (isset($appInfo['external-app']['scopes']['value'])) {
 				$appInfo['external-app']['scopes'] = $appInfo['external-app']['scopes']['value'];
+			}
+			if ($extractedDir) {
+				if (file_exists($extractedDir . '/l10n')) {
+					$appInfo['translations_folder'] = $extractedDir . '/l10n';
+				} else {
+					$this->logger->info(sprintf('Application %s does not support translations', $appId));
+				}
 			}
 			# TO-DO: remove this in AppAPI 2.3.0
 			if (isset($appInfo['external-app']['scopes']['required']['value'])) {

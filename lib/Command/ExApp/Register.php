@@ -72,9 +72,8 @@ class Register extends Command {
 			return 3;
 		}
 
-		$extractedDir = '';
 		$appInfo = $this->exAppService->getAppInfo(
-			$appId, $input->getOption('info-xml'), $input->getOption('json-info'), $extractedDir
+			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
 		);
 		if (isset($appInfo['error'])) {
 			$this->logger->error($appInfo['error']);
@@ -175,13 +174,15 @@ class Register extends Command {
 			}
 		}
 
-		if ($daemonConfig->getAcceptsDeployId() !== $this->manualActions->getAcceptsDeployId()) {
-			$result = $this->exAppArchiveFetcher->installTranslations($appId, $extractedDir);
+		if (!empty($appInfo['external-app']['translations_folder'])) {
+			$result = $this->exAppArchiveFetcher->installTranslations($appId, $appInfo['external-app']['translations_folder']);
 			if ($result) {
 				$this->logger->error(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
 				if ($outputConsole) {
 					$output->writeln(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
 				}
+				$this->exAppService->unregisterExApp($appId);
+				return 3;
 			}
 		}
 

@@ -56,9 +56,8 @@ class Update extends Command {
 		$outputConsole = !$input->getOption('silent');
 		$appId = $input->getArgument('appid');
 
-		$extractedDir = '';
 		$appInfo = $this->exAppService->getAppInfo(
-			$appId, $input->getOption('info-xml'), $input->getOption('json-info'), $extractedDir
+			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
 		);
 		if (isset($appInfo['error'])) {
 			$this->logger->error($appInfo['error']);
@@ -121,8 +120,8 @@ class Update extends Command {
 			}
 		}
 
-		if ($daemonConfig->getAcceptsDeployId() !== $this->manualActions->getAcceptsDeployId()) {
-			$result = $this->exAppArchiveFetcher->installTranslations($appId, $extractedDir);
+		if (!empty($appInfo['external-app']['translations_folder'])) {
+			$result = $this->exAppArchiveFetcher->installTranslations($appId, $appInfo['external-app']['translations_folder']);
 			if ($result) {
 				$this->logger->error(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
 				if ($outputConsole) {

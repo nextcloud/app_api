@@ -74,24 +74,20 @@ class ExAppArchiveFetcher {
 		return $infoXml;
 	}
 
-	public function installTranslations(string $appId, string $extractedDir): string {
-		if (!$extractedDir) {
-			return '';
-		}
-		if (!file_exists($extractedDir)) {
-			return 'Missing temp directory with ExApp files';
+	public function installTranslations(string $appId, string $dirTranslations): string {
+		if (!file_exists($dirTranslations)) {
+			return sprintf('Can not access directory: %s', $dirTranslations);
 		}
 		$writableAppPath = $this->getExAppFolder($appId);
 		if (!$writableAppPath) {
-			return 'Can not find writable apps path to perform install.';
+			return 'Can not find writable apps path to perform installation.';
 		}
 
-		$installL10NPath = $writableAppPath . '/' . $appId . '/l10n';
+		$installL10NPath = $writableAppPath . '/l10n';
 		if (file_exists($installL10NPath)) {
 			$this->rmdirr($installL10NPath);  // Remove old l10n folder and files if exists
 		}
-		// Move l10n folder from extracted temp to the app folder
-		rename($extractedDir . '/l10n', $installL10NPath);
+		$this->copyr($dirTranslations, $installL10NPath);
 		return '';
 	}
 
@@ -214,14 +210,7 @@ class ExAppArchiveFetcher {
 		return $matches[0];
 	}
 
-	/**
-	 * Recursive deletion of folders
-	 *
-	 * @param string $dir path to the folder
-	 * @param bool $deleteSelf if set to false only the content of the folder will be deleted
-	 * @return bool
-	 */
-	public static function rmdirr(string $dir, bool $deleteSelf = true): bool {
+	public function rmdirr(string $dir, bool $deleteSelf = true): bool {
 		if (is_dir($dir)) {
 			$files = new RecursiveIteratorIterator(
 				new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
@@ -250,5 +239,21 @@ class ExAppArchiveFetcher {
 		}
 
 		return !file_exists($dir);
+	}
+
+	public function copyr(string $src, string $dest): void {
+		if (is_dir($src)) {
+			if (!is_dir($dest)) {
+				mkdir($dest);
+			}
+			$files = scandir($src);
+			foreach ($files as $file) {
+				if ($file != "." && $file != "..") {
+					self::copyr("$src/$file", "$dest/$file");
+				}
+			}
+		} elseif (file_exists($src)) {
+			copy($src, $dest);
+		}
 	}
 }
