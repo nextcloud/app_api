@@ -6,6 +6,8 @@ namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\ManualActions;
+use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
@@ -30,7 +32,9 @@ class Update extends Command {
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DaemonConfigService  $daemonConfigService,
 		private readonly DockerActions        $dockerActions,
+		private readonly ManualActions        $manualActions,
 		private readonly LoggerInterface      $logger,
+		private readonly ExAppArchiveFetcher  $exAppArchiveFetcher,
 	) {
 		parent::__construct();
 	}
@@ -81,12 +85,17 @@ class Update extends Command {
 			}
 			return 2;
 		}
-		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {
-			$this->logger->error('For "manual-install" deployId update is done manually');
+
+		$actionsDeployIds = [
+			$this->dockerActions->getAcceptsDeployId(),
+			$this->manualActions->getAcceptsDeployId(),
+		];
+		if (!in_array($daemonConfig->getAcceptsDeployId(), $actionsDeployIds)) {
+			$this->logger->error(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
 			if ($outputConsole) {
-				$output->writeln('For "manual-install" deployId update is done manually');
+				$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
 			}
-			return 1;
+			return 2;
 		}
 
 		if ($exApp->getVersion() === $appInfo['version']) {
@@ -104,15 +113,25 @@ class Update extends Command {
 
 		if ($exApp->getEnabled()) {
 			if ($this->service->disableExApp($exApp)) {
-				$this->logger->info(sprintf('ExApp %s disabled.', $appId));
+				$this->logger->info(sprintf('ExApp %s successfully disabled.', $appId));
 				if ($outputConsole) {
-					$output->writeln(sprintf('ExApp %s disabled.', $appId));
+					$output->writeln(sprintf('ExApp %s successfully disabled.', $appId));
 				}
 			}
 		} else {
 			$this->logger->info(sprintf('ExApp %s was already disabled.', $appId));
 			if ($outputConsole) {
 				$output->writeln(sprintf('ExApp %s was already disabled.', $appId));
+			}
+		}
+
+		if (!empty($appInfo['external-app']['translations_folder'])) {
+			$result = $this->exAppArchiveFetcher->installTranslations($appId, $appInfo['external-app']['translations_folder']);
+			if ($result) {
+				$this->logger->error(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
+				if ($outputConsole) {
+					$output->writeln(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
+				}
 			}
 		}
 
@@ -161,12 +180,15 @@ class Update extends Command {
 				$auth,
 			);
 		} else {
-			$this->logger->error(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
-			if ($outputConsole) {
-				$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
-			}
-			$this->exAppService->setStatusError($exApp, 'Daemon actions not found');
-			return 2;
+			$this->manualActions->deployExApp($exApp, $daemonConfig);
+			$exAppUrl = $this->manualActions->resolveExAppUrl(
+				$appId,
+				$daemonConfig->getProtocol(),
+				$daemonConfig->getHost(),
+				$daemonConfig->getDeployConfig(),
+				(int) $appInfo['port'],
+				$auth,
+			);
 		}
 
 		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {

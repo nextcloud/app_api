@@ -18,6 +18,7 @@ class ExAppNotifier implements INotifier {
 		private readonly IFactory      $factory,
 		private readonly IURLGenerator $url,
 		private readonly ExAppService  $service,
+		private readonly IFactory 	   $l10nFactory
 	) {
 	}
 
@@ -40,6 +41,8 @@ class ExAppNotifier implements INotifier {
 			throw new InvalidArgumentException('ExApp is disabled');
 		}
 
+		$l = $this->l10nFactory->get($notification->getApp(), $languageCode);
+
 		$parameters = $notification->getSubjectParameters();
 		if (isset($parameters['link']) && $parameters['link'] !== '') {
 			$notification->setLink($parameters['link']);
@@ -47,10 +50,10 @@ class ExAppNotifier implements INotifier {
 		$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
 
 		if (isset($parameters['rich_subject']) && isset($parameters['rich_subject_params'])) {
-			$notification->setRichSubject($parameters['rich_subject'], $parameters['rich_subject_params']);
+			$notification->setRichSubject($l->t($parameters['rich_subject']), $parameters['rich_subject_params']);
 		}
 		if (isset($parameters['rich_message']) && isset($parameters['rich_message_params'])) {
-			$notification->setRichMessage($parameters['rich_message'], $parameters['rich_message_params']);
+			$notification->setRichMessage($l->t($parameters['rich_message']), $parameters['rich_message_params']);
 		}
 
 		return $notification;

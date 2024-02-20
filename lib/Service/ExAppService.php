@@ -118,6 +118,7 @@ class ExAppService {
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
 			$this->translationService->unregisterExAppTranslationProviders($appId);
 			$this->settingsService->unregisterExAppForms($appId);
+			$this->exAppArchiveFetcher->removeExAppFolder($appId);
 			if ($this->exAppMapper->deleteExApp($appId) === 1) {
 				$this->cache->remove('/exApp_' . $appId);
 				return true;
@@ -245,26 +246,7 @@ class ExAppService {
 		return false;
 	}
 
-	/**
-	 * Get info from App Store releases for specific ExApp and its current version
-	 */
-	public function getExAppInfoFromAppstore(ExApp $exApp): ?SimpleXMLElement {
-		$exApps = $this->exAppFetcher->get();
-		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($exApp) {
-			return $exAppItem['id'] === $exApp->getAppid() && count(array_filter($exAppItem['releases'], function (array $release) use ($exApp) {
-				return $release['version'] === $exApp->getVersion();
-			})) === 1;
-		});
-		if (count($exAppAppstoreData) === 1) {
-			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
-		}
-		return null;
-	}
-
-	/**
-	 * Get latest ExApp release info by ExApp appid (in case of first installation or update)
-	 */
-	public function getLatestExAppInfoFromAppstore(string $appId): ?SimpleXMLElement {
+	public function getLatestExAppInfoFromAppstore(string $appId, string &$extractedDir): ?SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
 		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($appId) {
 			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;
@@ -272,7 +254,7 @@ class ExAppService {
 		$exAppAppstoreData = end($exAppAppstoreData);
 		$exAppReleaseInfo = end($exAppAppstoreData['releases']);
 		if ($exAppReleaseInfo !== false) {
-			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
+			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData, $extractedDir);
 		}
 		return null;
 	}
@@ -287,12 +269,13 @@ class ExAppService {
 	}
 
 	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo): array {
+		$extractedDir = '';
 		if ($jsonInfo !== null) {
 			$appInfo = json_decode($jsonInfo, true);
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'scopes', 'system'] as $key) {
+			foreach (['docker-install', 'scopes', 'system', 'translations_folder'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);
@@ -310,11 +293,18 @@ class ExAppService {
 					return ['error' => sprintf('Failed to load info.xml from %s', $infoXml)];
 				}
 			} else {
-				$xmlAppInfo = $this->getLatestExAppInfoFromAppstore($appId);
+				$xmlAppInfo = $this->getLatestExAppInfoFromAppstore($appId, $extractedDir);
 			}
 			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
 			if (isset($appInfo['external-app']['scopes']['value'])) {
 				$appInfo['external-app']['scopes'] = $appInfo['external-app']['scopes']['value'];
+			}
+			if ($extractedDir) {
+				if (file_exists($extractedDir . '/l10n')) {
+					$appInfo['translations_folder'] = $extractedDir . '/l10n';
+				} else {
+					$this->logger->info(sprintf('Application %s does not support translations', $appId));
+				}
 			}
 			# TO-DO: remove this in AppAPI 2.3.0
 			if (isset($appInfo['external-app']['scopes']['required']['value'])) {

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Middleware;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Controller\TopMenuController;
 
+use OCA\AppAPI\Controller\TopMenuController;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Middleware;
@@ -16,25 +16,24 @@ use OCP\IRequest;
 class ExAppUiMiddleware extends Middleware {
 
 	public function __construct(
-		protected IRequest      $request,
-		private INavigationManager $navigationManager,
+		protected IRequest                  $request,
+		private readonly INavigationManager $navigationManager,
 	) {
 	}
 
 	public function beforeOutput(Controller $controller, string $methodName, string $output) {
 		if (($controller instanceof TopMenuController) && ($controller->postprocess)) {
-			$correctedOutput = preg_replace(
+			$output = preg_replace(
 				'/(href=")(\/.*?)(\/app_api\/css\/)(proxy\/.*css.*")/',
 				'$1/index.php/apps/app_api/$4',
 				$output);
 			foreach ($controller->jsProxyMap as $key => $value) {
-				$correctedOutput = preg_replace(
+				$output = preg_replace(
 					'/(src=")(\/.*?)(\/app_api\/js\/)(proxy_js\/' . $key . '.js)(.*")/',
 					'$1/index.php/apps/app_api/proxy/' . $value . '.js$5',
-					$correctedOutput,
+					$output,
 					limit: 1);
 			}
-			return $correctedOutput;
 		}
 		return $output;
 	}

@@ -1,7 +1,7 @@
 <template>
 	<div class="scopes">
 		<h3>{{ t('app_api', 'Required scopes') }}</h3>
-		<template v-if="app.scopes">
+		<template v-if="app.scopes.length > 0">
 			<div class="scopes-list">
 				<span v-for="scope in app.scopes" :key="scope" class="badge">{{ scope }}</span>
 			</div>

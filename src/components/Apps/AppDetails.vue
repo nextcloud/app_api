@@ -94,7 +94,7 @@
 			<Markdown class="app-details__description" :text="app.description" />
 		</template>
 		<template v-else>
-			<p>{{ t('app_api', 'This app is not registered in AppStore. No extra information available. Only enable/disable actions allowed.') }}</p>
+			<p>{{ t('app_api', 'This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed.') }}</p>
 		</template>
 	</div>
 </template>

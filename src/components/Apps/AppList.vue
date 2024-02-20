@@ -233,17 +233,4 @@ export default {
 	display: flex;
 	flex-wrap: wrap;
 }
-
-.toolbar {
-	height: 60px;
-	padding: 8px;
-	padding-left: 60px;
-	width: 100%;
-	background-color: var(--color-main-background);
-	position: sticky;
-	top: 0;
-	z-index: 1;
-	display: flex;
-	align-items: center;
-}
 </style>

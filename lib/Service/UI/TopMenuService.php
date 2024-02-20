@@ -18,6 +18,7 @@ use OCP\INavigationManager;
 use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserSession;
+use OCP\L10N\IFactory;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -55,6 +56,8 @@ class TopMenuService {
 			}
 			$container->get(INavigationManager::class)->add(function () use ($container, $menuEntry) {
 				$urlGenerator = $container->get(IURLGenerator::class);
+				/** @var IFactory $l10nFactory */
+				$l10nFactory = $container->get(IFactory::class);
 				$appId = $menuEntry->getAppid();
 				$entryName = $menuEntry->getName();
 				$icon = $menuEntry->getIcon();
@@ -70,7 +73,7 @@ class TopMenuService {
 						$urlGenerator->linkToRoute(
 							'app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => $icon]
 						),
-					'name' => $menuEntry->getDisplayName(),
+					'name' => $l10nFactory->get($appId)->t($menuEntry->getDisplayName()),
 				];
 			});
 		}

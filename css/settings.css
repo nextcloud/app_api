@@ -278,15 +278,15 @@
 
 .apps-list .toolbar {
 	height: 60px;
-	padding: 8px;
-	padding-left: 60px;
+	padding: 38px;
+	padding-left: 70px;
 	width: 100%;
 	background-color: var(--color-main-background);
 	position: sticky;
 	top: 0;
 	z-index: 1;
 	display: flex;
-	align-items: center
+	align-items: center;
 }
 
 .apps-list.installed {
