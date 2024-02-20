@@ -2,7 +2,6 @@ OC.L10N.register(
     "app_api",
     {
     "External Apps" : "Kanpoko aplikazioak",
-    "Only docker-install is supported for now" : "Docker-install bakarrik onartzen da oraingoz",
     "Update to {version}" : "Eguneratu {version} bertsiora",
     "Remove" : "Kendu",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "This app has no minimum Nextcloud version assigned. This will be an error in the future.",

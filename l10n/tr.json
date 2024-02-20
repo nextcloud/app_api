@@ -1,9 +1,5 @@
 { "translations": {
     "External Apps" : "Dış uygulamalar",
-    "Only docker-install is supported for now" : "Şu anda yalnızca docker-install destekleniyor",
-    "Failed to register ExApp" : "ExApp kaydedilemedi",
-    "Failed to deploy ExApp" : "ExApp dağıtılamadı",
-    "Failed to send \"init\" event to ExApp." : "ExApp için \"init\" etkinliği gönderilemedi",
     "Failed to enable ExApp" : "ExApp etkinleştirilemedi",
     "Failed to disable ExApp" : "ExApp devre dışı bırakılamadı",
     "Could not update ExApp" : "ExApp güncellenemedi",
@@ -63,8 +59,6 @@
     "Type" : "Tür",
     "Display Name" : "Görüntülenecek ad",
     "GPUs support" : "Grafik işlemci desteği",
-    "External App URL: " : "Dış uygulama adresi: ",
-    "System: " : "Sistem:",
     "Required scopes" : "Zorunlu kapsamlar",
     "No scopes granted to this app" : "Bu uygulamaya izin verilmiş bir kapsam yok",
     "Default" : "Varsayılan",
