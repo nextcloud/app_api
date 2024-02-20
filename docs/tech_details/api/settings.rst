@@ -1,3 +1,5 @@
+.. _declarative_settings_section:
+
 ====================
 Declarative Settings
 ====================

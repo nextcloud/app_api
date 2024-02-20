@@ -1,3 +1,5 @@
+.. _file_actions_menu_section:
+
 =================
 File Actions Menu
 =================

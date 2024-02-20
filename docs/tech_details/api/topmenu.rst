@@ -1,3 +1,5 @@
+.. _top_menu_section:
+
 ==============
 Top Menu Entry
 ==============
