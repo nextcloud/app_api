@@ -118,7 +118,7 @@ class ExAppService {
 			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
 			$this->translationService->unregisterExAppTranslationProviders($appId);
 			$this->settingsService->unregisterExAppForms($appId);
-			$this->exAppArchiveFetcher->removeExAppL10NFolder($appId);
+			$this->exAppArchiveFetcher->removeExAppFolder($appId);
 			if ($this->exAppMapper->deleteExApp($appId) === 1) {
 				$this->cache->remove('/exApp_' . $appId);
 				return true;
@@ -246,26 +246,7 @@ class ExAppService {
 		return false;
 	}
 
-	/**
-	 * Get info from App Store releases for specific ExApp and its current version
-	 */
-	public function getExAppInfoFromAppstore(ExApp $exApp): ?SimpleXMLElement {
-		$exApps = $this->exAppFetcher->get();
-		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($exApp) {
-			return $exAppItem['id'] === $exApp->getAppid() && count(array_filter($exAppItem['releases'], function (array $release) use ($exApp) {
-				return $release['version'] === $exApp->getVersion();
-			})) === 1;
-		});
-		if (count($exAppAppstoreData) === 1) {
-			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData);
-		}
-		return null;
-	}
-
-	/**
-	 * Get latest ExApp release info by ExApp appid (in case of first installation or update)
-	 */
-	public function getLatestExAppInfoFromAppstore(string $appId, bool $extract_l10n = false): ?SimpleXMLElement {
+	public function getLatestExAppInfoFromAppstore(string $appId, string &$extractedDir): ?SimpleXMLElement {
 		$exApps = $this->exAppFetcher->get();
 		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($appId) {
 			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;
@@ -273,7 +254,7 @@ class ExAppService {
 		$exAppAppstoreData = end($exAppAppstoreData);
 		$exAppReleaseInfo = end($exAppAppstoreData['releases']);
 		if ($exAppReleaseInfo !== false) {
-			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData, $extract_l10n);
+			return $this->exAppArchiveFetcher->downloadInfoXml($exAppAppstoreData, $extractedDir);
 		}
 		return null;
 	}
@@ -287,7 +268,7 @@ class ExAppService {
 		$this->settingsService->resetCacheEnabled();
 	}
 
-	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo): array {
+	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo, string &$extractedDir): array {
 		if ($jsonInfo !== null) {
 			$appInfo = json_decode($jsonInfo, true);
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
@@ -311,7 +292,7 @@ class ExAppService {
 					return ['error' => sprintf('Failed to load info.xml from %s', $infoXml)];
 				}
 			} else {
-				$xmlAppInfo = $this->getLatestExAppInfoFromAppstore($appId);
+				$xmlAppInfo = $this->getLatestExAppInfoFromAppstore($appId, $extractedDir);
 			}
 			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
 			if (isset($appInfo['external-app']['scopes']['value'])) {

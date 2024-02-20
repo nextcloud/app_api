@@ -10,6 +10,8 @@ use OCP\Http\Client\IClientService;
 use OCP\IConfig;
 use OCP\ITempManager;
 use phpseclib\File\X509;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use SimpleXMLElement;
 
 /**
@@ -28,7 +30,7 @@ class ExAppArchiveFetcher {
 	 * Based on regular app download algorithm.
 	 * Download ExApp release archive, verify signature extract info.xml and return its object
 	 */
-	public function downloadInfoXml(array $exAppAppstoreData, bool $extract_l10n = false): ?SimpleXMLElement {
+	public function downloadInfoXml(array $exAppAppstoreData, string &$extractedDir): ?SimpleXMLElement {
 		// 1. Signature check
 		if (!$this->checkExAppSignature($exAppAppstoreData)) {
 			return null;
@@ -58,9 +60,7 @@ class ExAppArchiveFetcher {
 		}
 
 		$allFiles = scandir($extractDir);
-		$folders = array_diff($allFiles, ['.', '..']);
-		$folders = array_values($folders);
-
+		$folders = array_values(array_diff($allFiles, ['.', '..']));
 		if (count($folders) > 1) {
 			return null;
 		}
@@ -70,25 +70,35 @@ class ExAppArchiveFetcher {
 		if ((string) $infoXml->id !== $exAppAppstoreData['id']) {
 			return null;
 		}
-
-		if ($extract_l10n) {
-			$writableAppPath = $this->getExAppL10NPath($exAppAppstoreData['id']);
-
-			if ($writableAppPath !== null) {
-				$extractedL10NPath = $writableAppPath . '/' . $exAppAppstoreData['id'] . '/l10n';
-				// Remove old l10n folder and files if exists
-				if (file_exists($extractedL10NPath)) {
-					rmdir($extractedL10NPath);
-				}
-				// Move l10n folder from extracted temp to the app folder
-				rename($extractDir . '/' . $folders[0] . '/l10n', $extractedL10NPath);
-			}
-		}
-
+		$extractedDir = $extractDir . '/' . $folders[0];
 		return $infoXml;
 	}
 
-	public function getExAppL10NPath(string $appId): ?string {
+	public function installTranslations(string $appId, string $extractedDir): string {
+		if (!$extractedDir) {
+			return '';
+		}
+		if (!file_exists($extractedDir)) {
+			return 'Missing temp directory with ExApp files';
+		}
+		$writableAppPath = $this->getExAppFolder($appId);
+		if (!$writableAppPath) {
+			return 'Can not find writable apps path to perform install.';
+		}
+
+		$installL10NPath = $writableAppPath . '/' . $appId . '/l10n';
+		if (file_exists($installL10NPath)) {
+			$this->rmdirr($installL10NPath);  // Remove old l10n folder and files if exists
+		}
+		// Move l10n folder from extracted temp to the app folder
+		rename($extractedDir . '/l10n', $installL10NPath);
+		return '';
+	}
+
+	/**
+	 * @throws Exception
+	 */
+	public function getExAppFolder(string $appId): ?string {
 		$appsPaths = $this->config->getSystemValue('apps_paths');
 		$count = 0;
 		$appPaths = [];
@@ -98,35 +108,30 @@ class ExAppArchiveFetcher {
 				$appPaths[] = $appPath['path'];
 			}
 		}
-
-		// Check if there is already app folder with only l10n folder
-		// Ensure that there is only one app with the same id in all apps-paths folders
 		if ($count > 1) {
 			throw new Exception(
-				sprintf(
-					'App with id %s exists in more than one apps-paths folder (%s)',
-					$appId, json_encode($appPaths)
-				)
-			);
-		} elseif ($count === 1) {
-			return $appPaths[0] . '/' . $appId . '/l10n';
-		} else {
-			foreach ($appsPaths as $appPath) {
-				if ($appPath['writable']) {
-					return $appPath['path'] . '/' . $appId . '/l10n';
+				sprintf('App with id %s exists in more than one apps-paths folder (%s)', $appId, json_encode($appPaths))
+			);  // Ensure that there is only one app with the same id in all apps-paths folders
+		}
+		if ($count === 1) {
+			return $appPaths[0] . '/' . $appId;
+		}
+		foreach ($appsPaths as $appPath) {
+			if ($appPath['writable']) {
+				if (mkdir($appPath['path'] . '/' . $appId)) {
+					return $appPath['path'] . '/' . $appId;
 				}
 			}
 		}
-
 		return null;
 	}
 
-	public function removeExAppL10NFolder(string $appId): void {
-		$appL10NPath = $this->getExAppL10NPath($appId);
-		if ($appL10NPath !== null) {
-			$extractedL10NPath = $appL10NPath . '/' . $appId . '/l10n';
-			if (file_exists($extractedL10NPath)) {
-				rmdir($extractedL10NPath);
+	public function removeExAppFolder(string $appId): void {
+		foreach ($this->config->getSystemValue('apps_paths') as $appPath) {
+			if ($appPath['writable']) {
+				if (file_exists($appPath['path'] . '/' . $appId)) {
+					$this->rmdirr($appPath['path'] . '/' . $appId);
+				}
 			}
 		}
 	}
@@ -207,5 +212,43 @@ class ExAppArchiveFetcher {
 		preg_match_all('([\-]{3,}[\S\ ]+?[\-]{3,}[\S\s]+?[\-]{3,}[\S\ ]+?[\-]{3,})', $cert, $matches);
 
 		return $matches[0];
+	}
+
+	/**
+	 * Recursive deletion of folders
+	 *
+	 * @param string $dir path to the folder
+	 * @param bool $deleteSelf if set to false only the content of the folder will be deleted
+	 * @return bool
+	 */
+	public static function rmdirr(string $dir, bool $deleteSelf = true): bool {
+		if (is_dir($dir)) {
+			$files = new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+				RecursiveIteratorIterator::CHILD_FIRST
+			);
+
+			foreach ($files as $fileInfo) {
+				if ($fileInfo->isLink()) {
+					unlink($fileInfo->getPathname());
+				} elseif ($fileInfo->isDir()) {
+					rmdir($fileInfo->getRealPath());
+				} else {
+					unlink($fileInfo->getRealPath());
+				}
+			}
+			if ($deleteSelf) {
+				rmdir($dir);
+			}
+		} elseif (file_exists($dir)) {
+			if ($deleteSelf) {
+				unlink($dir);
+			}
+		}
+		if (!$deleteSelf) {
+			return true;
+		}
+
+		return !file_exists($dir);
 	}
 }

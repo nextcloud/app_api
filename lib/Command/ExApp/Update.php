@@ -6,6 +6,8 @@ namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\ManualActions;
+use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
@@ -30,7 +32,9 @@ class Update extends Command {
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DaemonConfigService  $daemonConfigService,
 		private readonly DockerActions        $dockerActions,
+		private readonly ManualActions        $manualActions,
 		private readonly LoggerInterface      $logger,
+		private readonly ExAppArchiveFetcher  $exAppArchiveFetcher,
 	) {
 		parent::__construct();
 	}
@@ -52,8 +56,9 @@ class Update extends Command {
 		$outputConsole = !$input->getOption('silent');
 		$appId = $input->getArgument('appid');
 
+		$extractedDir = '';
 		$appInfo = $this->exAppService->getAppInfo(
-			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
+			$appId, $input->getOption('info-xml'), $input->getOption('json-info'), $extractedDir
 		);
 		if (isset($appInfo['error'])) {
 			$this->logger->error($appInfo['error']);
@@ -81,7 +86,7 @@ class Update extends Command {
 			}
 			return 2;
 		}
-		if ($daemonConfig->getAcceptsDeployId() === 'manual-install') {
+		if ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
 			$this->logger->error('For "manual-install" deployId update is done manually');
 			if ($outputConsole) {
 				$output->writeln('For "manual-install" deployId update is done manually');
@@ -104,15 +109,25 @@ class Update extends Command {
 
 		if ($exApp->getEnabled()) {
 			if ($this->service->disableExApp($exApp)) {
-				$this->logger->info(sprintf('ExApp %s disabled.', $appId));
+				$this->logger->info(sprintf('ExApp %s successfully disabled.', $appId));
 				if ($outputConsole) {
-					$output->writeln(sprintf('ExApp %s disabled.', $appId));
+					$output->writeln(sprintf('ExApp %s successfully disabled.', $appId));
 				}
 			}
 		} else {
 			$this->logger->info(sprintf('ExApp %s was already disabled.', $appId));
 			if ($outputConsole) {
 				$output->writeln(sprintf('ExApp %s was already disabled.', $appId));
+			}
+		}
+
+		if ($daemonConfig->getAcceptsDeployId() !== $this->manualActions->getAcceptsDeployId()) {
+			$result = $this->exAppArchiveFetcher->installTranslations($appId, $extractedDir);
+			if ($result) {
+				$this->logger->error(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
+				if ($outputConsole) {
+					$output->writeln(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
+				}
 			}
 		}
 

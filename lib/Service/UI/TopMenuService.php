@@ -61,7 +61,6 @@ class TopMenuService {
 				$appId = $menuEntry->getAppid();
 				$entryName = $menuEntry->getName();
 				$icon = $menuEntry->getIcon();
-				$l10n = $l10nFactory->get($appId);
 				return [
 					'id' => Application::APP_ID . '_' . $appId . '_' . $entryName,
 					'type' => 'link',
@@ -74,7 +73,7 @@ class TopMenuService {
 						$urlGenerator->linkToRoute(
 							'app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => $icon]
 						),
-					'name' => $l10n->t($menuEntry->getDisplayName()),
+					'name' => $l10nFactory->get($appId)->t($menuEntry->getDisplayName()),
 				];
 			});
 		}
