@@ -2,7 +2,6 @@ OC.L10N.register(
     "app_api",
     {
     "External Apps" : "Externí aplikace",
-    "Only docker-install is supported for now" : "Zatím jsou podporovány pouze instalace v docker",
     "Deploy Daemons" : "Nasadit procesy služeb",
     "External Apps management" : "Správa externích aplikací",
     "Admin options saved" : "Předvolby pro správu uloženy",
@@ -36,8 +35,6 @@ OC.L10N.register(
     "Type" : "Typ",
     "Display Name" : "Zobrazované jméno",
     "GPUs support" : "Podpora pro výpočty na GPU",
-    "External App URL: " : "URL externí aplikace:",
-    "System: " : "Systém:",
     "No scopes granted to this app" : "Této aplikaci neuděleny žádné rozsahy",
     "Default" : "Výchozí",
     "{license}-licensed" : "licencováno pod {license}",

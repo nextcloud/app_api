@@ -35,7 +35,6 @@ OC.L10N.register(
     "Deploy Daemon" : "Despregar o servizo",
     "Type" : "Escribir",
     "Display Name" : "Nome para amosar",
-    "System: " : "Sistema:",
     "Default" : "Predeterminado",
     "{license}-licensed" : "Licenciado baixo a {license}",
     "Set as default" : "Definir como predeterminado",

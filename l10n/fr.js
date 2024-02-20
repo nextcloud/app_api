@@ -2,8 +2,6 @@ OC.L10N.register(
     "app_api",
     {
     "External Apps" : "Applications externes",
-    "Only docker-install is supported for now" : "Seule l'installation par Docker est actuellement compatible",
-    "Failed to deploy ExApp" : "Échec du déploiement d'ExApp",
     "AppAPI authentication failed" : "Échec de l'authentification AppAPI",
     "AppAPI" : "AppAPI",
     "Nextcloud AppAPI" : "AppAPI Nextcloud",
@@ -37,8 +35,6 @@ OC.L10N.register(
     "Type" : "Type",
     "Display Name" : "Nom affiché",
     "GPUs support" : "Prise en charge des cartes graphiques",
-    "External App URL: " : "URL de l'application externe :",
-    "System: " : "Système :",
     "Default" : "Défaut",
     "{license}-licensed" : "Sous licence {license}",
     "Set as default" : "Définir comme valeur par défaut",

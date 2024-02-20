@@ -1,9 +1,5 @@
 { "translations": {
     "External Apps" : "Спољне апликације",
-    "Only docker-install is supported for now" : "За сада се подржава само docker-инсталација",
-    "Failed to register ExApp" : "Није успела регистрација ExApp",
-    "Failed to deploy ExApp" : "Није успело постављање ExApp",
-    "Failed to send \"init\" event to ExApp." : "Није успело слање „init” догађаја у ExApp.",
     "Failed to enable ExApp" : "Није успело укључивање ExApp",
     "Failed to disable ExApp" : "Није успело искључивање ExApp",
     "Could not update ExApp" : "Није успело ажурирање ExApp",
@@ -63,8 +59,6 @@
     "Type" : "Тип",
     "Display Name" : "Име за приказ",
     "GPUs support" : "Подршка за GPU",
-    "External App URL: " : "URL Спољне апликације:",
-    "System: " : "Систем:",
     "Required scopes" : "Тражени опсези важења",
     "No scopes granted to this app" : "Авој апликацији није одобрен ниједан опсег важења",
     "Default" : "Подразумевано",
