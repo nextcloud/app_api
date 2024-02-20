@@ -140,9 +140,11 @@ const mutations = {
 			console.debug('catching intermediate state deploying -> initializing')
 			// catching moment when app is deployed but initialization status not started yet
 			status.action = 'init'
+			app.canUnInstall = true
 		}
 		if (status.error !== '') {
 			app.error = status.error
+			app.canUnInstall = true
 		}
 		if (status.deploy === 100 && status.init === 100) {
 			app.active = true

@@ -482,7 +482,7 @@ class DockerActions implements IDeployActions {
 		} else {
 			$exAppHost = $appId;
 		}
-		if (empty($deployConfig['haproxy_password'])) {
+		if (!isset($deployConfig['haproxy_password']) || $deployConfig['haproxy_password'] === '') {
 			$auth = [];
 		} else {
 			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
@@ -527,7 +527,7 @@ class DockerActions implements IDeployActions {
 		} elseif ($daemonConfig->getProtocol() === 'https') {
 			$guzzleParams = $this->setupCerts($guzzleParams);
 		}
-		if (!empty($daemonConfig->getDeployConfig()['haproxy_password'])) {
+		if (isset($daemonConfig->getDeployConfig()['haproxy_password']) && $daemonConfig->getDeployConfig()['haproxy_password'] !== '') {
 			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $daemonConfig->getDeployConfig()['haproxy_password']];
 		}
 		$this->guzzleClient = new Client($guzzleParams);
