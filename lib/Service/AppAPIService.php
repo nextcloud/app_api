@@ -20,6 +20,7 @@ use OCP\IRequest;
 use OCP\ISession;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use OCP\L10N\IFactory;
 use OCP\Log\ILogFactory;
 use OCP\Security\Bruteforce\IThrottler;
 use Psr\Log\LoggerInterface;
@@ -37,6 +38,7 @@ class AppAPIService {
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
 		private readonly IUserManager            $userManager,
+		private readonly IFactory				 $l10nFactory,
 		private readonly ExNotificationsManager  $exNotificationsManager,
 		private readonly ExAppService			 $exAppService,
 		private readonly ExAppUsersService       $exAppUsersService,
@@ -97,6 +99,10 @@ class AppAPIService {
 				$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret())];
 			} else {
 				$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret());
+			}
+			$lang = $this->l10nFactory->findLanguage($exApp->getAppid());
+			if (!isset($options['headers']['Accept-Language'])) {
+				$options['headers']['Accept-Language'] = $lang;
 			}
 			$options['nextcloud'] = [
 				'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
