@@ -18,8 +18,9 @@ use Psr\Log\LoggerInterface;
 class ExAppUIL10NMiddleware extends Middleware {
 
 	private const routesToLoadL10N = [
-		'/files',
-		'/settings'
+		'/files/',
+		'/settings/',
+		'/app_api/embedded/'
 	];
 
 	public function __construct(
