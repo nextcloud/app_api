@@ -3,6 +3,7 @@ import { generateUrl } from '@nextcloud/router'
 import { loadState } from '@nextcloud/initial-state'
 import { registerFileAction, FileAction } from '@nextcloud/files'
 import { getCurrentUser } from '@nextcloud/auth'
+import { translate as t } from '@nextcloud/l10n'
 
 const state = loadState('app_api', 'ex_files_actions_menu')
 
@@ -28,29 +29,10 @@ function generateAppAPIProxyUrl(appId, route) {
 	return generateUrl(`/apps/app_api/proxy/${appId}/${route}`)
 }
 
-state.fileActions.forEach(fileAction => {
-	if (fileAction.icon === '') {
-		const inlineSvgIcon = loadStaticAppAPIInlineSvgIcon()
-		registerFileAction28(fileAction, inlineSvgIcon)
-	} else {
-		loadExAppInlineSvgIcon(fileAction.appid, fileAction.icon).then((svg) => {
-			if (svg !== null) {
-				// Set css filter for theming
-				const parser = new DOMParser()
-				const icon = parser.parseFromString(svg, 'image/svg+xml')
-				icon.documentElement.setAttribute('style', 'filter: var(--background-invert-if-dark);')
-				// Convert back to inline string
-				const inlineSvgIcon = icon.documentElement.outerHTML
-				registerFileAction28(fileAction, inlineSvgIcon)
-			}
-		})
-	}
-})
-
 function registerFileAction28(fileAction, inlineSvgIcon) {
 	const action = new FileAction({
 		id: fileAction.name,
-		displayName: () => fileAction.display_name,
+		displayName: () => t(fileAction.appid, fileAction.display_name),
 		iconSvgInline: () => inlineSvgIcon,
 		order: Number(fileAction.order),
 		enabled(files, view) {
@@ -112,3 +94,24 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 	})
 	registerFileAction(action)
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+	state.fileActions.forEach(fileAction => {
+		if (fileAction.icon === '') {
+			const inlineSvgIcon = loadStaticAppAPIInlineSvgIcon()
+			registerFileAction28(fileAction, inlineSvgIcon)
+		} else {
+			loadExAppInlineSvgIcon(fileAction.appid, fileAction.icon).then((svg) => {
+				if (svg !== null) {
+					// Set css filter for theming
+					const parser = new DOMParser()
+					const icon = parser.parseFromString(svg, 'image/svg+xml')
+					icon.documentElement.setAttribute('style', 'filter: var(--background-invert-if-dark);')
+					// Convert back to inline string
+					const inlineSvgIcon = icon.documentElement.outerHTML
+					registerFileAction28(fileAction, inlineSvgIcon)
+				}
+			})
+		}
+	})
+})
