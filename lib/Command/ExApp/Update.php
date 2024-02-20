@@ -85,12 +85,17 @@ class Update extends Command {
 			}
 			return 2;
 		}
-		if ($daemonConfig->getAcceptsDeployId() === $this->manualActions->getAcceptsDeployId()) {
-			$this->logger->error('For "manual-install" deployId update is done manually');
+
+		$actionsDeployIds = [
+			$this->dockerActions->getAcceptsDeployId(),
+			$this->manualActions->getAcceptsDeployId(),
+		];
+		if (!in_array($daemonConfig->getAcceptsDeployId(), $actionsDeployIds)) {
+			$this->logger->error(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
 			if ($outputConsole) {
-				$output->writeln('For "manual-install" deployId update is done manually');
+				$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
 			}
-			return 1;
+			return 2;
 		}
 
 		if ($exApp->getVersion() === $appInfo['version']) {
@@ -175,12 +180,15 @@ class Update extends Command {
 				$auth,
 			);
 		} else {
-			$this->logger->error(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
-			if ($outputConsole) {
-				$output->writeln(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
-			}
-			$this->exAppService->setStatusError($exApp, 'Daemon actions not found');
-			return 2;
+			$this->manualActions->deployExApp($exApp, $daemonConfig);
+			$exAppUrl = $this->manualActions->resolveExAppUrl(
+				$appId,
+				$daemonConfig->getProtocol(),
+				$daemonConfig->getHost(),
+				$daemonConfig->getDeployConfig(),
+				(int) $appInfo['port'],
+				$auth,
+			);
 		}
 
 		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
