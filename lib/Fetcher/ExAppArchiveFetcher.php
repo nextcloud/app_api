@@ -91,26 +91,16 @@ class ExAppArchiveFetcher {
 		return '';
 	}
 
-	/**
-	 * @throws Exception
-	 */
 	public function getExAppFolder(string $appId): ?string {
 		$appsPaths = $this->config->getSystemValue('apps_paths');
-		$count = 0;
-		$appPaths = [];
+		$existingPath = '';
 		foreach ($appsPaths as $appPath) {
-			if (file_exists($appPath['path'] . '/' . $appId)) {
-				$count++;
-				$appPaths[] = $appPath['path'];
+			if ($appPath['writable'] && file_exists($appPath['path'] . '/' . $appId)) {
+				$existingPath = $appPath['path'] . '/' . $appId;
 			}
 		}
-		if ($count > 1) {
-			throw new Exception(
-				sprintf('App with id %s exists in more than one apps-paths folder (%s)', $appId, json_encode($appPaths))
-			);  // Ensure that there is only one app with the same id in all apps-paths folders
-		}
-		if ($count === 1) {
-			return $appPaths[0] . '/' . $appId;
+		if (!empty($existingPath)) {
+			return $existingPath;
 		}
 		foreach ($appsPaths as $appPath) {
 			if ($appPath['writable']) {
