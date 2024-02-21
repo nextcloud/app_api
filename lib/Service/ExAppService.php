@@ -84,7 +84,7 @@ class ExAppService {
 			'daemon_config_name' => $appInfo['daemon_config_name'],
 			'port' => $appInfo['port'],
 			'secret' => $appInfo['secret'],
-			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install']),
+			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install', 'error' => '']),
 			'created_time' => time(),
 			'last_check_time' => time(),
 		]);
@@ -145,6 +145,9 @@ class ExAppService {
 
 	public function enableExAppInternal(ExApp $exApp): bool {
 		$exApp->setEnabled(1);
+		$status = $exApp->getStatus();
+		$status['error'] = '';
+		$exApp->setStatus($status);
 		$result = $this->updateExApp($exApp);
 		$this->resetCaches();
 		return $result;
