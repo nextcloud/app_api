@@ -150,7 +150,6 @@ class SpeechToTextService {
 				private IServerContainer     $serverContainer,
 				private readonly string      $class,
 			) {
-				$this->userId = null;
 			}
 
 			public function getId(): string {
