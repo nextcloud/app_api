@@ -15,7 +15,6 @@ use OCA\AppAPI\Service\ExAppScopesService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ExAppUsersService;
 
-use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
@@ -142,16 +141,6 @@ class Register extends Command {
 				$output->writeln(sprintf('Error during registering ExApp %s.', $appId));
 			}
 			return 3;
-		}
-		if (filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN)) {
-			# TO-DO: refactor in next version: move "system" to the "ex_apps" table as a separate field, remove this.
-			try {
-				$this->exAppUsersService->setupSystemAppFlag($appId);
-			} catch (Exception $e) {
-				$this->exAppService->unregisterExApp($appId);
-				$output->writeln(sprintf('Error while setting app system flag: %s', $e->getMessage()));
-				return 1;
-			}
 		}
 		if (count($appInfo['external-app']['scopes']) > 0) {
 			if (!$this->exAppScopesService->registerExAppScopes(

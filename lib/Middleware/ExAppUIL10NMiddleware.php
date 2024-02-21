@@ -54,12 +54,14 @@ class ExAppUIL10NMiddleware extends Middleware {
 			$availableLocales = $this->l10nFactory->findAvailableLanguages($appId);
 			if (in_array($lang, $availableLocales) && $lang !== 'en') {
 				$headPos = stripos($output, '</head>');
-				try {
-					$l10nScriptSrc = $this->appManager->getAppWebPath($appId) . '/l10n/' . $lang . '.js';
-					$nonce = $this->nonceManager->getNonce();
-					$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
-				} catch (AppPathNotFoundException) {
-					$this->logger->debug(sprintf('Can not find translations for %s ExApp.', $appId));
+				if ($headPos !== false) {
+					try {
+						$l10nScriptSrc = $this->appManager->getAppWebPath($appId) . '/l10n/' . $lang . '.js';
+						$nonce = $this->nonceManager->getNonce();
+						$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
+					} catch (AppPathNotFoundException) {
+						$this->logger->debug(sprintf('Can not find translations for %s ExApp.', $appId));
+					}
 				}
 			}
 		}
