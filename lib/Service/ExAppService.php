@@ -332,7 +332,7 @@ class ExAppService {
 			if ($progress === 0) {
 				$status['action'] = 'deploy';
 				$status['deploy_start_time'] = time();
-				unset($status['error']);
+				$status['error'] = '';
 			}
 			$status['deploy'] = $progress;
 		}
@@ -349,7 +349,7 @@ class ExAppService {
 		do {
 			$exApp = $this->getExApp($appId);
 			$status = $exApp->getStatus();
-			if (isset($status['error'])) {
+			if (isset($status['error']) && $status['error'] !== '') {
 				return sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']);
 			}
 			usleep(100000); // 0.1s
