@@ -19,6 +19,7 @@ use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IServerContainer;
 use OCP\SpeechToText\ISpeechToTextProviderWithId;
+use OCP\SpeechToText\ISpeechToTextProviderWithUserId;
 use Psr\Log\LoggerInterface;
 
 class SpeechToTextService {
@@ -141,16 +142,14 @@ class SpeechToTextService {
 	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
 	 */
 	private function getAnonymousExAppProvider(SpeechToTextProvider $provider, IServerContainer $serverContainer, string $class): ?ISpeechToTextProviderWithId {
-		return new class($provider, $serverContainer, $class) implements ISpeechToTextProviderWithId {
+		return new class($provider, $serverContainer, $class) implements ISpeechToTextProviderWithId, ISpeechToTextProviderWithUserId {
 			private ?string $userId;
 
 			public function __construct(
 				private SpeechToTextProvider $provider,
-				// We need this to delay the instantiation of AppAPIService during registration to avoid conflicts
-				private IServerContainer     $serverContainer, // TODO: Extract needed methods from AppAPIService to be able to use it everytime
+				private IServerContainer     $serverContainer,
 				private readonly string      $class,
 			) {
-				$this->userId = null;
 			}
 
 			public function getId(): string {
