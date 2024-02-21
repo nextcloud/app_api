@@ -108,6 +108,7 @@ class Update extends Command {
 
 		$status = $exApp->getStatus();
 		$status['type'] = 'update';
+		$status['error'] = '';
 		$exApp->setStatus($status);
 		$this->exAppService->updateExApp($exApp);
 

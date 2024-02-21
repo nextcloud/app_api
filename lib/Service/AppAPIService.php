@@ -561,7 +561,7 @@ class AppAPIService {
 			if ($progress === 0) {
 				$status['action'] = 'init';
 				$status['init_start_time'] = time();
-				unset($status['error']);
+				$status['error'] = '';
 			}
 			$status['init'] = $progress;
 		}

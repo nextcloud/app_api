@@ -84,7 +84,7 @@ class ExAppService {
 			'daemon_config_name' => $appInfo['daemon_config_name'],
 			'port' => $appInfo['port'],
 			'secret' => $appInfo['secret'],
-			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install']),
+			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install', 'error' => '']),
 			'created_time' => time(),
 			'last_check_time' => time(),
 		]);
@@ -145,6 +145,9 @@ class ExAppService {
 
 	public function enableExAppInternal(ExApp $exApp): bool {
 		$exApp->setEnabled(1);
+		$status = $exApp->getStatus();
+		$status['error'] = '';
+		$exApp->setStatus($status);
 		$result = $this->updateExApp($exApp);
 		$this->resetCaches();
 		return $result;
@@ -329,7 +332,7 @@ class ExAppService {
 			if ($progress === 0) {
 				$status['action'] = 'deploy';
 				$status['deploy_start_time'] = time();
-				unset($status['error']);
+				$status['error'] = '';
 			}
 			$status['deploy'] = $progress;
 		}
@@ -346,7 +349,7 @@ class ExAppService {
 		do {
 			$exApp = $this->getExApp($appId);
 			$status = $exApp->getStatus();
-			if (isset($status['error'])) {
+			if (isset($status['error']) && $status['error'] !== '') {
 				return sprintf('ExApp %s initialization step failed. Error: %s', $appId, $status['error']);
 			}
 			usleep(100000); // 0.1s
