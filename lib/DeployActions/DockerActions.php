@@ -22,18 +22,6 @@ use Psr\Log\LoggerInterface;
 
 class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
-	public const AE_REQUIRED_ENVS = [
-		'AA_VERSION',
-		'APP_SECRET',
-		'APP_ID',
-		'APP_DISPLAY_NAME',
-		'APP_VERSION',
-		'APP_HOST',
-		'APP_PORT',
-		'APP_PERSISTENT_STORAGE',
-		'IS_SYSTEM_APP',
-		'NEXTCLOUD_URL',
-	];
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
 
@@ -353,26 +341,17 @@ class DockerActions implements IDeployActions {
 		return false;
 	}
 
-	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): array {
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo): array {
 		$appId = (string) $appInfo['id'];
 		$externalApp = $appInfo['external-app'];
 		$deployConfig = $daemonConfig->getDeployConfig();
 
-		// If update process
-		if (isset($params['container_info'])) {
-			$containerInfo = $params['container_info'];
-			$oldEnvs = $this->extractDeployEnvs((array) $containerInfo['Config']['Env']);
-			$storage = $oldEnvs['APP_PERSISTENT_STORAGE'];
-			// Preserve previous device requests (GPU)
-			$deviceRequests = $containerInfo['HostConfig']['DeviceRequests'] ?? [];
+		if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
+			$deviceRequests = $this->buildDefaultGPUDeviceRequests();
 		} else {
-			if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
-				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
-			} else {
-				$deviceRequests = [];
-			}
-			$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
+			$deviceRequests = [];
 		}
+		$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
 
 		$imageParams = [
 			'image_src' => (string) ($externalApp['docker-install']['registry'] ?? 'docker.io'),
@@ -387,7 +366,6 @@ class DockerActions implements IDeployActions {
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $appInfo['port'],
 			'storage' => $storage,
-			'system_app' => filter_var((string) $externalApp['system'], FILTER_VALIDATE_BOOLEAN),
 			'secret' => $appInfo['secret'],
 		], $deployConfig);
 
@@ -407,17 +385,6 @@ class DockerActions implements IDeployActions {
 		];
 	}
 
-	private function extractDeployEnvs(array $envs): array {
-		$deployEnvs = [];
-		foreach ($envs as $env) {
-			[$key, $value] = explode('=', $env, 2);
-			if (in_array($key, DockerActions::AE_REQUIRED_ENVS, true)) {
-				$deployEnvs[$key] = $value;
-			}
-		}
-		return $deployEnvs;
-	}
-
 	public function buildDeployEnvs(array $params, array $deployConfig): array {
 		$autoEnvs = [
 			sprintf('AA_VERSION=%s', $this->appManager->getAppVersion(Application::APP_ID, false)),
@@ -428,7 +395,6 @@ class DockerActions implements IDeployActions {
 			sprintf('APP_HOST=%s', $params['host']),
 			sprintf('APP_PORT=%s', $params['port']),
 			sprintf('APP_PERSISTENT_STORAGE=%s', $params['storage']),
-			sprintf('IS_SYSTEM_APP=%s', $params['system_app'] ? 'true' : 'false'),
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
@@ -437,38 +403,7 @@ class DockerActions implements IDeployActions {
 			$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
 			$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
 		}
-
 		return $autoEnvs;
-	}
-
-	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array {
-		$this->initGuzzleClient($daemonConfig);
-		$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $this->buildExAppContainerName($appId));
-		if (isset($containerInfo['error'])) {
-			return ['error' => sprintf('Failed to inspect ExApp %s container: %s', $appId, $containerInfo['error'])];
-		}
-
-		$containerEnvs = (array) $containerInfo['Config']['Env'];
-		$aeEnvs = [];
-		foreach ($containerEnvs as $env) {
-			$envParts = explode('=', $env, 2);
-			if (in_array($envParts[0], self::AE_REQUIRED_ENVS)) {
-				$aeEnvs[$envParts[0]] = $envParts[1];
-			}
-		}
-
-		if ($appId !== $aeEnvs['APP_ID']) {
-			return ['error' => sprintf('ExApp appid %s does not match to deployed APP_ID %s.', $appId, $aeEnvs['APP_ID'])];
-		}
-
-		return [
-			'appid' => $aeEnvs['APP_ID'],
-			'name' => $aeEnvs['APP_DISPLAY_NAME'],
-			'version' => $aeEnvs['APP_VERSION'],
-			'secret' => $aeEnvs['APP_SECRET'],
-			'port' => $aeEnvs['APP_PORT'],
-			'system_app' => $aeEnvs['IS_SYSTEM_APP'] ?? false,
-		];
 	}
 
 	public function resolveExAppUrl(

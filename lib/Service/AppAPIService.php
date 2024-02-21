@@ -228,7 +228,7 @@ class AppAPIService {
 			}
 
 			// For APIs that not assuming work under user context we do not check ExApp users
-			if (($apiScope === null) or ($apiScope->getUserCheck())) {
+			if ((!$exApp->getSystem()) && (($apiScope === null) or ($apiScope->getUserCheck()))) {
 				try {
 					if (!$this->exAppUsersService->exAppUserExists($exApp->getAppid(), $userId)) {
 						$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));
@@ -571,7 +571,7 @@ class AppAPIService {
 		}
 		$exApp->setStatus($status);
 		$exApp->setLastCheckTime(time());
-		$this->exAppService->updateExApp($exApp);
+		$this->exAppService->updateExApp($exApp, ['status', 'last_check_time']);
 		if ($progress === 100) {
 			$this->enableExApp($exApp);
 		}

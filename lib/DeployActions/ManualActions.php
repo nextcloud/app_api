@@ -29,7 +29,7 @@ class ManualActions implements IDeployActions {
 		return '';
 	}
 
-	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): mixed {
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo): mixed {
 		// Not implemented. Deploy is done manually.
 		return null;
 	}
@@ -37,19 +37,6 @@ class ManualActions implements IDeployActions {
 	public function buildDeployEnvs(array $params, array $deployConfig): array {
 		// Not implemented. Deploy is done manually.
 		return [];
-	}
-
-	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array {
-		$jsonInfo = json_decode($params['json-info'], true);
-		return [
-			'appid' => $jsonInfo['appid'],
-			'version' => $jsonInfo['version'],
-			'name' => $jsonInfo['name'],
-			'port' => $jsonInfo['port'],
-			'secret' => $jsonInfo['secret'],
-			'system_app' => $jsonInfo['system_app'],
-			'scopes' => $jsonInfo['scopes'],
-		];
 	}
 
 	public function resolveExAppUrl(

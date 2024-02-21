@@ -87,6 +87,7 @@ class ExAppService {
 			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install', 'error' => '']),
 			'created_time' => time(),
 			'last_check_time' => time(),
+			'system' => (int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN),
 		]);
 		try {
 			$this->exAppMapper->insert($exApp);
@@ -148,7 +149,8 @@ class ExAppService {
 		$status = $exApp->getStatus();
 		$status['error'] = '';
 		$exApp->setStatus($status);
-		$result = $this->updateExApp($exApp);
+		$exApp->setLastCheckTime(time());
+		$result = $this->updateExApp($exApp, ['enabled', 'last_check_time']);
 		$this->resetCaches();
 		return $result;
 	}
@@ -156,7 +158,7 @@ class ExAppService {
 	public function disableExAppInternal(ExApp $exApp): void {
 		$exApp->setEnabled(0);
 		$exApp->setLastCheckTime(time());
-		$this->updateExApp($exApp);
+		$this->updateExApp($exApp, ['enabled', 'last_check_time']);
 		$this->resetCaches();
 	}
 
@@ -198,7 +200,7 @@ class ExAppService {
 			'version' => $exApp->getVersion(),
 			'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
 			'last_check_time' => $exApp->getLastCheckTime(),
-			'system' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
+			'system' => $exApp->getSystem(),
 			'status' => $exApp->getStatus(),
 			'scopes' => $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
 				return $exAppScope->getScopeGroup();
@@ -212,32 +214,17 @@ class ExAppService {
 		}, $this->userManager->searchDisplayName(''));
 	}
 
-	/**
-	 * Update ExApp info (version, name, system app flag changes after update)
-	 */
-	public function updateExAppInfo(ExApp $exApp, array $exAppInfo): bool {
-		$exApp->setVersion($exAppInfo['version']);
-		$exApp->setName($exAppInfo['name']);
-		if (!$this->updateExApp($exApp)) {
-			return false;
-		}
-
-		// Update system app flag
-		try {
-			$isSystemApp = $this->exAppUsersService->exAppUserExists($exApp->getAppid(), '');
-			if (filter_var($exAppInfo['system_app'], FILTER_VALIDATE_BOOLEAN) && !$isSystemApp) {
-				$this->exAppUsersService->setupSystemAppFlag($exApp->getAppid());
-			} else {
-				$this->exAppUsersService->removeExAppUser($exApp->getAppid(), '');
-			}
-		} catch (Exception $e) {
-			$this->logger->error(sprintf('Error while setting app system flag: %s', $e->getMessage()));
+	public function updateExAppInfo(ExApp $exApp, array $appInfo): bool {
+		$exApp->setVersion($appInfo['version']);
+		$exApp->setName($appInfo['name']);
+		$exApp->setSystem((int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN));
+		if (!$this->updateExApp($exApp, ['version', 'name', 'system'])) {
 			return false;
 		}
 		return true;
 	}
 
-	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time']): bool {
+	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'system']): bool {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
 			$this->cache->set('/exApp_' . $exApp->getAppid(), $exApp, self::CACHE_TTL);
@@ -342,7 +329,7 @@ class ExAppService {
 		}
 		$exApp->setStatus($status);
 		$exApp->setLastCheckTime(time());
-		$this->updateExApp($exApp);
+		$this->updateExApp($exApp, ['status', 'last_check_time']);
 	}
 
 	public function waitInitStepFinish(string $appId): string {

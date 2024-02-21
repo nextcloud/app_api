@@ -28,16 +28,6 @@ class ExAppUsersService {
 	/**
 	 * @throws Exception
 	 */
-	public function setupSystemAppFlag(string $appId): void {
-		$this->mapper->insert(new ExAppUser([
-			'appid' => $appId,
-			'userid' => '',
-		]));
-	}
-
-	/**
-	 * @throws Exception
-	 */
 	public function setupExAppUser(string $appId, ?string $userId): void {
 		if (!empty($userId)) {
 			if (!$this->exAppUserExists($appId, $userId)) {

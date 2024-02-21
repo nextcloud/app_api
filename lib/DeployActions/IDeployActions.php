@@ -34,11 +34,10 @@ interface IDeployActions {
 	 *
 	 * @param DaemonConfig $daemonConfig
 	 * @param array $appInfo
-	 * @param array $params
 	 *
 	 * @return mixed
 	 */
-	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo, array $params = []): mixed;
+	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo): mixed;
 
 	/**
 	 * Build required deploy environment variables
@@ -49,17 +48,6 @@ interface IDeployActions {
 	 * @return mixed
 	 */
 	public function buildDeployEnvs(array $params, array $deployConfig): array;
-
-	/**
-	 * Load ExApp information from the target daemon.
-	 *
-	 * @param string $appId
-	 * @param DaemonConfig $daemonConfig
-	 * @param array $params
-	 *
-	 * @return array required data for ExApp registration
-	 */
-	public function loadExAppInfo(string $appId, DaemonConfig $daemonConfig, array $params = []): array;
 
 	/**
 	 * Resolve ExApp URL(protocol://url:port) depending on the daemon configuration.

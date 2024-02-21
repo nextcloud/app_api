@@ -110,7 +110,7 @@ class Update extends Command {
 		$status['type'] = 'update';
 		$status['error'] = '';
 		$exApp->setStatus($status);
-		$this->exAppService->updateExApp($exApp);
+		$this->exAppService->updateExApp($exApp, ['status']);
 
 		if ($exApp->getEnabled()) {
 			if ($this->service->disableExApp($exApp)) {
@@ -136,23 +136,20 @@ class Update extends Command {
 			}
 		}
 
+		if (!$this->exAppService->updateExAppInfo($exApp, $appInfo)) {
+			$this->logger->error(sprintf('Failed to update ExApp %s info', $appId));
+			if ($outputConsole) {
+				$output->writeln(sprintf('Failed to update ExApp %s info', $appId));
+			}
+			$this->exAppService->setStatusError($exApp, 'Failed to update info');
+			return 1;
+		}
+
 		$appInfo['port'] = $exApp->getPort();
 		$appInfo['secret'] = $exApp->getSecret();
 		$auth = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-			$this->dockerActions->initGuzzleClient($daemonConfig); // Required init
-			$containerInfo = $this->dockerActions->inspectContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
-			if (isset($containerInfo['error'])) {
-				$this->logger->error(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
-				if ($outputConsole) {
-					$output->writeln(sprintf('Failed to inspect old ExApp %s container. Error: %s', $appId, $containerInfo['error']));
-				}
-				$this->exAppService->setStatusError($exApp, 'Failed to inspect old container');
-				return 1;
-			}
-			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo, [
-				'container_info' => $containerInfo,
-			]);
+			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
 			$deployResult = $this->dockerActions->deployExApp($exApp, $daemonConfig, $deployParams);
 			if ($deployResult) {
 				$this->logger->error(sprintf('ExApp %s deployment update failed. Error: %s', $appId, $deployResult));
@@ -177,7 +174,7 @@ class Update extends Command {
 				$daemonConfig->getProtocol(),
 				$daemonConfig->getHost(),
 				$daemonConfig->getDeployConfig(),
-				(int) $deployParams['container_params']['port'],
+				(int)explode('=', $deployParams['container_params']['env'][6])[1],
 				$auth,
 			);
 		} else {
@@ -204,16 +201,6 @@ class Update extends Command {
 		$this->logger->info(sprintf('ExApp %s update successfully deployed.', $appId));
 		if ($outputConsole) {
 			$output->writeln(sprintf('ExApp %s update successfully deployed.', $appId));
-		}
-
-		$exAppInfo = $this->dockerActions->loadExAppInfo($appId, $daemonConfig);
-		if (!$this->exAppService->updateExAppInfo($exApp, $exAppInfo)) {
-			$this->logger->error(sprintf('Failed to update ExApp %s info', $appId));
-			if ($outputConsole) {
-				$output->writeln(sprintf('Failed to update ExApp %s info', $appId));
-			}
-			$this->exAppService->setStatusError($exApp, 'Failed to update info');
-			return 1;
 		}
 
 		// Default scopes approval process (compare new ExApp scopes)
