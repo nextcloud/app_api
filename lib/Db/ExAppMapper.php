@@ -83,15 +83,16 @@ class ExAppMapper extends QBMapper {
 		return $ports;
 	}
 
-	/**
-	 * @throws Exception
-	 */
 	public function deleteExApp(string $appId): int {
 		$qb = $this->db->getQueryBuilder();
-		return $qb->delete($this->tableName)
-			->where(
-				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
-			)->executeStatement();
+		try {
+			return $qb->delete($this->tableName)
+				->where(
+					$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR))
+				)->executeStatement();
+		} catch (Exception) {
+			return 0;
+		}
 	}
 
 	/**
