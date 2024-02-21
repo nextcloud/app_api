@@ -42,7 +42,7 @@ class PublicFunctions {
 	public function exAppRequestWithUserInit(
 		string $appId,
 		string $route,
-		string $userId,
+		?string $userId = null,
 		string $method = 'POST',
 		array $params = [],
 		array $options = [],

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.0 - 2024-02-21]
+
+### Added
+
+- Support of `L10N` translations for ExApps. #227
+
+### Fixed
+
+- Allowed removing of ExApp from UI during "init" stage. #235
+- Reset of "Error" state for ExApp in Update/Enable actions. #236
+- PublicFunctions.php: `exAppRequestWithUserInit` can accept empty `userId`. #238
+
 ## [2.1.0 - 2024-02-19]
 
 ### Changed
