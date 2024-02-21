@@ -76,7 +76,7 @@ class DaemonConfigService {
 		try {
 			return $this->mapper->findByName($name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->error('Failed to get daemon config by name. Error: ' . $e->getMessage(), ['exception' => $e]);
+			$this->logger->debug('Failed to get daemon config by name. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
 	}
