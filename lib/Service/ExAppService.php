@@ -118,14 +118,9 @@ class ExAppService {
 		$this->translationService->unregisterExAppTranslationProviders($appId);
 		$this->settingsService->unregisterExAppForms($appId);
 		$this->exAppArchiveFetcher->removeExAppFolder($appId);
-		$r = 0;
-		try {
-			$r = $this->exAppMapper->deleteExApp($appId);
-			if ($r !== 1) {
-				$this->logger->warning(sprintf('Error while unregistering %s ExApp from the database.', $appId));
-			}
-		} catch (Exception $e) {
-			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()), ['exception' => $e]);
+		$r = $this->exAppMapper->deleteExApp($appId);
+		if ($r !== 1) {
+			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
 		}
 		$this->cache->remove('/exApp_' . $appId);
 		return $r === 1;
