@@ -105,7 +105,6 @@ class ExAppService {
 		if ($exApp === null) {
 			return false;
 		}
-		// TODO: Do we need to remove app_config_ex, app_preferences_ex too
 		$this->exAppScopesService->removeExAppScopes($appId);
 		$this->exAppUsersService->removeExAppUsers($appId);
 		$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
