@@ -58,7 +58,7 @@ class AppAPIService {
 	public function aeRequestToExApp(
 		ExApp $exApp,
 		string $route,
-		string $userId,
+		?string $userId = null,
 		string $method = 'POST',
 		array $params = [],
 		array $options = [],
