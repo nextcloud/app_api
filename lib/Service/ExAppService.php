@@ -87,7 +87,7 @@ class ExAppService {
 			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install', 'error' => '']),
 			'created_time' => time(),
 			'last_check_time' => time(),
-			'system' => (int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN),
+			'is_system' => (int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN),
 		]);
 		try {
 			$this->exAppMapper->insert($exApp);
@@ -200,7 +200,7 @@ class ExAppService {
 			'version' => $exApp->getVersion(),
 			'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
 			'last_check_time' => $exApp->getLastCheckTime(),
-			'system' => $exApp->getSystem(),
+			'system' => $exApp->getIsSystem(),
 			'status' => $exApp->getStatus(),
 			'scopes' => $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
 				return $exAppScope->getScopeGroup();
@@ -217,14 +217,14 @@ class ExAppService {
 	public function updateExAppInfo(ExApp $exApp, array $appInfo): bool {
 		$exApp->setVersion($appInfo['version']);
 		$exApp->setName($appInfo['name']);
-		$exApp->setSystem((int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN));
-		if (!$this->updateExApp($exApp, ['version', 'name', 'system'])) {
+		$exApp->setIsSystem((int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN));
+		if (!$this->updateExApp($exApp, ['version', 'name', 'is_system'])) {
 			return false;
 		}
 		return true;
 	}
 
-	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'system']): bool {
+	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'is_system']): bool {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
 			$this->cache->set('/exApp_' . $exApp->getAppid(), $exApp, self::CACHE_TTL);
@@ -265,7 +265,7 @@ class ExAppService {
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'scopes', 'system', 'translations_folder'] as $key) {
+			foreach (['docker-install', 'scopes', 'is_system', 'translations_folder'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);

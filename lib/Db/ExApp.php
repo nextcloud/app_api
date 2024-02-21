@@ -24,7 +24,7 @@ use OCP\AppFramework\Db\Entity;
  * @method int getEnabled()
  * @method int getCreatedTime()
  * @method int getLastCheckTime()
- * @method int getSystem()
+ * @method int getIsSystem()
  * @method array getDeployConfig()
  * @method string getAcceptsDeployId()
  * @method void setAppid(string $appid)
@@ -39,7 +39,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setEnabled(int $enabled)
  * @method void setCreatedTime(int $createdTime)
  * @method void setLastCheckTime(int $lastCheckTime)
- * @method void setSystem(int $system)
+ * @method void setIsSystem(int $system)
  * @method void setDeployConfig(array $deployConfig)
  * @method void setAcceptsDeployId(string $acceptsDeployId)
  */
@@ -56,7 +56,7 @@ class ExApp extends Entity implements JsonSerializable {
 	protected $enabled;
 	protected $createdTime;
 	protected $lastCheckTime;
-	protected $system;
+	protected $isSystem;
 	protected $deployConfig;
 	protected $acceptsDeployId;
 
@@ -76,7 +76,7 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('enabled', 'int');
 		$this->addType('createdTime', 'int');
 		$this->addType('lastCheckTime', 'int');
-		$this->addType('system', 'int');
+		$this->addType('isSystem', 'int');
 		$this->addType('deployConfig', 'json');
 		$this->addType('acceptsDeployId', 'string');
 
@@ -119,8 +119,8 @@ class ExApp extends Entity implements JsonSerializable {
 		if (isset($params['last_check_time'])) {
 			$this->setLastCheckTime($params['last_check_time']);
 		}
-		if (isset($params['system'])) {
-			$this->setEnabled($params['system']);
+		if (isset($params['is_system'])) {
+			$this->setIsSystem($params['is_system']);
 		}
 		if (isset($params['deploy_config'])) {
 			$this->setDeployConfig($params['deploy_config']);
@@ -145,7 +145,7 @@ class ExApp extends Entity implements JsonSerializable {
 			'enabled' => $this->getEnabled(),
 			'created_time' => $this->getCreatedTime(),
 			'last_check_time' => $this->getLastCheckTime(),
-			'system' => $this->getSystem(),
+			'is_system' => $this->getIsSystem(),
 			'deploy_config' => $this->getDeployConfig(),
 			'accepts_deploy_id' => $this->getAcceptsDeployId(),
 		];

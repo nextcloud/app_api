@@ -24,10 +24,11 @@ class Version2201Date20240221124152 extends SimpleMigrationStep {
 
 		$table = $schema->getTable('ex_apps');
 
-		$table->addColumn('system', Types::SMALLINT, [
+		$table->addColumn('is_system', Types::SMALLINT, [
 			'notnull' => true,
 			'default' => 0,
 			'length' => 1,
+			'unsigned' => true,
 		]);
 
 		return $schema;

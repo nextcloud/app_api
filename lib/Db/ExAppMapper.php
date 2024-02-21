@@ -113,8 +113,8 @@ class ExAppMapper extends QBMapper {
 				$qb = $qb->set('enabled', $qb->createNamedParameter($exApp->getEnabled(), IQueryBuilder::PARAM_INT));
 			} elseif ($field === 'last_check_time') {
 				$qb = $qb->set('last_check_time', $qb->createNamedParameter($exApp->getLastCheckTime(), IQueryBuilder::PARAM_INT));
-			} elseif ($field === 'system') {
-				$qb = $qb->set('system', $qb->createNamedParameter($exApp->getSystem(), IQueryBuilder::PARAM_INT));
+			} elseif ($field === 'is_system') {
+				$qb = $qb->set('is_system', $qb->createNamedParameter($exApp->getIsSystem(), IQueryBuilder::PARAM_INT));
 			}
 		}
 		return $qb->where($qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid())))->executeStatement();

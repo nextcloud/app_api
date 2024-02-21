@@ -228,7 +228,7 @@ class AppAPIService {
 			}
 
 			// For APIs that not assuming work under user context we do not check ExApp users
-			if ((!$exApp->getSystem()) && (($apiScope === null) or ($apiScope->getUserCheck()))) {
+			if ((!$exApp->getIsSystem()) && (($apiScope === null) or ($apiScope->getUserCheck()))) {
 				try {
 					if (!$this->exAppUsersService->exAppUserExists($exApp->getAppid(), $userId)) {
 						$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));
