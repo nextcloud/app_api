@@ -17,7 +17,6 @@ OC.L10N.register(
     "User documentation" : "Dokumentace pro uživatele",
     "Admin documentation" : "Dokumentace pro správce",
     "Developer documentation" : "Dokumentace pro vývojáře",
-    "This app is not registered in AppStore. No extra information available. Only enable/disable actions allowed." : "Tato aplikace není zaregistrována v katalogu aplikací. Tím nejsou k dispozici žádné další informace. Je možné pouze zapnout/vypnout.",
     "This app is supported via your current Nextcloud subscription." : "Tato aplikace je podporována prostřednictvím vašeho stávajícího předplatného podpory Nextcloud.",
     "Supported" : "Podporováno",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Doporučované aplikace jsou vyvíjeny komunitou. Jsou propojeny se zbytkem Nextcloud a připraveny na produkční nasazení.",

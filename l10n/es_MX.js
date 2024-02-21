@@ -12,6 +12,7 @@ OC.L10N.register(
     "User documentation" : "Documentación del usuario",
     "Admin documentation" : "Documentación del administrador",
     "Developer documentation" : "Documentación del desarrollador",
+    "Supported" : "Soportado",
     "Featured" : "Destacado",
     "Icon" : "Ícono",
     "Name" : "Nombre",
