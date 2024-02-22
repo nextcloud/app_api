@@ -43,6 +43,7 @@ OC.L10N.register(
     "User documentation" : "Brukerdokumentasjon",
     "Admin documentation" : "Administratordokumentasjon",
     "Developer documentation" : "Utviklerdokumentasjon",
+    "This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Denne appen er ikke registrert i AppStore. Ingen ekstra informasjon tilgjengelig. Bare aktivere-/deaktivere- og fjerne handlinger er tillatt.",
     "This app is supported via your current Nextcloud subscription." : "Denne appen er støttet av ditt nåværende Nextcloud abonnement.",
     "Supported" : "Støttet",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Anbefalte apper er utviklet av og innenfor fellesskapet. De tilbyr sentral funksjonalitet og er klare for bruk i produksjon.",

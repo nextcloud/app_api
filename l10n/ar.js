@@ -43,6 +43,7 @@ OC.L10N.register(
     "User documentation" : "دليل المستخدم",
     "Admin documentation" : "دليل المُشرِف",
     "Developer documentation" : "دليل المُطوّر",
+    "This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "هذا التطبيق غير مسجل في \"متجر التطبيقات\" AppStore. لا توجد معلومات إضافية متاحة. يُسمح فقط بإجراءات التمكين/التعطيل والإزالة.",
     "This app is supported via your current Nextcloud subscription." : "هذا التطبيق مدعوم من خلال اشتراكك الحالي في نكست كلود.",
     "Supported" : "مدعومٌ",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "تم تطوير التطبيقات المميزة من قبل المجتمع وداخله. و هي توفر وظائف مركزية وجاهزة للعمل في بيئة العمل الفعلية.",
