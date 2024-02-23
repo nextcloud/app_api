@@ -319,7 +319,7 @@ jobs:
             -v `pwd`/certs/cert.pem:/certs/cert.pem \
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             -e BIND_ADDRESS="172.17.0.1" \
-            -e EX_APPS_NET_FOR_HTTPS="ipv4@localhost" \
+            -e EX_APPS_NET="ipv4@localhost" \
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/cloud-py-api/nextcloud-appapi-dsp:latest
           docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
