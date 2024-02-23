@@ -27,6 +27,7 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Actualizar","Actualizar todo","Actualizar todo"],
     "Display Name" : "Nombre a desplegar",
     "Default" : "Por omisión",
+    "{license}-licensed" : "Licenciado bajo {license}",
     "Delete" : "Eliminar",
     "Host" : "Servidor",
     "Register" : "Registrar",
