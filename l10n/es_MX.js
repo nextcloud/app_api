@@ -30,13 +30,21 @@ OC.L10N.register(
     "{license}-licensed" : "Licenciado bajo {license}",
     "Delete" : "Eliminar",
     "Host" : "Servidor",
+    "Display name" : "Nombre para mostrar",
     "Register" : "Registrar",
     "Your apps" : "Tus aplicaciones",
     "Details" : "Detalles",
     "Changelog" : "Bitácora de cambios",
+    "by {author}\n{license}" : "por {author}\n{license}",
+    "Active apps" : "Aplicaciones activas",
     "Disabled apps" : "Aplicaciones deshabilitadas",
     "Updates" : "Actualizaciones",
+    "Featured apps" : "Aplicaciones destacadas",
+    "Supported apps" : "Aplicaciones soportadas",
     "Enable" : "Activar",
-    "Disable" : "Deshabilitar"
+    "Disable" : "Deshabilitar",
+    "Allow untested app" : "Permitir aplicación no probada",
+    "An error occurred during the request. Unable to proceed." : "Ocurrió un error durante la solicitud. No se puede continuar.",
+    "Error: This app cannot be enabled because it makes the server unstable" : "Error: Esta aplicación no se puede habilitar porque genera inestabilidad en el servidor"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
