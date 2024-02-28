@@ -45,6 +45,7 @@ OC.L10N.register(
     "Updates" : "アップデート",
     "Featured apps" : "注目のアプリ",
     "Supported apps" : "対応しているアプリ",
+    "Enable" : "有効にする",
     "Disable" : "無効",
     "Allow untested app" : "テストされていないアプリを許可する",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "このアプリはご利用中のNextcloudのバージョンと互換性があるとしてマークされていません。 続行しても、アプリをインストールすることはできます。 アプリが期待通りに動作しない可能性があることに注意してください。",
