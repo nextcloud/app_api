@@ -330,7 +330,7 @@ export default {
 				display_name: this.displayName,
 				accepts_deploy_id: this.acceptsDeployId,
 				protocol: this.acceptsDeployId === 'docker-install' ? this.daemonProtocol : 'http',
-				host: this.acceptsDeployId === 'docker-install' ? this.host : 'host.docker.internal',
+				host: this.host,
 				deploy_config: {
 					net: this.deployConfig.net,
 					nextcloud_url: this.nextcloud_url,
