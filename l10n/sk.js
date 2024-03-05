@@ -1,6 +1,11 @@
 OC.L10N.register(
     "app_api",
     {
+    "External Apps" : "Externé aplikácie",
+    "AppAPI" : "AppAPI",
+    "AI Integration Team" : "Integračný tím AI",
+    "ExApps Settings" : "Nastavenia ExApps",
+    "Nextcloud AppAPI" : "Nextcloud AppAPI",
     "Update to {version}" : "Aktualizovať na {version}",
     "Remove" : "Odobrať",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Pre túto aplikáciu nie je zadaná minimálna verzia Nextcloudu. Toto v budúcnosti spôsobí chybu.",
