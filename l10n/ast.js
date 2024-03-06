@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Remove" : "Quitar",
     "View in store" : "Ver na tienda",
+    "Visit website" : "Visitar el sitiu web",
     "User documentation" : "Documentación pa usuarios",
     "Admin documentation" : "Documentación p'alministradores",
     "Developer documentation" : "Documentación pa desendolcadores",
@@ -16,12 +17,15 @@ OC.L10N.register(
     "Delete" : "Desaniciar",
     "Cancel" : "Encaboxar",
     "Ok" : "Aceutar",
+    "Host" : "Agospiador",
     "Display name" : "Nome visible",
     "Your apps" : "Les tos aplicaciones",
     "Details" : "Detalles",
     "Changelog" : "Rexistru de cambeos",
     "Disabled apps" : "Aplicaciones deshabilitaes",
     "Featured apps" : "Aplicaciones destacaes",
+    "Enable" : "Activar",
+    "Disable" : "Desactivar",
     "An error occurred during the request. Unable to proceed." : "Prodúxose un error demientres la solicitú. Nun ye posible siguir.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Error: nun se pue activar esta aplicación porque fai que'l sirvidor seya inestable"
 },
