@@ -38,9 +38,9 @@ use OCP\IUser;
 use OCP\IUserSession;
 use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
-use OCP\Settings\GetDeclarativeSettingsValueEvent;
-use OCP\Settings\RegisterDeclarativeSettingsFormEvent;
-use OCP\Settings\SetDeclarativeSettingsValueEvent;
+use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
+use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
+use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
 use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -70,9 +70,9 @@ class Application extends App implements IBootstrap {
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 
-		$context->registerEventListener(RegisterDeclarativeSettingsFormEvent::class, RegisterDeclarativeSettingsListener::class);
-		$context->registerEventListener(GetDeclarativeSettingsValueEvent::class, GetValueListener::class);
-		$context->registerEventListener(SetDeclarativeSettingsValueEvent::class, SetValueListener::class);
+		$context->registerEventListener(DeclarativeSettingsRegisterFormEvent::class, RegisterDeclarativeSettingsListener::class);
+		$context->registerEventListener(DeclarativeSettingsGetValueEvent::class, GetValueListener::class);
+		$context->registerEventListener(DeclarativeSettingsSetValueEvent::class, SetValueListener::class);
 
 		$container = $this->getContainer();
 		try {

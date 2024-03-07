@@ -10,7 +10,7 @@ use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Settings\DeclarativeSettingsTypes;
-use OCP\Settings\SetDeclarativeSettingsValueEvent;
+use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
 
 /**
  * @template-implements IEventListener<Event>
@@ -24,7 +24,7 @@ class SetValueListener implements IEventListener {
 	}
 
 	public function handle(Event $event): void {
-		if (!$event instanceof SetDeclarativeSettingsValueEvent) {
+		if (!$event instanceof DeclarativeSettingsSetValueEvent) {
 			return;
 		}
 
