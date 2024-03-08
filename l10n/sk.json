@@ -47,8 +47,10 @@
     "Disabled apps" : "Vypnuté aplikácie",
     "Updates" : "Aktualizácie",
     "Featured apps" : "Odporúčané aplikácie",
+    "Supported apps" : "Podporované aplikácie",
     "Enable" : "Povoliť",
     "Disable" : "Zakázať",
+    "Allow untested app" : "Povoliť netestovanú aplikáciu",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Táto aplikácia nie je označená ako kompatibilná s vašou verziou Nextcloud. Ak budete pokračovať, aplikáciu budete môcť stále nainštalovať. Aplikácia nemusí fungovať podľa očakávania.",
     "An error occurred during the request. Unable to proceed." : "Počas vykonania požiadavky nastala chyba.  Nie je možné pokračovať.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Chyba: aplikáciu nie je možné povoliť, lebo naruší stabilitu servera"
