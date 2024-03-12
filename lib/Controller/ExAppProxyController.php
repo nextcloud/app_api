@@ -32,7 +32,15 @@ class ExAppProxyController extends Controller {
 	}
 
 	private function createProxyResponse(string $path, IResponse $response, $cache = true): ProxyResponse {
+		$headersToIgnore = ['aa-version', 'ex-app-id', 'authorization-app-api', 'ex-app-version', 'aa-request-id'];
+		$responseHeaders = [];
+		foreach ($response->getHeaders() as $key => $value) {
+			if (!in_array(strtolower($key), $headersToIgnore)) {
+				$responseHeaders[$key] = $value[0];
+			}
+		}
 		$content = $response->getBody();
+
 		$isHTML = pathinfo($path, PATHINFO_EXTENSION) === 'html';
 		if ($isHTML) {
 			$nonce = $this->nonceManager->getNonce();
@@ -43,29 +51,18 @@ class ExAppProxyController extends Controller {
 			);
 		}
 
-		$mime = $response->getHeader('content-type');
-		if (empty($mime)) {
+		if (empty($response->getHeader('content-type'))) {
 			$mime = $this->mimeTypeHelper->detectPath($path);
 			if (pathinfo($path, PATHINFO_EXTENSION) === 'wasm') {
 				$mime = 'application/wasm';
 			}
-		}
-
-		$proxyResponse = new ProxyResponse(
-			data: $content,
-			length: strlen($content),
-			mimeType: $mime,
-		);
-
-		$headersToCopy = ['Content-Disposition', 'Last-Modified', 'Etag'];
-		foreach ($headersToCopy as $element) {
-			$headerValue = $response->getHeader($element);
-			if (empty($headerValue)) {
-				$proxyResponse->addHeader($element, $headerValue);
+			if (!empty($mime) && $mime != 'application/octet-stream') {
+				$responseHeaders['Content-Type'] = $mime;
 			}
 		}
 
-		if ($cache && !$isHTML) {
+		$proxyResponse = new ProxyResponse($response->getStatusCode(), $responseHeaders, $content);
+		if ($cache && !$isHTML && empty($response->getHeader('cache-control'))) {
 			$proxyResponse->cacheFor(3600);
 		}
 		return $proxyResponse;
@@ -75,10 +72,7 @@ class ExAppProxyController extends Controller {
 	#[NoCSRFRequired]
 	public function ExAppGet(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null) {
-			return new NotFoundResponse();
-		}
-		if (!$exApp->getEnabled()) {
+		if ($exApp === null || !$exApp->getEnabled()) {
 			return new NotFoundResponse();
 		}
 
@@ -86,8 +80,7 @@ class ExAppProxyController extends Controller {
 			$exApp, '/' . $other, $this->userId, 'GET', request: $this->request
 		);
 		if (is_array($response)) {
-			$error_response = new Response();
-			return $error_response->setStatus(500);
+			return (new Response())->setStatus(500);
 		}
 		return $this->createProxyResponse($other, $response);
 	}
@@ -96,21 +89,16 @@ class ExAppProxyController extends Controller {
 	#[NoCSRFRequired]
 	public function ExAppPost(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null) {
-			return new NotFoundResponse();
-		}
-		if (!$exApp->getEnabled()) {
+		if ($exApp === null || !$exApp->getEnabled()) {
 			return new NotFoundResponse();
 		}
 
 		$response = $this->service->aeRequestToExApp(
 			$exApp, '/' . $other, $this->userId,
-			params: $this->request->getParams(),
-			request: $this->request
+			params: $this->request->getParams(), request: $this->request
 		);
 		if (is_array($response)) {
-			$error_response = new Response();
-			return $error_response->setStatus(500);
+			return (new Response())->setStatus(500);
 		}
 		return $this->createProxyResponse($other, $response);
 	}
@@ -119,21 +107,15 @@ class ExAppProxyController extends Controller {
 	#[NoCSRFRequired]
 	public function ExAppPut(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null) {
-			return new NotFoundResponse();
-		}
-		if (!$exApp->getEnabled()) {
+		if ($exApp === null || !$exApp->getEnabled()) {
 			return new NotFoundResponse();
 		}
 
 		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'PUT',
-			params: $this->request->getParams(),
-			request: $this->request
+			$exApp, '/' . $other, $this->userId, 'PUT', $this->request->getParams(), request: $this->request
 		);
 		if (is_array($response)) {
-			$error_response = new Response();
-			return $error_response->setStatus(500);
+			return (new Response())->setStatus(500);
 		}
 		return $this->createProxyResponse($other, $response);
 	}
@@ -142,21 +124,15 @@ class ExAppProxyController extends Controller {
 	#[NoCSRFRequired]
 	public function ExAppDelete(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null) {
-			return new NotFoundResponse();
-		}
-		if (!$exApp->getEnabled()) {
+		if ($exApp === null || !$exApp->getEnabled()) {
 			return new NotFoundResponse();
 		}
 
 		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'DELETE',
-			params: $this->request->getParams(),
-			request: $this->request
+			$exApp, '/' . $other, $this->userId, 'DELETE', $this->request->getParams(), request: $this->request
 		);
 		if (is_array($response)) {
-			$error_response = new Response();
-			return $error_response->setStatus(500);
+			return (new Response())->setStatus(500);
 		}
 		return $this->createProxyResponse($other, $response);
 	}
