@@ -51,6 +51,21 @@
       <code>VersionParser</code>
     </UndefinedClass>
   </file>
+  <file src="lib/Listener/DeclarativeSettings/GetValueListener.php">
+    <UndefinedClass>
+      <code>DeclarativeSettingsGetValueEvent</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Listener/DeclarativeSettings/RegisterDeclarativeSettingsListener.php">
+    <UndefinedClass>
+      <code>DeclarativeSettingsRegisterFormEvent</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Listener/DeclarativeSettings/SetValueListener.php">
+    <UndefinedClass>
+      <code>DeclarativeSettingsSetValueEvent</code>
+    </UndefinedClass>
+  </file>
   <file src="lib/Listener/LoadFilesPluginListener.php">
     <ImplementedParamTypeMismatch>
       <code>$event</code>
@@ -89,21 +104,6 @@
   <file src="lib/Profiler/AppAPIDataCollector.php">
     <UndefinedClass>
       <code>Request</code>
-    </UndefinedClass>
-  </file>
-  <file src="lib/Listener/DeclarativeSettings/GetValueListener.php">
-    <UndefinedClass>
-      <code>GetDeclarativeSettingsValueEvent</code>
-    </UndefinedClass>
-  </file>
-  <file src="lib/Listener/DeclarativeSettings/RegisterDeclarativeSettingsListener.php">
-    <UndefinedClass>
-      <code>RegisterDeclarativeSettingsFormEvent</code>
-    </UndefinedClass>
-  </file>
-  <file src="lib/Listener/DeclarativeSettings/SetValueListener.php">
-    <UndefinedClass>
-      <code>SetDeclarativeSettingsValueEvent</code>
     </UndefinedClass>
   </file>
 </files>
