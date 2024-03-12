@@ -43,6 +43,7 @@ OC.L10N.register(
     "User documentation" : "User documentation",
     "Admin documentation" : "Admin documentation",
     "Developer documentation" : "Developer documentation",
+    "This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed.",
     "This app is supported via your current Nextcloud subscription." : "This app is supported via your current Nextcloud subscription.",
     "Supported" : "Supported",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Featured apps are developed by and within the community. They offer central functionality and are ready for production use.",
