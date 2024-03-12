@@ -7,7 +7,7 @@ namespace OCA\AppAPI\Listener\DeclarativeSettings;
 use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\Settings\RegisterDeclarativeSettingsFormEvent;
+use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 
 /**
  * @template-implements IEventListener<Event>
@@ -19,7 +19,7 @@ class RegisterDeclarativeSettingsListener implements IEventListener {
 	}
 
 	public function handle(Event $event): void {
-		if (!$event instanceof RegisterDeclarativeSettingsFormEvent) {
+		if (!$event instanceof DeclarativeSettingsRegisterFormEvent) {
 			return;
 		}
 
