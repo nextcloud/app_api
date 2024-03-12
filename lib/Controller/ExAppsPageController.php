@@ -289,7 +289,8 @@ class ExAppsPageController extends Controller {
 				}))[0]['releases'][0]['version'];
 			}
 
-			$appData['canUnInstall'] = !$appData['active'] && $appData['removable'] && !isset($appData['status']['type'])
+			$appData['canUnInstall'] = !$appData['active'] && $appData['removable']
+				&& (isset($appData['status']['action']) && $appData['status']['action'] !== 'deploy')
 				|| (isset($appData['status']['action']) && $appData['status']['action'] === 'init')
 				|| !empty($appData['status']['error']);
 

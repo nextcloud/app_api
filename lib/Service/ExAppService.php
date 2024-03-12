@@ -105,30 +105,25 @@ class ExAppService {
 		if ($exApp === null) {
 			return false;
 		}
-		try {
-			// TODO: Do we need to remove app_config_ex, app_preferences_ex too
-			$this->exAppScopesService->removeExAppScopes($appId);
-			$this->exAppUsersService->removeExAppUsers($appId);
-			$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
-			$this->filesActionsMenuService->unregisterExAppFileActions($appId);
-			$this->topMenuService->unregisterExAppMenuEntries($appId);
-			$this->initialStateService->deleteExAppInitialStates($appId);
-			$this->scriptsService->deleteExAppScripts($appId);
-			$this->stylesService->deleteExAppStyles($appId);
-			$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
-			$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
-			$this->translationService->unregisterExAppTranslationProviders($appId);
-			$this->settingsService->unregisterExAppForms($appId);
-			$this->exAppArchiveFetcher->removeExAppFolder($appId);
-			if ($this->exAppMapper->deleteExApp($appId) === 1) {
-				$this->cache->remove('/exApp_' . $appId);
-				return true;
-			}
-			$this->logger->warning(sprintf('Error while unregistering %s ExApp from the database.', $appId));
-		} catch (Exception $e) {
-			$this->logger->error(sprintf('Error while unregistering ExApp: %s', $e->getMessage()), ['exception' => $e]);
+		$this->exAppScopesService->removeExAppScopes($appId);
+		$this->exAppUsersService->removeExAppUsers($appId);
+		$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
+		$this->filesActionsMenuService->unregisterExAppFileActions($appId);
+		$this->topMenuService->unregisterExAppMenuEntries($appId);
+		$this->initialStateService->deleteExAppInitialStates($appId);
+		$this->scriptsService->deleteExAppScripts($appId);
+		$this->stylesService->deleteExAppStyles($appId);
+		$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
+		$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
+		$this->translationService->unregisterExAppTranslationProviders($appId);
+		$this->settingsService->unregisterExAppForms($appId);
+		$this->exAppArchiveFetcher->removeExAppFolder($appId);
+		$r = $this->exAppMapper->deleteExApp($appId);
+		if ($r !== 1) {
+			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
 		}
-		return false;
+		$this->cache->remove('/exApp_' . $appId);
+		return $r === 1;
 	}
 
 	public function getExAppFreePort(): int {

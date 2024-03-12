@@ -43,6 +43,7 @@ OC.L10N.register(
     "User documentation" : "用戶使用手冊",
     "Admin documentation" : "管理員使用手冊",
     "Developer documentation" : "開發人員使用手冊",
+    "This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "此應用程式未在 AppStore 註冊。無可用的額外資訊。僅允許啟用/停用與移除動作。",
     "This app is supported via your current Nextcloud subscription." : "您目前的 Nextcloud 訂閱支援此應用程式。",
     "Supported" : "支援",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "精選應用程式是由社群開發的。它們提供了相當重要的功能，並已準備好在正式環境使用。",

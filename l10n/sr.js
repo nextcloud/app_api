@@ -43,6 +43,7 @@ OC.L10N.register(
     "User documentation" : "Корисничка документација",
     "Admin documentation" : "Администраторска документација",
     "Developer documentation" : "Програмерска документација",
+    "This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Ова апликација није регистрована у Продавници апликација. Нема доступних додатних информација. Дозвољене су само акције укључи/искључи и уклони.",
     "This app is supported via your current Nextcloud subscription." : "Ова апликација је подржана са Вашом тренутном Некстклауд претплатом.",
     "Supported" : "Подржана",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Препоручене апликације су развијене за и од стране заједнице. Нуде главне функционалности и спремне су за продукциону употребу.",
