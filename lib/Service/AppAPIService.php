@@ -239,7 +239,7 @@ class AppAPIService {
 					return false;
 				}
 			}
-			return $this->finalizeRequestToNC($userId, $request);
+			return $this->finalizeRequestToNC($userId, $request, $exApp->getIsSystem());
 		} else {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
@@ -258,7 +258,7 @@ class AppAPIService {
 	 *  - updates ExApp last response time
 	 *
 	 */
-	private function finalizeRequestToNC(string $userId, IRequest $request): bool {
+	private function finalizeRequestToNC(string $userId, IRequest $request, int $isSystemApp): bool {
 		if ($userId !== '') {
 			$activeUser = $this->userManager->get($userId);
 			if ($activeUser === null) {
@@ -270,6 +270,10 @@ class AppAPIService {
 			$this->userSession->setUser(null);
 		}
 		$this->session->set('app_api', true);
+		if ($isSystemApp === 1) {
+			$this->session->set('app_api_system', true);
+		}
+
 		$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
 			'appid' => $request->getHeader('EX-APP-ID'),
 			'userid' => $userId,

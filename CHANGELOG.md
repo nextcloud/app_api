@@ -5,11 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.3.0 - 2024-03-xx]
+## [2.3.0 - 2024-03-13]
+
+### Added
+
+- `app_api_system` session flag for Nextcloud server to bypass rate limits for system ExApps. #248
 
 ### Changed
 
-- ExAppProxy: adjusted how `headers` are passing from ExApp to client. # 
+- ExAppProxy: adjusted how `headers` are passing from ExApp to client. #246
+
+### Fixed
+
+- Declarative Settings API was merged into Nextcloud Server, adjusted AppAPI code. #247
 
 ## [2.2.0 - 2024-02-21]
 
