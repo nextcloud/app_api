@@ -46,4 +46,4 @@ OC.L10N.register(
     "Disable" : "השבתה",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "היישומון הזה לא מסומן כנתמך בגרסת ה־Nextcloud. עדיין יתאפשר לך להמשיך ולהתקין את היישומון. נא לשים לב שיכול להיות שהיישומון לא יעבוד כצפוי."
 },
-"nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;");
+"nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;");
