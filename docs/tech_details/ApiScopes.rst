@@ -3,22 +3,20 @@
 Api Scopes
 ==========
 
-One of the primary advantages inherent to the AppAPI is its clear-cut categorization of the required API groups
-essential for the application's operation.
-Equally significant is the provision of optional API groups, enabling the application to execute extra functions that
-enhance its capabilities, though not obligatory for its core functionality. An example of such a function is sending notifications.
+AppAPI design's focus on simplicity and necessity highlights the benefits of defining API scopes.
+which simplify the development and integration of applications into the Nextcloud ecosystem.
 
-During installation, the Nextcloud administrator retains the authority to regulate the application's access
-to any of these optional API function groups.
+With the elimination of optional API scopes, the configuration process during installation becomes more streamlined.
+Now, the Nextcloud administrator only needs to focus on the essential API groups,
+making the application's setup and permissions handling more efficient and less prone to errors.
 
-Both ``optional`` and ``required`` API groups employed by the application are explicitly outlined within
-the **info.xml** file. Upon the release of a new application version, adjustments to the API groups can be made.
-This grants the flexibility to introduce new API groups or remove outdated ones.
+The **info.xml** file continues to play a crucial role, listing all the `required` API groups an
+application needs to function correctly.
+This not only simplifies version updates, allowing for the seamless introduction of
+new API groups or the discontinuation of obsolete ones, but also enhances the overall security and reliability
+of the application by ensuring it only has access to necessary functionalities.
 
-For instance, if the initial version of your application did not necessitate notifications,
-but a subsequent version does, you can effortlessly specify the new API groups in the **info.xml** file.
-
-The following API groups are currently supported:
+Supported API Groups include:
 
 * ``2``     SYSTEM
 * ``10``    FILES
@@ -32,9 +30,18 @@ The following API groups are currently supported:
 * ``61``    AI_PROVIDERS
 * ``110``   ACTIVITIES
 * ``120``   NOTES
+* ``200``   TEXT_PROCESSING
+* ``210``   MACHINE_TRANSLATION
 * ``9999``  ALL
 
-These groups are identified using names. As time progresses,
-the list will steadily expand, comprehensively encompassing all potential APIs provided by Nextcloud.
+These groups, represented by intuitive names, ensure that applications have
+tailored access to the functionalities they need, enhancing performance and user experience.
+As Nextcloud evolves, this list of API groups will continue to grow, offering developers a wide array of tools
+to create innovative and efficient applications.
 
-There is a CLI command to list registered scopes: ``occ app_api:scopes:list``.
+The command to list registered scopes, `occ app_api:scopes:list`, remains an invaluable tool for developers
+and administrators, offering a quick and easy way to verify the API scopes available and required by applications within the Nextcloud platform.
+
+The streamlined approach to API scopes not only simplifies the application development process
+but also aligns with best practices in software design, emphasizing clarity, security, and efficiency.
+This refinement in the handling of API scopes reflects Nextcloud's commitment to providing a robust and developer-friendly platform.
