@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Fixed
 
-- Added missing check for the presence of a header for AppAPI authentication, which could lead to increased load on the server. #250
+- Added missing check for the presence of a header for AppAPI authentication, which could lead to increased load on the server. #251
+- Bump follow-redirects package from `1.15.5` to `1.15.6` #250
 
 ## [2.3.0 - 2024-03-13]
 
