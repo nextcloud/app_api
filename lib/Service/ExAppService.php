@@ -68,10 +68,7 @@ class ExAppService {
 			$exApp = $this->exAppMapper->findByAppId($appId);
 			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
 			return $exApp;
-		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
-			$this->logger->debug(
-				sprintf('Failed to get ExApp %s. Error: %s', $appId, $e->getMessage()), ['exception' => $e]
-			);
+		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException) {
 		}
 		return null;
 	}

@@ -168,7 +168,11 @@ class AppAPIService {
 	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
 		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
 
-		$exApp = $this->exAppService->getExApp($request->getHeader('EX-APP-ID'));
+		$exAppId = $request->getHeader('EX-APP-ID');
+		if (!$exAppId) {
+			return false;
+		}
+		$exApp = $this->exAppService->getExApp($exAppId);
 		if ($exApp === null) {
 			$this->logger->error(sprintf('ExApp with appId %s not found.', $request->getHeader('EX-APP-ID')));
 			// Protection for guessing installed ExApps list
