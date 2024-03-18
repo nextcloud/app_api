@@ -38,6 +38,9 @@ class AppAPIAuthMiddleware extends Middleware {
 
 		$isAppAPIAuth = !empty($reflectionMethod->getAttributes(AppAPIAuth::class));
 		if ($isAppAPIAuth) {
+			if (!$this->request->getHeader('AUTHORIZATION-APP-API')) {
+				throw new AppAPIAuthNotValidException($this->l->t('AppAPI authentication failed'), Http::STATUS_UNAUTHORIZED);
+			}
 			if (!$this->service->validateExAppRequestToNC($this->request)) {
 				throw new AppAPIAuthNotValidException($this->l->t('AppAPI authentication failed'), Http::STATUS_UNAUTHORIZED);
 			}
