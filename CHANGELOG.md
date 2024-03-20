@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fixed incorrect notifications handling producing a lot of errors in the log. #252
+- Replaced single ExApp caching with list caching, should improve performance. #253
 
 ## [2.3.1 - 2024-03-18]
 

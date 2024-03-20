@@ -30,7 +30,6 @@ use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
 class ExAppService {
-	public const CACHE_TTL = 60 * 60; // 1 hour
 	private ICache $cache;
 
 	public function __construct(
@@ -58,18 +57,12 @@ class ExAppService {
 	}
 
 	public function getExApp(string $appId): ?ExApp {
-		try {
-			$cacheKey = '/exApp_' . $appId;
-			$cached = $this->cache->get($cacheKey);
-			if ($cached !== null) {
-				return $cached instanceof ExApp ? $cached : new ExApp($cached);
+		foreach ($this->getExApps() as $exApp) {
+			if ($exApp->getAppid() === $appId) {
+				return $exApp;
 			}
-
-			$exApp = $this->exAppMapper->findByAppId($appId);
-			$this->cache->set($cacheKey, $exApp, self::CACHE_TTL);
-			return $exApp;
-		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException) {
 		}
+		$this->logger->debug(sprintf('ExApp "%s" not found.', $appId));
 		return null;
 	}
 
@@ -89,7 +82,7 @@ class ExAppService {
 		try {
 			$this->exAppMapper->insert($exApp);
 			$exApp = $this->exAppMapper->findByAppId($appInfo['id']);
-			$this->cache->set('/exApp_' . $appInfo['id'], $exApp, self::CACHE_TTL);
+			$this->cache->remove('/ex_apps');
 			return $exApp;
 		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
 			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appInfo['id'], $e->getMessage()));
@@ -119,7 +112,7 @@ class ExAppService {
 		if ($r !== 1) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
 		}
-		$this->cache->remove('/exApp_' . $appId);
+		$this->cache->remove('/ex_apps');
 		return $r === 1;
 	}
 
@@ -166,23 +159,15 @@ class ExAppService {
 	}
 
 	public function getExAppsList(string $list = 'enabled'): array {
-		try {
-			$exApps = $this->exAppMapper->findAll();
-
-			if ($list === 'enabled') {
-				$exApps = array_values(array_filter($exApps, function (ExApp $exApp) {
-					return $exApp->getEnabled() === 1;
-				}));
-			}
-
-			$exApps = array_map(function (ExApp $exApp) {
-				return $this->formatExAppInfo($exApp);
-			}, $exApps);
-		} catch (Exception $e) {
-			$this->logger->error(sprintf('Error while getting ExApps list. Error: %s', $e->getMessage()), ['exception' => $e]);
-			$exApps = [];
+		$exApps = $this->getExApps();
+		if ($list === 'enabled') {
+			$exApps = array_values(array_filter($exApps, function (ExApp $exApp) {
+				return $exApp->getEnabled() === 1;
+			}));
 		}
-		return $exApps;
+		return array_map(function (ExApp $exApp) {
+			return $this->formatExAppInfo($exApp);
+		}, $exApps);
 	}
 
 	public function formatExAppInfo(ExApp $exApp): array {
@@ -219,7 +204,7 @@ class ExAppService {
 	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'is_system']): bool {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
-			$this->cache->set('/exApp_' . $exApp->getAppid(), $exApp, self::CACHE_TTL);
+			$this->cache->remove('/ex_apps');
 			return true;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to update "%s" ExApp info.', $exApp->getAppid()), ['exception' => $e]);
@@ -341,5 +326,27 @@ class ExAppService {
 		$status['error'] = $error;
 		$exApp->setStatus($status);
 		$this->updateExApp($exApp, ['status']);
+	}
+
+	/**
+	 * Get list of registered ExApps
+	 *
+	 * @return ExApp[]
+	 */
+	public function getExApps(): array {
+		try {
+			$cacheKey = '/ex_apps';
+			$records = $this->cache->get($cacheKey);
+			if ($records !== null) {
+				return array_map(function ($record) {
+					return $record instanceof ExApp ? $record : new ExApp($record);
+				}, $records);
+			}
+			$records = $this->exAppMapper->findAll();
+			$this->cache->set($cacheKey, $records);
+			return $records;
+		} catch (Exception) {
+			return [];
+		}
 	}
 }
