@@ -30,10 +30,11 @@ class ExAppAdminNotifier implements INotifier {
 	}
 
 	public function prepare(INotification $notification, string $languageCode): INotification {
+		if ($notification->getSubject() !== 'ex_app_version_update') {
+			throw new InvalidArgumentException();
+		}
 		$exApp = $this->service->getExApp($notification->getApp());
-		// TODO: Think about another possible admin ExApp notifications, make them unified
-		// TODO: Think about ExApp rich objects
-		if ($exApp === null || $notification->getSubject() !== 'ex_app_version_update') {
+		if ($exApp === null) {
 			throw new InvalidArgumentException();
 		}
 		if ($exApp->getEnabled()) {
