@@ -11,3 +11,4 @@ vendor
 _build
 certs
 .php-cs-fixer.cache
+dev
