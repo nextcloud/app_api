@@ -337,14 +337,14 @@ class ExAppService {
 		try {
 			$cacheKey = '/ex_apps';
 			$records = $this->cache->get($cacheKey);
-			if ($records === null) {
-				$records = $this->exAppMapper->findAll();
-				$this->cache->set($cacheKey, $records);
+			if ($records !== null) {
+				return array_map(function ($record) {
+					return new ExApp($record);
+				}, $records);
 			}
-
-			return array_map(function ($record) {
-				return new ExApp($record);
-			}, $records);
+			$records = $this->exAppMapper->findAll();
+			$this->cache->set($cacheKey, $records);
+			return $records;
 		} catch (Exception) {
 			return [];
 		}
