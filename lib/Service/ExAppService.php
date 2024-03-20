@@ -339,7 +339,7 @@ class ExAppService {
 			$records = $this->cache->get($cacheKey);
 			if ($records !== null) {
 				return array_map(function ($record) {
-					return new ExApp($record);
+					return $record instanceof ExApp ? $record : new ExApp($record);
 				}, $records);
 			}
 			$records = $this->exAppMapper->findAll();
