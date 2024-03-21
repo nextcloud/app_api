@@ -1,6 +1,7 @@
 OC.L10N.register(
     "app_api",
     {
+    "External Apps" : "Aplicacións externas",
     "Deploy Daemons" : "Despregue de servizos",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Despregue de servizos (DaemonConfig) é un servizo de orquestración de Aplicacións externas (ExApps).",
     "Default Deploy Daemon is not accessible. Please verify its configuration" : "Non é posíbel acceder ao servizo predeterminado de  despregue. Verifique a súa configuración",
