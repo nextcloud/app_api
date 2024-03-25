@@ -128,6 +128,8 @@ class ExApp extends Entity implements JsonSerializable {
 		}
 		if (isset($params['api_scopes'])) {
 			$this->setApiScopes($params['api_scopes']);
+		} else {
+			$this->setApiScopes([]);
 		}
 		if (isset($params['deploy_config'])) {
 			$this->setDeployConfig($params['deploy_config']);

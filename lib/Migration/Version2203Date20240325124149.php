@@ -25,8 +25,7 @@ class Version2203Date20240325124149 extends SimpleMigrationStep {
 		$table = $schema->getTable('ex_apps');
 
 		$table->addColumn('api_scopes', Types::JSON, [
-			'notnull' => true,
-			'default' => '[]',
+			'notnull' => false,
 		]);
 
 		return $schema;
