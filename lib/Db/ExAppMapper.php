@@ -117,7 +117,7 @@ class ExAppMapper extends QBMapper {
 			} elseif ($field === 'is_system') {
 				$qb = $qb->set('is_system', $qb->createNamedParameter($exApp->getIsSystem(), IQueryBuilder::PARAM_INT));
 			} elseif ($field === 'api_scopes') {
-				$qb = $qb->set('api_scopes', $qb->createNamedParameter($exApp->getApiScopes(), IQueryBuilder::PARAM_INT));
+				$qb = $qb->set('api_scopes', $qb->createNamedParameter($exApp->getApiScopes(), IQueryBuilder::PARAM_JSON));
 			}
 		}
 		return $qb->where($qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid())))->executeStatement();
