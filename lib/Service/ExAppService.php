@@ -78,6 +78,7 @@ class ExAppService {
 			'created_time' => time(),
 			'last_check_time' => time(),
 			'is_system' => (int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN),
+			'api_scopes' => $appInfo['api_scopes'],
 		]);
 		try {
 			$this->exAppMapper->insert($exApp);
@@ -195,13 +196,14 @@ class ExAppService {
 		$exApp->setVersion($appInfo['version']);
 		$exApp->setName($appInfo['name']);
 		$exApp->setIsSystem((int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN));
-		if (!$this->updateExApp($exApp, ['version', 'name', 'is_system'])) {
+		$exApp->setApiScopes($appInfo['api_scopes']);
+		if (!$this->updateExApp($exApp, ['version', 'name', 'is_system', 'api_scopes'])) {
 			return false;
 		}
 		return true;
 	}
 
-	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'is_system']): bool {
+	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'is_system', 'api_scopes']): bool {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
 			$this->cache->remove('/ex_apps');
@@ -242,16 +244,16 @@ class ExAppService {
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'scopes', 'is_system', 'translations_folder'] as $key) {
+			foreach (['docker-install', 'scopes', 'is_system', 'system', 'translations_folder'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);
 				}
 			}
 			# TO-DO: remove this in AppAPI 2.4.0
-			if (isset($appInfo['system_app'])) {
-				$appInfo['external-app']['system'] = $appInfo['system_app'];
-				unset($appInfo['system_app']);
+			if (isset($appInfo['external-app']['system_app'])) {
+				$appInfo['external-app']['system'] = $appInfo['external-app']['system_app'];
+				unset($appInfo['external-app']['system_app']);
 			}
 		} else {
 			if ($infoXml !== null) {
