@@ -44,6 +44,7 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Eguneratu","Eguneratu denak"],
     "Type" : "Mota",
     "Display Name" : "Izena erakutsi",
+    "Default" : "Lehenetsia",
     "{license}-licensed" : "{license}-lizentziaduna",
     "Delete" : "Ezabatu",
     "Cancel" : "Utzi",
