@@ -136,6 +136,7 @@ class Update extends Command {
 			}
 		}
 
+		$appInfo['api_scopes'] = $this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']);
 		if (!$this->exAppService->updateExAppInfo($exApp, $appInfo)) {
 			$this->logger->error(sprintf('Failed to update ExApp %s info', $appId));
 			if ($outputConsole) {
