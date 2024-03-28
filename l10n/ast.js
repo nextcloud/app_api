@@ -19,6 +19,7 @@ OC.L10N.register(
     "Ok" : "Aceutar",
     "Host" : "Agospiador",
     "Display name" : "Nome visible",
+    "Register" : "Rexistrase",
     "Your apps" : "Les tos aplicaciones",
     "Details" : "Detalles",
     "Changelog" : "Rexistru de cambeos",
