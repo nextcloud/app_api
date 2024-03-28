@@ -8,6 +8,7 @@ use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
+use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
@@ -35,6 +36,7 @@ class Update extends Command {
 		private readonly ManualActions        $manualActions,
 		private readonly LoggerInterface      $logger,
 		private readonly ExAppArchiveFetcher  $exAppArchiveFetcher,
+		private readonly ExAppFetcher		  $exAppFetcher,
 	) {
 		parent::__construct();
 	}
@@ -43,19 +45,52 @@ class Update extends Command {
 		$this->setName('app_api:app:update');
 		$this->setDescription('Update ExApp');
 
-		$this->addArgument('appid', InputArgument::REQUIRED);
+		$this->addArgument('appid', InputArgument::OPTIONAL, 'Update the specified app');
 
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, 'Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp info.xml in JSON format');
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force new ExApp scopes approval');
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Do not print to console');
+		$this->addOption('all', null, InputOption::VALUE_NONE, 'Update all updatable apps');
+		$this->addOption('showonly', null, InputOption::VALUE_NONE, 'Additional flag for "--all" to only show all updatable apps');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$outputConsole = !$input->getOption('silent');
 		$appId = $input->getArgument('appid');
+		if (empty($appId) && !$input->getOption('all')) {
+			$output->writeln("<error>Please specify an app to update or \"--all\" to update all updatable apps</error>");
+			return 1;
+		} elseif (!empty($appId) && $input->getOption('all')) {
+			$output->writeln("<error>The \"--all\" flag is mutually exclusive with specifying app</error>");
+			return 1;
+		} elseif ($input->getOption('all')) {
+			$apps = $this->exAppFetcher->get();
+			$appsWithUpdates = array_filter($apps, function (array $app) {
+				$exApp = $this->exAppService->getExApp($app['id']);
+				$newestVersion = $app['releases'][0]['version'];
+				return $exApp !== null && isset($app['releases'][0]['version']) && version_compare($newestVersion, $exApp->getVersion(), '>');
+			});
+			if ($input->getOption('showonly')) {
+				foreach ($appsWithUpdates as $appWithUpdate) {
+					$output->writeln($appWithUpdate['id'] . ' new version available: ' . $appWithUpdate['releases'][0]['version']);
+				}
+				return 0;
+			}
+			$return = 0;
+			foreach ($appsWithUpdates as $appWithUpdate) {
+				$result = $this->updateExApp($input, $output, $appWithUpdate['id']);
+				if ($result > 0) {
+					$return = $result;
+				}
+			}
+			return $return;
+		}
+		return $this->updateExApp($input, $output, $appId);
+	}
 
+	private function updateExApp(InputInterface $input, OutputInterface $output, string $appId): int {
+		$outputConsole = !$input->getOption('silent');
 		$appInfo = $this->exAppService->getAppInfo(
 			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
 		);
@@ -136,7 +171,7 @@ class Update extends Command {
 			}
 		}
 
-		$appInfo['api_scopes'] = $this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']);
+		$appInfo['api_scopes'] = array_values($this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']));
 		if (!$this->exAppService->updateExAppInfo($exApp, $appInfo)) {
 			$this->logger->error(sprintf('Failed to update ExApp %s info', $appId));
 			if ($outputConsole) {
