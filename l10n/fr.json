@@ -9,7 +9,7 @@
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Cette application n'a pas de version minimum Nextcloud exigée. Ce sera considéré comme une erreur à l'avenir.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Cette application n'a pas de version maximum Nextcloud exigée. Ce sera considéré comme une erreur à l'avenir.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Cette application ne peut être installée à cause de ces dépendances non satisfaites :",
-    "View in store" : "Afficher dans le magasin d'applications",
+    "View in store" : "Afficher dans le magasin d’applications",
     "Visit website" : "Visiter le site web",
     "Report a bug" : "Signaler un bug",
     "User documentation" : "Documentation utilisateur",

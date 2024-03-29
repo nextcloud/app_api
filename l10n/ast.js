@@ -18,6 +18,7 @@ OC.L10N.register(
     "Cancel" : "Encaboxar",
     "Ok" : "Aceutar",
     "Host" : "Agospiador",
+    "Nextcloud URL" : "URL de Nextcloud",
     "Display name" : "Nome visible",
     "Register" : "Rexistrase",
     "Your apps" : "Les tos aplicaciones",
