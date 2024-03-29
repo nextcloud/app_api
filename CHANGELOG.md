@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Corrected error handling for `occ` commands: `register` and `update`. #257
+- Corrected error handling for `occ` commands: `register` and `update`. #258
 
 ## [2.3.2 - 2024-03-28]
 
