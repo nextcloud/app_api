@@ -220,6 +220,9 @@ class ExAppService {
 		$exAppAppstoreData = array_filter($exApps, function (array $exAppItem) use ($appId) {
 			return $exAppItem['id'] === $appId && count($exAppItem['releases']) > 0;
 		});
+		if (empty($exAppAppstoreData)) {
+			return null;
+		}
 		$exAppAppstoreData = end($exAppAppstoreData);
 		$exAppReleaseInfo = end($exAppAppstoreData['releases']);
 		if ($exAppReleaseInfo !== false) {
@@ -263,6 +266,9 @@ class ExAppService {
 				}
 			} else {
 				$xmlAppInfo = $this->getLatestExAppInfoFromAppstore($appId, $extractedDir);
+				if (empty($xmlAppInfo)) {
+					return ['error' => sprintf('Failed to get app info for `%s` from the Appstore', $appId)];
+				}
 			}
 			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
 			if (isset($appInfo['external-app']['scopes']['value'])) {
