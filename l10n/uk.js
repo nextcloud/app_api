@@ -3,7 +3,7 @@ OC.L10N.register(
     {
     "External Apps" : "Зовнішні застосунки",
     "Update to {version}" : "Оновити до {version}",
-    "Remove" : "Видалити",
+    "Remove" : "Вилучити",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Цей застосунок не має обмежень щодо мінімальної версії Nextcloud. В майбутньому це може викликати певні помилки.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Для цього застосунку не визначено найвищу версію Nextcloud. Це може викликати помилку в майбутньому.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Цей застосунок не буде встановлено, оскільки такі залежності неможливо виконати:",
