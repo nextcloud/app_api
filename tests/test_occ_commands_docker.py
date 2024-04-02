@@ -2,7 +2,7 @@ from subprocess import run, DEVNULL, PIPE
 
 
 SKELETON_XML_URL = (
-    "https://raw.githubusercontent.com/cloud-py-api/nc_py_api/main/examples/as_app/skeleton/appinfo/info.xml"
+    "https://raw.githubusercontent.com/cloud-py-api/app-skeleton-python/main/appinfo/info.xml"
 )
 
 
