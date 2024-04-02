@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Corrected error handling for `occ` commands: `register` and `update`. #258
+- `SensitiveParameter` is applied to variables containing secrets, preventing them from being leaked to the logs. #261
 
 ## [2.3.2 - 2024-03-28]
 

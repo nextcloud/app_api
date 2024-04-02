@@ -85,20 +85,30 @@ class AppAPIService {
 		array $options = [],
 		?IRequest $request = null,
 	): array|IResponse {
-		$request_data = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		return $this->requestToExAppInternal($exApp, $method, $requestData['url'], $requestData['options']);
+	}
+
+	private function requestToExAppInternal(
+		ExApp $exApp,
+		string $method,
+		string $uri,
+		#[\SensitiveParameter]
+		array $options,
+	): array|IResponse {
 		try {
 			switch ($method) {
 				case 'GET':
-					$response = $this->client->get($request_data['url'], $request_data['options']);
+					$response = $this->client->get($uri, $options);
 					break;
 				case 'POST':
-					$response = $this->client->post($request_data['url'], $request_data['options']);
+					$response = $this->client->post($uri, $options);
 					break;
 				case 'PUT':
-					$response = $this->client->put($request_data['url'], $request_data['options']);
+					$response = $this->client->put($uri, $options);
 					break;
 				case 'DELETE':
-					$response = $this->client->delete($request_data['url'], $request_data['options']);
+					$response = $this->client->delete($uri, $options);
 					break;
 				default:
 					return ['error' => 'Bad HTTP method'];
@@ -119,16 +129,26 @@ class AppAPIService {
 		array $options = [],
 		?IRequest $request = null,
 	): void {
-		$request_data = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		$this->requestToExAppInternalAsync($exApp, $method, $requestData['url'], $requestData['options']);
+	}
+
+	private function requestToExAppInternalAsync(
+		ExApp $exApp,
+		string $method,
+		string $uri,
+		#[\SensitiveParameter]
+		array $options,
+	): void {
 		switch ($method) {
 			case 'POST':
-				$promise = $this->client->postAsync($request_data['url'], $request_data['options']);
+				$promise = $this->client->postAsync($uri, $options);
 				break;
 			case 'PUT':
-				$promise = $this->client->putAsync($request_data['url'], $request_data['options']);
+				$promise = $this->client->putAsync($uri, $options);
 				break;
 			case 'DELETE':
-				$promise = $this->client->deleteAsync($request_data['url'], $request_data['options']);
+				$promise = $this->client->deleteAsync($uri, $options);
 				break;
 			default:
 				$this->logger->error('Bad HTTP method: requestToExAppAsync accepts only `POST`, `PUT` and `DELETE`');
@@ -145,6 +165,7 @@ class AppAPIService {
 		?string $userId,
 		string $method,
 		array $params,
+		#[\SensitiveParameter]
 		array $options,
 		?IRequest $request,
 	): array {
@@ -478,7 +499,11 @@ class AppAPIService {
 		return true;
 	}
 
-	public function heartbeatExApp(string $exAppUrl, array $auth): bool {
+	public function heartbeatExApp(
+		string $exAppUrl,
+		#[\SensitiveParameter]
+		array $auth,
+	): bool {
 		$heartbeatAttempts = 0;
 		$delay = 1;
 		$maxHeartbeatAttempts = 60 * 10 * $delay; // minutes for container initialization
