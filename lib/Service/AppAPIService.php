@@ -85,52 +85,20 @@ class AppAPIService {
 		array $options = [],
 		?IRequest $request = null,
 	): array|IResponse {
-		$this->handleExAppDebug($exApp->getAppid(), $request, true);
+		$request_data = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 		try {
-			$auth = [];
-			$url = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
-			if (str_starts_with($route, '/')) {
-				$url = $url.$route;
-			} else {
-				$url = $url.'/'.$route;
-			}
-
-			if (isset($options['headers']) && is_array($options['headers'])) {
-				$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret())];
-			} else {
-				$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret());
-			}
-			$lang = $this->l10nFactory->findLanguage($exApp->getAppid());
-			if (!isset($options['headers']['Accept-Language'])) {
-				$options['headers']['Accept-Language'] = $lang;
-			}
-			$options['nextcloud'] = [
-				'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
-			];
-			if (!empty($auth)) {
-				$options['auth'] = $auth;
-			}
-
-			if ((!array_key_exists('multipart', $options)) && (count($params)) > 0) {
-				if ($method === 'GET') {
-					$url .= '?' . $this->getUriEncodedParams($params);
-				} else {
-					$options['json'] = $params;
-				}
-			}
-
 			switch ($method) {
 				case 'GET':
-					$response = $this->client->get($url, $options);
+					$response = $this->client->get($request_data['url'], $request_data['options']);
 					break;
 				case 'POST':
-					$response = $this->client->post($url, $options);
+					$response = $this->client->post($request_data['url'], $request_data['options']);
 					break;
 				case 'PUT':
-					$response = $this->client->put($url, $options);
+					$response = $this->client->put($request_data['url'], $request_data['options']);
 					break;
 				case 'DELETE':
-					$response = $this->client->delete($url, $options);
+					$response = $this->client->delete($request_data['url'], $request_data['options']);
 					break;
 				default:
 					return ['error' => 'Bad HTTP method'];
@@ -140,6 +108,79 @@ class AppAPIService {
 			$this->logger->error(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => $e->getMessage()];
 		}
+	}
+
+	public function requestToExAppAsync(
+		ExApp $exApp,
+		string $route,
+		?string $userId = null,
+		string $method = 'POST',
+		array $params = [],
+		array $options = [],
+		?IRequest $request = null,
+	): void {
+		$request_data = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		switch ($method) {
+			case 'POST':
+				$promise = $this->client->postAsync($request_data['url'], $request_data['options']);
+				break;
+			case 'PUT':
+				$promise = $this->client->putAsync($request_data['url'], $request_data['options']);
+				break;
+			case 'DELETE':
+				$promise = $this->client->deleteAsync($request_data['url'], $request_data['options']);
+				break;
+			default:
+				$this->logger->error('Bad HTTP method: requestToExAppAsync accepts only `POST`, `PUT` and `DELETE`');
+				return;
+		}
+		$promise->then(function (IResponse $response) use ($exApp) {
+		}, function (\Exception $exception) use ($exApp) {
+		});
+	}
+
+	private function prepareRequestToExApp(
+		ExApp $exApp,
+		string $route,
+		?string $userId,
+		string $method,
+		array $params,
+		array $options,
+		?IRequest $request,
+	): array {
+		$this->handleExAppDebug($exApp->getAppid(), $request, true);
+		$auth = [];
+		$url = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
+		if (str_starts_with($route, '/')) {
+			$url = $url.$route;
+		} else {
+			$url = $url.'/'.$route;
+		}
+
+		if (isset($options['headers']) && is_array($options['headers'])) {
+			$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret())];
+		} else {
+			$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret());
+		}
+		$lang = $this->l10nFactory->findLanguage($exApp->getAppid());
+		if (!isset($options['headers']['Accept-Language'])) {
+			$options['headers']['Accept-Language'] = $lang;
+		}
+		$options['nextcloud'] = [
+			'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
+		];
+		if (!empty($auth)) {
+			$options['auth'] = $auth;
+		}
+
+		if ((!array_key_exists('multipart', $options)) && (count($params)) > 0) {
+			if ($method === 'GET') {
+				$url .= '?' . $this->getUriEncodedParams($params);
+			} else {
+				$options['json'] = $params;
+			}
+		}
+		return ['url' => $url, 'options' => $options];
 	}
 
 	private function getUriEncodedParams(array $params): string {
