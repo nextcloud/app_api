@@ -18,6 +18,7 @@ AppAPI Nextcloud APIs
 	topmenu
 	settings
 	notifications
+	events_listener
 	talkbots
 	speechtotext
 	textprocessing

@@ -66,6 +66,13 @@
       <code>DeclarativeSettingsSetValueEvent</code>
     </UndefinedClass>
   </file>
+  <file src="lib/Listener/FileEventsListener.php">
+    <MissingDependency>
+      <code><![CDATA[$this->rootFolder]]></code>
+      <code><![CDATA[$this->rootFolder]]></code>
+      <code>private</code>
+    </MissingDependency>
+  </file>
   <file src="lib/Listener/LoadFilesPluginListener.php">
     <ImplementedParamTypeMismatch>
       <code>$event</code>

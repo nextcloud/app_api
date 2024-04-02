@@ -75,6 +75,11 @@ return [
 		// Notifications
 		['name' => 'Notifications#sendNotification', 'url' => '/api/v1/notification', 'verb' => 'POST'],
 
+		// Events
+		['name' => 'EventsListener#registerListener', 'url' => '/api/v1/events_listener', 'verb' => 'POST'],
+		['name' => 'EventsListener#unregisterListener', 'url' => '/api/v1/events_listener', 'verb' => 'DELETE'],
+		['name' => 'EventsListener#getListener', 'url' => '/api/v1/events_listener', 'verb' => 'GET'],
+
 		// Talk bots
 		['name' => 'TalkBot#registerExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'POST'],
 		['name' => 'TalkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'DELETE'],

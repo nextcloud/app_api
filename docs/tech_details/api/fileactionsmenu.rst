@@ -60,6 +60,8 @@ To unregister FileActionsMenu, you just need to provide name of registered FileA
 		"name": "unique_name_of_file_action_menu"
 	}
 
+.. _node_info:
+
 Action payload to ExApp
 ^^^^^^^^^^^^^^^^^^^^^^^
 
