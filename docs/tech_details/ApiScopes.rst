@@ -40,9 +40,6 @@ tailored access to the functionalities they need, enhancing performance and user
 As Nextcloud evolves, this list of API groups will continue to grow, offering developers a wide array of tools
 to create innovative and efficient applications.
 
-The command to list registered scopes, `occ app_api:scopes:list`, remains an invaluable tool for developers
-and administrators, offering a quick and easy way to verify the API scopes available and required by applications within the Nextcloud platform.
-
 The streamlined approach to API scopes not only simplifies the application development process
 but also aligns with best practices in software design, emphasizing clarity, security, and efficiency.
 This refinement in the handling of API scopes reflects Nextcloud's commitment to providing a robust and developer-friendly platform.

@@ -132,7 +132,7 @@ class Register extends Command {
 		$appInfo['port'] = $appInfo['port'] ?? $this->exAppService->getExAppFreePort();
 		$appInfo['secret'] = $appInfo['secret'] ?? $this->random->generate(128);
 		$appInfo['daemon_config_name'] = $appInfo['daemon_config_name'] ?? $daemonConfigName;
-		$appInfo['api_scopes'] = array_values($this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']));
+		$appInfo['api_scopes'] = array_values($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']));
 		$exApp = $this->exAppService->registerExApp($appInfo);
 		if (!$exApp) {
 			$this->logger->error(sprintf('Error during registering ExApp %s.', $appId));
@@ -142,7 +142,7 @@ class Register extends Command {
 			return 3;
 		}
 		if (count($appInfo['external-app']['scopes']) > 0) {
-			if (!$this->exAppScopesService->registerExAppScopes($exApp, $this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']))) {
+			if (!$this->exAppScopesService->registerExAppScopes($exApp, $this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']))) {
 				$this->logger->error(sprintf('Error while registering API scopes for %s.', $appId));
 				if ($outputConsole) {
 					$output->writeln(sprintf('Error while registering API scopes for %s.', $appId));

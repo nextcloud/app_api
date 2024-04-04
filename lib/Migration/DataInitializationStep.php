@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Migration;
 
 use OCA\AppAPI\DeployActions\AIODockerActions;
-use OCA\AppAPI\Service\ExAppApiScopeService;
 
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
 class DataInitializationStep implements IRepairStep {
 	public function __construct(
-		private readonly ExAppApiScopeService $service,
 		private readonly AIODockerActions     $AIODockerActions,
 	) {
 	}
@@ -22,12 +20,6 @@ class DataInitializationStep implements IRepairStep {
 	}
 
 	public function run(IOutput $output): void {
-		if ($this->service->registerInitScopes()) {
-			$output->info('API scopes successfully initialized');
-		} else {
-			$output->warning('Failed to initialize API scopes');
-		}
-
 		// If in AIO - automatically register default DaemonConfig
 		if ($this->AIODockerActions->isAIO()) {
 			$output->info('AIO installation detected. Registering default daemon');

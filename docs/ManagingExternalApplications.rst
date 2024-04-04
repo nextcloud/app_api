@@ -116,13 +116,6 @@ System user
 
 System user (``[system user]``) in the list means that this ExApp was setup as a system ExApp.
 
-List ExApp Scopes
------------------
-
-List accepted scopes (see :ref:`api_scopes`) for ExApp.
-
-Command: ``app_api:app:scopes:list <appid>``
-
 Using the ExApp Management UI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

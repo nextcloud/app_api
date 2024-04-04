@@ -171,7 +171,7 @@ class Update extends Command {
 			}
 		}
 
-		$appInfo['api_scopes'] = array_values($this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']));
+		$appInfo['api_scopes'] = array_values($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']));
 		if (!$this->exAppService->updateExAppInfo($exApp, $appInfo)) {
 			$this->logger->error(sprintf('Failed to update ExApp %s info', $appId));
 			if ($outputConsole) {
@@ -244,7 +244,7 @@ class Update extends Command {
 			return $exAppScope->getScopeGroup();
 		}, $this->exAppScopeService->getExAppScopes($exApp));
 		// Prepare for prompt of newly requested ExApp scopes
-		$requiredScopes = $this->compareExAppScopes($currentExAppScopes, $appInfo['external-app']['scopes']);
+		$requiredScopes = array_values(array_diff($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']), $currentExAppScopes));
 
 		$forceScopes = (bool) $input->getOption('force-scopes');
 		$confirmScopes = $forceScopes;
@@ -269,7 +269,7 @@ class Update extends Command {
 		}
 
 		if (!$this->exAppScopeService->registerExAppScopes(
-			$exApp, $this->exAppApiScopeService->mapScopeNamesToNumbers($appInfo['external-app']['scopes']))
+			$exApp, $this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']))
 		) {
 			$this->logger->error(sprintf('Failed to update ExApp %s scopes.', $appId));
 			if ($outputConsole) {
@@ -292,16 +292,5 @@ class Update extends Command {
 			$output->writeln(sprintf('ExApp %s successfully updated.', $appId));
 		}
 		return 0;
-	}
-
-	/**
-	 * Compare ExApp scopes and return difference (new requested)
-	 *
-	 * @param array $currentExAppScopes
-	 * @param array $newExAppScopes
-	 * @return array
-	 */
-	private function compareExAppScopes(array $currentExAppScopes, array $newExAppScopes): array {
-		return array_values(array_diff($this->exAppApiScopeService->mapScopeNamesToNumbers($newExAppScopes), $currentExAppScopes));
 	}
 }

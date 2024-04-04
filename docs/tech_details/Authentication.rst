@@ -89,3 +89,11 @@ After successful authentication AppAPI sets `app_api` session key to ``true``.
 	$this->session->set('app_api', true);
 
 .. note:: The Nextcloud server verifies this session key and allows **CORS protection** and **Two-Factor authentication** to be bypassed for requests coming from ExApps.
+
+For ``System`` applications additional flag is set:
+
+.. code-block:: php
+
+	$this->session->set('app_api_system', true);
+
+.. note:: The Nextcloud Server skips rate limiting for requests coming from ``System`` ExApps.
