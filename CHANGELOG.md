@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Optimizations(1) related to speed up handling the incoming ExApps requests. #262
+- `occ app_api:scopes:list` command removed as not needed. #262
 
 ### Fixed
 
