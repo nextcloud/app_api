@@ -285,8 +285,8 @@ class AppAPIService {
 				}
 
 				// BASIC ApiScope is granted to all ExApps (all API routes with BASIC scope group).
-				if ($apiScope->getScopeGroup() !== ExAppApiScopeService::BASIC_API_SCOPE) {
-					if (!$this->exAppScopesService->passesScopeCheck($exApp, $apiScope->getScopeGroup())) {
+				if ($apiScope['scope_group'] !== ExAppApiScopeService::BASIC_API_SCOPE) {
+					if (!$this->exAppScopesService->passesScopeCheck($exApp, $apiScope['scope_group'])) {
 						$this->logger->error(sprintf('ExApp %s not passed scope group check %s', $exApp->getAppid(), $path));
 						return false;
 					}
@@ -294,7 +294,7 @@ class AppAPIService {
 			}
 
 			// For APIs that not assuming work under user context we do not check ExApp users
-			if ((!$exApp->getIsSystem()) && (($apiScope === null) or ($apiScope->getUserCheck()))) {
+			if ((!$exApp->getIsSystem()) && (($apiScope === null) or ($apiScope['user_check']))) {
 				try {
 					if (!$this->exAppUsersService->exAppUserExists($exApp->getAppid(), $userId)) {
 						$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));
