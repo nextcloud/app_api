@@ -33,25 +33,26 @@ class ExAppService {
 	private ICache $cache;
 
 	public function __construct(
-		private readonly LoggerInterface         $logger,
-		ICacheFactory                            $cacheFactory,
-		private readonly IUserManager    		 $userManager,
-		private readonly ExAppFetcher            $exAppFetcher,
-		private readonly ExAppArchiveFetcher     $exAppArchiveFetcher,
-		private readonly ExAppMapper             $exAppMapper,
-		private readonly ExAppUsersService       $exAppUsersService,
-		private readonly ExAppScopesService      $exAppScopesService,
-		private readonly ExAppApiScopeService    $exAppApiScopeService,
-		private readonly TopMenuService          $topMenuService,
-		private readonly InitialStateService     $initialStateService,
-		private readonly ScriptsService          $scriptsService,
-		private readonly StylesService           $stylesService,
-		private readonly FilesActionsMenuService $filesActionsMenuService,
-		private readonly SpeechToTextService     $speechToTextService,
-		private readonly TextProcessingService   $textProcessingService,
-		private readonly TranslationService      $translationService,
-		private readonly TalkBotsService         $talkBotsService,
-		private readonly SettingsService         $settingsService,
+		private readonly LoggerInterface         	$logger,
+		ICacheFactory                            	$cacheFactory,
+		private readonly IUserManager    		 	$userManager,
+		private readonly ExAppFetcher            	$exAppFetcher,
+		private readonly ExAppArchiveFetcher     	$exAppArchiveFetcher,
+		private readonly ExAppMapper             	$exAppMapper,
+		private readonly ExAppUsersService       	$exAppUsersService,
+		private readonly ExAppScopesService      	$exAppScopesService,
+		private readonly ExAppApiScopeService    	$exAppApiScopeService,
+		private readonly TopMenuService          	$topMenuService,
+		private readonly InitialStateService     	$initialStateService,
+		private readonly ScriptsService          	$scriptsService,
+		private readonly StylesService           	$stylesService,
+		private readonly FilesActionsMenuService 	$filesActionsMenuService,
+		private readonly SpeechToTextService     	$speechToTextService,
+		private readonly TextProcessingService   	$textProcessingService,
+		private readonly TranslationService      	$translationService,
+		private readonly TalkBotsService         	$talkBotsService,
+		private readonly SettingsService         	$settingsService,
+		private readonly ExAppEventsListenerService $appEventsListenerService,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 	}
@@ -238,6 +239,7 @@ class ExAppService {
 		$this->speechToTextService->resetCacheEnabled();
 		$this->translationService->resetCacheEnabled();
 		$this->settingsService->resetCacheEnabled();
+		$this->appEventsListenerService->resetCacheEnabled();
 	}
 
 	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo): array {
