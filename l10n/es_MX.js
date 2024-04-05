@@ -29,6 +29,7 @@ OC.L10N.register(
     "Default" : "Por omisión",
     "{license}-licensed" : "Licenciado bajo {license}",
     "Delete" : "Eliminar",
+    "Cancel" : "Cancelar",
     "Host" : "Servidor",
     "Display name" : "Nombre para mostrar",
     "Register" : "Registrar",

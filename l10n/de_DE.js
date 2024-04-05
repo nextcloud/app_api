@@ -43,7 +43,7 @@ OC.L10N.register(
     "User documentation" : "Benutzer-Dokumentation",
     "Admin documentation" : "Dokumentation für die Administration",
     "Developer documentation" : "Entwickler-Dokumentation",
-    "This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Diese App ist nicht im AppStore gelistet. Es sind keine weiteren Informationen verfügbar. Nur erlauben/deaktivieren und Aktionen entfernen ist zulässig.",
+    "This app is not registered in AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Diese App ist nicht im App-Store gelistet. Es sind keine weiteren Informationen verfügbar. Nur erlauben/deaktivieren und Aktionen entfernen ist zulässig.",
     "This app is supported via your current Nextcloud subscription." : "Diese App wird von Ihrem aktuellen Nextcloud-Abonnement unterstützt.",
     "Supported" : "Unterstützt",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Vorgestellte Apps werden von und innerhalb der Nextcloud-Gemeinschaft entwickelt. Sie stellen zentrale Funktionen bereit und sind für den produktiven Einsatz geeignet.",
