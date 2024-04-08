@@ -40,6 +40,7 @@
 							v-model="acceptsDeployId"
 							:disabled="configurationTab.id === 'manual_install'"
 							:options="deployMethods"
+							:label-outside="true"
 							:placeholder="t('app_api', 'Select daemon deploy method')" />
 					</div>
 					<div class="external-label" :aria-label="t('app_api', 'Daemon host')">
