@@ -46,7 +46,10 @@ class AIODockerActions {
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
 			'haproxy_password' => null,
-			'gpu' => false,
+			'computeDevice' => [
+				'id' => 'cpu',
+				'label' => 'CPU',
+			],
 		];
 
 		if ($this->isGPUsEnabled()) {
@@ -82,7 +85,10 @@ class AIODockerActions {
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
 			'haproxy_password' => null,
-			'gpu' => true,
+			'computeDevice' => [
+				'id' => 'rocm',
+				'label' => 'ROCm (NVIDIA)',
+			],
 		];
 
 		$daemonConfigParams = [

@@ -125,11 +125,16 @@ class DockerActions implements IDeployActions {
 			$containerParams['NetworkingConfig'] = $networkingConfig;
 		}
 
-		if (isset($params['gpu']) && filter_var($params['gpu'], FILTER_VALIDATE_BOOLEAN)) {
-			if (isset($params['deviceRequests'])) {
-				$containerParams['HostConfig']['DeviceRequests'] = $params['deviceRequests'];
-			} else {
-				$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
+		if (isset($params['computeDevice'])) {
+			if ($params['computeDevice']['id'] === 'cuda') {
+				if (isset($params['deviceRequests'])) {
+					$containerParams['HostConfig']['DeviceRequests'] = $params['deviceRequests'];
+				} else {
+					$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
+				}
+			}
+			if ($params['computeDevice']['id'] === 'rocm') {
+				$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
 			}
 		}
 
@@ -518,8 +523,6 @@ class DockerActions implements IDeployActions {
 
 	/**
 	 * Return default GPU device requests for container.
-	 * For now only NVIDIA GPUs supported.
-	 * TODO: Add support for other GPU vendors
 	 */
 	private function buildDefaultGPUDeviceRequests(): array {
 		return [
