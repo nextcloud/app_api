@@ -413,3 +413,11 @@ export default {
 	}
 }
 </style>
+
+<style lang="scss">
+.app-navigation-entry.active {
+	.app-navigation-entry-icon {
+		filter: var(--background-invert-if-bright);
+	}
+}
+</style>
