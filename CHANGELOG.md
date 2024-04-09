@@ -9,7 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Different compute device configuration for Daemon (NVIDIA, AMD, CPU)
+- Different compute device configuration for Daemon (NVIDIA, AMD, CPU). #267
+- Possibility to add additional option when registering daemon. #269
+
+### Fixed
+
+- Fixed notification icon absolute url. #268
 
 ## [2.4.0 - 2024-04-04]
 
