@@ -391,7 +391,6 @@ class DockerActions implements IDeployActions {
 			'env' => $envs,
 			'devices' => $devices,
 			'deviceRequests' => $deviceRequests,
-			'gpu' => count($deviceRequests) > 0,
 		];
 
 		return [
