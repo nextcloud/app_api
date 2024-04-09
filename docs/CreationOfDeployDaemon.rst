@@ -32,7 +32,7 @@ Register
 
 Register Deploy Daemon (DaemonConfig).
 
-Command: ``app_api:daemon:register [--net NET] [--gpu] [--] <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url>``
+Command: ``app_api:daemon:register [--net NET] [--haproxy_password HAPROXY_PASSWORD] [--compute_device COMPUTE_DEVICE] [--set-default] [--] <name> <display-name> <accepts-deploy-id> <protocol> <host> <nextcloud_url>``
 
 Arguments
 *********
@@ -49,7 +49,7 @@ Options
 
 	* ``--net [network-name]``  - ``[required]`` network name to bind docker container to (default: ``host``)
 	* ``--haproxy_password HAPROXY_PASSWORD`` - ``[optional]`` password for AppAPI Docker Socket Proxy
-	* ``--gpu GPU`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``/dev/dri``)
+	* ``--compute_device GPU`` - ``[optional]`` GPU device to expose to the daemon (e.g. ``cpu|cuda|rocm``, default: ``cpu``)
 	* ``--set-default`` - ``[optional]`` set created daemon as default for ExApps installation
 
 DeployConfig
@@ -64,7 +64,10 @@ ExApp container.
 		"net": "host",
 		"nextcloud_url": "https://nextcloud.local",
 		"haproxy_password": "some_secure_password",
-		"gpus": true,
+		"computeDevice": {
+			"id": "cuda",
+			"name": "CUDA (NVIDIA)",
+		},
 	}
 
 DeployConfig options
@@ -73,7 +76,7 @@ DeployConfig options
 	* ``net`` **[required]** - network name to bind docker container to (default: ``host``)
 	* ``nextcloud_url`` **[required]** - Nextcloud URL (e.g. ``https://nextcloud.local``)
 	* ``haproxy_password`` *[optional]* - password for AppAPI Docker Socket Proxy
-	* ``gpus`` *[optional]* - GPU device to attach to the daemon (e.g. ``/dev/dri``)
+	* ``computeDevice`` *[optional]* - Compute device to attach to the daemon (e.g. ``{ "id": "cuda", "label": "CUDA (NVIDIA)" }``)
 
 Unregister
 ----------

@@ -211,7 +211,6 @@ export default {
 			deployConfig: {
 				net: 'host',
 				haproxy_password: '',
-				gpu: false,
 				computeDevice: {
 					id: 'cuda',
 					label: 'CUDA (NVIDIA)',
@@ -334,7 +333,6 @@ export default {
 				deploy_config: {
 					net: this.deployConfig.net,
 					nextcloud_url: this.nextcloud_url,
-					gpu: this.deployConfig.gpu,
 					haproxy_password: this.deployConfig.haproxy_password ?? '',
 					computeDevice: this.deployConfig.computeDevice,
 				},
@@ -354,7 +352,6 @@ export default {
 			this.deployConfigSettingsOpened = template.deployConfigSettingsOpened
 			this.deployConfig.net = template.deployConfig.net
 			this.deployConfig.haproxy_password = template.deployConfig.haproxy_password
-			this.deployConfig.gpu = template.deployConfig.gpu
 			this.deployConfig.computeDevice = template.deployConfig.computeDevice
 			this.defaultDaemon = template.defaultDaemon
 		},

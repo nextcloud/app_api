@@ -134,7 +134,11 @@ class DockerActions implements IDeployActions {
 				}
 			}
 			if ($params['computeDevice']['id'] === 'rocm') {
-				$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
+				if (isset($params['devices'])) {
+					$containerParams['HostConfig']['Devices'] = $params['devices'];
+				} else {
+					$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
+				}
 			}
 		}
 
@@ -351,10 +355,15 @@ class DockerActions implements IDeployActions {
 		$externalApp = $appInfo['external-app'];
 		$deployConfig = $daemonConfig->getDeployConfig();
 
-		if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
-			$deviceRequests = $this->buildDefaultGPUDeviceRequests();
+		if (isset($params['computeDevice'])) {
+			if ($params['computeDevice']['id'] === 'cuda') {
+				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
+			} elseif ($params['computeDevice']['id'] === 'rocm') {
+				$devices = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
+			}
 		} else {
 			$deviceRequests = [];
+			$devices = [];
 		}
 		$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
 
@@ -380,6 +389,7 @@ class DockerActions implements IDeployActions {
 			'port' => $appInfo['port'],
 			'net' => $deployConfig['net'] ?? 'host',
 			'env' => $envs,
+			'devices' => $devices,
 			'deviceRequests' => $deviceRequests,
 			'gpu' => count($deviceRequests) > 0,
 		];
@@ -403,10 +413,14 @@ class DockerActions implements IDeployActions {
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
+		// Always set COMPUTE_DEVICE=cpu|cuda|rocm
+		$autoEnvs[] = sprintf('COMPUTE_DEVICE=%s', $params['computeDevice']['id']);
 		// Add required GPU runtime envs if daemon configured to use GPU
-		if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
-			$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
-			$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
+		if (isset($params['computeDevice'])) {
+			if ($params['computeDevice']['id'] === 'cuda') {
+				$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
+				$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
+			}
 		}
 		return $autoEnvs;
 	}

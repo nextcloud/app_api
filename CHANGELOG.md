@@ -5,12 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-
 ## [2.5.0 - 2024-04-xx]
 
 ### Added
 
 - Different compute device configuration for Daemon (NVIDIA, AMD, CPU)
+
+## [2.4.0 - 2024-04-04]
+
+### Added
+
+- API for listening to file system events. #259
+
+### Changed
+
+- Optimizations(1) related to speed up handling the incoming ExApps requests. #262
+- `occ app_api:scopes:list` command removed as not needed. #262
+
+### Fixed
+
+- Corrected error handling for `occ` commands: `register` and `update`. #258
+- `SensitiveParameter` is applied to variables containing secrets, preventing them from being leaked to the logs. #261
 
 ## [2.3.2 - 2024-03-28]
 
