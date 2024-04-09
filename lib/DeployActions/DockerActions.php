@@ -389,6 +389,7 @@ class DockerActions implements IDeployActions {
 			'port' => $appInfo['port'],
 			'net' => $deployConfig['net'] ?? 'host',
 			'env' => $envs,
+			'computeDevice' => $deployConfig['computeDevice'] ?? null,
 			'devices' => $devices,
 			'deviceRequests' => $deviceRequests,
 		];
@@ -413,10 +414,10 @@ class DockerActions implements IDeployActions {
 		];
 
 		// Always set COMPUTE_DEVICE=cpu|cuda|rocm
-		$autoEnvs[] = sprintf('COMPUTE_DEVICE=%s', $params['computeDevice']['id']);
+		$autoEnvs[] = sprintf('COMPUTE_DEVICE=%s', $deployConfig['computeDevice']['id']);
 		// Add required GPU runtime envs if daemon configured to use GPU
-		if (isset($params['computeDevice'])) {
-			if ($params['computeDevice']['id'] === 'cuda') {
+		if (isset($deployConfig['computeDevice'])) {
+			if ($deployConfig['computeDevice']['id'] === 'cuda') {
 				$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
 				$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
 			}
