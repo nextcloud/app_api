@@ -44,7 +44,7 @@ class ExAppAdminNotifier implements INotifier {
 		$parameters = $notification->getSubjectParameters();
 
 		$notification->setLink($this->url->getAbsoluteURL('/index.php/settings/admin/' . Application::APP_ID));
-		$notification->setIcon($this->url->imagePath(Application::APP_ID, 'app-dark.svg'));
+		$notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath(Application::APP_ID, 'app-dark.svg')));
 
 		if (isset($parameters['rich_subject']) && isset($parameters['rich_subject_params'])) {
 			$notification->setRichSubject($parameters['rich_subject'], $parameters['rich_subject_params']);
