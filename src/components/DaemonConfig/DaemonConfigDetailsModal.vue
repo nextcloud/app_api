@@ -23,7 +23,12 @@
 					<b>{{ t('app_api', 'HaProxy password') }}: </b>
 					{{ daemon.deploy_config?.haproxy_password }}
 				</p>
-				<p><b>{{ t('app_api', 'GPUs support') }}:</b> {{ daemon.deploy_config.gpu === true }}</p>
+				<p>
+					<b>{{ t('app_api', 'GPUs support') }}:</b> {{ daemon.deploy_config.computeDevice && daemon.deploy_config?.computeDevice?.id !== 'cpu' || false }}
+				</p>
+				<p v-if="daemon.deploy_config.computeDevice">
+					<b>{{ t('app_api', 'Compute device') }}:</b> {{ daemon.deploy_config?.computeDevice?.label }}
+				</p>
 
 				<div class="actions">
 					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install'" @click="verifyConnection">

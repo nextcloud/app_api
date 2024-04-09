@@ -31,39 +31,12 @@
 			:show.sync="showDetailsModal"
 			:daemon="daemon"
 			:is-default="isDefault" />
-		<NcDialog
+		<ConfirmDaemonDeleteModal
 			v-show="showDeleteDialog"
-			style="padding: 20px;"
-			:open.sync="showDeleteDialog"
-			:content-classes="'confirm-delete-dialog'"
-			:name="t('app_api', 'Confirm Deploy daemon deletion')">
-			<template #actions>
-				<NcDialogButton :label="t('app_api', 'Cancel')" :callback="() => showDeleteDialog = false">
-					<template #icon>
-						<Cancel :size="20" />
-					</template>
-				</NcDialogButton>
-				<NcDialogButton :disabled="!removeExAppsOnDaemonDelete || deleting" :label="t('app_api', 'Ok')" :callback="() => _deleteDaemonConfig(daemon)">
-					<template #icon>
-						<NcLoadingIcon v-if="deleting" :size="20" />
-						<Check v-else :size="20" />
-					</template>
-				</NcDialogButton>
-			</template>
-			<template #default>
-				<div class="confirm-delete-dialog">
-					<p>{{ t('app_api', 'Are you sure you want delete Deploy Daemon?') }}</p>
-					<NcCheckboxRadioSwitch
-						:checked.sync="removeExAppsOnDaemonDelete"
-						:placeholder="t('app_api', 'All ExApps on this daemon will be removed')"
-						:aria-label="t('app_api', 'All ExApps on this daemon will be removed')">
-						<template #default>
-							{{ t('app_api', 'All ExApps installed on this daemon will be removed') }}
-						</template>
-					</NcCheckboxRadioSwitch>
-				</div>
-			</template>
-		</NcDialog>
+			:daemon="daemon"
+			:deleting="deleting"
+			:delete-daemon-config="_deleteDaemonConfig"
+			:show.sync="showDeleteDialog" />
 	</div>
 </template>
 
@@ -72,31 +45,23 @@ import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import NcListItem from '@nextcloud/vue/dist/Components/NcListItem.js'
-import NcDialog from '@nextcloud/vue/dist/Components/NcDialog.js'
-import NcDialogButton from '@nextcloud/vue/dist/Components/NcDialogButton.js'
-import Cancel from 'vue-material-design-icons/Cancel.vue'
-import Check from 'vue-material-design-icons/Check.vue'
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
 
+import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import CheckBold from 'vue-material-design-icons/CheckBold.vue'
 
 import DaemonConfigDetailsModal from './DaemonConfigDetailsModal.vue'
+import ConfirmDaemonDeleteModal from './ConfirmDaemonDeleteModal.vue'
 
 export default {
 	name: 'DaemonConfig',
 	components: {
 		NcListItem,
 		NcActionButton,
-		NcLoadingIcon,
 		CheckBold,
-		NcDialog,
-		NcDialogButton,
-		Cancel,
-		Check,
 		DaemonConfigDetailsModal,
-		NcCheckboxRadioSwitch,
+		ConfirmDaemonDeleteModal,
+		NcLoadingIcon,
 	},
 	props: {
 		daemon: {
@@ -180,13 +145,5 @@ export default {
 .daemon-default {
 	background-color: var(--color-background-dark);
 	border-radius: var(--border-radius-pill);
-}
-
-.confirm-delete-dialog {
-	padding: 20px;
-
-	p {
-		margin-bottom: 10px;
-	}
 }
 </style>

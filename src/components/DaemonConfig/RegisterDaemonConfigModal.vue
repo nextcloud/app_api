@@ -40,6 +40,7 @@
 							v-model="acceptsDeployId"
 							:disabled="configurationTab.id === 'manual_install'"
 							:options="deployMethods"
+							:label-outside="true"
 							:placeholder="t('app_api', 'Select daemon deploy method')" />
 					</div>
 					<div class="external-label" :aria-label="t('app_api', 'Daemon host')">
@@ -110,19 +111,15 @@
 									:aria-label="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
 									:helper-text="haProxyPasswordHelperText" />
 							</div>
-							<NcCheckboxRadioSwitch
-								id="deploy-config-gpus"
-								:checked.sync="deployConfig.gpu"
-								:placeholder="t('app_api', 'Enable gpus support (attach gpu to ExApp containers)')"
-								:aria-label="t('app_api', 'Enable gpus support (attach gpu to ExApp containers)')"
-								style="margin-top: 1rem;">
-								{{ t('app_api', 'Enable GPUs support') }}
-							</NcCheckboxRadioSwitch>
-							<p v-if="deployConfig.gpu" class="hint" :aria-label="t('app_api', 'GPUs support enabled hint')">
+							<NcSelect
+								id="compute-device"
+								v-model="deployConfig.computeDevice"
+								:options="computeDevices"
+								:input-label="t('app_api', 'Compute device')" />
+							<p v-if="deployConfig.computeDevice.id !== 'cpu'"
+								class="hint"
+								:aria-label="t('app_api', 'GPUs support enabled hint')">
 								{{ t('app_api', 'All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker.') }}
-								<NcNoteCard>
-									{{ t('app_api', 'Only NVIDIA GPUs are supported for now.') }}
-								</NcNoteCard>
 							</p>
 						</div>
 					</template>
@@ -159,7 +156,6 @@ import { generateUrl } from '@nextcloud/router'
 import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
 import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
 
 import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
@@ -169,7 +165,7 @@ import Check from 'vue-material-design-icons/Check.vue'
 import Connection from 'vue-material-design-icons/Connection.vue'
 import UnfoldLessHorizontal from 'vue-material-design-icons/UnfoldLessHorizontal.vue'
 import UnfoldMoreHorizontal from 'vue-material-design-icons/UnfoldMoreHorizontal.vue'
-import { DAEMON_TEMPLATES } from '../../constants/daemonTemplates.js'
+import { DAEMON_TEMPLATES, DAEMON_COMPUTE_DEVICES } from '../../constants/daemonTemplates.js'
 
 export default {
 	name: 'RegisterDaemonConfigModal',
@@ -180,7 +176,6 @@ export default {
 		UnfoldLessHorizontal,
 		UnfoldMoreHorizontal,
 		NcCheckboxRadioSwitch,
-		NcNoteCard,
 		NcSelect,
 		NcButton,
 		Check,
@@ -216,7 +211,10 @@ export default {
 			deployConfig: {
 				net: 'host',
 				haproxy_password: '',
-				gpu: false,
+				computeDevice: {
+					id: 'cpu',
+					label: 'CPU',
+				},
 			},
 			defaultDaemon: false,
 			registeringDaemon: false,
@@ -225,6 +223,7 @@ export default {
 				...DAEMON_TEMPLATES.map(template => { return { id: template.name, label: template.displayName } }),
 			],
 			verifyingDaemonConnection: false,
+			computeDevices: DAEMON_COMPUTE_DEVICES,
 		}
 	},
 	computed: {
@@ -334,8 +333,8 @@ export default {
 				deploy_config: {
 					net: this.deployConfig.net,
 					nextcloud_url: this.nextcloud_url,
-					gpu: this.deployConfig.gpu,
 					haproxy_password: this.deployConfig.haproxy_password ?? '',
+					computeDevice: this.deployConfig.computeDevice,
 				},
 			}
 		},
@@ -353,7 +352,7 @@ export default {
 			this.deployConfigSettingsOpened = template.deployConfigSettingsOpened
 			this.deployConfig.net = template.deployConfig.net
 			this.deployConfig.haproxy_password = template.deployConfig.haproxy_password
-			this.deployConfig.gpu = template.deployConfig.gpu
+			this.deployConfig.computeDevice = template.deployConfig.computeDevice
 			this.defaultDaemon = template.defaultDaemon
 		},
 		onProtocolChange() {

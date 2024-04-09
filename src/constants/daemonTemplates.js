@@ -10,6 +10,10 @@ export const DAEMON_TEMPLATES = [
 			net: 'host',
 			haproxy_password: 'some_secure_password',
 			gpu: false,
+			computeDevice: {
+				id: 'cpu',
+				label: 'CPU',
+			},
 		},
 		deployConfigSettingsOpened: false,
 		defaultDaemon: true,
@@ -25,6 +29,10 @@ export const DAEMON_TEMPLATES = [
 			net: 'host',
 			haproxy_password: 'enter_haproxy_password',
 			gpu: false,
+			computeDevice: {
+				id: 'cpu',
+				label: 'CPU',
+			},
 		},
 		deployConfigSettingsOpened: false,
 		defaultDaemon: true,
@@ -40,6 +48,10 @@ export const DAEMON_TEMPLATES = [
 			net: 'nextcloud-aio',
 			haproxy_password: '',
 			gpu: false,
+			computeDevice: {
+				id: 'cpu',
+				label: 'CPU',
+			},
 		},
 		deployConfigSettingsOpened: false,
 		defaultDaemon: true,
@@ -55,8 +67,27 @@ export const DAEMON_TEMPLATES = [
 			net: 'host',
 			haproxy_password: '',
 			gpu: false,
+			computeDevice: {
+				id: 'cpu',
+				label: 'CPU',
+			},
 		},
 		deployConfigSettingsOpened: false,
 		defaultDaemon: false,
+	},
+]
+
+export const DAEMON_COMPUTE_DEVICES = [
+	{
+		id: 'cpu',
+		label: 'CPU',
+	},
+	{
+		id: 'cuda',
+		label: 'CUDA (NVIDIA)',
+	},
+	{
+		id: 'rocm',
+		label: 'ROCm (AMD)',
 	},
 ]

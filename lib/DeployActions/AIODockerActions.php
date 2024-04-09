@@ -14,7 +14,6 @@ use OCP\IConfig;
  */
 class AIODockerActions {
 	public const AIO_DAEMON_CONFIG_NAME = 'docker_aio';
-	public const AIO_DAEMON_CONFIG_NAME_GPU = 'docker_aio_gpu';
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
 
 	public function __construct(
@@ -46,12 +45,11 @@ class AIODockerActions {
 			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
 			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
 			'haproxy_password' => null,
-			'gpu' => false,
+			'computeDevice' => [
+				'id' => 'cpu',
+				'label' => 'CPU',
+			],
 		];
-
-		if ($this->isGPUsEnabled()) {
-			$this->registerAIODaemonConfigWithGPU();
-		}
 
 		$daemonConfigParams = [
 			'name' => self::AIO_DAEMON_CONFIG_NAME,
@@ -67,45 +65,5 @@ class AIODockerActions {
 			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
 		}
 		return $daemonConfig;
-	}
-
-	/**
-	 * Registers DaemonConfig with default params to use AIO Docker Socket Proxy with GPU
-	 */
-	private function registerAIODaemonConfigWithGPU(): ?DaemonConfig {
-		$daemonConfigWithGPU = $this->daemonConfigService->getDaemonConfigByName(self::AIO_DAEMON_CONFIG_NAME_GPU);
-		if ($daemonConfigWithGPU !== null) {
-			return $daemonConfigWithGPU;
-		}
-
-		$deployConfig = [
-			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
-			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
-			'haproxy_password' => null,
-			'gpu' => true,
-		];
-
-		$daemonConfigParams = [
-			'name' => self::AIO_DAEMON_CONFIG_NAME_GPU,
-			'display_name' => 'AIO Docker Socket Proxy with GPU',
-			'accepts_deploy_id' => 'docker-install',
-			'protocol' => 'http',
-			'host' => self::AIO_DOCKER_SOCKET_PROXY_HOST,
-			'deploy_config' => $deployConfig,
-		];
-
-		return $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
-	}
-
-	/**
-	 * Check if /dev/dri folder mounted to the container.
-	 * In AIO this means that NEXTCLOUD_ENABLE_DRI_DEVICE=true
-	 */
-	private function isGPUsEnabled(): bool {
-		$devDri = '/dev/dri';
-		if (is_dir($devDri)) {
-			return true;
-		}
-		return false;
 	}
 }

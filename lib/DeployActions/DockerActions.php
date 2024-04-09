@@ -125,11 +125,20 @@ class DockerActions implements IDeployActions {
 			$containerParams['NetworkingConfig'] = $networkingConfig;
 		}
 
-		if (isset($params['gpu']) && filter_var($params['gpu'], FILTER_VALIDATE_BOOLEAN)) {
-			if (isset($params['deviceRequests'])) {
-				$containerParams['HostConfig']['DeviceRequests'] = $params['deviceRequests'];
-			} else {
-				$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
+		if (isset($params['computeDevice'])) {
+			if ($params['computeDevice']['id'] === 'cuda') {
+				if (isset($params['deviceRequests'])) {
+					$containerParams['HostConfig']['DeviceRequests'] = $params['deviceRequests'];
+				} else {
+					$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
+				}
+			}
+			if ($params['computeDevice']['id'] === 'rocm') {
+				if (isset($params['devices'])) {
+					$containerParams['HostConfig']['Devices'] = $params['devices'];
+				} else {
+					$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
+				}
 			}
 		}
 
@@ -346,10 +355,15 @@ class DockerActions implements IDeployActions {
 		$externalApp = $appInfo['external-app'];
 		$deployConfig = $daemonConfig->getDeployConfig();
 
-		if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
-			$deviceRequests = $this->buildDefaultGPUDeviceRequests();
+		if (isset($deployConfig['computeDevice'])) {
+			if ($deployConfig['computeDevice']['id'] === 'cuda') {
+				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
+			} elseif ($deployConfig['computeDevice']['id'] === 'rocm') {
+				$devices = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
+			}
 		} else {
 			$deviceRequests = [];
+			$devices = [];
 		}
 		$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
 
@@ -375,8 +389,9 @@ class DockerActions implements IDeployActions {
 			'port' => $appInfo['port'],
 			'net' => $deployConfig['net'] ?? 'host',
 			'env' => $envs,
+			'computeDevice' => $deployConfig['computeDevice'] ?? null,
+			'devices' => $devices,
 			'deviceRequests' => $deviceRequests,
-			'gpu' => count($deviceRequests) > 0,
 		];
 
 		return [
@@ -398,10 +413,14 @@ class DockerActions implements IDeployActions {
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
+		// Always set COMPUTE_DEVICE=cpu|cuda|rocm
+		$autoEnvs[] = sprintf('COMPUTE_DEVICE=%s', $deployConfig['computeDevice']['id']);
 		// Add required GPU runtime envs if daemon configured to use GPU
-		if (isset($deployConfig['gpu']) && filter_var($deployConfig['gpu'], FILTER_VALIDATE_BOOLEAN)) {
-			$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
-			$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
+		if (isset($deployConfig['computeDevice'])) {
+			if ($deployConfig['computeDevice']['id'] === 'cuda') {
+				$autoEnvs[] = sprintf('NVIDIA_VISIBLE_DEVICES=%s', 'all');
+				$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
+			}
 		}
 		return $autoEnvs;
 	}
@@ -518,8 +537,6 @@ class DockerActions implements IDeployActions {
 
 	/**
 	 * Return default GPU device requests for container.
-	 * For now only NVIDIA GPUs supported.
-	 * TODO: Add support for other GPU vendors
 	 */
 	private function buildDefaultGPUDeviceRequests(): array {
 		return [

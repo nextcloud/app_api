@@ -39,6 +39,7 @@
 				:options="['no', 'always', 'unless-stopped']"
 				:placeholder="t('app_api', 'ExApp container restart policy')"
 				:aria-label="t('app_api', 'ExApp container restart policy')"
+				:aria-label-combobox="t('app_api', 'ExApp container restart policy')"
 				@input="onInput" />
 		</NcSettingsSection>
 	</div>
