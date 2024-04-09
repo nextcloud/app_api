@@ -355,10 +355,10 @@ class DockerActions implements IDeployActions {
 		$externalApp = $appInfo['external-app'];
 		$deployConfig = $daemonConfig->getDeployConfig();
 
-		if (isset($params['computeDevice'])) {
-			if ($params['computeDevice']['id'] === 'cuda') {
+		if (isset($deployConfig['computeDevice'])) {
+			if ($deployConfig['computeDevice']['id'] === 'cuda') {
 				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
-			} elseif ($params['computeDevice']['id'] === 'rocm') {
+			} elseif ($deployConfig['computeDevice']['id'] === 'rocm') {
 				$devices = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
 			}
 		} else {
