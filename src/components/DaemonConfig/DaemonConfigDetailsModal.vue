@@ -32,7 +32,7 @@
 
 				<div v-if="daemon.deploy_config.additional_options" class="additional-options">
 					<h3>{{ t('app_api', 'Additional options') }}</h3>
-					<p v-for="option_key in Object.keys(daemon.deploy_config.additional_options)">
+					<p v-for="option_key in Object.keys(daemon.deploy_config.additional_options)" :key="option_key">
 						<b>{{ option_key }}:</b> {{ daemon.deploy_config.additional_options[option_key] }}
 					</p>
 				</div>

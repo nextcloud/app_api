@@ -405,7 +405,7 @@ export default {
 				})
 		},
 		_buildDaemonParams() {
-			let params = {
+			const params = {
 				name: this.name,
 				display_name: this.displayName,
 				accepts_deploy_id: this.acceptsDeployId,
