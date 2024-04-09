@@ -212,8 +212,8 @@ export default {
 				net: 'host',
 				haproxy_password: '',
 				computeDevice: {
-					id: 'cuda',
-					label: 'CUDA (NVIDIA)',
+					id: 'cpu',
+					label: 'CPU',
 				},
 			},
 			defaultDaemon: false,
