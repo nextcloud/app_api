@@ -43,6 +43,14 @@ class ManualActions implements IDeployActions {
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
 		$auth = [];
+		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
+			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
+		) {
+			$wideNetworkAddresses = ['0.0.0.0', '127.0.0.1', '::', '::1'];
+			if (!in_array($deployConfig['additional_options']['OVERRIDE_APP_HOST'], $wideNetworkAddresses)) {
+				$host = $deployConfig['additional_options']['OVERRIDE_APP_HOST'];
+			}
+		}
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 }
