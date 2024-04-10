@@ -158,23 +158,28 @@
 									</NcButton>
 								</div>
 								<template v-if="addingAdditionalOption">
-									<div class="row">
+									<div class="row" style="align-items: start;">
 										<NcInputField
 											id="additional-option-key"
 											ref="additionalOptionKey"
 											:value.sync="additionalOption.key"
 											:label="t('app_api', 'Option key (unique)')"
-											:placeholder="t('app_api', 'Option key (unique)')"
+											:placeholder="t('app_api', 'Option key (unique, e.g. my_key)')"
+											:error="additionalOption.key.trim() === ''"
+											:helper-text="additionalOption.key.trim() === '' ? t('app_api', 'Option key is required') : ''"
 											style="margin: 0 5px 0 0;" />
 										<NcInputField
 											id="additional-option-value"
 											:value.sync="additionalOption.value"
 											:label="t('app_api', 'Option value')"
 											:placeholder="t('app_api', 'Option value')"
+											:error="additionalOption.value.trim() === ''"
+											:helper-text="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
 											style="margin: 0 5px 0 0;" />
 										<NcButton
 											type="tertiary"
 											:aria-label="t('app_api', 'Confirm')"
+											:disabled="isAdditionalOptionValid === false"
 											@click="confirmAddingAdditionalOption">
 											<template #icon>
 												<Check :size="20" />
@@ -347,6 +352,9 @@ export default {
 		},
 		canRegister() {
 			return this.isDaemonNameValid === true || this.isHaProxyPasswordValid === false
+		},
+		isAdditionalOptionValid() {
+			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
 		},
 	},
 	watch: {
