@@ -9,8 +9,8 @@ OC.L10N.register(
     "Developer documentation" : "developer hujjatlari",
     "Name" : "Name",
     "Actions" : "Actions",
-    "Delete" : "Delete",
     "Cancel" : "Cancel",
+    "Delete" : "Delete",
     "Details" : "Details",
     "Enable" : "Enable",
     "Disable" : "Oʻchirish"

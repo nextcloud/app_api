@@ -5,9 +5,9 @@ OC.L10N.register(
     "Remove" : "ຍ້າຍອອກ",
     "Name" : "ຊື່",
     "Type" : "ພິມ",
-    "Default" : "ເລີ່ມຕົ້ນ",
-    "Delete" : "ລຶບ",
     "Cancel" : "ຍົກເລີກ",
+    "Delete" : "ລຶບ",
+    "Default" : "ເລີ່ມຕົ້ນ",
     "Details" : "ລາຍລະອຽດ",
     "Disable" : "ປິດ"
 },

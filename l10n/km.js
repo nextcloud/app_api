@@ -4,9 +4,8 @@ OC.L10N.register(
     "Name" : "ឈ្មោះ",
     "Version" : "កំណែ",
     "Type" : "ប្រភេទ",
-    "Delete" : "លុប",
     "Cancel" : "លើកលែង",
-    "Ok" : "ព្រម",
+    "Delete" : "លុប",
     "Host" : "ម៉ាស៊ីន​ផ្ទុក",
     "Details" : "ព័ត៌មាន​លម្អិត",
     "Disable" : "បិទ"

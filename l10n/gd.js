@@ -5,9 +5,9 @@ OC.L10N.register(
     "Name" : "Ainm",
     "Version" : "Tionndadh",
     "Type" : "Seòrsa",
-    "Default" : "Bunaiteach",
-    "Delete" : "Sguab às",
     "Cancel" : "Sguir dheth",
+    "Delete" : "Sguab às",
+    "Default" : "Bunaiteach",
     "Details" : "Mion-fhiosrachadh",
     "Disable" : "Cuir à comas"
 },

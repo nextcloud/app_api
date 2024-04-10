@@ -4,9 +4,9 @@ OC.L10N.register(
     "Remove" : "Aýyrmak",
     "Name" : "Ady",
     "Type" : "Görnüşi",
-    "Default" : "Bellenen",
-    "Delete" : "Pozmak",
     "Cancel" : "ýatyrmak",
+    "Delete" : "Pozmak",
+    "Default" : "Bellenen",
     "Details" : "Jikme-jiklikler",
     "Disable" : "Öçürmek"
 },

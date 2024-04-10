@@ -6,7 +6,6 @@ OC.L10N.register(
     "Actions" : "Aktiounen",
     "Type" : "Typ",
     "Delete" : "Läschen",
-    "Ok" : "OK",
     "Host" : "Host",
     "Details" : "Detailer",
     "Updates" : "Updates",

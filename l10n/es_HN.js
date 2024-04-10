@@ -21,7 +21,6 @@ OC.L10N.register(
     "Type" : "Tipo",
     "Display Name" : "Nombre a desplegar",
     "Delete" : "Borrar",
-    "Ok" : "Ok",
     "Host" : "Servidor",
     "Register" : "Registrar",
     "Your apps" : "Tus aplicaciones",
