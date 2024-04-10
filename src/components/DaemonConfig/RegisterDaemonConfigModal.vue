@@ -121,8 +121,84 @@
 								:aria-label="t('app_api', 'GPUs support enabled hint')">
 								{{ t('app_api', 'All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker.') }}
 							</p>
+
+							<template v-if="additionalOptions.length > 0">
+								<div class="row" style="flex-direction: column;">
+									<div
+										v-for="(option, index) in additionalOptions"
+										:id="option.key"
+										:key="index"
+										class="external-label"
+										:aria-label="t('app_api', 'Additional option')">
+										<label :for="option.key">{{ option.key }}</label>
+										<div class="additional-option">
+											<NcInputField
+												:id="option.key"
+												:value.sync="option.value"
+												:placeholder="option.value"
+												:aria-label="option.value"
+												style="margin: 0 5px 0 0; width: fit-content;" />
+											<NcButton type="tertiary" @click="removeAdditionalOption(option, index)">
+												<template #icon>
+													<Close :size="20" />
+												</template>
+											</NcButton>
+										</div>
+									</div>
+								</div>
+							</template>
+
+							<div class="additional-options">
+								<div style="display: flex; justify-content: flex-end;">
+									<NcButton type="tertiary" @click="addAdditionalOption">
+										<template #icon>
+											<Plus :size="20" />
+										</template>
+										{{ t('app_api', 'Add additional option') }}
+									</NcButton>
+								</div>
+								<template v-if="addingAdditionalOption">
+									<div class="row" style="align-items: start;">
+										<NcInputField
+											id="additional-option-key"
+											ref="additionalOptionKey"
+											:value.sync="additionalOption.key"
+											:label="t('app_api', 'Option key (unique)')"
+											:placeholder="t('app_api', 'Option key (unique, e.g. my_key)')"
+											:error="additionalOption.key.trim() === ''"
+											:helper-text="additionalOption.key.trim() === '' ? t('app_api', 'Option key is required') : ''"
+											style="margin: 0 5px 0 0;" />
+										<NcInputField
+											id="additional-option-value"
+											:value.sync="additionalOption.value"
+											:label="t('app_api', 'Option value')"
+											:placeholder="t('app_api', 'Option value')"
+											:error="additionalOption.value.trim() === ''"
+											:helper-text="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
+											style="margin: 0 5px 0 0;" />
+										<NcButton
+											type="tertiary"
+											:aria-label="t('app_api', 'Confirm')"
+											:disabled="isAdditionalOptionValid === false"
+											@click="confirmAddingAdditionalOption">
+											<template #icon>
+												<Check :size="20" />
+											</template>
+										</NcButton>
+										<NcButton
+											type="tertiary"
+											:aria-label="t('app_api', 'Cancel')"
+											@click="cancelAddingAdditionalOption">
+											<template #icon>
+												<Close :size="20" />
+											</template>
+										</NcButton>
+									</div>
+								</template>
+							</div>
 						</div>
 					</template>
+
 					<div class="row">
 						<NcButton
 							type="primary"
@@ -163,6 +239,8 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import Check from 'vue-material-design-icons/Check.vue'
 import Connection from 'vue-material-design-icons/Connection.vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
+import Close from 'vue-material-design-icons/Close.vue'
 import UnfoldLessHorizontal from 'vue-material-design-icons/UnfoldLessHorizontal.vue'
 import UnfoldMoreHorizontal from 'vue-material-design-icons/UnfoldMoreHorizontal.vue'
 import { DAEMON_TEMPLATES, DAEMON_COMPUTE_DEVICES } from '../../constants/daemonTemplates.js'
@@ -180,6 +258,8 @@ export default {
 		NcButton,
 		Check,
 		Connection,
+		Plus,
+		Close,
 	},
 	props: {
 		show: {
@@ -224,6 +304,12 @@ export default {
 			],
 			verifyingDaemonConnection: false,
 			computeDevices: DAEMON_COMPUTE_DEVICES,
+			addingAdditionalOption: false,
+			additionalOption: {
+				key: '',
+				value: '',
+			},
+			additionalOptions: [],
 		}
 	},
 	computed: {
@@ -266,6 +352,9 @@ export default {
 		},
 		canRegister() {
 			return this.isDaemonNameValid === true || this.isHaProxyPasswordValid === false
+		},
+		isAdditionalOptionValid() {
+			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
 		},
 	},
 	watch: {
@@ -324,7 +413,7 @@ export default {
 				})
 		},
 		_buildDaemonParams() {
-			return {
+			const params = {
 				name: this.name,
 				display_name: this.displayName,
 				accepts_deploy_id: this.acceptsDeployId,
@@ -337,6 +426,13 @@ export default {
 					computeDevice: this.deployConfig.computeDevice,
 				},
 			}
+			if (this.additionalOptions.length > 0) {
+				params.deploy_config.additional_options = this.additionalOptions.reduce((acc, option) => {
+					acc[option.key] = option.value
+					return acc
+				}, {})
+			}
+			return params
 		},
 		setupFormConfiguration(templateName) {
 			const template = Object.assign({}, DAEMON_TEMPLATES.find(template => template.name === templateName.id))
@@ -362,6 +458,24 @@ export default {
 			} else {
 				this.host = DAEMON_TEMPLATES.find(template => template.name === this.configurationTab.id).host || ''
 			}
+		},
+		addAdditionalOption() {
+			this.addingAdditionalOption = true
+			this.$nextTick(() => {
+				this.$refs.additionalOptionKey.focus()
+			})
+		},
+		removeAdditionalOption(option, index) {
+			this.additionalOptions.splice(index, 1)
+		},
+		confirmAddingAdditionalOption() {
+			this.additionalOptions.push({ key: this.additionalOption.key, value: this.additionalOption.value })
+			this.addingAdditionalOption = false
+			this.additionalOption = { key: '', value: '' }
+		},
+		cancelAddingAdditionalOption() {
+			this.addingAdditionalOption = false
+			this.additionalOption = { key: '', value: '' }
 		},
 		closeModal() {
 			const customTemplate = DAEMON_TEMPLATES.find(template => template.name === 'custom')
@@ -416,6 +530,15 @@ export default {
 		width: fit-content;
 		border-bottom: 1px solid var(--color-border-dark);
 		padding-bottom: 20px;
+	}
+
+	.additional-options {
+		margin: 20px 0;
+		padding: 10px 0;
+	}
+
+	.additional-option {
+		display: flex;
 	}
 }
 </style>

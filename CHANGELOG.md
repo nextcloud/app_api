@@ -5,11 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.5.0 - 2024-04-xx]
+## [2.5.0 - 2024-04-1x]
 
 ### Added
 
-- Different compute device configuration for Daemon (NVIDIA, AMD, CPU)
+- Different compute device configuration for Daemon (NVIDIA, AMD, CPU). #267
+- Ability to add optional parameters when registering a daemon, for example *OVERRIDE_APP_HOST*. #269
+
+### Fixed
+
+- Fixed notification icon absolute url. #268
 
 ## [2.4.0 - 2024-04-04]
 

@@ -264,12 +264,9 @@ It has `fixed parameters <https://github.com/cloud-py-api/app_api/blob/main/lib/
 * Accepts Deploy ID: ``docker-install``
 * Protocol: ``http``
 * Host: ``nextcloud-aio-docker-socket-proxy:2375``
-* GPUs support: ``false``
+* Compute device: ``CPU``
 * Network: ``nextcloud-aio``
 * Nextcloud URL (passed to ExApps): ``https://$NC_DOMAIN``
-
-.. note::
-	If ``NEXTCLOUD_ENABLE_DRI_DEVICE=true`` is set - separate DaemonConfig (``docker_aio_gpu``) will be created with ``gpus=true``.
 
 Docker Socket Proxy security
 ****************************
@@ -298,6 +295,17 @@ where:
 * **deployConfig** can be custom for each Daemon type
 * **auth** is an optional array, with *Basic Authentication* data if needed to access ExApp
 
+.. note::
+
+	Starting with AppAPI version ``2.5.0``, the optional additional parameter *OVERRIDE_APP_HOST* can be used to
+	override the host that will be used for ExApp binding.
+
+	It can be ``0.0.0.0`` in some specific configurations, when VPN is used
+	or both Nextcloud instance and ExApps are one the same physical machine but different virtual environments.
+
+	Also you can specify something like ``10.10.2.5`` and in this case ``ExApp`` wil try to bind to that address and
+	AppAPI will try to send request s directly to this address assuming that ExApp itself bound on it.
+
 The simplest implementation is in **Manual-Install** deploy type:
 
 .. code-block:: php
@@ -306,10 +314,18 @@ The simplest implementation is in **Manual-Install** deploy type:
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
 		$auth = [];
+		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
+			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
+		) {
+			$wideNetworkAddresses = ['0.0.0.0', '127.0.0.1', '::', '::1'];
+			if (!in_array($deployConfig['additional_options']['OVERRIDE_APP_HOST'], $wideNetworkAddresses)) {
+				$host = $deployConfig['additional_options']['OVERRIDE_APP_HOST'];
+			}
+		}
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 
-Here we see that AppAPI always send requests to **host**:**port** specified during daemon creation.
+Here we see that AppAPI send requests to **host**:**port** specified during daemon creation.
 
 Now let's take a look at the Docker Daemon implementation of ``resolveExAppUrl``:
 
@@ -318,6 +334,17 @@ Now let's take a look at the Docker Daemon implementation of ``resolveExAppUrl``
 	public function resolveExAppUrl(
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
+		$auth = [];
+		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
+			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
+		) {
+			$wideNetworkAddresses = ['0.0.0.0', '127.0.0.1', '::', '::1'];
+			if (!in_array($deployConfig['additional_options']['OVERRIDE_APP_HOST'], $wideNetworkAddresses)) {
+				return sprintf(
+					'%s://%s:%s', $protocol, $deployConfig['additional_options']['OVERRIDE_APP_HOST'], $port
+				);
+			}
+		}
 		$host = explode(':', $host)[0];
 		if ($protocol == 'https') {
 			$exAppHost = $host;
@@ -326,9 +353,7 @@ Now let's take a look at the Docker Daemon implementation of ``resolveExAppUrl``
 		} else {
 			$exAppHost = $appId;
 		}
-		if (empty($deployConfig['haproxy_password'])) {
-			$auth = [];
-		} else {
+		if (isset($deployConfig['haproxy_password']) && $deployConfig['haproxy_password'] !== '') {
 			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
 		}
 		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);

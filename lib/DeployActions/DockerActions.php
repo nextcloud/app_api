@@ -428,6 +428,17 @@ class DockerActions implements IDeployActions {
 	public function resolveExAppUrl(
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
+		$auth = [];
+		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
+			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
+		) {
+			$wideNetworkAddresses = ['0.0.0.0', '127.0.0.1', '::', '::1'];
+			if (!in_array($deployConfig['additional_options']['OVERRIDE_APP_HOST'], $wideNetworkAddresses)) {
+				return sprintf(
+					'%s://%s:%s', $protocol, $deployConfig['additional_options']['OVERRIDE_APP_HOST'], $port
+				);
+			}
+		}
 		$host = explode(':', $host)[0];
 		if ($protocol == 'https') {
 			$exAppHost = $host;
@@ -436,9 +447,7 @@ class DockerActions implements IDeployActions {
 		} else {
 			$exAppHost = $appId;
 		}
-		if (!isset($deployConfig['haproxy_password']) || $deployConfig['haproxy_password'] === '') {
-			$auth = [];
-		} else {
+		if (isset($deployConfig['haproxy_password']) && $deployConfig['haproxy_password'] !== '') {
 			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
 		}
 		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);

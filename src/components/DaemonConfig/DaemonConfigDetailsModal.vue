@@ -30,6 +30,13 @@
 					<b>{{ t('app_api', 'Compute device') }}:</b> {{ daemon.deploy_config?.computeDevice?.label }}
 				</p>
 
+				<div v-if="daemon.deploy_config.additional_options" class="additional-options">
+					<h3>{{ t('app_api', 'Additional options') }}</h3>
+					<p v-for="option_key in Object.keys(daemon.deploy_config.additional_options)" :key="option_key">
+						<b>{{ option_key }}:</b> {{ daemon.deploy_config.additional_options[option_key] }}
+					</p>
+				</div>
+
 				<div class="actions">
 					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install'" @click="verifyConnection">
 						{{ t('app_api', 'Verify connection') }}

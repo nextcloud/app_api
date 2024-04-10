@@ -26,6 +26,9 @@ class AppAPICommonService {
 	}
 
 	public function buildExAppHost(array $deployConfig): string {
+		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST'])) {
+			return $deployConfig['additional_options']['OVERRIDE_APP_HOST'];
+		}
 		if (isset($deployConfig['net'])) {
 			if ($deployConfig['net'] === 'host') {
 				return '127.0.0.1';  # ExApp using this host network, it is visible for Nextcloud on loop-back adapter
