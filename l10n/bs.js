@@ -5,9 +5,8 @@ OC.L10N.register(
     "Name" : "Ime",
     "Version" : "Verzija",
     "Actions" : "Radnje",
-    "Delete" : "Obriši",
     "Cancel" : "Odustani",
-    "Ok" : "Ok",
+    "Delete" : "Obriši",
     "Updates" : "Ažuriranja",
     "Disable" : "Onemogući"
 },

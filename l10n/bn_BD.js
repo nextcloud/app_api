@@ -5,9 +5,8 @@ OC.L10N.register(
     "Version" : "ভার্সন",
     "Actions" : "পদক্ষেপসমূহ",
     "Type" : "ধরণ",
-    "Delete" : "মুছে",
     "Cancel" : "বাতিল করুন",
-    "Ok" : "তথাস্তু",
+    "Delete" : "মুছে",
     "Host" : "হোস্ট",
     "Details" : "বিসতারিত",
     "Disable" : "নিষ্ক্রিয়"

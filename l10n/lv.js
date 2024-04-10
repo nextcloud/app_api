@@ -15,7 +15,6 @@ OC.L10N.register(
     "Type" : "Tips",
     "Display Name" : "Ekrāna vārds",
     "Delete" : "Dzēst",
-    "Ok" : "Labi",
     "Host" : "Resursdators",
     "Network" : "Tīkls",
     "Details" : "Detaļas",
