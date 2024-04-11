@@ -27,6 +27,7 @@ OC.L10N.register(
     "{license}-licensed" : "สัญญาอนุญาต {license}",
     "Host" : "โฮสต์",
     "Display name" : "ชื่อที่แสดง",
+    "Confirm" : "ยืนยัน",
     "Register" : "ลงทะเบียน",
     "Your apps" : "แอปของคุณ",
     "Details" : "รายละเอียด",

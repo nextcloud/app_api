@@ -32,6 +32,7 @@ OC.L10N.register(
     "{license}-licensed" : "Licenciado bajo {license}",
     "Host" : "Servidor",
     "Display name" : "Nombre para mostrar",
+    "Confirm" : "Confirmar",
     "Register" : "Registrar",
     "Your apps" : "Tus aplicaciones",
     "Details" : "Detalles",

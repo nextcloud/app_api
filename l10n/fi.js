@@ -34,6 +34,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloudin URL-osoite",
     "Display name" : "Näyttönimi",
     "Network" : "Verkko",
+    "Confirm" : "Vahvista",
     "Register" : "Rekisteröidy",
     "Your apps" : "Sovelluksesi",
     "Details" : "Tiedot",

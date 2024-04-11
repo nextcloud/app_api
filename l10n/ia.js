@@ -11,6 +11,7 @@ OC.L10N.register(
     "Type" : "Typo",
     "Delete" : "Deler",
     "Host" : "Hospite",
+    "Confirm" : "Confirmar",
     "Details" : "Detalios",
     "Disable" : "Disactivar"
 },

@@ -32,6 +32,7 @@ OC.L10N.register(
     "Nextcloud URL" : "URL de Nextcloud",
     "Display name" : "Ammustra nùmene",
     "Network" : "Rete",
+    "Confirm" : "Cunfirma",
     "Register" : "Registra",
     "Your apps" : "Is aplicatziones tuas",
     "Details" : "Detàllios",

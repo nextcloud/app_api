@@ -95,6 +95,7 @@
     "AppAPI Docker Socket Proxy authentication password" : "Contraseña de autenticación del proxy de Socket de Docker de AppAPI",
     "GPUs support enabled hint" : "Pista para habilitación de soporte de GPUs",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "A todos los dispositivos GPU se les solicitará ser habilitados en los contenedores de ExApps de Docker.",
+    "Confirm" : "Confirmar",
     "Register" : "Registrarse",
     "Check connection" : "Verificar conexión",
     "Hostname to access ExApps" : "Nombre de host para el acceso a ExApps",

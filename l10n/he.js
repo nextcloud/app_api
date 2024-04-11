@@ -33,6 +33,7 @@ OC.L10N.register(
     "Host" : "מארח",
     "Nextcloud URL" : "כתובת Nextcloud",
     "Network" : "רשת",
+    "Confirm" : "אימות",
     "Register" : "רישום",
     "Your apps" : "היישומונים שלך",
     "Details" : "פרטים",

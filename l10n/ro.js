@@ -21,6 +21,7 @@ OC.L10N.register(
     "Default" : "Implicită",
     "Host" : "Gazdă",
     "Display name" : "Nume afișat",
+    "Confirm" : "Confirmă",
     "Register" : "Înregistrează-te",
     "Your apps" : "Aplicațiile tale",
     "Details" : "Detalii",

@@ -32,6 +32,7 @@ OC.L10N.register(
     "Host" : "Þjónn",
     "Display name" : "Birtingarnafn",
     "Network" : "Netkerfi",
+    "Confirm" : "Staðfesta",
     "Register" : "Nýskráning",
     "Your apps" : "Forritin þín",
     "Details" : "Nánar",

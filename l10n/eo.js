@@ -28,6 +28,7 @@ OC.L10N.register(
     "Host" : "Gastigo",
     "Display name" : "Vidiga nomo",
     "Network" : "Reto",
+    "Confirm" : "Konfirmi",
     "Register" : "Registriĝi",
     "Your apps" : "Viaj aplikaĵoj",
     "Details" : "Detaloj",

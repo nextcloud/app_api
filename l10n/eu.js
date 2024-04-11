@@ -52,6 +52,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URLa",
     "Display name" : "Erakusteko izena",
     "Network" : "Sarea",
+    "Confirm" : "Berretsi",
     "Register" : "Erregistratu",
     "Your apps" : "Zure aplikazioak",
     "Details" : "Xehetasunak",

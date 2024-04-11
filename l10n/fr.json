@@ -53,6 +53,7 @@
     "Enable https" : "Activer https",
     "Network" : "Réseau",
     "Docker network name" : "Nom du réseau Docker",
+    "Confirm" : "Confirmer",
     "Register" : "S'inscrire",
     "Check connection" : "Vérifier la connexion",
     "Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)" : "Nom d’hôte ou chemin d’accès au daemon Docker (par ex. nextcloud-appapi-dsp:2375, /var/run/docker.sock)",

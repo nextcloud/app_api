@@ -11,6 +11,7 @@ OC.L10N.register(
     "Actions" : "Actions",
     "Cancel" : "Cancel",
     "Delete" : "Delete",
+    "Confirm" : "Confirm",
     "Details" : "Details",
     "Enable" : "Enable",
     "Disable" : "Oʻchirish"

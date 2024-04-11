@@ -24,6 +24,7 @@ OC.L10N.register(
     "Host" : "Host",
     "Display name" : "Kuvatav nimi",
     "Network" : "Võrk",
+    "Confirm" : "Kinnita",
     "Register" : "Registreeru",
     "Your apps" : "Sinu rakendused",
     "Details" : "Üksikasjad",

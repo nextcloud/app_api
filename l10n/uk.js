@@ -33,6 +33,7 @@ OC.L10N.register(
     "Host" : "Хост",
     "Display name" : "Ім'я для показу",
     "Network" : "Мережа",
+    "Confirm" : "Підтвердити",
     "Register" : "Зареєструватися",
     "Your apps" : "Ваші застосунки",
     "Details" : "Деталі",

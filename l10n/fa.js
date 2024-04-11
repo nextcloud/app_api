@@ -34,6 +34,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Display name" : "Display name",
     "Network" : "شبکه",
+    "Confirm" : "تأیید",
     "Register" : "ثبت‌نام",
     "Your apps" : "برنامه‌های شما",
     "Details" : "جزییات",

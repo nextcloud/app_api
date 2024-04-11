@@ -33,6 +33,7 @@ OC.L10N.register(
     "Host" : "Glavno računalo",
     "Nextcloud URL" : "Nextcloud URL",
     "Network" : "Mreža",
+    "Confirm" : "Potvrdi",
     "Register" : "Registriraj se",
     "Your apps" : "Vaše aplikacije",
     "Details" : "Pojedinosti",

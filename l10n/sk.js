@@ -39,6 +39,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Display name" : "Zobrazované meno",
     "Network" : "Sieť",
+    "Confirm" : "Potvrdiť",
     "Register" : "Registrovať",
     "Your apps" : "Vaše aplikácie",
     "Details" : "Podrobnosti",

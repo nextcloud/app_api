@@ -35,6 +35,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud-URL",
     "Display name" : "Visningsnamn",
     "Network" : "Nätverk",
+    "Confirm" : "Bekräfta",
     "Register" : "Registrera",
     "Your apps" : "Dina appar",
     "Details" : "Detaljer",

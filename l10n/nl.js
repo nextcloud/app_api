@@ -32,6 +32,7 @@ OC.L10N.register(
     "Host" : "Host",
     "Nextcloud URL" : "Nextcloud URL",
     "Network" : "Netwerk",
+    "Confirm" : "Bevestigen",
     "Register" : "Aanmelden",
     "Your apps" : "Jouw apps",
     "Details" : "Details",

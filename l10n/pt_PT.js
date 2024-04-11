@@ -27,6 +27,7 @@ OC.L10N.register(
     "Host" : "Anfitrião",
     "Display name" : "Nome a exibir",
     "Network" : "Rede",
+    "Confirm" : "Confirmar",
     "Register" : "Registar",
     "Your apps" : "As suas apps",
     "Details" : "Detalhes",

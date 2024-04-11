@@ -17,6 +17,7 @@ OC.L10N.register(
     "Delete" : "Dzēst",
     "Host" : "Resursdators",
     "Network" : "Tīkls",
+    "Confirm" : "Apstiprināt",
     "Details" : "Detaļas",
     "Changelog" : "Izmaiņu žurnāls",
     "Updates" : "Atjauninājumi",

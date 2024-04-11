@@ -34,6 +34,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Naslov URL Nextcloud",
     "Display name" : "Prikazno ime",
     "Network" : "Omrežje",
+    "Confirm" : "Potrdi",
     "Register" : "Vpis računa",
     "Your apps" : "Vsi programi",
     "Details" : "Podrobnosti",

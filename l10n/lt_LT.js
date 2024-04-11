@@ -34,6 +34,7 @@ OC.L10N.register(
     "Host" : "Serveris",
     "Nextcloud URL" : "Nextcloud URL",
     "Network" : "Tinklas",
+    "Confirm" : "Patvirtinti",
     "Register" : "Registruotis",
     "Your apps" : "Jūsų programėlės",
     "Details" : "Išsamiau",

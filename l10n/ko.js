@@ -34,6 +34,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Display name" : "표시 이름",
     "Network" : "네트워크",
+    "Confirm" : "확인",
     "Register" : "등록",
     "Your apps" : "내 앱",
     "Details" : "세부사항",

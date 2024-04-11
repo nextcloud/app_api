@@ -34,6 +34,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Display name" : "Megjelenítendő név",
     "Network" : "Hálózat",
+    "Confirm" : "Megerősítés",
     "Register" : "Regisztráció",
     "Your apps" : "Az Ön alkalmazásai",
     "Details" : "Részletek",

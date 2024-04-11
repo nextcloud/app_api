@@ -113,6 +113,7 @@ OC.L10N.register(
     "AppAPI Docker Socket Proxy authentication password" : "Лозинка за AppAPI Docker Socket Proxy потврђивање идентитета",
     "GPUs support enabled hint" : "Назнака за укључено GPU подршку",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "Захтеваће се да Docker укључи све доступне GPU уређаје у ExApp контејнерима.",
+    "Confirm" : "Потврди",
     "Register" : "Региструј се",
     "Check connection" : "Провера везе",
     "Hostname to access ExApps" : "Име хоста за приступ ExApps",
