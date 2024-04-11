@@ -19,6 +19,7 @@ AppAPI Nextcloud APIs
 	settings
 	notifications
 	events_listener
+	occ_command
 	talkbots
 	speechtotext
 	textprocessing
