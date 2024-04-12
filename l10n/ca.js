@@ -47,6 +47,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Display name" : "Nom de visualització",
     "Network" : "Xarxa",
+    "Confirm" : "Confirma",
     "Register" : "Registra",
     "Your apps" : "Les vostres aplicacions",
     "Details" : "Detalls",

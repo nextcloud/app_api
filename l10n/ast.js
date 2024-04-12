@@ -57,6 +57,7 @@ OC.L10N.register(
     "Set as default daemon" : "Predeterminar el degorriu",
     "Enable https" : "Activar HTTPS",
     "Network" : "Rede",
+    "Confirm" : "Confirmar",
     "Register" : "Rexistrase",
     "Check connection" : "Comprobar la conexón",
     "Daemon with this name already exists" : "Yá esiste un degorriu con esti nome",

@@ -27,6 +27,7 @@ OC.L10N.register(
     "Host" : "Ostiz",
     "Display name" : "Anv ardivink",
     "Network" : "Rouedad",
+    "Confirm" : "Kadarnañ",
     "Your apps" : "Ho meziantoù",
     "Details" : "Munudoù",
     "by {author}\n{license}" : "great gant {author}\n{license}",

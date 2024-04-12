@@ -53,6 +53,7 @@ OC.L10N.register(
     "Hide deploy config" : "Skrýt nastavení nasazení",
     "Network" : "Síť",
     "Docker network name" : "Název Docker sítě",
+    "Confirm" : "Potvrdit",
     "Register" : "Registrovat",
     "Your apps" : "Vaše aplikace",
     "Admin settings" : "Nastavení pro správu",

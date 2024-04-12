@@ -13,6 +13,7 @@ OC.L10N.register(
     "Display Name" : "Vertoonnaam",
     "Delete" : "Skrap",
     "Host" : "Gasheer",
+    "Confirm" : "Bevestig",
     "Register" : "Registreer",
     "Your apps" : "U toeps",
     "Details" : "Besonderhede",

@@ -34,6 +34,7 @@ OC.L10N.register(
     "Nextcloud URL" : "URL адрес на Nextcloud",
     "Display name" : "Име за визуализация",
     "Network" : "Мрежа",
+    "Confirm" : "Потвърдете",
     "Register" : "Регистрация",
     "Your apps" : "Вашите приложения",
     "Details" : "Подробности",

@@ -7,6 +7,7 @@ OC.L10N.register(
     "Type" : "Typ",
     "Delete" : "Läschen",
     "Host" : "Host",
+    "Confirm" : "Konfirméieren",
     "Details" : "Detailer",
     "Updates" : "Updates",
     "Disable" : "Ofschalten"
