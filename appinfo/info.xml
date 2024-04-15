@@ -54,9 +54,9 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<category>integration</category>
 	<category>tools</category>
 	<website>https://github.com/cloud-py-api/app_api</website>
+	<discussion>https://github.com/cloud-py-api/app_api/discussions</discussion>
 	<bugs>https://github.com/cloud-py-api/app_api/issues</bugs>
 	<repository type="git">https://github.com/cloud-py-api/app_api.git</repository>
-	<discussion>https://github.com/cloud-py-api/app_api/discussions</discussion>
 	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_1.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_2.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_3.png</screenshot>
