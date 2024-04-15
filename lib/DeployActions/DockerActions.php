@@ -355,15 +355,14 @@ class DockerActions implements IDeployActions {
 		$externalApp = $appInfo['external-app'];
 		$deployConfig = $daemonConfig->getDeployConfig();
 
+		$deviceRequests = [];
+		$devices = [];
 		if (isset($deployConfig['computeDevice'])) {
 			if ($deployConfig['computeDevice']['id'] === 'cuda') {
 				$deviceRequests = $this->buildDefaultGPUDeviceRequests();
 			} elseif ($deployConfig['computeDevice']['id'] === 'rocm') {
 				$devices = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
 			}
-		} else {
-			$deviceRequests = [];
-			$devices = [];
 		}
 		$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
 
