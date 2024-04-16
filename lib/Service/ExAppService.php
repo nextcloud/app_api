@@ -312,7 +312,7 @@ class ExAppService {
 		}
 		unset($status['active']);  # TO-DO: Remove in AppAPI 2.4.0
 		if ($progress === 100) {
-			$status['action'] = '';
+			$status['action'] = 'healthcheck';
 		}
 		$exApp->setStatus($status);
 		$exApp->setLastCheckTime(time());

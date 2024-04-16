@@ -196,7 +196,7 @@ class Update extends Command {
 				return 1;
 			}
 
-			if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig)) {
+			if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($appId), $daemonConfig, true)) {
 				$this->logger->error(sprintf('ExApp %s update failed. Error: %s', $appId, 'Container healthcheck failed.'));
 				if ($outputConsole) {
 					$output->writeln(sprintf('ExApp %s update failed. Error: %s', $appId, 'Container healthcheck failed.'));
