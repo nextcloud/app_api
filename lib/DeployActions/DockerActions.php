@@ -223,6 +223,7 @@ class DockerActions implements IDeployActions {
 		if (($r === '') || ($imageId === $this->buildBaseImageName($params))) {
 			return $r;
 		}
+		$this->logger->info(sprintf('Failed to pull "extended" image for %s: %s', $imageId, $r));
 		$this->logger->info(sprintf('Pulling "base" image: %s', $imageId));
 		$imageId = $this->buildBaseImageName($params);
 		try {
