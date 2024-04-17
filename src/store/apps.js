@@ -200,7 +200,7 @@ const getters = {
 	},
 	getInitializingOrDeployingApps(state) {
 		return state.apps.filter(app => Object.hasOwn(app.status, 'action')
-			&& (app.status.action === 'deploy' || app.status.action === 'init')
+			&& (app.status.action === 'deploy' || app.status.action === 'init' || app.status.action === 'healthcheck')
 			&& app.status.type !== '')
 	},
 }

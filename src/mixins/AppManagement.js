@@ -32,7 +32,7 @@ export default {
 				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.init })
 			}
 			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'healthcheck') {
-				return t('app_api', 'Healthcheck')
+				return t('app_api', 'Healthchecking')
 			}
 			if (this.app.needsDownload) {
 				return t('app_api', 'Deploy and Enable')
@@ -47,7 +47,7 @@ export default {
 				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.init })
 			}
 			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'healthcheck') {
-				return t('app_api', 'Healthcheck')
+				return t('app_api', 'Healthchecking')
 			}
 			return t('app_api', 'Disable')
 		},
