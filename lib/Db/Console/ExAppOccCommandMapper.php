@@ -37,7 +37,7 @@ class ExAppOccCommandMapper extends QBMapper {
 		$qb->delete($this->tableName)
 			->where(
 				$qb->expr()->eq('appid', $qb->createNamedParameter($appId, IQueryBuilder::PARAM_STR)),
-				$qb->expr()->eq('event_type', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
+				$qb->expr()->eq('name', $qb->createNamedParameter($name, IQueryBuilder::PARAM_STR))
 			);
 		try {
 			$result = $qb->executeStatement();
