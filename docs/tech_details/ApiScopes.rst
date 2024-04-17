@@ -29,6 +29,7 @@ Supported API Groups include:
 * ``60``    TALK_BOT
 * ``61``    AI_PROVIDERS
 * ``62``    EVENTS_LISTENER
+* ``63``    OCC_COMMAND
 * ``110``   ACTIVITIES
 * ``120``   NOTES
 * ``200``   TEXT_PROCESSING

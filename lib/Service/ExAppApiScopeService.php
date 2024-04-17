@@ -33,6 +33,7 @@ class ExAppApiScopeService {
 			['api_route' => $aeApiV1Prefix . '/talk_bot', 'scope_group' => 60, 'name' => 'TALK_BOT', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ai_provider/', 'scope_group' => 61, 'name' => 'AI_PROVIDERS', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/events_listener', 'scope_group' => 62, 'name' => 'EVENTS_LISTENER', 'user_check' => 0],
+			['api_route' => $aeApiV1Prefix . '/occ_command', 'scope_group' => 63, 'name' => 'OCC_COMMAND', 'user_check' => 0],
 
 			// AppAPI internal scopes
 			['api_route' => '/apps/app_api/apps/status', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
