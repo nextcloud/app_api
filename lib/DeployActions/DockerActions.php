@@ -47,18 +47,16 @@ class DockerActions implements IDeployActions {
 		if (!isset($params['image_params'])) {
 			return 'Missing image_params.';
 		}
-		$imageParams = $params['image_params'];
-
 		if (!isset($params['container_params'])) {
 			return 'Missing container_params.';
 		}
-		$containerParams = $params['container_params'];
 
 		$dockerUrl = $this->buildDockerUrl($daemonConfig);
 		$this->initGuzzleClient($daemonConfig);
 
 		$this->exAppService->setAppDeployProgress($exApp, 0);
-		$result = $this->pullImage($dockerUrl, $imageParams, $exApp, 0, 94);
+		$imageId = '';
+		$result = $this->pullImage($dockerUrl, $params['image_params'], $exApp, 0, 94, $daemonConfig, $imageId);
 		if ($result) {
 			return $result;
 		}
@@ -72,7 +70,7 @@ class DockerActions implements IDeployActions {
 			}
 		}
 		$this->exAppService->setAppDeployProgress($exApp, 96);
-		$result = $this->createContainer($dockerUrl, $imageParams, $containerParams);
+		$result = $this->createContainer($dockerUrl, $imageId, $params['container_params']);
 		if (isset($result['error'])) {
 			return $result['error'];
 		}
@@ -93,18 +91,27 @@ class DockerActions implements IDeployActions {
 		return sprintf('%s/%s/%s', $dockerUrl, self::DOCKER_API_VERSION, $route);
 	}
 
-	public function buildImageName(array $imageParams): string {
-		return $imageParams['image_src'] . '/' . $imageParams['image_name'] . ':' . $imageParams['image_tag'];
+	public function buildBaseImageName(array $imageParams): string {
+		return $imageParams['image_src'] . '/' .
+			$imageParams['image_name'] . ':' . $imageParams['image_tag'];
 	}
 
-	public function createContainer(string $dockerUrl, array $imageParams, array $params = []): array {
+	public function buildExtendedImageName(array $imageParams, DaemonConfig $daemonConfig): ?string {
+		if (empty($daemonConfig['computeDevice']['id'])) {
+			return null;
+		}
+		return $imageParams['image_src'] . '/' .
+			$imageParams['image_name'] . '-' . $daemonConfig['computeDevice']['id'] . ':' . $imageParams['image_tag'];
+	}
+
+	public function createContainer(string $dockerUrl, string $imageId, array $params = []): array {
 		$createVolumeResult = $this->createVolume($dockerUrl, $this->buildExAppVolumeName($params['name']));
 		if (isset($createVolumeResult['error'])) {
 			return $createVolumeResult;
 		}
 
 		$containerParams = [
-			'Image' => $this->buildImageName($imageParams),
+			'Image' => $imageId,
 			'Hostname' => $params['hostname'],
 			'HostConfig' => [
 				'NetworkMode' => $params['net'],
@@ -200,19 +207,34 @@ class DockerActions implements IDeployActions {
 		return sprintf('Failed to remove container: %s', $containerId);
 	}
 
-	public function pullImage(string $dockerUrl, array $params, ExApp $exApp, int $startPercent, int $maxPercent): string {
+	public function pullImage(
+		string $dockerUrl, array $params, ExApp $exApp, int $startPercent, int $maxPercent, DaemonConfig $daemonConfig, string &$imageId
+	): string {
 		# docs: https://github.com/docker/compose/blob/main/pkg/compose/pull.go
 		$layerInProgress = ['preparing', 'waiting', 'pulling fs layer', 'download', 'extracting', 'verifying checksum'];
 		$layerFinished = ['already exists', 'pull complete'];
 		$disableProgressTracking = false;
-		$imageId = $this->buildImageName($params);
+		$imageId = $this->buildExtendedImageName($params, $daemonConfig);
+		if ($imageId === null) {
+			$imageId = $this->buildBaseImageName($params);
+		}
 		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($imageId)));
-		$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
 		try {
+			$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
 			if ($this->useSocket) {
 				$response = $this->guzzleClient->post($url);
 			} else {
 				$response = $this->guzzleClient->post($url, ['stream' => true]);
+			}
+			if (($response->getStatusCode() === 404) && ($imageId !== $this->buildBaseImageName($params))) {
+				$imageId = $this->buildBaseImageName($params);
+				$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($imageId)));
+				$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
+				if ($this->useSocket) {
+					$response = $this->guzzleClient->post($url);
+				} else {
+					$response = $this->guzzleClient->post($url, ['stream' => true]);
+				}
 			}
 			if ($response->getStatusCode() !== 200) {
 				return sprintf('Pulling ExApp Image: %s return status code: %d', $imageId, $response->getStatusCode());
