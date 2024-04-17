@@ -242,7 +242,8 @@ class ExAppService {
 		$this->speechToTextService->resetCacheEnabled();
 		$this->translationService->resetCacheEnabled();
 		$this->settingsService->resetCacheEnabled();
-		$this->appEventsListenerService->resetCacheEnabled();
+		$this->eventsListenerService->resetCacheEnabled();
+		$this->occService->resetCacheEnabled();
 	}
 
 	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo): array {
