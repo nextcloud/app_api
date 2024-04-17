@@ -1,6 +1,8 @@
 OC.L10N.register(
     "app_api",
     {
+    "External Apps" : "Externe Apps",
+    "Error starting install of ExApp" : "Fehler beim Starten der Installation von ExApp",
     "Update to {version}" : "Aktualisieren auf {version}",
     "Remove" : "Entfernen",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Für diese App wurde keine untere Versionsgrenze für Nextcloud gesetzt. Dies wird zukünftig als Fehler behandelt.",
@@ -35,6 +37,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud-URL",
     "Display name" : "Anzeigename",
     "Network" : "Netzwerk",
+    "Confirm" : "Bestätigen",
     "Register" : "Registrieren",
     "Your apps" : "Deine Apps",
     "Details" : "Details",
