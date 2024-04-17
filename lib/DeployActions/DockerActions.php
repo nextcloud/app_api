@@ -97,11 +97,11 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function buildExtendedImageName(array $imageParams, DaemonConfig $daemonConfig): ?string {
-		if (empty($daemonConfig['computeDevice']['id'])) {
+		if (empty($daemonConfig->getDeployConfig()['computeDevice']['id'])) {
 			return null;
 		}
 		return $imageParams['image_src'] . '/' .
-			$imageParams['image_name'] . '-' . $daemonConfig['computeDevice']['id'] . ':' . $imageParams['image_tag'];
+			$imageParams['image_name'] . '-' . $daemonConfig->getDeployConfig()['computeDevice']['id'] . ':' . $imageParams['image_tag'];
 	}
 
 	public function createContainer(string $dockerUrl, string $imageId, array $params = []): array {
@@ -210,95 +210,104 @@ class DockerActions implements IDeployActions {
 	public function pullImage(
 		string $dockerUrl, array $params, ExApp $exApp, int $startPercent, int $maxPercent, DaemonConfig $daemonConfig, string &$imageId
 	): string {
+		$imageId = $this->buildExtendedImageName($params, $daemonConfig);
+		if ($imageId === null) {
+			$imageId = $this->buildBaseImageName($params);
+			$this->logger->info(sprintf('Pulling "base" image: %s', $imageId));
+		}
+		try {
+			$r = $this->pullImageInternal($dockerUrl, $exApp, $startPercent, $maxPercent, $imageId);
+		} catch (GuzzleException $e) {
+			$r = sprintf('Failed to pull image, GuzzleException occur: %s', $e->getMessage());
+		}
+		if (($r === '') || ($imageId === $this->buildBaseImageName($params))) {
+			return $r;
+		}
+		$this->logger->info(sprintf('Pulling "base" image: %s', $imageId));
+		$imageId = $this->buildBaseImageName($params);
+		try {
+			$r = $this->pullImageInternal($dockerUrl, $exApp, $startPercent, $maxPercent, $imageId);
+		} catch (GuzzleException $e) {
+			$r = sprintf('Failed to pull image, GuzzleException occur: %s', $e->getMessage());
+		}
+		return $r;
+	}
+
+	/**
+	 * @throws GuzzleException
+	 */
+	public function pullImageInternal(
+		string $dockerUrl, ExApp $exApp, int $startPercent, int $maxPercent, string $imageId
+	): string {
 		# docs: https://github.com/docker/compose/blob/main/pkg/compose/pull.go
 		$layerInProgress = ['preparing', 'waiting', 'pulling fs layer', 'download', 'extracting', 'verifying checksum'];
 		$layerFinished = ['already exists', 'pull complete'];
 		$disableProgressTracking = false;
-		$imageId = $this->buildExtendedImageName($params, $daemonConfig);
-		if ($imageId === null) {
-			$imageId = $this->buildBaseImageName($params);
-		}
 		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($imageId)));
-		try {
-			$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
-			if ($this->useSocket) {
-				$response = $this->guzzleClient->post($url);
-			} else {
-				$response = $this->guzzleClient->post($url, ['stream' => true]);
-			}
-			if (($response->getStatusCode() === 404) && ($imageId !== $this->buildBaseImageName($params))) {
-				$imageId = $this->buildBaseImageName($params);
-				$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($imageId)));
-				$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
-				if ($this->useSocket) {
-					$response = $this->guzzleClient->post($url);
-				} else {
-					$response = $this->guzzleClient->post($url, ['stream' => true]);
-				}
-			}
-			if ($response->getStatusCode() !== 200) {
-				return sprintf('Pulling ExApp Image: %s return status code: %d', $imageId, $response->getStatusCode());
-			}
-			if ($this->useSocket) {
-				return '';
-			}
-			$lastPercent = $startPercent;
-			$layers = [];
-			$buffer = '';
-			$responseBody = $response->getBody();
-			while (!$responseBody->eof()) {
-				$buffer .= $responseBody->read(1024);
-				try {
-					while (($newlinePos = strpos($buffer, "\n")) !== false) {
-						$line = substr($buffer, 0, $newlinePos);
-						$buffer = substr($buffer, $newlinePos + 1);
-						$jsonLine = json_decode(trim($line));
-						if ($jsonLine) {
-							if (isset($jsonLine->id) && isset($jsonLine->status)) {
-								$layerId = $jsonLine->id;
-								$status = strtolower($jsonLine->status);
-								foreach ($layerInProgress as $substring) {
-									if (str_contains($status, $substring)) {
-										$layers[$layerId] = false;
-										break;
-									}
-								}
-								foreach ($layerFinished as $substring) {
-									if (str_contains($status, $substring)) {
-										$layers[$layerId] = true;
-										break;
-									}
+		$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
+		if ($this->useSocket) {
+			$response = $this->guzzleClient->post($url);
+		} else {
+			$response = $this->guzzleClient->post($url, ['stream' => true]);
+		}
+		if ($response->getStatusCode() !== 200) {
+			return sprintf('Pulling ExApp Image: %s return status code: %d', $imageId, $response->getStatusCode());
+		}
+		if ($this->useSocket) {
+			return '';
+		}
+		$lastPercent = $startPercent;
+		$layers = [];
+		$buffer = '';
+		$responseBody = $response->getBody();
+		while (!$responseBody->eof()) {
+			$buffer .= $responseBody->read(1024);
+			try {
+				while (($newlinePos = strpos($buffer, "\n")) !== false) {
+					$line = substr($buffer, 0, $newlinePos);
+					$buffer = substr($buffer, $newlinePos + 1);
+					$jsonLine = json_decode(trim($line));
+					if ($jsonLine) {
+						if (isset($jsonLine->id) && isset($jsonLine->status)) {
+							$layerId = $jsonLine->id;
+							$status = strtolower($jsonLine->status);
+							foreach ($layerInProgress as $substring) {
+								if (str_contains($status, $substring)) {
+									$layers[$layerId] = false;
+									break;
 								}
 							}
-						} else {
-							$this->logger->warning(
-								sprintf("Progress tracking of image pulling(%s) disabled, error: %d, data: %s", $exApp->getAppid(), json_last_error(), $line)
-							);
-							$disableProgressTracking = true;
+							foreach ($layerFinished as $substring) {
+								if (str_contains($status, $substring)) {
+									$layers[$layerId] = true;
+									break;
+								}
+							}
 						}
+					} else {
+						$this->logger->warning(
+							sprintf("Progress tracking of image pulling(%s) disabled, error: %d, data: %s", $exApp->getAppid(), json_last_error(), $line)
+						);
+						$disableProgressTracking = true;
 					}
-				} catch (Exception $e) {
-					$this->logger->warning(
-						sprintf("Progress tracking of image pulling(%s) disabled, exception: %s", $exApp->getAppid(), $e->getMessage()), ['exception' => $e]
-					);
-					$disableProgressTracking = true;
 				}
-				if (!$disableProgressTracking) {
-					$completedLayers = count(array_filter($layers));
-					$totalLayers = count($layers);
-					$newLastPercent = intval($totalLayers > 0 ? ($completedLayers / $totalLayers) * ($maxPercent - $startPercent) : 0);
-					if ($lastPercent != $newLastPercent) {
-						$this->exAppService->setAppDeployProgress($exApp, $newLastPercent);
-						$lastPercent = $newLastPercent;
-					}
+			} catch (Exception $e) {
+				$this->logger->warning(
+					sprintf("Progress tracking of image pulling(%s) disabled, exception: %s", $exApp->getAppid(), $e->getMessage()), ['exception' => $e]
+				);
+				$disableProgressTracking = true;
+			}
+			if (!$disableProgressTracking) {
+				$completedLayers = count(array_filter($layers));
+				$totalLayers = count($layers);
+				$newLastPercent = intval($totalLayers > 0 ? ($completedLayers / $totalLayers) * ($maxPercent - $startPercent) : 0);
+				if ($lastPercent != $newLastPercent) {
+					$this->exAppService->setAppDeployProgress($exApp, $newLastPercent);
+					$lastPercent = $newLastPercent;
 				}
 			}
-			return '';
-		} catch (GuzzleException $e) {
-			$this->logger->error('Failed to pull image', ['exception' => $e]);
-			error_log($e->getMessage());
-			return 'Failed to pull image, GuzzleException occur.';
 		}
+		return '';
 	}
 
 	public function inspectContainer(string $dockerUrl, string $containerId): array {
