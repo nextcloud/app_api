@@ -245,7 +245,6 @@ class DockerActions implements IDeployActions {
 		$layerFinished = ['already exists', 'pull complete'];
 		$disableProgressTracking = false;
 		$url = $this->buildApiUrl($dockerUrl, sprintf('images/create?fromImage=%s', urlencode($imageId)));
-		$this->logger->info(sprintf('Pulling ExApp Image: %s', $imageId));
 		if ($this->useSocket) {
 			$response = $this->guzzleClient->post($url);
 		} else {
