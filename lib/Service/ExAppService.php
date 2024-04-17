@@ -52,7 +52,8 @@ class ExAppService {
 		private readonly TranslationService      	$translationService,
 		private readonly TalkBotsService         	$talkBotsService,
 		private readonly SettingsService         	$settingsService,
-		private readonly ExAppEventsListenerService $appEventsListenerService,
+		private readonly ExAppEventsListenerService $eventsListenerService,
+		private readonly ExAppOccService            $occService,
 	) {
 		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 	}
@@ -110,6 +111,8 @@ class ExAppService {
 		$this->translationService->unregisterExAppTranslationProviders($appId);
 		$this->settingsService->unregisterExAppForms($appId);
 		$this->exAppArchiveFetcher->removeExAppFolder($appId);
+		$this->eventsListenerService->unregisterExAppEventListeners($appId);
+		$this->occService->unregisterExAppOccCommands($appId);
 		$r = $this->exAppMapper->deleteExApp($appId);
 		if ($r !== 1) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));

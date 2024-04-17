@@ -215,6 +215,16 @@ class ExAppOccService {
 		};
 	}
 
+	public function unregisterExAppOccCommands(string $appId): int {
+		try {
+			$result = $this->mapper->removeAllByAppId($appId);
+		} catch (Exception) {
+			$result = -1;
+		}
+		$this->resetCacheEnabled();
+		return $result;
+	}
+
 	public function resetCacheEnabled(): void {
 		$this->cache->remove('/ex_occ_commands');
 	}
