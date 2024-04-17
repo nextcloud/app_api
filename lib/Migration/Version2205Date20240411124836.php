@@ -65,7 +65,7 @@ class Version2205Date20240411124836 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('execute_handler', Types::STRING, [
 				'notnull' => true,
-				'length' => 255,
+				'length' => 410,
 			]);
 
 			$table->setPrimaryKey(['id']);
