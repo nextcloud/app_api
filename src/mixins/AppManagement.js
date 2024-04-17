@@ -10,7 +10,7 @@ export default {
 			return this.app && this.$store.getters.loading(this.app.id)
 		},
 		isInitializing() {
-			return this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'init'
+			return this.app && Object.hasOwn(this.app?.status, 'action') && (this.app.status.action === 'init' || this.app.status.action === 'healthcheck')
 		},
 		isDeploying() {
 			return this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'deploy'
@@ -31,6 +31,9 @@ export default {
 			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'init') {
 				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.init })
 			}
+			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'healthcheck') {
+				return t('app_api', 'Healthcheck')
+			}
 			if (this.app.needsDownload) {
 				return t('app_api', 'Deploy and Enable')
 			}
@@ -42,6 +45,9 @@ export default {
 			}
 			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'init') {
 				return t('app_api', '{progress}% Initializing', { progress: this.app.status?.init })
+			}
+			if (this.app && Object.hasOwn(this.app?.status, 'action') && this.app.status.action === 'healthcheck') {
+				return t('app_api', 'Healthcheck')
 			}
 			return t('app_api', 'Disable')
 		},
