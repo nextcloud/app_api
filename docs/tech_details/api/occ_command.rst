@@ -9,6 +9,10 @@ The principal is similar to the regular Nextcloud OCC command for PHP apps, that
 but for ExApps it is a trigger via Nextcloud OCC interface to perform some action on the External App side.
 
 
+.. note::
+
+    Passing files directly as an input argument to the occ command is not supported.
+
 Register
 ^^^^^^^^
 

@@ -152,19 +152,19 @@ class ExAppOccService {
 				foreach ($this->occCommand->getArguments() as $argument) {
 					$arguments[$argument['name']] = $input->getArgument($argument['name']);
 				}
-
 				$options = [];
 				foreach ($this->occCommand->getOptions() as $option) {
 					$options[$option['name']] = $input->getOption($option['name']);
 				}
 
 				$executeHandler = $this->occCommand->getExecuteHandler();
-				$response = $this->service->exAppRequest($this->occCommand->getAppid(), $executeHandler, null, 'POST', [], [
+				$response = $this->service->exAppRequest($this->occCommand->getAppid(), $executeHandler, params: [
 					'occ' => [
 						'arguments' => $arguments,
 						'options' => $options,
 					]
 				]);
+
 				if (!($response instanceof IResponse) && isset($response['error'])) {
 					$output->writeln(sprintf('[%s] command executeHandler failed. Error: %s', $this->occCommand->getName(), $response['error']));
 					$this->logger->error(sprintf('[%s] command executeHandler failed. Error: %s', $this->occCommand->getName(), $response['error']), [
