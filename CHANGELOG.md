@@ -11,9 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Different compute device configuration for Daemon (NVIDIA, AMD, CPU). #267
 - Ability to add optional parameters when registering a daemon, for example *OVERRIDE_APP_HOST*. #269
+- API for registering OCC commands. #272
 - Correct support of the Docker `HEALTHCHECK` instruction. #273
 - Support of pulling "custom" images for the selected compute device. #274
-- API for registering OCC commands.
 
 ### Fixed
 
