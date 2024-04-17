@@ -81,6 +81,10 @@ class DockerActions implements IDeployActions {
 		if (isset($result['error'])) {
 			return $result['error'];
 		}
+		$this->exAppService->setAppDeployProgress($exApp, 99);
+		if (!$this->waitTillContainerStart($this->buildExAppContainerName($exApp->getAppid()), $daemonConfig)) {
+			return 'container startup failed';
+		}
 		$this->exAppService->setAppDeployProgress($exApp, 100);
 		return '';
 	}
@@ -285,6 +289,17 @@ class DockerActions implements IDeployActions {
 		}
 	}
 
+	/**
+	 * @throws GuzzleException
+	 */
+	public function getContainerLogs(string $dockerUrl, string $containerId, string $tail = 'all'): string {
+		$url = $this->buildApiUrl(
+			$dockerUrl, sprintf('containers/%s/logs?stdout=true&stderr=true&tail=%s', $containerId, $tail)
+		);
+		$response = $this->guzzleClient->get($url);
+		return (string) $response->getBody();
+	}
+
 	public function createVolume(string $dockerUrl, string $volume): array {
 		$url = $this->buildApiUrl($dockerUrl, 'volumes/create');
 		try {
@@ -452,19 +467,40 @@ class DockerActions implements IDeployActions {
 		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);
 	}
 
-	public function containerStateHealthy(array $containerInfo): bool {
-		return $containerInfo['State']['Status'] === 'running';
-	}
-
-	public function healthcheckContainer(string $containerId, DaemonConfig $daemonConfig): bool {
+	public function waitTillContainerStart(string $containerId, DaemonConfig $daemonConfig): bool {
+		$dockerUrl = $this->buildDockerUrl($daemonConfig);
 		$attempts = 0;
-		$totalAttempts = 90; // ~90 seconds for container to initialize
+		$totalAttempts = 90; // ~90 seconds for container to start
 		while ($attempts < $totalAttempts) {
-			$containerInfo = $this->inspectContainer($this->buildDockerUrl($daemonConfig), $containerId);
-			if ($this->containerStateHealthy($containerInfo)) {
+			$containerInfo = $this->inspectContainer($dockerUrl, $containerId);
+			if ($containerInfo['State']['Status'] === 'running') {
 				return true;
 			}
 			$attempts++;
+			sleep(1);
+		}
+		return false;
+	}
+
+	public function healthcheckContainer(string $containerId, DaemonConfig $daemonConfig, bool $waitForSuccess): bool {
+		$dockerUrl = $this->buildDockerUrl($daemonConfig);
+		$containerInfo = $this->inspectContainer($dockerUrl, $containerId);
+		if (!isset($containerInfo['State']['Health']['Status'])) {
+			return true;  // container does not support Healthcheck
+		}
+		if (!$waitForSuccess) {
+			return $containerInfo['State']['Health']['Status'] === 'healthy';
+		}
+		$maxTotalAttempts = 900;
+		while ($maxTotalAttempts > 0) {
+			$containerInfo = $this->inspectContainer($dockerUrl, $containerId);
+			if ($containerInfo['State']['Health']['Status'] === 'healthy') {
+				return true;
+			}
+			if ($containerInfo['State']['Health']['Status'] === 'unhealthy') {
+				return false;
+			}
+			$maxTotalAttempts--;
 			sleep(1);
 		}
 		return false;

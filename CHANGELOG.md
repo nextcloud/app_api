@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.5.0 - 2024-04-1x]
+## [2.5.0 - 2024-04-23]
 
 ### Added
 
 - Different compute device configuration for Daemon (NVIDIA, AMD, CPU). #267
 - Ability to add optional parameters when registering a daemon, for example *OVERRIDE_APP_HOST*. #269
+- Correct support of the Docker `HEALTHCHECK` instruction. #273
 
 ### Fixed
 
