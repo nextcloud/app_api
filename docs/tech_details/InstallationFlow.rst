@@ -3,6 +3,25 @@
 App Installation Flow
 =====================
 
+Image Pulling(Docker)
+---------------------
+
+AppAPI **2.5.0+** will always first try to pull a docker image with a ``suffix`` equal to value of *computeDevice*.
+
+Let us remind you that ``computeDevice`` can take the following values: ``cpu``, ``cuda``, ``rocm``
+
+The suffix will be added as follows:
+
+.. code::
+
+	return $imageParams['image_src'] . '/' .
+		$imageParams['image_name'] . '-' . $daemonConfig['computeDevice']['id'] . ':' . $imageParams['image_tag'];
+
+For ``cpu`` AppAPI will first try to get the image from ``ghcr.io/cloud-py-api/skeleton-cpu:latest``.
+In case the image is not found, ``ghcr.io/cloud-py-api/skeleton:latest`` will be pulled.
+
+If you as an application developer want to have a custom images for any of these values, you can push that extended images to registry in addition to the based one.
+
 Heartbeat
 ---------
 
@@ -12,7 +31,8 @@ In the case of ``Docker``, this is:
 
 #. 1. performing an image pull
 #. 2. creating container from the docker image
-#. 3. waiting until the “/heartbeat” endpoint becomes available with a ``GET`` request.
+#. 3. if the container supports `healthcheck` - AppAPI waits for the `healthy` status
+#. 4. waiting until the “/heartbeat” endpoint becomes available with a ``GET`` request
 
 The application, in response to the request "/heartbeat", should return json: ``{"status": "ok"}``.
 
