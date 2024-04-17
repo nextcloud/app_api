@@ -274,7 +274,11 @@ class ExAppService {
 			}
 			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
 			if (isset($appInfo['external-app']['scopes']['value'])) {
-				$appInfo['external-app']['scopes'] = $appInfo['external-app']['scopes']['value'];
+				if (is_array($appInfo['external-app']['scopes']['value'])) {
+					$appInfo['external-app']['scopes'] = $appInfo['external-app']['scopes']['value'];
+				} else {
+					$appInfo['external-app']['scopes'] = [$appInfo['external-app']['scopes']['value']];
+				}
 			}
 			if ($extractedDir) {
 				if (file_exists($extractedDir . '/l10n')) {
@@ -282,10 +286,6 @@ class ExAppService {
 				} else {
 					$this->logger->info(sprintf('Application %s does not support translations', $appId));
 				}
-			}
-			# TO-DO: remove this in AppAPI 2.3.0
-			if (isset($appInfo['external-app']['scopes']['required']['value'])) {
-				$appInfo['external-app']['scopes'] = $appInfo['external-app']['scopes']['required']['value'];
 			}
 		}
 		return $appInfo;
