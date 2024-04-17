@@ -46,22 +46,18 @@ class Version2205Date20240411124836 extends SimpleMigrationStep {
 			// Symfony\Component\Console\Command\Command->setHidden()
 			$table->addColumn('hidden', Types::SMALLINT, [
 				'notnull' => true,
-				'default' => 0,
 			]);
 			// Symfony\Component\Console\Command\Command->addArgument()
 			$table->addColumn('arguments', Types::JSON, [
 				'notnull' => true,
-				'default' => '[]',
 			]);
 			// Symfony\Component\Console\Command\Command->addOption()
 			$table->addColumn('options', Types::JSON, [
 				'notnull' => true,
-				'default' => '[]',
 			]);
 			// Symfony\Component\Console\Command\Command->addUsage()
 			$table->addColumn('usages', Types::JSON, [
 				'notnull' => true,
-				'default' => '[]',
 			]);
 			$table->addColumn('execute_handler', Types::STRING, [
 				'notnull' => true,
