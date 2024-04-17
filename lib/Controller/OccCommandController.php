@@ -32,11 +32,11 @@ class OccCommandController extends OCSController {
 	public function registerCommand(
 		string $name,
 		string $description,
-		bool $hidden,
-		array $arguments,
-		array $options,
-		array $usages,
-		string $execute_handler
+		string $execute_handler,
+		bool $hidden = false,
+		array $arguments = [],
+		array $options = [],
+		array $usages = [],
 	): DataResponse {
 		$command = $this->service->registerCommand(
 			$this->request->getHeader('EX-APP-ID'), $name,

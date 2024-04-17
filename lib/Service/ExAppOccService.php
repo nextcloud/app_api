@@ -53,7 +53,7 @@ class ExAppOccService {
 				'arguments' => $arguments,
 				'options' => $options,
 				'usages' => $usages,
-				'execute_handler' => $executeHandler,
+				'execute_handler' => ltrim($executeHandler, '/'),
 			]);
 			if ($occCommandEntry !== null) {
 				$newOccCommandEntry->setId($occCommandEntry->getId());
