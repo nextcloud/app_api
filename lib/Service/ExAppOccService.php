@@ -10,11 +10,9 @@ use OCA\AppAPI\Db\Console\ExAppOccCommandMapper;
 use OCA\AppAPI\PublicFunctions;
 use OCP\AppFramework\Http;
 use OCP\DB\Exception;
-use OCP\Http\Client\IResponse;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -110,8 +108,8 @@ class ExAppOccService {
 
 	public function buildCommand(ExAppOccCommand $occCommand, ContainerInterface $container): Command {
 		return new class($occCommand, $container) extends Command {
-			private PublicFunctions $service;
 			private LoggerInterface $logger;
+			private PublicFunctions $service;
 
 			public function __construct(
 				private ExAppOccCommand $occCommand,
@@ -119,8 +117,8 @@ class ExAppOccService {
 			) {
 				parent::__construct();
 
-				$this->service = $this->container->get(PublicFunctions::class);
 				$this->logger = $this->container->get(LoggerInterface::class);
+				$this->service = $this->container->get(PublicFunctions::class);
 			}
 
 			protected function configure() {
@@ -132,7 +130,7 @@ class ExAppOccService {
 						$argument['name'],
 						$this->buildArgumentMode($argument['mode']),
 						$argument['description'],
-						$argument['default']
+						in_array($argument['mode'], ['optional', 'array']) ? $argument['default'] : null,
 					);
 				}
 				foreach ($this->occCommand->getOptions() as $option) {
@@ -141,7 +139,10 @@ class ExAppOccService {
 						$option['shortcut'] ?? null,
 						$this->buildOptionMode($option['mode']),
 						$option['description'],
-						$option['default'] ?? null);
+						$this->buildOptionMode($option['mode']) !== InputOption::VALUE_NONE
+							? $option['default'] ?? null
+							: null
+					);
 				}
 				foreach ($this->occCommand->getUsages() as $usage) {
 					$this->addUsage($usage);
@@ -167,7 +168,7 @@ class ExAppOccService {
 				}
 
 				$executeHandler = $this->occCommand->getExecuteHandler();
-				$response = $this->service->exAppRequest($this->occCommand->getAppid(), $executeHandler,
+				$response = $this->service->exAppRequestGuzzle($this->occCommand->getAppid(), $executeHandler,
 					params: [
 						'occ' => [
 							'arguments' => $arguments,
@@ -176,10 +177,11 @@ class ExAppOccService {
 					],
 					options: [
 						'stream' => true,
+						'timeout' => 0,
 					]
 				);
 
-				if (!($response instanceof IResponse) && isset($response['error'])) {
+				if (is_array($response) && isset($response['error'])) {
 					$output->writeln(sprintf('[%s] command executeHandler failed. Error: %s', $this->occCommand->getName(), $response['error']));
 					$this->logger->error(sprintf('[%s] command executeHandler failed. Error: %s', $this->occCommand->getName(), $response['error']), [
 						'app' => $this->occCommand->getAppid(),
@@ -197,14 +199,22 @@ class ExAppOccService {
 
 				$body = $response->getBody();
 				while(!$body->eof()) {
-					$row = $body->read(1024);
-					$output->write($row);
+					$output->write($body->read(1024));
 				}
 
 				return 0;
 			}
 
 			private function buildArgumentMode(string $mode): int {
+				$modes = explode(',', $mode);
+				$argumentMode = 0;
+				foreach ($modes as $mode) {
+					$argumentMode |= $this->_buildArgumentMode($mode);
+				}
+				return $argumentMode;
+			}
+
+			private function _buildArgumentMode(string $mode): int {
 				if ($mode === 'required') {
 					return InputArgument::REQUIRED;
 				}

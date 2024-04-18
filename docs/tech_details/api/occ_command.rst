@@ -30,7 +30,7 @@ Params
         "arguments": [
             {
                 "name": "argument_name",
-                "mode": "required (InputArgument::REQUIRED)/optional (InputArgument::OPTIONAL)/array (InputArgument::IS_ARRAY)",
+                "mode": "required/optional/array",
                 "description": "Description of the argument",
                 "default": "default_value"
             }
@@ -38,11 +38,55 @@ Params
         "options": [
             {
                 "name": "option_name",
-                "shortcut": "shortcut",
-                "mode": "required (InputOption::VALUE_REQUIRED)/optional (InputOption::VALUE_OPTIONAL)/none (InputOption::VALUE_NONE)/array (InputOption::VALUE_IS_ARRAY)/negatable (InputOption::VALUE_NEGATABLE)",
+                "shortcut": "s",
+                "mode": "required/optional/none/array/negatable",
                 "description": "Description of the option",
                 "default": "default_value"
             }
+        ],
+        "usages": [
+            "occ appid:unique:command:name argument_name --option_name",
+            "occ appid:unique:command:name argument_name -s"
+        ],
+        "execute_handler": "handler_route"
+    }
+
+For more details on the command arguments and options modes,
+see the original docs for the Symfony console input parameters, which are actually being built from the provided data:
+`https://symfony.com/doc/current/console/input.html#using-command-arguments <https://symfony.com/doc/current/console/input.html#using-command-arguments>`_
+
+
+Example
+*******
+
+Lets assume we have a command `ping` that takes an argument `test_arg` and has an option `test-option`:
+
+.. code-block:: json
+
+    {
+        "name": "my_app_id:ping",
+        "description": "Test ping command",
+        "hidden": "false",
+        "arguments": [
+            {
+                "name": "test_arg",
+                "mode": "required",
+                "description": "Test argument",
+                "default": 123
+            }
+        ],
+        "options": [
+            {
+                "name": "test-option",
+                "shortcut": "t",
+                "mode": "none",
+                "description": "Test option",
+            }
+        ],
+        "usages": [
+            "occ my_app_id:ping 12345",
+            "occ my_app_id:ping 12345 --test-option",
+            "occ my_app_id:ping 12345 -t"
         ],
         "execute_handler": "handler_route"
     }

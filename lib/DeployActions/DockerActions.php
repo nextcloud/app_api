@@ -602,14 +602,6 @@ class DockerActions implements IDeployActions {
 		return self::EX_APP_CONTAINER_PREFIX . $appId . '_data';
 	}
 
-	private function isGPUAvailable(): bool {
-		$gpusDir = '/dev/dri';
-		if (is_dir($gpusDir) && is_readable($gpusDir)) {
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	 * Return default GPU device requests for container.
 	 */

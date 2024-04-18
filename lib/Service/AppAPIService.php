@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Service;
 
+use GuzzleHttp\Client;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
@@ -15,6 +16,7 @@ use OCP\DB\Exception;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IResponse;
+use OCP\ICertificateManager;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ISession;
@@ -23,6 +25,7 @@ use OCP\IUserSession;
 use OCP\L10N\IFactory;
 use OCP\Log\ILogFactory;
 use OCP\Security\Bruteforce\IThrottler;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 class AppAPIService {
@@ -37,6 +40,7 @@ class AppAPIService {
 		IClientService                           $clientService,
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
+		private readonly ICertificateManager	 $certificateManager,
 		private readonly IUserManager            $userManager,
 		private readonly IFactory				 $l10nFactory,
 		private readonly ExNotificationsManager  $exNotificationsManager,
@@ -95,20 +99,24 @@ class AppAPIService {
 		string $uri,
 		#[\SensitiveParameter]
 		array $options,
-	): array|IResponse {
+		Client $client = null,
+	): array|IResponse|ResponseInterface {
 		try {
+			if ($client === null) {
+				$client = $this->client;
+			}
 			switch ($method) {
 				case 'GET':
-					$response = $this->client->get($uri, $options);
+					$response = $client->get($uri, $options);
 					break;
 				case 'POST':
-					$response = $this->client->post($uri, $options);
+					$response = $client->post($uri, $options);
 					break;
 				case 'PUT':
-					$response = $this->client->put($uri, $options);
+					$response = $client->put($uri, $options);
 					break;
 				case 'DELETE':
-					$response = $this->client->delete($uri, $options);
+					$response = $client->delete($uri, $options);
 					break;
 				default:
 					return ['error' => 'Bad HTTP method'];
@@ -157,6 +165,21 @@ class AppAPIService {
 		$promise->then(function (IResponse $response) use ($exApp) {
 		}, function (\Exception $exception) use ($exApp) {
 		});
+	}
+
+	public function requestToExAppGuzzle(
+		ExApp $exApp,
+		string $route,
+		?string $userId = null,
+		string $method = 'POST',
+		array $params = [],
+		array $options = [],
+		?IRequest $request = null,
+	): array|IResponse|ResponseInterface {
+		$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		$options = $this->setupCerts($requestData['options']);
+		$client = new Client($options);
+		return $this->requestToExAppInternal($exApp, $method, $requestData['url'], $requestData['options'], $client);
 	}
 
 	private function prepareRequestToExApp(
@@ -215,6 +238,17 @@ class AppAPIService {
 			}
 		}
 		return $paramsContent . http_build_query($params);
+	}
+
+	private function setupCerts(array $guzzleParams): array {
+		if (!$this->config->getSystemValueBool('installed', false)) {
+			$certs = \OC::$SERVERROOT . '/resources/config/ca-bundle.crt';
+		} else {
+			$certs = $this->certificateManager->getAbsoluteBundlePath();
+		}
+
+		$guzzleParams['verify'] = $certs;
+		return $guzzleParams;
 	}
 
 	/**
