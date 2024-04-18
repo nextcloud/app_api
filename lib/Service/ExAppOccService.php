@@ -14,6 +14,7 @@ use OCP\Http\Client\IResponse;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -148,22 +149,35 @@ class ExAppOccService {
 			}
 
 			protected function execute(InputInterface $input, OutputInterface $output): int {
-				$arguments = [];
-				foreach ($this->occCommand->getArguments() as $argument) {
-					$arguments[$argument['name']] = $input->getArgument($argument['name']);
+				if (count($this->occCommand->getArguments()) > 0) {
+					$arguments = [];
+					foreach ($this->occCommand->getArguments() as $argument) {
+						$arguments[$argument['name']] = $input->getArgument($argument['name']);
+					}
+				} else {
+					$arguments = null;
 				}
-				$options = [];
-				foreach ($this->occCommand->getOptions() as $option) {
-					$options[$option['name']] = $input->getOption($option['name']);
+				if (count($this->occCommand->getOptions()) > 0) {
+					$options = [];
+					foreach ($this->occCommand->getOptions() as $option) {
+						$options[$option['name']] = $input->getOption($option['name']);
+					}
+				} else {
+					$options = null;
 				}
 
 				$executeHandler = $this->occCommand->getExecuteHandler();
-				$response = $this->service->exAppRequest($this->occCommand->getAppid(), $executeHandler, params: [
-					'occ' => [
-						'arguments' => $arguments,
-						'options' => $options,
+				$response = $this->service->exAppRequest($this->occCommand->getAppid(), $executeHandler,
+					params: [
+						'occ' => [
+							'arguments' => $arguments,
+							'options' => $options,
+						],
+					],
+					options: [
+						'stream' => true,
 					]
-				]);
+				);
 
 				if (!($response instanceof IResponse) && isset($response['error'])) {
 					$output->writeln(sprintf('[%s] command executeHandler failed. Error: %s', $this->occCommand->getName(), $response['error']));
@@ -172,6 +186,7 @@ class ExAppOccService {
 					]);
 					return 1;
 				}
+
 				if ($response->getStatusCode() !== Http::STATUS_OK) {
 					$output->writeln(sprintf('[%s] command executeHandler failed', $this->occCommand->getName()));
 					$this->logger->error(sprintf('[%s] command executeHandler failed', $this->occCommand->getName()), [
@@ -179,7 +194,12 @@ class ExAppOccService {
 					]);
 					return 1;
 				}
-				$output->writeln($response->getBody());
+
+				$body = $response->getBody();
+				while(!$body->eof()) {
+					$row = $body->read(1024);
+					$output->write($row);
+				}
 
 				return 0;
 			}
@@ -203,6 +223,9 @@ class ExAppOccService {
 				}
 				if ($mode === 'optional') {
 					return InputOption::VALUE_OPTIONAL;
+				}
+				if ($mode === 'none') {
+					return InputOption::VALUE_NONE;
 				}
 				if ($mode === 'array') {
 					return InputOption::VALUE_IS_ARRAY;

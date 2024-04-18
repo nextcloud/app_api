@@ -30,7 +30,7 @@ Params
         "arguments": [
             {
                 "name": "argument_name",
-                "mode": "required (InputArgument::REQUIRED)/optional(InputArgument::OPTIONAL)/array(InputArgument::IS_ARRAY)",
+                "mode": "required (InputArgument::REQUIRED)/optional (InputArgument::OPTIONAL)/array (InputArgument::IS_ARRAY)",
                 "description": "Description of the argument",
                 "default": "default_value"
             }
@@ -39,7 +39,7 @@ Params
             {
                 "name": "option_name",
                 "shortcut": "shortcut",
-                "mode": "value_required(InputOption::VALUE_REQUIRED)/value_optional(InputOption::VALUE_OPTIONAL)/value_none(InputOption::VALUE_NONE)/array(InputOption::VALUE_IS_ARRAY)/negatable(InputOption::VALUE_NEGATABLE)",
+                "mode": "required (InputOption::VALUE_REQUIRED)/optional (InputOption::VALUE_OPTIONAL)/none (InputOption::VALUE_NONE)/array (InputOption::VALUE_IS_ARRAY)/negatable (InputOption::VALUE_NEGATABLE)",
                 "description": "Description of the option",
                 "default": "default_value"
             }
