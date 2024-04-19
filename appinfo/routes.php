@@ -80,6 +80,11 @@ return [
 		['name' => 'EventsListener#unregisterListener', 'url' => '/api/v1/events_listener', 'verb' => 'DELETE'],
 		['name' => 'EventsListener#getListener', 'url' => '/api/v1/events_listener', 'verb' => 'GET'],
 
+		// Commands
+		['name' => 'OccCommand#registerCommand', 'url' => '/api/v1/occ_command', 'verb' => 'POST'],
+		['name' => 'OccCommand#unregisterCommand', 'url' => '/api/v1/occ_command', 'verb' => 'DELETE'],
+		['name' => 'OccCommand#getCommand', 'url' => '/api/v1/occ_command', 'verb' => 'GET'],
+
 		// Talk bots
 		['name' => 'TalkBot#registerExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'POST'],
 		['name' => 'TalkBot#unregisterExAppTalkBot', 'url' => '/api/v1/talk_bot', 'verb' => 'DELETE'],
