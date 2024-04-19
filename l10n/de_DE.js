@@ -149,6 +149,7 @@ OC.L10N.register(
     "manual-install apps cannot be updated" : "manual-install Apps können nicht aktualisiert werden",
     "{progress}% Deploying" : "{progress}% bereitstellen",
     "{progress}% Initializing" : "{progress}% Initialisierung",
+    "Healthchecking" : "Gesundheitscheck",
     "Deploy and Enable" : "Bereitstellen und Aktivieren",
     "Enable" : "Aktivieren",
     "Disable" : "Deaktivieren",

@@ -34,6 +34,7 @@ OC.L10N.register(
     "Host" : "Διακομιστής",
     "Nextcloud URL" : "Διεύθυνση URL του Nextcloud",
     "Network" : "Δίκτυο",
+    "Confirm" : "Επιβεβαίωση",
     "Register" : "Εγγραφή",
     "Your apps" : "Οι εφαρμογές σας",
     "Details" : "Λεπτομέρειες",

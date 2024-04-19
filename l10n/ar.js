@@ -149,6 +149,7 @@ OC.L10N.register(
     "manual-install apps cannot be updated" : "التطبيقات المثبية يدويّاً لا يمكن تحديثها",
     "{progress}% Deploying" : "{progress}% في طور النشر",
     "{progress}% Initializing" : "{progress}% تحت التحضير",
+    "Healthchecking" : "إختبار الصحة Healthchecking",
     "Deploy and Enable" : "قُم بالنشر و التمكين",
     "Enable" : "تمكين",
     "Disable" : "تعطيل",

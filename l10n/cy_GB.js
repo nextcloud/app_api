@@ -10,6 +10,7 @@ OC.L10N.register(
     "Actions" : "Gweithredoedd",
     "Type" : "Math",
     "Delete" : "Dileu",
+    "Confirm" : "Cadarnhau",
     "Register" : "Cofrestru",
     "Details" : "Manylion",
     "Changelog" : "Cofnod newid",

@@ -149,6 +149,7 @@ OC.L10N.register(
     "manual-install apps cannot be updated" : "無法更新手動安裝應用程式",
     "{progress}% Deploying" : "{progress}% 部署中",
     "{progress}% Initializing" : "初始化 {progress}%",
+    "Healthchecking" : "健康檢查",
     "Deploy and Enable" : "部署與啟用",
     "Enable" : "啟用",
     "Disable" : "停用",

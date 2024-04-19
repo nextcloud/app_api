@@ -31,6 +31,7 @@ OC.L10N.register(
     "Host" : "Vært",
     "Display name" : "Vist navn",
     "Network" : "Netværk",
+    "Confirm" : "Bekræft",
     "Register" : "Registér",
     "Your apps" : "Dine apps",
     "Details" : "Detaljer",
