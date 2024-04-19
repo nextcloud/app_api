@@ -168,7 +168,7 @@ class ExAppOccService {
 				}
 
 				$executeHandler = $this->occCommand->getExecuteHandler();
-				$response = $this->service->exAppRequestGuzzle($this->occCommand->getAppid(), $executeHandler,
+				$response = $this->service->exAppRequest($this->occCommand->getAppid(), $executeHandler,
 					params: [
 						'occ' => [
 							'arguments' => $arguments,
@@ -198,8 +198,10 @@ class ExAppOccService {
 				}
 
 				$body = $response->getBody();
-				while(!$body->eof()) {
-					$output->write($body->read(1024));
+				if (is_resource($body)) {
+					while (!feof($body)) {
+						$output->write(fread($body, 1024));
+					}
 				}
 
 				return 0;
