@@ -75,6 +75,7 @@ OC.L10N.register(
     "Supported apps" : "Applications supportées",
     "manual-install apps cannot be updated" : "les applications installées manuellement ne peuvent pas être mises à jour",
     "{progress}% Initializing" : "{progress}% Initialisation",
+    "Healthchecking" : "Vérification de l'état",
     "Deploy and Enable" : "Déployer et Activer",
     "Enable" : "Activer",
     "Disable" : "Désactiver",
