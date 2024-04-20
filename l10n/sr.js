@@ -149,6 +149,7 @@ OC.L10N.register(
     "manual-install apps cannot be updated" : "ручно инсталиране апликације не могу да се ажурирају",
     "{progress}% Deploying" : "{progress}% Поставља се",
     "{progress}% Initializing" : "{progress}% иницијализовано",
+    "Healthchecking" : "Провера здравља",
     "Deploy and Enable" : "Постави и укључи",
     "Enable" : "Укључи",
     "Disable" : "Искључи",
