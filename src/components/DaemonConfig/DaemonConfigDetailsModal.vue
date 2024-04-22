@@ -12,6 +12,7 @@
 					{{ t('app_api', 'Manual install daemon usually used for development. It cannot be set as default daemon.') }}
 				</NcNoteCard>
 
+				<p><b>{{ t('app_api', 'ExApps installed') }}: </b>{{ daemon.exAppsCount }}</p>
 				<p><b>{{ t('app_api', 'Name') }}: </b>{{ daemon.name }}</p>
 				<p><b>{{ t('app_api', 'Protocol') }}: </b>{{ daemon.protocol }}</p>
 				<p><b>{{ t('app_api', 'Host') }}: </b>{{ daemon.host }}</p>

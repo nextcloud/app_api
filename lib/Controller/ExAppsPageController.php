@@ -26,6 +26,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
@@ -524,12 +525,36 @@ class ExAppsPageController extends Controller {
 	/**
 	 * Get ExApp status, that includes initialization information
 	 */
+	#[NoCSRFRequired]
 	public function getAppStatus(string $appId): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
 		if (is_null($exApp)) {
 			return new JSONResponse(['error' => $this->l10n->t('ExApp not found, failed to get status')], Http::STATUS_NOT_FOUND);
 		}
 		return new JSONResponse($exApp->getStatus());
+	}
+
+	#[NoCSRFRequired]
+	public function getAppLogs(string $appId): DataDownloadResponse {
+		$exApp = $this->exAppService->getExApp($appId);
+		if (is_null($exApp)) {
+			return new DataDownloadResponse(json_encode(['error' => $this->l10n->t('ExApp not found, failed to get logs')]), $this->dockerActions->buildExAppContainerName($appId) . '_logs.txt', 'text/plain');
+		}
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		$this->dockerActions->initGuzzleClient($daemonConfig);
+		try {
+			$logs = $this->dockerActions->getContainerLogs(
+				$this->dockerActions->buildDockerUrl($daemonConfig),
+				$this->dockerActions->buildExAppContainerName($appId)
+			);
+			return new DataDownloadResponse(
+				$logs,
+				$this->dockerActions->buildExAppContainerName($appId) . '_logs.txt', 'text/plain',
+				Http::STATUS_OK
+			);
+		} catch (Exception) {
+			return new DataDownloadResponse(json_encode(['error' => $this->l10n->t('Failed to get logs')]), $this->dockerActions->buildExAppContainerName($appId) . '_logs.txt', 'text/plain');
+		}
 	}
 
 	/**

@@ -18,7 +18,13 @@
 					</template>
 					{{ !isDefault ? t('app_api', 'Set as default') : t('app_api', 'Default') }}
 				</NcActionButton>
-				<NcActionButton icon="icon-delete" :close-after-click="true" @click="deleteDaemonConfig(daemon)">
+				<NcActionButton v-if="daemon.accepts_deploy_id !== 'manual-install'" :close-after-click="true" @click="showTestDeployModal()">
+					{{ t('app_api', 'Test deploy') }}
+					<template #icon>
+						<TestTube :size="20" />
+					</template>
+				</NcActionButton>
+				<NcActionButton icon="icon-delete" :close-after-click="true" @click="deleteDaemonConfig()">
 					{{ t('app_api', 'Delete') }}
 					<template #icon>
 						<NcLoadingIcon v-if="deleting" :size="20" />
@@ -37,6 +43,12 @@
 			:deleting="deleting"
 			:delete-daemon-config="_deleteDaemonConfig"
 			:show.sync="showDeleteDialog" />
+		<template v-if="daemon.accepts_deploy_id !== 'manual-install'">
+			<DaemonTestDeploy
+				v-if="showTestDeployDialog"
+				:show.sync="showTestDeployDialog"
+				:daemon="daemon" />
+		</template>
 	</div>
 </template>
 
@@ -49,9 +61,11 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
 
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import CheckBold from 'vue-material-design-icons/CheckBold.vue'
+import TestTube from 'vue-material-design-icons/TestTube.vue'
 
 import DaemonConfigDetailsModal from './DaemonConfigDetailsModal.vue'
 import ConfirmDaemonDeleteModal from './ConfirmDaemonDeleteModal.vue'
+import DaemonTestDeploy from './DaemonTestDeploy.vue'
 
 export default {
 	name: 'DaemonConfig',
@@ -61,7 +75,9 @@ export default {
 		CheckBold,
 		DaemonConfigDetailsModal,
 		ConfirmDaemonDeleteModal,
+		DaemonTestDeploy,
 		NcLoadingIcon,
+		TestTube,
 	},
 	props: {
 		daemon: {
@@ -90,6 +106,7 @@ export default {
 			deleting: false,
 			showDeleteDialog: false,
 			removeExAppsOnDaemonDelete: false,
+			showTestDeployDialog: false,
 		}
 	},
 	computed: {
@@ -118,7 +135,7 @@ export default {
 					this.settingDefault = false
 				})
 		},
-		deleteDaemonConfig(daemon) {
+		deleteDaemonConfig() {
 			this.showDeleteDialog = true
 		},
 		_deleteDaemonConfig(daemon) {
@@ -136,6 +153,9 @@ export default {
 					this.deleting = false
 					this.showDetailsModal = false
 				})
+		},
+		showTestDeployModal() {
+			this.showTestDeployDialog = true
 		},
 	},
 }
