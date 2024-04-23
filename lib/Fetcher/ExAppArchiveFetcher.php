@@ -46,9 +46,7 @@ class ExAppArchiveFetcher {
 
 		// Validate signature of downloaded archive
 		$certificate = openssl_get_publickey($exAppAppstoreData['certificate']);
-		$verified = (bool) openssl_verify(file_get_contents($tempFile), base64_decode($releaseSignature), $certificate, OPENSSL_ALGO_SHA512);
-
-		if (!$verified) {
+		if (openssl_verify(file_get_contents($tempFile), base64_decode($releaseSignature), $certificate, OPENSSL_ALGO_SHA512) !== 1) {
 			return null;
 		}
 

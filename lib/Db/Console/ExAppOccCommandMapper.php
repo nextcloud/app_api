@@ -24,7 +24,7 @@ class ExAppOccCommandMapper extends QBMapper {
 		$qb = $this->db->getQueryBuilder();
 		$result = $qb->select('exs.*')
 			->from($this->tableName, 'exs')
-			->innerJoin('exs', 'ex_apps', 'exa', 'exa.appid = exs.appid')
+			->innerJoin('exs', 'ex_apps', 'exa', $qb->expr()->eq('exa.appid', 'exs.appid'))
 			->where(
 				$qb->expr()->eq('exa.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT))
 			)

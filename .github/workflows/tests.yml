@@ -270,7 +270,11 @@ jobs:
 
   nc-py-api-oci:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • stable28 • 8.2 • Oracle
+    name: NC_Py_API • ${{ matrix.server-version }} • 8.2 • Oracle
+    strategy:
+      fail-fast: false
+      matrix:
+        server-version: [ 'stable28', 'stable29' ]
 
     services:
       oracle:
@@ -300,13 +304,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: stable28
+          ref: ${{ matrix.server-version }}
 
       - name: Checkout Notifications
         uses: actions/checkout@v3
         with:
           repository: nextcloud/notifications
-          ref: stable28
+          ref: ${{ matrix.server-version }}
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -376,7 +380,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: oci_nc_py_api_stable28_8.2_nextcloud.log
+          name: oci_nc_py_api_${{ matrix.server-version }}_8.2_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 

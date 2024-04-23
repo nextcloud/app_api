@@ -15,7 +15,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getAppid()
  * @method string getName()
  * @method string getDescription()
- * @method bool getHidden()
+ * @method int getHidden()
  * @method array getArguments()
  * @method array getOptions()
  * @method array getUsages()
@@ -23,7 +23,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
  * @method void setDescription(string $description)
- * @method void setHidden(bool $hidden)
+ * @method void setHidden(int $hidden)
  * @method void setArguments(array $arguments)
  * @method void setOptions(array $options)
  * @method void setUsages(array $usages)
@@ -46,7 +46,7 @@ class ExAppOccCommand extends Entity implements JsonSerializable {
 		$this->addType('appid', 'string');
 		$this->addType('name', 'string');
 		$this->addType('description', 'string');
-		$this->addType('hidden', 'bool');
+		$this->addType('hidden', 'int');
 		$this->addType('arguments', 'json');
 		$this->addType('options', 'json');
 		$this->addType('usages', 'json');
@@ -63,6 +63,8 @@ class ExAppOccCommand extends Entity implements JsonSerializable {
 		}
 		if (isset($params['description'])) {
 			$this->setDescription($params['description']);
+		} else {
+			$this->setDescription('');
 		}
 		if (isset($params['hidden'])) {
 			$this->setHidden($params['hidden']);
