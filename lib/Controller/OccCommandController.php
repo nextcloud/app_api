@@ -19,7 +19,7 @@ class OccCommandController extends OCSController {
 
 	public function __construct(
 		IRequest $request,
-		private readonly ExAppOccService $service,
+		private readonly ExAppOccService $service
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -33,7 +33,7 @@ class OccCommandController extends OCSController {
 		string $name,
 		string $description,
 		string $execute_handler,
-		bool $hidden = false,
+		int $hidden = 0,
 		array $arguments = [],
 		array $options = [],
 		array $usages = [],

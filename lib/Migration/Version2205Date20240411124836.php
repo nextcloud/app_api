@@ -36,7 +36,7 @@ class Version2205Date20240411124836 extends SimpleMigrationStep {
 			// Symfony\Component\Console\Command\Command->setName()
 			$table->addColumn('name', Types::STRING, [
 				'notnull' => true,
-				'length' => 128,
+				'length' => 64,
 			]);
 			// Symfony\Component\Console\Command\Command->setDescription()
 			$table->addColumn('description', Types::STRING, [
@@ -46,6 +46,8 @@ class Version2205Date20240411124836 extends SimpleMigrationStep {
 			// Symfony\Component\Console\Command\Command->setHidden()
 			$table->addColumn('hidden', Types::SMALLINT, [
 				'notnull' => true,
+				'default' => 0,
+				'length' => 1,
 			]);
 			// Symfony\Component\Console\Command\Command->addArgument()
 			$table->addColumn('arguments', Types::JSON, [

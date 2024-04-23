@@ -36,7 +36,7 @@ class ExAppOccService {
 		string $appId,
 		string $name,
 		string $description,
-		bool $hidden,
+		int $hidden,
 		array $arguments,
 		array $options,
 		array $usages,
@@ -124,7 +124,7 @@ class ExAppOccService {
 			protected function configure() {
 				$this->setName($this->occCommand->getName());
 				$this->setDescription($this->occCommand->getDescription());
-				$this->setHidden($this->occCommand->getHidden());
+				$this->setHidden(filter_var($this->occCommand->getHidden(), FILTER_VALIDATE_BOOLEAN));
 				foreach ($this->occCommand->getArguments() as $argument) {
 					$this->addArgument(
 						$argument['name'],

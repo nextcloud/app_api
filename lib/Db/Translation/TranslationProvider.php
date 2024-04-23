@@ -67,6 +67,8 @@ class TranslationProvider extends Entity implements \JsonSerializable {
 		}
 		if (isset($params['action_detect_lang'])) {
 			$this->setActionDetectLang($params['action_detect_lang']);
+		} else {
+			$this->setActionDetectLang('');
 		}
 	}
 
