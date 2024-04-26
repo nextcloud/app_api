@@ -70,14 +70,14 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		<job>OCA\AppAPI\BackgroundJob\ProvidersAICleanUpJob</job>
 	</background-jobs>
 	<repair-steps>
+		<post-migration>
+			<step>OCA\AppAPI\Migration\DaemonUpdateGPUSRepairStep</step>
+		</post-migration>
 		<install>
 			<step>OCA\AppAPI\Migration\DataInitializationStep</step>
 			<step>OCA\AppAPI\Migration\DaemonUpdateV2RepairStep</step>
 			<step>OCA\AppAPI\Migration\DaemonUpdateGPUSRepairStep</step>
 		</install>
-		<post-migration>
-			<step>OCA\AppAPI\Migration\DaemonUpdateGPUSRepairStep</step>
-		</post-migration>
 	</repair-steps>
 	<commands>
 		<command>OCA\AppAPI\Command\ExApp\Deploy</command>
