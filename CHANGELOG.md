@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Test deploy button in Admin settings for each Daemon configuration.
+- Test deploy button in Admin settings for each Daemon configuration. #279
 
 ## [2.5.0 - 2024-04-23]
 
