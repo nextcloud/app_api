@@ -43,7 +43,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 *Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
-	<version>2.5.0</version>
+	<version>2.5.1</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
@@ -75,6 +75,9 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 			<step>OCA\AppAPI\Migration\DaemonUpdateV2RepairStep</step>
 			<step>OCA\AppAPI\Migration\DaemonUpdateGPUSRepairStep</step>
 		</install>
+		<post-migration>
+			<step>OCA\AppAPI\Migration\DaemonUpdateGPUSRepairStep</step>
+		</post-migration>
 	</repair-steps>
 	<commands>
 		<command>OCA\AppAPI\Command\ExApp\Deploy</command>

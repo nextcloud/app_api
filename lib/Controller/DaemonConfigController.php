@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Controller;
 
-use OC\AppFramework\Http;
+use OCP\AppFramework\Http;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 
@@ -145,7 +145,6 @@ class DaemonConfigController extends ApiController {
 		$status = $exApp->getStatus();
 
 		return new JSONResponse([
-			'success' => $exApp !== null,
 			'status' => $status,
 		]);
 	}
@@ -155,10 +154,23 @@ class DaemonConfigController extends ApiController {
 		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
 		if ($exApp !== null) {
 			$this->service->runOccCommand(sprintf("app_api:app:unregister --silent --force %s", Application::TEST_DEPLOY_APPID));
+			$elapsedTime = 0;
+			while ($elapsedTime < 5000000 && $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID) === null) {
+				usleep(150000); // 0.15
+				$elapsedTime += 150000;
+			}
 		}
 		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
 		return new JSONResponse([
 			'success' => $exApp === null,
 		]);
+	}
+
+	public function getTestDeployStatus(string $name): Response {
+		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
+		if (is_null($exApp) || $exApp->getDaemonConfigName() !== $name) {
+			return new JSONResponse(['error' => $this->l10n->t('ExApp not found, failed to get status')], Http::STATUS_NOT_FOUND);
+		}
+		return new JSONResponse($exApp->getStatus());
 	}
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use OC\App\AppStore\Fetcher\CategoryFetcher;
 use OC\App\AppStore\Version\VersionParser;
 use OC\App\DependencyAnalyzer;
@@ -535,25 +536,34 @@ class ExAppsPageController extends Controller {
 	}
 
 	#[NoCSRFRequired]
-	public function getAppLogs(string $appId): DataDownloadResponse {
+	public function getAppLogs(string $appId, string $tail = 'all'): DataDownloadResponse {
 		$exApp = $this->exAppService->getExApp($appId);
 		if (is_null($exApp)) {
-			return new DataDownloadResponse(json_encode(['error' => $this->l10n->t('ExApp not found, failed to get logs')]), $this->dockerActions->buildExAppContainerName($appId) . '_logs.txt', 'text/plain');
+			return new DataDownloadResponse(
+				json_encode(['error' => $this->l10n->t('ExApp not found, failed to get logs')]),
+				$this->dockerActions->buildExAppContainerName($appId) . '_logs.txt',
+				'text/plain'
+			);
 		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 		$this->dockerActions->initGuzzleClient($daemonConfig);
 		try {
 			$logs = $this->dockerActions->getContainerLogs(
 				$this->dockerActions->buildDockerUrl($daemonConfig),
-				$this->dockerActions->buildExAppContainerName($appId)
+				$this->dockerActions->buildExAppContainerName($appId),
+				$tail
 			);
 			return new DataDownloadResponse(
 				$logs,
 				$this->dockerActions->buildExAppContainerName($appId) . '_logs.txt', 'text/plain',
 				Http::STATUS_OK
 			);
-		} catch (Exception) {
-			return new DataDownloadResponse(json_encode(['error' => $this->l10n->t('Failed to get logs')]), $this->dockerActions->buildExAppContainerName($appId) . '_logs.txt', 'text/plain');
+		} catch (GuzzleException $e) {
+			return new DataDownloadResponse(
+				json_encode(['error' => $this->l10n->t('Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s', [$e->getMessage()])]),
+				$this->dockerActions->buildExAppContainerName($appId) . '_logs.txt',
+				'text/plain'
+			);
 		}
 	}
 

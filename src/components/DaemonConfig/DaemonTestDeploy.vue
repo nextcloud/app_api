@@ -133,7 +133,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/',
+					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#register',
 				},
 				image_pull: {
 					id: 'image_pull',
@@ -143,7 +143,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/',
+					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#image-pull',
 				},
 				container_started: {
 					id: 'container_started',
@@ -153,7 +153,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/',
+					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#container-started',
 				},
 				heartbeat: {
 					id: 'heartbeat',
@@ -163,7 +163,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/',
+					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#heartbeat',
 				},
 				init: {
 					id: 'init',
@@ -173,7 +173,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/',
+					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#init',
 				},
 				enabled: {
 					id: 'enabled',
@@ -183,7 +183,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/',
+					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#enabled',
 				},
 			},
 		}
@@ -218,23 +218,20 @@ export default {
 			}).catch(() => {
 				this.stopDeployTest()
 			}).finally(() => {
-				this.startingTest = false
+				this.clearTestRunning()
 			})
 		},
 		_startDeployTest() {
 			return axios.post(generateUrl(`/apps/app_api/daemons/${this.daemon.name}/test_deploy`))
 				.then(res => {
-					if (res.data.success) {
-						this.startDeployTestPolling()
-					}
+					this.startDeployTestPolling()
 					return res
 				}).catch(err => {
 					console.debug(err)
 					if (err.data.error) {
 						showError(err.data.error)
 					}
-					this.testRunning = false
-					clearInterval(this.polling)
+					this.clearTestRunning()
 					return err
 				})
 		},
@@ -245,11 +242,10 @@ export default {
 		},
 		stopDeployTest() {
 			this._stopDeployTest().then(() => {
-				this.testRunning = false
 				Object.values(this.statusChecks).forEach(statusCheck => {
 					statusCheck.loading = false
 				})
-				clearInterval(this.polling)
+				this.clearTestRunning()
 			})
 		},
 		_stopDeployTest() {
@@ -261,20 +257,19 @@ export default {
 			})
 		},
 		fetchTestDeployStatus() {
-			return axios.get(generateUrl('/apps/app_api/apps/status/test-deploy'))
+			return axios.get(generateUrl(`/apps/app_api/daemons/${this.daemon.name}/test_deploy/status`))
 				.then(res => {
 					this.handleTestDeployStatus(res.data)
 				}).catch(err => {
 					// test-deploy app is not registered, test is not running
 					if (err.status === 404) {
-						this.testRunning = false
-						clearInterval(this.polling)
+						this.clearTestRunning()
 					}
 				})
 		},
 		handleTestDeployStatus(status) {
 			const currentStep = this._detectCurrentStep(status)
-			if (currentStep !== null) {
+			if (currentStep !== null && status.error === '') {
 				this.testRunning = true
 				if (this.polling === null) {
 					this.startDeployTestPolling()
@@ -305,8 +300,7 @@ export default {
 					statusCheck.passed = status.init === 100 && status.deploy === 100 && status.action === '' && status.error === ''
 					if (statusCheck.passed) {
 						showSuccess(t('app_api', 'Deploy test passed successfully!'))
-						clearInterval(this.polling)
-						this.testRunning = false
+						this.clearTestRunning()
 						statusCheck.loading = false
 					}
 					break
@@ -317,8 +311,7 @@ export default {
 					statusCheck.loading = false
 					statusCheck.passed = false
 					showError(t('app_api', 'Deploy test failed at step "{step}"', { step }))
-					clearInterval(this.polling)
-					this.testRunning = false
+					this.clearTestRunning()
 				}
 			})
 		},
@@ -356,6 +349,11 @@ export default {
 				return 'success'
 			}
 			return 'info'
+		},
+		clearTestRunning() {
+			this.testRunning = false
+			clearInterval(this.polling)
+			this.polling = null
 		},
 		getDownloadLogsUrl() {
 			return generateUrl('/apps/app_api/apps/logs/test-deploy')

@@ -26,6 +26,7 @@ and handle complex problems through issues.
    Installation
    DeployConfigurations
    CreationOfDeployDaemon
+   TestDeploy
    ManagingExternalApplications
    Concepts
    tech_details/index.rst

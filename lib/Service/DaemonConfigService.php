@@ -74,15 +74,13 @@ class DaemonConfigService {
 	}
 
 	public function getDaemonConfigsWithAppsCount(): array {
-		$exApps = $this->exAppService->getExAppsList('all');
-		$daemonsExAppsCount = [];
-		foreach ($exApps as $app) {
-			$exApp = $this->exAppService->getExApp($app['id']);
-			if (!isset($daemonsExAppsCount[$exApp->getDaemonConfigName()])) {
-				$daemonsExAppsCount[$exApp->getDaemonConfigName()] = 0;
+		$daemonsExAppsCount = array_reduce($this->exAppService->getExApps(), function (array $carry, $exApp) {
+			if (!isset($carry[$exApp->getDaemonConfigName()])) {
+				$carry[$exApp->getDaemonConfigName()] = 0;
 			}
-			$daemonsExAppsCount[$exApp->getDaemonConfigName()] += 1;
-		}
+			$carry[$exApp->getDaemonConfigName()] += 1;
+			return $carry;
+		}, []);
 		return array_map(function (DaemonConfig $daemonConfig) use ($daemonsExAppsCount) {
 			return [
 				...$daemonConfig->jsonSerialize(),
