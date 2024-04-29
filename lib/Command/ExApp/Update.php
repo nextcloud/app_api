@@ -225,7 +225,7 @@ class Update extends Command {
 			);
 		}
 
-		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
+		if (!$this->service->heartbeatExApp($exAppUrl, $auth, $appId)) {
 			$this->logger->error(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
 			if ($outputConsole) {
 				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));

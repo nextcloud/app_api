@@ -15,7 +15,7 @@
 					class="status-check">
 					<NcNoteCard
 						:type="getStatusCheckType(statusCheck)"
-						:heading="statusCheck?.progress ? statusCheck.title + ` (${statusCheck.progress}%)` : statusCheck.title"
+						:heading="getStatusCheckTitle(statusCheck)"
 						style="margin: 0 0 10px 0;">
 						<template #icon>
 							<NcLoadingIcon v-if="statusCheck.loading && !statusCheck.error" :size="20" />
@@ -278,23 +278,30 @@ export default {
 			Object.keys(this.statusChecks).forEach(step => {
 				const statusCheck = this.statusChecks[step]
 				statusCheck.loading = step === currentStep
+				if (statusCheck.id === 'image_pull' && statusCheck.loading) {
+					statusCheck.progress = status.deploy
+				}
+				if (statusCheck.id === 'init' && statusCheck.loading) {
+					statusCheck.progress = status.init
+				}
 				switch (step) {
 				case 'register':
 					statusCheck.passed = true // at this point we're reading app status, so it's already registered
 					break
 				case 'image_pull':
 					statusCheck.passed = status.deploy >= 94
-					statusCheck.progress = status.deploy
 					break
 				case 'container_started':
 					statusCheck.passed = status.deploy >= 98
 					break
 				case 'heartbeat':
 					statusCheck.passed = status.deploy === 100
+					if (status.heartbeat_count) {
+						statusCheck.heartbeat_count = status.heartbeat_count
+					}
 					break
 				case 'init':
 					statusCheck.passed = status.init === 100
-					statusCheck.progress = status.init
 					break
 				case 'enabled':
 					statusCheck.passed = status.init === 100 && status.deploy === 100 && status.action === '' && status.error === ''
@@ -351,6 +358,12 @@ export default {
 				return 'success'
 			}
 			return 'info'
+		},
+		getStatusCheckTitle(statusCheck) {
+			if (statusCheck.id === 'heartbeat' && statusCheck.heartbeat_count) {
+				return statusCheck.title + ` (heartbeat_count: ${statusCheck.heartbeat_count})`
+			}
+			return statusCheck?.progress ? statusCheck.title + ` (${statusCheck.progress}%)` : statusCheck.title
 		},
 		clearTestRunning() {
 			this.testRunning = false

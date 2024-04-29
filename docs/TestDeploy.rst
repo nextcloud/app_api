@@ -60,7 +60,7 @@ The ExApp might have additional pre-configuration logic during this step.
 Possible errors:
 
 - ExApp failed to start a web server, e.g., if the port is already in use (this should be visible in the container logs)
-
+- ExApp heartbeat_count keeps increasing, this may indicate that the ExApp couldn't start properly
 
 Init
 ****
