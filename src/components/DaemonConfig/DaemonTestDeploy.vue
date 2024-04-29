@@ -311,16 +311,18 @@ export default {
 					statusCheck.loading = false
 					statusCheck.passed = false
 					showError(t('app_api', 'Deploy test failed at step "{step}"', { step }))
-					this.clearTestRunning()
 				}
 			})
+			if (status.error !== '') {
+				this.clearTestRunning()
+			}
 		},
 		_detectCurrentStep(status) {
 			if (status.action === '' && status.deploy === 0 && status.init === 0) {
 				return 'register'
 			}
 			if (status.action === 'deploy') {
-				if (status.deploy > 0 && status.deploy < 94) {
+				if (status.deploy >= 0 && status.deploy < 94) {
 					return 'image_pull'
 				}
 				if (status.deploy >= 95 && status.deploy <= 97) {
