@@ -208,6 +208,9 @@ export default {
 				if (statusCheck.progress) {
 					delete statusCheck.progress
 				}
+				if (statusCheck.heartbeat.heartbeat_count) {
+					delete statusCheck.heartbeat.heartbeat_count
+				}
 			})
 			this._startDeployTest().then((res) => {
 				this.testRunning = true
@@ -284,6 +287,9 @@ export default {
 				if (statusCheck.id === 'init' && statusCheck.loading) {
 					statusCheck.progress = status.init
 				}
+				if (status.heartbeat_count) {
+					statusCheck.heartbeat.heartbeat_count = status.heartbeat_count
+				}
 				switch (step) {
 				case 'register':
 					statusCheck.passed = true // at this point we're reading app status, so it's already registered
@@ -296,9 +302,6 @@ export default {
 					break
 				case 'heartbeat':
 					statusCheck.passed = status.deploy === 100
-					if (status.heartbeat_count) {
-						statusCheck.heartbeat_count = status.heartbeat_count
-					}
 					break
 				case 'init':
 					statusCheck.passed = status.init === 100
