@@ -55,6 +55,8 @@ use Throwable;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_api';
+	public const TEST_DEPLOY_APPID = 'test-deploy';
+	public const TEST_DEPLOY_INFO_XML = 'https://raw.githubusercontent.com/cloud-py-api/test-deploy/main/appinfo/info.xml';
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);
