@@ -208,7 +208,7 @@ export default {
 				if (statusCheck.progress) {
 					delete statusCheck.progress
 				}
-				if (statusCheck.heartbeat.heartbeat_count) {
+				if (statusCheck.heartbeat_count) {
 					delete statusCheck.heartbeat.heartbeat_count
 				}
 			})
