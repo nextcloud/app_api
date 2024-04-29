@@ -218,7 +218,7 @@ export default {
 			}).catch(() => {
 				this.stopDeployTest()
 			}).finally(() => {
-				this.clearTestRunning()
+				this.startingTest = false
 			})
 		},
 		_startDeployTest() {
