@@ -551,7 +551,7 @@ class AppAPIService {
 					sprintf('Failed heartbeat on %s for %d times. Most recent status=%d, error: %s', $exAppUrl, $failedHeartbeatCount, $statusCode, $errorMsg)
 				);
 				$status = $exApp->getStatus();
-				if ($status['heartbeat_count']) {
+				if (isset($status['heartbeat_count'])) {
 					$status['heartbeat_count'] += $failedHeartbeatCount;
 				} else {
 					$status['heartbeat_count'] = $failedHeartbeatCount;
