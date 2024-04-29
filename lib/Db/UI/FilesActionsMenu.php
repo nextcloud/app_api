@@ -20,6 +20,7 @@ use OCP\AppFramework\Db\Entity;
  * @method int getOrder()
  * @method string getIcon()
  * @method string getActionHandler()
+ * @method string getVersion()
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
@@ -28,6 +29,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setOrder(int $order)
  * @method void setIcon(string $icon)
  * @method void setActionHandler(string $actionHandler)
+ * @method void setVersion(string $version)
  */
 class FilesActionsMenu extends Entity implements JsonSerializable {
 	protected $appid;
@@ -38,6 +40,7 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 	protected $order;
 	protected $icon;
 	protected $actionHandler;
+	protected $version;
 
 	/**
 	 * @param array $params
@@ -51,6 +54,7 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		$this->addType('order', 'int');
 		$this->addType('icon', 'string');
 		$this->addType('actionHandler', 'string');
+		$this->addType('version', 'string');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
@@ -79,6 +83,9 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		if (isset($params['action_handler'])) {
 			$this->setActionHandler($params['action_handler']);
 		}
+		if (isset($params['version'])) {
+			$this->setVersion($params['version']);
+		}
 	}
 
 	public function jsonSerialize(): array {
@@ -92,6 +99,7 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 			'order' => $this->getOrder(),
 			'icon' => $this->getIcon(),
 			'action_handler' => $this->getActionHandler(),
+			'version' => $this->getVersion(),
 		];
 	}
 }

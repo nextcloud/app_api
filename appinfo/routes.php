@@ -99,6 +99,7 @@ return [
 		// --- UI ---
 		// File Actions Menu
 		['name' => 'OCSUi#registerFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'POST'],
+		['name' => 'OCSUi#registerFileActionMenuV2', 'url' => '/api/v2/ui/files-actions-menu', 'verb' => 'POST'],
 		['name' => 'OCSUi#unregisterFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'GET'],
 

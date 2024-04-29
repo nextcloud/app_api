@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Test deploy button in Admin settings for each Daemon configuration. #279
+- File Actions option to redirect to the ExApp Top Menu (UI) page with the selected file context. #280
 
 ## [2.5.0 - 2024-04-23]
 

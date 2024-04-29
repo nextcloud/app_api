@@ -25,12 +25,13 @@ Complete list of params (including optional):
 
 	{
 		"name": "unique_name_of_file_actions_menu",
-		"displayName": "Display name (for UI listing)",
-		"actionHandler": "/action_handler_route"
+		"display_name": "Display name (for UI listing)",
+		"action_handler": "/action_handler_route"
 		"mime": "mime of files where to display action menu",
 		"icon": "img/icon.svg",
 		"permissions": "permissions",
 		"order": "order_in_file_actions_menu",
+		"version": "1.0"
 	}
 
 .. note:: Urls ``icon`` and ``actionHandler`` are relative to the ExApp root, starting slash is not required.
@@ -90,6 +91,38 @@ The following data is sent to ExApp FileActionsMenu handler from the context of 
 		"instanceId": "string",
 	}
 
+Redirect to ExApp UI page (top menu)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+    Supported in Nextcloud 28+.
+
+If you want to open some file in ExApp UI, you need to set ``version`` to ``2.0``` in the FileActionsMenu registration.
+
+.. code-block:: json
+
+    {
+        "name": "unique_name_of_file_actions_menu",
+        "display_name": "Display name (for UI listing)",
+        "action_handler": "/action_handler_route"
+        "mime": "mime of files where to display action menu",
+        "icon": "img/icon.svg",
+        "permissions": "permissions",
+        "order": "order_in_file_actions_menu",
+        "version": "2.0"
+    }
+
+After that, AppAPI will expect in the JSON response of the ExApp ``action_handler``
+the ``redirect_handler`` - a relative path on the ExApp Top Menu page,
+to which AppAPI will attach a ``fileIds`` query parameter with the selected file ids, for example:
+
+``/index.php/apps/app_api/embedded/ui_example/first_menu/second_page?fileIds=123,124,125``,
+
+where the ``first_menu`` is the name of the Top Menu ExApp UI page,
+and the ``second_page`` relative route handled on the frontend routing of the ExApp,
+the ``fileIds`` query parameter contains the selected file ids separated by commas.
+After that you can get the files info via webdav search request, see `ui_example <https://github.com/cloud-py-api/ui_example>`_.
+
 
 Request flow
 ^^^^^^^^^^^^
@@ -126,5 +159,5 @@ Examples
 
 Here is a list of simple example ExApps based on FileActionsMenu:
 
-* `video_to_gif <https://github.com/cloud-py-api/nc_py_api/tree/main/examples/as_app/to_gif>`_ - ExApp based on FileActionsMenu to convert videos to gif in place
-* `upscaler_demo <https://github.com/cloud-py-api/upscaler_example.git>`_ - ExApp based on FileActionsMenu to upscale image in place
+* `to_gif <https://github.com/cloud-py-api/nc_py_api/tree/main/examples/as_app/to_gif>`_ - ExApp based on FileActionsMenu to convert videos to gif in place
+* `upscaler_example <https://github.com/cloud-py-api/upscaler_example.git>`_ - ExApp based on FileActionsMenu to upscale image in place

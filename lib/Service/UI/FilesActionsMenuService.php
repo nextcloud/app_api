@@ -36,10 +36,11 @@ class FilesActionsMenuService {
 	 * @param string $mime
 	 * @param int $permissions
 	 * @param int $order
+	 * @param string $version
 	 * @return FilesActionsMenu|null
 	 */
 	public function registerFileActionMenu(string $appId, string $name, string $displayName, string $actionHandler,
-		string $icon, string $mime, int $permissions, int $order): ?FilesActionsMenu {
+		string $icon, string $mime, int $permissions, int $order, string $version): ?FilesActionsMenu {
 		try {
 			$fileActionMenu = $this->mapper->findByAppidName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
@@ -55,6 +56,7 @@ class FilesActionsMenuService {
 				'mime' => $mime,
 				'permissions' => $permissions,
 				'order' => $order,
+				'version' => $version,
 			]);
 			if ($fileActionMenu !== null) {
 				$newFileActionMenu->setId($fileActionMenu->getId());
