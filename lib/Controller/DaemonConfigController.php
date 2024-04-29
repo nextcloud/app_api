@@ -155,7 +155,7 @@ class DaemonConfigController extends ApiController {
 		if ($exApp !== null) {
 			$this->service->runOccCommand(sprintf("app_api:app:unregister --silent --force %s", Application::TEST_DEPLOY_APPID));
 			$elapsedTime = 0;
-			while ($elapsedTime < 5000000 && $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID) === null) {
+			while ($elapsedTime < 5000000 && $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID) !== null) {
 				usleep(150000); // 0.15
 				$elapsedTime += 150000;
 			}
