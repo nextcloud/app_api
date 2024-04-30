@@ -508,6 +508,9 @@ class AppAPIService {
 		$heartbeatAttempts = 0;
 		$delay = 1;
 		$maxHeartbeatAttempts = 60 * 10 * $delay; // minutes for container initialization
+		if ($appId === Application::TEST_DEPLOY_APPID) {
+			$maxHeartbeatAttempts = 60 * 1 * $delay; // 1 minute for test deploy app
+		}
 
 		$options = [
 			'headers' => [

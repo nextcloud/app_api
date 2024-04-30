@@ -38,6 +38,10 @@ class ExAppInitStatusCheckJob extends TimedJob {
 					if (!isset($status['init_start_time'])) {
 						continue;
 					}
+					if ($exApp->getAppid() === Application::TEST_DEPLOY_APPID) {
+						// Check for smaller timeout for test deploy app
+						$initTimeoutMinutes = 0.5;
+					}
 					if ((time() >= ($status['init_start_time'] + $initTimeoutMinutes * 60)) && (empty($status['error']))) {
 						$this->service->setAppInitProgress(
 							$exApp, 0, sprintf('ExApp %s initialization timed out (%sm)', $exApp->getAppid(), $initTimeoutMinutes * 60)
