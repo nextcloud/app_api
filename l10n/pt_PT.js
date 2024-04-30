@@ -25,6 +25,7 @@ OC.L10N.register(
     "Delete" : "Eliminar",
     "Default" : "Predefinido",
     "Host" : "Anfitrião",
+    "Enabled" : "Activo",
     "Display name" : "Nome a exibir",
     "Network" : "Rede",
     "Confirm" : "Confirmar",

@@ -30,6 +30,7 @@ OC.L10N.register(
     "Delete" : "Eyða",
     "{license}-licensed" : "{license}-notkunarleyfi",
     "Host" : "Þjónn",
+    "Enabled" : "Virkt",
     "Display name" : "Birtingarnafn",
     "Network" : "Netkerfi",
     "Confirm" : "Staðfesta",

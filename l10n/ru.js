@@ -34,6 +34,7 @@ OC.L10N.register(
     "Set as default" : "Использовать по умолчанию",
     "Host" : "Имя или адрес сервера",
     "Nextcloud URL" : "Адрес сервера Nextcloud",
+    "Enabled" : "Включено",
     "Display name" : "Отображаемое имя",
     "Network" : "Сеть",
     "Confirm" : "Подтвердить",

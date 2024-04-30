@@ -40,6 +40,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-许可协议",
     "Host" : "主机",
     "Nextcloud URL" : "Nextcloud URL ",
+    "Enabled" : "已启用",
     "Display name" : "显示用户名",
     "Network" : "网络",
     "Confirm" : "确认",

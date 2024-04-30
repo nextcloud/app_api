@@ -32,6 +32,7 @@ OC.L10N.register(
     "{license}-licensed" : "Licencirano prema {license}",
     "Host" : "Glavno računalo",
     "Nextcloud URL" : "Nextcloud URL",
+    "Enabled" : "Omogućeno",
     "Network" : "Mreža",
     "Confirm" : "Potvrdi",
     "Register" : "Registriraj se",

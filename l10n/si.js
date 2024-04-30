@@ -7,6 +7,7 @@ OC.L10N.register(
     "Actions" : "ක්‍රියාමාර්ග",
     "Cancel" : "අවලංගු",
     "Host" : " ධාරකය",
+    "Enabled" : "සබල කර ඇත",
     "Confirm" : "තහවුරු කරන්න",
     "Disable" : "අබල කරන්න"
 },

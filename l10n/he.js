@@ -32,6 +32,7 @@ OC.L10N.register(
     "{license}-licensed" : "ברישיון {license}",
     "Host" : "מארח",
     "Nextcloud URL" : "כתובת Nextcloud",
+    "Enabled" : "מופעל",
     "Network" : "רשת",
     "Confirm" : "אימות",
     "Register" : "רישום",

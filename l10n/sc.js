@@ -30,6 +30,7 @@ OC.L10N.register(
     "{license}-licensed" : "suta lissèntzia {license}",
     "Host" : "Retzidore",
     "Nextcloud URL" : "URL de Nextcloud",
+    "Enabled" : "Ativadu",
     "Display name" : "Ammustra nùmene",
     "Network" : "Rete",
     "Confirm" : "Cunfirma",

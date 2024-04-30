@@ -6,6 +6,7 @@ OC.L10N.register(
     "Type" : "Anaw",
     "Delete" : "Kkes",
     "Default" : "Prédéfini(e)",
+    "Enabled" : "Yermed",
     "Confirm" : "Serggeg",
     "Details" : "Talqayt",
     "Disable" : "Désactiver"

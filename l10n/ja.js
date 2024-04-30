@@ -32,6 +32,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-に許諾されています",
     "Host" : "ホスト",
     "Nextcloud URL" : "Nextcloud URL",
+    "Enabled" : "有効",
     "Display name" : "表示名",
     "Network" : "ネットワーク",
     "Confirm" : "承認",

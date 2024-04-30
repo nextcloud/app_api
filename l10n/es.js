@@ -2,10 +2,10 @@ OC.L10N.register(
     "app_api",
     {
     "External Apps" : "Apps Externas",
+    "ExApp not found, failed to get status" : "No se encontró ExApp, fallo al obtener el estado",
     "Failed to enable ExApp" : "Fallo al habilitar ExApp",
     "Failed to disable ExApp" : "Fallo al deshabilitar ExApp",
     "Could not update ExApp" : "No se pudo actualizar ExApp",
-    "ExApp not found, failed to get status" : "No se encontró ExApp, fallo al obtener el estado",
     "AppAPI authentication failed" : "Fallo de autenticación AppAPI",
     "AppAPI ExApp version update notifier" : "Notificador AppAPI de actualizaciones de versión para ExApps",
     "AppAPI ExApp notifier" : "Notificador AppAPI",

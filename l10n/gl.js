@@ -45,6 +45,7 @@ OC.L10N.register(
     "Host" : "Servidor",
     "Deploy config" : "Despregar a configuración",
     "Nextcloud URL" : "URL de Nextcloud",
+    "Enabled" : "Activado",
     "Display name" : "Nome para amosar",
     "Network" : "Rede",
     "Confirm" : "Confirmar",

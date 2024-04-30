@@ -49,6 +49,7 @@ OC.L10N.register(
     "Additional options" : "Options supplémentaires",
     "Verify connection" : "Vérifier la connexion",
     "Daemon connection successful" : "Connexion au Deamon réussie",
+    "Enabled" : "Activé",
     "Display name" : "Nom d'affichage",
     "Deployment method" : "Méthode de déploiement",
     "Daemon host" : "Hôte du Deamon",

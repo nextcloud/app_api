@@ -7,6 +7,7 @@ OC.L10N.register(
     "Cancel" : "លើកលែង",
     "Delete" : "លុប",
     "Host" : "ម៉ាស៊ីន​ផ្ទុក",
+    "Enabled" : "បាន​បើក",
     "Details" : "ព័ត៌មាន​លម្អិត",
     "Disable" : "បិទ"
 },

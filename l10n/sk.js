@@ -37,6 +37,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-licencovaný",
     "Host" : "Adresa servera",
     "Nextcloud URL" : "Nextcloud URL",
+    "Enabled" : "Zapnuté",
     "Display name" : "Zobrazované meno",
     "Network" : "Sieť",
     "Confirm" : "Potvrdiť",
