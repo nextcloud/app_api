@@ -503,10 +503,15 @@ class AppAPIService {
 		string $exAppUrl,
 		#[\SensitiveParameter]
 		array $auth,
+		string $appId,
 	): bool {
 		$heartbeatAttempts = 0;
 		$delay = 1;
-		$maxHeartbeatAttempts = 60 * 10 * $delay; // minutes for container initialization
+		if ($appId === Application::TEST_DEPLOY_APPID) {
+			$maxHeartbeatAttempts = 60 * $delay; // 1 minute for test deploy app
+		} else {
+			$maxHeartbeatAttempts = 60 * 10 * $delay; // minutes for container initialization
+		}
 
 		$options = [
 			'headers' => [
@@ -527,6 +532,10 @@ class AppAPIService {
 			$heartbeatAttempts++;
 			$errorMsg = '';
 			$statusCode = 0;
+			$exApp = $this->exAppService->getExApp($appId);
+			if ($exApp === null) {
+				return false;
+			}
 			try {
 				$heartbeatResult = $this->client->get($exAppUrl . '/heartbeat', $options);
 				$statusCode = $heartbeatResult->getStatusCode();
@@ -545,6 +554,14 @@ class AppAPIService {
 				$this->logger->warning(
 					sprintf('Failed heartbeat on %s for %d times. Most recent status=%d, error: %s', $exAppUrl, $failedHeartbeatCount, $statusCode, $errorMsg)
 				);
+				$status = $exApp->getStatus();
+				if (isset($status['heartbeat_count'])) {
+					$status['heartbeat_count'] += $failedHeartbeatCount;
+				} else {
+					$status['heartbeat_count'] = $failedHeartbeatCount;
+				}
+				$exApp->setStatus($status);
+				$this->exAppService->updateExApp($exApp, ['status']);
 			}
 			sleep($delay);
 		}

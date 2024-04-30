@@ -47,6 +47,7 @@
 			<DaemonTestDeploy
 				v-if="showTestDeployDialog"
 				:show.sync="showTestDeployDialog"
+				:get-all-daemons="getAllDaemons"
 				:daemon="daemon" />
 		</template>
 	</div>

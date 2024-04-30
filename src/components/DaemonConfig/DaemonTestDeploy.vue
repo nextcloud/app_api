@@ -15,7 +15,7 @@
 					class="status-check">
 					<NcNoteCard
 						:type="getStatusCheckType(statusCheck)"
-						:heading="statusCheck?.progress ? statusCheck.title + ` (${statusCheck.progress}%)` : statusCheck.title"
+						:heading="getStatusCheckTitle(statusCheck)"
 						style="margin: 0 0 10px 0;">
 						<template #icon>
 							<NcLoadingIcon v-if="statusCheck.loading && !statusCheck.error" :size="20" />
@@ -117,6 +117,10 @@ export default {
 			required: true,
 			default: () => null,
 		},
+		getAllDaemons: {
+			type: Function,
+			required: true,
+		},
 	},
 	data() {
 		return {
@@ -144,6 +148,7 @@ export default {
 					error: false,
 					error_message: '',
 					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#image-pull',
+					progress: null,
 				},
 				container_started: {
 					id: 'container_started',
@@ -164,6 +169,7 @@ export default {
 					error: false,
 					error_message: '',
 					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#heartbeat',
+					heartbeat_count: null,
 				},
 				init: {
 					id: 'init',
@@ -174,6 +180,7 @@ export default {
 					error: false,
 					error_message: '',
 					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#init',
+					progress: null,
 				},
 				enabled: {
 					id: 'enabled',
@@ -187,6 +194,17 @@ export default {
 				},
 			},
 		}
+	},
+	computed: {
+		heartbeatCountHeadingProgress() {
+			return `${this.statusChecks.heartbeat.title} (heartbeat_count: ${this.statusChecks.heartbeat.heartbeat_count || 0})`
+		},
+		imagePullHeadingProgress() {
+			return `${this.statusChecks.image_pull.title} (${this.statusChecks.image_pull.progress}%)`
+		},
+		initHeadingProgress() {
+			return `${this.statusChecks.init.title} (${this.statusChecks.init.progress}%)`
+		},
 	},
 	beforeMount() {
 		this.fetchTestDeployStatus()
@@ -205,8 +223,11 @@ export default {
 				statusCheck.passed = false
 				statusCheck.error = false
 				statusCheck.error_message = ''
-				if (statusCheck.progress) {
-					delete statusCheck.progress
+				if ('progress' in statusCheck) {
+					statusCheck.progress = null
+				}
+				if ('heartbeat_count' in statusCheck) {
+					statusCheck.heartbeat_count = null
 				}
 			})
 			this._startDeployTest().then((res) => {
@@ -233,6 +254,8 @@ export default {
 					}
 					this.clearTestRunning()
 					return err
+				}).finally(() => {
+					this.getAllDaemons()
 				})
 		},
 		startDeployTestPolling() {
@@ -254,6 +277,7 @@ export default {
 				clearInterval(this.polling)
 			}).finally(() => {
 				this.stoppingTest = false
+				this.getAllDaemons()
 			})
 		},
 		fetchTestDeployStatus() {
@@ -278,13 +302,21 @@ export default {
 			Object.keys(this.statusChecks).forEach(step => {
 				const statusCheck = this.statusChecks[step]
 				statusCheck.loading = step === currentStep
+				if (statusCheck.id === 'image_pull' && statusCheck.loading) {
+					statusCheck.progress = status.deploy
+				}
+				if (statusCheck.id === 'init' && statusCheck.loading) {
+					statusCheck.progress = status.init
+				}
+				if (statusCheck.id === 'heartbeat' && 'heartbeat_count' in status) {
+					statusCheck.heartbeat_count = status.heartbeat_count
+				}
 				switch (step) {
 				case 'register':
 					statusCheck.passed = true // at this point we're reading app status, so it's already registered
 					break
 				case 'image_pull':
 					statusCheck.passed = status.deploy >= 94
-					statusCheck.progress = status.deploy
 					break
 				case 'container_started':
 					statusCheck.passed = status.deploy >= 98
@@ -294,7 +326,6 @@ export default {
 					break
 				case 'init':
 					statusCheck.passed = status.init === 100
-					statusCheck.progress = status.init
 					break
 				case 'enabled':
 					statusCheck.passed = status.init === 100 && status.deploy === 100 && status.action === '' && status.error === ''
@@ -311,16 +342,18 @@ export default {
 					statusCheck.loading = false
 					statusCheck.passed = false
 					showError(t('app_api', 'Deploy test failed at step "{step}"', { step }))
-					this.clearTestRunning()
 				}
 			})
+			if (status.error !== '') {
+				this.clearTestRunning()
+			}
 		},
 		_detectCurrentStep(status) {
 			if (status.action === '' && status.deploy === 0 && status.init === 0) {
 				return 'register'
 			}
 			if (status.action === 'deploy') {
-				if (status.deploy > 0 && status.deploy < 94) {
+				if (status.deploy >= 0 && status.deploy < 94) {
 					return 'image_pull'
 				}
 				if (status.deploy >= 95 && status.deploy <= 97) {
@@ -349,6 +382,18 @@ export default {
 				return 'success'
 			}
 			return 'info'
+		},
+		getStatusCheckTitle(statusCheck) {
+			if (statusCheck.id === 'heartbeat' && this.statusChecks.heartbeat.heartbeat_count) {
+				return this.heartbeatCountHeadingProgress
+			}
+			if (statusCheck.id === 'image_pull' && this.statusChecks.image_pull.progress) {
+				return this.imagePullHeadingProgress
+			}
+			if (statusCheck.id === 'init' && this.statusChecks.init.progress) {
+				return this.initHeadingProgress
+			}
+			return statusCheck.title
 		},
 		clearTestRunning() {
 			this.testRunning = false
