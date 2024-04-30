@@ -117,6 +117,10 @@ export default {
 			required: true,
 			default: () => null,
 		},
+		getAllDaemons: {
+			type: Function,
+			required: true,
+		},
 	},
 	data() {
 		return {
@@ -144,6 +148,7 @@ export default {
 					error: false,
 					error_message: '',
 					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#image-pull',
+					progress: null,
 				},
 				container_started: {
 					id: 'container_started',
@@ -164,6 +169,7 @@ export default {
 					error: false,
 					error_message: '',
 					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#heartbeat',
+					heartbeat_count: null,
 				},
 				init: {
 					id: 'init',
@@ -174,6 +180,7 @@ export default {
 					error: false,
 					error_message: '',
 					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#init',
+					progress: null,
 				},
 				enabled: {
 					id: 'enabled',
@@ -187,6 +194,17 @@ export default {
 				},
 			},
 		}
+	},
+	computed: {
+		heartbeatCountHeadingProgress() {
+			return `${this.statusChecks.heartbeat.title} (heartbeat_count: ${this.statusChecks.heartbeat.heartbeat_count || 0})`
+		},
+		imagePullHeadingProgress() {
+			return `${this.statusChecks.image_pull.title} (${this.statusChecks.image_pull.progress}%)`
+		},
+		initHeadingProgress() {
+			return `${this.statusChecks.init.title} (${this.statusChecks.init.progress}%)`
+		},
 	},
 	beforeMount() {
 		this.fetchTestDeployStatus()
@@ -205,11 +223,11 @@ export default {
 				statusCheck.passed = false
 				statusCheck.error = false
 				statusCheck.error_message = ''
-				if (statusCheck.progress) {
-					delete statusCheck.progress
+				if ('progress' in statusCheck) {
+					statusCheck.progress = null
 				}
-				if (statusCheck.heartbeat_count) {
-					delete statusCheck.heartbeat.heartbeat_count
+				if ('heartbeat_count' in statusCheck) {
+					statusCheck.heartbeat_count = null
 				}
 			})
 			this._startDeployTest().then((res) => {
@@ -236,6 +254,8 @@ export default {
 					}
 					this.clearTestRunning()
 					return err
+				}).finally(() => {
+					this.getAllDaemons()
 				})
 		},
 		startDeployTestPolling() {
@@ -257,6 +277,7 @@ export default {
 				clearInterval(this.polling)
 			}).finally(() => {
 				this.stoppingTest = false
+				this.getAllDaemons()
 			})
 		},
 		fetchTestDeployStatus() {
@@ -287,8 +308,8 @@ export default {
 				if (statusCheck.id === 'init' && statusCheck.loading) {
 					statusCheck.progress = status.init
 				}
-				if (status.heartbeat_count) {
-					statusCheck.heartbeat.heartbeat_count = status.heartbeat_count
+				if (statusCheck.id === 'heartbeat' && 'heartbeat_count' in status) {
+					statusCheck.heartbeat_count = status.heartbeat_count
 				}
 				switch (step) {
 				case 'register':
@@ -363,10 +384,16 @@ export default {
 			return 'info'
 		},
 		getStatusCheckTitle(statusCheck) {
-			if (statusCheck.id === 'heartbeat' && statusCheck.heartbeat_count) {
-				return statusCheck.title + ` (heartbeat_count: ${statusCheck.heartbeat_count})`
+			if (statusCheck.id === 'heartbeat' && this.statusChecks.heartbeat.heartbeat_count) {
+				return this.heartbeatCountHeadingProgress
 			}
-			return statusCheck?.progress ? statusCheck.title + ` (${statusCheck.progress}%)` : statusCheck.title
+			if (statusCheck.id === 'image_pull' && this.statusChecks.image_pull.progress) {
+				return this.imagePullHeadingProgress
+			}
+			if (statusCheck.id === 'init' && this.statusChecks.init.progress) {
+				return this.initHeadingProgress
+			}
+			return statusCheck.title
 		},
 		clearTestRunning() {
 			this.testRunning = false
