@@ -23,6 +23,7 @@ OC.L10N.register(
     "Display Name" : "Nombre a desplegar",
     "Delete" : "Borrar",
     "Host" : "Servidor",
+    "Enabled" : "Habilitado",
     "Confirm" : "Confirmar",
     "Register" : "Registrar",
     "Your apps" : "Tus aplicaciones",

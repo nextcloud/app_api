@@ -35,6 +35,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-Lizenziert",
     "Host" : "Host",
     "Nextcloud URL" : "Nextcloud-URL",
+    "Enabled" : "Aktiviert",
     "Display name" : "Anzeigename",
     "Network" : "Netzwerk",
     "Confirm" : "Bestätigen",

@@ -46,6 +46,7 @@ OC.L10N.register(
     "Deploy config" : "Nastavení nasazení",
     "Nextcloud URL" : "URL adresa Nextcloud",
     "Verify connection" : "Ověřit připojení",
+    "Enabled" : "Zapnuto",
     "Display name" : "Zobrazované jméno",
     "Set daemon as default" : "Nastavit proces služby jako výchozí",
     "Set as default daemon" : "Nastavit jako výchozí proces služby",

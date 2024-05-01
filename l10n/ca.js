@@ -45,6 +45,7 @@ OC.L10N.register(
     "{license}-licensed" : "sota la llicència - {license}",
     "Host" : "Servidor",
     "Nextcloud URL" : "Nextcloud URL",
+    "Enabled" : "Habilitat",
     "Display name" : "Nom de visualització",
     "Network" : "Xarxa",
     "Confirm" : "Confirma",

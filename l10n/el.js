@@ -33,6 +33,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-αδειοδοτημένο",
     "Host" : "Διακομιστής",
     "Nextcloud URL" : "Διεύθυνση URL του Nextcloud",
+    "Enabled" : "Ενεργοποιημένο",
     "Network" : "Δίκτυο",
     "Confirm" : "Επιβεβαίωση",
     "Register" : "Εγγραφή",

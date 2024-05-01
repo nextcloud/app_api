@@ -50,6 +50,7 @@
     "Verify connection" : "Verificar la conexón",
     "Daemon connection successful" : "La conexón del degorriu foi correuta",
     "Register Daemon" : "Rexistrar el degorriu",
+    "Enabled" : "Activóse",
     "Display name" : "Nome visible",
     "Daemon host" : "Agospiador del degorriu",
     "Set daemon as default" : "Predeterminar el degorriu",

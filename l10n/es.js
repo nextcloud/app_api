@@ -78,6 +78,7 @@ OC.L10N.register(
     "No Deploy daemons configured" : "No hay daemons de despliegue configurados",
     "Register a custom one or setup from available templates" : "Registre uno personalizado, o, configure desde las plantillas disponibles",
     "Register Daemon" : "Registrar Daemon",
+    "Enabled" : "Activado",
     "Register Deploy Daemon" : "Registrar Daemon de despliegue",
     "Daemon configuration template" : "Plantilla de configuración de daemon",
     "Select daemon configuration template" : "Seleccione una plantilla de configuración de daemon",
