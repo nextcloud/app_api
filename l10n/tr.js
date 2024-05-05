@@ -2,6 +2,7 @@ OC.L10N.register(
     "app_api",
     {
     "External Apps" : "Dış uygulamalar",
+    "Daemon config not found" : "Arka plan işlemi yapılandırması bulunamadı",
     "Error starting install of ExApp" : "ExApp kurulumu başlatılırken sorun çıktı",
     "ExApp not found, failed to get status" : "ExApp bulunamadı. Durum alınamadı",
     "Could not perform installation of ExApp" : "ExApp kurulumu yapılamadı",
@@ -10,6 +11,7 @@ OC.L10N.register(
     "Could not update ExApp" : "ExApp güncellenemedi",
     "Error starting update of ExApp" : "ExApp güncellemesi başlatılırken sorun çıktı",
     "Could not perform update of ExApp" : "ExApp güncellemesi yapılamadı",
+    "ExApp not found, failed to get logs" : "ExApp bulunamadı. Günlük kayıtları alınamadı",
     "AppAPI authentication failed" : "AppAPI kimliği doğrulanamadı ",
     "AppAPI ExApp version update notifier" : "AppAPI ExApp sürümü güncelleme bildirimi",
     "AppAPI ExApp notifier" : "AppAPI ExApp bildirimi",
