@@ -65,15 +65,25 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 		},
 		async exec(node, view, dir) {
 			const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-			return axios.post(exAppFileActionHandler, { files: [buildNodeInfo(node)] })
-				.then((response) => {
-					if ('redirect_handler' in response.data) {
-						const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
-						window.location.assign(`${redirectPage}?fileIds=${node.fileid}`)
+			if ('version' in fileAction && fileAction.version === '2.0') {
+				return axios.post(exAppFileActionHandler, { files: [buildNodeInfo(node)] })
+					.then((response) => {
+						if ('redirect_handler' in response.data) {
+							const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
+							window.location.assign(`${redirectPage}?fileIds=${node.fileid}`)
+							return true
+						}
 						return true
-					}
+					}).catch((error) => {
+						console.error('Failed to send FileAction request to ExApp', error)
+						return false
+					})
+			}
+			return axios.post(exAppFileActionHandler, buildNodeInfo(node))
+				.then((response) => {
 					return true
-				}).catch((error) => {
+				})
+				.catch((error) => {
 					console.error('Failed to send FileAction request to ExApp', error)
 					return false
 				})
