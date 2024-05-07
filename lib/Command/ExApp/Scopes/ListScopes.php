@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp\Scopes;
 
-use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\Service\ExAppApiScopeService;
-use OCA\AppAPI\Service\ExAppScopesService;
 
 use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
@@ -18,7 +16,6 @@ class ListScopes extends Command {
 
 	public function __construct(
 		private readonly ExAppService         $service,
-		private readonly ExAppScopesService   $exAppScopeService,
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 	) {
 		parent::__construct();
@@ -39,16 +36,14 @@ class ListScopes extends Command {
 			return 2;
 		}
 
-		$scopes = $this->exAppScopeService->getExAppScopes($exApp);
+		$scopes = $exApp->getApiScopes();
 		if (empty($scopes)) {
 			$output->writeln(sprintf('No scopes granted for ExApp %s', $appId));
 			return 0;
 		}
 
 		$output->writeln(sprintf('ExApp %s scopes:', $exApp->getAppid()));
-		$mappedScopes = array_unique($this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $scope) {
-			return intval($scope->getScopeGroup());
-		}, $scopes)));
+		$mappedScopes = array_unique($this->exAppApiScopeService->mapScopeGroupsToNames($scopes));
 		$output->writeln(join(', ', $mappedScopes));
 		return 0;
 	}
