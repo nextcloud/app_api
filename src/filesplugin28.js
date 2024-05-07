@@ -65,7 +65,7 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 		},
 		async exec(node, view, dir) {
 			const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-			return axios.post(exAppFileActionHandler, {files: [buildNodeInfo(node)]})
+			return axios.post(exAppFileActionHandler, { files: [buildNodeInfo(node)] })
 				.then((response) => {
 					if ('redirect_handler' in response.data) {
 						const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
