@@ -14,7 +14,14 @@ AppAPI takes responsibility to register FileActionsMenu, ExApps needs only to re
 Register
 ^^^^^^^^
 
+.. note::
+
+    With AppAPI 2.6.0 there is a new v2 OCS endpoint with redirect to ExApp UI support:
+    OCS endpoint: ``POST /apps/app_api/api/v2/ui/files-actions-menu``.
+    Old v1 is marked as deprecated.
+
 OCS endpoint: ``POST /apps/app_api/api/v1/ui/files-actions-menu``
+
 
 Params
 ******
@@ -31,11 +38,9 @@ Complete list of params (including optional):
 		"icon": "img/icon.svg",
 		"permissions": "permissions",
 		"order": "order_in_file_actions_menu",
-		"version": "1.0"
 	}
 
 .. note:: Urls ``icon`` and ``actionHandler`` are relative to the ExApp root, starting slash is not required.
-
 
 Optional params
 ***************
@@ -95,22 +100,9 @@ Redirect to ExApp UI page (top menu)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
-    Supported in Nextcloud 28+.
+    Supported only for Nextcloud 28+.
 
-If you want to open some file in ExApp UI, you need to set ``version`` to ``2.0``` in the FileActionsMenu registration.
-
-.. code-block:: json
-
-    {
-        "name": "unique_name_of_file_actions_menu",
-        "display_name": "Display name (for UI listing)",
-        "action_handler": "/action_handler_route"
-        "mime": "mime of files where to display action menu",
-        "icon": "img/icon.svg",
-        "permissions": "permissions",
-        "order": "order_in_file_actions_menu",
-        "version": "2.0"
-    }
+If you want to open some files in ExApp UI, your FileActionsMenu have to be registered using OCS v2 version (``/apps/app_api/api/v2/ui/files-actions-menu``).
 
 After that, AppAPI will expect in the JSON response of the ExApp ``action_handler``
 the ``redirect_handler`` - a relative path on the ExApp Top Menu page,

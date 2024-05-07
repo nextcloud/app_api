@@ -46,9 +46,9 @@ class OCSUiController extends OCSController {
 	#[NoCSRFRequired]
 	public function registerFileActionMenu(string $name, string $displayName, string $actionHandler,
 		string $icon = "", string $mime = "file", int $permissions = 31,
-		int $order = 0, string $version = '1.0'): DataResponse {
+		int $order = 0): DataResponse {
 		$result = $this->filesActionsMenuService->registerFileActionMenu(
-			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, $version);
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, '1.0');
 		if (!$result) {
 			throw new OCSBadRequestException("File Action Menu entry could not be registered");
 		}
@@ -63,9 +63,9 @@ class OCSUiController extends OCSController {
 	#[NoCSRFRequired]
 	public function registerFileActionMenuV2(string $name, string $displayName, string $actionHandler,
 		string $icon = "", string $mime = "file", int $permissions = 31,
-		int $order = 0, string $version = '2.0'): DataResponse {
+		int $order = 0): DataResponse {
 		$result = $this->filesActionsMenuService->registerFileActionMenu(
-			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, $version);
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, '2.0');
 		if (!$result) {
 			throw new OCSBadRequestException("File Action Menu entry could not be registered");
 		}
