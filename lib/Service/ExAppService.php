@@ -7,7 +7,6 @@ namespace OCA\AppAPI\Service;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
-use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
@@ -33,25 +32,24 @@ class ExAppService {
 	private ICache $cache;
 
 	public function __construct(
-		private readonly LoggerInterface         	$logger,
-		ICacheFactory                            	$cacheFactory,
-		private readonly IUserManager    		 	$userManager,
-		private readonly ExAppFetcher            	$exAppFetcher,
-		private readonly ExAppArchiveFetcher     	$exAppArchiveFetcher,
-		private readonly ExAppMapper             	$exAppMapper,
-		private readonly ExAppUsersService       	$exAppUsersService,
-		private readonly ExAppScopesService      	$exAppScopesService,
-		private readonly ExAppApiScopeService    	$exAppApiScopeService,
-		private readonly TopMenuService          	$topMenuService,
-		private readonly InitialStateService     	$initialStateService,
-		private readonly ScriptsService          	$scriptsService,
-		private readonly StylesService           	$stylesService,
-		private readonly FilesActionsMenuService 	$filesActionsMenuService,
-		private readonly SpeechToTextService     	$speechToTextService,
-		private readonly TextProcessingService   	$textProcessingService,
-		private readonly TranslationService      	$translationService,
-		private readonly TalkBotsService         	$talkBotsService,
-		private readonly SettingsService         	$settingsService,
+		private readonly LoggerInterface            $logger,
+		ICacheFactory                               $cacheFactory,
+		private readonly IUserManager               $userManager,
+		private readonly ExAppFetcher               $exAppFetcher,
+		private readonly ExAppArchiveFetcher        $exAppArchiveFetcher,
+		private readonly ExAppMapper                $exAppMapper,
+		private readonly ExAppUsersService          $exAppUsersService,
+		private readonly ExAppApiScopeService       $exAppApiScopeService,
+		private readonly TopMenuService             $topMenuService,
+		private readonly InitialStateService        $initialStateService,
+		private readonly ScriptsService             $scriptsService,
+		private readonly StylesService              $stylesService,
+		private readonly FilesActionsMenuService    $filesActionsMenuService,
+		private readonly SpeechToTextService        $speechToTextService,
+		private readonly TextProcessingService      $textProcessingService,
+		private readonly TranslationService         $translationService,
+		private readonly TalkBotsService            $talkBotsService,
+		private readonly SettingsService            $settingsService,
 		private readonly ExAppEventsListenerService $eventsListenerService,
 		private readonly ExAppOccService            $occService,
 	) {
@@ -98,7 +96,6 @@ class ExAppService {
 		if ($exApp === null) {
 			return false;
 		}
-		$this->exAppScopesService->removeExAppScopes($appId);
 		$this->exAppUsersService->removeExAppUsers($appId);
 		$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
 		$this->filesActionsMenuService->unregisterExAppFileActions($appId);
@@ -184,9 +181,7 @@ class ExAppService {
 			'last_check_time' => $exApp->getLastCheckTime(),
 			'system' => $exApp->getIsSystem(),
 			'status' => $exApp->getStatus(),
-			'scopes' => $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
-				return $exAppScope->getScopeGroup();
-			}, $this->exAppScopesService->getExAppScopes($exApp))),
+			'scopes' => $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes()),
 		];
 	}
 

@@ -38,16 +38,15 @@ class AppAPIService {
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
 		private readonly IUserManager            $userManager,
-		private readonly IFactory				 $l10nFactory,
+		private readonly IFactory                $l10nFactory,
 		private readonly ExNotificationsManager  $exNotificationsManager,
-		private readonly ExAppService			 $exAppService,
+		private readonly ExAppService            $exAppService,
 		private readonly ExAppUsersService       $exAppUsersService,
 		private readonly ExAppApiScopeService    $exAppApiScopeService,
-		private readonly ExAppScopesService      $exAppScopesService,
 		private readonly ExAppConfigService      $exAppConfigService,
-		private readonly DockerActions        	 $dockerActions,
-		private readonly ManualActions        	 $manualActions,
-		private readonly AppAPICommonService	 $commonService,
+		private readonly DockerActions           $dockerActions,
+		private readonly ManualActions           $manualActions,
+		private readonly AppAPICommonService     $commonService,
 	) {
 		$this->client = $clientService->newClient();
 	}
@@ -275,7 +274,7 @@ class AppAPIService {
 				$path = '/dav/';
 			}
 
-			$allScopesFlag = (bool)$this->exAppScopesService->getByScope($exApp, ExAppApiScopeService::ALL_API_SCOPE);
+			$allScopesFlag = (bool)$this->getByScope($exApp, ExAppApiScopeService::ALL_API_SCOPE);
 			$apiScope = $this->exAppApiScopeService->getApiScopeByRoute($path);
 
 			if (!$allScopesFlag) {
@@ -286,7 +285,7 @@ class AppAPIService {
 
 				// BASIC ApiScope is granted to all ExApps (all API routes with BASIC scope group).
 				if ($apiScope['scope_group'] !== ExAppApiScopeService::BASIC_API_SCOPE) {
-					if (!$this->exAppScopesService->passesScopeCheck($exApp, $apiScope['scope_group'])) {
+					if (!$this->passesScopeCheck($exApp, $apiScope['scope_group'])) {
 						$this->logger->error(sprintf('ExApp %s not passed scope group check %s', $exApp->getAppid(), $path));
 						return false;
 					}
@@ -345,6 +344,22 @@ class AppAPIService {
 			'userid' => $userId,
 		]);
 		return true;
+	}
+
+	public function getByScope(ExApp $exApp, int $apiScope): ?int {
+		foreach ($exApp->getApiScopes() as $scope) {
+			if ($scope === $apiScope) {
+				return $scope;
+			}
+		}
+		return null;
+	}
+
+	public function passesScopeCheck(ExApp $exApp, int $apiScope): bool {
+		if (in_array($apiScope, $exApp->getApiScopes(), true)) {
+			return true;
+		}
+		return false;
 	}
 
 	private function buildRequestInfo(IRequest $request): array {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
@@ -12,7 +11,6 @@ use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
-use OCA\AppAPI\Service\ExAppScopesService;
 
 use OCA\AppAPI\Service\ExAppService;
 use Psr\Log\LoggerInterface;
@@ -29,7 +27,6 @@ class Update extends Command {
 	public function __construct(
 		private readonly AppAPIService  	  $service,
 		private readonly ExAppService         $exAppService,
-		private readonly ExAppScopesService   $exAppScopeService,
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DaemonConfigService  $daemonConfigService,
 		private readonly DockerActions        $dockerActions,
@@ -240,9 +237,7 @@ class Update extends Command {
 		}
 
 		// Default scopes approval process (compare new ExApp scopes)
-		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
-			return $exAppScope->getScopeGroup();
-		}, $this->exAppScopeService->getExAppScopes($exApp));
+		$currentExAppScopes = $exApp->getApiScopes();
 		// Prepare for prompt of newly requested ExApp scopes
 		$requiredScopes = array_values(array_diff($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']), $currentExAppScopes));
 
@@ -265,17 +260,6 @@ class Update extends Command {
 
 		if (!$confirmScopes && count($requiredScopes) > 0) {
 			$output->writeln(sprintf('ExApp %s required scopes not approved. Failed to finish ExApp update.', $appId));
-			return 1;
-		}
-
-		if (!$this->exAppScopeService->registerExAppScopes(
-			$exApp, $this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']))
-		) {
-			$this->logger->error(sprintf('Failed to update ExApp %s scopes.', $appId));
-			if ($outputConsole) {
-				$output->writeln(sprintf('Failed to update ExApp %s scopes.', $appId));
-			}
-			$this->exAppService->setStatusError($exApp, 'Failed to update scopes');
 			return 1;
 		}
 
