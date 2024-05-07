@@ -138,6 +138,30 @@ class Update extends Command {
 			return 0;
 		}
 
+		// Default scopes approval process (compare new ExApp scopes)
+		$currentExAppScopes = $exApp->getApiScopes();
+		// Prepare for prompt of newly requested ExApp scopes
+		$requiredScopes = array_values(array_diff($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']), $currentExAppScopes));
+
+		$confirmScopes = (bool) $input->getOption('force-scopes');
+		if (!$confirmScopes && $input->isInteractive()) {
+			/** @var QuestionHelper $helper */
+			$helper = $this->getHelper('question');
+
+			if (count($requiredScopes) > 0) {
+				$output->writeln(sprintf('ExApp %s requested scopes: %s', $appId, implode(', ',
+					$this->exAppApiScopeService->mapScopeGroupsToNames($requiredScopes))));
+				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
+				$confirmScopes = $helper->ask($input, $output, $question);
+			} else {
+				$confirmScopes = true;
+			}
+		}
+		if (!$confirmScopes && count($requiredScopes) > 0) {
+			$output->writeln(sprintf('ExApp %s required scopes not approved. Failed to finish ExApp update.', $appId));
+			return 1;
+		}
+
 		$status = $exApp->getStatus();
 		$status['type'] = 'update';
 		$status['error'] = '';
@@ -166,30 +190,6 @@ class Update extends Command {
 					$output->writeln(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
 				}
 			}
-		}
-
-		// Default scopes approval process (compare new ExApp scopes)
-		$currentExAppScopes = $exApp->getApiScopes();
-		// Prepare for prompt of newly requested ExApp scopes
-		$requiredScopes = array_values(array_diff($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']), $currentExAppScopes));
-
-		$confirmScopes = (bool) $input->getOption('force-scopes');
-		if (!$confirmScopes && $input->isInteractive()) {
-			/** @var QuestionHelper $helper */
-			$helper = $this->getHelper('question');
-
-			if (count($requiredScopes) > 0) {
-				$output->writeln(sprintf('ExApp %s requested scopes: %s', $appId, implode(', ',
-					$this->exAppApiScopeService->mapScopeGroupsToNames($requiredScopes))));
-				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-				$confirmScopes = $helper->ask($input, $output, $question);
-			} else {
-				$confirmScopes = true;
-			}
-		}
-		if (!$confirmScopes && count($requiredScopes) > 0) {
-			$output->writeln(sprintf('ExApp %s required scopes not approved. Failed to finish ExApp update.', $appId));
-			return 1;
 		}
 
 		$appInfo['api_scopes'] = array_values($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']));
