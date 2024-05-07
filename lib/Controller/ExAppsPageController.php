@@ -12,13 +12,11 @@ use OC\App\DependencyAnalyzer;
 use OC\App\Platform;
 use OC_App;
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
-use OCA\AppAPI\Service\ExAppScopesService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ExAppUsersService;
 use OCP\App\IAppManager;
@@ -45,7 +43,6 @@ class ExAppsPageController extends Controller {
 	private IConfig $config;
 	private AppAPIService $service;
 	private DaemonConfigService $daemonConfigService;
-	private ExAppScopesService $exAppScopeService;
 	private DockerActions $dockerActions;
 	private CategoryFetcher $categoryFetcher;
 	private IFactory $l10nFactory;
@@ -62,7 +59,6 @@ class ExAppsPageController extends Controller {
 		IInitialState $initialStateService,
 		AppAPIService $service,
 		DaemonConfigService $daemonConfigService,
-		ExAppScopesService $exAppScopeService,
 		ExAppApiScopeService $exAppApiScopeService,
 		ExAppUsersService $exAppUsersService,
 		DockerActions $dockerActions,
@@ -80,7 +76,6 @@ class ExAppsPageController extends Controller {
 		$this->config = $config;
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
-		$this->exAppScopeService = $exAppScopeService;
 		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->dockerActions = $dockerActions;
 		$this->categoryFetcher = $categoryFetcher;
@@ -205,9 +200,7 @@ class ExAppsPageController extends Controller {
 			$daemon = null;
 
 			if ($exApp !== null) {
-				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
-					return $exAppScope->getScopeGroup();
-				}, $this->exAppScopeService->getExAppScopes($exApp)));
+				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes());
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 			}
 
@@ -342,9 +335,7 @@ class ExAppsPageController extends Controller {
 			if (!in_array($app['id'], $registeredAppsIds)) {
 				$exApp = $this->exAppService->getExApp($app['id']);
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
-					return $exAppScope->getScopeGroup();
-				}, $this->exAppScopeService->getExAppScopes($exApp)));
+				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes());
 
 				$formattedLocalApps[] = [
 					'id' => $app['id'],

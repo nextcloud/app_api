@@ -11,7 +11,6 @@ use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
-use OCA\AppAPI\Service\ExAppScopesService;
 use OCA\AppAPI\Service\ExAppService;
 
 use OCP\IConfig;
@@ -30,7 +29,6 @@ class Register extends Command {
 	public function __construct(
 		private readonly AppAPIService  	  $service,
 		private readonly DaemonConfigService  $daemonConfigService,
-		private readonly ExAppScopesService   $exAppScopesService,
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DockerActions        $dockerActions,
 		private readonly ManualActions        $manualActions,
@@ -111,9 +109,8 @@ class Register extends Command {
 			return 2;
 		}
 
-		$forceScopes = (bool) $input->getOption('force-scopes');
-		$confirmRequiredScopes = $forceScopes;
-		if (!$forceScopes && $input->isInteractive()) {
+		$confirmRequiredScopes = (bool) $input->getOption('force-scopes');
+		if (!$confirmRequiredScopes && $input->isInteractive()) {
 			/** @var QuestionHelper $helper */
 			$helper = $this->getHelper('question');
 
@@ -147,14 +144,6 @@ class Register extends Command {
 			return 3;
 		}
 		if (count($appInfo['external-app']['scopes']) > 0) {
-			if (!$this->exAppScopesService->registerExAppScopes($exApp, $this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']))) {
-				$this->logger->error(sprintf('Error while registering API scopes for %s.', $appId));
-				if ($outputConsole) {
-					$output->writeln(sprintf('Error while registering API scopes for %s.', $appId));
-				}
-				$this->_unregisterExApp($appId, $isTestDeployMode);
-				return 1;
-			}
 			$this->logger->info(
 				sprintf('ExApp %s scope groups successfully set: %s', $exApp->getAppid(), implode(', ', $appInfo['external-app']['scopes']))
 			);
