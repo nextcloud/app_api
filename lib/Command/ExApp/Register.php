@@ -109,9 +109,8 @@ class Register extends Command {
 			return 2;
 		}
 
-		$forceScopes = (bool) $input->getOption('force-scopes');
-		$confirmRequiredScopes = $forceScopes;
-		if (!$forceScopes && $input->isInteractive()) {
+		$confirmRequiredScopes = (bool) $input->getOption('force-scopes');
+		if (!$confirmRequiredScopes && $input->isInteractive()) {
 			/** @var QuestionHelper $helper */
 			$helper = $this->getHelper('question');
 
