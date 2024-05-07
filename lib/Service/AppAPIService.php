@@ -14,6 +14,7 @@ use OCP\AppFramework\Http;
 use OCP\DB\Exception;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
+use OCP\Http\Client\IPromise;
 use OCP\Http\Client\IResponse;
 use OCP\IConfig;
 use OCP\IRequest;
@@ -66,7 +67,7 @@ class AppAPIService {
 		try {
 			$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
 		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			$this->logger->warning(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
 		}
 		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
@@ -96,29 +97,44 @@ class AppAPIService {
 		array $options,
 	): array|IResponse {
 		try {
-			switch ($method) {
-				case 'GET':
-					$response = $this->client->get($uri, $options);
-					break;
-				case 'POST':
-					$response = $this->client->post($uri, $options);
-					break;
-				case 'PUT':
-					$response = $this->client->put($uri, $options);
-					break;
-				case 'DELETE':
-					$response = $this->client->delete($uri, $options);
-					break;
-				default:
-					return ['error' => 'Bad HTTP method'];
-			}
-			return $response;
+			return match ($method) {
+				'GET' => $this->client->get($uri, $options),
+				'POST' => $this->client->post($uri, $options),
+				'PUT' => $this->client->put($uri, $options),
+				'DELETE' => $this->client->delete($uri, $options),
+				default => ['error' => 'Bad HTTP method'],
+			};
 		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			$this->logger->warning(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => $e->getMessage()];
 		}
 	}
 
+	/**
+	 * @throws \Exception
+	 */
+	public function aeRequestToExAppAsync(
+		ExApp $exApp,
+		string $route,
+		?string $userId = null,
+		string $method = 'POST',
+		array $params = [],
+		array $options = [],
+		?IRequest $request = null,
+	): array|IPromise {
+		try {
+			$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
+			$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+			return $this->requestToExAppInternalAsync($exApp, $method, $requestData['url'], $requestData['options']);
+		} catch (\Exception $e) {
+			$this->logger->warning(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			throw new \Exception(sprintf('Error while inserting ExApp user: %s', $e->getMessage()));
+		}
+	}
+
+	/**
+	 * @throws \Exception
+	 */
 	public function requestToExAppAsync(
 		ExApp $exApp,
 		string $route,
@@ -127,35 +143,32 @@ class AppAPIService {
 		array $params = [],
 		array $options = [],
 		?IRequest $request = null,
-	): void {
+	): array|IPromise {
 		$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
-		$this->requestToExAppInternalAsync($exApp, $method, $requestData['url'], $requestData['options']);
+		return $this->requestToExAppInternalAsync($exApp, $method, $requestData['url'], $requestData['options']);
 	}
 
+	/**
+	 * @throws \Exception if bad HTTP method
+	 */
 	private function requestToExAppInternalAsync(
 		ExApp $exApp,
 		string $method,
 		string $uri,
 		#[\SensitiveParameter]
 		array $options,
-	): void {
-		switch ($method) {
-			case 'POST':
-				$promise = $this->client->postAsync($uri, $options);
-				break;
-			case 'PUT':
-				$promise = $this->client->putAsync($uri, $options);
-				break;
-			case 'DELETE':
-				$promise = $this->client->deleteAsync($uri, $options);
-				break;
-			default:
-				$this->logger->error('Bad HTTP method: requestToExAppAsync accepts only `POST`, `PUT` and `DELETE`');
-				return;
-		}
-		$promise->then(function (IResponse $response) use ($exApp) {
-		}, function (\Exception $exception) use ($exApp) {
+	): IPromise {
+		$promise = match ($method) {
+			'GET' => $this->client->getAsync($uri, $options),
+			'POST' => $this->client->postAsync($uri, $options),
+			'PUT' => $this->client->putAsync($uri, $options),
+			'DELETE' => $this->client->deleteAsync($uri, $options),
+			default => throw new \Exception('Bad HTTP method'),
+		};
+		$promise->then(onRejected: function (\Exception $exception) use ($exApp) {
+			$this->logger->warning(sprintf('Error during requestToExAppAsync %s: %s', $exApp->getAppid(), $exception->getMessage()), ['exception' => $exception]);
 		});
+		return $promise;
 	}
 
 	private function prepareRequestToExApp(
