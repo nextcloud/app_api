@@ -32,8 +32,8 @@ Complete list of params (including optional):
 
 	{
 		"name": "unique_name_of_file_actions_menu",
-		"display_name": "Display name (for UI listing)",
-		"action_handler": "/action_handler_route"
+		"displayName": "Display name (for UI listing)",
+		"actionHandler": "/action_handler_route"
 		"mime": "mime of files where to display action menu",
 		"icon": "img/icon.svg",
 		"permissions": "permissions",
