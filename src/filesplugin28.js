@@ -69,7 +69,7 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 				.then((response) => {
 					if ('redirect_handler' in response.data) {
 						const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
-						window.location.assign(`${redirectPage}?fileIds=${fileIds}`)
+						window.location.assign(`${redirectPage}?fileIds=${node.fileid}`)
 						return true
 					}
 					return true
