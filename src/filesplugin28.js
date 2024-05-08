@@ -68,7 +68,7 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 			if ('version' in fileAction && fileAction.version === '2.0') {
 				return axios.post(exAppFileActionHandler, { files: [buildNodeInfo(node)] })
 					.then((response) => {
-						if ('redirect_handler' in response.data) {
+						if (typeof response.data === 'object' && 'redirect_handler' in response.data) {
 							const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
 							window.location.assign(`${redirectPage}?fileIds=${node.fileid}`)
 							return true
@@ -94,7 +94,7 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 				const nodesDataList = nodes.map(buildNodeInfo)
 				return axios.post(exAppFileActionHandler, { files: nodesDataList })
 					.then((response) => {
-						if ('redirect_handler' in response.data) {
+						if (typeof response.data === 'object' && 'redirect_handler' in response.data) {
 							const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
 							const fileIds = nodes.map((node) => node.fileid).join(',')
 							window.location.assign(`${redirectPage}?fileIds=${fileIds}`)
