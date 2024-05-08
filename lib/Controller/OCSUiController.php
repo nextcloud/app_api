@@ -38,6 +38,8 @@ class OCSUiController extends OCSController {
 
 	/**
 	 * @throws OCSBadRequestException
+	 *
+	 * @depreacted since AppAPI 2.6.0, use registerFileActionMenuV2 instead
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
@@ -46,7 +48,24 @@ class OCSUiController extends OCSController {
 		string $icon = "", string $mime = "file", int $permissions = 31,
 		int $order = 0): DataResponse {
 		$result = $this->filesActionsMenuService->registerFileActionMenu(
-			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order);
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, '1.0');
+		if (!$result) {
+			throw new OCSBadRequestException("File Action Menu entry could not be registered");
+		}
+		return new DataResponse();
+	}
+
+	/**
+	 * @throws OCSBadRequestException
+	 */
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function registerFileActionMenuV2(string $name, string $displayName, string $actionHandler,
+		string $icon = "", string $mime = "file", int $permissions = 31,
+		int $order = 0): DataResponse {
+		$result = $this->filesActionsMenuService->registerFileActionMenu(
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, '2.0');
 		if (!$result) {
 			throw new OCSBadRequestException("File Action Menu entry could not be registered");
 		}

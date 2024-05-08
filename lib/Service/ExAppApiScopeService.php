@@ -15,9 +15,11 @@ class ExAppApiScopeService {
 	public function __construct(
 	) {
 		$aeApiV1Prefix = '/apps/' . Application::APP_ID . '/api/v1';
+		$aeApiV2Prefix = '/apps/' . Application::APP_ID . '/api/v2';
 		$this->apiScopes = [
 			// AppAPI scopes
 			['api_route' => $aeApiV1Prefix . '/ui/files-actions-menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
+			['api_route' => $aeApiV2Prefix . '/ui/files-actions-menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ui/top-menu', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ui/initial-state', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => $aeApiV1Prefix . '/ui/script', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],

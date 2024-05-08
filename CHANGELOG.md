@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.6.0 - 2024-05-xx]
+
+### Added
+
+- Added File Actions v2 version with redirect to the ExApp UI. #284
+
+### Changed
+
+- Reworked scopes for database/cache requests optimization, drop old ex_app_scopes table. #285
+
 ## [2.5.1 - 2024-05-02]
 
 ### Added
