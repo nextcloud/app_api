@@ -43,6 +43,8 @@
 			</div>
 			<div class="actions">
 				<NcButton
+					v-tooltip="{ content: downloadLogsTooltip, placement: 'top' }"
+					:disabled="!canDownloadLogs"
 					type="tertiary"
 					:href="getDownloadLogsUrl()"
 					target="_blank"
@@ -51,6 +53,18 @@
 						<Download :size="20" />
 					</template>
 					{{ t('app_api', 'Download ExApp logs') }}
+				</NcButton>
+				<NcButton
+					v-if="!testRunning && hasTestDeployResults"
+					v-tooltip="{ content: t('app_api', 'Remove test ExApp'), placement: 'top' }"
+					:disabled="stoppingTest"
+					type="tertiary"
+					style="margin-right: 10px;"
+					@click="removeTestExApp">
+					<template #icon>
+						<TrashCan v-if="!stoppingTest" :size="20" />
+						<NcLoadingIcon v-else :size="20" />
+					</template>
 				</NcButton>
 				<NcButton
 					v-if="!testRunning"
@@ -75,6 +89,9 @@
 					{{ t('app_api', 'Stop Deploy test') }}
 				</NcButton>
 			</div>
+			<p v-if="testRunning" class="warning-text">
+				{{ t('app_api', 'ExApp is unregistered and container is removed on "Stop deploy test"') }}
+			</p>
 		</div>
 	</NcModal>
 </template>
@@ -93,6 +110,7 @@ import Check from 'vue-material-design-icons/Check.vue'
 import StopIcon from 'vue-material-design-icons/Stop.vue'
 import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
 import Download from 'vue-material-design-icons/Download.vue'
+import TrashCan from 'vue-material-design-icons/TrashCan.vue'
 
 export default {
 	name: 'DaemonTestDeploy',
@@ -105,6 +123,7 @@ export default {
 		StopIcon,
 		OpenInNew,
 		Download,
+		TrashCan,
 	},
 	props: {
 		show: {
@@ -128,6 +147,7 @@ export default {
 			stoppingTest: false,
 			testRunning: false,
 			polling: null,
+			canDownloadLogs: false,
 			statusChecks: {
 				register: {
 					id: 'register',
@@ -205,6 +225,15 @@ export default {
 		initHeadingProgress() {
 			return `${this.statusChecks.init.title} (${this.statusChecks.init.progress}%)`
 		},
+		downloadLogsTooltip() {
+			if (!this.canDownloadLogs) {
+				return t('app_api', 'Only if ExApp container is preset')
+			}
+			return null
+		},
+		hasTestDeployResults() {
+			return Object.values(this.statusChecks).some(statusCheck => statusCheck.passed || statusCheck.error)
+		},
 	},
 	beforeMount() {
 		this.fetchTestDeployStatus()
@@ -216,8 +245,7 @@ export default {
 		closeModal() {
 			this.$emit('update:show', false)
 		},
-		startDeployTest() {
-			this.startingTest = true
+		_cleanupStatusChecks() {
 			Object.values(this.statusChecks).forEach(statusCheck => {
 				statusCheck.loading = false
 				statusCheck.passed = false
@@ -230,6 +258,10 @@ export default {
 					statusCheck.heartbeat_count = null
 				}
 			})
+		},
+		startDeployTest() {
+			this.startingTest = true
+			this._cleanupStatusChecks()
 			this._startDeployTest().then((res) => {
 				this.testRunning = true
 				if (this._detectCurrentStep(res.data.status) === 'register') {
@@ -262,6 +294,11 @@ export default {
 			this.polling = setInterval(() => {
 				this.fetchTestDeployStatus()
 			}, 1000)
+		},
+		removeTestExApp() {
+			this._stopDeployTest().then(() => {
+				this._cleanupStatusChecks()
+			})
 		},
 		stopDeployTest() {
 			this._stopDeployTest().then(() => {
@@ -320,12 +357,15 @@ export default {
 					break
 				case 'container_started':
 					statusCheck.passed = status.deploy >= 98
+					this.canDownloadLogs = true // at status.deploy = 97  container is already created
 					break
 				case 'heartbeat':
 					statusCheck.passed = status.deploy === 100
+					this.canDownloadLogs = true
 					break
 				case 'init':
 					statusCheck.passed = status.init === 100
+					this.canDownloadLogs = true
 					break
 				case 'enabled':
 					statusCheck.passed = status.init === 100 && status.deploy === 100 && status.action === '' && status.error === ''
@@ -401,6 +441,9 @@ export default {
 			this.polling = null
 		},
 		getDownloadLogsUrl() {
+			if (!this.canDownloadLogs) {
+				return null
+			}
 			return generateUrl('/apps/app_api/apps/logs/test-deploy')
 		},
 	},
@@ -424,6 +467,13 @@ export default {
 
 	.error {
 		color: var(--color-error-text);
+	}
+
+	.warning-text {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 10px;
+		color: var(--color-warning-text);
 	}
 }
 </style>
