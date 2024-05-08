@@ -80,7 +80,7 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 					})
 			}
 			return axios.post(exAppFileActionHandler, buildNodeInfo(node))
-				.then((response) => {
+				.then(() => {
 					return true
 				})
 				.catch((error) => {
@@ -98,13 +98,12 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 							const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
 							const fileIds = nodes.map((node) => node.fileid).join(',')
 							window.location.assign(`${redirectPage}?fileIds=${fileIds}`)
-							return true
 						}
-						return true
+						return nodes.map(_ => true)
 					})
 					.catch((error) => {
 						console.error('Failed to send FileAction request to ExApp', error)
-						return false
+						return nodes.map(_ => false)
 					})
 			}
 			// for version 1.0 behavior is not changed
