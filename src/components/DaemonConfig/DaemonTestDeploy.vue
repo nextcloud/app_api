@@ -43,6 +43,8 @@
 			</div>
 			<div class="actions">
 				<NcButton
+					v-tooltip="{ content: downloadLogsTooltip, placement: 'top' }"
+					:disabled="!canDownloadLogs"
 					type="tertiary"
 					:href="getDownloadLogsUrl()"
 					target="_blank"
@@ -128,6 +130,7 @@ export default {
 			stoppingTest: false,
 			testRunning: false,
 			polling: null,
+			canDownloadLogs: false,
 			statusChecks: {
 				register: {
 					id: 'register',
@@ -204,6 +207,12 @@ export default {
 		},
 		initHeadingProgress() {
 			return `${this.statusChecks.init.title} (${this.statusChecks.init.progress}%)`
+		},
+		downloadLogsTooltip() {
+			if (!this.canDownloadLogs) {
+				return t('app_api', 'Only if ExApp container is preset')
+			}
+			return null
 		},
 	},
 	beforeMount() {
@@ -320,12 +329,15 @@ export default {
 					break
 				case 'container_started':
 					statusCheck.passed = status.deploy >= 98
+					this.canDownloadLogs = true // at status.deploy = 97  container is already created
 					break
 				case 'heartbeat':
 					statusCheck.passed = status.deploy === 100
+					this.canDownloadLogs = true
 					break
 				case 'init':
 					statusCheck.passed = status.init === 100
+					this.canDownloadLogs = true
 					break
 				case 'enabled':
 					statusCheck.passed = status.init === 100 && status.deploy === 100 && status.action === '' && status.error === ''
@@ -401,6 +413,9 @@ export default {
 			this.polling = null
 		},
 		getDownloadLogsUrl() {
+			if (!this.canDownloadLogs) {
+				return null
+			}
 			return generateUrl('/apps/app_api/apps/logs/test-deploy')
 		},
 	},
