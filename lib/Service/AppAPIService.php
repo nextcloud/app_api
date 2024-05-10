@@ -121,15 +121,10 @@ class AppAPIService {
 		array $params = [],
 		array $options = [],
 		?IRequest $request = null,
-	): array|IPromise {
-		try {
-			$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
-			$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
-			return $this->requestToExAppInternalAsync($exApp, $method, $requestData['url'], $requestData['options']);
-		} catch (\Exception $e) {
-			$this->logger->warning(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
-			throw new \Exception(sprintf('Error while inserting ExApp user: %s', $e->getMessage()));
-		}
+	): IPromise {
+		$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
+		$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		return $this->requestToExAppInternalAsync($exApp, $method, $requestData['url'], $requestData['options']);
 	}
 
 	/**

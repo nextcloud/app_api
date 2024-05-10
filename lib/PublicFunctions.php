@@ -69,7 +69,7 @@ class PublicFunctions {
 		array $params = [],
 		array $options = [],
 		?IRequest $request = null,
-	): array|IPromise {
+	): IPromise {
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			throw new \Exception(sprintf('ExApp `%s` not found', $appId));
@@ -90,7 +90,7 @@ class PublicFunctions {
 		array $params = [],
 		array $options = [],
 		?IRequest $request = null,
-	): array|IPromise {
+	): IPromise {
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			throw new \Exception(sprintf('ExApp `%s` not found', $appId));
