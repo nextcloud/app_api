@@ -142,10 +142,12 @@ class DaemonConfigController extends ApiController {
 		}
 
 		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
-		$status = $exApp->getStatus();
+		if ($exApp === null) {
+			return new JSONResponse(['error' => $this->l10n->t('ExApp failed to register, check the NC logs')], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
 
 		return new JSONResponse([
-			'status' => $status,
+			'status' => $exApp->getStatus(),
 		]);
 	}
 
