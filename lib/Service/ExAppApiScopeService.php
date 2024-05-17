@@ -58,6 +58,7 @@ class ExAppApiScopeService {
 			['api_route' => '/apps/notes/api/', 'scope_group' => 120, 'name' => 'NOTES', 'user_check' => 1],
 			['api_route' => '/textprocessing/', 'scope_group' => 200, 'name' => 'TEXT_PROCESSING', 'user_check' => 1],
 			['api_route' => '/translation/', 'scope_group' => 210, 'name' => 'MACHINE_TRANSLATION', 'user_check' => 1],
+			['api_route' => '/taskprocessing/', 'scope_group' => 220, 'name' => 'TASK_PROCESSING', 'user_check' => 0],
 
 			//ALL Scope
 			['api_route' => 'non-exist-all-api-route', 'scope_group' => self::ALL_API_SCOPE, 'name' => 'ALL', 'user_check' => 1],
