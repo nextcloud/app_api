@@ -268,7 +268,10 @@ export default {
 					this.statusChecks.register.passed = true
 					this.statusChecks.register.loading = false
 				}
-			}).catch(() => {
+			}).catch((err) => {
+				if (err.response.data.error) {
+					showError(err.response.data.error)
+				}
 				this.stopDeployTest()
 			}).finally(() => {
 				this.startingTest = false
@@ -279,13 +282,6 @@ export default {
 				.then(res => {
 					this.startDeployTestPolling()
 					return res
-				}).catch(err => {
-					console.debug(err)
-					if (err.data.error) {
-						showError(err.data.error)
-					}
-					this.clearTestRunning()
-					return err
 				}).finally(() => {
 					this.getAllDaemons()
 				})
