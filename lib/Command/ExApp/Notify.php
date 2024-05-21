@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\Service\AppAPIService;
-use OCA\AppAPI\Service\ExAppEventsListenerService;
 use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,7 +16,6 @@ class Notify extends Command {
 	public function __construct(
 		private AppAPIService $service,
 		private ExAppService $exAppService,
-		private ExAppEventsListenerService $exAppEventsListenerService,
 	) {
 		parent::__construct();
 	}
@@ -51,16 +49,6 @@ class Notify extends Command {
 		if ($eventJsonData === null) {
 			$output->writeln('Invalid JSON payload');
 			return 1;
-		}
-
-		$eventListeners = $this->exAppEventsListenerService->getEventsListeners();
-		$eventListeners = array_filter($eventListeners, function ($eventListener) use ($eventJson) {
-			return $eventListener->getEventType() === $eventJson['event_type'] && in_array($eventJson['event_subtype'], $eventListener->getEventSubtypes());
-		});
-
-		if (empty($eventListeners)) {
-			$output->writeln(sprintf('No ExApp %s registered listeners found for event: %s', $appId, $eventJson['event_type']));
-			return 0;
 		}
 
 		$route = $input->getArgument('route');
