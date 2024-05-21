@@ -35,6 +35,8 @@ jobs:
             php-version: "8.2"
           - server-version: "master"
             php-version: "8.3"
+    env:
+      DATABASE_PGSQL: 1
 
     services:
       postgres:
