@@ -25,7 +25,7 @@ class Notify extends Command {
 	protected function configure(): void {
 		$this->setName('app_api:app:notify');
 		$this->setDescription('Notify ExApp about internal event');
-		$this->setHidden(true);
+		$this->setHidden();
 		$this->addArgument('appid', InputArgument::REQUIRED);
 		$this->addArgument('route', InputArgument::REQUIRED);
 		$this->addOption('user-id', null, InputOption::VALUE_REQUIRED, 'User ID');
@@ -65,7 +65,7 @@ class Notify extends Command {
 
 		$route = $input->getArgument('route');
 		$userId = $input->getOption('user-id');
-		$response = $this->service->requestToExApp($exApp, $route, $userId, params: $eventJsonData);
+		$response = $this->service->aeRequestToExApp($exApp, $route, $userId, params: $eventJsonData);
 		if (is_array($response) && isset($response['error'])) {
 			$output->writeln(sprintf('Failed to notify ExApp %s: %s', $appId, $response['error']));
 			return 1;
