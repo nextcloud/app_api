@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Controller;
 
+use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
+use GuzzleHttp\RequestOptions;
 use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\ProxyResponse;
@@ -77,7 +80,10 @@ class ExAppProxyController extends Controller {
 		}
 
 		$response = $this->service->requestToExApp(
-			$exApp, '/' . $other, $this->userId, 'GET', request: $this->request
+			$exApp, '/' . $other, $this->userId, 'GET', params: $_GET, options: [
+				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+			],
+			request: $this->request,
 		);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
@@ -95,7 +101,10 @@ class ExAppProxyController extends Controller {
 
 		$response = $this->service->aeRequestToExApp(
 			$exApp, '/' . $other, $this->userId,
-			params: $this->request->getParams(), request: $this->request
+			params: $this->request->getParams(), options: [
+				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+			],
+			request: $this->request,
 		);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
@@ -112,7 +121,10 @@ class ExAppProxyController extends Controller {
 		}
 
 		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'PUT', $this->request->getParams(), request: $this->request
+			$exApp, '/' . $other, $this->userId, 'PUT', $this->request->getParams(), options: [
+				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+			],
+			request: $this->request,
 		);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
@@ -129,11 +141,29 @@ class ExAppProxyController extends Controller {
 		}
 
 		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'DELETE', $this->request->getParams(), request: $this->request
+			$exApp, '/' . $other, $this->userId, 'DELETE', $this->request->getParams(), options: [
+				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+			],
+			request: $this->request,
 		);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
 		return $this->createProxyResponse($other, $response);
+	}
+
+	private function buildProxyCookiesJar(array $cookies, string $domain): CookieJar {
+		$cookieJar = new CookieJar();
+		foreach ($cookies as $name => $value) {
+			$cookieJar->setCookie(new SetCookie([
+				'Domain' => $domain,
+				'Name' => $name,
+				'Value' => $value,
+				'Discard' => true,
+				'Secure' => false,
+				'HttpOnly' => true,
+			]));
+		}
+		return $cookieJar;
 	}
 }
