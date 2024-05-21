@@ -1,6 +1,7 @@
 OC.L10N.register(
     "app_api",
     {
+    "Update to {version}" : "Nuashonraigh go {version}",
     "Remove" : "Bain",
     "Report a bug" : "Tuairiscigh fabht",
     "Name" : "Ainm",
