@@ -23,7 +23,7 @@ class Notify extends Command {
 	protected function configure(): void {
 		$this->setName('app_api:app:notify');
 		$this->setDescription('Notify ExApp about internal event');
-		$this->setHidden();
+		$this->setHidden(true);
 		$this->addArgument('appid', InputArgument::REQUIRED);
 		$this->addArgument('route', InputArgument::REQUIRED);
 		$this->addOption('user-id', null, InputOption::VALUE_REQUIRED, 'User ID');
