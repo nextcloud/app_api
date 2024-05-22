@@ -45,6 +45,7 @@ OC.L10N.register(
     "Disabled apps" : "Απενεργοποιημένες εφαρμογές",
     "Updates" : "Ενημερώσεις",
     "Featured apps" : "Προτεινόμενες εφαρμογές",
+    "Enable" : "Ενεργοποίηση",
     "Disable" : "Απενεργοποίηση",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Η εφαρμογή δεν είναι συμβατή με την έκδοση Nextcloud σας. Εάν συνεχίσετε μπορείτε να εγκαταστήσετε την εφαρμογή. Η εφαρμογή ίσως να μην λειτουργεί σωστά.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Σφάλμα: Αυτή η εφαρμογή δεν μπορεί να ενεργοποιηθεί γιατί θα καταστήσει ασταθή τον διακομιστή."
