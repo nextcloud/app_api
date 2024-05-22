@@ -95,13 +95,19 @@ class FileEventsListener implements IEventListener {
 			) {
 				$exApp = $this->exAppService->getExApp($nodeEventListener->getAppid());
 				if ($exApp !== null) {
-					$command = sprintf('app_api:app:notify %s %s --event-json %s',
-						$exApp->getAppid(), $nodeEventListener->getActionHandler(), json_encode($eventData));
+					$args = [
+						'app_api:app:notify',
+						escapeshellarg($exApp->getAppid()),
+						escapeshellarg($nodeEventListener->getActionHandler()),
+						'--event-json',
+						escapeshellarg(json_encode($eventData))
+					];
 					$userId = $this->userSession->getUser();
 					if ($userId !== null) {
-						$command .= sprintf(' --user-id %s', $userId->getUID());
+						$args[] = '--user-id';
+						$args[] = escapeshellarg($userId->getUID());
 					}
-					$this->appAPIService->runOccCommand($command);
+					$this->appAPIService->runOccCommandInternal($args);
 				}
 			}
 		}
