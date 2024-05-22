@@ -4,6 +4,8 @@ OC.L10N.register(
     "Update to {version}" : "Nuashonraigh go {version}",
     "Remove" : "Bain",
     "Report a bug" : "Tuairiscigh fabht",
+    "User documentation" : "Doiciméadú úsáideora",
+    "Supported" : "Tacaithe",
     "Name" : "Ainm",
     "Type" : "Cineál",
     "Cancel" : "Cealaigh",

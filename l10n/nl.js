@@ -43,6 +43,7 @@ OC.L10N.register(
     "Disabled apps" : "Uitgeschakelde apps",
     "Updates" : "Updates",
     "Featured apps" : "Aanbevolen apps",
+    "Enable" : "Inschakelen",
     "Disable" : "Uitschakelen",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Deze is niet aangeduid als compatibel met jouw versie van Nextcloud. Als je verdergaat, zal je de app kunnen installeren. Let op dat de app misschien niet werkt zoals verwacht.",
     "An error occurred during the request. Unable to proceed." : "Er is een fout opgetreden tijdens het verzoek. Kan niet doorgaan.",
