@@ -496,16 +496,20 @@ class AppAPIService {
 	 * Dispatch ExApp initialization step, that may take a long time to display the progress of initialization.
 	 */
 	public function runOccCommand(string $command): bool {
+		$args = array_map(function ($arg) {
+			return escapeshellarg($arg);
+		}, explode(' ', $command));
+		$args[] = '--no-ansi --no-warnings';
+		return $this->runOccCommandInternal($args);
+	}
+
+	public function runOccCommandInternal(array $args): bool {
+		$args = implode(' ', $args);
 		$descriptors = [
 			0 => ['pipe', 'r'],
 			1 => ['pipe', 'w'],
 			2 => ['pipe', 'w'],
 		];
-		$args = array_map(function ($arg) {
-			return escapeshellarg($arg);
-		}, explode(' ', $command));
-		$args[] = '--no-ansi --no-warnings';
-		$args = implode(' ', $args);
 		$occDirectory = null;
 		if (!file_exists("console.php")) {
 			$occDirectory = dirname(__FILE__, 5);
