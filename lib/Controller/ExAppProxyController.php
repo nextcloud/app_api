@@ -65,7 +65,8 @@ class ExAppProxyController extends Controller {
 		}
 
 		$proxyResponse = new ProxyResponse($response->getStatusCode(), $responseHeaders, $content);
-		if ($cache && !$isHTML && empty($response->getHeader('cache-control'))) {
+		if ($cache && !$isHTML && empty($response->getHeader('cache-control'))
+			&& $response->getHeader ('Content-Type') !== 'application/json') {
 			$proxyResponse->cacheFor(3600);
 		}
 		return $proxyResponse;
@@ -79,8 +80,8 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->requestToExApp(
-			$exApp, '/' . $other, $this->userId, 'GET', params: $_GET, options: [
+		$response = $this->service->aeRequestToExApp2(
+			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
 			],
 			request: $this->request,
@@ -99,11 +100,18 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->aeRequestToExApp(
+		$options = [
+			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+		];
+		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
+			$multipart = $this->buildMultipartFormData($this->prepareBodyParams($this->request->getParams()), $_FILES);
+			$options[RequestOptions::MULTIPART] = $multipart;
+		}
+		$bodyParams = $this->prepareBodyParams($this->request->getParams());
+
+		$response = $this->service->aeRequestToExApp2(
 			$exApp, '/' . $other, $this->userId,
-			params: $this->request->getParams(), options: [
-				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
-			],
+			queryParams: $_GET, bodyParams: $bodyParams, options: $options,
 			request: $this->request,
 		);
 		if (is_array($response)) {
@@ -120,10 +128,18 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'PUT', $this->request->getParams(), options: [
-				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
-			],
+		$options = [
+			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+		];
+		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
+			$multipart = $this->buildMultipartFormData($this->prepareBodyParams($this->request->getParams()), $_FILES);
+			$options[RequestOptions::MULTIPART] = $multipart;
+		}
+		$bodyParams = $this->prepareBodyParams($this->request->getParams());
+
+		$response = $this->service->aeRequestToExApp2(
+			$exApp, '/' . $other, $this->userId, 'PUT', queryParams: $_GET, bodyParams: $bodyParams,
+			options: $options,
 			request: $this->request,
 		);
 		if (is_array($response)) {
@@ -140,8 +156,10 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'DELETE', $this->request->getParams(), options: [
+		$bodyParams = $this->prepareBodyParams($this->request->getParams());
+		$response = $this->service->aeRequestToExApp2(
+			$exApp, '/' . $other, $this->userId, 'DELETE', queryParams: $_GET, bodyParams: $bodyParams,
+			options: [
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
 			],
 			request: $this->request,
@@ -165,5 +183,34 @@ class ExAppProxyController extends Controller {
 			]));
 		}
 		return $cookieJar;
+	}
+
+	private function prepareBodyParams(array $params): array {
+		unset($params['appId'], $params['other'], $params['_route']);
+		foreach ($_GET as $key => $value) {
+			unset($params[$key]);
+		}
+		return $params;
+	}
+
+	/**
+	 * Build the multipart form data from input parameters and files
+	 */
+	private function buildMultipartFormData(array $bodyParams, array $files): array {
+		$multipart = [];
+		foreach ($bodyParams as $key => $value) {
+			$multipart[] = [
+				'name' => $key,
+				'contents' => $value,
+			];
+		}
+		foreach ($files as $key => $file) {
+			$multipart[] = [
+				'name' => $key,
+				'contents' => fopen($file['tmp_name'], 'r'),
+				'filename' => $file['name'],
+			];
+		}
+		return $multipart;
 	}
 }
