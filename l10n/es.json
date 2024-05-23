@@ -2,6 +2,7 @@
     "External Apps" : "Apps Externas",
     "Daemon config not found" : "No se pudo conseguir la configuración del Daemon",
     "Error starting install of ExApp" : "Error iniciando la instalación de ExApp",
+    "ExApp failed to register, check the NC logs" : "La ExApp falló al registrarse, revise los registros de NC",
     "ExApp not found, failed to get status" : "No se encontró ExApp, fallo al obtener el estado",
     "Could not perform installation of ExApp" : "No se pudo ejecutar la instalación de ExApp",
     "Failed to enable ExApp" : "Fallo al habilitar ExApp",

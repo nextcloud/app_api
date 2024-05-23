@@ -4,6 +4,7 @@ OC.L10N.register(
     "External Apps" : "تطبيقات خارجية",
     "Daemon config not found" : "تعذّر العثور على التكوين الخفي daemon",
     "Error starting install of ExApp" : "حدث خطأ عند البدء في تثبيت ExApp",
+    "ExApp failed to register, check the NC logs" : "التطبيق الخارجي ExApp فشل في التسجيل. تحقق من سجل الحركات في نكست كلاود.",
     "ExApp not found, failed to get status" : "تعذّر العثور على التطبيقات الخارجية ExApp، و تعذّر الحصول على حالتها",
     "Could not perform installation of ExApp" : "تعذّر تنفيذ عملية تثبيت ExApp",
     "Failed to enable ExApp" : "تعذّر تمكين تطبيق خارجي ExApp",

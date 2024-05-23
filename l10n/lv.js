@@ -16,6 +16,7 @@ OC.L10N.register(
     "Display Name" : "Ekrāna vārds",
     "Delete" : "Dzēst",
     "Host" : "Resursdators",
+    "More info" : "Vairāk informācijas",
     "Enabled" : "Iespējots",
     "Network" : "Tīkls",
     "Confirm" : "Apstiprināt",

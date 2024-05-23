@@ -4,6 +4,7 @@ OC.L10N.register(
     "External Apps" : "External Apps",
     "Daemon config not found" : "Daemon config not found",
     "Error starting install of ExApp" : "Error starting install of ExApp",
+    "ExApp failed to register, check the NC logs" : "ExApp failed to register, check the NC logs",
     "ExApp not found, failed to get status" : "ExApp not found, failed to get status",
     "Could not perform installation of ExApp" : "Could not perform installation of ExApp",
     "Failed to enable ExApp" : "Failed to enable ExApp",
