@@ -26,9 +26,23 @@
     "Cancel" : "Cealaigh",
     "Delete" : "Scrios",
     "Default" : "Réamhshocrú",
+    "{license}-licensed" : "{license}-cheadúnaithe",
+    "Display name" : "Ainm taispeána",
     "Confirm" : "Deimhnigh",
+    "Your apps" : "D'aipeanna",
     "Details" : "Sonraí",
+    "Changelog" : "Loga athrú",
+    "by {author}\n{license}" : "le {author}\n{license}",
+    "Active apps" : "Aipeanna gníomhacha",
+    "Disabled apps" : "Aipeanna díchumasaithe",
+    "Updates" : "Nuashonruithe",
+    "Featured apps" : "Aipeanna faoi thrácht",
+    "Supported apps" : "Aipeanna tacaithe",
     "Enable" : "Cumasaigh",
-    "Disable" : "Díchumasaigh"
+    "Disable" : "Díchumasaigh",
+    "Allow untested app" : "Ceadaigh aip neamhthástáilte",
+    "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Níl an aip seo marcáilte mar chomhoiriúnach le do leagan Nextcloud. Má leanann tú ar aghaidh beidh tú fós in ann an aip a shuiteáil. Tabhair faoi deara go bhféadfadh sé nach n-oibreoidh an aip mar a bhíothas ag súil leis.",
+    "An error occurred during the request. Unable to proceed." : "Tharla earráid le linn an iarratais. Ní féidir dul ar aghaidh.",
+    "Error: This app cannot be enabled because it makes the server unstable" : "Earráid: Ní féidir an aip seo a chumasú toisc go ndéanann sé an freastalaí éagobhsaí"
 },"pluralForm" :"nplurals=5; plural=(n==1 ? 0 : n==2 ? 1 : n<7 ? 2 : n<11 ? 3 : 4);"
 }
