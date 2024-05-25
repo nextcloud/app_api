@@ -12,7 +12,7 @@ OC.L10N.register(
     "Name" : "Vārds",
     "Version" : "Versija",
     "Actions" : "Darbības",
-    "Type" : "Tips",
+    "Type" : "Veids",
     "Display Name" : "Ekrāna vārds",
     "Delete" : "Dzēst",
     "Host" : "Resursdators",
