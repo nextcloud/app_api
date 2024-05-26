@@ -29,6 +29,7 @@ OC.L10N.register(
     "Delete" : "Scrios",
     "Default" : "Réamhshocrú",
     "{license}-licensed" : "{license}-cheadúnaithe",
+    "Host" : "Óstach",
     "Display name" : "Ainm taispeána",
     "Confirm" : "Deimhnigh",
     "Your apps" : "D'aipeanna",
