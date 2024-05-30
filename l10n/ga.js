@@ -32,6 +32,7 @@ OC.L10N.register(
     "Host" : "Óstach",
     "Display name" : "Ainm taispeána",
     "Confirm" : "Deimhnigh",
+    "Register" : "Clár",
     "Your apps" : "D'aipeanna",
     "Details" : "Sonraí",
     "Changelog" : "Loga athrú",
