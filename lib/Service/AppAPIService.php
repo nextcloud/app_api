@@ -237,6 +237,7 @@ class AppAPIService {
 		$options['nextcloud'] = [
 			'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 		];
+		$options['http_errors'] = false; // do not throw exceptions on 4xx and 5xx responses
 		if (!empty($auth)) {
 			$options['auth'] = $auth;
 		}
@@ -283,6 +284,7 @@ class AppAPIService {
 		$options['nextcloud'] = [
 			'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 		];
+		$options['http_errors'] = false; // do not throw exceptions on 4xx and 5xx responses
 		if (!empty($auth)) {
 			$options['auth'] = $auth;
 		}
