@@ -127,7 +127,7 @@ class TaskProcessingService {
 		$exAppsProviders = $this->getRegisteredTaskProcessingProviders();
 		foreach ($exAppsProviders as $exAppProvider) {
 			$className = '\\OCA\\AppAPI\\' . $exAppProvider->getAppId() . '\\' . $exAppProvider->getName();
-			$provider = $this->getAnonymousExAppProvider($exAppProvider, $className);
+			$provider = $this->getAnonymousExAppProvider($exAppProvider);
 			$context->registerService($className, function () use ($provider) {
 				return $provider;
 			});
@@ -140,17 +140,15 @@ class TaskProcessingService {
 	 */
 	private function getAnonymousExAppProvider(
 		TaskProcessingProvider $provider,
-		string $className,
 	): IProvider {
-		return new class($provider, $className) implements IProvider {
+		return new class($provider) implements IProvider {
 			public function __construct(
 				private readonly TaskProcessingProvider $provider,
-				private readonly string $className,
 			) {
 			}
 
 			public function getId(): string {
-				return $this->className;
+				return $this->provider->getName();
 			}
 
 			public function getName(): string {
