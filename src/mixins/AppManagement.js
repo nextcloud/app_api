@@ -100,8 +100,8 @@ export default {
 				.then((response) => { rebuildNavigation() })
 				.catch((error) => { showError(error) })
 		},
-		remove(appId) {
-			this.$store.dispatch('uninstallApp', { appId })
+		remove(appId, removeData) {
+			this.$store.dispatch('uninstallApp', { appId, removeData })
 				.then((response) => { rebuildNavigation() })
 				.catch((error) => { showError(error) })
 		},

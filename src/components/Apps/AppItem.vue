@@ -79,7 +79,7 @@
 				class="uninstall"
 				type="tertiary"
 				:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
-				@click.stop="remove(app.id)">
+				@click.stop="remove(app.id, removeData)">
 				{{ t('settings', 'Remove') }}
 			</NcButton>
 			<NcButton v-if="app.active"
@@ -147,6 +147,7 @@ export default {
 	data() {
 		return {
 			isSelected: false,
+			removeData: false,
 			scrolled: false,
 			screenshotLoaded: false,
 		}

@@ -14,7 +14,7 @@
 					type="button"
 					:value="t('settings', 'Remove')"
 					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
-					@click="remove(app.id)">
+					@click="remove(app.id, removeData)">
 				<input v-if="app.active"
 					class="enable"
 					type="button"
@@ -37,6 +37,12 @@
 					:value="forceEnableButtonText"
 					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
 					@click="forceEnable(app.id)">
+				<NcCheckboxRadioSwitch v-if="app.canUnInstall"
+					:checked="removeData"
+					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
+					@update:checked="toggleRemoveData">
+					{{ t('settings', 'Delete data on remove') }}
+				</NcCheckboxRadioSwitch>
 			</div>
 		</div>
 
@@ -100,6 +106,7 @@
 </template>
 
 <script>
+import { NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import AppManagement from '../../mixins/AppManagement.js'
 import PrefixMixin from './PrefixMixin.vue'
 import Markdown from './Markdown.vue'
@@ -109,6 +116,7 @@ export default {
 
 	components: {
 		Markdown,
+		NcCheckboxRadioSwitch,
 	},
 	mixins: [AppManagement, PrefixMixin],
 
@@ -117,6 +125,12 @@ export default {
 			type: Object,
 			required: true,
 		},
+	},
+
+	data() {
+		return {
+			removeData: false,
+		}
 	},
 
 	computed: {
@@ -141,6 +155,12 @@ export default {
 				return [this.app.author]
 			}
 			return this.app.author
+		},
+	},
+
+	methods: {
+		toggleRemoveData() {
+			this.removeData = !this.removeData
 		},
 	},
 }
