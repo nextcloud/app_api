@@ -175,6 +175,7 @@ export default {
 		&-manage {
 			// if too many, shrink them and ellipsis
 			display: flex;
+			flex-wrap: wrap;
 			input {
 				flex: 0 1 auto;
 				min-width: 0;
