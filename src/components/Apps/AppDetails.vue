@@ -158,6 +158,12 @@ export default {
 		},
 	},
 
+	watch: {
+		'app.id'() {
+			this.removeData = false
+		},
+	},
+
 	methods: {
 		toggleRemoveData() {
 			this.removeData = !this.removeData
