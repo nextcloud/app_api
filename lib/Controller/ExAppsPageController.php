@@ -472,7 +472,7 @@ class ExAppsPageController extends Controller {
 	}
 
 	/**
-	 * Unregister ExApp, remove container and volume by default
+	 * Unregister ExApp, remove container by default
 	 */
 	#[PasswordConfirmationRequired]
 	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
