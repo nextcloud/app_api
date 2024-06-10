@@ -66,7 +66,8 @@ class ExAppProxyController extends Controller {
 
 		$proxyResponse = new ProxyResponse($response->getStatusCode(), $responseHeaders, $content);
 		if ($cache && !$isHTML && empty($response->getHeader('cache-control'))
-			&& $response->getHeader('Content-Type') !== 'application/json') {
+			&& $response->getHeader('Content-Type') !== 'application/json'
+			&& $response->getHeader('Content-Type') !== 'application/x-tar') {
 			$proxyResponse->cacheFor(3600);
 		}
 		return $proxyResponse;
