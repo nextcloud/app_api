@@ -30,6 +30,7 @@ OC.L10N.register(
     "Default" : "Réamhshocrú",
     "{license}-licensed" : "{license}-cheadúnaithe",
     "Host" : "Óstach",
+    "Nextcloud URL" : "URL Nextcloud",
     "Enabled" : "Cumasaithe",
     "Display name" : "Ainm taispeána",
     "Confirm" : "Deimhnigh",
