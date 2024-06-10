@@ -137,16 +137,13 @@ class ExAppService {
 		$status['error'] = '';
 		$exApp->setStatus($status);
 		$exApp->setLastCheckTime(time());
-		$result = $this->updateExApp($exApp, ['enabled', 'last_check_time']);
-		$this->resetCaches();
-		return $result;
+		return $this->updateExApp($exApp, ['enabled', 'status', 'last_check_time']);
 	}
 
 	public function disableExAppInternal(ExApp $exApp): void {
 		$exApp->setEnabled(0);
 		$exApp->setLastCheckTime(time());
 		$this->updateExApp($exApp, ['enabled', 'last_check_time']);
-		$this->resetCaches();
 	}
 
 	public function getExAppsByDaemonName(string $daemonName): array {
@@ -206,9 +203,13 @@ class ExAppService {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
 			$this->cache->remove('/ex_apps');
+			if (in_array('enabled', $fields)) {
+				$this->resetCaches();
+			}
 			return true;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to update "%s" ExApp info.', $exApp->getAppid()), ['exception' => $e]);
+			$this->cache->remove('/ex_apps');
 			$this->resetCaches();
 		}
 		return false;
