@@ -10,6 +10,19 @@
       <code>DavPlugin</code>
     </MissingDependency>
   </file>
+  <file src="lib/Controller/ExAppProxyController.php">
+    <UndefinedClass>
+      <code>CookieJar</code>
+      <code>CookieJar</code>
+      <code>RequestOptions</code>
+      <code>RequestOptions</code>
+      <code>RequestOptions</code>
+      <code>RequestOptions</code>
+      <code>RequestOptions</code>
+      <code>RequestOptions</code>
+      <code>SetCookie</code>
+    </UndefinedClass>
+  </file>
   <file src="lib/Controller/ExAppsPageController.php">
     <UndefinedClass>
       <code><![CDATA[$this->categoryFetcher]]></code>

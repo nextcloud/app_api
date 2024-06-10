@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Controller;
 
+use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
+use GuzzleHttp\RequestOptions;
 use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\ProxyResponse;
@@ -62,7 +65,9 @@ class ExAppProxyController extends Controller {
 		}
 
 		$proxyResponse = new ProxyResponse($response->getStatusCode(), $responseHeaders, $content);
-		if ($cache && !$isHTML && empty($response->getHeader('cache-control'))) {
+		if ($cache && !$isHTML && empty($response->getHeader('cache-control'))
+			&& $response->getHeader('Content-Type') !== 'application/json'
+			&& $response->getHeader('Content-Type') !== 'application/x-tar') {
 			$proxyResponse->cacheFor(3600);
 		}
 		return $proxyResponse;
@@ -76,8 +81,11 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->requestToExApp(
-			$exApp, '/' . $other, $this->userId, 'GET', request: $this->request
+		$response = $this->service->aeRequestToExApp2(
+			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
+				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+			],
+			request: $this->request,
 		);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
@@ -93,9 +101,19 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->aeRequestToExApp(
+		$options = [
+			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+		];
+		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
+			$multipart = $this->buildMultipartFormData($this->prepareBodyParams($this->request->getParams()), $_FILES);
+			$options[RequestOptions::MULTIPART] = $multipart;
+		}
+		$bodyParams = $this->prepareBodyParams($this->request->getParams());
+
+		$response = $this->service->aeRequestToExApp2(
 			$exApp, '/' . $other, $this->userId,
-			params: $this->request->getParams(), request: $this->request
+			queryParams: $_GET, bodyParams: $bodyParams, options: $options,
+			request: $this->request,
 		);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
@@ -111,8 +129,19 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'PUT', $this->request->getParams(), request: $this->request
+		$options = [
+			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+		];
+		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
+			$multipart = $this->buildMultipartFormData($this->prepareBodyParams($this->request->getParams()), $_FILES);
+			$options[RequestOptions::MULTIPART] = $multipart;
+		}
+		$bodyParams = $this->prepareBodyParams($this->request->getParams());
+
+		$response = $this->service->aeRequestToExApp2(
+			$exApp, '/' . $other, $this->userId, 'PUT', queryParams: $_GET, bodyParams: $bodyParams,
+			options: $options,
+			request: $this->request,
 		);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
@@ -128,12 +157,61 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->aeRequestToExApp(
-			$exApp, '/' . $other, $this->userId, 'DELETE', $this->request->getParams(), request: $this->request
+		$bodyParams = $this->prepareBodyParams($this->request->getParams());
+		$response = $this->service->aeRequestToExApp2(
+			$exApp, '/' . $other, $this->userId, 'DELETE', queryParams: $_GET, bodyParams: $bodyParams,
+			options: [
+				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+			],
+			request: $this->request,
 		);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
 		return $this->createProxyResponse($other, $response);
+	}
+
+	private function buildProxyCookiesJar(array $cookies, string $domain): CookieJar {
+		$cookieJar = new CookieJar();
+		foreach ($cookies as $name => $value) {
+			$cookieJar->setCookie(new SetCookie([
+				'Domain' => $domain,
+				'Name' => $name,
+				'Value' => $value,
+				'Discard' => true,
+				'Secure' => false,
+				'HttpOnly' => true,
+			]));
+		}
+		return $cookieJar;
+	}
+
+	private function prepareBodyParams(array $params): array {
+		unset($params['appId'], $params['other'], $params['_route']);
+		foreach ($_GET as $key => $value) {
+			unset($params[$key]);
+		}
+		return $params;
+	}
+
+	/**
+	 * Build the multipart form data from input parameters and files
+	 */
+	private function buildMultipartFormData(array $bodyParams, array $files): array {
+		$multipart = [];
+		foreach ($bodyParams as $key => $value) {
+			$multipart[] = [
+				'name' => $key,
+				'contents' => $value,
+			];
+		}
+		foreach ($files as $key => $file) {
+			$multipart[] = [
+				'name' => $key,
+				'contents' => fopen($file['tmp_name'], 'r'),
+				'filename' => $file['name'],
+			];
+		}
+		return $multipart;
 	}
 }
