@@ -15,7 +15,7 @@ return [
 		// Proxy
 		['name' => 'ExAppProxy#ExAppGet',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'GET' , 'root' => '/proxy',
-			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],
+			'requirements' => ['other' => '.*'], 'defaults' => ['other' => '']],
 		['name' => 'ExAppProxy#ExAppPost',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxy',
 			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],

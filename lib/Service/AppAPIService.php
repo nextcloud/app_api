@@ -74,6 +74,29 @@ class AppAPIService {
 	}
 
 	/**
+	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
+	 * with more correct query/body params handling
+	 */
+	public function aeRequestToExApp2(
+		ExApp $exApp,
+		string $route,
+		?string $userId = null,
+		string $method = 'POST',
+		array $queryParams = [],
+		array $bodyParams = [],
+		array $options = [],
+		?IRequest $request = null,
+	): array|IResponse {
+		try {
+			$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
+		} catch (\Exception $e) {
+			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
+			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
+		}
+		return $this->requestToExApp2($exApp, $route, $userId, $method, $queryParams, $bodyParams, $options, $request);
+	}
+
+	/**
 	 * Request to ExApp with AppAPI auth headers
 	 */
 	public function requestToExApp(
@@ -86,6 +109,23 @@ class AppAPIService {
 		?IRequest $request = null,
 	): array|IResponse {
 		$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		return $this->requestToExAppInternal($exApp, $method, $requestData['url'], $requestData['options']);
+	}
+
+	/**
+	 * Request to ExApp with AppAPI auth headers with proper query/body params handling
+	 */
+	public function requestToExApp2(
+		ExApp $exApp,
+		string $route,
+		?string $userId = null,
+		string $method = 'POST',
+		array $queryParams = [],
+		array $bodyParams = [],
+		array $options = [],
+		?IRequest $request = null,
+	): array|IResponse {
+		$requestData = $this->prepareRequestToExApp2($exApp, $route, $userId, $method, $queryParams, $bodyParams, $options, $request);
 		return $this->requestToExAppInternal($exApp, $method, $requestData['url'], $requestData['options']);
 	}
 
@@ -197,6 +237,7 @@ class AppAPIService {
 		$options['nextcloud'] = [
 			'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
 		];
+		$options['http_errors'] = false; // do not throw exceptions on 4xx and 5xx responses
 		if (!empty($auth)) {
 			$options['auth'] = $auth;
 		}
@@ -206,6 +247,54 @@ class AppAPIService {
 				$url .= '?' . $this->getUriEncodedParams($params);
 			} else {
 				$options['json'] = $params;
+			}
+		}
+		return ['url' => $url, 'options' => $options];
+	}
+
+	private function prepareRequestToExApp2(
+		ExApp $exApp,
+		string $route,
+		?string $userId,
+		string $method,
+		array $queryParams,
+		array $bodyParams,
+		#[\SensitiveParameter]
+		array $options,
+		?IRequest $request,
+	): array {
+		$this->handleExAppDebug($exApp->getAppid(), $request, true);
+		$auth = [];
+		$url = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
+		if (str_starts_with($route, '/')) {
+			$url = $url.$route;
+		} else {
+			$url = $url.'/'.$route;
+		}
+
+		if (isset($options['headers']) && is_array($options['headers'])) {
+			$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret())];
+		} else {
+			$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret());
+		}
+		$lang = $this->l10nFactory->findLanguage($exApp->getAppid());
+		if (!isset($options['headers']['Accept-Language'])) {
+			$options['headers']['Accept-Language'] = $lang;
+		}
+		$options['nextcloud'] = [
+			'allow_local_address' => true, // it's required as we are using ExApp appid as hostname (usually local)
+		];
+		$options['http_errors'] = false; // do not throw exceptions on 4xx and 5xx responses
+		if (!empty($auth)) {
+			$options['auth'] = $auth;
+		}
+
+		if ((!array_key_exists('multipart', $options))) {
+			if (count($queryParams) > 0) {
+				$url .= '?' . $this->getUriEncodedParams($queryParams);
+			}
+			if ($method !== 'GET' && count($bodyParams) > 0) {
+				$options['json'] = $bodyParams;
 			}
 		}
 		return ['url' => $url, 'options' => $options];
