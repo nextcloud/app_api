@@ -295,10 +295,10 @@ const actions = {
 		}).catch((error) => context.commit('API_FAILURE', { appId, error }))
 	},
 
-	uninstallApp(context, { appId }) {
+	uninstallApp(context, { appId, removeData }) {
 		return api.requireAdmin().then((response) => {
 			context.commit('startLoading', appId)
-			return api.get(generateUrl(`/apps/app_api/apps/uninstall/${appId}`))
+			return api.get(generateUrl(`/apps/app_api/apps/uninstall/${appId}?removeData=${removeData}`))
 				.then((response) => {
 					context.commit('stopLoading', appId)
 					context.commit('uninstallApp', appId)

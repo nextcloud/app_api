@@ -2,6 +2,7 @@
     "External Apps" : "Спољне апликације",
     "Daemon config not found" : "Није пронађена конфигурација даемона",
     "Error starting install of ExApp" : "Грешка приликом покретања инсталације ExApp",
+    "ExApp failed to register, check the NC logs" : "Није успела регистрација ExApp, погледајте NC дневнике",
     "ExApp not found, failed to get status" : "ExApp није пронађена, није успело добављање статуса",
     "Could not perform installation of ExApp" : "Није могла да се изврши инсталација ExApp",
     "Failed to enable ExApp" : "Није успело укључивање ExApp",

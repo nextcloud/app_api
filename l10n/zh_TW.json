@@ -2,6 +2,7 @@
     "External Apps" : "外部應用程式",
     "Daemon config not found" : "找不到幕後程式設定",
     "Error starting install of ExApp" : "開始安裝 ExApp 時發生錯誤",
+    "ExApp failed to register, check the NC logs" : "ExApp 註冊失敗，請檢查 Nextcloud 紀錄檔",
     "ExApp not found, failed to get status" : "找不到 ExApp，無法取得狀態",
     "Could not perform installation of ExApp" : "無法執行 ExApp 的安裝",
     "Failed to enable ExApp" : "啟用 ExApp 失敗",
