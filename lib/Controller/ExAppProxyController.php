@@ -83,7 +83,7 @@ class ExAppProxyController extends Controller {
 
 		$response = $this->service->aeRequestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
-				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			],
 			request: $this->request,
 		);
@@ -102,7 +102,7 @@ class ExAppProxyController extends Controller {
 		}
 
 		$options = [
-			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 		];
 		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
 			$multipart = $this->buildMultipartFormData($this->prepareBodyParams($this->request->getParams()), $_FILES);
@@ -130,7 +130,7 @@ class ExAppProxyController extends Controller {
 		}
 
 		$options = [
-			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 		];
 		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
 			$multipart = $this->buildMultipartFormData($this->prepareBodyParams($this->request->getParams()), $_FILES);
@@ -161,7 +161,7 @@ class ExAppProxyController extends Controller {
 		$response = $this->service->aeRequestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'DELETE', queryParams: $_GET, bodyParams: $bodyParams,
 			options: [
-				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $exApp->getHost()),
+				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			],
 			request: $this->request,
 		);
