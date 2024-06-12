@@ -36,6 +36,7 @@
     "Failed to save admin options" : "تعذّر حفظ خيارات المشرف",
     "Update to {version}" : "التحديث إلى {version}",
     "Remove" : "حذف",
+    "Delete data on remove" : "إحذف البيانات عند الإزالة",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "هذا التطبيق لم يُحدّد فيه أقدم إصدار متوافق معه من نكست كلاود. هذا قد يسبب خطأ في المستقبل.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : " لم يتم تعيين الحد الأقصى لهذا التطبيق لإصدار  نكست كلاود. وهذا سيكون خطأ في المستقبل.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "تعذّر تنصيب التطبيق بسبب عدم توافر التَبعِيّات dependencies التالية:",
