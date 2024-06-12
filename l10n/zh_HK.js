@@ -38,6 +38,7 @@ OC.L10N.register(
     "Failed to save admin options" : "儲存管理選項失敗",
     "Update to {version}" : "更新到 {version}",
     "Remove" : "移除",
+    "Delete data on remove" : "移除時刪除資料",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "此應用程式並未指定最低的 Nextcloud 版本。未來可能會出現錯誤。",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "此應用程式並未指定最高的 Nextcloud 版本。未來可能會出現錯誤。",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "無法安裝此應用程式，因為無法滿足下列的依賴關係：",

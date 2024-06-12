@@ -38,6 +38,7 @@ OC.L10N.register(
     "Failed to save admin options" : "Failed to save admin options",
     "Update to {version}" : "Update to {version}",
     "Remove" : "Remove",
+    "Delete data on remove" : "Delete data on remove",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "This app has no minimum Nextcloud version assigned. This will cause an error in the future.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "This app has no maximum Nextcloud version assigned. This will cause an error in the future.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "This app cannot be installed because the following dependencies are not fulfilled:",

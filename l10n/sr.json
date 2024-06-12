@@ -36,6 +36,7 @@
     "Failed to save admin options" : "Није успело чување админ опција",
     "Update to {version}" : "Ажурирај на верзију {version}",
     "Remove" : "Уклони",
+    "Delete data on remove" : "Обриши податке приликом уклањања",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Ова апликација нема дефинисану минималну верзију Некстклауда на којој ради. Ово ће у будућности постати грешка.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Ова апликација нема дефинисану максималну верзију Некстклауда на којој ради. Ово ће у будућности постати грешка.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Апликација се не може инсталирати јер следеће зависности нису испуњене:",
