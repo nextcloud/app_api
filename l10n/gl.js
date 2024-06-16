@@ -2,6 +2,7 @@ OC.L10N.register(
     "app_api",
     {
     "External Apps" : "Aplicacións externas",
+    "Daemon config not found" : "Non se atopou a configuración do servizo",
     "Deploy Daemons" : "Despregue de servizos",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Despregue de servizos (DaemonConfig) é un servizo de orquestración de Aplicacións externas (ExApps).",
     "Default Deploy Daemon is not accessible. Please verify its configuration" : "Non é posíbel acceder ao servizo predeterminado de  despregue. Verifique a súa configuración",
@@ -47,7 +48,9 @@ OC.L10N.register(
     "Nextcloud URL" : "URL de Nextcloud",
     "Enabled" : "Activado",
     "Display name" : "Nome para amosar",
+    "Enable https" : "Activar https",
     "Network" : "Rede",
+    "Additional option" : "Opción adicional",
     "Confirm" : "Confirmar",
     "Register" : "Rexistrar",
     "Your apps" : "As súas aplicacións",
