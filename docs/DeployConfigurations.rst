@@ -64,7 +64,7 @@ Suggested config values(template *Custom default*):
 	1. Daemon host: ``/var/run/docker.sock``
 	2. HTTPS checkbox: *not supported using docker socket*
 	3. Network: ``host``
-	4. HaProxy password: *not supported using docker socket*
+	4. HaProxy password: **not supported using raw docker socket, should be empty**
 
 ---
 
@@ -104,12 +104,12 @@ Suggested config values(template *Docker Socket Proxy*):
 			B. Docker Socket Proxy should be deployed with ``network=bridge`` and it's port should be published to host's 127.0.0.1(e.g. **-p 127.0.0.1:2375:2375**)
 	2. HTTPS checkbox: **disabled**
 	3. Network: ``host``
-	4. HaProxy password: **can be empty**
+	4. HaProxy password: **should not be empty**
 
 .. warning::
 
 	Be careful with option ``A``, by default **Docker Socket Proxy** binds to ``*`` if ``BIND_ADDRESS`` is not specified during container creation.
-	Check opened ports after finishing configuration(*or set HaProxy password*).
+	Check opened ports after finishing configuration.
 
 
 Docker on a remote host
@@ -158,7 +158,7 @@ Suggested config values(template *Docker Socket Proxy*):
 	1. Daemon host: ADDRESS_OF_REMOTE_MACHINE (e.g. **server_name.com:2375**)
 	2. HTTPS checkbox: ``enabled``
 	3. Network: ``host``
-	4. HaProxy password: ``your chosen password``
+	4. HaProxy password: **should not be empty**
 
 NC & ExApps in the same Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -198,7 +198,7 @@ Suggested config values(template *Docker Socket Proxy*):
 	1. Daemon host: nextcloud-appapi-dsp:2375
 	2. HTTPS checkbox: ``disabled``
 	3. Network: `user defined network <https://docs.docker.com/network/#user-defined-networks>`_
-	4. HaProxy password: ``optional``
+	4. HaProxy password: **should not be empty**
 
 .. note::
 	Network **should not be the default docker's bridge** as it does not support DNS resolving by container names.
