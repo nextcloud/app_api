@@ -64,11 +64,17 @@ OC.L10N.register(
     "Updates" : "Actualizacións",
     "Featured apps" : "Aplicacións destacadas",
     "Supported apps" : "Aplicacións compatíbeis",
+    "Healthchecking" : "Control de integridade",
+    "Deploy and Enable" : "Despregar e activar",
     "Enable" : "Activar",
     "Disable" : "Desactivar",
     "Allow untested app" : "Permitir aplicación non probada",
+    "Default Deploy daemon is not accessible. Please verify configuration" : "Non é posíbel acceder ao servizo predeterminado de  despregue. Verifique a súa configuración",
+    "The app will be downloaded from the App Store and deployed on default Deploy Daemon" : "A aplicación descargarase da tenda de aplicacións e despregarase no servizo de despregue predeterminado",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Esta aplicación non está marcado como compatíbel coa súa versión de Nextcloud. Se continúa, poderá instalar a aplicación. Teña en conta que é probábel que a aplicación non funcione como se agarda.",
+    "Your ExApps" : "As súas ExApps",
     "An error occurred during the request. Unable to proceed." : "Produciuse un erro durante a solicitude. Non é posíbel continuar.",
+    "The app has been enabled but needs to be updated." : "Activouse a aplicación mais cómpre actualizala.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Erro: non é posíbel activar esta aplicación porque fai que o servidor sexa inestábel"
 },
 "nplurals=2; plural=(n != 1);");
