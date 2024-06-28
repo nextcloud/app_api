@@ -11,6 +11,7 @@ OC.L10N.register(
     "Icon" : "Ikona",
     "Name" : "Vārds",
     "Version" : "Versija",
+    "Level" : "Līmenis",
     "Actions" : "Darbības",
     "Type" : "Veids",
     "Display Name" : "Ekrāna vārds",

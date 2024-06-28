@@ -706,6 +706,13 @@ class AppAPIService {
 		}
 	}
 
+	public function getExAppDomain(ExApp $exApp): string {
+		$auth = [];
+		$appFullUrl = $this->getExAppUrl($exApp, 0, $auth);
+		$urlComponents = parse_url($appFullUrl);
+		return $urlComponents['host'] ?? '';
+	}
+
 	/**
 	 * Enable ExApp. Sends request to ExApp to update enabled state.
 	 * If request fails, ExApp will be disabled.
