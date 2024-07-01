@@ -57,9 +57,12 @@
 						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
 						<NcInputField
 							id="nextcloud-url"
+							:helper-text="isNextcloudUrlSafeHelpText"
+							:input-class="!isNextcloudUrlSafe ? 'text-warning' : ''"
 							:value.sync="nextcloud_url"
+							style="max-width: 70%;"
 							:placeholder="t('app_api', 'Nextcloud URL')"
-							:aria-label="t('app_api', 'Nextcloud URL')" />
+							:aria-label="t('app_api', 'Nextcloud URL')"/>
 					</div>
 					<div class="row">
 						<NcCheckboxRadioSwitch
@@ -356,6 +359,15 @@ export default {
 		isAdditionalOptionValid() {
 			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
 		},
+		isNextcloudUrlSafe() {
+			if (this.httpsEnabled) {
+				return this.nextcloud_url.startsWith('https://')
+			}
+			return this.nextcloud_url.startsWith('http://') || this.nextcloud_url.startsWith('https://')
+		},
+		isNextcloudUrlSafeHelpText() {
+			return this.isNextcloudUrlSafe ? '' : t('app_api', 'For HTTPS daemon, Nextcloud URL should be HTTPS')
+		},
 	},
 	watch: {
 		configurationTab(newConfigurationTab) {
@@ -539,6 +551,15 @@ export default {
 
 	.additional-option {
 		display: flex;
+	}
+}
+</style>
+
+<style lang="scss">
+.register-daemon-config-body {
+	.input-field__input.text-warning {
+		border-color: var(--color-warning-text) !important;
+		color: var(--color-warning-text) !important;
 	}
 }
 </style>
