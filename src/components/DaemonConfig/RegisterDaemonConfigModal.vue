@@ -62,7 +62,7 @@
 							:value.sync="nextcloud_url"
 							style="max-width: 70%;"
 							:placeholder="t('app_api', 'Nextcloud URL')"
-							:aria-label="t('app_api', 'Nextcloud URL')"/>
+							:aria-label="t('app_api', 'Nextcloud URL')" />
 					</div>
 					<div class="row">
 						<NcCheckboxRadioSwitch
