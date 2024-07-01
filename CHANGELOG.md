@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Nextcloud URL state warning in the Register daemon form for HTTPS configuration. #312
+- Fix ExApp proxy to preserve the url params. #296
+- Added missing pass through of cookies in ExApp proxy. #296
+- Added missing multipart/form-data support for ExApp proxy. #296
+- Fixed HTTP caching issue for application/json requests in ExApp proxy. #296 
+- Fixed TopMenu API to allow using iframes. #311
 
 ## [2.6.0 - 2024-05-10]
 
