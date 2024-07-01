@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.7.0 - 2024-07-0x]
+
+### Fixed
+
+- Nextcloud URL state warning in the Register daemon form for HTTPS configuration. #312
+
 ## [2.6.0 - 2024-05-10]
 
 ### Added
