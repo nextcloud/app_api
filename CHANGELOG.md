@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.7.1 - 2024-07-xx]
+
+### Fixed
+
+- Allow ExApps management disable and remove actions if default Deploy daemon is not accessible. #314
+- Fixed Deploy daemon avilability check using ping timeout set to 3s. #314
+
 ## [2.7.0 - 2024-07-01]
 
 ### Fixed
