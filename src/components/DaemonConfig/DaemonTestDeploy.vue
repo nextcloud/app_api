@@ -357,14 +357,22 @@ export default {
 					break
 				case 'heartbeat':
 					statusCheck.passed = status.deploy === 100
+					// update later 'image_pull' progress as well
+					this.statusChecks.image_pull.progress = status.deploy
 					this.canDownloadLogs = true
 					break
 				case 'init':
 					statusCheck.passed = status.init === 100
+					// update later 'image_pull' and 'init' progress as well
+					this.statusChecks.image_pull.progress = status.deploy
+					this.statusChecks.init.progress = status.init
 					this.canDownloadLogs = true
 					break
 				case 'enabled':
 					statusCheck.passed = status.init === 100 && status.deploy === 100 && status.action === '' && status.error === ''
+					// update later 'image_pull' and 'init' progress as well
+					this.statusChecks.image_pull.progress = status.deploy
+					this.statusChecks.init.progress = status.init
 					if (statusCheck.passed) {
 						showSuccess(t('app_api', 'Deploy test passed successfully!'))
 						this.clearTestRunning()
