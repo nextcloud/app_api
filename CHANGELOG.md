@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Allow ExApps management disable and remove actions if default Deploy daemon is not accessible. #314
 - Fixed Deploy daemon avilability check using ping timeout set to 3s. #314
+- Fix Test Deploy `image_pull` and `init` steps status update. #315
 
 ## [2.7.0 - 2024-07-01]
 
