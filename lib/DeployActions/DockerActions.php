@@ -418,7 +418,9 @@ class DockerActions implements IDeployActions {
 	public function ping(string $dockerUrl): bool {
 		$url = $this->buildApiUrl($dockerUrl, '_ping');
 		try {
-			$response = $this->guzzleClient->get($url);
+			$response = $this->guzzleClient->get($url, [
+				'timeout' => 3,
+			]);
 			if ($response->getStatusCode() === 200) {
 				return true;
 			}
