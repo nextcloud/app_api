@@ -13,13 +13,13 @@
 					class="uninstall"
 					type="button"
 					:value="t('settings', 'Remove')"
-					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
+					:disabled="installing || isLoading"
 					@click="remove(app.id, removeData)">
 				<input v-if="app.active"
 					class="enable"
 					type="button"
 					:value="disableButtonText"
-					:disabled="installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
+					:disabled="installing || isLoading || isInitializing || isDeploying"
 					@click="disable(app.id)">
 				<input v-if="!app.active && (app.canInstall || app.isCompatible)"
 					:title="enableButtonTooltip"
