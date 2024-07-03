@@ -159,6 +159,7 @@
     "Daemon with this name already exists" : "Deamhan leis an ainm seo ann cheana",
     "Password must be at least 12 characters long" : "Caithfidh pasfhocal a bheith 12 charachtar ar a laghad ar fad",
     "With https enabled network is set to host" : "Le https cumasaithe líonra socraithe chun óstáil",
+    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "Maidir le deamhan HTTPS, ba cheart go mbeadh URL Nextcloud mar HTTPS",
     "DaemonConfig successfully registered" : "Cláraíodh DaemonConfig go rathúil",
     "Failed to register DaemonConfig. Check the logs" : "Theip ar chlárú DaemonConfig. Seiceáil na logs",
     "Your apps" : "D'aipeanna",

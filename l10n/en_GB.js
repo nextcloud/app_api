@@ -161,6 +161,7 @@ OC.L10N.register(
     "Daemon with this name already exists" : "Daemon with this name already exists",
     "Password must be at least 12 characters long" : "Password must be at least 12 characters long",
     "With https enabled network is set to host" : "With https enabled network is set to host",
+    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "For HTTPS daemon, Nextcloud URL should be HTTPS",
     "DaemonConfig successfully registered" : "DaemonConfig successfully registered",
     "Failed to register DaemonConfig. Check the logs" : "Failed to register DaemonConfig. Check the logs",
     "Your apps" : "Your apps",

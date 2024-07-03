@@ -159,6 +159,7 @@
     "Daemon with this name already exists" : "برنامج خفي آخر بنفس هذا الاسم موجود سلفاً",
     "Password must be at least 12 characters long" : "يجب ألّا يقل طول كلمة المرور عن 12 حرفاً",
     "With https enabled network is set to host" : "مع تعيين شبكة للمضيف يكون فيها بروتوكول https مٌمكّناً",
+    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "بالنسبة للبرنامج الخفي لـ HTTPS، عنوان URL لنكست كلاود يجب أن يكون HTTPS",
     "DaemonConfig successfully registered" : "تمّ بنجاحٍ تسجيل إعداد لبرنامج خفي DaemonConfig",
     "Failed to register DaemonConfig. Check the logs" : "تعذّر تسجيل إعداد لبرنامج خفي DaemonConfig. راجع سجل الحركات",
     "Your apps" : "تطبيقاتك",

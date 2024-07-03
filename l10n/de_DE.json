@@ -159,6 +159,7 @@
     "Daemon with this name already exists" : "Ein Daemon mit diesem Namen existiert bereits",
     "Password must be at least 12 characters long" : "Das Passwort muss mindestens 12 Zeichen lang sein",
     "With https enabled network is set to host" : "Bei aktiviertem https ist das Netzwerk auf Host eingestellt",
+    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "Für den HTTPS-Daemon sollte die Nextcloud-URL HTTPS sein",
     "DaemonConfig successfully registered" : "Daemonkonfiguration erfolgreich registriert",
     "Failed to register DaemonConfig. Check the logs" : "Fehler beim Registrieren der Daemonkonfiguration. Prüfen Sie die Protokolle",
     "Your apps" : "Ihre Apps",

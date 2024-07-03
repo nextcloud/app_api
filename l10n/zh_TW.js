@@ -161,6 +161,7 @@ OC.L10N.register(
     "Daemon with this name already exists" : "同名幕後程式已存在",
     "Password must be at least 12 characters long" : "密碼必須至少 12 個字元長",
     "With https enabled network is set to host" : "啟用 https 後，網路設定為主機",
+    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "對於 HTTPS 幕後程式，Nextcloud URL 應該為 HTTPS",
     "DaemonConfig successfully registered" : "DaemonConfig 成功註冊",
     "Failed to register DaemonConfig. Check the logs" : "註冊 DaemonConfig 失敗。請檢查紀錄檔",
     "Your apps" : "您的應用程式",
