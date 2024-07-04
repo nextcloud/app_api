@@ -161,6 +161,7 @@ OC.L10N.register(
     "Daemon with this name already exists" : "Даемон са овим именом већ постоји",
     "Password must be at least 12 characters long" : "Дужина лозинке мора да буде барем 12 карактера",
     "With https enabled network is set to host" : "Са укљученим https мрежа се поставља на хост",
+    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "Nextcloud URL би за HTTPS даемон требало да буде HTTPS",
     "DaemonConfig successfully registered" : "DaemonConfig је успешно регистрована",
     "Failed to register DaemonConfig. Check the logs" : "Није успело регистровање DaemonConfig. Погледајте дневнике",
     "Your apps" : "Ваше апликације",
