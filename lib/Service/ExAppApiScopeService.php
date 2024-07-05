@@ -39,6 +39,7 @@ class ExAppApiScopeService {
 
 			// AppAPI internal scopes
 			['api_route' => '/apps/app_api/apps/status', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
+			['api_route' => '/apps/app_api/ex-app/state', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 
 			// Cloud scopes
 			['api_route' => '/cloud/capabilities', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
@@ -77,7 +78,7 @@ class ExAppApiScopeService {
 	/**
 	 * Check if the given route has ocs prefix and cut it off
 	 */
-	private function sanitizeOcsRoute(string $route): string {
+	public function sanitizeOcsRoute(string $route): string {
 		if (preg_match("/\/ocs\/v([12])\.php/", $route, $matches)) {
 			return str_replace($matches[0], '', $route);
 		}
