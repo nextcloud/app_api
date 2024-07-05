@@ -353,13 +353,6 @@ class AppAPIService {
 		$authValid = $authorizationSecret === $exApp->getSecret();
 
 		if ($authValid) {
-			if (!$exApp->getEnabled()) {
-				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
-				return false;
-			}
-			if (!$this->handleExAppVersionChange($request, $exApp)) {
-				return false;
-			}
 			if (!$isDav) {
 				try {
 					$path = $request->getPathInfo();
@@ -369,6 +362,14 @@ class AppAPIService {
 				}
 			} else {
 				$path = '/dav/';
+			}
+
+			if (($this->exAppApiScopeService->sanitizeOcsRoute($path) !== '/apps/app_api/ex-app/state') && !$exApp->getEnabled()) {
+				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
+				return false;
+			}
+			if (!$this->handleExAppVersionChange($request, $exApp)) {
+				return false;
 			}
 
 			$allScopesFlag = (bool)$this->getByScope($exApp, ExAppApiScopeService::ALL_API_SCOPE);

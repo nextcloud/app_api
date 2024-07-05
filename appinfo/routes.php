@@ -59,6 +59,7 @@ return [
 
 		['name' => 'OCSApi#getNCUsersList', 'url' => '/api/v1/users', 'verb' => 'GET'],
 		['name' => 'OCSApi#setAppInitProgress', 'url' => '/apps/status/{appId}', 'verb' => 'PUT'],
+		['name' => 'OCSApi#getEnabledState', 'url' => '/ex-app/state', 'verb' => 'GET'],
 
 		// ExApps
 		['name' => 'OCSExApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
