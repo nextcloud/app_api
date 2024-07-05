@@ -90,6 +90,6 @@ class OCSApiController extends OCSController {
 		if (!$exApp) {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
-		return new DataResponse([$exApp->getEnabled()]);
+		return new DataResponse($exApp->getEnabled());
 	}
 }
