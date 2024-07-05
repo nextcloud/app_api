@@ -19,6 +19,7 @@ use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\DB\Exception;
+use OCP\IGroupManager;
 use OCP\IRequest;
 
 class TopMenuController extends Controller {
@@ -36,6 +37,7 @@ class TopMenuController extends Controller {
 		private readonly ExAppUsersService   $exAppUsersService,
 		private readonly ExAppService        $service,
 		private readonly ?string             $userId,
+		private readonly IGroupManager       $groupManager,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -55,6 +57,9 @@ class TopMenuController extends Controller {
 		}
 		$menuEntry = $this->menuEntryService->getExAppMenuEntry($appId, $name);
 		if ($menuEntry === null) {
+			return new NotFoundResponse();
+		}
+		if (filter_var($menuEntry->getAdminRequired(), FILTER_VALIDATE_BOOLEAN) && !$this->groupManager->isAdmin($this->userId)) {
 			return new NotFoundResponse();
 		}
 		$initialStates = $this->initialStateService->getExAppInitialStates($appId, 'top_menu', $menuEntry->getName());
