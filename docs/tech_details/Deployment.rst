@@ -1,3 +1,5 @@
+.. _app_deployment:
+
 Deployment
 ==========
 
@@ -101,6 +103,8 @@ For all examples and applications we release we usually add manual_install comma
 
 .. note:: **Deployment/Startup of App should be done by developer when ``manual-install`` DeployConfig type is used.**
 
+.. _ex_app_env_vars:
+
 Deploy env variables
 ********************
 
@@ -150,6 +154,6 @@ It has the same structure as Nextcloud appinfo/info.xml file, but with some addi
 			<value>TALK</value>
 			<value>TALK_BOT</value>
 		</scopes>
-		<system>0</system>
+		<system>0</system> // deprecated since AppAPI 3.0.0
 	</ex-app>
 	...

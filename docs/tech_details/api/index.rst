@@ -1,3 +1,5 @@
+.. _app_api_nextcloud_apis:
+
 =====================
 AppAPI Nextcloud APIs
 =====================

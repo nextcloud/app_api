@@ -1,3 +1,5 @@
+.. _app_api_auth:
+
 Authentication
 ==============
 
@@ -59,8 +61,6 @@ Authentication flow in details
 		Nextcloud->>+AppAPI: Validate request
 		AppAPI-->>AppAPI: Check if ExApp exists and enabled
 		AppAPI-->>Nextcloud: Reject if ExApp not exists or disabled
-		AppAPI-->>AppAPI: Check if ExApp version changed
-		AppAPI-->>Nextcloud: Disable ExApp and notify admins if version changed
 		AppAPI-->>AppAPI: Validate shared secret from AUTHORIZATION-APP-API
 		AppAPI-->>Nextcloud: Reject if secret does not match
 		AppAPI-->>AppAPI: Check API scope
@@ -85,7 +85,7 @@ After successful authentication AppAPI sets `app_api` session key to ``true``.
 .. code-block:: php
 
 	$this->session->set('app_api', true);
-	$this->session->set('app_api_system', true); // deprecated since AppAPI 2.8.0
+	$this->session->set('app_api_system', true); // deprecated since AppAPI 3.0.0
 
 .. note::
 

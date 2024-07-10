@@ -101,7 +101,7 @@ class OCSExAppController extends OCSController {
 	/**
 	 * TODO: remove later
 	 *
-	 * @deprecated since AppAPI 2.8.0
+	 * @deprecated since AppAPI 3.0.0
 	 */
 	#[NoCSRFRequired]
 	public function aeRequestToExApp(

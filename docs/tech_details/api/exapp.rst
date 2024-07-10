@@ -33,6 +33,32 @@ The response data is a JSON array of ExApp objects with the following attributes
 		"system": "true/false flag indicating system ExApp",
 	}
 
+Set ExApp init progress
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Used during ExApp :ref:`initialization step <ex_app_lifecycle_init>`.
+
+.. note::
+
+	AppAPIAuth required.
+
+OCS endpoint: ``PUT /apps/app_api/ex-app/status``
+
+Request data
+************
+
+.. code-block:: json
+
+	{
+		"progress": "progress value",
+		"error": "optional, error string message"
+	}
+
+Response data
+*************
+
+Returns HTTP 200 on success, HTTP 404 - on error.
+
 
 Make Requests to ExApps
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -75,3 +101,21 @@ Successful request to ExApp OCS data response structure is the following:
     }
 
 If there is an error, the response object will have only an ``error`` attribute with the error message.
+
+
+Get ExApp enabled status
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Return the enabled status of the authenticated ExApp.
+
+OCS endpoint: ``GET /apps/app_api/api/v1/ex-app/state``
+
+.. note::
+
+	This endpoint can be called by ExApp even if it is disabled on the Nextcloud side,
+	and requires :ref:`AppAPIAuth <app_api_auth>`.
+
+Response data
+*************
+
+Returns 1 if the ExApp is enabled, 0 if it is disabled.

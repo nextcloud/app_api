@@ -10,7 +10,7 @@ use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
 /**
- * Since AppAPI 2.8.0, the `system` flag of the ExApp has been removed.
+ * Since AppAPI 3.0.0, the `system` flag of the ExApp has been removed.
  */
 class Version2800Date20240710220000 extends SimpleMigrationStep {
 	/**

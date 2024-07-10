@@ -205,6 +205,9 @@ Suggested config values(template *Docker Socket Proxy*):
 
 	This means that **Docker Socket Proxy**, **Nextcloud** and **ExApps** containers should all be in the same docker network, different from the default **bridge**.
 
+
+.. _nextcloud-in-docker-aio-all-in-one:
+
 Nextcloud in Docker AIO (all-in-one)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

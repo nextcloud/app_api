@@ -31,3 +31,5 @@ and handle complex problems through issues.
    Concepts
    tech_details/index.rst
    DevSetup
+   notes_for_developers/index.rst
+   faq/index.rst
