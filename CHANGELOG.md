@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.8.0 - 2024-07-1x]
 
+Note: Nextcloud 27 is no longer supported since this version.
+
 ### Added
 
 - New OCS API endpoint to setAppInitProgress. The old one is marked as deprecated. #319
 - Added default timeout for requestToExApp function set to 3s. #277
+
+### Changed
+
+- Dropped support of Nextcloud 27. #322
 
 ### Fixed
 
