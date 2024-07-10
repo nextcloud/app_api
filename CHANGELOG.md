@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- New OCS API endpoint to setAppInitProgress. The old one is marked deprecated. #319
+- New OCS API endpoint to setAppInitProgress. The old one is marked as deprecated. #319
 
 ### Fixed
 
