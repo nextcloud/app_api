@@ -21,9 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         php-version: [ '8.1' ]
-        server-version: [ 'stable27' ]
+        server-version: [ 'stable28' ]
         include:
-          - server-version: "stable28"
+          - server-version: "stable29"
             php-version: "8.2"
           - server-version: "master"
             php-version: "8.3"
