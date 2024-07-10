@@ -176,6 +176,7 @@ class ExAppService {
 			'version' => $exApp->getVersion(),
 			'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
 			'last_check_time' => $exApp->getLastCheckTime(),
+			'system' => true, // TODO: Remove later
 			'status' => $exApp->getStatus(),
 			'scopes' => $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes()),
 		];
