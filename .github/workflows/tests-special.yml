@@ -55,7 +55,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: nextcloud/notifications
-          ref: ${{ matrix.server-version }}
+          ref: 'stable28'
           path: apps/notifications
 
       - name: Checkout AppAPI
