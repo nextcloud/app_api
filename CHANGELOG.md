@@ -16,7 +16,7 @@ Note: Nextcloud 27 is no longer supported since this version.
 
 ### Changed
 
-- Dropped support of Nextcloud 27.
+- Dropped support of Nextcloud 27. #322
 
 ### Fixed
 
