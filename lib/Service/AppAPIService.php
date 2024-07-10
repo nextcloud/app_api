@@ -411,6 +411,7 @@ class AppAPIService {
 			$this->userSession->setUser(null);
 		}
 		$this->session->set('app_api', true);
+		$this->session->set('app_api_system', true); // TODO: Remove after drop support NC29
 
 		$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
 			'appid' => $request->getHeader('EX-APP-ID'),
