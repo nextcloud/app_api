@@ -402,7 +402,7 @@ jobs:
 
   nc-host-app-docker-redis:
     runs-on: ubuntu-22.04
-    name: NC In Host(Redis) • stable27 • 🐘8.1
+    name: NC In Host(Redis) • stable28 • 🐘8.1
 
     services:
       postgres:
@@ -434,7 +434,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: stable27
+          ref: stable28
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -520,7 +520,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable27_8.1_container.json
+          name: nc_host_app_docker_redis_stable28_8.1_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -528,7 +528,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable27_8.1_container.log
+          name: nc_host_app_docker_redis_stable28_8.1_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -536,7 +536,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable27_8.1_nextcloud.log
+          name: nc_host_app_docker_redis_stable28_8.1_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
