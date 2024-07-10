@@ -39,6 +39,7 @@ class ExAppApiScopeService {
 
 			// AppAPI internal scopes
 			['api_route' => '/apps/app_api/apps/status', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
+			['api_route' => '/apps/app_api/ex-app/status', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 			['api_route' => '/apps/app_api/ex-app/state', 'scope_group' => 1, 'name' => 'BASIC', 'user_check' => 0],
 
 			// Cloud scopes
