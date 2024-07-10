@@ -39,7 +39,6 @@ class ExAppService {
 		private readonly ExAppFetcher               $exAppFetcher,
 		private readonly ExAppArchiveFetcher        $exAppArchiveFetcher,
 		private readonly ExAppMapper                $exAppMapper,
-		private readonly ExAppUsersService          $exAppUsersService,
 		private readonly ExAppApiScopeService       $exAppApiScopeService,
 		private readonly TopMenuService             $topMenuService,
 		private readonly InitialStateService        $initialStateService,
@@ -79,7 +78,6 @@ class ExAppService {
 			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install', 'error' => '']),
 			'created_time' => time(),
 			'last_check_time' => time(),
-			'is_system' => (int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN),
 			'api_scopes' => $appInfo['api_scopes'],
 		]);
 		try {
@@ -98,7 +96,6 @@ class ExAppService {
 		if ($exApp === null) {
 			return false;
 		}
-		$this->exAppUsersService->removeExAppUsers($appId);
 		$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
 		$this->filesActionsMenuService->unregisterExAppFileActions($appId);
 		$this->topMenuService->unregisterExAppMenuEntries($appId);
@@ -179,7 +176,6 @@ class ExAppService {
 			'version' => $exApp->getVersion(),
 			'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
 			'last_check_time' => $exApp->getLastCheckTime(),
-			'system' => $exApp->getIsSystem(),
 			'status' => $exApp->getStatus(),
 			'scopes' => $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes()),
 		];
@@ -194,15 +190,14 @@ class ExAppService {
 	public function updateExAppInfo(ExApp $exApp, array $appInfo): bool {
 		$exApp->setVersion($appInfo['version']);
 		$exApp->setName($appInfo['name']);
-		$exApp->setIsSystem((int)filter_var($appInfo['external-app']['system'], FILTER_VALIDATE_BOOLEAN));
 		$exApp->setApiScopes($appInfo['api_scopes']);
-		if (!$this->updateExApp($exApp, ['version', 'name', 'is_system', 'api_scopes'])) {
+		if (!$this->updateExApp($exApp, ['version', 'name', 'api_scopes'])) {
 			return false;
 		}
 		return true;
 	}
 
-	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'is_system', 'api_scopes']): bool {
+	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'api_scopes']): bool {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
 			$this->cache->remove('/ex_apps');
@@ -252,16 +247,11 @@ class ExAppService {
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'scopes', 'system', 'system_app', 'translations_folder'] as $key) {
+			foreach (['docker-install', 'scopes', 'system_app', 'translations_folder'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);
 				}
-			}
-			# TO-DO: remove this in AppAPI 2.4.0
-			if (isset($appInfo['external-app']['system_app'])) {
-				$appInfo['external-app']['system'] = $appInfo['external-app']['system_app'];
-				unset($appInfo['external-app']['system_app']);
 			}
 		} else {
 			if ($infoXml !== null) {

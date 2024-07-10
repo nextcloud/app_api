@@ -98,6 +98,11 @@ class OCSExAppController extends OCSController {
 		]);
 	}
 
+	/**
+	 * TODO: remove later
+	 *
+	 * @deprecated since AppAPI 2.8.0
+	 */
 	#[NoCSRFRequired]
 	public function aeRequestToExApp(
 		string $appId,
@@ -111,7 +116,7 @@ class OCSExAppController extends OCSController {
 		if ($exApp === null) {
 			return new DataResponse(['error' => sprintf('ExApp `%s` not found', $appId)]);
 		}
-		$response = $this->service->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $this->request);
+		$response = $this->service->requestToExApp($exApp, $route, $userId, $method, $params, $options, $this->request);
 		if (is_array($response) && isset($response['error'])) {
 			return new DataResponse($response, Http::STATUS_BAD_REQUEST);
 		}

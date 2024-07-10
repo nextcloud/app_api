@@ -6,7 +6,6 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\ExAppService;
-use OCA\AppAPI\Service\ExAppUsersService;
 use OCA\AppAPI\Service\UI\InitialStateService;
 use OCA\AppAPI\Service\UI\ScriptsService;
 use OCA\AppAPI\Service\UI\StylesService;
@@ -34,7 +33,6 @@ class TopMenuController extends Controller {
 		private readonly InitialStateService $initialStateService,
 		private readonly ScriptsService      $scriptsService,
 		private readonly StylesService       $stylesService,
-		private readonly ExAppUsersService   $exAppUsersService,
 		private readonly ExAppService        $service,
 		private readonly ?string             $userId,
 		private readonly IGroupManager       $groupManager,
@@ -70,7 +68,6 @@ class TopMenuController extends Controller {
 		$this->stylesService->applyExAppStyles($appId, 'top_menu', $menuEntry->getName());
 
 		$this->postprocess = true;
-		$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $this->userId);
 		$response = new TemplateResponse(Application::APP_ID, 'embedded');
 		$csp = new ContentSecurityPolicy();
 		$csp->addAllowedScriptDomain($this->request->getServerHost());

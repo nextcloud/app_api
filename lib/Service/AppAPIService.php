@@ -38,7 +38,6 @@ class AppAPIService {
 		private readonly IFactory                $l10nFactory,
 		private readonly ExNotificationsManager  $exNotificationsManager,
 		private readonly ExAppService            $exAppService,
-		private readonly ExAppUsersService       $exAppUsersService,
 		private readonly ExAppApiScopeService    $exAppApiScopeService,
 		private readonly DockerActions           $dockerActions,
 		private readonly ManualActions           $manualActions,
@@ -49,6 +48,8 @@ class AppAPIService {
 
 	/**
 	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
+	 *
+	 * @deprecated since AppAPI 2.8.0, use `requestToExApp` instead
 	 */
 	public function aeRequestToExApp(
 		ExApp $exApp,
@@ -59,18 +60,15 @@ class AppAPIService {
 		array $options = [],
 		?IRequest $request = null,
 	): array|IResponse {
-		try {
-			$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
-		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
-			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
-		}
+		// TODO: Remove later
 		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 
 	/**
 	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
 	 * with more correct query/body params handling
+	 *
+	 * @deprecated since AppAPI 2.8.0, use `requestToExApp2` instead
 	 */
 	public function aeRequestToExApp2(
 		ExApp $exApp,
@@ -82,12 +80,7 @@ class AppAPIService {
 		array $options = [],
 		?IRequest $request = null,
 	): array|IResponse {
-		try {
-			$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
-		} catch (\Exception $e) {
-			$this->logger->error(sprintf('Error while inserting ExApp %s user. Error: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
-			return ['error' => 'Error while inserting ExApp user: ' . $e->getMessage()];
-		}
+		// TODO: Remove later
 		return $this->requestToExApp2($exApp, $route, $userId, $method, $queryParams, $bodyParams, $options, $request);
 	}
 
@@ -147,6 +140,8 @@ class AppAPIService {
 
 	/**
 	 * @throws \Exception
+	 *
+	 * @deprecated since AppAPI 2.8.0, use `requestToExAppAsync` instead
 	 */
 	public function aeRequestToExAppAsync(
 		ExApp $exApp,
@@ -157,7 +152,7 @@ class AppAPIService {
 		array $options = [],
 		?IRequest $request = null,
 	): IPromise {
-		$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $userId);
+		// TODO: Remove later
 		$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 		return $this->requestToExAppInternalAsync($exApp, $method, $requestData['url'], $requestData['options']);
 	}
@@ -320,7 +315,6 @@ class AppAPIService {
 	 *  - checks ExApp scopes <-> ExApp API copes
 	 *
 	 * More info in docs: https://cloud-py-api.github.io/app_api/authentication.html
-	 *
 	 */
 	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
 		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
@@ -387,19 +381,7 @@ class AppAPIService {
 				}
 			}
 
-			// For APIs that not assuming work under user context we do not check ExApp users
-			if ((!$exApp->getIsSystem()) && (($apiScope === null) or ($apiScope['user_check']))) {
-				try {
-					if (!$this->exAppUsersService->exAppUserExists($exApp->getAppid(), $userId)) {
-						$this->logger->error(sprintf('ExApp %s user %s does not exist', $exApp->getAppid(), $userId));
-						return false;
-					}
-				} catch (Exception $e) {
-					$this->logger->error(sprintf('Failed to get ExApp %s user %s. Error: %s', $exApp->getAppid(), $userId, $e->getMessage()), ['exception' => $e]);
-					return false;
-				}
-			}
-			return $this->finalizeRequestToNC($userId, $request, $exApp->getIsSystem());
+			return $this->finalizeRequestToNC($userId, $request);
 		} else {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
@@ -416,9 +398,8 @@ class AppAPIService {
 	 * Final step of AppAPI authentication request validation for Nextcloud:
 	 *  - sets active user (null if not a user context)
 	 *  - updates ExApp last response time
-	 *
 	 */
-	private function finalizeRequestToNC(string $userId, IRequest $request, int $isSystemApp): bool {
+	private function finalizeRequestToNC(string $userId, IRequest $request): bool {
 		if ($userId !== '') {
 			$activeUser = $this->userManager->get($userId);
 			if ($activeUser === null) {
@@ -430,9 +411,6 @@ class AppAPIService {
 			$this->userSession->setUser(null);
 		}
 		$this->session->set('app_api', true);
-		if ($isSystemApp === 1) {
-			$this->session->set('app_api_system', true);
-		}
 
 		$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
 			'appid' => $request->getHeader('EX-APP-ID'),

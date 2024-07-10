@@ -103,18 +103,8 @@ ListExApps command will show all ExApps:
 
     ExApps:
     appid (Display Name): version [enabled/disabled]
-    to_gif (ToGif): 1.0.0 [enabled]
-    upscaler_demo (Upscaler Demo): 1.0.0 [enabled]
-
-List ExApp users
-----------------
-
-Command: ``app_api:app:users:list <appid>``
-
-System user
-***********
-
-System user (``[system user]``) in the list means that this ExApp was setup as a system ExApp.
+    to_gif_example (To Gif Example): 1.0.0 [enabled]
+    upscaler_example (Upscaler Example): 1.0.0 [enabled]
 
 Using the ExApp Management UI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
