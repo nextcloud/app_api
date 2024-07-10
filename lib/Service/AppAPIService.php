@@ -236,7 +236,7 @@ class AppAPIService {
 			$options['auth'] = $auth;
 		}
 		if (!isset($options['timeout'])) {
-			$options['timeout'] = '3.0';
+			$options['timeout'] = 3;
 		}
 
 		if ((!array_key_exists('multipart', $options)) && (count($params)) > 0) {
@@ -283,6 +283,9 @@ class AppAPIService {
 		$options['http_errors'] = false; // do not throw exceptions on 4xx and 5xx responses
 		if (!empty($auth)) {
 			$options['auth'] = $auth;
+		}
+		if (!isset($options['timeout'])) {
+			$options['timeout'] = 3;
 		}
 
 		if ((!array_key_exists('multipart', $options))) {
@@ -661,7 +664,7 @@ class AppAPIService {
 	 */
 	public function enableExApp(ExApp $exApp): bool {
 		if ($this->exAppService->enableExAppInternal($exApp)) {
-			$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT');
+			$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 30]);
 			if ($exAppEnabled instanceof IResponse) {
 				$response = json_decode($exAppEnabled->getBody(), true);
 				if (empty($response['error'])) {
@@ -686,7 +689,7 @@ class AppAPIService {
 	 */
 	public function disableExApp(ExApp $exApp): bool {
 		$result = true;
-		$exAppDisabled = $this->requestToExApp($exApp, '/enabled?enabled=0', null, 'PUT');
+		$exAppDisabled = $this->requestToExApp($exApp, '/enabled?enabled=0', null, 'PUT', options: ['timeout' => 30]);
 		if ($exAppDisabled instanceof IResponse) {
 			$response = json_decode($exAppDisabled->getBody(), true);
 			if (isset($response['error']) && strlen($response['error']) !== 0) {
