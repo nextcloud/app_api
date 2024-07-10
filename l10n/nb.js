@@ -161,6 +161,7 @@ OC.L10N.register(
     "Daemon with this name already exists" : "En daemon med dette navnet finnes allerede",
     "Password must be at least 12 characters long" : "Passordet må bestå av minst 12 tegn",
     "With https enabled network is set to host" : "Med https aktivert er nettverk satt til å være vert",
+    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "For HTTPS-daemon bør Nextcloud URL være HTTPS",
     "DaemonConfig successfully registered" : "DaemonKonfigurasjon registrert",
     "Failed to register DaemonConfig. Check the logs" : "Registrering av DaemonKonfigurasjon feilet. Sjekk loggene.",
     "Your apps" : "Dine apper",

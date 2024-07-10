@@ -11,15 +11,15 @@
   </file>
   <file src="lib/Controller/ExAppProxyController.php">
     <UndefinedClass>
-      <code>CookieJar</code>
-      <code>CookieJar</code>
-      <code>RequestOptions</code>
-      <code>RequestOptions</code>
-      <code>RequestOptions</code>
-      <code>RequestOptions</code>
-      <code>RequestOptions</code>
-      <code>RequestOptions</code>
-      <code>SetCookie</code>
+      <code><![CDATA[CookieJar]]></code>
+      <code><![CDATA[CookieJar]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[SetCookie]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Controller/ExAppsPageController.php">
@@ -104,10 +104,5 @@
     <MissingTemplateParam>
       <code><![CDATA[IEventListener]]></code>
     </MissingTemplateParam>
-  </file>
-  <file src="lib/Profiler/AppAPIDataCollector.php">
-    <UndefinedClass>
-      <code><![CDATA[Request]]></code>
-    </UndefinedClass>
   </file>
 </files>

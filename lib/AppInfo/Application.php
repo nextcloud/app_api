@@ -18,7 +18,6 @@ use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
 use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
-use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
 use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
@@ -44,7 +43,6 @@ use OCP\INavigationManager;
 use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserSession;
-use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
@@ -114,10 +112,6 @@ class Application extends App implements IBootstrap {
 	public function boot(IBootContext $context): void {
 		$server = $context->getServerContainer();
 		try {
-			$profiler = $server->get(IProfiler::class);
-			if ($profiler->isEnabled()) {
-				$profiler->add(new AppAPIDataCollector());
-			}
 			$context->injectFn($this->registerExAppsManagementNavigation(...));
 			$context->injectFn($this->registerExAppsMenuEntries(...));
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|Throwable) {
