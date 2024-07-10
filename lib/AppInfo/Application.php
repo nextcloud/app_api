@@ -114,10 +114,6 @@ class Application extends App implements IBootstrap {
 	public function boot(IBootContext $context): void {
 		$server = $context->getServerContainer();
 		try {
-			$profiler = $server->get(IProfiler::class);
-			if ($profiler->isEnabled()) {
-				$profiler->add(new AppAPIDataCollector());
-			}
 			$context->injectFn($this->registerExAppsManagementNavigation(...));
 			$context->injectFn($this->registerExAppsMenuEntries(...));
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|Throwable) {
