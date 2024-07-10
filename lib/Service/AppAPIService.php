@@ -16,13 +16,11 @@ use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IPromise;
 use OCP\Http\Client\IResponse;
-use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\L10N\IFactory;
-use OCP\Log\ILogFactory;
 use OCP\Security\Bruteforce\IThrottler;
 use Psr\Log\LoggerInterface;
 
@@ -32,9 +30,7 @@ class AppAPIService {
 
 	public function __construct(
 		private readonly LoggerInterface         $logger,
-		private readonly ILogFactory             $logFactory,
 		private readonly IThrottler              $throttler,
-		private readonly IConfig                 $config,
 		IClientService                           $clientService,
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
@@ -44,7 +40,6 @@ class AppAPIService {
 		private readonly ExAppService            $exAppService,
 		private readonly ExAppUsersService       $exAppUsersService,
 		private readonly ExAppApiScopeService    $exAppApiScopeService,
-		private readonly ExAppConfigService      $exAppConfigService,
 		private readonly DockerActions           $dockerActions,
 		private readonly ManualActions           $manualActions,
 		private readonly AppAPICommonService     $commonService,
@@ -216,7 +211,6 @@ class AppAPIService {
 		array $options,
 		?IRequest $request,
 	): array {
-		$this->handleExAppDebug($exApp->getAppid(), $request, true);
 		$auth = [];
 		$url = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
 		if (str_starts_with($route, '/')) {
@@ -263,7 +257,6 @@ class AppAPIService {
 		array $options,
 		?IRequest $request,
 	): array {
-		$this->handleExAppDebug($exApp->getAppid(), $request, true);
 		$auth = [];
 		$url = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
 		if (str_starts_with($route, '/')) {
@@ -340,8 +333,6 @@ class AppAPIService {
 			]);
 			return false;
 		}
-
-		$this->handleExAppDebug($exApp->getAppid(), $request, false);
 
 		$authorization = base64_decode($request->getHeader('AUTHORIZATION-APP-API'));
 		if ($authorization === false) {
@@ -458,60 +449,6 @@ class AppAPIService {
 			return true;
 		}
 		return false;
-	}
-
-	private function buildRequestInfo(IRequest $request): array {
-		$headers = [];
-		$aeHeadersList = [
-			'AA-VERSION',
-			'EX-APP-VERSION',
-		];
-		foreach ($aeHeadersList as $header) {
-			if ($request->getHeader($header) !== '') {
-				$headers[$header] = $request->getHeader($header);
-			}
-		}
-		return [
-			'headers' => $headers,
-			'params' => $request->getParams(),
-		];
-	}
-
-	private function getExAppDebugSettings(string $appId): array {
-		$exAppConfigs = $this->exAppConfigService->getAppConfigValues($appId, ['debug', 'loglevel']);
-		$debug = false;
-		$level = $this->config->getSystemValue('loglevel', 2);
-		foreach ($exAppConfigs as $exAppConfig) {
-			if ($exAppConfig['configkey'] === 'debug') {
-				$debug = $exAppConfig['configvalue'] === 1;
-			}
-			if ($exAppConfig['configkey'] === 'loglevel') {
-				$level = intval($exAppConfig['configvalue']);
-			}
-		}
-		return [
-			'debug' => $debug,
-			'level' => $level,
-		];
-	}
-
-	private function getCustomLogger(string $name): LoggerInterface {
-		$path = $this->config->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/' . $name;
-		return $this->logFactory->getCustomPsrLogger($path);
-	}
-
-	private function handleExAppDebug(string $appId, ?IRequest $request, bool $fromNextcloud = true): void {
-		$exAppDebugSettings = $this->getExAppDebugSettings($appId);
-		if ($exAppDebugSettings['debug']) {
-			$message = $fromNextcloud
-				? '[' . Application::APP_ID . '] Nextcloud --> ' . $appId
-				: '[' . Application::APP_ID . '] ' . $appId . ' --> Nextcloud';
-			$aeDebugLogger = $this->getCustomLogger('aa_debug.log');
-			$aeDebugLogger->log($exAppDebugSettings['level'], $message, [
-				'app' => $appId,
-				'request_info' => $request instanceof IRequest ? $this->buildRequestInfo($request) : 'CLI request',
-			]);
-		}
 	}
 
 	/**
