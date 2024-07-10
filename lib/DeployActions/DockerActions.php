@@ -328,7 +328,40 @@ class DockerActions implements IDeployActions {
 			$dockerUrl, sprintf('containers/%s/logs?stdout=true&stderr=true&tail=%s', $containerId, $tail)
 		);
 		$response = $this->guzzleClient->get($url);
-		return (string) $response->getBody();
+		return array_reduce($this->processDockerLogs((string) $response->getBody()), function ($carry, $logEntry) {
+			return $carry . $logEntry['content'];
+		}, '');
+	}
+
+	private function processDockerLogs($binaryData): array {
+		$offset = 0;
+		$length = strlen($binaryData);
+		$logs = [];
+
+		while ($offset < $length) {
+			if ($offset + 8 > $length) {
+				break; // Incomplete header, handle this case as needed
+			}
+
+			// Unpack the header
+			$header = unpack('C1type/C3skip/N1size', substr($binaryData, $offset, 8));
+			$offset += 8; // Move past the header
+
+			// Extract the log data based on the size from header
+			$logSize = $header['size'];
+			if ($offset + $logSize > $length) {
+				break; // Incomplete data, handle this case as needed
+			}
+
+			$logs[] = [
+				'stream_type' => $header['type'] === 1 ? 'stdout' : 'stderr',
+				'content' => substr($binaryData, $offset, $logSize)
+			];
+
+			$offset += $logSize; // Move to the next log entry
+		}
+
+		return $logs;
 	}
 
 	public function createVolume(string $dockerUrl, string $volume): array {
@@ -385,7 +418,9 @@ class DockerActions implements IDeployActions {
 	public function ping(string $dockerUrl): bool {
 		$url = $this->buildApiUrl($dockerUrl, '_ping');
 		try {
-			$response = $this->guzzleClient->get($url);
+			$response = $this->guzzleClient->get($url, [
+				'timeout' => 3,
+			]);
 			if ($response->getStatusCode() === 200) {
 				return true;
 			}

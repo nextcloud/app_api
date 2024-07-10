@@ -74,4 +74,22 @@ class OCSApiController extends OCSController {
 		$this->service->setAppInitProgress($exApp, $progress, $error);
 		return new DataResponse();
 	}
+
+
+	/**
+	 * Retrieves the enabled status of an ExApp (0 for disabled, 1 for enabled).
+	 * Note: This endpoint is accessible even if the ExApp itself is disabled.
+	 *
+	 * @return DataResponse The enabled status of the ExApp.
+	 */
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function getEnabledState(): DataResponse {
+		$exApp = $this->exAppService->getExApp($this->request->getHeader('EX-APP-ID'));
+		if (!$exApp) {
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
+		}
+		return new DataResponse($exApp->getEnabled());
+	}
 }

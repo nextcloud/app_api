@@ -8,6 +8,7 @@ OC.L10N.register(
     "Cancel" : "বাতিল করুন",
     "Delete" : "মুছে",
     "Host" : "হোস্ট",
+    "Enabled" : "কার্যকর",
     "Details" : "বিসতারিত",
     "Disable" : "নিষ্ক্রিয়"
 },

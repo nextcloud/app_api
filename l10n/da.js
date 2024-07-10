@@ -29,6 +29,7 @@ OC.L10N.register(
     "Delete" : "Slet",
     "{license}-licensed" : "{license}-licenseret",
     "Host" : "Vært",
+    "Enabled" : "Aktiveret",
     "Display name" : "Vist navn",
     "Network" : "Netværk",
     "Confirm" : "Bekræft",

@@ -19,7 +19,7 @@ class DaemonUpdateV2RepairStep implements IRepairStep {
 	}
 
 	public function getName(): string {
-		return 'AppAPI 2.0 Daemons configuration update';
+		return 'AppAPI 2.5.0 Daemons configuration update';
 	}
 
 	public function run(IOutput $output): void {
@@ -30,7 +30,7 @@ class DaemonUpdateV2RepairStep implements IRepairStep {
 		foreach ($daemons as $daemon) {
 			$daemonsUpdated += $this->updateDaemonConfiguration($daemon);
 		}
-		$output->info(sprintf('Daemons configurations updated to V2: %s', $daemonsUpdated));
+		$output->info(sprintf('Daemons configurations updated to V2.5.0: %s', $daemonsUpdated));
 	}
 
 	private function updateDaemonConfiguration(DaemonConfig $daemonConfig): int {

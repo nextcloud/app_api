@@ -31,6 +31,7 @@ OC.L10N.register(
     "Delete" : "Вилучати",
     "{license}-licensed" : "Ліцензія: {license}",
     "Host" : "Хост",
+    "Enabled" : "Увімкнено",
     "Display name" : "Ім'я для показу",
     "Network" : "Мережа",
     "Confirm" : "Підтвердити",

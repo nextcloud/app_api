@@ -29,6 +29,10 @@ function generateAppAPIProxyUrl(appId, route) {
 	return generateUrl(`/apps/app_api/proxy/${appId}/${route}`)
 }
 
+function generateExAppUIPageUrl(appId, route) {
+	return generateUrl(`/apps/app_api/embedded/${appId}/${route}`)
+}
+
 function registerFileAction28(fileAction, inlineSvgIcon) {
 	const action = new FileAction({
 		id: fileAction.name,
@@ -61,38 +65,76 @@ function registerFileAction28(fileAction, inlineSvgIcon) {
 		},
 		async exec(node, view, dir) {
 			const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-			return axios.post(exAppFileActionHandler, {
-				fileId: node.fileid,
-				name: node.basename,
-				directory: node.dirname,
-				etag: node.attributes.etag,
-				mime: node.mime,
-				favorite: Boolean(node.attributes.favorite).toString(),
-				permissions: node.permissions,
-				fileType: node.type,
-				size: Number(node.size),
-				mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
-				shareTypes: node.attributes.shareTypes || null,
-				shareAttributes: node.attributes.shareAttributes || null,
-				sharePermissions: node.attributes.sharePermissions || null,
-				shareOwner: node.attributes.ownerDisplayName || null,
-				shareOwnerId: node.attributes.ownerId || null,
-				userId: getCurrentUser().uid,
-				instanceId: state.instanceId,
-			}).then((response) => {
-				return true
-			}).catch((error) => {
-				console.error('Failed to send FileAction request to ExApp', error)
-				return false
-			})
+			if ('version' in fileAction && fileAction.version === '2.0') {
+				return axios.post(exAppFileActionHandler, { files: [buildNodeInfo(node)] })
+					.then((response) => {
+						if (typeof response.data === 'object' && 'redirect_handler' in response.data) {
+							const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
+							window.location.assign(`${redirectPage}?fileIds=${node.fileid}`)
+							return true
+						}
+						return true
+					}).catch((error) => {
+						console.error('Failed to send FileAction request to ExApp', error)
+						return false
+					})
+			}
+			return axios.post(exAppFileActionHandler, buildNodeInfo(node))
+				.then(() => {
+					return true
+				})
+				.catch((error) => {
+					console.error('Failed to send FileAction request to ExApp', error)
+					return false
+				})
 		},
 		async execBatch(nodes, view, dir) {
+			if ('version' in fileAction && fileAction.version === '2.0') {
+				const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
+				const nodesDataList = nodes.map(buildNodeInfo)
+				return axios.post(exAppFileActionHandler, { files: nodesDataList })
+					.then((response) => {
+						if (typeof response.data === 'object' && 'redirect_handler' in response.data) {
+							const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
+							const fileIds = nodes.map((node) => node.fileid).join(',')
+							window.location.assign(`${redirectPage}?fileIds=${fileIds}`)
+						}
+						return nodes.map(_ => true)
+					})
+					.catch((error) => {
+						console.error('Failed to send FileAction request to ExApp', error)
+						return nodes.map(_ => false)
+					})
+			}
+			// for version 1.0 behavior is not changed
 			return Promise.all(nodes.map((node) => {
 				return this.exec(node, view, dir)
 			}))
 		},
 	})
 	registerFileAction(action)
+}
+
+function buildNodeInfo(node) {
+	return {
+		fileId: node.fileid,
+		name: node.basename,
+		directory: node.dirname,
+		etag: node.attributes.etag,
+		mime: node.mime,
+		favorite: Boolean(node.attributes.favorite).toString(),
+		permissions: node.permissions,
+		fileType: node.type,
+		size: Number(node.size),
+		mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
+		shareTypes: node.attributes.shareTypes || null,
+		shareAttributes: node.attributes.shareAttributes || null,
+		sharePermissions: node.attributes.sharePermissions || null,
+		shareOwner: node.attributes.ownerDisplayName || null,
+		shareOwnerId: node.attributes.ownerId || null,
+		userId: getCurrentUser().uid,
+		instanceId: state.instanceId,
+	}
 }
 
 document.addEventListener('DOMContentLoaded', () => {

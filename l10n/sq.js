@@ -24,6 +24,7 @@ OC.L10N.register(
     "Delete" : "Fshi",
     "Default" : "Paraprake",
     "Host" : "Strehë",
+    "Enabled" : "E aktivizuar",
     "Confirm" : "Konfirmo",
     "Register" : "Regjistrohu",
     "Your apps" : "Aplikacionet tuaja ",

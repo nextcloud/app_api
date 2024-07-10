@@ -22,6 +22,7 @@ OC.L10N.register(
     "Delete" : "Kustuta",
     "{license}-licensed" : "{license} litsents",
     "Host" : "Host",
+    "Enabled" : "Sisse lülitatud",
     "Display name" : "Kuvatav nimi",
     "Network" : "Võrk",
     "Confirm" : "Kinnita",

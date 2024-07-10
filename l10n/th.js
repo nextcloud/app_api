@@ -26,6 +26,7 @@ OC.L10N.register(
     "Delete" : "ลบ",
     "{license}-licensed" : "สัญญาอนุญาต {license}",
     "Host" : "โฮสต์",
+    "Enabled" : "เปิดใช้งาน",
     "Display name" : "ชื่อที่แสดง",
     "Confirm" : "ยืนยัน",
     "Register" : "ลงทะเบียน",

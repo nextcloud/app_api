@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use OC\App\AppStore\Fetcher\CategoryFetcher;
 use OC\App\AppStore\Version\VersionParser;
 use OC\App\DependencyAnalyzer;
 use OC\App\Platform;
 use OC_App;
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
-use OCA\AppAPI\Service\ExAppScopesService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ExAppUsersService;
 use OCP\App\IAppManager;
@@ -26,6 +25,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
@@ -43,7 +43,6 @@ class ExAppsPageController extends Controller {
 	private IConfig $config;
 	private AppAPIService $service;
 	private DaemonConfigService $daemonConfigService;
-	private ExAppScopesService $exAppScopeService;
 	private DockerActions $dockerActions;
 	private CategoryFetcher $categoryFetcher;
 	private IFactory $l10nFactory;
@@ -60,7 +59,6 @@ class ExAppsPageController extends Controller {
 		IInitialState $initialStateService,
 		AppAPIService $service,
 		DaemonConfigService $daemonConfigService,
-		ExAppScopesService $exAppScopeService,
 		ExAppApiScopeService $exAppApiScopeService,
 		ExAppUsersService $exAppUsersService,
 		DockerActions $dockerActions,
@@ -78,7 +76,6 @@ class ExAppsPageController extends Controller {
 		$this->config = $config;
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
-		$this->exAppScopeService = $exAppScopeService;
 		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->dockerActions = $dockerActions;
 		$this->categoryFetcher = $categoryFetcher;
@@ -203,9 +200,7 @@ class ExAppsPageController extends Controller {
 			$daemon = null;
 
 			if ($exApp !== null) {
-				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
-					return $exAppScope->getScopeGroup();
-				}, $this->exAppScopeService->getExAppScopes($exApp)));
+				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes());
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 			}
 
@@ -340,9 +335,7 @@ class ExAppsPageController extends Controller {
 			if (!in_array($app['id'], $registeredAppsIds)) {
 				$exApp = $this->exAppService->getExApp($app['id']);
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames(array_map(function (ExAppScope $exAppScope) {
-					return $exAppScope->getScopeGroup();
-				}, $this->exAppScopeService->getExAppScopes($exApp)));
+				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes());
 
 				$formattedLocalApps[] = [
 					'id' => $app['id'],
@@ -479,7 +472,7 @@ class ExAppsPageController extends Controller {
 	}
 
 	/**
-	 * Unregister ExApp, remove container and volume by default
+	 * Unregister ExApp, remove container by default
 	 */
 	#[PasswordConfirmationRequired]
 	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
@@ -524,12 +517,45 @@ class ExAppsPageController extends Controller {
 	/**
 	 * Get ExApp status, that includes initialization information
 	 */
+	#[NoCSRFRequired]
 	public function getAppStatus(string $appId): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
 		if (is_null($exApp)) {
 			return new JSONResponse(['error' => $this->l10n->t('ExApp not found, failed to get status')], Http::STATUS_NOT_FOUND);
 		}
 		return new JSONResponse($exApp->getStatus());
+	}
+
+	#[NoCSRFRequired]
+	public function getAppLogs(string $appId, string $tail = 'all'): DataDownloadResponse {
+		$exApp = $this->exAppService->getExApp($appId);
+		if (is_null($exApp)) {
+			return new DataDownloadResponse(
+				json_encode(['error' => $this->l10n->t('ExApp not found, failed to get logs')]),
+				$this->dockerActions->buildExAppContainerName($appId) . '_logs.txt',
+				'text/plain'
+			);
+		}
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		$this->dockerActions->initGuzzleClient($daemonConfig);
+		try {
+			$logs = $this->dockerActions->getContainerLogs(
+				$this->dockerActions->buildDockerUrl($daemonConfig),
+				$this->dockerActions->buildExAppContainerName($appId),
+				$tail
+			);
+			return new DataDownloadResponse(
+				$logs,
+				$this->dockerActions->buildExAppContainerName($appId) . '_logs.txt', 'text/plain',
+				Http::STATUS_OK
+			);
+		} catch (GuzzleException $e) {
+			return new DataDownloadResponse(
+				json_encode(['error' => $this->l10n->t('Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s', [$e->getMessage()])]),
+				$this->dockerActions->buildExAppContainerName($appId) . '_logs.txt',
+				'text/plain'
+			);
+		}
 	}
 
 	/**

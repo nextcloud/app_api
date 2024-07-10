@@ -11,7 +11,6 @@ use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
-use OCA\AppAPI\Service\ExAppScopesService;
 use OCA\AppAPI\Service\ExAppService;
 
 use OCP\IConfig;
@@ -30,7 +29,6 @@ class Register extends Command {
 	public function __construct(
 		private readonly AppAPIService  	  $service,
 		private readonly DaemonConfigService  $daemonConfigService,
-		private readonly ExAppScopesService   $exAppScopesService,
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DockerActions        $dockerActions,
 		private readonly ManualActions        $manualActions,
@@ -55,18 +53,23 @@ class Register extends Command {
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp info.xml in JSON format');
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Do not print to console');
+		$this->addOption('test-deploy-mode', null, InputOption::VALUE_NONE, 'Test deploy mode with additional status checks and slightly different logic');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$outputConsole = !$input->getOption('silent');
+		$isTestDeployMode = $input->getOption('test-deploy-mode');
 		$appId = $input->getArgument('appid');
 
 		if ($this->exAppService->getExApp($appId) !== null) {
-			$this->logger->error(sprintf('ExApp %s is already registered.', $appId));
-			if ($outputConsole) {
-				$output->writeln(sprintf('ExApp %s is already registered.', $appId));
+			if (!$isTestDeployMode) {
+				$this->logger->error(sprintf('ExApp %s is already registered.', $appId));
+				if ($outputConsole) {
+					$output->writeln(sprintf('ExApp %s is already registered.', $appId));
+				}
+				return 3;
 			}
-			return 3;
+			$this->exAppService->unregisterExApp($appId);
 		}
 
 		$appInfo = $this->exAppService->getAppInfo(
@@ -106,9 +109,8 @@ class Register extends Command {
 			return 2;
 		}
 
-		$forceScopes = (bool) $input->getOption('force-scopes');
-		$confirmRequiredScopes = $forceScopes;
-		if (!$forceScopes && $input->isInteractive()) {
+		$confirmRequiredScopes = (bool) $input->getOption('force-scopes');
+		if (!$confirmRequiredScopes && $input->isInteractive()) {
 			/** @var QuestionHelper $helper */
 			$helper = $this->getHelper('question');
 
@@ -142,14 +144,6 @@ class Register extends Command {
 			return 3;
 		}
 		if (count($appInfo['external-app']['scopes']) > 0) {
-			if (!$this->exAppScopesService->registerExAppScopes($exApp, $this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']))) {
-				$this->logger->error(sprintf('Error while registering API scopes for %s.', $appId));
-				if ($outputConsole) {
-					$output->writeln(sprintf('Error while registering API scopes for %s.', $appId));
-				}
-				$this->exAppService->unregisterExApp($appId);
-				return 1;
-			}
 			$this->logger->info(
 				sprintf('ExApp %s scope groups successfully set: %s', $exApp->getAppid(), implode(', ', $appInfo['external-app']['scopes']))
 			);
@@ -167,7 +161,7 @@ class Register extends Command {
 				if ($outputConsole) {
 					$output->writeln(sprintf('Failed to install translations for %s. Reason: %s', $appId, $result));
 				}
-				$this->exAppService->unregisterExApp($appId);
+				$this->_unregisterExApp($appId, $isTestDeployMode);
 				return 3;
 			}
 		}
@@ -181,7 +175,8 @@ class Register extends Command {
 				if ($outputConsole) {
 					$output->writeln(sprintf('ExApp %s deployment failed. Error: %s', $appId, $deployResult));
 				}
-				$this->exAppService->unregisterExApp($appId);
+				$this->exAppService->setStatusError($exApp, $deployResult);
+				$this->_unregisterExApp($appId, $isTestDeployMode);
 				return 1;
 			}
 
@@ -214,7 +209,7 @@ class Register extends Command {
 			);
 		}
 
-		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
+		if (!$this->service->heartbeatExApp($exAppUrl, $auth, $appId)) {
 			$this->logger->error(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
 			if ($outputConsole) {
 				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
@@ -240,5 +235,12 @@ class Register extends Command {
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 		}
 		return 0;
+	}
+
+	private function _unregisterExApp(string $appId, bool $testDeployMode = false): void {
+		if ($testDeployMode) {
+			return;
+		}
+		$this->exAppService->unregisterExApp($appId);
 	}
 }

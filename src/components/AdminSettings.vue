@@ -94,7 +94,7 @@ export default {
 		onInput() {
 			delay(() => {
 				this.saveOptions({
-					ex_app_init_timeout: this.state.init_timeout,
+					init_timeout: this.state.init_timeout,
 					container_restart_policy: this.state.container_restart_policy,
 				})
 			}, 2000)()

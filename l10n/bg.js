@@ -32,6 +32,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-лицензиран",
     "Host" : "Хост",
     "Nextcloud URL" : "URL адрес на Nextcloud",
+    "Enabled" : "Включено",
     "Display name" : "Име за визуализация",
     "Network" : "Мрежа",
     "Confirm" : "Потвърдете",

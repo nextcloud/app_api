@@ -155,7 +155,7 @@ class TextProcessingService {
 	}
 
 	/**
-	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
+	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType, MissingTemplateParam
 	 */
 	private function getAnonymousExAppProvider(
 		TextProcessingProvider $provider,

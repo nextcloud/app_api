@@ -18,9 +18,9 @@ use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
 use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
-use OCA\AppAPI\Profiler\AppAPIDataCollector;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
+use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
 use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
 use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCA\AppAPI\Service\UI\TopMenuService;
@@ -43,7 +43,6 @@ use OCP\INavigationManager;
 use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserSession;
-use OCP\Profiler\IProfiler;
 use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
@@ -55,6 +54,8 @@ use Throwable;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_api';
+	public const TEST_DEPLOY_APPID = 'test-deploy';
+	public const TEST_DEPLOY_INFO_XML = 'https://raw.githubusercontent.com/cloud-py-api/test-deploy/main/appinfo/info.xml';
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);
@@ -94,6 +95,10 @@ class Application extends App implements IBootstrap {
 			/** @var TranslationService $translationService */
 			$translationService = $container->get(TranslationService::class);
 			$translationService->registerExAppTranslationProviders($context, $container->getServer());
+
+			/** @var TaskProcessingService $taskProcessingService */
+			$taskProcessingService = $container->get(TaskProcessingService::class);
+			$taskProcessingService->registerExAppTaskProcessingProviders($context, $container->getServer());
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 		$context->registerEventListener(NodeCreatedEvent::class, FileEventsListener::class);
@@ -107,10 +112,6 @@ class Application extends App implements IBootstrap {
 	public function boot(IBootContext $context): void {
 		$server = $context->getServerContainer();
 		try {
-			$profiler = $server->get(IProfiler::class);
-			if ($profiler->isEnabled()) {
-				$profiler->add(new AppAPIDataCollector());
-			}
 			$context->injectFn($this->registerExAppsManagementNavigation(...));
 			$context->injectFn($this->registerExAppsMenuEntries(...));
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|Throwable) {

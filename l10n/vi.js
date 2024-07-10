@@ -30,6 +30,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-được cấp phép",
     "Host" : "Máy chủ",
     "Nextcloud URL" : "vWorkspace URL",
+    "Enabled" : "Đá kích hoạt",
     "Confirm" : "Xác nhận",
     "Register" : "Đăng ký",
     "Your apps" : "Ứng dụng của bạn",

@@ -31,12 +31,18 @@ class ExAppInitStatusCheckJob extends TimedJob {
 		// set status.progress=0 and status.error message with timeout error
 		try {
 			$exApps = $this->mapper->findAll();
-			$initTimeoutMinutes = intval($this->config->getAppValue(Application::APP_ID, 'init_timeout', '40'));
+			$initTimeoutMinutesSetting = intval($this->config->getAppValue(Application::APP_ID, 'init_timeout', '40'));
 			foreach ($exApps as $exApp) {
 				$status = $exApp->getStatus();
 				if (isset($status['init']) && $status['init'] !== 100) {
 					if (!isset($status['init_start_time'])) {
 						continue;
+					}
+					if ($exApp->getAppid() === Application::TEST_DEPLOY_APPID) {
+						// Check for smaller timeout for test deploy app
+						$initTimeoutMinutes = 0.5;
+					} else {
+						$initTimeoutMinutes = $initTimeoutMinutesSetting;
 					}
 					if ((time() >= ($status['init_start_time'] + $initTimeoutMinutes * 60)) && (empty($status['error']))) {
 						$this->service->setAppInitProgress(

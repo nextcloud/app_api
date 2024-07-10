@@ -2,6 +2,9 @@ import Vue from 'vue'
 import './bootstrap.js'
 import AdminSettings from './components/AdminSettings.vue'
 import { generateFilePath } from '@nextcloud/router'
+import { Tooltip } from '@nextcloud/vue'
+
+Vue.directive('tooltip', Tooltip)
 
 // eslint-disable-next-line
 __webpack_public_path__ = generateFilePath(appName, '', 'js/')

@@ -15,7 +15,7 @@ return [
 		// Proxy
 		['name' => 'ExAppProxy#ExAppGet',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'GET' , 'root' => '/proxy',
-			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],
+			'requirements' => ['other' => '.*'], 'defaults' => ['other' => '']],
 		['name' => 'ExAppProxy#ExAppPost',
 			'url' => '/proxy/{appId}/{other}', 'verb' => 'POST' , 'root' => '/proxy',
 			'requirements' => ['other' => '.+'], 'defaults' => ['other' => '']],
@@ -33,6 +33,7 @@ return [
 		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}', 'verb' => 'POST' , 'root' => ''],
 		['name' => 'ExAppsPage#getAppStatus', 'url' => '/apps/status/{appId}', 'verb' => 'GET' , 'root' => ''],
+		['name' => 'ExAppsPage#getAppLogs', 'url' => '/apps/logs/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#disableApp', 'url' => '/apps/disable/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#updateApp', 'url' => '/apps/update/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#uninstallApp', 'url' => '/apps/uninstall/{appId}', 'verb' => 'GET' , 'root' => ''],
@@ -46,7 +47,11 @@ return [
 		['name' => 'DaemonConfig#unregisterDaemonConfig', 'url' => '/daemons/{name}', 'verb' => 'DELETE'],
 		['name' => 'DaemonConfig#verifyDaemonConnection', 'url' => '/daemons/{name}/check', 'verb' => 'POST'],
 		['name' => 'DaemonConfig#checkDaemonConnection', 'url' => '/daemons/verify_connection', 'verb' => 'POST'],
-		['name' => 'DaemonConfig#updateDaemonConfig', 'url' => '/daemons', 'verb' => 'PUT'],
+
+		// Test Deploy actions
+		['name' => 'DaemonConfig#startTestDeploy', 'url' => '/daemons/{name}/test_deploy', 'verb' => 'POST'],
+		['name' => 'DaemonConfig#stopTestDeploy', 'url' => '/daemons/{name}/test_deploy', 'verb' => 'DELETE'],
+		['name' => 'DaemonConfig#getTestDeployStatus', 'url' => '/daemons/{name}/test_deploy/status', 'verb' => 'GET'],
 	],
 	'ocs' => [
 		// Logging
@@ -54,10 +59,15 @@ return [
 
 		['name' => 'OCSApi#getNCUsersList', 'url' => '/api/v1/users', 'verb' => 'GET'],
 		['name' => 'OCSApi#setAppInitProgress', 'url' => '/apps/status/{appId}', 'verb' => 'PUT'],
+		['name' => 'OCSApi#getEnabledState', 'url' => '/ex-app/state', 'verb' => 'GET'],
 
 		// ExApps
 		['name' => 'OCSExApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
 		['name' => 'OCSExApp#getExApp', 'url' => '/api/v1/ex-app/info/{appId}', 'verb' => 'GET'],
+
+		// Requests to ExApps
+		['name' => 'OCSExApp#requestToExApp', 'url' => '/api/v1/ex-app/request/{appId}/', 'verb' => 'POST'],
+		['name' => 'OCSExApp#aeRequestToExApp', 'url' => '/api/v1/ex-app/request/{appId}/{$userId}', 'verb' => 'POST'],
 
 		// ExApps actions
 		['name' => 'OCSExApp#setExAppEnabled', 'url' => '/api/v1/ex-app/{appId}/enabled', 'verb' => 'PUT'],
@@ -94,6 +104,7 @@ return [
 		// --- UI ---
 		// File Actions Menu
 		['name' => 'OCSUi#registerFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'POST'],
+		['name' => 'OCSUi#registerFileActionMenuV2', 'url' => '/api/v2/ui/files-actions-menu', 'verb' => 'POST'],
 		['name' => 'OCSUi#unregisterFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getFileActionMenu', 'url' => '/api/v1/ui/files-actions-menu', 'verb' => 'GET'],
 
@@ -135,5 +146,10 @@ return [
 		['name' => 'Translation#unregisterProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'DELETE'],
 		['name' => 'Translation#getProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'GET'],
 		['name' => 'Translation#reportResult', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'PUT'],
+
+		// Task-Processing
+		['name' => 'taskProcessing#registerProvider', 'url' => '/api/v1/ai_provider/task_processing', 'verb' => 'POST'],
+		['name' => 'taskProcessing#unregisterProvider', 'url' => '/api/v1/ai_provider/task_processing', 'verb' => 'DELETE'],
+		['name' => 'taskProcessing#getProvider', 'url' => '/api/v1/ai_provider/task_processing', 'verb' => 'GET'],
 	],
 ];

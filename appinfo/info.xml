@@ -43,7 +43,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 *Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
-	<version>2.5.0</version>
+	<version>2.7.1</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
@@ -70,6 +70,9 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		<job>OCA\AppAPI\BackgroundJob\ProvidersAICleanUpJob</job>
 	</background-jobs>
 	<repair-steps>
+		<post-migration>
+			<step>OCA\AppAPI\Migration\DaemonUpdateGPUSRepairStep</step>
+		</post-migration>
 		<install>
 			<step>OCA\AppAPI\Migration\DataInitializationStep</step>
 			<step>OCA\AppAPI\Migration\DaemonUpdateV2RepairStep</step>
@@ -84,6 +87,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		<command>OCA\AppAPI\Command\ExApp\Enable</command>
 		<command>OCA\AppAPI\Command\ExApp\Disable</command>
 		<command>OCA\AppAPI\Command\ExApp\ListExApps</command>
+		<command>OCA\AppAPI\Command\ExApp\Notify</command>
 		<command>OCA\AppAPI\Command\ExApp\Scopes\ListScopes</command>
 		<command>OCA\AppAPI\Command\ExApp\Users\ListUsers</command>
 		<command>OCA\AppAPI\Command\ExAppConfig\GetConfig</command>

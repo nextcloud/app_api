@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp;
 
-use OCA\AppAPI\Db\ExAppScope;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
@@ -12,7 +11,6 @@ use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
-use OCA\AppAPI\Service\ExAppScopesService;
 
 use OCA\AppAPI\Service\ExAppService;
 use Psr\Log\LoggerInterface;
@@ -29,7 +27,6 @@ class Update extends Command {
 	public function __construct(
 		private readonly AppAPIService  	  $service,
 		private readonly ExAppService         $exAppService,
-		private readonly ExAppScopesService   $exAppScopeService,
 		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DaemonConfigService  $daemonConfigService,
 		private readonly DockerActions        $dockerActions,
@@ -141,6 +138,30 @@ class Update extends Command {
 			return 0;
 		}
 
+		// Default scopes approval process (compare new ExApp scopes)
+		$currentExAppScopes = $exApp->getApiScopes();
+		// Prepare for prompt of newly requested ExApp scopes
+		$requiredScopes = array_values(array_diff($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']), $currentExAppScopes));
+
+		$confirmScopes = (bool) $input->getOption('force-scopes');
+		if (!$confirmScopes && $input->isInteractive()) {
+			/** @var QuestionHelper $helper */
+			$helper = $this->getHelper('question');
+
+			if (count($requiredScopes) > 0) {
+				$output->writeln(sprintf('ExApp %s requested scopes: %s', $appId, implode(', ',
+					$this->exAppApiScopeService->mapScopeGroupsToNames($requiredScopes))));
+				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
+				$confirmScopes = $helper->ask($input, $output, $question);
+			} else {
+				$confirmScopes = true;
+			}
+		}
+		if (!$confirmScopes && count($requiredScopes) > 0) {
+			$output->writeln(sprintf('ExApp %s required scopes not approved. Failed to finish ExApp update.', $appId));
+			return 1;
+		}
+
 		$status = $exApp->getStatus();
 		$status['type'] = 'update';
 		$status['error'] = '';
@@ -225,7 +246,7 @@ class Update extends Command {
 			);
 		}
 
-		if (!$this->service->heartbeatExApp($exAppUrl, $auth)) {
+		if (!$this->service->heartbeatExApp($exAppUrl, $auth, $appId)) {
 			$this->logger->error(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
 			if ($outputConsole) {
 				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
@@ -237,46 +258,6 @@ class Update extends Command {
 		$this->logger->info(sprintf('ExApp %s update successfully deployed.', $appId));
 		if ($outputConsole) {
 			$output->writeln(sprintf('ExApp %s update successfully deployed.', $appId));
-		}
-
-		// Default scopes approval process (compare new ExApp scopes)
-		$currentExAppScopes = array_map(function (ExAppScope $exAppScope) {
-			return $exAppScope->getScopeGroup();
-		}, $this->exAppScopeService->getExAppScopes($exApp));
-		// Prepare for prompt of newly requested ExApp scopes
-		$requiredScopes = array_values(array_diff($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']), $currentExAppScopes));
-
-		$forceScopes = (bool) $input->getOption('force-scopes');
-		$confirmScopes = $forceScopes;
-
-		if (!$forceScopes && $input->isInteractive()) {
-			/** @var QuestionHelper $helper */
-			$helper = $this->getHelper('question');
-
-			if (count($requiredScopes) > 0) {
-				$output->writeln(sprintf('ExApp %s requested scopes: %s', $appId, implode(', ',
-					$this->exAppApiScopeService->mapScopeGroupsToNames($requiredScopes))));
-				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-				$confirmScopes = $helper->ask($input, $output, $question);
-			} else {
-				$confirmScopes = true;
-			}
-		}
-
-		if (!$confirmScopes && count($requiredScopes) > 0) {
-			$output->writeln(sprintf('ExApp %s required scopes not approved. Failed to finish ExApp update.', $appId));
-			return 1;
-		}
-
-		if (!$this->exAppScopeService->registerExAppScopes(
-			$exApp, $this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']))
-		) {
-			$this->logger->error(sprintf('Failed to update ExApp %s scopes.', $appId));
-			if ($outputConsole) {
-				$output->writeln(sprintf('Failed to update ExApp %s scopes.', $appId));
-			}
-			$this->exAppService->setStatusError($exApp, 'Failed to update scopes');
-			return 1;
 		}
 
 		$this->service->dispatchExAppInitInternal($exApp);

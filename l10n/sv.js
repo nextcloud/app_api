@@ -33,6 +33,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-licensierad",
     "Host" : "Server",
     "Nextcloud URL" : "Nextcloud-URL",
+    "Enabled" : "Aktiverad",
     "Display name" : "Visningsnamn",
     "Network" : "Nätverk",
     "Confirm" : "Bekräfta",

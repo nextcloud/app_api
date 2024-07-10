@@ -6,15 +6,18 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
-
 use OCA\AppAPI\DeployActions\DockerActions;
+
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\ApiController;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\IConfig;
+use OCP\IL10N;
 use OCP\IRequest;
 
 /**
@@ -28,16 +31,17 @@ class DaemonConfigController extends ApiController {
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions       $dockerActions,
 		private readonly AppAPIService       $service,
+		private readonly ExAppService        $exAppService,
+		private readonly IL10N               $l10n,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
 
 	#[NoCSRFRequired]
 	public function getAllDaemonConfigs(): Response {
-		$daemonConfigs = $this->daemonConfigService->getRegisteredDaemonConfigs();
 		return new JSONResponse([
-			'daemons' => $daemonConfigs,
-			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', ''),
+			'daemons' => $this->daemonConfigService->getDaemonConfigsWithAppsCount(),
+			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config'),
 		]);
 	}
 
@@ -115,5 +119,60 @@ class DaemonConfigController extends ApiController {
 		return new JSONResponse([
 			'success' => $dockerDaemonAccessible,
 		]);
+	}
+
+	#[NoCSRFRequired]
+	public function startTestDeploy(string $name): Response {
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+		if (!$daemonConfig) {
+			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
+		}
+
+		if (!$this->service->runOccCommand(
+			sprintf("app_api:app:register --force-scopes --silent %s %s --info-xml %s --test-deploy-mode",
+				Application::TEST_DEPLOY_APPID, $daemonConfig->getName(), Application::TEST_DEPLOY_INFO_XML)
+		)) {
+			return new JSONResponse(['error' => $this->l10n->t('Error starting install of ExApp')], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+
+		$elapsedTime = 0;
+		while ($elapsedTime < 5000000 && !$this->exAppService->getExApp(Application::TEST_DEPLOY_APPID)) {
+			usleep(150000); // 0.15
+			$elapsedTime += 150000;
+		}
+
+		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
+		if ($exApp === null) {
+			return new JSONResponse(['error' => $this->l10n->t('ExApp failed to register, check the NC logs')], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+
+		return new JSONResponse([
+			'status' => $exApp->getStatus(),
+		]);
+	}
+
+	#[NoCSRFRequired]
+	public function stopTestDeploy(string $name): Response {
+		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
+		if ($exApp !== null) {
+			$this->service->runOccCommand(sprintf("app_api:app:unregister --silent --force %s", Application::TEST_DEPLOY_APPID));
+			$elapsedTime = 0;
+			while ($elapsedTime < 5000000 && $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID) !== null) {
+				usleep(150000); // 0.15
+				$elapsedTime += 150000;
+			}
+		}
+		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
+		return new JSONResponse([
+			'success' => $exApp === null,
+		]);
+	}
+
+	public function getTestDeployStatus(string $name): Response {
+		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
+		if (is_null($exApp) || $exApp->getDaemonConfigName() !== $name) {
+			return new JSONResponse(['error' => $this->l10n->t('ExApp not found, failed to get status')], Http::STATUS_NOT_FOUND);
+		}
+		return new JSONResponse($exApp->getStatus());
 	}
 }

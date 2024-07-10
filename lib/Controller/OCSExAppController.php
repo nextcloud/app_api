@@ -16,6 +16,7 @@ use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
 class OCSExAppController extends OCSController {
+	protected $request;
 
 	public function __construct(
 		IRequest                       $request,
@@ -23,6 +24,8 @@ class OCSExAppController extends OCSController {
 		private readonly ExAppService  $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
+
+		$this->request = $request;
 	}
 
 	#[NoCSRFRequired]
@@ -69,5 +72,53 @@ class OCSExAppController extends OCSController {
 		}
 
 		return new DataResponse();
+	}
+
+	#[NoCSRFRequired]
+	public function requestToExApp(
+		string $appId,
+		string $route,
+		?string $userId = null,
+		string $method = 'POST',
+		array $params = [],
+		array $options = [],
+	): DataResponse {
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp === null) {
+			return new DataResponse(['error' => sprintf('ExApp `%s` not found', $appId)]);
+		}
+		$response = $this->service->requestToExApp($exApp, $route, $userId, $method, $params, $options, $this->request);
+		if (is_array($response) && isset($response['error'])) {
+			return new DataResponse($response, Http::STATUS_BAD_REQUEST);
+		}
+		return new DataResponse([
+			'status_code' => $response->getStatusCode(),
+			'headers' => $response->getHeaders(),
+			'body' => $response->getBody(),
+		]);
+	}
+
+	#[NoCSRFRequired]
+	public function aeRequestToExApp(
+		string $appId,
+		string $route,
+		?string $userId = null,
+		string $method = 'POST',
+		array $params = [],
+		array $options = [],
+	): DataResponse {
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp === null) {
+			return new DataResponse(['error' => sprintf('ExApp `%s` not found', $appId)]);
+		}
+		$response = $this->service->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $this->request);
+		if (is_array($response) && isset($response['error'])) {
+			return new DataResponse($response, Http::STATUS_BAD_REQUEST);
+		}
+		return new DataResponse([
+			'status_code' => $response->getStatusCode(),
+			'headers' => $response->getHeaders(),
+			'body' => $response->getBody(),
+		]);
 	}
 }

@@ -19,6 +19,7 @@ class DaemonConfigService {
 	public function __construct(
 		private readonly LoggerInterface    $logger,
 		private readonly DaemonConfigMapper $mapper,
+		private readonly ExAppService       $exAppService,
 	) {
 	}
 
@@ -70,6 +71,22 @@ class DaemonConfigService {
 			$this->logger->debug('Failed to get registered daemon configs. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return [];
 		}
+	}
+
+	public function getDaemonConfigsWithAppsCount(): array {
+		$daemonsExAppsCount = array_reduce($this->exAppService->getExApps(), function (array $carry, $exApp) {
+			if (!isset($carry[$exApp->getDaemonConfigName()])) {
+				$carry[$exApp->getDaemonConfigName()] = 0;
+			}
+			$carry[$exApp->getDaemonConfigName()] += 1;
+			return $carry;
+		}, []);
+		return array_map(function (DaemonConfig $daemonConfig) use ($daemonsExAppsCount) {
+			return [
+				...$daemonConfig->jsonSerialize(),
+				'exAppsCount' => isset($daemonsExAppsCount[$daemonConfig->getName()]) ? $daemonsExAppsCount[$daemonConfig->getName()] : 0,
+			];
+		}, $this->getRegisteredDaemonConfigs());
 	}
 
 	public function getDaemonConfigByName(string $name): ?DaemonConfig {

@@ -32,6 +32,7 @@ OC.L10N.register(
     "{license}-licensed" : "دارای مجوز- {license}",
     "Host" : "میزبان",
     "Nextcloud URL" : "Nextcloud URL",
+    "Enabled" : "فعال شده",
     "Display name" : "Display name",
     "Network" : "شبکه",
     "Confirm" : "تأیید",

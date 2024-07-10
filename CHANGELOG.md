@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.7.1 - 2024-07-xx]
+
+### Fixed
+
+- Allow ExApps management disable and remove actions if default Deploy daemon is not accessible. #314
+- Fixed Deploy daemon avilability check using ping timeout set to 3s. #314
+- Fix Test Deploy `image_pull` and `init` steps status update. #315
+
+## [2.7.0 - 2024-07-01]
+
+### Fixed
+
+- Nextcloud URL state warning in the Register daemon form for HTTPS configuration. #312
+- Fix ExApp proxy to preserve the url params. #296
+- Added missing pass through of cookies in ExApp proxy. #296
+- Added missing multipart/form-data support for ExApp proxy. #296
+- Fixed HTTP caching issue for application/json requests in ExApp proxy. #296 
+- Fixed TopMenu API to allow using iframes. #311
+
+## [2.6.0 - 2024-05-10]
+
+### Added
+
+- Added File Actions v2 version with redirect to the ExApp UI. #284
+- Added async requestToExApp public functions. #290
+- Added OCS API for synchronous requestToExApp functions. #290
+
+### Changed
+
+- Reworked scopes for database/cache requests optimization, drop old ex_app_scopes table. #285
+- Corrected "Download ExApp logs" button availability in "Test deploy". #289
+
+### Fixed
+
+- Fixed incorrect init_timeout setting key in the UI. #288
+
+## [2.5.1 - 2024-05-02]
+
+### Added
+
+- Test deploy button in Admin settings for each Daemon configuration. #279
+
 ## [2.5.0 - 2024-04-23]
 
 ### Added

@@ -14,10 +14,12 @@ use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\DB\Exception;
+use OCP\IGroupManager;
 use OCP\IRequest;
 
 class TopMenuController extends Controller {
@@ -35,6 +37,7 @@ class TopMenuController extends Controller {
 		private readonly ExAppUsersService   $exAppUsersService,
 		private readonly ExAppService        $service,
 		private readonly ?string             $userId,
+		private readonly IGroupManager       $groupManager,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -56,6 +59,9 @@ class TopMenuController extends Controller {
 		if ($menuEntry === null) {
 			return new NotFoundResponse();
 		}
+		if (filter_var($menuEntry->getAdminRequired(), FILTER_VALIDATE_BOOLEAN) && !$this->groupManager->isAdmin($this->userId)) {
+			return new NotFoundResponse();
+		}
 		$initialStates = $this->initialStateService->getExAppInitialStates($appId, 'top_menu', $menuEntry->getName());
 		foreach ($initialStates as $key => $value) {
 			$this->initialState->provideInitialState($key, $value);
@@ -65,6 +71,13 @@ class TopMenuController extends Controller {
 
 		$this->postprocess = true;
 		$this->exAppUsersService->setupExAppUser($exApp->getAppid(), $this->userId);
-		return new TemplateResponse(Application::APP_ID, 'embedded');
+		$response = new TemplateResponse(Application::APP_ID, 'embedded');
+		$csp = new ContentSecurityPolicy();
+		$csp->addAllowedScriptDomain($this->request->getServerHost());
+		$csp->addAllowedScriptDomain('\'unsafe-eval\'');
+		$csp->addAllowedScriptDomain('\'unsafe-inline\'');
+		$csp->addAllowedFrameDomain($this->request->getServerHost());
+		$response->setContentSecurityPolicy($csp);
+		return $response;
 	}
 }

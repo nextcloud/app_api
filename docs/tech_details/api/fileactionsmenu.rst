@@ -14,7 +14,14 @@ AppAPI takes responsibility to register FileActionsMenu, ExApps needs only to re
 Register
 ^^^^^^^^
 
+.. note::
+
+    With AppAPI 2.6.0 there is a new v2 OCS endpoint with redirect to ExApp UI support:
+    OCS endpoint: ``POST /apps/app_api/api/v2/ui/files-actions-menu``.
+    Old v1 is marked as deprecated.
+
 OCS endpoint: ``POST /apps/app_api/api/v1/ui/files-actions-menu``
+
 
 Params
 ******
@@ -34,7 +41,6 @@ Complete list of params (including optional):
 	}
 
 .. note:: Urls ``icon`` and ``actionHandler`` are relative to the ExApp root, starting slash is not required.
-
 
 Optional params
 ***************
@@ -90,6 +96,25 @@ The following data is sent to ExApp FileActionsMenu handler from the context of 
 		"instanceId": "string",
 	}
 
+Redirect to ExApp UI page (top menu)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+    Supported only for Nextcloud 28+.
+
+If you want to open some files in ExApp UI, your FileActionsMenu have to be registered using OCS v2 version (``/apps/app_api/api/v2/ui/files-actions-menu``).
+
+After that, AppAPI will expect in the JSON response of the ExApp ``action_handler``
+the ``redirect_handler`` - a relative path on the ExApp Top Menu page,
+to which AppAPI will attach a ``fileIds`` query parameter with the selected file ids, for example:
+
+``/index.php/apps/app_api/embedded/ui_example/first_menu/second_page?fileIds=123,124,125``,
+
+where the ``first_menu`` is the name of the Top Menu ExApp UI page,
+and the ``second_page`` relative route handled on the frontend routing of the ExApp,
+the ``fileIds`` query parameter contains the selected file ids separated by commas.
+After that you can get the files info via webdav search request, see `ui_example <https://github.com/cloud-py-api/ui_example>`_.
+
 
 Request flow
 ^^^^^^^^^^^^
@@ -126,5 +151,5 @@ Examples
 
 Here is a list of simple example ExApps based on FileActionsMenu:
 
-* `video_to_gif <https://github.com/cloud-py-api/nc_py_api/tree/main/examples/as_app/to_gif>`_ - ExApp based on FileActionsMenu to convert videos to gif in place
-* `upscaler_demo <https://github.com/cloud-py-api/upscaler_example.git>`_ - ExApp based on FileActionsMenu to upscale image in place
+* `to_gif <https://github.com/cloud-py-api/nc_py_api/tree/main/examples/as_app/to_gif>`_ - ExApp based on FileActionsMenu to convert videos to gif in place
+* `upscaler_example <https://github.com/cloud-py-api/upscaler_example.git>`_ - ExApp based on FileActionsMenu to upscale image in place

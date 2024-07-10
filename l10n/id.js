@@ -28,6 +28,7 @@ OC.L10N.register(
     "Default" : "Default",
     "{license}-licensed" : "{license}-dilisensikan",
     "Host" : "Host",
+    "Enabled" : "Diaktifkan",
     "Confirm" : "Konfirmasi",
     "Register" : "Daftar",
     "Your apps" : "Aplikasi Anda",

@@ -32,6 +32,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-lisensoitu",
     "Host" : "Palvelin",
     "Nextcloud URL" : "Nextcloudin URL-osoite",
+    "Enabled" : "Käytössä",
     "Display name" : "Näyttönimi",
     "Network" : "Verkko",
     "Confirm" : "Vahvista",

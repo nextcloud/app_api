@@ -33,6 +33,7 @@ OC.L10N.register(
     "{license}-licensed" : "Licencijuota pagal {license}",
     "Host" : "Serveris",
     "Nextcloud URL" : "Nextcloud URL",
+    "Enabled" : "Įjungta",
     "Network" : "Tinklas",
     "Confirm" : "Patvirtinti",
     "Register" : "Registruotis",

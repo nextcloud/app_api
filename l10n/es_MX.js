@@ -31,6 +31,7 @@ OC.L10N.register(
     "Default" : "Por omisión",
     "{license}-licensed" : "Licenciado bajo {license}",
     "Host" : "Servidor",
+    "Enabled" : "Habilitado",
     "Display name" : "Nombre para mostrar",
     "Confirm" : "Confirmar",
     "Register" : "Registrar",

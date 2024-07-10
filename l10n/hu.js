@@ -32,6 +32,7 @@ OC.L10N.register(
     "{license}-licensed" : "{license}-licencelt",
     "Host" : "Kiszolgáló",
     "Nextcloud URL" : "Nextcloud URL",
+    "Enabled" : "Engedélyezve",
     "Display name" : "Megjelenítendő név",
     "Network" : "Hálózat",
     "Confirm" : "Megerősítés",

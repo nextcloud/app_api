@@ -20,6 +20,7 @@ OC.L10N.register(
     "Delete" : "Șterge",
     "Default" : "Implicită",
     "Host" : "Gazdă",
+    "Enabled" : "Activat",
     "Display name" : "Nume afișat",
     "Confirm" : "Confirmă",
     "Register" : "Înregistrează-te",

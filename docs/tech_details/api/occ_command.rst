@@ -26,7 +26,7 @@ Params
     {
         "name": "appid:unique:command:name",
         "description": "Description of the command",
-        "hidden": "true/false",
+        "hidden": "1/0",
         "arguments": [
             {
                 "name": "argument_name",
@@ -66,7 +66,7 @@ Lets assume we have a command `ping` that takes an argument `test_arg` and has a
     {
         "name": "my_app_id:ping",
         "description": "Test ping command",
-        "hidden": "false",
+        "hidden": 0,
         "arguments": [
             {
                 "name": "test_arg",
