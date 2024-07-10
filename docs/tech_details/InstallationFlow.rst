@@ -52,7 +52,11 @@ AppAPI will get 404 or 501 error on it's request, and consider that initializati
 In case you want to implement "/init" endpoint, your application should:
 
 1. In "/init" handler: Response with empty JSON on AppAPI call.
-2. In background job: Send an ``OCS request`` to ``/ocs/v1.php/apps/app_api/apps/status/$APP_ID`` with the progress value.
+2. In background job: Send an ``OCS request`` to ``PUT /ocs/v1.php/apps/app_api/ex-app/status`` with the progress value.
+
+.. warning::
+
+    ``PUT /ocs/v1.php/apps/app_api/apps/status/$APP_ID`` is deprecated and will be removed in the future.
 
 Possible values for **progress** are integers from 1 to 100;
 after receiving the value 100, the **application is considered initialized and ready to work**.

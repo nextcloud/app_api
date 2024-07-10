@@ -60,14 +60,23 @@ class OCSApiController extends OCSController {
 		return new DataResponse($this->exAppService->getNCUsersList(), Http::STATUS_OK);
 	}
 
-	/**
-	 * Get ExApp status, that required during initialization step with progress information
-	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function setAppInitProgress(string $appId, int $progress, string $error = ''): DataResponse {
+	public function setAppInitProgressDeprecated(string $appId, int $progress, string $error = ''): DataResponse {
 		$exApp = $this->exAppService->getExApp($appId);
+		if (!$exApp) {
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
+		}
+		$this->service->setAppInitProgress($exApp, $progress, $error);
+		return new DataResponse();
+	}
+
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function setAppInitProgress(int $progress, string $error = ''): DataResponse {
+		$exApp = $this->exAppService->getExApp($this->request->getHeader('EX-APP-ID'));
 		if (!$exApp) {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}

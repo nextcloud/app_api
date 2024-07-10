@@ -58,7 +58,8 @@ return [
 		['name' => 'OCSApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
 
 		['name' => 'OCSApi#getNCUsersList', 'url' => '/api/v1/users', 'verb' => 'GET'],
-		['name' => 'OCSApi#setAppInitProgress', 'url' => '/apps/status/{appId}', 'verb' => 'PUT'],
+		['name' => 'OCSApi#setAppInitProgressDeprecated', 'url' => '/apps/status/{appId}', 'verb' => 'PUT'],
+		['name' => 'OCSApi#setAppInitProgress', 'url' => '/ex-app/status', 'verb' => 'PUT'],
 		['name' => 'OCSApi#getEnabledState', 'url' => '/ex-app/state', 'verb' => 'GET'],
 
 		// ExApps

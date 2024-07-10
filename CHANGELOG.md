@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.7.1 - 2024-07-xx]
 
+### Added
+
+- New OCS API endpoint to setAppInitProgress. The old one is marked as deprecated. #319
+
 ### Fixed
 
 - Allow ExApps management disable and remove actions if default Deploy daemon is not accessible. #314
-- Fixed Deploy daemon avilability check using ping timeout set to 3s. #314
+- Fixed Deploy daemon availability check using ping timeout set to 3s. #314
 - Fix Test Deploy `image_pull` and `init` steps status update. #315
 
 ## [2.7.0 - 2024-07-01]
