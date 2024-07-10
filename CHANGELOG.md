@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.7.1 - 2024-07-xx]
+## [2.8.0 - 2024-07-1x]
 
 ### Added
 
 - New OCS API endpoint to setAppInitProgress. The old one is marked as deprecated. #319
+- Added default timeout for requestToExApp function set to 3s. #277
 
 ### Fixed
 
