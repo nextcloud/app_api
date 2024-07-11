@@ -173,7 +173,7 @@ class SpeechToTextService {
 				} catch (Exception $e) {
 					throw new \Exception(sprintf('Failed to open file: %s. Error: %s', $file->getName(), $e->getMessage()));
 				}
-				$response = $service->exAppRequestWithUserInit($this->provider->getAppid(),
+				$response = $service->exAppRequest($this->provider->getAppid(),
 					$route,
 					$this->userId,
 					options: [

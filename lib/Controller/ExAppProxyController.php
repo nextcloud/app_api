@@ -81,7 +81,7 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$response = $this->service->aeRequestToExApp2(
+		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			],
@@ -110,7 +110,7 @@ class ExAppProxyController extends Controller {
 		}
 		$bodyParams = $this->prepareBodyParams($this->request->getParams());
 
-		$response = $this->service->aeRequestToExApp2(
+		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId,
 			queryParams: $_GET, bodyParams: $bodyParams, options: $options,
 			request: $this->request,
@@ -138,7 +138,7 @@ class ExAppProxyController extends Controller {
 		}
 		$bodyParams = $this->prepareBodyParams($this->request->getParams());
 
-		$response = $this->service->aeRequestToExApp2(
+		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'PUT', queryParams: $_GET, bodyParams: $bodyParams,
 			options: $options,
 			request: $this->request,
@@ -158,7 +158,7 @@ class ExAppProxyController extends Controller {
 		}
 
 		$bodyParams = $this->prepareBodyParams($this->request->getParams());
-		$response = $this->service->aeRequestToExApp2(
+		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'DELETE', queryParams: $_GET, bodyParams: $bodyParams,
 			options: [
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),

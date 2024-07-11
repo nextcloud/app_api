@@ -18,7 +18,6 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppService;
-use OCA\AppAPI\Service\ExAppUsersService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -51,7 +50,6 @@ class ExAppsPageController extends Controller {
 	private IL10N $l10n;
 	private LoggerInterface $logger;
 	private IAppManager $appManager;
-	private ExAppUsersService $exAppUsersService;
 
 	public function __construct(
 		IRequest $request,
@@ -60,7 +58,6 @@ class ExAppsPageController extends Controller {
 		AppAPIService $service,
 		DaemonConfigService $daemonConfigService,
 		ExAppApiScopeService $exAppApiScopeService,
-		ExAppUsersService $exAppUsersService,
 		DockerActions $dockerActions,
 		CategoryFetcher $categoryFetcher,
 		IFactory $l10nFactory,
@@ -84,7 +81,6 @@ class ExAppsPageController extends Controller {
 		$this->exAppFetcher = $exAppFetcher;
 		$this->logger = $logger;
 		$this->appManager = $appManager;
-		$this->exAppUsersService = $exAppUsersService;
 	}
 
 	#[NoCSRFRequired]
@@ -243,7 +239,6 @@ class ExAppsPageController extends Controller {
 				'appstoreData' => $app,
 				'scopes' => $scopes,
 				'daemon' => $daemon,
-				'systemApp' => $exApp !== null && $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 				'status' => $exApp !== null ? $exApp->getStatus() : [],
 				'error' => $exApp !== null ? $exApp->getStatus()['error'] ?? '' : '',
 			];
@@ -375,7 +370,6 @@ class ExAppsPageController extends Controller {
 					'appstoreData' => $app,
 					'scopes' => $scopes,
 					'daemon' => $daemon,
-					'systemApp' => $this->exAppUsersService->exAppUserExists($exApp->getAppid(), ''),
 					'exAppUrl' => $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth),
 					'releases' => [],
 					'update' => null,

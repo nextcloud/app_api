@@ -201,7 +201,7 @@ class TranslationService {
 					return null; // ExApp does not support language detection
 				}
 
-				$response = $service->exAppRequestWithUserInit($this->provider->getAppid(),
+				$response = $service->exAppRequest($this->provider->getAppid(),
 					$route,
 					$this->userId,
 					params: [
@@ -268,7 +268,7 @@ trait TranslationProviderWithIdAndUserId {
 		$queueRecord = $mapper->insert(new TranslationQueue(['created_time' => time()]));
 		$taskId = $queueRecord->getId();
 
-		$response = $service->exAppRequestWithUserInit($this->provider->getAppid(),
+		$response = $service->exAppRequest($this->provider->getAppid(),
 			$route,
 			$this->userId,
 			params: [

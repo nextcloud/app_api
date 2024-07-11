@@ -89,7 +89,6 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		<command>OCA\AppAPI\Command\ExApp\ListExApps</command>
 		<command>OCA\AppAPI\Command\ExApp\Notify</command>
 		<command>OCA\AppAPI\Command\ExApp\Scopes\ListScopes</command>
-		<command>OCA\AppAPI\Command\ExApp\Users\ListUsers</command>
 		<command>OCA\AppAPI\Command\ExAppConfig\GetConfig</command>
 		<command>OCA\AppAPI\Command\ExAppConfig\SetConfig</command>
 		<command>OCA\AppAPI\Command\ExAppConfig\DeleteConfig</command>

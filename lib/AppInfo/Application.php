@@ -12,7 +12,6 @@ use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
 use OCA\AppAPI\Listener\FileEventsListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
-use OCA\AppAPI\Listener\UserDeletedListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
 use OCA\AppAPI\Middleware\ExAppUiMiddleware;
@@ -47,7 +46,6 @@ use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
-use OCP\User\Events\UserDeletedEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Throwable;
@@ -74,7 +72,6 @@ class Application extends App implements IBootstrap {
 		$context->registerMiddleware(ExAppUiMiddleware::class);
 		$context->registerMiddleware(ExAppUIL10NMiddleware::class, true);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
-		$context->registerEventListener(UserDeletedEvent::class, UserDeletedListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
 		$context->registerNotifierService(ExAppAdminNotifier::class);
 

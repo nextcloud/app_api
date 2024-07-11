@@ -63,7 +63,6 @@ const mutations = {
 		if (!app.installed) {
 			app.installed = true
 			app.needsDownload = false
-			app.systemApp = false
 			app.daemon = state.defaultDaemon
 			app.status = {
 				type: 'install',
@@ -158,9 +157,6 @@ const mutations = {
 		const app = state.apps.find(app => app.id === appId)
 		if (exAppInfo.scopes) {
 			app.scopes = exAppInfo.scopes
-		}
-		if (exAppInfo.system) {
-			app.systemApp = exAppInfo.system
 		}
 	},
 
