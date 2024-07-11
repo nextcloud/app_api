@@ -173,8 +173,6 @@
     "Updates" : "Aktualisierungen",
     "Featured apps" : "Vorgestellte Apps",
     "Supported apps" : "Unterstützte Apps",
-    "Action request sent to ExApp" : "Aktionsanforderung an ExApp gesendet",
-    "Error while sending File action request to ExApp" : "Fehler beim Senden der Dateiaktionsanforderung an ExApp",
     "manual-install apps cannot be updated" : "manual-install Apps können nicht aktualisiert werden",
     "{progress}% Deploying" : "{progress}% bereitstellen",
     "{progress}% Initializing" : "{progress}% Initialisierung",

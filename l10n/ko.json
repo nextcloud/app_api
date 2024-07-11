@@ -172,8 +172,6 @@
     "Updates" : "업데이트",
     "Featured apps" : "추천 앱 - ",
     "Supported apps" : "지원하는 앱",
-    "Action request sent to ExApp" : "외부 응용 프로그램으로 전송된 작업 요청",
-    "Error while sending File action request to ExApp" : "외부 응용 프로그램에 파일 작업 요청을 보내는 중 오류 발생",
     "manual-install apps cannot be updated" : "수동 설치 앱은 업데이트 할 수 없음",
     "{progress}% Deploying" : "배포 중 {progress}%",
     "{progress}% Initializing" : "초기화 중 {progress}%",

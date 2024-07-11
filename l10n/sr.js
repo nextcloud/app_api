@@ -175,8 +175,6 @@ OC.L10N.register(
     "Updates" : "Ажурирања",
     "Featured apps" : "Препоручене апликације",
     "Supported apps" : "Подржане апликације",
-    "Action request sent to ExApp" : "Захтев за акцијом је послат у ExApp",
-    "Error while sending File action request to ExApp" : "Грешка приликом слања захтева File акције у ExApp",
     "manual-install apps cannot be updated" : "ручно инсталиране апликације не могу да се ажурирају",
     "{progress}% Deploying" : "{progress}% Поставља се",
     "{progress}% Initializing" : "{progress}% иницијализовано",
