@@ -17,6 +17,8 @@ Note: Nextcloud 27 is no longer supported since this version.
 ### Changed
 
 - Dropped support of Nextcloud 27. #322
+- ExApp system flag is now deprecated and removed to optimize performance and simplicity. #323
+- PublicFunctions changes: `exAppRequestWithUserInit` and `asyncExAppRequestWithUserInit` are now deprecated. #323
 
 ### Fixed
 
