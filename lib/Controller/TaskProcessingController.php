@@ -35,14 +35,15 @@ class TaskProcessingController extends OCSController {
 	public function registerProvider(
 		string $name,
 		string $displayName,
-		string $taskType
+		string $taskType,
+		?array $customTaskType,
 	): DataResponse {
 		if (!$this->isSupported()) {
 			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
 		}
 
 		$provider = $this->taskProcessingService->registerTaskProcessingProvider(
-			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $taskType,
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $taskType, $customTaskType,
 		);
 
 		if ($provider === null) {
