@@ -47,44 +47,6 @@ class AppAPIService {
 	}
 
 	/**
-	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
-	 *
-	 * @deprecated since AppAPI 2.8.0, use `requestToExApp` instead
-	 */
-	public function aeRequestToExApp(
-		ExApp $exApp,
-		string $route,
-		?string $userId = null,
-		string $method = 'POST',
-		array $params = [],
-		array $options = [],
-		?IRequest $request = null,
-	): array|IResponse {
-		// TODO: Remove later
-		return $this->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
-	}
-
-	/**
-	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
-	 * with more correct query/body params handling
-	 *
-	 * @deprecated since AppAPI 2.8.0, use `requestToExApp2` instead
-	 */
-	public function aeRequestToExApp2(
-		ExApp $exApp,
-		string $route,
-		?string $userId = null,
-		string $method = 'POST',
-		array $queryParams = [],
-		array $bodyParams = [],
-		array $options = [],
-		?IRequest $request = null,
-	): array|IResponse {
-		// TODO: Remove later
-		return $this->requestToExApp2($exApp, $route, $userId, $method, $queryParams, $bodyParams, $options, $request);
-	}
-
-	/**
 	 * Request to ExApp with AppAPI auth headers
 	 */
 	public function requestToExApp(
@@ -136,25 +98,6 @@ class AppAPIService {
 			$this->logger->warning(sprintf('Error during request to ExApp %s: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]);
 			return ['error' => $e->getMessage()];
 		}
-	}
-
-	/**
-	 * @throws \Exception
-	 *
-	 * @deprecated since AppAPI 2.8.0, use `requestToExAppAsync` instead
-	 */
-	public function aeRequestToExAppAsync(
-		ExApp $exApp,
-		string $route,
-		?string $userId = null,
-		string $method = 'POST',
-		array $params = [],
-		array $options = [],
-		?IRequest $request = null,
-	): IPromise {
-		// TODO: Remove later
-		$requestData = $this->prepareRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
-		return $this->requestToExAppInternalAsync($exApp, $method, $requestData['url'], $requestData['options']);
 	}
 
 	/**
