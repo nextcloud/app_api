@@ -73,8 +73,6 @@ OC.L10N.register(
     "Updates" : "Anovamientos",
     "Featured apps" : "Aplicaciones destacaes",
     "Supported apps" : "Aplicaciones compatibles",
-    "Action request sent to ExApp" : "Unvióse la solciitú d'aición a l'aplicación esterna",
-    "Error while sending File action request to ExApp" : "Hebo un error al unviar la solicitú d'aición «File» a l'aplicación esterna",
     "Enable" : "Activar",
     "Disable" : "Desactivar",
     "Allow untested app" : "Permitir l'aplicación ensin probar",

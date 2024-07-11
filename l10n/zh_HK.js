@@ -175,8 +175,6 @@ OC.L10N.register(
     "Updates" : "更新",
     "Featured apps" : "精選應用程式",
     "Supported apps" : "支援的應用程式",
-    "Action request sent to ExApp" : "動作請求已傳送至 ExApp ",
-    "Error while sending File action request to ExApp" : "傳送檔案動作請求至 ExApp 時發生錯誤",
     "manual-install apps cannot be updated" : "無法更新手動安裝應用程式",
     "{progress}% Deploying" : "{progress}% 部署中",
     "{progress}% Initializing" : "初始化 {progress}%",

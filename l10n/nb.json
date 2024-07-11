@@ -173,8 +173,6 @@
     "Updates" : "Oppdateringer",
     "Featured apps" : "Fremhevede apper",
     "Supported apps" : "Støttede apper",
-    "Action request sent to ExApp" : "Handlingsforespørsel sendt til ExApp",
-    "Error while sending File action request to ExApp" : "Feil under sending av handlingsforespørsel til ExApp",
     "manual-install apps cannot be updated" : "Apper som installeres manuelt, kan ikke oppdateres",
     "{progress}% Deploying" : "{progress}% utplasserer",
     "{progress}% Initializing" : "{progress}% Initialiserer",
