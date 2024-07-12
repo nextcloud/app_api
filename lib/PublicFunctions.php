@@ -109,17 +109,17 @@ class PublicFunctions {
 	 *
 	 * @return array ExApp info (appid, version, name, enabled) or error message
 	 */
-	public function getExApp(string $appId): array {
+	public function getExApp(string $appId): ?array {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null) {
-			return ['error' => sprintf('ExApp `%s` not found', $appId)];
+		if ($exApp !== null) {
+			$info = $exApp->jsonSerialize();
+			return [
+				'appid' => $info['appid'],
+				'version' => $info['version'],
+				'name' => $info['name'],
+				'enabled' => $info['enabled'],
+			];
 		}
-		$info = $exApp->jsonSerialize();
-		return [
-			'appid' => $info['appid'],
-			'version' => $info['version'],
-			'name' => $info['name'],
-			'enabled' => $info['enabled'],
-		];
+		return null;
 	}
 }
