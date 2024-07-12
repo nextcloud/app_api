@@ -13,6 +13,7 @@ Note: Nextcloud 27 is no longer supported since this version.
 
 - New OCS API endpoint to setAppInitProgress. The old one is marked as deprecated. #319
 - Added default timeout for requestToExApp function set to 3s. #277
+- Added new PublicFunction method `getExApp`. #326
 
 ### Changed
 
