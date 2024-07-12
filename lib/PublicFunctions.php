@@ -101,4 +101,25 @@ class PublicFunctions {
 		}
 		return $this->service->requestToExAppAsync($exApp, $route, $userId, $method, $params, $options, $request);
 	}
+
+	/**
+	 * Get basic ExApp info by appid
+	 *
+	 * @param string $appId
+	 *
+	 * @return array ExApp info (appid, version, name, enabled) or null if no ExApp found
+	 */
+	public function getExApp(string $appId): ?array {
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp !== null) {
+			$info = $exApp->jsonSerialize();
+			return [
+				'appid' => $info['appid'],
+				'version' => $info['version'],
+				'name' => $info['name'],
+				'enabled' => $info['enabled'],
+			];
+		}
+		return null;
+	}
 }
