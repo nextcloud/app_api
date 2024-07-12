@@ -107,7 +107,7 @@ class PublicFunctions {
 	 *
 	 * @param string $appId
 	 *
-	 * @return array ExApp info (appid, version, name, enabled) or error message
+	 * @return array ExApp info (appid, version, name, enabled) or null if no ExApp found
 	 */
 	public function getExApp(string $appId): ?array {
 		$exApp = $this->exAppService->getExApp($appId);
