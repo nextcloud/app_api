@@ -70,7 +70,6 @@ OC.L10N.register(
     "Type" : "حسب النوع",
     "Display Name" : "إسم العرض",
     "GPUs support" : "دعم وحدات المعالجة الرسومية GPU",
-    "System app: " : "تطبيق النظام:",
     "Required scopes" : "النطاقات scopes المطلوبة",
     "No scopes granted to this app" : "لم يتم منح أي مَجالات لهذا التطبيق",
     "Are you sure you want delete Deploy Daemon" : "هل أنت متأكد أنك تريد حذف البرنامج المخفي للنشر Deploy Daemon؟",

@@ -35,7 +35,6 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["Anovar","Anovar too"],
     "Type" : "Tipu",
     "Display Name" : "Nome visible",
-    "System app: " : "Aplicación del sistema:",
     "Required scopes" : "Ámbitos riquíos",
     "All ExApps on this daemon will be removed" : "Van quitase toles aplicaciones esternes d'esti degorriu",
     "All ExApps installed on this daemon will be removed" : "Van quitase toles aplicaciones instalaes d'esti degorriu",
