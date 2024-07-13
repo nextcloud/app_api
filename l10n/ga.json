@@ -68,7 +68,6 @@
     "Type" : "Cineál",
     "Display Name" : "Ainm taispeána",
     "GPUs support" : "Tacaíocht GPUs",
-    "System app: " : "Aip chórais:",
     "Required scopes" : "Scóip ag teastáil",
     "No scopes granted to this app" : "Níor deonaíodh aon scóip don aip seo",
     "Are you sure you want delete Deploy Daemon" : "An bhfuil tú cinnte gur mhaith leat Deploy Deploy a scriosadh",

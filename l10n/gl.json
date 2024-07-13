@@ -68,7 +68,6 @@
     "Type" : "Escribir",
     "Display Name" : "Nome para amosar",
     "GPUs support" : "Compatibilidade con GPU",
-    "System app: " : "Aplicación do sistema:",
     "Required scopes" : "Ámbitos necesarios",
     "No scopes granted to this app" : "Non se concedeu ningún ámbito a esta aplicación",
     "Are you sure you want delete Deploy Daemon" : "Confirma que quere eliminar o servizo de despregadura",

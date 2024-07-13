@@ -70,7 +70,6 @@ OC.L10N.register(
     "Type" : "類型",
     "Display Name" : "顯示名稱",
     "GPUs support" : "GPU 支援",
-    "System app: " : "系統應用程式：",
     "Required scopes" : "需要的範圍",
     "No scopes granted to this app" : "未授予範圍給此應用程式",
     "Are you sure you want delete Deploy Daemon" : "您確定您想要刪除部署幕後程式嗎",

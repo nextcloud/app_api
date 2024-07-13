@@ -53,7 +53,7 @@ class Notify extends Command {
 
 		$route = $input->getArgument('route');
 		$userId = $input->getOption('user-id');
-		$response = $this->service->aeRequestToExApp($exApp, $route, $userId, params: $eventJsonData,
+		$response = $this->service->requestToExApp($exApp, $route, $userId, params: $eventJsonData,
 			options: ['timeout' => 2]);
 		if (is_array($response) && isset($response['error'])) {
 			$output->writeln(sprintf('Failed to notify ExApp %s: %s', $appId, $response['error']));

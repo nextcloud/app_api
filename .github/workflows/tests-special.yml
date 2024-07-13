@@ -228,7 +228,7 @@ jobs:
       - name: Check logs
         run: grep -q 'Hello from ' data/nextcloud.log || error
 
-      - name: Test ALL Scope, System App
+      - name: Test ALL Scope
         run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 0
 
       - name: Re-Register App
@@ -243,23 +243,8 @@ jobs:
           kill -15 $(cat /tmp/_install.pid)
           timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
 
-      - name: Test NO ALL Scope, System App
+      - name: Test NO ALL Scope
         run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 1
-
-      - name: Re-Register App
-        run: |
-          php occ app_api:app:unregister $APP_ID --silent --force || true
-          python3 apps/${{ env.APP_NAME }}/tests/install_no_init.py &
-          echo $! > /tmp/_install.pid
-          sleep 5s
-          php occ app_api:app:register $APP_ID manual_install --json-info \
-            "{\"appid\":\"$APP_ID\",\"name\":\"$APP_ID\",\"daemon_config_name\":\"manual_install\",\"version\":\"$APP_VERSION\",\"secret\":\"$APP_SECRET\",\"port\":$APP_PORT,\"scopes\":[\"ALL\"],\"system_app\":0}" \
-            --force-scopes --wait-finish
-          kill -15 $(cat /tmp/_install.pid)
-          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
-
-      - name: Test NO ALL Scope, NO System App
-        run: python3 apps/${{ env.APP_NAME }}/tests/auth_scopes_system.py 2
 
       - name: Upload NC logs
         if: always()

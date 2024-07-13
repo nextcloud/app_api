@@ -69,7 +69,6 @@ OC.L10N.register(
     "Type" : "Tipo",
     "Display Name" : "Nombre a mostrar",
     "GPUs support" : "Soporte a GPUs",
-    "System app: " : "App del sistema:",
     "Required scopes" : "Ámbitos requeridos",
     "No scopes granted to this app" : "No hay ámbitos otorgados a esta app",
     "Are you sure you want delete Deploy Daemon" : "¿Está seguro que desea eliminar el Daemon de despliegue?",

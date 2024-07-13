@@ -70,7 +70,6 @@ OC.L10N.register(
     "Type" : "Тип",
     "Display Name" : "Име за приказ",
     "GPUs support" : "Подршка за GPU",
-    "System app: " : "Системска апликација:",
     "Required scopes" : "Тражени опсези важења",
     "No scopes granted to this app" : "Авој апликацији није одобрен ниједан опсег важења",
     "Are you sure you want delete Deploy Daemon" : "Да ли сте сигурни да желите да обришете Даемон за постављање",

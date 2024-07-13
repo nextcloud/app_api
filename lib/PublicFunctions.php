@@ -39,6 +39,8 @@ class PublicFunctions {
 
 	/**
 	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
+	 *
+	 * @depreacted since AppAPI 2.8.0, use `exAppRequest` instead
 	 */
 	public function exAppRequestWithUserInit(
 		string $appId,
@@ -53,7 +55,7 @@ class PublicFunctions {
 		if ($exApp === null) {
 			return ['error' => sprintf('ExApp `%s` not found', $appId)];
 		}
-		return $this->service->aeRequestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
+		return $this->service->requestToExApp($exApp, $route, $userId, $method, $params, $options, $request);
 	}
 
 	/**
@@ -81,6 +83,8 @@ class PublicFunctions {
 	 * Async request to ExApp with AppAPI auth headers and ExApp user initialization
 	 *
 	 * @throws \Exception if ExApp not found or failed to setup ExApp user
+	 *
+	 * @depreacted since AppAPI 2.8.0, use `asyncExAppRequest` instead
 	 */
 	public function asyncExAppRequestWithUserInit(
 		string $appId,
@@ -95,6 +99,27 @@ class PublicFunctions {
 		if ($exApp === null) {
 			throw new \Exception(sprintf('ExApp `%s` not found', $appId));
 		}
-		return $this->service->aeRequestToExAppAsync($exApp, $route, $userId, $method, $params, $options, $request);
+		return $this->service->requestToExAppAsync($exApp, $route, $userId, $method, $params, $options, $request);
+	}
+
+	/**
+	 * Get basic ExApp info by appid
+	 *
+	 * @param string $appId
+	 *
+	 * @return array|null ExApp info (appid, version, name, enabled) or null if no ExApp found
+	 */
+	public function getExApp(string $appId): ?array {
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp !== null) {
+			$info = $exApp->jsonSerialize();
+			return [
+				'appid' => $info['appid'],
+				'version' => $info['version'],
+				'name' => $info['name'],
+				'enabled' => $info['enabled'],
+			];
+		}
+		return null;
 	}
 }

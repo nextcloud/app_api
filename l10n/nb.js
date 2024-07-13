@@ -70,7 +70,6 @@ OC.L10N.register(
     "Type" : "Type",
     "Display Name" : "Visningsnavn",
     "GPUs support" : "Støtte for GPUer",
-    "System app: " : "System app: ",
     "Required scopes" : "Nødvendige omfang",
     "No scopes granted to this app" : "Ingen omfang gitt til denne appen",
     "Are you sure you want delete Deploy Daemon" : "Er du sikker på at du vil slette distribuerings-daemon?",

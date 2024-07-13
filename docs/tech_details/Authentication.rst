@@ -65,8 +65,6 @@ Authentication flow in details
 		AppAPI-->>Nextcloud: Reject if secret does not match
 		AppAPI-->>AppAPI: Check API scope
 		AppAPI-->>Nextcloud: Reject if API scope not match
-		AppAPI-->>AppAPI: Check if user interacted with ExApp
-		AppAPI-->>Nextcloud: Reject if user has not interacted with ExApp (attempt to bypass user)
 		AppAPI-->>AppAPI: Check if user is not empty and active
 		AppAPI-->>Nextcloud: Set active user
 		AppAPI->>-Nextcloud: Request accepted/rejected
@@ -87,13 +85,9 @@ After successful authentication AppAPI sets `app_api` session key to ``true``.
 .. code-block:: php
 
 	$this->session->set('app_api', true);
+	$this->session->set('app_api_system', true); // deprecated since AppAPI 2.8.0
 
-.. note:: The Nextcloud server verifies this session key and allows **CORS protection** and **Two-Factor authentication** to be bypassed for requests coming from ExApps.
+.. note::
 
-For ``System`` applications additional flag is set:
-
-.. code-block:: php
-
-	$this->session->set('app_api_system', true);
-
-.. note:: The Nextcloud Server skips rate limiting for requests coming from ``System`` ExApps.
+	The Nextcloud server verifies this session key and allows **CORS protection** and **Two-Factor authentication** to be bypassed for requests coming from ExApps.
+	Also the rate limit is not applied to requests coming from ExApps.

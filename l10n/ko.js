@@ -70,7 +70,6 @@ OC.L10N.register(
     "Type" : "종류",
     "Display Name" : "표시 이름",
     "GPUs support" : "GPU 지원<br>",
-    "System app: " : "시스템 앱:",
     "Required scopes" : "필수 범위",
     "No scopes granted to this app" : "이 앱에 부여된 범위가 없습니다.",
     "Are you sure you want delete Deploy Daemon" : "배포 데몬을 삭제하시겠습니까?",

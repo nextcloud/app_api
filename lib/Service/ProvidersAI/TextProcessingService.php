@@ -188,7 +188,7 @@ class TextProcessingService {
 				$queueRecord = $mapper->insert(new TextProcessingProviderQueue(['created_time' => time()]));
 				$taskId = $queueRecord->getId();
 
-				$response = $service->exAppRequestWithUserInit($this->provider->getAppid(),
+				$response = $service->exAppRequest($this->provider->getAppid(),
 					$route,
 					$this->userId,
 					params: [

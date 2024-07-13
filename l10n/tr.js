@@ -68,7 +68,6 @@ OC.L10N.register(
     "Type" : "Tür",
     "Display Name" : "Görüntülenecek ad",
     "GPUs support" : "Grafik işlemci desteği",
-    "System app: " : "Sistem uygulaması:",
     "Required scopes" : "Zorunlu kapsamlar",
     "No scopes granted to this app" : "Bu uygulamaya izin verilmiş bir kapsam yok",
     "Are you sure you want delete Deploy Daemon" : "Dağıtım arka plan işlemini silmek istediğinize emin misiniz",
