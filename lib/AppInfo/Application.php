@@ -96,6 +96,7 @@ class Application extends App implements IBootstrap {
 			/** @var TaskProcessingService $taskProcessingService */
 			$taskProcessingService = $container->get(TaskProcessingService::class);
 			$taskProcessingService->registerExAppTaskProcessingProviders($context, $container->getServer());
+			$taskProcessingService->registerExAppTaskProcessingCustomTaskTypes($context);
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 		$context->registerEventListener(NodeCreatedEvent::class, FileEventsListener::class);

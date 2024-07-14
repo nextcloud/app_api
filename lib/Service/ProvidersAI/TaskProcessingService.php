@@ -14,7 +14,10 @@ use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IServerContainer;
+use OCP\TaskProcessing\EShapeType;
 use OCP\TaskProcessing\IProvider;
+use OCP\TaskProcessing\ITaskType;
+use OCP\TaskProcessing\ShapeDescriptor;
 use Psr\Log\LoggerInterface;
 
 class TaskProcessingService {
@@ -71,7 +74,8 @@ class TaskProcessingService {
 		string $appId,
 		string $name,
 		string $displayName,
-		string $taskType
+		string $taskType,
+		?array $customTaskType,
 	): ?TaskProcessingProvider {
 		try {
 			$taskProcessingProvider = $this->mapper->findByAppidName($appId, $name);
@@ -84,6 +88,7 @@ class TaskProcessingService {
 				'name' => $name,
 				'display_name' => $displayName,
 				'task_type' => $taskType,
+				'custom_task_type' => json_encode($customTaskType, JSON_THROW_ON_ERROR),
 			]);
 
 			if ($taskProcessingProvider !== null) {
@@ -185,5 +190,65 @@ class TaskProcessingService {
 		}
 		$this->resetCacheEnabled();
 		return $result;
+	}
+
+	/**
+	 * @param IRegistrationContext $context
+	 *
+	 * @return void
+	 */
+	public function registerExAppTaskProcessingCustomTaskTypes(IRegistrationContext $context): void {
+		$exAppsProviders = $this->getRegisteredTaskProcessingProviders();
+		foreach ($exAppsProviders as $exAppProvider) {
+			if ($exAppProvider->getCustomTaskType() === null) {
+				continue;
+			}
+
+			$className = '\\OCA\\AppAPI\\' . $exAppProvider->getAppId() . '\\' . $exAppProvider->getName() . '\\TaskType';
+			$taskType = $this->getAnonymousTaskType(json_decode($exAppProvider->getCustomTaskType(), true, 512, JSON_THROW_ON_ERROR));
+			$context->registerService($className, function () use ($taskType) {
+				return $taskType;
+			});
+			$context->registerTaskProcessingTaskType($className);
+		}
+	}
+
+	private function getAnonymousTaskType(
+		array $customTaskType,
+	): ITaskType {
+		return new class($customTaskType) implements ITaskType {
+			public function __construct(
+				private readonly array $customTaskType,
+			) {
+			}
+
+			public function getId(): string {
+				return $this->customTaskType['id'];
+			}
+
+			public function getName(): string {
+				return $this->customTaskType['name'];
+			}
+
+			public function getDescription(): string {
+				return $this->customTaskType['description'];
+			}
+
+			public function getInputShape(): array {
+				return array_map(static fn (array $shape) => new ShapeDescriptor(
+					$shape['name'],
+					$shape['description'],
+					EShapeType::from($shape['type']),
+				), $this->customTaskType['input_shape']);
+			}
+
+			public function getOutputShape(): array {
+				return array_map(static fn (array $shape) => new ShapeDescriptor(
+					$shape['name'],
+					$shape['description'],
+					EShapeType::from($shape['type']),
+				), $this->customTaskType['output_shape']);
+			}
+		};
 	}
 }
