@@ -118,7 +118,7 @@ return [
 		// ExApp routes
 		['name' => 'ExAppRoutes#registerExAppRoutes', 'url' => '/api/v1/routes', 'verb' => 'POST'],
 		['name' => 'ExAppRoutes#unregisterExAppRoutes', 'url' => '/api/v1/routes', 'verb' => 'DELETE'],
-		['name' => 'ExAppRoutes#getExAppRoutes', 'url' => '/api/v1/ui/routes', 'verb' => 'GET'],
+		['name' => 'ExAppRoutes#getExAppRoutes', 'url' => '/api/v1/routes', 'verb' => 'GET'],
 
 		// Common UI
 		['name' => 'OCSUi#setExAppInitialState', 'url' => '/api/v1/ui/initial-state', 'verb' => 'POST'],
