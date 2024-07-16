@@ -27,6 +27,7 @@ use OCP\AppFramework\Db\Entity;
  * @method array getApiScopes()
  * @method array getDeployConfig()
  * @method string getAcceptsDeployId()
+ * @method array getRoutes()
  * @method void setAppid(string $appid)
  * @method void setVersion(string $version)
  * @method void setName(string $name)
@@ -42,6 +43,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setApiScopes(array $apiScopes)
  * @method void setDeployConfig(array $deployConfig)
  * @method void setAcceptsDeployId(string $acceptsDeployId)
+ * @method void setRoutes(array $routes)
  */
 class ExApp extends Entity implements JsonSerializable {
 	protected $appid;
@@ -59,6 +61,7 @@ class ExApp extends Entity implements JsonSerializable {
 	protected $apiScopes;
 	protected $deployConfig;
 	protected $acceptsDeployId;
+	protected $routes;
 
 	/**
 	 * @param array $params
@@ -79,6 +82,7 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('apiScopes', 'json');
 		$this->addType('deployConfig', 'json');
 		$this->addType('acceptsDeployId', 'string');
+		$this->addType('routes', 'json');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
@@ -130,6 +134,11 @@ class ExApp extends Entity implements JsonSerializable {
 		if (isset($params['accepts_deploy_id'])) {
 			$this->setAcceptsDeployId($params['accepts_deploy_id']);
 		}
+		if (isset($params['routes'])) {
+			$this->setRoutes($params['routes']);
+		} else {
+			$this->setRoutes([]);
+		}
 	}
 
 	public function jsonSerialize(): array {
@@ -150,6 +159,13 @@ class ExApp extends Entity implements JsonSerializable {
 			'api_scopes' => $this->getApiScopes(),
 			'deploy_config' => $this->getDeployConfig(),
 			'accepts_deploy_id' => $this->getAcceptsDeployId(),
+			'routes' => $this->getRoutes(),
 		];
 	}
+}
+
+enum ExAppRouteAccessLevel: int {
+	case USER = 0;
+	case ADMIN = 1;
+	case PUBLIC = 2;
 }

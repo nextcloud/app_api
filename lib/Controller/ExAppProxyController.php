@@ -9,16 +9,19 @@ use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\RequestOptions;
 use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExAppRouteAccessLevel;
 use OCA\AppAPI\ProxyResponse;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\Files\IMimeTypeDetector;
 use OCP\Http\Client\IResponse;
+use OCP\IGroupManager;
 use OCP\IRequest;
 
 class ExAppProxyController extends Controller {
@@ -30,6 +33,7 @@ class ExAppProxyController extends Controller {
 		private readonly IMimeTypeDetector                 $mimeTypeHelper,
 		private readonly ContentSecurityPolicyNonceManager $nonceManager,
 		private readonly ?string                           $userId,
+		private readonly IGroupManager                     $groupManager,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -73,11 +77,12 @@ class ExAppProxyController extends Controller {
 		return $proxyResponse;
 	}
 
+	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppGet(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled()) {
+		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($appId, $other)) {
 			return new NotFoundResponse();
 		}
 
@@ -93,11 +98,12 @@ class ExAppProxyController extends Controller {
 		return $this->createProxyResponse($other, $response);
 	}
 
+	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppPost(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled()) {
+		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($appId, $other)) {
 			return new NotFoundResponse();
 		}
 
@@ -127,11 +133,12 @@ class ExAppProxyController extends Controller {
 		return $this->createProxyResponse($other, $response);
 	}
 
+	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppPut(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled()) {
+		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($appId, $other)) {
 			return new NotFoundResponse();
 		}
 
@@ -152,11 +159,12 @@ class ExAppProxyController extends Controller {
 		return $this->createProxyResponse($other, $response);
 	}
 
+	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppDelete(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled()) {
+		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($appId, $other)) {
 			return new NotFoundResponse();
 		}
 
@@ -211,5 +219,36 @@ class ExAppProxyController extends Controller {
 			];
 		}
 		return $multipart;
+	}
+
+	private function passesExAppProxyRoutesChecks(string $appId, string $other): bool {
+		$routes = $this->exAppService->getExApp($appId)->getRoutes();
+		foreach ($routes as $route) {
+			// check if the $route['url'] is regex and matches the $other route
+			if (preg_match($route['url'], $other) === 1
+				&& strtolower($route['verb']) === strtolower($this->request->getMethod())) {
+				return $this->passesExAppProxyRouteAccessLevelCheck($route['access_level']);
+			}
+		}
+		return false;
+	}
+
+	private function passesExAppProxyRouteAccessLevelCheck(string $accessLevel): bool {
+		return match ($accessLevel) {
+			ExAppRouteAccessLevel::ADMIN => $this->userId !== null && $this->groupManager->isAdmin($this->userId),
+			ExAppRouteAccessLevel::USER => $this->userId !== null,
+			ExAppRouteAccessLevel::PUBLIC => true,
+			default => false,
+		};
+	}
+
+	private function buildHeadersToInclude(ExApp $exApp): array {
+		$headersToInclude = [];
+		foreach ($exApp->getRoutes() as $route) {
+			if (preg_match($route['url'], $other) === 1) {
+				$headersToInclude = json_decode($route['headers_to_include'], true);
+			}
+		}
+		return $headersToInclude;
 	}
 }

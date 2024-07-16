@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.8.0 - 2024-07-19]
+## [3.0.0 - 2024-xx-xx]
+
+**Breaking change**: new mandatory ExApp lifecycle endpoint to register ExApp routes allowed to be called from Nextcloud or other origins.
+
+### Added
+
+- [Breaking change] Added new ExApp lifecycle endpoint to register ExApp routes allowed to be called from Nextcloud or other origins.
+
+
+## [2.8.0 - 2024-07-1x]
 
 Note: Nextcloud 27 is no longer supported since this version.
 

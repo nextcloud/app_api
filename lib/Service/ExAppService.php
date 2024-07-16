@@ -84,6 +84,9 @@ class ExAppService {
 			$this->exAppMapper->insert($exApp);
 			$exApp = $this->exAppMapper->findByAppId($appInfo['id']);
 			$this->cache->remove('/ex_apps');
+			if (isset($appInfo['routes'])) {
+				$this->registerExAppRoutes($exApp, $appInfo['routes']);
+			}
 			return $exApp;
 		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
 			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appInfo['id'], $e->getMessage()));
@@ -113,6 +116,10 @@ class ExAppService {
 		$r = $this->exAppMapper->deleteExApp($appId);
 		if ($r !== 1) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
+		}
+		$r = $this->removeExAppRoutes($exApp);
+		if ($r === null) {
+			$this->logger->error(sprintf('Error while unregistering %s ExApp routes from the database.', $appId));
 		}
 		$this->cache->remove('/ex_apps');
 		return $r === 1;
@@ -351,6 +358,40 @@ class ExAppService {
 			return $records;
 		} catch (Exception) {
 			return [];
+		}
+	}
+
+	public function registerExAppRoutes(ExApp $exApp, array $routes): ?ExApp {
+		try {
+			$this->exAppMapper->registerExAppRoutes($exApp, $routes);
+			$exApp->setRoutes($routes);
+			$this->resetCaches();
+			return $exApp;
+		} catch (Exception) {
+			return null;
+		}
+	}
+
+	public function removeExAppRoutes(ExApp $exApp): ?ExApp {
+		try {
+			$this->exAppMapper->removeExAppRoutes($exApp);
+			$exApp->setRoutes([]);
+			$this->resetCaches();
+			return $exApp;
+		} catch (Exception) {
+			return null;
+		}
+	}
+
+	public function updateExAppRoutes(ExApp $exApp, array $routes): ?ExApp {
+		try {
+			if ($this->exAppMapper->updateExAppRoutes($exApp, $routes) === count($routes)) {
+				$exApp->setRoutes($routes);
+				$this->resetCaches();
+				return $exApp;
+			}
+		} catch (Exception) {
+			return null;
 		}
 	}
 }
