@@ -103,18 +103,24 @@ class ExAppProxyController extends Controller {
 
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
+			'headers' => getallheaders(),
 		];
 		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
-			$multipart = $this->buildMultipartFormData($this->prepareBodyParams($this->request->getParams()), $_FILES);
-			$options[RequestOptions::MULTIPART] = $multipart;
+			unset($options['headers']['Content-Type']);
+			unset($options['headers']['Content-Length']);
+			$options[RequestOptions::MULTIPART] = $this->buildMultipartFormData($_POST, $_FILES);
+		} else {
+			$options['body'] = $stream = fopen('php://input', 'r');
 		}
-		$bodyParams = $this->prepareBodyParams($this->request->getParams());
 
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId,
-			queryParams: $_GET, bodyParams: $bodyParams, options: $options,
-			request: $this->request,
+			queryParams: $_GET, options: $options, request: $this->request,
 		);
+
+		if (isset($stream) && is_resource($stream)) {
+			fclose($stream);
+		}
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
@@ -131,18 +137,24 @@ class ExAppProxyController extends Controller {
 
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
+			'headers' => getallheaders(),
 		];
 		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
-			$multipart = $this->buildMultipartFormData($this->prepareBodyParams($this->request->getParams()), $_FILES);
-			$options[RequestOptions::MULTIPART] = $multipart;
+			unset($options['headers']['Content-Type']);
+			unset($options['headers']['Content-Length']);
+			$options[RequestOptions::MULTIPART] = $this->buildMultipartFormData($_POST, $_FILES);
+		} else {
+			$options['body'] = $stream = fopen('php://input', 'r');
 		}
-		$bodyParams = $this->prepareBodyParams($this->request->getParams());
 
 		$response = $this->service->requestToExApp2(
-			$exApp, '/' . $other, $this->userId, 'PUT', queryParams: $_GET, bodyParams: $bodyParams,
-			options: $options,
-			request: $this->request,
+			$exApp, '/' . $other, $this->userId, 'PUT',
+			queryParams: $_GET, options: $options, request: $this->request,
 		);
+
+		if (isset($stream) && is_resource($stream)) {
+			fclose($stream);
+		}
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
@@ -157,14 +169,17 @@ class ExAppProxyController extends Controller {
 			return new NotFoundResponse();
 		}
 
-		$bodyParams = $this->prepareBodyParams($this->request->getParams());
+		$stream = fopen('php://input', 'r');
+		$options = [
+			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
+			'body' => $stream,
+			'headers' => getallheaders(),
+		];
 		$response = $this->service->requestToExApp2(
-			$exApp, '/' . $other, $this->userId, 'DELETE', queryParams: $_GET, bodyParams: $bodyParams,
-			options: [
-				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
-			],
-			request: $this->request,
+			$exApp, '/' . $other, $this->userId, 'DELETE', queryParams: $_GET,
+			options: $options, request: $this->request,
 		);
+		fclose($stream);
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
