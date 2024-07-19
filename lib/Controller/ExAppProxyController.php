@@ -9,6 +9,7 @@ use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\RequestOptions;
 use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppRouteAccessLevel;
 use OCA\AppAPI\ProxyResponse;
 use OCA\AppAPI\Service\AppAPIService;
@@ -82,7 +83,7 @@ class ExAppProxyController extends Controller {
 	#[NoCSRFRequired]
 	public function ExAppGet(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($appId, $other)) {
+		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($exApp, $other)) {
 			return new NotFoundResponse();
 		}
 
@@ -103,7 +104,7 @@ class ExAppProxyController extends Controller {
 	#[NoCSRFRequired]
 	public function ExAppPost(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($appId, $other)) {
+		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($exApp, $other)) {
 			return new NotFoundResponse();
 		}
 
@@ -138,7 +139,7 @@ class ExAppProxyController extends Controller {
 	#[NoCSRFRequired]
 	public function ExAppPut(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($appId, $other)) {
+		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($exApp, $other)) {
 			return new NotFoundResponse();
 		}
 
@@ -164,7 +165,7 @@ class ExAppProxyController extends Controller {
 	#[NoCSRFRequired]
 	public function ExAppDelete(string $appId, string $other): Response {
 		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($appId, $other)) {
+		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($exApp, $other)) {
 			return new NotFoundResponse();
 		}
 
@@ -221,8 +222,8 @@ class ExAppProxyController extends Controller {
 		return $multipart;
 	}
 
-	private function passesExAppProxyRoutesChecks(string $appId, string $other): bool {
-		$routes = $this->exAppService->getExApp($appId)->getRoutes();
+	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $other): bool {
+		$routes = $exApp->getRoutes();
 		foreach ($routes as $route) {
 			// check if the $route['url'] is regex and matches the $other route
 			if (preg_match($route['url'], $other) === 1
@@ -242,13 +243,13 @@ class ExAppProxyController extends Controller {
 		};
 	}
 
-	private function buildHeadersToInclude(ExApp $exApp): array {
-		$headersToInclude = [];
+	private function buildHeadersToExclude(ExApp $exApp, string $exAppRoute): array {
+		$headersToExclude = [];
 		foreach ($exApp->getRoutes() as $route) {
-			if (preg_match($route['url'], $other) === 1) {
-				$headersToInclude = json_decode($route['headers_to_include'], true);
+			if (preg_match($route['url'], $exAppRoute) === 1) {
+				$headersToExclude = json_decode($route['headers_to_include'], true);
 			}
 		}
-		return $headersToInclude;
+		return $headersToExclude;
 	}
 }

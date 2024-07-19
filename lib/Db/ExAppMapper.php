@@ -44,12 +44,57 @@ class ExAppMapper extends QBMapper {
 			->orderBy('a.appid', 'ASC')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
+		return $this->buildExAppRoutes($qb->executeQuery()->fetchAll());
+	}
 
-		// Compose the ExApp entities with multiple routes rows in one ExApp field
+	/**
+	 * @param string $appId
+	 *
+	 * @throws DoesNotExistException if not found
+	 * @throws MultipleObjectsReturnedException if more than one result
+	 * @throws Exception
+	 *
+	 * @return ExApp
+	 */
+	public function findByAppId(string $appId): Entity {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select(
+			'a.*',
+			'd.protocol',
+			'd.host',
+			'd.deploy_config',
+			'd.accepts_deploy_id',
+			'r.url',
+			'r.verb',
+			'r.access_level',
+			'r.headers_to_include',
+		)
+			->from($this->tableName, 'a')
+			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
+			->leftJoin('a', 'ex_apps_routes', 'r', $qb->expr()->eq('a.appid', 'r.appid'))
+			->orderBy('a.appid', 'ASC')
+			->where(
+				$qb->expr()->eq('a.appid', $qb->createNamedParameter($appId))
+			);
+		$apps = $this->buildExAppRoutes($qb->executeQuery()->fetchAll());
+		if (count($apps) === 0) {
+			throw new DoesNotExistException();
+		}
+		if (count($apps) > 1) {
+			throw new MultipleObjectsReturnedException();
+		}
+		return $apps[0];
+	}
+
+	/**
+	 * @param array $result fetched rows from the database
+	 *
+	 * @return array of ExApps with composed routes
+	 */
+	private function buildExAppRoutes(array $result): array {
 		$apps = [];
 		$lastAppId = null;
 		$lastApp = null;
-		$result = $qb->executeQuery()->fetchAll();
 		foreach ($result as $row) {
 			if ($lastAppId !== $row['appid'] || $lastAppId === null) {
 				$lastAppId = $row['appid'];
@@ -88,32 +133,6 @@ class ExAppMapper extends QBMapper {
 			}
 		}
 		return $apps;
-	}
-
-	/**
-	 * @param string $appId
-	 *
-	 * @throws DoesNotExistException if not found
-	 * @throws MultipleObjectsReturnedException if more than one result
-	 * @throws Exception
-	 *
-	 * @return ExApp
-	 */
-	public function findByAppId(string $appId): Entity {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select(
-			'a.*',
-			'd.protocol',
-			'd.host',
-			'd.deploy_config',
-			'd.accepts_deploy_id',
-		)
-			->from($this->tableName, 'a')
-			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
-			->where(
-				$qb->expr()->eq('a.appid', $qb->createNamedParameter($appId))
-			);
-		return $this->findEntity($qb);
 	}
 
 	/**
