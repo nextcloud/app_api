@@ -90,6 +90,7 @@ class ExAppProxyController extends Controller {
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
+				RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
 			],
 			request: $this->request,
 		);
@@ -110,7 +111,7 @@ class ExAppProxyController extends Controller {
 
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
-			'headers' => getallheaders(),
+			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
 		];
 		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
 			unset($options['headers']['Content-Type']);
@@ -146,8 +147,8 @@ class ExAppProxyController extends Controller {
 		$stream = fopen('php://input', 'r');
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
-			'body' => $stream,
-			'headers' => getallheaders(),
+			RequestOptions::BODY => $stream,
+			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
 		];
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'PUT',
@@ -172,8 +173,8 @@ class ExAppProxyController extends Controller {
 		$stream = fopen('php://input', 'r');
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
-			'body' => $stream,
-			'headers' => getallheaders(),
+			RequestOptions::BODY => $stream,
+			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
 		];
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'DELETE',
@@ -243,13 +244,22 @@ class ExAppProxyController extends Controller {
 		};
 	}
 
-	private function buildHeadersToExclude(ExApp $exApp, string $exAppRoute): array {
+	private function buildHeadersWithExclude(ExApp $exApp, string $exAppRoute, array $headers): array {
 		$headersToExclude = [];
 		foreach ($exApp->getRoutes() as $route) {
 			if (preg_match($route['url'], $exAppRoute) === 1) {
 				$headersToExclude = json_decode($route['headers_to_include'], true);
+				break;
 			}
 		}
-		return $headersToExclude;
+		if (empty($headersToExclude)) {
+			return $headers;
+		}
+		foreach ($headers as $key => $value) {
+			if (in_array($key, $headersToExclude)) {
+				unset($headers[$key]);
+			}
+		}
+		return $headers;
 	}
 }
