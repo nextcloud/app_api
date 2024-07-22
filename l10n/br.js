@@ -22,6 +22,7 @@ OC.L10N.register(
     "Actions" : "Oberoù",
     "Results from other categories" : "Disoc'hoù evit rummadoù all",
     "Type" : "Stumm",
+    "Cancel" : "Nullañ",
     "Delete" : "Lemel",
     "{license}-licensed" : "{license}-aotre",
     "Host" : "Ostiz",
