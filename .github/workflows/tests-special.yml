@@ -49,13 +49,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: 'stable28'
+          ref: 'stable27'
 
       - name: Checkout Notifications
         uses: actions/checkout@v3
         with:
           repository: nextcloud/notifications
-          ref: 'stable28'
+          ref: ${{ matrix.server-version }}
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -162,7 +162,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: 'stable28'
+          ref: 'stable27'
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
