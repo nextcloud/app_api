@@ -36,7 +36,7 @@ class ExAppMapper extends QBMapper {
 			'r.url',
 			'r.verb',
 			'r.access_level',
-			'r.headers_to_include',
+			'r.headers_to_exclude',
 		)
 			->from($this->tableName, 'a')
 			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
@@ -67,7 +67,7 @@ class ExAppMapper extends QBMapper {
 			'r.url',
 			'r.verb',
 			'r.access_level',
-			'r.headers_to_include',
+			'r.headers_to_exclude',
 		)
 			->from($this->tableName, 'a')
 			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
@@ -125,7 +125,7 @@ class ExAppMapper extends QBMapper {
 					'url' => $row['url'],
 					'verb' => $row['verb'],
 					'access_level' => $row['access_level'],
-					'headers_to_include' => $row['headers_to_include'],
+					'headers_to_exclude' => $row['headers_to_exclude'],
 				];
 				$lastAppRoutes = $lastApp->getRoutes();
 				$lastAppRoutes[] = $route;
@@ -200,13 +200,13 @@ class ExAppMapper extends QBMapper {
 				'url' => $qb->createNamedParameter(''),
 				'verb' => $qb->createNamedParameter(''),
 				'access_level' => $qb->createNamedParameter(''),
-				'headers_to_include' => $qb->createNamedParameter(''),
+				'headers_to_exclude' => $qb->createNamedParameter(''),
 			]);
 		foreach ($routes as $route) {
 			$qb->setValue('url', $qb->createNamedParameter($route['url']));
 			$qb->setValue('verb', $qb->createNamedParameter($route['verb']));
 			$qb->setValue('access_level', $qb->createNamedParameter($route['access_level']));
-			$qb->setValue('headers_to_include', $qb->createNamedParameter($route['headers_to_include']));
+			$qb->setValue('headers_to_exclude', $qb->createNamedParameter($route['headers_to_exclude']));
 			$qb->executeStatement();
 		}
 		return count($routes);
@@ -223,7 +223,7 @@ class ExAppMapper extends QBMapper {
 				->set('url', $qb->createNamedParameter($route['url']))
 				->set('verb', $qb->createNamedParameter($route['verb']))
 				->set('access_level', $qb->createNamedParameter($route['access_level']))
-				->set('headers_to_include', $qb->createNamedParameter($route['headers_to_include']))
+				->set('headers_to_exclude', $qb->createNamedParameter($route['headers_to_exclude']))
 				->where($qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid())));
 			$count += $qb->executeStatement();
 		}

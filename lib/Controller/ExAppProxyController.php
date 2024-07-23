@@ -248,7 +248,7 @@ class ExAppProxyController extends Controller {
 		$headersToExclude = [];
 		foreach ($exApp->getRoutes() as $route) {
 			if (preg_match($route['url'], $exAppRoute) === 1) {
-				$headersToExclude = json_decode($route['headers_to_include'], true);
+				$headersToExclude = json_decode($route['headers_to_exclude'], true);
 				break;
 			}
 		}

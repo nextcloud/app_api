@@ -45,7 +45,7 @@ class Version3000Date20240715170800 extends SimpleMigrationStep {
 				'notnull' => true,
 				'default' => 0, // 0 = user, 1 = admin, 2 = public
 			]);
-			$table->addColumn('headers_to_include', 'string', [
+			$table->addColumn('headers_to_exclude', 'string', [
 				'notnull' => false,
 				'length' => 512,
 			]);
