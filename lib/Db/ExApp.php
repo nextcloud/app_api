@@ -136,8 +136,6 @@ class ExApp extends Entity implements JsonSerializable {
 		}
 		if (isset($params['routes'])) {
 			$this->setRoutes($params['routes']);
-		} else {
-			$this->setRoutes([]);
 		}
 	}
 
