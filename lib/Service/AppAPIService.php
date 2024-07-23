@@ -172,7 +172,7 @@ class AppAPIService {
 		$options['http_errors'] = false; // do not throw exceptions on 4xx and 5xx responses
 		if (!empty($auth)) {
 			$options['auth'] = $auth;
-			$options['headers'] = $this->swapAuthenticationHeader($options['headers']);
+			$options['headers'] = $this->swapAuthorizationHeader($options['headers']);
 		}
 		if (!isset($options['timeout'])) {
 			$options['timeout'] = 3;
@@ -222,7 +222,7 @@ class AppAPIService {
 		$options['http_errors'] = false; // do not throw exceptions on 4xx and 5xx responses
 		if (!empty($auth)) {
 			$options['auth'] = $auth;
-			$options['headers'] = $this->swapAuthenticationHeader($options['headers']);
+			$options['headers'] = $this->swapAuthorizationHeader($options['headers']);
 		}
 		if (!isset($options['timeout'])) {
 			$options['timeout'] = 3;
@@ -241,14 +241,18 @@ class AppAPIService {
 
 	/**
 	 * This is required for AppAPI Docker Socket Proxy, as the Basic Auth is already in use by HaProxy,
-	 * and the incoming request's Authentication is replaced with X-Original-Authentication header
+	 * and the incoming request's Authorization is replaced with X-Original-Authorization header
 	 * after HaProxy authenticated.
 	 *
 	 * @since AppAPI 3.0.0
 	 */
-	private function swapAuthenticationHeader(array $headers): array {
-		if (isset($headers['Authorization'])) {
-			$headers['X-Original-Authentication'] = $headers['Authorization'];
+
+	private function swapAuthorizationHeader(array $headers): array {
+		foreach ($headers as $key => $value) {
+			if (strtoupper($key) === 'AUTHORIZATION') {
+				$headers['X-Original-Authorization'] = $value;
+				break;
+			}
 		}
 		return $headers;
 	}

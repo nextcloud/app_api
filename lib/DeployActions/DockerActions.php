@@ -527,7 +527,8 @@ class DockerActions implements IDeployActions {
 		} else {
 			$exAppHost = $appId;
 		}
-		if (isset($deployConfig['haproxy_password']) && $deployConfig['haproxy_password'] !== '') {
+		if ($protocol == 'https' && isset($deployConfig['haproxy_password']) && $deployConfig['haproxy_password'] !== '') {
+			// we only set haproxy auth for remote installations, when all requests come through HaProxy.
 			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
 		}
 		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);
