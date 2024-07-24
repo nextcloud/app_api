@@ -224,22 +224,21 @@ class ExAppProxyController extends Controller {
 	}
 
 	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $other): bool {
-		$routes = $exApp->getRoutes();
-		foreach ($routes as $route) {
-			// check if the $route['url'] is regex and matches the $other route
-			if (preg_match($route['url'], $other) === 1
-				&& strtolower($route['verb']) === strtolower($this->request->getMethod())) {
+		foreach ($exApp->getRoutes() as $route) {
+			$matchesUrlPattern = preg_match('/' . $route['url'] . '/i', $other) === 1;
+			$matchesVerb = str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()));
+			if ($matchesUrlPattern && $matchesVerb) {
 				return $this->passesExAppProxyRouteAccessLevelCheck($route['access_level']);
 			}
 		}
 		return false;
 	}
 
-	private function passesExAppProxyRouteAccessLevelCheck(string $accessLevel): bool {
+	private function passesExAppProxyRouteAccessLevelCheck(int $accessLevel): bool {
 		return match ($accessLevel) {
-			ExAppRouteAccessLevel::ADMIN => $this->userId !== null && $this->groupManager->isAdmin($this->userId),
-			ExAppRouteAccessLevel::USER => $this->userId !== null,
-			ExAppRouteAccessLevel::PUBLIC => true,
+			ExAppRouteAccessLevel::ADMIN->value => $this->userId !== null && $this->groupManager->isAdmin($this->userId),
+			ExAppRouteAccessLevel::USER->value => $this->userId !== null,
+			ExAppRouteAccessLevel::PUBLIC->value => true,
 			default => false,
 		};
 	}

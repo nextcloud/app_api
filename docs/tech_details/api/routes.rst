@@ -27,7 +27,7 @@ Params
         "routes": [
             {
                 "url": "/regex-route-on-ex-app-side",
-                "verb": "GET, POST, PUT, DELETE",
+                "verb": "GET,POST,PUT,DELETE",
                 "access_level": "0/1/2",
                 "headers_to_exclude": "json_encoded string of array of strings ['headerName1', 'headerName2', ...]",
             }
@@ -37,7 +37,7 @@ Params
 where the fields are:
 
 - ``url``: the route to be registered on the ExApp side, can be a regex
-- ``verb``: the HTTP verb that the route will accept
+- ``verb``: the HTTP verb that the route will accept, can be a comma separated list of verbs
 - ``access_level``: the numeric access level required to access the route, 0 - public route, 1 - Nextcloud user auth required, 2 - admin user required
 - ``headers_to_exclude``: a json encoded string of an array of strings, the headers that the ExApp wants to be excluded from the request to it
 

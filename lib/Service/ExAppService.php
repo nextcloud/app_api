@@ -84,8 +84,8 @@ class ExAppService {
 			$this->exAppMapper->insert($exApp);
 			$exApp = $this->exAppMapper->findByAppId($appInfo['id']);
 			$this->cache->remove('/ex_apps');
-			if (isset($appInfo['routes'])) {
-				$this->registerExAppRoutes($exApp, $appInfo['routes']);
+			if (isset($appInfo['external-app']['routes'])) {
+				$exApp->setRoutes($this->registerExAppRoutes($exApp, $appInfo['external-app']['routes'])->getRoutes() ?? []);
 			}
 			return $exApp;
 		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
@@ -255,7 +255,7 @@ class ExAppService {
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'scopes', 'system_app', 'translations_folder'] as $key) {
+			foreach (['docker-install', 'scopes', 'system_app', 'translations_folder', 'routes'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);
@@ -367,7 +367,8 @@ class ExAppService {
 			$exApp->setRoutes($routes);
 			$this->resetCaches();
 			return $exApp;
-		} catch (Exception) {
+		} catch (Exception $e) {
+			$this->logger->debug(sprintf('Error while registering ExApp %s routes: %s. Routes: %s', $exApp->getAppid(), $e->getMessage(), json_encode($routes)));
 			return null;
 		}
 	}
@@ -393,5 +394,6 @@ class ExAppService {
 		} catch (Exception) {
 			return null;
 		}
+		return null;
 	}
 }

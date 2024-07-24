@@ -121,7 +121,6 @@ class ExAppMapper extends QBMapper {
 			}
 			if (isset($row['url'])) {
 				$route = [
-					'appid' => $row['appid'],
 					'url' => $row['url'],
 					'verb' => $row['verb'],
 					'access_level' => $row['access_level'],
@@ -194,22 +193,19 @@ class ExAppMapper extends QBMapper {
 	 */
 	public function registerExAppRoutes(ExApp $exApp, array $routes): int {
 		$qb = $this->db->getQueryBuilder();
-		$qb->insert('ex_apps_routes')
-			->values([
-				'appid' => $qb->createNamedParameter($exApp->getAppid()),
-				'url' => $qb->createNamedParameter(''),
-				'verb' => $qb->createNamedParameter(''),
-				'access_level' => $qb->createNamedParameter(''),
-				'headers_to_exclude' => $qb->createNamedParameter(''),
-			]);
+		$count = 0;
 		foreach ($routes as $route) {
-			$qb->setValue('url', $qb->createNamedParameter($route['url']));
-			$qb->setValue('verb', $qb->createNamedParameter($route['verb']));
-			$qb->setValue('access_level', $qb->createNamedParameter($route['access_level']));
-			$qb->setValue('headers_to_exclude', $qb->createNamedParameter($route['headers_to_exclude']));
-			$qb->executeStatement();
+			$qb->insert('ex_apps_routes')
+				->values([
+					'appid' => $qb->createNamedParameter($exApp->getAppid()),
+					'url' => $qb->createNamedParameter($route['url']),
+					'verb' => $qb->createNamedParameter($route['verb']),
+					'access_level' => $qb->createNamedParameter($route['access_level']),
+					'headers_to_exclude' => $qb->createNamedParameter($route['headers_to_exclude']),
+				]);
+			$count += $qb->executeStatement();
 		}
-		return count($routes);
+		return $count;
 	}
 
 	/**

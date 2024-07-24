@@ -154,6 +154,16 @@ class Register extends Command {
 			}
 		}
 
+		if (!empty($appInfo['external-app']['routes'])
+			&& count($exApp->getRoutes()) !== count($appInfo['external-app']['routes'])) {
+			$this->logger->error(sprintf('Error during registering ExApp %s routes.', $appId));
+			if ($outputConsole) {
+				$output->writeln(sprintf('Error during registering ExApp %s routes.', $appId));
+			}
+			$this->_unregisterExApp($appId, $isTestDeployMode);
+			return 3;
+		}
+
 		if (!empty($appInfo['external-app']['translations_folder'])) {
 			$result = $this->exAppArchiveFetcher->installTranslations($appId, $appInfo['external-app']['translations_folder']);
 			if ($result) {

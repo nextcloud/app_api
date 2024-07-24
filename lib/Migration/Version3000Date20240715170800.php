@@ -39,7 +39,7 @@ class Version3000Date20240715170800 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('verb', 'string', [
 				'notnull' => true,
-				'length' => 16,
+				'length' => 64,
 			]);
 			$table->addColumn('access_level', 'integer', [
 				'notnull' => true,
