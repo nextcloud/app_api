@@ -174,6 +174,8 @@ OC.L10N.register(
     "Updates" : "Nuashonruithe",
     "Featured apps" : "Aipeanna faoi thrácht",
     "Supported apps" : "Aipeanna tacaithe",
+    "Action request sent to ExApp" : "Iarratas gnímh seolta chuig ExApp",
+    "Error while sending File action request to ExApp" : "Earráid agus iarratas gnímh Comhad á sheoladh chuig ExApp",
     "manual-install apps cannot be updated" : "Ní féidir aipeanna le suiteáil láimhe a nuashonrú",
     "{progress}% Deploying" : "{dul chun cinn } % Ag imscaradh",
     "{progress}% Initializing" : "{dul chun cinn } % á thúsú",

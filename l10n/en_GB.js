@@ -174,6 +174,8 @@ OC.L10N.register(
     "Updates" : "Updates",
     "Featured apps" : "Featured apps",
     "Supported apps" : "Supported apps",
+    "Action request sent to ExApp" : "Action request sent to ExApp",
+    "Error while sending File action request to ExApp" : "Error while sending File action request to ExApp",
     "manual-install apps cannot be updated" : "manual-install apps cannot be updated",
     "{progress}% Deploying" : "{progress}% Deploying",
     "{progress}% Initializing" : "{progress}% Initializing",
