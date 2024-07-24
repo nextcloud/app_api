@@ -163,7 +163,7 @@ class ExApp extends Entity implements JsonSerializable {
 }
 
 enum ExAppRouteAccessLevel: int {
-	case USER = 0;
-	case ADMIN = 1;
-	case PUBLIC = 2;
+	case PUBLIC = 0;
+	case USER = 1;
+	case ADMIN = 2;
 }

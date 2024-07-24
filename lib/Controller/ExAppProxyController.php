@@ -223,9 +223,9 @@ class ExAppProxyController extends Controller {
 		return $multipart;
 	}
 
-	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $other): bool {
+	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): bool {
 		foreach ($exApp->getRoutes() as $route) {
-			$matchesUrlPattern = preg_match('/' . $route['url'] . '/i', $other) === 1;
+			$matchesUrlPattern = preg_match('/' . $route['url'] . '/i', $exAppRoute) === 1;
 			$matchesVerb = str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()));
 			if ($matchesUrlPattern && $matchesVerb) {
 				return $this->passesExAppProxyRouteAccessLevelCheck($route['access_level']);
@@ -236,9 +236,9 @@ class ExAppProxyController extends Controller {
 
 	private function passesExAppProxyRouteAccessLevelCheck(int $accessLevel): bool {
 		return match ($accessLevel) {
-			ExAppRouteAccessLevel::ADMIN->value => $this->userId !== null && $this->groupManager->isAdmin($this->userId),
-			ExAppRouteAccessLevel::USER->value => $this->userId !== null,
 			ExAppRouteAccessLevel::PUBLIC->value => true,
+			ExAppRouteAccessLevel::USER->value => $this->userId !== null,
+			ExAppRouteAccessLevel::ADMIN->value => $this->userId !== null && $this->groupManager->isAdmin($this->userId),
 			default => false,
 		};
 	}
@@ -246,7 +246,9 @@ class ExAppProxyController extends Controller {
 	private function buildHeadersWithExclude(ExApp $exApp, string $exAppRoute, array $headers): array {
 		$headersToExclude = [];
 		foreach ($exApp->getRoutes() as $route) {
-			if (preg_match($route['url'], $exAppRoute) === 1) {
+			$matchesUrlPattern = preg_match('/' . $route['url'] . '/i', $exAppRoute) === 1;
+			$matchesVerb = str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()));
+			if ($matchesUrlPattern && $matchesVerb) {
 				$headersToExclude = json_decode($route['headers_to_exclude'], true);
 				break;
 			}
