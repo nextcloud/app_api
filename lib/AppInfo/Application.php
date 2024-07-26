@@ -36,6 +36,7 @@ use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeRenamedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
+use OCP\IConfig;
 use OCP\IGroupManager;
 use OCP\IL10N;
 use OCP\INavigationManager;
@@ -93,10 +94,13 @@ class Application extends App implements IBootstrap {
 			$translationService = $container->get(TranslationService::class);
 			$translationService->registerExAppTranslationProviders($context, $container->getServer());
 
-			/** @var TaskProcessingService $taskProcessingService */
-			$taskProcessingService = $container->get(TaskProcessingService::class);
-			$taskProcessingService->registerExAppTaskProcessingProviders($context, $container->getServer());
-			$taskProcessingService->registerExAppTaskProcessingCustomTaskTypes($context);
+			$config = $this->getContainer()->query(IConfig::class);
+			if (version_compare($config->getSystemValueString('version', '0.0.0'), '30.0', '>=')) {
+				/** @var TaskProcessingService $taskProcessingService */
+				$taskProcessingService = $container->get(TaskProcessingService::class);
+				$taskProcessingService->registerExAppTaskProcessingProviders($context, $container->getServer());
+				$taskProcessingService->registerExAppTaskProcessingCustomTaskTypes($context);
+			}
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 		$context->registerEventListener(NodeCreatedEvent::class, FileEventsListener::class);
