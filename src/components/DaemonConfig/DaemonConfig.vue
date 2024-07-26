@@ -24,6 +24,12 @@
 						<TestTube :size="20" />
 					</template>
 				</NcActionButton>
+				<NcActionButton :close-after-click="true" @click="showDaemonConfigDetailsModal()">
+					{{ t('app_api', 'Edit') }}
+					<template #icon>
+						<Pencil :size="20" />
+					</template>
+				</NcActionButton>
 				<NcActionButton icon="icon-delete" :close-after-click="true" @click="deleteDaemonConfig()">
 					{{ t('app_api', 'Delete') }}
 					<template #icon>
@@ -63,6 +69,7 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import CheckBold from 'vue-material-design-icons/CheckBold.vue'
 import TestTube from 'vue-material-design-icons/TestTube.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
 
 import DaemonConfigDetailsModal from './DaemonConfigDetailsModal.vue'
 import ConfirmDaemonDeleteModal from './ConfirmDaemonDeleteModal.vue'
@@ -79,6 +86,7 @@ export default {
 		DaemonTestDeploy,
 		NcLoadingIcon,
 		TestTube,
+		Pencil,
 	},
 	props: {
 		daemon: {
