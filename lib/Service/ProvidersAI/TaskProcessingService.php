@@ -175,6 +175,30 @@ class TaskProcessingService {
 			public function getOptionalOutputShape(): array {
 				return [];
 			}
+
+			public function getInputShapeEnumValues(): array {
+				return [];
+			}
+
+			public function getInputShapeDefaults(): array {
+				return [];
+			}
+
+			public function getOptionalInputShapeEnumValues(): array {
+				return [];
+			}
+
+			public function getOptionalInputShapeDefaults(): array {
+				return [];
+			}
+
+			public function getOutputShapeEnumValues(): array {
+				return [];
+			}
+
+			public function getOptionalOutputShapeEnumValues(): array {
+				return [];
+			}
 		};
 	}
 
