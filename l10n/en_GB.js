@@ -82,6 +82,7 @@ OC.L10N.register(
     "Set as default" : "Set as default",
     "Test deploy" : "Test deploy",
     "Edit" : "Edit",
+    "Save" : "Save",
     "\"manual-install\" Deploy Daemon cannot be set as default" : "\"manual-install\" Deploy Daemon cannot be set as default",
     "Failed to save admin options. Check the logs" : "Failed to save admin options. Check the logs",
     "Deploy daemon config details" : "Deploy daemon config details",

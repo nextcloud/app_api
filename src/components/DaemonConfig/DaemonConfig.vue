@@ -24,7 +24,7 @@
 						<TestTube :size="20" />
 					</template>
 				</NcActionButton>
-				<NcActionButton :close-after-click="true" @click="showDaemonConfigDetailsModal()">
+				<NcActionButton :close-after-click="true" @click="showEditModal()">
 					{{ t('app_api', 'Edit') }}
 					<template #icon>
 						<Pencil :size="20" />
@@ -56,6 +56,12 @@
 				:get-all-daemons="getAllDaemons"
 				:daemon="daemon" />
 		</template>
+		<RegisterDaemonConfigModal
+			:show.sync="showEditDialog"
+			:daemons="daemons"
+			:get-all-daemons="getAllDaemons"
+			:daemon="daemon"
+			:is-default-daemon="isDefault" />
 	</div>
 </template>
 
@@ -74,10 +80,12 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
 import DaemonConfigDetailsModal from './DaemonConfigDetailsModal.vue'
 import ConfirmDaemonDeleteModal from './ConfirmDaemonDeleteModal.vue'
 import DaemonTestDeploy from './DaemonTestDeploy.vue'
+import RegisterDaemonConfigModal from './RegisterDaemonConfigModal.vue'
 
 export default {
 	name: 'DaemonConfig',
 	components: {
+		RegisterDaemonConfigModal,
 		NcListItem,
 		NcActionButton,
 		CheckBold,
@@ -103,6 +111,11 @@ export default {
 			type: Function,
 			required: true,
 		},
+		daemons: {
+			type: Array,
+			required: true,
+			default: () => [],
+		},
 		getAllDaemons: {
 			type: Function,
 			required: true,
@@ -116,6 +129,7 @@ export default {
 			showDeleteDialog: false,
 			removeExAppsOnDaemonDelete: false,
 			showTestDeployDialog: false,
+			showEditDialog: false,
 		}
 	},
 	computed: {
@@ -165,6 +179,9 @@ export default {
 		},
 		showTestDeployModal() {
 			this.showTestDeployDialog = true
+		},
+		showEditModal() {
+			this.showEditDialog = true
 		},
 	},
 }

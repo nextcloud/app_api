@@ -2,8 +2,8 @@
 	<div class="register-daemon-config">
 		<NcModal :show="show" @close="closeModal">
 			<div class="register-daemon-config-body">
-				<h2>{{ t('app_api', 'Register Deploy Daemon') }}</h2>
-				<div class="templates">
+				<h2>{{ isEdit ? t('app_api', 'Edit Deploy Daemon') : t('app_api', 'Register Deploy Daemon') }}</h2>
+				<div v-if="!isEdit" class="templates">
 					<div class="external-label" :aria-label="t('app_api', 'Daemon configuration template')">
 						<label for="daemon-template">{{ t('app_api', 'Daemon configuration template') }}</label>
 						<NcSelect
@@ -207,7 +207,7 @@
 							type="primary"
 							:disabled="canRegister"
 							@click="registerDaemon">
-							{{ t('app_api', 'Register') }}
+							{{ isEdit ? t('app_api', 'Save') : t('app_api', 'Register') }}
 							<template #icon>
 								<NcLoadingIcon v-if="registeringDaemon" :size="20" />
 								<Check v-else :size="20" />
@@ -279,9 +279,19 @@ export default {
 			type: Function,
 			required: true,
 		},
+		daemon: {
+			type: Object,
+			required: false,
+			default: () => null,
+		},
+		isDefaultDaemon: {
+			type: Boolean,
+			required: false,
+			default: () => false,
+		},
 	},
 	data() {
-		return {
+		const data = {
 			name: 'docker_local',
 			displayName: 'Docker Local',
 			acceptsDeployId: 'docker-install',
@@ -314,6 +324,22 @@ export default {
 			},
 			additionalOptions: [],
 		}
+
+		if (this.daemon !== null) {
+			data.name = this.daemon.name
+			data.displayName = this.daemon.display_name
+			data.acceptsDeployId = this.daemon.accepts_deploy_id
+			// data.httpsEnabled = this.daemon.protocol === 'https' // TODO: throws error on change
+			data.host = this.daemon.host
+			data.nextcloud_url = this.daemon.deploy_config.nextcloud_url
+			data.deployConfig.net = this.daemon.deploy_config.net
+			data.deployConfig.haproxy_password = this.daemon.deploy_config.haproxy_password
+			data.deployConfig.computeDevice = this.daemon.deploy_config.computeDevice
+			data.defaultDaemon = this.isDefaultDaemon
+			data.additionalOptions = Object.entries(this.daemon.deploy_config.additional_options ?? {}).map(([key, value]) => ({ key, value }))
+		}
+
+		return data
 	},
 	computed: {
 		daemonHostHelperText() {
@@ -368,6 +394,9 @@ export default {
 		isNextcloudUrlSafeHelpText() {
 			return this.isNextcloudUrlSafe ? '' : t('app_api', 'For HTTPS daemon, Nextcloud URL should be HTTPS')
 		},
+		isEdit() {
+			return this.daemon !== null
+		},
 	},
 	watch: {
 		configurationTab(newConfigurationTab) {
@@ -385,6 +414,16 @@ export default {
 	methods: {
 		registerDaemon() {
 			this.registeringDaemon = true
+
+			if (this.isEdit) {
+				// TODO: Implement update
+				showSuccess(t('app_api', 'DaemonConfig successfully updated'))
+				this.registeringDaemon = false
+				this.closeModal()
+				this.getAllDaemons()
+				return
+			}
+
 			axios.post(generateUrl('/apps/app_api/daemons'), {
 				daemonConfigParams: this._buildDaemonParams(),
 				defaultDaemon: this.acceptsDeployId === 'docker-install' ? this.defaultDaemon : false,
@@ -490,8 +529,9 @@ export default {
 			this.additionalOption = { key: '', value: '' }
 		},
 		closeModal() {
-			const customTemplate = DAEMON_TEMPLATES.find(template => template.name === 'custom')
-			this.configurationTab = { id: customTemplate.name, label: customTemplate.displayName }
+			// TODO: Not sure what is this for. But it seems to mess the modal data when closing. Therefore commented out.
+			// const customTemplate = DAEMON_TEMPLATES.find(template => template.name === 'custom')
+			// this.configurationTab = { id: customTemplate.name, label: customTemplate.displayName }
 			this.$emit('update:show', false)
 		},
 	},

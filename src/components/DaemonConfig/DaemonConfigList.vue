@@ -8,6 +8,7 @@
 					:daemon="daemon"
 					:is-default="defaultDaemon === daemon.name"
 					:save-options="saveOptions"
+					:daemons="daemons"
 					:get-all-daemons="getAllDaemons" />
 			</ul>
 			<NcEmptyContent

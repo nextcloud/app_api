@@ -45,6 +45,7 @@ OC.L10N.register(
 	"Set as default" : "Als Standard einstellen",
 	"Test deploy" : "Testen der Bereitstellung",
 	"Edit" : "Bearbeiten",
+	"Save" : "Speichern",
     "Host" : "Host",
     "Nextcloud URL" : "Nextcloud-URL",
     "Enabled" : "Aktiviert",
