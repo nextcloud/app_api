@@ -358,7 +358,7 @@ export default {
 			return this.acceptsDeployId !== 'manual-install'
 		},
 		isDaemonNameValid() {
-			return this.daemons.some(daemon => daemon.name === this.name)
+			return this.daemons.some(daemon => daemon.name === this.name && daemon.name !== this.daemon?.name)
 		},
 		isDaemonNameValidHelperText() {
 			return this.isDaemonNameValid === true ? t('app_api', 'Daemon with this name already exists') : ''
