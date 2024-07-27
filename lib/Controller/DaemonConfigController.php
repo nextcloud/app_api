@@ -58,11 +58,11 @@ class DaemonConfigController extends ApiController {
 	}
 
 	#[NoCSRFRequired]
-	public function updateDaemonConfig(string $name, array $params): Response {
+	public function updateDaemonConfig(string $name, array $daemonConfigParams): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
-		$updatedDaemonConfig = new DaemonConfig($params);
+		$updatedDaemonConfig = new DaemonConfig($daemonConfigParams);
 		$updatedDaemonConfig->setId($daemonConfig->getId());
-		$updatedDaemonConfig = $this->daemonConfigService->updateDaemonConfig($daemonConfig);
+		$updatedDaemonConfig = $this->daemonConfigService->updateDaemonConfig($updatedDaemonConfig);
 		return new JSONResponse([
 			'success' => $updatedDaemonConfig !== null,
 			'daemonConfig' => $updatedDaemonConfig,

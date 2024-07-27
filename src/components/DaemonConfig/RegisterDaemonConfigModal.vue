@@ -206,7 +206,7 @@
 						<NcButton
 							type="primary"
 							:disabled="canRegister"
-							@click="registerDaemon">
+							@click="isEdit ? updateDaemon() : registerDaemon()">
 							{{ isEdit ? t('app_api', 'Save') : t('app_api', 'Register') }}
 							<template #icon>
 								<NcLoadingIcon v-if="registeringDaemon" :size="20" />
@@ -415,15 +415,6 @@ export default {
 		registerDaemon() {
 			this.registeringDaemon = true
 
-			if (this.isEdit) {
-				// TODO: Implement update
-				showSuccess(t('app_api', 'DaemonConfig successfully updated'))
-				this.registeringDaemon = false
-				this.closeModal()
-				this.getAllDaemons()
-				return
-			}
-
 			axios.post(generateUrl('/apps/app_api/daemons'), {
 				daemonConfigParams: this._buildDaemonParams(),
 				defaultDaemon: this.acceptsDeployId === 'docker-install' ? this.defaultDaemon : false,
@@ -442,6 +433,32 @@ export default {
 					this.registeringDaemon = false
 					console.debug(err)
 					showError(t('app_api', 'Failed to register DaemonConfig. Check the logs'))
+				})
+		},
+		updateDaemon() {
+			if (this.isEdit) {
+				console.debug('Logic error. Cannot update daemon if it\'s not set')
+			}
+
+			this.registeringDaemon = true
+
+			axios.put(generateUrl(`/apps/app_api/daemons/${this.daemon.name}`), {
+				daemonConfigParams: this._buildDaemonParams(),
+			})
+				.then(res => {
+					this.registeringDaemon = false
+					if (res.data.success) {
+						showSuccess(t('app_api', 'DaemonConfig successfully updated'))
+						this.closeModal()
+						this.getAllDaemons()
+					} else {
+						showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
+					}
+				})
+				.catch(err => {
+					this.registeringDaemon = false
+					console.debug(err)
+					showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
 				})
 		},
 		verifyDaemonConnection() {
