@@ -66,13 +66,14 @@
 					</div>
 					<div class="row">
 						<NcCheckboxRadioSwitch
-							v-if="isNotManualInstall"
+							v-if="isNotManualInstall && !isEdit"
 							id="default-deploy-config"
 							:checked.sync="defaultDaemon"
 							:placeholder="t('app_api', 'Set daemon as default')"
 							:aria-label="t('app_api', 'Set daemon as default')">
 							{{ t('app_api', 'Set as default daemon') }}
 						</NcCheckboxRadioSwitch>
+						<div v-if="isEdit" />
 						<NcCheckboxRadioSwitch v-if="isNotManualInstall"
 							id="https-enabled"
 							:checked.sync="httpsEnabled"
@@ -329,7 +330,9 @@ export default {
 			data.name = this.daemon.name
 			data.displayName = this.daemon.display_name
 			data.acceptsDeployId = this.daemon.accepts_deploy_id
-			// data.httpsEnabled = this.daemon.protocol === 'https' // TODO: throws error on change
+			// TODO: Investigate why this is not working properly.
+			// Throws error on change if value is "true". Seems to be unrelated to this change. Also reproducible with httpsEnabled = true as default.
+			data.httpsEnabled = this.daemon.protocol === 'https'
 			data.host = this.daemon.host
 			data.nextcloud_url = this.daemon.deploy_config.nextcloud_url
 			data.deployConfig.net = this.daemon.deploy_config.net
