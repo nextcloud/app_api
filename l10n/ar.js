@@ -175,6 +175,7 @@ OC.L10N.register(
     "Featured apps" : "تطبيقات مُميّزة",
     "Supported apps" : "التطبيقات المدعومة",
     "Action request sent to ExApp" : "طلب بالإجراء تمّ إرساله إلى التطبيق الخارجي ExApp",
+    "Error while sending File action request to ExApp" : "حدث خطأ أثناء إرسال إجراء على الملفات إلى التطبيق الخارجي ExApp",
     "manual-install apps cannot be updated" : "التطبيقات المثبية يدويّاً لا يمكن تحديثها",
     "{progress}% Deploying" : "{progress}% في طور النشر",
     "{progress}% Initializing" : "{progress}% تحت التحضير",
