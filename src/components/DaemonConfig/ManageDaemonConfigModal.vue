@@ -250,7 +250,7 @@ import UnfoldMoreHorizontal from 'vue-material-design-icons/UnfoldMoreHorizontal
 import { DAEMON_TEMPLATES, DAEMON_COMPUTE_DEVICES } from '../../constants/daemonTemplates.js'
 
 export default {
-	name: 'RegisterDaemonConfigModal',
+	name: 'ManageDaemonConfigModal',
 	components: {
 		NcLoadingIcon,
 		NcModal,

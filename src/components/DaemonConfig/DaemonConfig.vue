@@ -56,7 +56,7 @@
 				:get-all-daemons="getAllDaemons"
 				:daemon="daemon" />
 		</template>
-		<RegisterDaemonConfigModal
+		<ManageDaemonConfigModal
 			:show.sync="showEditDialog"
 			:daemons="daemons"
 			:get-all-daemons="getAllDaemons"
@@ -80,12 +80,12 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
 import DaemonConfigDetailsModal from './DaemonConfigDetailsModal.vue'
 import ConfirmDaemonDeleteModal from './ConfirmDaemonDeleteModal.vue'
 import DaemonTestDeploy from './DaemonTestDeploy.vue'
-import RegisterDaemonConfigModal from './RegisterDaemonConfigModal.vue'
+import ManageDaemonConfigModal from './ManageDaemonConfigModal.vue'
 
 export default {
 	name: 'DaemonConfig',
 	components: {
-		RegisterDaemonConfigModal,
+		ManageDaemonConfigModal,
 		NcListItem,
 		NcActionButton,
 		CheckBold,
