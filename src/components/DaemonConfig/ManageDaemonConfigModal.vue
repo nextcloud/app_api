@@ -429,8 +429,16 @@ export default {
 			this.prevNet = this.deployConfig.net
 			this.deployConfig.net = newHttpsEnabled ? 'host' : this.prevNet
 		},
+		show(newShow) {
+			if (newShow === true) {
+				this.resetData()
+			}
+		},
 	},
 	methods: {
+		resetData() {
+			Object.assign(this.$data, this.$options.data.apply(this))
+		},
 		registerDaemon() {
 			this.registeringDaemon = true
 
@@ -523,7 +531,7 @@ export default {
 		},
 		setupFormConfiguration(templateName) {
 			const template = Object.assign({}, DAEMON_TEMPLATES.find(template => template.name === templateName.id))
-			if (!template) {
+			if (Object.keys(template).length === 0) {
 				return
 			}
 			this.name = template.name
@@ -565,9 +573,6 @@ export default {
 			this.additionalOption = { key: '', value: '' }
 		},
 		closeModal() {
-			// TODO: Not sure what is this for. But it seems to mess the modal data when closing. Therefore commented out.
-			// const customTemplate = DAEMON_TEMPLATES.find(template => template.name === 'custom')
-			// this.configurationTab = { id: customTemplate.name, label: customTemplate.displayName }
 			this.$emit('update:show', false)
 		},
 	},
