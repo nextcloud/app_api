@@ -19,6 +19,7 @@
 						<label for="daemon-name">{{ t('app_api', 'Name') }}</label>
 						<NcInputField
 							id="daemon-name"
+							:disabled="isEdit"
 							:value.sync="name"
 							:placeholder="t('app_api', 'Unique Deploy Daemon Name')"
 							:aria-label="t('app_api', 'Unique Deploy Daemon Name')"
@@ -38,7 +39,7 @@
 						<NcSelect
 							id="daemon-deploy-id"
 							v-model="acceptsDeployId"
-							:disabled="configurationTab.id === 'manual_install'"
+							:disabled="configurationTab.id === 'manual_install' || isEdit"
 							:options="deployMethods"
 							:label-outside="true"
 							:placeholder="t('app_api', 'Select daemon deploy method')" />
@@ -138,11 +139,12 @@
 										<div class="additional-option">
 											<NcInputField
 												:id="option.key"
+												:disabled="isEdit"
 												:value.sync="option.value"
 												:placeholder="option.value"
 												:aria-label="option.value"
 												style="margin: 0 5px 0 0; width: fit-content;" />
-											<NcButton type="tertiary" @click="removeAdditionalOption(option, index)">
+											<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
 												<template #icon>
 													<Close :size="20" />
 												</template>
@@ -152,7 +154,7 @@
 								</div>
 							</template>
 
-							<div class="additional-options">
+							<div v-if="!isEdit" class="additional-options">
 								<div style="display: flex; justify-content: flex-end;">
 									<NcButton type="tertiary" @click="addAdditionalOption">
 										<template #icon>
