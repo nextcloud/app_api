@@ -330,8 +330,6 @@ export default {
 			data.name = this.daemon.name
 			data.displayName = this.daemon.display_name
 			data.acceptsDeployId = this.daemon.accepts_deploy_id
-			// TODO: Investigate why this is not working properly.
-			// Throws error on change if value is "true". Seems to be unrelated to this change. Also reproducible with httpsEnabled = true as default.
 			data.httpsEnabled = this.daemon.protocol === 'https'
 			data.host = this.daemon.host
 			data.nextcloud_url = this.daemon.deploy_config.nextcloud_url
@@ -428,12 +426,8 @@ export default {
 			this.setupFormConfiguration(newConfigurationTab)
 		},
 		httpsEnabled(newHttpsEnabled) {
-			if (newHttpsEnabled) {
-				this.prevNet = this.deployConfig.net
-				this.deployConfig.net = 'host'
-			} else {
-				this.deployConfig.net = this.prevNet
-			}
+			this.prevNet = this.deployConfig.net
+			this.deployConfig.net = newHttpsEnabled ? 'host' : this.prevNet
 		},
 	},
 	methods: {
