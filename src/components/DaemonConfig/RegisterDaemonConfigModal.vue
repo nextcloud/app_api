@@ -57,8 +57,8 @@
 						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
 						<NcInputField
 							id="nextcloud-url"
-							:helper-text="isNextcloudUrlSafeHelpText"
-							:input-class="!isNextcloudUrlSafe ? 'text-warning' : ''"
+							:helper-text="getNextcloudUrlHelperText"
+							:input-class="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
 							:value.sync="nextcloud_url"
 							style="max-width: 70%;"
 							:placeholder="t('app_api', 'Nextcloud URL')"
@@ -101,7 +101,8 @@
 									:disabled="daemonProtocol === 'https'"
 									:placeholder="t('app_api', 'Docker network name')"
 									:aria-label="t('app_api', 'Docker network name')"
-									:helper-text="networkHelperText" />
+									:helper-text="getNetworkHelperText || t('app_api', 'Docker network name')"
+									:input-class="getNetworkHelperText !== '' ? 'text-warning' : ''" />
 							</div>
 							<div v-if="['http', 'https'].includes(daemonProtocol)"
 								class="external-label"
@@ -120,10 +121,10 @@
 								v-model="deployConfig.computeDevice"
 								:options="computeDevices"
 								:input-label="t('app_api', 'Compute device')" />
-							<p v-if="deployConfig.computeDevice.id !== 'cpu'"
+							<p v-if="getComputeDeviceHelperText !== ''"
 								class="hint"
 								:aria-label="t('app_api', 'GPUs support enabled hint')">
-								{{ t('app_api', 'All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker.') }}
+								{{ getComputeDeviceHelperText }}
 							</p>
 
 							<template v-if="additionalOptions.length > 0">
@@ -376,11 +377,16 @@ export default {
 		haProxyPasswordHelperText() {
 			return this.isHaProxyPasswordValid ? t('app_api', 'AppAPI Docker Socket Proxy authentication password') : t('app_api', 'Password must be at least 12 characters long')
 		},
-		networkHelperText() {
+		getNetworkHelperText() {
 			if (this.httpsEnabled) {
 				return t('app_api', 'With https enabled network is set to host')
 			}
-			return t('app_api', 'Docker network name')
+
+			if (this.isEdit && this.deployConfig.net !== this.daemon.deploy_config.net) {
+				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+			}
+
+			return ''
 		},
 		canRegister() {
 			return this.isDaemonNameValid === true || this.isHaProxyPasswordValid === false
@@ -388,14 +394,31 @@ export default {
 		isAdditionalOptionValid() {
 			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
 		},
-		isNextcloudUrlSafe() {
-			if (this.httpsEnabled) {
-				return this.nextcloud_url.startsWith('https://')
+		getNextcloudUrlHelperText() {
+			if (!/^https?:\/\//.test(this.nextcloud_url)) {
+				return t('app_api', 'URL should start with http:// or https://')
 			}
-			return this.nextcloud_url.startsWith('http://') || this.nextcloud_url.startsWith('https://')
+
+			if (this.httpsEnabled && !this.nextcloud_url.startsWith('https://')) {
+				return t('app_api', 'For HTTPS daemon, Nextcloud URL should be HTTPS')
+			}
+
+			if (this.isEdit && this.nextcloud_url !== this.daemon.deploy_config.nextcloud_url) {
+				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+			}
+
+			return ''
 		},
-		isNextcloudUrlSafeHelpText() {
-			return this.isNextcloudUrlSafe ? '' : t('app_api', 'For HTTPS daemon, Nextcloud URL should be HTTPS')
+		getComputeDeviceHelperText() {
+			if (this.isEdit && this.deployConfig.computeDevice.id !== this.daemon.deploy_config.computeDevice.id) {
+				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+			}
+
+			if (this.deployConfig.computeDevice.id !== 'cpu') {
+				return t('app_api', 'All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker.')
+			}
+
+			return ''
 		},
 		isEdit() {
 			return this.daemon !== null
