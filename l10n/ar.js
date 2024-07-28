@@ -143,7 +143,6 @@ OC.L10N.register(
     "Network" : "الشبكة",
     "Docker network name" : "إسم شبكة \"دوكر\" Docker",
     "AppAPI Docker Socket Proxy authentication password" : "كلمة مرور التصديق على وكيل مقبس \"دوكر\"  Docker Socket Proxy للواجهات AppAPI",
-    "GPUs support enabled hint" : "إرشاد حول تمكين دعم وحدات المعالجة الرسومية",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "كل وحدات المعالجة الرسومية GPU على مُضيف البرنامج الخفي سيتم طلب تمكينها في حاويات التطبيقات الخارجية ExApp من قِبَل \"دوكر\" Docker.  ",
     "Additional option" : "خيار إضافي",
     "Add additional option" : "إضِف خياراً إضافيّاً",

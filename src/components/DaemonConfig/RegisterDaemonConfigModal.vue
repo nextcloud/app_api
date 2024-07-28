@@ -122,8 +122,7 @@
 								:options="computeDevices"
 								:input-label="t('app_api', 'Compute device')" />
 							<p v-if="getComputeDeviceHelperText !== ''"
-								class="hint"
-								:aria-label="t('app_api', 'GPUs support enabled hint')">
+								class="hint">
 								{{ getComputeDeviceHelperText }}
 							</p>
 

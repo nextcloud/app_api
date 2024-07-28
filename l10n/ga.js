@@ -143,7 +143,6 @@ OC.L10N.register(
     "Network" : "Líonra",
     "Docker network name" : "Ainm líonra docker",
     "AppAPI Docker Socket Proxy authentication password" : "Pasfhocal fíordheimhnithe seachfhreastalaí Soicéad Docker AppAPI",
-    "GPUs support enabled hint" : "Tacaíonn GPUanna le leid chumasaithe",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "Iarrfar ar gach feiste GPU atá ar fáil ar óstach deamhan a bheith cumasaithe i gcoimeádáin ExApp ag Docker.",
     "Additional option" : "Rogha breise",
     "Add additional option" : "Cuir rogha breise leis",
