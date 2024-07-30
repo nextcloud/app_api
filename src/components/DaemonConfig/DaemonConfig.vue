@@ -24,6 +24,12 @@
 						<TestTube :size="20" />
 					</template>
 				</NcActionButton>
+				<NcActionButton :close-after-click="true" @click="showEditModal()">
+					{{ t('app_api', 'Edit') }}
+					<template #icon>
+						<Pencil :size="20" />
+					</template>
+				</NcActionButton>
 				<NcActionButton icon="icon-delete" :close-after-click="true" @click="deleteDaemonConfig()">
 					{{ t('app_api', 'Delete') }}
 					<template #icon>
@@ -50,6 +56,12 @@
 				:get-all-daemons="getAllDaemons"
 				:daemon="daemon" />
 		</template>
+		<ManageDaemonConfigModal
+			:show.sync="showEditDialog"
+			:daemons="daemons"
+			:get-all-daemons="getAllDaemons"
+			:daemon="daemon"
+			:is-default-daemon="isDefault" />
 	</div>
 </template>
 
@@ -63,14 +75,17 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import CheckBold from 'vue-material-design-icons/CheckBold.vue'
 import TestTube from 'vue-material-design-icons/TestTube.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
 
 import DaemonConfigDetailsModal from './DaemonConfigDetailsModal.vue'
 import ConfirmDaemonDeleteModal from './ConfirmDaemonDeleteModal.vue'
 import DaemonTestDeploy from './DaemonTestDeploy.vue'
+import ManageDaemonConfigModal from './ManageDaemonConfigModal.vue'
 
 export default {
 	name: 'DaemonConfig',
 	components: {
+		ManageDaemonConfigModal,
 		NcListItem,
 		NcActionButton,
 		CheckBold,
@@ -79,6 +94,7 @@ export default {
 		DaemonTestDeploy,
 		NcLoadingIcon,
 		TestTube,
+		Pencil,
 	},
 	props: {
 		daemon: {
@@ -95,6 +111,11 @@ export default {
 			type: Function,
 			required: true,
 		},
+		daemons: {
+			type: Array,
+			required: true,
+			default: () => [],
+		},
 		getAllDaemons: {
 			type: Function,
 			required: true,
@@ -108,6 +129,7 @@ export default {
 			showDeleteDialog: false,
 			removeExAppsOnDaemonDelete: false,
 			showTestDeployDialog: false,
+			showEditDialog: false,
 		}
 	},
 	computed: {
@@ -157,6 +179,9 @@ export default {
 		},
 		showTestDeployModal() {
 			this.showTestDeployDialog = true
+		},
+		showEditModal() {
+			this.showEditDialog = true
 		},
 	},
 }

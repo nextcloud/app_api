@@ -2,8 +2,8 @@
 	<div class="register-daemon-config">
 		<NcModal :show="show" @close="closeModal">
 			<div class="register-daemon-config-body">
-				<h2>{{ t('app_api', 'Register Deploy Daemon') }}</h2>
-				<div class="templates">
+				<h2>{{ isEdit ? t('app_api', 'Edit Deploy Daemon') : t('app_api', 'Register Deploy Daemon') }}</h2>
+				<div v-if="!isEdit" class="templates">
 					<div class="external-label" :aria-label="t('app_api', 'Daemon configuration template')">
 						<label for="daemon-template">{{ t('app_api', 'Daemon configuration template') }}</label>
 						<NcSelect
@@ -19,6 +19,7 @@
 						<label for="daemon-name">{{ t('app_api', 'Name') }}</label>
 						<NcInputField
 							id="daemon-name"
+							:disabled="isEdit"
 							:value.sync="name"
 							:placeholder="t('app_api', 'Unique Deploy Daemon Name')"
 							:aria-label="t('app_api', 'Unique Deploy Daemon Name')"
@@ -38,7 +39,7 @@
 						<NcSelect
 							id="daemon-deploy-id"
 							v-model="acceptsDeployId"
-							:disabled="configurationTab.id === 'manual_install'"
+							:disabled="configurationTab.id === 'manual_install' || isEdit"
 							:options="deployMethods"
 							:label-outside="true"
 							:placeholder="t('app_api', 'Select daemon deploy method')" />
@@ -57,8 +58,8 @@
 						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
 						<NcInputField
 							id="nextcloud-url"
-							:helper-text="isNextcloudUrlSafeHelpText"
-							:input-class="!isNextcloudUrlSafe ? 'text-warning' : ''"
+							:helper-text="getNextcloudUrlHelperText"
+							:input-class="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
 							:value.sync="nextcloud_url"
 							style="max-width: 70%;"
 							:placeholder="t('app_api', 'Nextcloud URL')"
@@ -66,13 +67,14 @@
 					</div>
 					<div class="row">
 						<NcCheckboxRadioSwitch
-							v-if="isNotManualInstall"
+							v-if="isNotManualInstall && !isEdit"
 							id="default-deploy-config"
 							:checked.sync="defaultDaemon"
 							:placeholder="t('app_api', 'Set daemon as default')"
 							:aria-label="t('app_api', 'Set daemon as default')">
 							{{ t('app_api', 'Set as default daemon') }}
 						</NcCheckboxRadioSwitch>
+						<div v-if="isEdit" />
 						<NcCheckboxRadioSwitch v-if="isNotManualInstall"
 							id="https-enabled"
 							:checked.sync="httpsEnabled"
@@ -100,7 +102,8 @@
 									:disabled="daemonProtocol === 'https'"
 									:placeholder="t('app_api', 'Docker network name')"
 									:aria-label="t('app_api', 'Docker network name')"
-									:helper-text="networkHelperText" />
+									:helper-text="getNetworkHelperText || t('app_api', 'Docker network name')"
+									:input-class="getNetworkHelperText !== '' ? 'text-warning' : ''" />
 							</div>
 							<div v-if="['http', 'https'].includes(daemonProtocol)"
 								class="external-label"
@@ -119,10 +122,9 @@
 								v-model="deployConfig.computeDevice"
 								:options="computeDevices"
 								:input-label="t('app_api', 'Compute device')" />
-							<p v-if="deployConfig.computeDevice.id !== 'cpu'"
-								class="hint"
-								:aria-label="t('app_api', 'GPUs support enabled hint')">
-								{{ t('app_api', 'All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker.') }}
+							<p v-if="getComputeDeviceHelperText !== ''"
+								class="hint">
+								{{ getComputeDeviceHelperText }}
 							</p>
 
 							<template v-if="additionalOptions.length > 0">
@@ -137,11 +139,12 @@
 										<div class="additional-option">
 											<NcInputField
 												:id="option.key"
+												:disabled="isEdit"
 												:value.sync="option.value"
 												:placeholder="option.value"
 												:aria-label="option.value"
 												style="margin: 0 5px 0 0; width: fit-content;" />
-											<NcButton type="tertiary" @click="removeAdditionalOption(option, index)">
+											<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
 												<template #icon>
 													<Close :size="20" />
 												</template>
@@ -151,7 +154,7 @@
 								</div>
 							</template>
 
-							<div class="additional-options">
+							<div v-if="!isEdit" class="additional-options">
 								<div style="display: flex; justify-content: flex-end;">
 									<NcButton type="tertiary" @click="addAdditionalOption">
 										<template #icon>
@@ -206,8 +209,8 @@
 						<NcButton
 							type="primary"
 							:disabled="canRegister"
-							@click="registerDaemon">
-							{{ t('app_api', 'Register') }}
+							@click="isEdit ? updateDaemon() : registerDaemon()">
+							{{ isEdit ? t('app_api', 'Save') : t('app_api', 'Register') }}
 							<template #icon>
 								<NcLoadingIcon v-if="registeringDaemon" :size="20" />
 								<Check v-else :size="20" />
@@ -249,7 +252,7 @@ import UnfoldMoreHorizontal from 'vue-material-design-icons/UnfoldMoreHorizontal
 import { DAEMON_TEMPLATES, DAEMON_COMPUTE_DEVICES } from '../../constants/daemonTemplates.js'
 
 export default {
-	name: 'RegisterDaemonConfigModal',
+	name: 'ManageDaemonConfigModal',
 	components: {
 		NcLoadingIcon,
 		NcModal,
@@ -279,9 +282,19 @@ export default {
 			type: Function,
 			required: true,
 		},
+		daemon: {
+			type: Object,
+			required: false,
+			default: () => null,
+		},
+		isDefaultDaemon: {
+			type: Boolean,
+			required: false,
+			default: () => false,
+		},
 	},
 	data() {
-		return {
+		const data = {
 			name: 'docker_local',
 			displayName: 'Docker Local',
 			acceptsDeployId: 'docker-install',
@@ -314,6 +327,22 @@ export default {
 			},
 			additionalOptions: [],
 		}
+
+		if (this.daemon !== null) {
+			data.name = this.daemon.name
+			data.displayName = this.daemon.display_name
+			data.acceptsDeployId = this.daemon.accepts_deploy_id
+			data.httpsEnabled = this.daemon.protocol === 'https'
+			data.host = this.daemon.host
+			data.nextcloud_url = this.daemon.deploy_config.nextcloud_url
+			data.deployConfig.net = this.daemon.deploy_config.net
+			data.deployConfig.haproxy_password = this.daemon.deploy_config.haproxy_password
+			data.deployConfig.computeDevice = this.daemon.deploy_config.computeDevice
+			data.defaultDaemon = this.isDefaultDaemon
+			data.additionalOptions = Object.entries(this.daemon.deploy_config.additional_options ?? {}).map(([key, value]) => ({ key, value }))
+		}
+
+		return data
 	},
 	computed: {
 		daemonHostHelperText() {
@@ -332,7 +361,7 @@ export default {
 			return this.acceptsDeployId !== 'manual-install'
 		},
 		isDaemonNameValid() {
-			return this.daemons.some(daemon => daemon.name === this.name)
+			return this.daemons.some(daemon => daemon.name === this.name && daemon.name !== this.daemon?.name)
 		},
 		isDaemonNameValidHelperText() {
 			return this.isDaemonNameValid === true ? t('app_api', 'Daemon with this name already exists') : ''
@@ -347,11 +376,16 @@ export default {
 		haProxyPasswordHelperText() {
 			return this.isHaProxyPasswordValid ? t('app_api', 'AppAPI Docker Socket Proxy authentication password') : t('app_api', 'Password must be at least 12 characters long')
 		},
-		networkHelperText() {
+		getNetworkHelperText() {
 			if (this.httpsEnabled) {
 				return t('app_api', 'With https enabled network is set to host')
 			}
-			return t('app_api', 'Docker network name')
+
+			if (this.isEdit && this.deployConfig.net !== this.daemon.deploy_config.net) {
+				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+			}
+
+			return ''
 		},
 		canRegister() {
 			return this.isDaemonNameValid === true || this.isHaProxyPasswordValid === false
@@ -359,14 +393,34 @@ export default {
 		isAdditionalOptionValid() {
 			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
 		},
-		isNextcloudUrlSafe() {
-			if (this.httpsEnabled) {
-				return this.nextcloud_url.startsWith('https://')
+		getNextcloudUrlHelperText() {
+			if (!/^https?:\/\//.test(this.nextcloud_url)) {
+				return t('app_api', 'URL should start with http:// or https://')
 			}
-			return this.nextcloud_url.startsWith('http://') || this.nextcloud_url.startsWith('https://')
+
+			if (this.httpsEnabled && !this.nextcloud_url.startsWith('https://')) {
+				return t('app_api', 'For HTTPS daemon, Nextcloud URL should be HTTPS')
+			}
+
+			if (this.isEdit && this.nextcloud_url !== this.daemon.deploy_config.nextcloud_url) {
+				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+			}
+
+			return ''
 		},
-		isNextcloudUrlSafeHelpText() {
-			return this.isNextcloudUrlSafe ? '' : t('app_api', 'For HTTPS daemon, Nextcloud URL should be HTTPS')
+		getComputeDeviceHelperText() {
+			if (this.isEdit && this.deployConfig.computeDevice.id !== this.daemon.deploy_config.computeDevice.id) {
+				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+			}
+
+			if (this.deployConfig.computeDevice.id !== 'cpu') {
+				return t('app_api', 'All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker.')
+			}
+
+			return ''
+		},
+		isEdit() {
+			return this.daemon !== null
 		},
 	},
 	watch: {
@@ -374,17 +428,22 @@ export default {
 			this.setupFormConfiguration(newConfigurationTab)
 		},
 		httpsEnabled(newHttpsEnabled) {
-			if (newHttpsEnabled) {
-				this.prevNet = this.deployConfig.net
-				this.deployConfig.net = 'host'
-			} else {
-				this.deployConfig.net = this.prevNet
+			this.prevNet = this.deployConfig.net
+			this.deployConfig.net = newHttpsEnabled ? 'host' : this.prevNet
+		},
+		show(newShow) {
+			if (newShow === true) {
+				this.resetData()
 			}
 		},
 	},
 	methods: {
+		resetData() {
+			Object.assign(this.$data, this.$options.data.apply(this))
+		},
 		registerDaemon() {
 			this.registeringDaemon = true
+
 			axios.post(generateUrl('/apps/app_api/daemons'), {
 				daemonConfigParams: this._buildDaemonParams(),
 				defaultDaemon: this.acceptsDeployId === 'docker-install' ? this.defaultDaemon : false,
@@ -403,6 +462,32 @@ export default {
 					this.registeringDaemon = false
 					console.debug(err)
 					showError(t('app_api', 'Failed to register DaemonConfig. Check the logs'))
+				})
+		},
+		updateDaemon() {
+			if (this.isEdit) {
+				console.debug('Logic error. Cannot update daemon if it\'s not set')
+			}
+
+			this.registeringDaemon = true
+
+			axios.put(generateUrl(`/apps/app_api/daemons/${this.daemon.name}`), {
+				daemonConfigParams: this._buildDaemonParams(),
+			})
+				.then(res => {
+					this.registeringDaemon = false
+					if (res.data.success) {
+						showSuccess(t('app_api', 'DaemonConfig successfully updated'))
+						this.closeModal()
+						this.getAllDaemons()
+					} else {
+						showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
+					}
+				})
+				.catch(err => {
+					this.registeringDaemon = false
+					console.debug(err)
+					showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
 				})
 		},
 		verifyDaemonConnection() {
@@ -448,7 +533,7 @@ export default {
 		},
 		setupFormConfiguration(templateName) {
 			const template = Object.assign({}, DAEMON_TEMPLATES.find(template => template.name === templateName.id))
-			if (!template) {
+			if (Object.keys(template).length === 0) {
 				return
 			}
 			this.name = template.name
@@ -490,8 +575,6 @@ export default {
 			this.additionalOption = { key: '', value: '' }
 		},
 		closeModal() {
-			const customTemplate = DAEMON_TEMPLATES.find(template => template.name === 'custom')
-			this.configurationTab = { id: customTemplate.name, label: customTemplate.displayName }
 			this.$emit('update:show', false)
 		},
 	},

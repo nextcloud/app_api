@@ -8,6 +8,7 @@
 					:daemon="daemon"
 					:is-default="defaultDaemon === daemon.name"
 					:save-options="saveOptions"
+					:daemons="daemons"
 					:get-all-daemons="getAllDaemons" />
 			</ul>
 			<NcEmptyContent
@@ -26,7 +27,7 @@
 				<NcLoadingIcon v-else />
 			</template>
 		</NcButton>
-		<RegisterDaemonConfigModal :show.sync="showRegisterModal" :daemons="daemons" :get-all-daemons="getAllDaemons" />
+		<ManageDaemonConfigModal :show.sync="showRegisterModal" :daemons="daemons" :get-all-daemons="getAllDaemons" />
 	</div>
 </template>
 
@@ -42,7 +43,7 @@ import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js'
 
 import FormatListBullet from 'vue-material-design-icons/FormatListBulleted.vue'
 
-import RegisterDaemonConfigModal from './RegisterDaemonConfigModal.vue'
+import ManageDaemonConfigModal from './ManageDaemonConfigModal.vue'
 
 export default {
 	name: 'DaemonConfigList',
@@ -52,7 +53,7 @@ export default {
 		NcLoadingIcon,
 		Plus,
 		DaemonConfig,
-		RegisterDaemonConfigModal,
+		ManageDaemonConfigModal,
 		NcEmptyContent,
 	},
 	props: {
