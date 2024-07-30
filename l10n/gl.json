@@ -141,6 +141,7 @@
     "Network" : "Rede",
     "Docker network name" : "Nome da rede Docker",
     "AppAPI Docker Socket Proxy authentication password" : "Contrasinal de autenticación do proxy de AppAPI Docker Socket",
+    "GPUs support enabled hint" : "Suxestión para a activación da compatibilidade coas GPU",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "Docker solicitará que todos os dispositivos GPU dispoñíbeis no servidor do servizo estean activados nos contedores de aplicación externa (ExApp).",
     "Additional option" : "Opción adicional",
     "Add additional option" : "Engadir unha opción adicional",

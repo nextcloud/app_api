@@ -141,6 +141,7 @@
     "Network" : "네트워크",
     "Docker network name" : "Docker 네트워크 이름",
     "AppAPI Docker Socket Proxy authentication password" : "AppAPI Docker 소켓 프록시 인증 비밀번호",
+    "GPUs support enabled hint" : "GPU는 활성화된 힌트를 지원",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "Docker는 데몬 호스트에서 사용 가능한 모든 GPU 장치를 외부 응용 프로그램 컨테이너에서 활성화하도록 요청합니다.",
     "Additional option" : "부가 옵션",
     "Add additional option" : "부가 옵션 추가",

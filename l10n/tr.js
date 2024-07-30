@@ -119,6 +119,7 @@ OC.L10N.register(
     "Network" : "Ağ",
     "Docker network name" : "Docker ağı adı",
     "AppAPI Docker Socket Proxy authentication password" : "AppAPI Docker soket vekil sunucu kimlik doğrulama parolası",
+    "GPUs support enabled hint" : "GPU desteği etkinleştirme ipucu",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "Arka plan işlemi sunucusunda var olan tüm GPU aygıtlarının Docker tarafından ExApp kapsayıcılarında etkinleştirilmesi istenecek.",
     "Additional option" : "Ek seçenek",
     "Add additional option" : "Ek seçenek ekle",

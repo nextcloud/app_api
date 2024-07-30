@@ -143,6 +143,7 @@ OC.L10N.register(
     "Network" : "Netzwerk",
     "Docker network name" : "Docker-Netzwerkname",
     "AppAPI Docker Socket Proxy authentication password" : "AppAPI Docker Socket Proxy Authentifizierungs-Passwort",
+    "GPUs support enabled hint" : "Hinweis für aktivierte GPU-Unterstützung",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "Alle verfügbaren GPU-Geräte auf dem Daemon-Host werden von Docker aufgefordert, in ExApp-Containern aktiviert zu werden.",
     "Additional option" : "Zusatzoption",
     "Add additional option" : "Zusätzliche Option hinzufügen",
