@@ -493,8 +493,8 @@ class DockerActions implements IDeployActions {
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
 		];
 
-		// Always set COMPUTE_DEVICE=cpu|cuda|rocm
-		$autoEnvs[] = sprintf('COMPUTE_DEVICE=%s', $deployConfig['computeDevice']['id']);
+		// Always set COMPUTE_DEVICE=CPU|CUDA|ROCM
+		$autoEnvs[] = sprintf('COMPUTE_DEVICE=%s', strtoupper($deployConfig['computeDevice']['id']));
 		// Add required GPU runtime envs if daemon configured to use GPU
 		if (isset($deployConfig['computeDevice'])) {
 			if ($deployConfig['computeDevice']['id'] === 'cuda') {
