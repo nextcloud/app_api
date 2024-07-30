@@ -117,12 +117,12 @@ class ExAppService {
 		if ($r !== 1) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
 		}
-		$r = $this->removeExAppRoutes($exApp);
-		if ($r === null) {
+		$rmRoutes = $this->removeExAppRoutes($exApp);
+		if ($rmRoutes === null) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp routes from the database.', $appId));
 		}
 		$this->cache->remove('/ex_apps');
-		return $r === 1;
+		return $r === 1 && $rmRoutes !== null;
 	}
 
 	public function getExAppFreePort(): int {
@@ -382,18 +382,5 @@ class ExAppService {
 		} catch (Exception) {
 			return null;
 		}
-	}
-
-	public function updateExAppRoutes(ExApp $exApp, array $routes): ?ExApp {
-		try {
-			if ($this->exAppMapper->updateExAppRoutes($exApp, $routes) === count($routes)) {
-				$exApp->setRoutes($routes);
-				$this->resetCaches();
-				return $exApp;
-			}
-		} catch (Exception) {
-			return null;
-		}
-		return null;
 	}
 }

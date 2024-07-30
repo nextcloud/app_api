@@ -78,10 +78,10 @@ class ExAppMapper extends QBMapper {
 			);
 		$apps = $this->buildExAppRoutes($qb->executeQuery()->fetchAll());
 		if (count($apps) === 0) {
-			throw new DoesNotExistException();
+			throw new DoesNotExistException('No ExApp found with appId ' . $appId);
 		}
 		if (count($apps) > 1) {
-			throw new MultipleObjectsReturnedException();
+			throw new MultipleObjectsReturnedException('Multiple ExApps found with appId ' . $appId);
 		}
 		return $apps[0];
 	}
@@ -203,24 +203,6 @@ class ExAppMapper extends QBMapper {
 					'access_level' => $qb->createNamedParameter($route['access_level']),
 					'headers_to_exclude' => $qb->createNamedParameter($route['headers_to_exclude']),
 				]);
-			$count += $qb->executeStatement();
-		}
-		return $count;
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function updateExAppRoutes(ExApp $exApp, array $routes): int {
-		$count = 0;
-		foreach ($routes as $route) {
-			$qb = $this->db->getQueryBuilder();
-			$qb->update('ex_apps_routes')
-				->set('url', $qb->createNamedParameter($route['url']))
-				->set('verb', $qb->createNamedParameter($route['verb']))
-				->set('access_level', $qb->createNamedParameter($route['access_level']))
-				->set('headers_to_exclude', $qb->createNamedParameter($route['headers_to_exclude']))
-				->where($qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid())));
 			$count += $qb->executeStatement();
 		}
 		return $count;
