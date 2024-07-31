@@ -11,7 +11,6 @@ use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 
