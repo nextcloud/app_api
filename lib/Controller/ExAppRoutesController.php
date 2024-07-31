@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Controller;
 
+use OC\AppFramework\Http;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Service\ExAppService;
@@ -23,17 +24,16 @@ class ExAppRoutesController extends OCSController {
 		parent::__construct(Application::APP_ID, $request);
 	}
 
-	/**
-	 * @throws OCSBadRequestException
-	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerExAppRoutes(array $routes): DataResponse {
-		$this->validateRoutes($routes);
+		if (!$this->validateRoutes($routes)) {
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
+		}
 		$exApp = $this->exAppService->registerExAppRoutes($this->exAppService->getExApp($this->request->getHeader('EX-APP-ID')), $routes);
 		if ($exApp === null) {
-			throw new OCSBadRequestException('Could not register ExApp routes');
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
 		}
 		return new DataResponse();
 	}
@@ -47,7 +47,7 @@ class ExAppRoutesController extends OCSController {
 	public function unregisterExAppRoutes(): DataResponse {
 		$exApp = $this->exAppService->removeExAppRoutes($this->exAppService->getExApp($this->request->getHeader('EX-APP-ID')));
 		if ($exApp === null) {
-			throw new OCSBadRequestException('Could not unregister ExApp routes');
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
 		}
 		return new DataResponse();
 	}
@@ -59,14 +59,12 @@ class ExAppRoutesController extends OCSController {
 		return $this->exAppService->getExApp($this->request->getHeader('EX-APP-ID'))->getRoutes();
 	}
 
-	/**
-	 * @throws OCSBadRequestException
-	 */
-	private function validateRoutes(array $routes): void {
+	private function validateRoutes(array $routes): bool {
 		foreach ($routes as $route) {
 			if (!isset($route['url']) || !isset($route['verb']) || !isset($route['access_level'])) {
-				throw new OCSBadRequestException('Invalid route data');
+				return false;
 			}
 		}
+		return true;
 	}
 }
