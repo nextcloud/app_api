@@ -10,7 +10,9 @@ OC.L10N.register(
     "Actions" : "Handlingar",
     "Type" : "Skriv",
     "Delete" : "Slett",
+    "Edit" : "Rediger",
     "Host" : "Tenar",
+    "Save" : "Lagre",
     "Details" : "Detaljar",
     "Enable" : "SLå på",
     "Disable" : "Slå av"
