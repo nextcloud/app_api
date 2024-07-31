@@ -51,7 +51,7 @@ class Version3000Date20240715170800 extends SimpleMigrationStep {
 			]);
 
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['appid'], 'ex_apps_routes_appid');
+			$table->addIndex(['appid'], 'ex_apps_routes_appid');
 		}
 
 		return $schema;
