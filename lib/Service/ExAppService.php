@@ -368,7 +368,7 @@ class ExAppService {
 			$this->resetCaches();
 			return $exApp;
 		} catch (Exception $e) {
-			$this->logger->debug(sprintf('Error while registering ExApp %s routes: %s. Routes: %s', $exApp->getAppid(), $e->getMessage(), json_encode($routes)));
+			$this->logger->error(sprintf('Error while registering ExApp %s routes: %s. Routes: %s', $exApp->getAppid(), $e->getMessage(), json_encode($routes)));
 			return null;
 		}
 	}
