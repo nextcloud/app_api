@@ -38,9 +38,6 @@ class ExAppRoutesController extends OCSController {
 		return new DataResponse();
 	}
 
-	/**
-	 * @throws OCSBadRequestException
-	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
