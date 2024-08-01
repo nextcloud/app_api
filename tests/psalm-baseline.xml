@@ -29,13 +29,6 @@
       <code><![CDATA[SetCookie]]></code>
     </UndefinedClass>
   </file>
-  <file src="lib/Controller/ExAppRoutesController.php">
-    <UndefinedClass>
-      <code><![CDATA[Http]]></code>
-      <code><![CDATA[Http]]></code>
-      <code><![CDATA[Http]]></code>
-    </UndefinedClass>
-  </file>
   <file src="lib/Controller/ExAppsPageController.php">
     <UndefinedClass>
       <code><![CDATA[$this->categoryFetcher]]></code>
