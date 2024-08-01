@@ -1,0 +1,13 @@
+{ "translations": {
+    "Remove" : "Aýyrmak",
+    "Name" : "Ady",
+    "Type" : "Görnüşi",
+    "Cancel" : "ýatyrmak",
+    "Delete" : "Pozmak",
+    "Default" : "Bellenen",
+    "Edit" : "Redaktirläň",
+    "Save" : "Saklamak",
+    "Details" : "Jikme-jiklikler",
+    "Disable" : "Öçürmek"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}
