@@ -4,35 +4,32 @@
 Routes
 ======
 
-This OCS API is mandatory for all ExApps to register their routes during the ExApp enable/disable step.
+Since AppAPI 3.0.0 ExApps have to declare their routes allowed to be accessed via the AppAPI ExApp proxy.
 
 .. note::
 
-	Available and mandatory since AppAPI 3.0.0, requires AppAPIAuth.
-
-This routes check applied only for ExApp proxy (``/apps/app_api/proxy/*``).
+	This routes check applied only for ExApp proxy (``/apps/app_api/proxy/*``).
 
 
 Register
 ^^^^^^^^
 
-OCS endpoint: ``POST /apps/app_api/api/v1/routes``
+During ExApp installation, the ExApp routes are registered automatically.
+The routes must be declared in the ``external-app`` - ``routes`` tag of the ``info.xml`` file.
 
-Params
-******
+Example
+*******
 
-.. code-block:: json
+.. code-block::
 
-    {
-        "routes": [
-            {
-                "url": "/regex-route-on-ex-app-side",
-                "verb": "GET,POST,PUT,DELETE",
-                "access_level": "0/1/2",
-                "headers_to_exclude": "json_encoded string of array of strings ['headerName1', 'headerName2', ...]",
-            }
-        ]
-    }
+    <routes>
+		<route>
+			<url>.*</url>
+			<verb>GET,POST,PUT,DELETE</verb>
+			<access_level>2</access_level>
+			<headers_to_exclude>[]</headers_to_exclude>
+		</route>
+	</routes>
 
 where the fields are:
 
@@ -45,4 +42,4 @@ where the fields are:
 Unregister
 ^^^^^^^^^^
 
-OCS endpoint: ``DELETE /apps/app_api/api/v1/routes``
+ExApp routes are unregistered automatically when the ExApp is uninstalling.

@@ -115,11 +115,6 @@ return [
 		['name' => 'OCSUi#unregisterExAppMenuEntry', 'url' => '/api/v1/ui/top-menu', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getExAppMenuEntry', 'url' => '/api/v1/ui/top-menu', 'verb' => 'GET'],
 
-		// ExApp routes
-		['name' => 'ExAppRoutes#registerExAppRoutes', 'url' => '/api/v1/routes', 'verb' => 'POST'],
-		['name' => 'ExAppRoutes#unregisterExAppRoutes', 'url' => '/api/v1/routes', 'verb' => 'DELETE'],
-		['name' => 'ExAppRoutes#getExAppRoutes', 'url' => '/api/v1/routes', 'verb' => 'GET'],
-
 		// Common UI
 		['name' => 'OCSUi#setExAppInitialState', 'url' => '/api/v1/ui/initial-state', 'verb' => 'POST'],
 		['name' => 'OCSUi#deleteExAppInitialState', 'url' => '/api/v1/ui/initial-state', 'verb' => 'DELETE'],
