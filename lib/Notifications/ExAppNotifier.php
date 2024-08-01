@@ -35,9 +35,7 @@ class ExAppNotifier implements INotifier {
 		if ($exApp === null) {
 			throw new InvalidArgumentException();
 		}
-		if ($notification->getSubject() === 'ex_app_version_update' && $exApp->getEnabled()) {
-			throw new InvalidArgumentException('ExApp is probably already re-enabled');
-		} elseif (!$exApp->getEnabled()) { // Only enabled ExApps can render notifications
+		if (!$exApp->getEnabled()) { // Only enabled ExApps can render notifications
 			throw new InvalidArgumentException('ExApp is disabled');
 		}
 

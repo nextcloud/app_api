@@ -9,7 +9,6 @@ use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\ManualActions;
-use OCA\AppAPI\Notifications\ExNotificationsManager;
 use OCP\AppFramework\Http;
 use OCP\DB\Exception;
 use OCP\Http\Client\IClient;
@@ -36,7 +35,6 @@ class AppAPIService {
 		private readonly ISession                $session,
 		private readonly IUserManager            $userManager,
 		private readonly IFactory                $l10nFactory,
-		private readonly ExNotificationsManager  $exNotificationsManager,
 		private readonly ExAppService            $exAppService,
 		private readonly ExAppApiScopeService    $exAppApiScopeService,
 		private readonly DockerActions           $dockerActions,
@@ -400,42 +398,18 @@ class AppAPIService {
 	}
 
 	/**
-	 * Check if ExApp version changed and update it in database.
-	 * Immediately disable ExApp and send notifications to the administrators (users of admins group).
-	 * This handling only intentional case of manual ExApp update
-	 * so the administrator must re-enable ExApp in UI or CLI after that.
-	 *
-	 * Ref: https://github.com/cloud-py-api/app_api/pull/29
-	 * TODO: Add link to docs with warning and mark as not-recommended
-	 *
+	 * Checks if the ExApp version changed and if it is higher, updates it in the database.
 	 */
 	public function handleExAppVersionChange(IRequest $request, ExApp $exApp): bool {
 		$requestExAppVersion = $request->getHeader('EX-APP-VERSION');
-		$versionValid = $exApp->getVersion() === $requestExAppVersion;
-		if (!$versionValid) {
-			// Update ExApp version
-			$oldVersion = $exApp->getVersion();
+		if ($requestExAppVersion === '') {
+			return false;
+		}
+		if (version_compare($requestExAppVersion, $exApp->getVersion(), '>')) {
 			$exApp->setVersion($requestExAppVersion);
 			if (!$this->exAppService->updateExApp($exApp, ['version'])) {
 				return false;
 			}
-			$this->disableExApp($exApp);
-			$this->exNotificationsManager->sendAdminsNotification($exApp->getAppid(), [
-				'object' => 'ex_app_update',
-				'object_id' => $exApp->getAppid(),
-				'subject_type' => 'ex_app_version_update',
-				'subject_params' => [
-					'rich_subject' => 'ExApp updated, action required!',
-					'rich_subject_params' => [],
-					'rich_message' => sprintf(
-						'ExApp %s disabled due to update from %s to %s. Manual re-enable required.',
-						$exApp->getAppid(),
-						$oldVersion,
-						$exApp->getVersion()),
-					'rich_message_params' => [],
-				],
-			]);
-			return false;
 		}
 		return true;
 	}
