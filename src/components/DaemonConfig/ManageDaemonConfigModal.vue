@@ -234,6 +234,7 @@
 import axios from '@nextcloud/axios'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 import { generateUrl } from '@nextcloud/router'
+import { confirmPassword } from '@nextcloud/password-confirmation'
 
 import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
 import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
@@ -444,25 +445,30 @@ export default {
 		registerDaemon() {
 			this.registeringDaemon = true
 
-			axios.post(generateUrl('/apps/app_api/daemons'), {
-				daemonConfigParams: this._buildDaemonParams(),
-				defaultDaemon: this.acceptsDeployId === 'docker-install' ? this.defaultDaemon : false,
-			})
-				.then(res => {
-					this.registeringDaemon = false
-					if (res.data.success) {
-						showSuccess(t('app_api', 'DaemonConfig successfully registered'))
-						this.closeModal()
-						this.getAllDaemons()
-					} else {
+			confirmPassword().then(() => {
+				axios.post(generateUrl('/apps/app_api/daemons'), {
+					daemonConfigParams: this._buildDaemonParams(),
+					defaultDaemon: this.acceptsDeployId === 'docker-install' ? this.defaultDaemon : false,
+				})
+					.then(res => {
+						this.registeringDaemon = false
+						if (res.data.success) {
+							showSuccess(t('app_api', 'DaemonConfig successfully registered'))
+							this.closeModal()
+							this.getAllDaemons()
+						} else {
+							showError(t('app_api', 'Failed to register DaemonConfig. Check the logs'))
+						}
+					})
+					.catch(err => {
+						this.registeringDaemon = false
+						console.debug(err)
 						showError(t('app_api', 'Failed to register DaemonConfig. Check the logs'))
-					}
-				})
-				.catch(err => {
-					this.registeringDaemon = false
-					console.debug(err)
-					showError(t('app_api', 'Failed to register DaemonConfig. Check the logs'))
-				})
+					})
+			}).catch(() => {
+				this.registeringDaemon = false
+				showError(t('app_api', 'Password confirmation failed'))
+			})
 		},
 		updateDaemon() {
 			if (this.isEdit) {
@@ -471,24 +477,29 @@ export default {
 
 			this.registeringDaemon = true
 
-			axios.put(generateUrl(`/apps/app_api/daemons/${this.daemon.name}`), {
-				daemonConfigParams: this._buildDaemonParams(),
-			})
-				.then(res => {
-					this.registeringDaemon = false
-					if (res.data.success) {
-						showSuccess(t('app_api', 'DaemonConfig successfully updated'))
-						this.closeModal()
-						this.getAllDaemons()
-					} else {
+			confirmPassword().then(() => {
+				axios.put(generateUrl(`/apps/app_api/daemons/${this.daemon.name}`), {
+					daemonConfigParams: this._buildDaemonParams(),
+				})
+					.then(res => {
+						this.registeringDaemon = false
+						if (res.data.success) {
+							showSuccess(t('app_api', 'DaemonConfig successfully updated'))
+							this.closeModal()
+							this.getAllDaemons()
+						} else {
+							showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
+						}
+					})
+					.catch(err => {
+						this.registeringDaemon = false
+						console.debug(err)
 						showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
-					}
-				})
-				.catch(err => {
-					this.registeringDaemon = false
-					console.debug(err)
-					showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
-				})
+					})
+			}).catch(() => {
+				this.registeringDaemon = false
+				showError(t('app_api', 'Password confirmation failed'))
+			})
 		},
 		verifyDaemonConnection() {
 			this.verifyingDaemonConnection = true

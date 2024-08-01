@@ -69,6 +69,7 @@
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
+import { confirmPassword } from '@nextcloud/password-confirmation'
 import NcListItem from '@nextcloud/vue/dist/Components/NcListItem.js'
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
 
@@ -163,19 +164,25 @@ export default {
 		},
 		_deleteDaemonConfig(daemon) {
 			this.deleting = true
-			return axios.delete(generateUrl(`/apps/app_api/daemons/${daemon.name}?removeExApps=${this.removeExAppsOnDaemonDelete}`))
-				.then(res => {
-					if (res.data.success) {
-						this.getAllDaemons()
-					}
-					this.deleting = false
-					this.showDetailsModal = false
-				})
-				.catch(err => {
-					console.debug(err)
-					this.deleting = false
-					this.showDetailsModal = false
-				})
+			return confirmPassword().then(() => {
+				return axios.delete(generateUrl(`/apps/app_api/daemons/${daemon.name}?removeExApps=${this.removeExAppsOnDaemonDelete}`))
+					.then(res => {
+						if (res.data.success) {
+							this.getAllDaemons()
+						}
+						this.deleting = false
+						this.showDetailsModal = false
+					})
+					.catch(err => {
+						console.debug(err)
+						this.deleting = false
+						this.showDetailsModal = false
+					})
+			}).catch(() => {
+				this.deleting = false
+				this.showDeleteDialog = false
+				showError(t('app_api', 'Password confirmation failed'))
+			})
 		},
 		showTestDeployModal() {
 			this.showTestDeployDialog = true
