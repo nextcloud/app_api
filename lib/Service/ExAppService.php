@@ -287,6 +287,15 @@ class ExAppService {
 				} else {
 					$appInfo['external-app']['routes'] = [$appInfo['external-app']['routes']['route']];
 				}
+				// update routes, map string access_level to int
+				$appInfo['external-app']['routes'] = array_map(function ($route) use ($appId) {
+					$route['access_level'] = $this->mapExAppRouteAccessLevelNameToNumber($route['access_level']);
+					if ($route['access_level'] !== -1) {
+						return $route;
+					} else {
+						$this->logger->error(sprintf('Invalid access level `%s` for route `%s` in ExApp `%s`', $route['access_level'], $route['url'], $appId));
+					}
+				}, $appInfo['external-app']['routes']);
 			}
 			if ($extractedDir) {
 				if (file_exists($extractedDir . '/l10n')) {
@@ -297,6 +306,15 @@ class ExAppService {
 			}
 		}
 		return $appInfo;
+	}
+
+	public function mapExAppRouteAccessLevelNameToNumber(string $accessLevel): int {
+		return match($accessLevel) {
+			'PUBLIC' => 0,
+			'USER' => 1,
+			'ADMIN' => 2,
+			default => -1,
+		};
 	}
 
 	public function setAppDeployProgress(ExApp $exApp, int $progress, string $error = ''): void {

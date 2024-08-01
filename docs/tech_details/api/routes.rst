@@ -22,11 +22,11 @@ Example
 
 .. code-block::
 
-    <routes>
+	<routes>
 		<route>
 			<url>.*</url>
 			<verb>GET,POST,PUT,DELETE</verb>
-			<access_level>2</access_level>
+			<access_level>USER</access_level>
 			<headers_to_exclude>[]</headers_to_exclude>
 		</route>
 	</routes>
@@ -35,11 +35,11 @@ where the fields are:
 
 - ``url``: the route to be registered on the ExApp side, can be a regex
 - ``verb``: the HTTP verb that the route will accept, can be a comma separated list of verbs
-- ``access_level``: the numeric access level required to access the route, 0 - public route, 1 - Nextcloud user auth required, 2 - admin user required
+- ``access_level``: the name of the access level required to access the route, PUBLIC - public access without auth, USER - Nextcloud user auth required, ADMIN - admin user required
 - ``headers_to_exclude``: a json encoded string of an array of strings, the headers that the ExApp wants to be excluded from the request to it
 
 
 Unregister
 ^^^^^^^^^^
 
-ExApp routes are unregistered automatically when the ExApp is uninstalling.
+ExApp routes are unregistered automatically when the ExApp is uninstalling, or during the ExApp update before registering the new routes.
