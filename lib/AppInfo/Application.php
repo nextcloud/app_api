@@ -15,7 +15,6 @@ use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
 use OCA\AppAPI\Middleware\ExAppUiMiddleware;
-use OCA\AppAPI\Notifications\ExAppAdminNotifier;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
@@ -74,7 +73,6 @@ class Application extends App implements IBootstrap {
 		$context->registerMiddleware(ExAppUIL10NMiddleware::class, true);
 		$context->registerEventListener(SabrePluginAuthInitEvent::class, SabrePluginAuthInitListener::class);
 		$context->registerNotifierService(ExAppNotifier::class);
-		$context->registerNotifierService(ExAppAdminNotifier::class);
 
 		$context->registerEventListener(DeclarativeSettingsRegisterFormEvent::class, RegisterDeclarativeSettingsListener::class);
 		$context->registerEventListener(DeclarativeSettingsGetValueEvent::class, GetValueListener::class);
