@@ -281,6 +281,13 @@ class ExAppService {
 					$appInfo['external-app']['scopes'] = [$appInfo['external-app']['scopes']['value']];
 				}
 			}
+			if (isset($appInfo['external-app']['routes']['route'])) {
+				if (isset($appInfo['external-app']['routes']['route'][0])) {
+					$appInfo['external-app']['routes'] = $appInfo['external-app']['routes']['route'];
+				} else {
+					$appInfo['external-app']['routes'] = [$appInfo['external-app']['routes']['route']];
+				}
+			}
 			if ($extractedDir) {
 				if (file_exists($extractedDir . '/l10n')) {
 					$appInfo['translations_folder'] = $extractedDir . '/l10n';
@@ -365,7 +372,6 @@ class ExAppService {
 		try {
 			$this->exAppMapper->registerExAppRoutes($exApp, $routes);
 			$exApp->setRoutes($routes);
-			$this->resetCaches();
 			return $exApp;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Error while registering ExApp %s routes: %s. Routes: %s', $exApp->getAppid(), $e->getMessage(), json_encode($routes)));
@@ -377,7 +383,6 @@ class ExAppService {
 		try {
 			$this->exAppMapper->removeExAppRoutes($exApp);
 			$exApp->setRoutes([]);
-			$this->resetCaches();
 			return $exApp;
 		} catch (Exception) {
 			return null;
