@@ -11,7 +11,6 @@ OC.L10N.register(
     "Error starting update of ExApp" : "Errore bat gertatu da ExApp eguneratzean",
     "Could not perform update of ExApp" : "Ezin izan da ExApp-ren eguneraketa egin",
     "AppAPI authentication failed" : "AppAPI autentifikazioak huts egin du",
-    "AppAPI ExApp version update notifier" : "AppAPI ExApp bertsioaren eguneratze-jakinarazlea",
     "AppAPI ExApp notifier" : "AppAPI ExApp jakinarazlea",
     "AppAPI" : "AppAPI",
     "AI Integration Team" : "AA integrazio taldea",

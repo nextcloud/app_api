@@ -15,7 +15,6 @@ OC.L10N.register(
     "ExApp not found, failed to get logs" : "외부 응용 프로그램을 찾을 수 없음, 로그 가져오기를 실패",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "컨테이너 로그를 가져오는데 실패했습니다. 참고: Docker 컨테이너 다운로드는 json 파일 또는 journald 로깅 드라이버가 있는 컨테이너에 대해서만 작동합니다. 오류: %s",
     "AppAPI authentication failed" : "AppAPI 인증 실패",
-    "AppAPI ExApp version update notifier" : "AppAPI 외부 응용 프로그램 버전 업데이트 알리미",
     "AppAPI ExApp notifier" : "AppAPI 외부 응용 프로그램 알리미",
     "AppAPI" : "AppAPI",
     "AI Integration Team" : "AI 통합 추진팀",

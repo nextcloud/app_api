@@ -13,7 +13,6 @@
     "ExApp not found, failed to get logs" : "ExApp ikke funnet, henting av logger feilet",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Henting av konteinerlogger feilet. Merk: Nedlasting av Docker-konteiner fungerer bare for konteinere med json-fil eller journalført loggdriver. Feil: %s",
     "AppAPI authentication failed" : "AppAPI-autentisering feilet",
-    "AppAPI ExApp version update notifier" : "AppAPI ExApp versjonsoppdateringsvarsler",
     "AppAPI ExApp notifier" : "AppAPI ExApp-varsler",
     "AppAPI" : "AppAPI",
     "AI Integration Team" : "AI-integrasjonsteam",

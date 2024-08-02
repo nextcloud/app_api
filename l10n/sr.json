@@ -13,7 +13,6 @@
     "ExApp not found, failed to get logs" : "ExApp није пронађена, није успело добављање дневника",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Није успело преузимање дневника контејнера. Напомена: преузимање Docker контејнера функционише само за контејнере који имају драјвер дневника типа json-фајл или journald. Грешка: %s",
     "AppAPI authentication failed" : "Није успела AppAPI провера идентитета",
-    "AppAPI ExApp version update notifier" : "AppAPI ExApp обавештавач о ажурираној верзији",
     "AppAPI ExApp notifier" : "AppAPI ExApp обавештавач",
     "AppAPI" : "AppAPI",
     "AI Integration Team" : "Тим за интеграцију AI",
