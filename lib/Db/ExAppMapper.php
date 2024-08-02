@@ -91,7 +91,7 @@ class ExAppMapper extends QBMapper {
 	 *
 	 * @return array of ExApps with composed routes
 	 */
-	private function buildExAppRoutes(array $result): array {
+	private function buildExAppWithRoutes(array $result): array {
 		$apps = [];
 		$lastAppId = null;
 		$lastApp = null;
