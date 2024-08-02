@@ -11,8 +11,16 @@
   </file>
   <file src="lib/Controller/ExAppProxyController.php">
     <UndefinedClass>
+      <code><![CDATA[$options['headers']]]></code>
+      <code><![CDATA[$options['headers']]]></code>
       <code><![CDATA[CookieJar]]></code>
       <code><![CDATA[CookieJar]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
+      <code><![CDATA[RequestOptions]]></code>
       <code><![CDATA[RequestOptions]]></code>
       <code><![CDATA[RequestOptions]]></code>
       <code><![CDATA[RequestOptions]]></code>

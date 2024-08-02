@@ -182,6 +182,11 @@ class Update extends Command {
 			}
 		}
 
+		$this->exAppService->removeExAppRoutes($exApp);
+		if (isset($appInfo['external-app']['routes'])) {
+			$this->exAppService->registerExAppRoutes($exApp, $appInfo['external-app']['routes']);
+		}
+
 		if (!empty($appInfo['external-app']['translations_folder'])) {
 			$result = $this->exAppArchiveFetcher->installTranslations($appId, $appInfo['external-app']['translations_folder']);
 			if ($result) {

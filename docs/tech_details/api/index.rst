@@ -13,6 +13,7 @@ AppAPI Nextcloud APIs
 	appconfig
 	preferences
 	exapp
+	routes
 	utils
 	fileactionsmenu
 	topmenu

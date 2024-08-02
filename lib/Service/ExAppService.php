@@ -84,6 +84,9 @@ class ExAppService {
 			$this->exAppMapper->insert($exApp);
 			$exApp = $this->exAppMapper->findByAppId($appInfo['id']);
 			$this->cache->remove('/ex_apps');
+			if (isset($appInfo['external-app']['routes'])) {
+				$exApp->setRoutes($this->registerExAppRoutes($exApp, $appInfo['external-app']['routes'])->getRoutes() ?? []);
+			}
 			return $exApp;
 		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
 			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appInfo['id'], $e->getMessage()));
@@ -114,8 +117,12 @@ class ExAppService {
 		if ($r !== 1) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
 		}
+		$rmRoutes = $this->removeExAppRoutes($exApp);
+		if ($rmRoutes === null) {
+			$this->logger->error(sprintf('Error while unregistering %s ExApp routes from the database.', $appId));
+		}
 		$this->cache->remove('/ex_apps');
-		return $r === 1;
+		return $r === 1 && $rmRoutes !== null;
 	}
 
 	public function getExAppFreePort(): int {
@@ -248,7 +255,7 @@ class ExAppService {
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'scopes', 'system_app', 'translations_folder'] as $key) {
+			foreach (['docker-install', 'scopes', 'system_app', 'translations_folder', 'routes'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);
@@ -274,6 +281,22 @@ class ExAppService {
 					$appInfo['external-app']['scopes'] = [$appInfo['external-app']['scopes']['value']];
 				}
 			}
+			if (isset($appInfo['external-app']['routes']['route'])) {
+				if (isset($appInfo['external-app']['routes']['route'][0])) {
+					$appInfo['external-app']['routes'] = $appInfo['external-app']['routes']['route'];
+				} else {
+					$appInfo['external-app']['routes'] = [$appInfo['external-app']['routes']['route']];
+				}
+				// update routes, map string access_level to int
+				$appInfo['external-app']['routes'] = array_map(function ($route) use ($appId) {
+					$route['access_level'] = $this->mapExAppRouteAccessLevelNameToNumber($route['access_level']);
+					if ($route['access_level'] !== -1) {
+						return $route;
+					} else {
+						$this->logger->error(sprintf('Invalid access level `%s` for route `%s` in ExApp `%s`', $route['access_level'], $route['url'], $appId));
+					}
+				}, $appInfo['external-app']['routes']);
+			}
 			if ($extractedDir) {
 				if (file_exists($extractedDir . '/l10n')) {
 					$appInfo['translations_folder'] = $extractedDir . '/l10n';
@@ -283,6 +306,15 @@ class ExAppService {
 			}
 		}
 		return $appInfo;
+	}
+
+	public function mapExAppRouteAccessLevelNameToNumber(string $accessLevel): int {
+		return match($accessLevel) {
+			'PUBLIC' => 0,
+			'USER' => 1,
+			'ADMIN' => 2,
+			default => -1,
+		};
 	}
 
 	public function setAppDeployProgress(ExApp $exApp, int $progress, string $error = ''): void {
@@ -351,6 +383,27 @@ class ExAppService {
 			return $records;
 		} catch (Exception) {
 			return [];
+		}
+	}
+
+	public function registerExAppRoutes(ExApp $exApp, array $routes): ?ExApp {
+		try {
+			$this->exAppMapper->registerExAppRoutes($exApp, $routes);
+			$exApp->setRoutes($routes);
+			return $exApp;
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('Error while registering ExApp %s routes: %s. Routes: %s', $exApp->getAppid(), $e->getMessage(), json_encode($routes)));
+			return null;
+		}
+	}
+
+	public function removeExAppRoutes(ExApp $exApp): ?ExApp {
+		try {
+			$this->exAppMapper->removeExAppRoutes($exApp);
+			$exApp->setRoutes([]);
+			return $exApp;
+		} catch (Exception) {
+			return null;
 		}
 	}
 }

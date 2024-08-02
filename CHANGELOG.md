@@ -5,19 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.8.0 - 2024-07-19]
+## [3.0.0 - 2024-07-2x]
 
-Note: Nextcloud 27 is no longer supported since this version.
+**Breaking change**: new mandatory ExApp lifecycle endpoint to register ExApp routes allowed to be called from Nextcloud or other origins.
 
 ### Added
 
+- [Breaking change] Added new ExApp lifecycle endpoint to register ExApp routes allowed to be called from Nextcloud or other origins.
 - New OCS API endpoint to setAppInitProgress. The old one is marked as deprecated. #319
 - Added default timeout for requestToExApp function set to 3s. #277
 - Added new PublicFunction method `getExApp`. #326
 
 ### Changed
 
-- Dropped support of Nextcloud 27. #322
 - ExApp system flag is now deprecated and removed to optimize performance and simplicity. #323
 - PublicFunctions changes: `exAppRequestWithUserInit` and `asyncExAppRequestWithUserInit` are now deprecated. #323
 
