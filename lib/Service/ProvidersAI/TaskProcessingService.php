@@ -48,11 +48,7 @@ class TaskProcessingService {
 			return array_map(static function ($record) {
 				return new TaskProcessingProvider($record);
 			}, $records);
-		} catch (Exception $e) {
-			$this->logger->error($e->getMessage(), [
-				'app' => 'app_api',
-				'exception' => $e,
-			]);
+		} catch (Exception) {
 			return [];
 		}
 	}
