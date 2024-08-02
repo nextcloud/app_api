@@ -109,13 +109,14 @@
 								class="external-label"
 								:aria-label="t('app_api', 'HaProxy password')">
 								<label for="deploy-config-haproxy-password">{{ t('app_api', 'HaProxy password') }}</label>
-								<NcInputField
+								<NcPasswordField
 									id="deploy-config-haproxy-password"
 									:value.sync="deployConfig.haproxy_password"
 									:error="isHaProxyPasswordValid === false"
 									:placeholder="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
 									:aria-label="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
-									:helper-text="haProxyPasswordHelperText" />
+									:helper-text="haProxyPasswordHelperText"
+									autocomplete="off" />
 							</div>
 							<NcSelect
 								id="compute-device"
@@ -238,6 +239,7 @@ import { confirmPassword } from '@nextcloud/password-confirmation'
 
 import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
 import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
+import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
 
 import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
@@ -258,6 +260,7 @@ export default {
 		NcLoadingIcon,
 		NcModal,
 		NcInputField,
+		NcPasswordField,
 		UnfoldLessHorizontal,
 		UnfoldMoreHorizontal,
 		NcCheckboxRadioSwitch,
