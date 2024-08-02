@@ -56,8 +56,9 @@
 
 				<NcAppNavigationItem
 					id="admin-section"
-					:href="linkToAdminSettings"
-					:name="t('app_api', 'Admin settings') + ' ↗'">
+					href="https://cloud-py-api.github.io/app_api/"
+					target="_blank"
+					:name="t('app_api', 'Documentation') + ' ↗'">
 					<template v-if="!state.daemon_config_accessible" #icon>
 						<Alert :size="20" />
 					</template>
@@ -162,7 +163,6 @@ import DaemonDetails from '../components/Apps/DaemonDetails.vue'
 import ScopesDetails from '../components/Apps/ScopesDetails.vue'
 
 import { APPS_SECTION_ENUM } from '../constants/AppsConstants.js'
-import { generateUrl } from '@nextcloud/router'
 import { loadState } from '@nextcloud/initial-state'
 
 Vue.use(VueLocalStorage)
@@ -276,9 +276,6 @@ export default {
 		isSubscribed() {
 			// For customers of the Nextcloud GmbH the app level will be set to `300` for apps that are supported in their subscription
 			return this.apps.some(app => app.level === 300)
-		},
-		linkToAdminSettings() {
-			return generateUrl('/settings/admin/app_api')
 		},
 	},
 
