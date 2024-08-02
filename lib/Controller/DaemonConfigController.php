@@ -13,7 +13,7 @@ use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\IConfig;
@@ -37,7 +37,6 @@ class DaemonConfigController extends ApiController {
 		parent::__construct(Application::APP_ID, $request);
 	}
 
-	#[NoCSRFRequired]
 	public function getAllDaemonConfigs(): Response {
 		return new JSONResponse([
 			'daemons' => $this->daemonConfigService->getDaemonConfigsWithAppsCount(),
@@ -45,7 +44,7 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	#[NoCSRFRequired]
+	#[PasswordConfirmationRequired]
 	public function registerDaemonConfig(array $daemonConfigParams, bool $defaultDaemon = false): Response {
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
 		if ($daemonConfig !== null && $defaultDaemon) {
@@ -57,7 +56,7 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	#[NoCSRFRequired]
+	#[PasswordConfirmationRequired]
 	public function updateDaemonConfig(string $name, array $daemonConfigParams): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		$updatedDaemonConfig = new DaemonConfig($daemonConfigParams);
@@ -69,7 +68,7 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	#[NoCSRFRequired]
+	#[PasswordConfirmationRequired]
 	public function unregisterDaemonConfig(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
@@ -84,7 +83,6 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	#[NoCSRFRequired]
 	public function verifyDaemonConnection(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
@@ -99,7 +97,6 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	#[NoCSRFRequired]
 	public function checkDaemonConnection(array $daemonParams): Response {
 		$daemonConfig = new DaemonConfig([
 			'name' => $daemonParams['name'],
@@ -121,7 +118,6 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	#[NoCSRFRequired]
 	public function startTestDeploy(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		if (!$daemonConfig) {
@@ -151,7 +147,6 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
-	#[NoCSRFRequired]
 	public function stopTestDeploy(string $name): Response {
 		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
 		if ($exApp !== null) {
