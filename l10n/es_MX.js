@@ -25,6 +25,7 @@ OC.L10N.register(
     "Actions" : "Acciones",
     "Results from other categories" : "Resultados de otras categorías",
     "_Update_::_Update all_" : ["Actualizar","Actualizar todo","Actualizar todo"],
+    "Type" : "Tipo",
     "Display Name" : "Nombre a desplegar",
     "Cancel" : "Cancelar",
     "Delete" : "Eliminar",

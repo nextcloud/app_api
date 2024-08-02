@@ -14,7 +14,6 @@ OC.L10N.register(
     "ExApp not found, failed to get logs" : "ExApp bulunamadı. Günlük kayıtları alınamadı",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Kapsayıcı günlükleri alınamadı. Not: Docker kapsayıcısının indirilmesi yalnızca json-file veya journald günlük sürücüsünü kullanan kapsayıcılarla çalışır. Hata: %s",
     "AppAPI authentication failed" : "AppAPI kimliği doğrulanamadı ",
-    "AppAPI ExApp version update notifier" : "AppAPI ExApp sürümü güncelleme bildirimi",
     "AppAPI ExApp notifier" : "AppAPI ExApp bildirimi",
     "AppAPI" : "AppAPI",
     "AI Integration Team" : "Yapay Zeka bütünleştirme ekibi",

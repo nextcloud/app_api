@@ -15,7 +15,6 @@ OC.L10N.register(
     "ExApp not found, failed to get logs" : "Non se atopou a aplicación externa (ExApp), produciuse un fallo ao obter os rexistros",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Produciuse un erro ao obter os rexistros do contedor. Nota: a descarga do contedor Docker só funciona para contedores co controlador de rexistro json-file ou journald. Erro: %s",
     "AppAPI authentication failed" : "Fallou a autenticación da AppAPI",
-    "AppAPI ExApp version update notifier" : "Notificador de actualización da versión de AppAPI para aplicación externa (ExApp)",
     "AppAPI ExApp notifier" : "Notificador de AppAPI para aplicación externa (ExApp)",
     "AppAPI" : "AppAPI (API de ExApps)",
     "AI Integration Team" : "Equipo de integración de IA",

@@ -13,7 +13,6 @@
     "ExApp not found, failed to get logs" : "No se consiguió la ExApp, fallo al obtener los registros",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Fallo al obtener los registros del contenedor. Nota: La descarga del contenedor Docker funciona solamente para contenedores que tengan el controlador json-file o journald. Error: %s",
     "AppAPI authentication failed" : "Fallo de autenticación AppAPI",
-    "AppAPI ExApp version update notifier" : "Notificador AppAPI de actualizaciones de versión para ExApps",
     "AppAPI ExApp notifier" : "Notificador AppAPI",
     "AppAPI" : "AppAPI",
     "AI Integration Team" : "Equipo de integración de IA",
