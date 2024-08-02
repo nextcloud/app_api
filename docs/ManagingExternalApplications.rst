@@ -4,7 +4,7 @@ Managing External Applications
 There are two ways to manage ExApps:
 
 1. Using OCC CLI tool
-2. Using the ExApp Management UI (in progress)
+2. Using the ExApp Management UI
 
 
 OCC CLI
@@ -18,7 +18,7 @@ There are several commands to work with ExApps:
 4. Enable
 5. Disable
 6. List ExApps
-7. List ExApp users
+7. List ExApp users (removed since AppAPI 3.0.0)
 8. List ExApp scopes
 
 Register

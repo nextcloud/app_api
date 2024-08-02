@@ -40,7 +40,7 @@ class PublicFunctions {
 	/**
 	 * Request to ExApp with AppAPI auth headers and ExApp user initialization
 	 *
-	 * @depreacted since AppAPI 2.8.0, use `exAppRequest` instead
+	 * @depreacted since AppAPI 3.0.0, use `exAppRequest` instead
 	 */
 	public function exAppRequestWithUserInit(
 		string $appId,
@@ -84,7 +84,7 @@ class PublicFunctions {
 	 *
 	 * @throws \Exception if ExApp not found or failed to setup ExApp user
 	 *
-	 * @depreacted since AppAPI 2.8.0, use `asyncExAppRequest` instead
+	 * @depreacted since AppAPI 3.0.0, use `asyncExAppRequest` instead
 	 */
 	public function asyncExAppRequestWithUserInit(
 		string $appId,

@@ -35,9 +35,10 @@ The Image Pull step downloads the ExApp Docker image.
 
 Possible errors:
 
-- Image not found
+- Image not found (e.g. not public, no image found for your hardware architecture)
 - Image pull failed (e.g., due to network issues)
 - Image pull timeout
+- Your Docker Socket Proxy is not configured correctly and blocks access to this Docker Engine API
 
 Container Started
 *****************
@@ -46,9 +47,10 @@ The Container Started step verifies that the ExApp container is created and star
 
 Possible errors:
 
-- Container failed to start with GPU support
+- Container failed to start with GPU support (may be missing or misconfigured)
     - For NVIDIA, refer to the `NVIDIA Docker configuration docs <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html>`_.
     - For AMD, refer to the `ROCm Docker configuration docs <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/how-to/docker.html>`_.
+- The ExApp issue during startup (e.g. not enough memory)
 
 
 Heartbeat

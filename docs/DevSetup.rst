@@ -14,15 +14,15 @@ Assuming you're in the ``apps`` folder of Nextcloud with command :command:`git`:
 
 	git clone https://github.com/cloud-py-api/app_api.git
 
-Move to the ``app_api`` directory with :command:`shell`::
+Change to the ``app_api`` directory with :command:`shell`::
 
 	cd app_api
 
-Then, build NPM and JS with :command:`shell`::
+Then, build frontend assets in development mode with :command:`shell`::
 
-	npm ci && npm run build
+	npm ci && npm run dev
 
-AAfter this, you can enable it from the directory where the ``occ`` command resides, with :command:`shell`::
+After this, you can enable it from the directory where the ``occ`` command resides, with :command:`shell`::
 
 	./occ app:enable --force app_api
 

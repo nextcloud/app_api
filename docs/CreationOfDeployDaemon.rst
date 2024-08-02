@@ -18,6 +18,29 @@ You can choose one of the basic configuration templates and adjust to your needs
 
 .. note:: We highly recommend to use UI to create Deploy Daemons.
 
+Register Deploy daemon form
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. ``Name``: unique name of the Deploy daemon
+2. ``Display name``: the name that will be displayed in the UI
+3. ``Deployment method``: by default you will need to choose ``docker_install``, ``manual_install`` is for development or custom use case of manual ExApp installation
+4. ``Daemon Host``: hostname/IP address + port of the Deploy daemon
+5. ``Nextcloud URL``: autofilled with current domain, you might need to change the protocol to http/https depending on your setup
+6. ``Set as default daemon``: check if you want set new Deploy daemon as default
+7. ``Enable https``: check if your Deploy daemon (Docker Socket Proxy) is configured with TLS
+8. Deploy Config:
+	9. ``Network``: Docker network name, depends on your networking setup, enforces to "host" if "Enable https" is checked
+	10. ``HaProxy password``: password for Docker Socket Proxy, if it is configured with TLS
+	11. ``Compute Device``: CPU, CUDA or ROCm, depending on your hardware config on Deploy daemon host machine
+	12. ``Add additional option`` (see :ref:`additional_options_list`): setup additional KEY + VALUE deploy config options
+
+.. note::
+
+	For remote DSP setup, it should expose the ports on the host.
+
+
+.. _create-deploy-daemon-cli:
+
 OCC CLI
 ^^^^^^^
 
@@ -71,7 +94,7 @@ ExApp container.
 	}
 
 DeployConfig options
-""""""""""""""""""""
+********************
 
 	* ``net`` **[required]** - network name to bind docker container to (default: ``host``)
 	* ``nextcloud_url`` **[required]** - Nextcloud URL (e.g. ``https://nextcloud.local``)
@@ -97,3 +120,16 @@ Nextcloud AIO
 
 In case of AppAPI installed in AIO, default Deploy Daemon is registered automatically.
 It is possible to register additional Deploy Daemons with the same ways as described above.
+
+
+.. _additional_options_list:
+
+Additional options
+^^^^^^^^^^^^^^^^^^
+
+There is a possibility to add additional options to the Deploy Daemon configuration,
+which are key-value pairs.
+
+Currently, the following options are available:
+
+	- ``OVERRIDE_APP_HOST`` - can be used to override the host that will be used for ExApp binding (not passed to ExApp container envs)
