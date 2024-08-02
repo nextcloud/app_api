@@ -44,7 +44,7 @@ class ExAppMapper extends QBMapper {
 			->orderBy('a.appid', 'ASC')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
-		return $this->buildExAppRoutes($qb->executeQuery()->fetchAll());
+		return $this->buildExAppWithRoutes($qb->executeQuery()->fetchAll());
 	}
 
 	/**
@@ -76,7 +76,7 @@ class ExAppMapper extends QBMapper {
 			->where(
 				$qb->expr()->eq('a.appid', $qb->createNamedParameter($appId))
 			);
-		$apps = $this->buildExAppRoutes($qb->executeQuery()->fetchAll());
+		$apps = $this->buildExAppWithRoutes($qb->executeQuery()->fetchAll());
 		if (count($apps) === 0) {
 			throw new DoesNotExistException('No ExApp found with appId ' . $appId);
 		}
