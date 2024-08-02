@@ -201,7 +201,7 @@ class ExAppMapper extends QBMapper {
 					'url' => $qb->createNamedParameter($route['url']),
 					'verb' => $qb->createNamedParameter($route['verb']),
 					'access_level' => $qb->createNamedParameter($route['access_level']),
-					'headers_to_exclude' => $qb->createNamedParameter($route['headers_to_exclude']),
+					'headers_to_exclude' => $qb->createNamedParameter(is_array($route['headers_to_exclude']) ? json_encode($route['headers_to_exclude']) : $route['headers_to_exclude']),
 				]);
 			$count += $qb->executeStatement();
 		}

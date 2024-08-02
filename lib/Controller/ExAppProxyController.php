@@ -249,7 +249,9 @@ class ExAppProxyController extends Controller {
 			$matchesUrlPattern = preg_match('/' . $route['url'] . '/i', $exAppRoute) === 1;
 			$matchesVerb = str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()));
 			if ($matchesUrlPattern && $matchesVerb) {
-				$headersToExclude = json_decode($route['headers_to_exclude'], true);
+				$headersToExclude = array_map(function ($headerName) {
+					return strtolower($headerName);
+				}, json_decode($route['headers_to_exclude'], true));
 				break;
 			}
 		}
@@ -257,7 +259,7 @@ class ExAppProxyController extends Controller {
 			return $headers;
 		}
 		foreach ($headers as $key => $value) {
-			if (in_array($key, $headersToExclude)) {
+			if (in_array(strtolower($key), $headersToExclude)) {
 				unset($headers[$key]);
 			}
 		}
