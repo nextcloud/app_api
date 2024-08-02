@@ -4,9 +4,11 @@
     "Actions" : "Aktiounen",
     "Type" : "Typ",
     "Delete" : "Läschen",
+    "Edit" : "Änneren",
     "Host" : "Host",
     "Enabled" : "Aktivéiert",
     "Confirm" : "Konfirméieren",
+    "Save" : "Späicheren",
     "Details" : "Detailer",
     "Updates" : "Updates",
     "Disable" : "Ofschalten"

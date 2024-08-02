@@ -10,9 +10,11 @@ OC.L10N.register(
     "Actions" : "Actiones",
     "Type" : "Typo",
     "Delete" : "Deler",
+    "Edit" : "Modificar",
     "Host" : "Hospite",
     "Enabled" : "Activate",
     "Confirm" : "Confirmar",
+    "Save" : "Salveguardar",
     "Details" : "Detalios",
     "Disable" : "Disactivar"
 },

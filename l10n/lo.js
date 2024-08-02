@@ -8,7 +8,9 @@ OC.L10N.register(
     "Cancel" : "ຍົກເລີກ",
     "Delete" : "ລຶບ",
     "Default" : "ເລີ່ມຕົ້ນ",
+    "Edit" : "ແກ້ໄຂ",
     "Confirm" : "ຢືນຢັນ",
+    "Save" : "ບັນທຶກ",
     "Details" : "ລາຍລະອຽດ",
     "Disable" : "ປິດ"
 },

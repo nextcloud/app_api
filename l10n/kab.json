@@ -1,0 +1,14 @@
+{ "translations": {
+    "Remove" : "Kkes",
+    "Name" : "Nom",
+    "Type" : "Anaw",
+    "Delete" : "Kkes",
+    "Default" : "Prédéfini(e)",
+    "Edit" : "Ẓreg",
+    "Enabled" : "Yermed",
+    "Confirm" : "Serggeg",
+    "Save" : "Sekles",
+    "Details" : "Talqayt",
+    "Disable" : "Désactiver"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

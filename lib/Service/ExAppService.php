@@ -209,7 +209,7 @@ class ExAppService {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
 			$this->cache->remove('/ex_apps');
-			if (in_array('enabled', $fields)) {
+			if (in_array('enabled', $fields) || in_array('version', $fields)) {
 				$this->resetCaches();
 			}
 			return true;

@@ -14,6 +14,7 @@ OC.L10N.register(
     "Delete" : "Skrap",
     "Host" : "Gasheer",
     "Confirm" : "Bevestig",
+    "Save" : "Stoor",
     "Register" : "Registreer",
     "Your apps" : "U toeps",
     "Details" : "Besonderhede",
