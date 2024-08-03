@@ -30,14 +30,16 @@ class TextProcessingService {
 		'topics' => 'OCP\TextProcessing\TopicsTaskType',
 	];
 
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		ICacheFactory                                 $cacheFactory,
 		private readonly TextProcessingProviderMapper $mapper,
 		private readonly LoggerInterface              $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_text_processing_providers');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_text_processing_providers');
+		}
 	}
 
 	/**
@@ -48,10 +50,10 @@ class TextProcessingService {
 	public function getRegisteredTextProcessingProviders(): array {
 		try {
 			$cacheKey = '/ex_text_processing_providers';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 
 			return array_map(function ($record) {
@@ -242,7 +244,7 @@ class TextProcessingService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_text_processing_providers');
+		$this->cache?->remove('/ex_text_processing_providers');
 	}
 
 	public function unregisterExAppTextProcessingProviders(string $appId): int {

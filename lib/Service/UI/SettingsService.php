@@ -15,14 +15,16 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class SettingsService {
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		ICacheFactory                       $cacheFactory,
 		private readonly SettingsFormMapper $mapper,
 		private readonly LoggerInterface    $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_settings_forms');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_settings_forms');
+		}
 	}
 
 	public function registerForm(
@@ -78,10 +80,10 @@ class SettingsService {
 	public function getRegisteredForms(): array {
 		try {
 			$cacheKey = '/ex_settings_forms';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
 				return new SettingsForm($record);
@@ -115,6 +117,6 @@ class SettingsService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_settings_forms');
+		$this->cache?->remove('/ex_settings_forms');
 	}
 }

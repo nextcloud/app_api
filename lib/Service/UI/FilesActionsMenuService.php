@@ -15,14 +15,16 @@ use OCP\ICacheFactory;
 use Psr\Log\LoggerInterface;
 
 class FilesActionsMenuService {
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		ICacheFactory                           $cacheFactory,
 		private readonly FilesActionsMenuMapper $mapper,
 		private readonly LoggerInterface        $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_ui_files_actions');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_ui_files_actions');
+		}
 	}
 
 	/**
@@ -94,10 +96,10 @@ class FilesActionsMenuService {
 	public function getRegisteredFileActions(): array {
 		try {
 			$cacheKey = '/ex_ui_files_actions';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
 				return new FilesActionsMenu($record);
@@ -131,6 +133,6 @@ class FilesActionsMenuService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_ui_files_actions');
+		$this->cache?->remove('/ex_ui_files_actions');
 	}
 }

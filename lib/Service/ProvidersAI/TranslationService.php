@@ -24,14 +24,16 @@ use OCP\Translation\LanguageTuple;
 use Psr\Log\LoggerInterface;
 
 class TranslationService {
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		ICacheFactory                              $cacheFactory,
 		private readonly TranslationProviderMapper $mapper,
 		private readonly LoggerInterface           $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_translation_providers');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_translation_providers');
+		}
 	}
 
 	public function registerTranslationProvider(
@@ -94,10 +96,10 @@ class TranslationService {
 	public function getRegisteredTranslationProviders(): array {
 		try {
 			$cacheKey = '/ex_translation_providers';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
 				return new TranslationProvider($record);
@@ -131,7 +133,7 @@ class TranslationService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_translation_providers');
+		$this->cache?->remove('/ex_translation_providers');
 	}
 
 	/**

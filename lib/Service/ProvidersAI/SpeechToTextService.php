@@ -23,14 +23,16 @@ use OCP\SpeechToText\ISpeechToTextProviderWithUserId;
 use Psr\Log\LoggerInterface;
 
 class SpeechToTextService {
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		ICacheFactory                               $cacheFactory,
 		private readonly SpeechToTextProviderMapper $mapper,
 		private readonly LoggerInterface            $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_speech_to_text_providers');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_speech_to_text_providers');
+		}
 	}
 
 	public function registerSpeechToTextProvider(string $appId, string $name, string $displayName, string $actionHandler): ?SpeechToTextProvider {
@@ -82,10 +84,10 @@ class SpeechToTextService {
 	public function getRegisteredSpeechToTextProviders(): array {
 		try {
 			$cacheKey = '/ex_speech_to_text_providers';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
 				return new SpeechToTextProvider($record);
@@ -119,7 +121,7 @@ class SpeechToTextService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_speech_to_text_providers');
+		$this->cache?->remove('/ex_speech_to_text_providers');
 	}
 
 	/**

@@ -22,14 +22,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExAppOccService {
 
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		private readonly LoggerInterface       $logger,
 		private readonly ExAppOccCommandMapper $mapper,
 		ICacheFactory                          $cacheFactory,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_occ_commands');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_occ_commands');
+		}
 	}
 
 	public function registerCommand(
@@ -93,10 +95,10 @@ class ExAppOccService {
 	public function getOccCommands(): array {
 		try {
 			$cacheKey = '/ex_occ_commands';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
 				return new ExAppOccCommand($record);
@@ -261,6 +263,6 @@ class ExAppOccService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_occ_commands');
+		$this->cache?->remove('/ex_occ_commands');
 	}
 }
