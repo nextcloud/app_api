@@ -25,7 +25,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 
 class TopMenuService {
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		private readonly TopMenuMapper       $mapper,
@@ -35,7 +35,9 @@ class TopMenuService {
 		private readonly StylesService       $stylesService,
 		ICacheFactory                        $cacheFactory,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_top_menus');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_top_menus');
+		}
 	}
 
 	/**
@@ -147,10 +149,10 @@ class TopMenuService {
 	public function getExAppMenuEntries(): array {
 		try {
 			$cacheKey = '/ex_top_menus';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
 				return new TopMenu($record);
@@ -161,6 +163,6 @@ class TopMenuService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_top_menus');
+		$this->cache?->remove('/ex_top_menus');
 	}
 }

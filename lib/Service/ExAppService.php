@@ -30,7 +30,7 @@ use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
 class ExAppService {
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		private readonly LoggerInterface            $logger,
@@ -54,7 +54,9 @@ class ExAppService {
 		private readonly ExAppEventsListenerService $eventsListenerService,
 		private readonly ExAppOccService            $occService,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
+		}
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -83,7 +85,7 @@ class ExAppService {
 		try {
 			$this->exAppMapper->insert($exApp);
 			$exApp = $this->exAppMapper->findByAppId($appInfo['id']);
-			$this->cache->remove('/ex_apps');
+			$this->cache?->remove('/ex_apps');
 			if (isset($appInfo['external-app']['routes'])) {
 				$exApp->setRoutes($this->registerExAppRoutes($exApp, $appInfo['external-app']['routes'])->getRoutes() ?? []);
 			}
@@ -121,7 +123,7 @@ class ExAppService {
 		if ($rmRoutes === null) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp routes from the database.', $appId));
 		}
-		$this->cache->remove('/ex_apps');
+		$this->cache?->remove('/ex_apps');
 		return $r === 1 && $rmRoutes !== null;
 	}
 
@@ -208,14 +210,14 @@ class ExAppService {
 	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'api_scopes']): bool {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
-			$this->cache->remove('/ex_apps');
+			$this->cache?->remove('/ex_apps');
 			if (in_array('enabled', $fields) || in_array('version', $fields)) {
 				$this->resetCaches();
 			}
 			return true;
 		} catch (Exception $e) {
 			$this->logger->error(sprintf('Failed to update "%s" ExApp info.', $exApp->getAppid()), ['exception' => $e]);
-			$this->cache->remove('/ex_apps');
+			$this->cache?->remove('/ex_apps');
 			$this->resetCaches();
 		}
 		return false;
@@ -372,14 +374,14 @@ class ExAppService {
 	public function getExApps(): array {
 		try {
 			$cacheKey = '/ex_apps';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records !== null) {
 				return array_map(function ($record) {
 					return $record instanceof ExApp ? $record : new ExApp($record);
 				}, $records);
 			}
 			$records = $this->exAppMapper->findAll();
-			$this->cache->set($cacheKey, $records);
+			$this->cache?->set($cacheKey, $records);
 			return $records;
 		} catch (Exception) {
 			return [];

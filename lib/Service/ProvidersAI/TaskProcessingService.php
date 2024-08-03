@@ -21,14 +21,16 @@ use OCP\TaskProcessing\ShapeDescriptor;
 use Psr\Log\LoggerInterface;
 
 class TaskProcessingService {
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		ICacheFactory $cacheFactory,
 		private readonly TaskProcessingProviderMapper $mapper,
 		private readonly LoggerInterface $logger,
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_task_processing_providers');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_task_processing_providers');
+		}
 	}
 
 	/**
@@ -39,10 +41,10 @@ class TaskProcessingService {
 	public function getRegisteredTaskProcessingProviders(): array {
 		try {
 			$cacheKey = '/ex_task_processing_providers';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 
 			return array_map(static function ($record) {
@@ -199,7 +201,7 @@ class TaskProcessingService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_task_processing_providers');
+		$this->cache?->remove('/ex_task_processing_providers');
 	}
 
 	public function unregisterExAppTaskProcessingProviders(string $appId): int {

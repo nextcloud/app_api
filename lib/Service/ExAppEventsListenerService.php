@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 class ExAppEventsListenerService {
 
-	private ICache $cache;
+	private ?ICache $cache = null;
 
 	public function __construct(
 		private readonly LoggerInterface     	   $logger,
@@ -24,7 +24,9 @@ class ExAppEventsListenerService {
 		ICacheFactory                              $cacheFactory,
 
 	) {
-		$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_events_listener');
+		if ($cacheFactory->isAvailable()) {
+			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_events_listener');
+		}
 	}
 
 	public function registerEventsListener(string $appId, string $eventType, string $actionHandler, array $eventSubtypes = []): ?ExAppEventsListener {
@@ -79,10 +81,10 @@ class ExAppEventsListenerService {
 	public function getEventsListeners(): array {
 		try {
 			$cacheKey = '/ex_events_listener';
-			$records = $this->cache->get($cacheKey);
+			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
 				$records = $this->mapper->findAllEnabled();
-				$this->cache->set($cacheKey, $records);
+				$this->cache?->set($cacheKey, $records);
 			}
 			return array_map(function ($record) {
 				return new ExAppEventsListener($record);
@@ -103,6 +105,6 @@ class ExAppEventsListenerService {
 	}
 
 	public function resetCacheEnabled(): void {
-		$this->cache->remove('/ex_events_listener');
+		$this->cache?->remove('/ex_events_listener');
 	}
 }
