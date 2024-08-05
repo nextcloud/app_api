@@ -247,8 +247,8 @@ class DockerActions implements IDeployActions {
 			}
 		}
 		$this->logger->info(sprintf('Failed to pull "extended" image for %s: %s', $imageId, $r));
-		$this->logger->info(sprintf('Pulling "base" image: %s', $imageId));
 		$imageId = $this->buildBaseImageName($params);
+		$this->logger->info(sprintf('Pulling "base" image: %s', $imageId));
 		try {
 			$r = $this->pullImageInternal($dockerUrl, $exApp, $startPercent, $maxPercent, $imageId);
 		} catch (GuzzleException $e) {
