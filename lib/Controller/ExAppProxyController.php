@@ -263,6 +263,9 @@ class ExAppProxyController extends Controller {
 				unset($headers[$key]);
 			}
 		}
+		if (!isset($headers['X-Origin-IP'])) {
+			$headers['X-Origin-IP'] = $this->request->getRemoteAddress();
+		}
 		return $headers;
 	}
 }
