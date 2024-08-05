@@ -112,4 +112,10 @@
       <code><![CDATA[IEventListener]]></code>
     </MissingTemplateParam>
   </file>
+  <file src="lib/Service/ExAppService.php">
+    <UndefinedClass>
+      <code><![CDATA[\OC\Memcache\APCu]]></code>
+      <code><![CDATA[\OC\Memcache\APCu]]></code>
+    </UndefinedClass>
+  </file>
 </files>

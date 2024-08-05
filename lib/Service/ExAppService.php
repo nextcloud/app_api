@@ -24,6 +24,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
+use OCP\IConfig;
 use OCP\IUser;
 use OCP\IUserManager;
 use Psr\Log\LoggerInterface;
@@ -53,9 +54,17 @@ class ExAppService {
 		private readonly SettingsService            $settingsService,
 		private readonly ExAppEventsListenerService $eventsListenerService,
 		private readonly ExAppOccService            $occService,
+		private readonly IConfig                    $config,
 	) {
 		if ($cacheFactory->isAvailable()) {
-			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
+			$distributedCacheClass = ltrim($config->getSystemValueString('memcache.distributed', ''), '\\');
+			$localCacheClass = ltrim($config->getSystemValueString('memcache.local', ''), '\\');
+			if (
+				($distributedCacheClass === '' && ($localCacheClass !== \OC\Memcache\APCu::class)) &&
+				($distributedCacheClass !== \OC\Memcache\APCu::class)
+			) {
+				$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
+			}
 		}
 	}
 
