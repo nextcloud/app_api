@@ -5,27 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.0 - 2024-07-2x]
+## [3.0.0 - 2024-08-05]
 
-**Breaking change**: new mandatory ExApp lifecycle endpoint to register ExApp routes allowed to be called from Nextcloud or other origins.
+**Breaking change**: new mandatory (if ExAppProxy is used) ExApp routes declaration to register ExApp routes allowed to be called from Nextcloud or other origins.
 
 ### Added
 
-- [Breaking change] Added new ExApp lifecycle endpoint to register ExApp routes allowed to be called from Nextcloud or other origins.
+- ExAppProxy: **Breaking change** added new mandatory (if ExAppProxy is used) routes declaration in `info.xml` to register ExApp routes allowed to be called from Nextcloud or other origins. #327
 - New OCS API endpoint to setAppInitProgress. The old one is marked as deprecated. #319
 - Added default timeout for requestToExApp function set to 3s. #277
-- Added new PublicFunction method `getExApp`. #326
+- PublicFunction: added new method `getExApp`. #326
+- TaskProcessing: added possibility to define custom task types. #324 @provokateurin
+- AdminSettings: added possibility to edit Deploy daemon. #338 @vstelmakh
+- ExAppProxy: added `X-Origin-IP` header for rate-limiting purposes. #351
 
 ### Changed
 
 - ExApp system flag is now deprecated and removed to optimize performance and simplicity. #323
 - PublicFunctions changes: `exAppRequestWithUserInit` and `asyncExAppRequestWithUserInit` are now deprecated. #323
+- Admin settings actions on Deploy daemons now require a password confirmation. #342
+- Changed the ExApp Docker image naming (`<image-name>:version_tag-<compute_device_type>`), the previous one is marked as deprecated (`<image-name>-<compute_device>:version_tag`). #340
+- AppAPI now does not disable ExApp if the ExApp version has changed (`EX-APP-VERSION` header). #341
+- `COMPUTE_DEVICE` environment variable is now always in upper case. #339
 
 ### Fixed
 
 - Allow ExApps management disable and remove actions if default Deploy daemon is not accessible. #314
 - Fixed Deploy daemon availability check using ping timeout set to 3s. #314
 - Fix Test Deploy `image_pull` and `init` steps status update. #315
+- Minor fixes to TaskProcessing provider. #336 @marcelklehr
+- Fixed critical bug with work with APCu cache. #348
+- ExAppProxy: preserve original `Authentication` passed to ExApp via Docker Socket Proxy. #334
+- ExAppProxy: send all headers and raw data to ExApp. #330
+
 
 ## [2.7.0 - 2024-07-01]
 
