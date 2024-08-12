@@ -24,6 +24,7 @@ OC.L10N.register(
     "Save" : "Enregistrar",
     "Register" : "S'inscriure",
     "Your apps" : "Vòstras aplicacions",
+    "Documentation" : "Documentacion",
     "Details" : "Per lo Menut",
     "Changelog" : "Nòta de version",
     "by {author}\n{license}" : "per {author}\n{license}",

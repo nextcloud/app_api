@@ -91,6 +91,7 @@ class ExAppProxyController extends Controller {
 			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 				RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
+				RequestOptions::TIMEOUT => 0,
 			],
 			request: $this->request,
 		);
@@ -112,6 +113,7 @@ class ExAppProxyController extends Controller {
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
+			RequestOptions::TIMEOUT => 0,
 		];
 		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
 			unset($options['headers']['Content-Type']);
@@ -149,6 +151,7 @@ class ExAppProxyController extends Controller {
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::BODY => $stream,
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
+			RequestOptions::TIMEOUT => 0,
 		];
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'PUT',
@@ -175,6 +178,7 @@ class ExAppProxyController extends Controller {
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::BODY => $stream,
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
+			RequestOptions::TIMEOUT => 0,
 		];
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'DELETE',

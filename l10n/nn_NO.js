@@ -13,6 +13,7 @@ OC.L10N.register(
     "Edit" : "Rediger",
     "Host" : "Tenar",
     "Save" : "Lagre",
+    "Documentation" : "Dokumentasjon",
     "Details" : "Detaljar",
     "Enable" : "SLå på",
     "Disable" : "Slå av"

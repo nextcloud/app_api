@@ -47,7 +47,7 @@ OC.L10N.register(
     "Save" : "Zapisz",
     "Register" : "Zarejestruj się",
     "Your apps" : "Twoje aplikacje",
-    "Admin settings" : "Ustawienia administratora",
+    "Documentation" : "Dokumentacja",
     "Details" : "Szczegóły",
     "Changelog" : "Dziennik zmian",
     "by {author}\n{license}" : "wykonane przez {author}\n{license}",

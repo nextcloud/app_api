@@ -38,6 +38,7 @@ OC.L10N.register(
     "Save" : "Sarva",
     "Register" : "Registra",
     "Your apps" : "Is aplicatziones tuas",
+    "Documentation" : "Documentatzione",
     "Details" : "Detàllios",
     "Changelog" : "Registru de is càmbios",
     "by {author}\n{license}" : "de {author}\n{license}",

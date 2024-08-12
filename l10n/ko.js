@@ -163,7 +163,7 @@ OC.L10N.register(
     "DaemonConfig successfully registered" : "데몬Config가 성공적으로 등록되었습니다.",
     "Failed to register DaemonConfig. Check the logs" : "데몬Config를 등록하지 못했습니다. 로그를 확인하세요.",
     "Your apps" : "내 앱",
-    "Admin settings" : "관리자 설정",
+    "Documentation" : "문서",
     "Details" : "세부사항",
     "Changelog" : "변경 기록",
     "Scopes" : "범위(Scopes)",

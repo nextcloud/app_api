@@ -39,6 +39,7 @@ OC.L10N.register(
     "Save" : "שמירה",
     "Register" : "רישום",
     "Your apps" : "היישומונים שלך",
+    "Documentation" : "תיעוד",
     "Details" : "פרטים",
     "Changelog" : "יומן שינויים",
     "by {author}\n{license}" : "מאת {author}\n{license}",

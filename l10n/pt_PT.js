@@ -33,6 +33,7 @@ OC.L10N.register(
     "Save" : "Guardar",
     "Register" : "Registar",
     "Your apps" : "As suas apps",
+    "Documentation" : "Documentação",
     "Details" : "Detalhes",
     "Changelog" : "Registo de alterações",
     "Disabled apps" : "Apps desativadas",

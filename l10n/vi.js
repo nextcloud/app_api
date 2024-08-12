@@ -36,6 +36,7 @@ OC.L10N.register(
     "Save" : "Lưu",
     "Register" : "Đăng ký",
     "Your apps" : "Ứng dụng của bạn",
+    "Documentation" : "Tài liệu",
     "Details" : "Chi tiết",
     "Changelog" : "Sổ cập nhập thay đổi",
     "by {author}\n{license}" : "bởi {tác giả}{giấy phép}",

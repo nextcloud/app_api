@@ -15,6 +15,7 @@ OC.L10N.register(
     "Enabled" : "Activate",
     "Confirm" : "Confirmar",
     "Save" : "Salveguardar",
+    "Documentation" : "Documentation",
     "Details" : "Detalios",
     "Disable" : "Disactivar"
 },

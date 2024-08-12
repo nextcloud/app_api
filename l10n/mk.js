@@ -39,6 +39,7 @@ OC.L10N.register(
     "Save" : "Сними",
     "Register" : "Регистрирај се",
     "Your apps" : "Ваши апликации",
+    "Documentation" : "Документација",
     "Details" : "Детали",
     "Changelog" : "Листа на промени",
     "by {author}\n{license}" : "од {author}\n{license}",

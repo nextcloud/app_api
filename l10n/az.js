@@ -20,6 +20,7 @@ OC.L10N.register(
     "Enabled" : "İşə salınıb",
     "Confirm" : "Təsdiq edin",
     "Save" : "Saxla",
+    "Documentation" : "Sənədlər",
     "Details" : "Detallar",
     "Changelog" : "Dəyişikliklər jurnalı",
     "Updates" : "Yenilənmələr",

@@ -52,6 +52,7 @@ OC.L10N.register(
     "Save" : "Speichern",
     "Register" : "Registrieren",
     "Your apps" : "Deine Apps",
+    "Documentation" : "Dokumentation",
     "Details" : "Details",
     "Changelog" : "Liste der Veränderungen",
     "by {author}\n{license}" : "von {author}\n{license}",

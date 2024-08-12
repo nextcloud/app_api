@@ -13,6 +13,7 @@
     "Enabled" : "Activate",
     "Confirm" : "Confirmar",
     "Save" : "Salveguardar",
+    "Documentation" : "Documentation",
     "Details" : "Detalios",
     "Disable" : "Disactivar"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

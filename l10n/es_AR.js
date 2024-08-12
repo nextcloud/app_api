@@ -28,6 +28,7 @@ OC.L10N.register(
     "Save" : "Guardar",
     "Register" : "Registrar",
     "Your apps" : "Sus aplicaciones",
+    "Documentation" : "Documentación",
     "Details" : "Detalles",
     "Changelog" : "Bitácora de cambios",
     "Disabled apps" : "Aplicaciones deshabilitadas",

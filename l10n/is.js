@@ -38,6 +38,7 @@ OC.L10N.register(
     "Save" : "Vista",
     "Register" : "Nýskráning",
     "Your apps" : "Forritin þín",
+    "Documentation" : "Hjálparskjöl",
     "Details" : "Nánar",
     "Changelog" : "Breytingaskrá",
     "by {author}\n{license}" : "frá {author}\n{license}",

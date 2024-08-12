@@ -40,6 +40,7 @@ OC.L10N.register(
     "Save" : "ذخیره",
     "Register" : "ثبت‌نام",
     "Your apps" : "برنامه‌های شما",
+    "Documentation" : "مستندات",
     "Details" : "جزییات",
     "Changelog" : "تغییر",
     "by {author}\n{license}" : "by {author}\n{license}",

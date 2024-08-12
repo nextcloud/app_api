@@ -162,7 +162,7 @@ OC.L10N.register(
     "DaemonConfig successfully registered" : "DaemonConfig registrado exitosamente",
     "Failed to register DaemonConfig. Check the logs" : "Fallo al registrar DaemonConfig. Chequee los registros",
     "Your apps" : "Tus apps",
-    "Admin settings" : "Opciones de Admin",
+    "Documentation" : "Documentación",
     "Details" : "Detalles",
     "Changelog" : "Registro de cambios",
     "Scopes" : "Ámbitos",

@@ -33,6 +33,7 @@ OC.L10N.register(
     "Save" : "บันทึก",
     "Register" : "ลงทะเบียน",
     "Your apps" : "แอปของคุณ",
+    "Documentation" : "เอกสารประกอบ",
     "Details" : "รายละเอียด",
     "Changelog" : "บันทึกการเปลี่ยนแปลง",
     "by {author}\n{license}" : "โดย {author}\n{license}",

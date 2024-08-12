@@ -40,6 +40,7 @@ OC.L10N.register(
     "Save" : "Запиши",
     "Register" : "Регистрация",
     "Your apps" : "Вашите приложения",
+    "Documentation" : "Документация",
     "Details" : "Подробности",
     "Changelog" : "Списък на промените",
     "by {author}\n{license}" : "от {author}\n{license}",

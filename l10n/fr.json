@@ -65,6 +65,7 @@
     "Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)" : "Nom d’hôte ou chemin d’accès au daemon Docker (par ex. nextcloud-appapi-dsp:2375, /var/run/docker.sock)",
     "Password must be at least 12 characters long" : "Le mot de passe doit comporter au moins 12 caractères",
     "Your apps" : "Vos applications",
+    "Documentation" : "Documentation",
     "Details" : "Détails",
     "Changelog" : "Journal des modifications",
     "Scopes" : "Portées",

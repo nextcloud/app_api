@@ -11,6 +11,7 @@ OC.L10N.register(
     "Enabled" : "Aktivéiert",
     "Confirm" : "Konfirméieren",
     "Save" : "Späicheren",
+    "Documentation" : "Dokumentatioun",
     "Details" : "Detailer",
     "Updates" : "Updates",
     "Disable" : "Ofschalten"

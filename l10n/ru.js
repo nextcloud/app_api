@@ -59,7 +59,7 @@ OC.L10N.register(
     "Check connection" : "Проверить подключение",
     "Daemon with this name already exists" : "Служба с таким названием уже существует",
     "Your apps" : "Ваши приложения",
-    "Admin settings" : "Настройки администратора",
+    "Documentation" : "Документация",
     "Details" : "Свойства",
     "Changelog" : "Журнал изменений",
     "Scopes" : "Области",

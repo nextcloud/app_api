@@ -40,6 +40,7 @@ OC.L10N.register(
     "Save" : "保存する",
     "Register" : "登録",
     "Your apps" : "あなたのアプリ",
+    "Documentation" : "ドキュメント",
     "Details" : "詳細",
     "Changelog" : "変更履歴",
     "by {author}\n{license}" : "作者 {author}\n{license}",

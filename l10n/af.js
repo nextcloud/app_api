@@ -17,6 +17,7 @@ OC.L10N.register(
     "Save" : "Stoor",
     "Register" : "Registreer",
     "Your apps" : "U toeps",
+    "Documentation" : "Dokumentasie",
     "Details" : "Besonderhede",
     "Changelog" : "Veranderingslog",
     "Disabled apps" : "Gedeaktiveerde toeps",

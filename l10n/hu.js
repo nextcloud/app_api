@@ -40,6 +40,7 @@ OC.L10N.register(
     "Save" : "Mentés",
     "Register" : "Regisztráció",
     "Your apps" : "Az Ön alkalmazásai",
+    "Documentation" : "Dokumentáció",
     "Details" : "Részletek",
     "Changelog" : "Változásnapló",
     "by {author}\n{license}" : "szerző: {author}\n{license}",
