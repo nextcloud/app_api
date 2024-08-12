@@ -34,6 +34,7 @@ OC.L10N.register(
     "Save" : "Simpan",
     "Register" : "Daftar",
     "Your apps" : "Aplikasi Anda",
+    "Documentation" : "Dokumentasi",
     "Details" : "Detail",
     "Changelog" : "Log pembaruan",
     "Active apps" : "Aplikasi aktif",

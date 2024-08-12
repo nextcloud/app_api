@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Obriši",
     "Edit" : "Izmeni",
     "Save" : "Sačuvaj",
+    "Documentation" : "Dokumentacija",
     "Details" : "Detalji",
     "Disable" : "Isključi"
 },

@@ -41,6 +41,7 @@ OC.L10N.register(
     "Save" : "Spara",
     "Register" : "Registrera",
     "Your apps" : "Dina appar",
+    "Documentation" : "Dokumentation",
     "Details" : "Detaljer",
     "Changelog" : "Ändringslogg",
     "by {author}\n{license}" : "av {author}\n{license}",

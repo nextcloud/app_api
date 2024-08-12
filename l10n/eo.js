@@ -33,6 +33,7 @@ OC.L10N.register(
     "Save" : "Konservi",
     "Register" : "Registriĝi",
     "Your apps" : "Viaj aplikaĵoj",
+    "Documentation" : "Dokumentaro",
     "Details" : "Detaloj",
     "Changelog" : "Ŝanĝoprotokolo",
     "Active apps" : "Aktivaj aplikaĵoj",

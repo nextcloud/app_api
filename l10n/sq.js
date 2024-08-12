@@ -30,6 +30,7 @@ OC.L10N.register(
     "Save" : "Ruaje",
     "Register" : "Regjistrohu",
     "Your apps" : "Aplikacionet tuaja ",
+    "Documentation" : "Dokumentacioni",
     "Details" : "Detajet",
     "Changelog" : "Katalogu i ndryshimeve",
     "Active apps" : "Aplikacionet aktive",

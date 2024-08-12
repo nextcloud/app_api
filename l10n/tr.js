@@ -139,7 +139,7 @@ OC.L10N.register(
     "DaemonConfig successfully registered" : "DaemonConfig kaydedildi",
     "Failed to register DaemonConfig. Check the logs" : "DaemonConfig kaydedilemedi. Günlük kayıtlarına bakın",
     "Your apps" : "Uygulamalarınız",
-    "Admin settings" : "Yönetici ayarları",
+    "Documentation" : "Belgeler",
     "Details" : "Ayrıntılar",
     "Changelog" : "Değişiklik günlüğü",
     "Scopes" : "Kapsamlar",

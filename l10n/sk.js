@@ -45,6 +45,7 @@ OC.L10N.register(
     "Save" : "Uložiť",
     "Register" : "Registrovať",
     "Your apps" : "Vaše aplikácie",
+    "Documentation" : "Dokumentácia",
     "Details" : "Podrobnosti",
     "Changelog" : "Zoznam zmien",
     "by {author}\n{license}" : "od {author}\n{license}",

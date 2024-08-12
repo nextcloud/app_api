@@ -164,7 +164,7 @@ OC.L10N.register(
     "DaemonConfig successfully registered" : "DaemonConfig је успешно регистрована",
     "Failed to register DaemonConfig. Check the logs" : "Није успело регистровање DaemonConfig. Погледајте дневнике",
     "Your apps" : "Ваше апликације",
-    "Admin settings" : "Админ подешавања",
+    "Documentation" : "Документација",
     "Details" : "Детаљи",
     "Changelog" : "Дневник измена",
     "Scopes" : "Опсези важења",

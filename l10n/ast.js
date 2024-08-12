@@ -65,6 +65,7 @@ OC.L10N.register(
     "Check connection" : "Comprobar la conexón",
     "Daemon with this name already exists" : "Yá esiste un degorriu con esti nome",
     "Your apps" : "Les tos aplicaciones",
+    "Documentation" : "Documentación",
     "Details" : "Detalles",
     "Changelog" : "Rexistru de cambeos",
     "Scopes" : "Ámbitos",

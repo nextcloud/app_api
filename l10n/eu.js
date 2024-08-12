@@ -57,6 +57,7 @@ OC.L10N.register(
     "Save" : "Gorde",
     "Register" : "Erregistratu",
     "Your apps" : "Zure aplikazioak",
+    "Documentation" : "Dokumentazioa",
     "Details" : "Xehetasunak",
     "Changelog" : "Aldaketak",
     "by {author}\n{license}" : "{autor}-(e)k egina\n{license}",

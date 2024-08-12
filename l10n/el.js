@@ -40,6 +40,7 @@ OC.L10N.register(
     "Save" : "Αποθήκευση",
     "Register" : "Εγγραφή",
     "Your apps" : "Οι εφαρμογές σας",
+    "Documentation" : "Τεκμηρίωση",
     "Details" : "Λεπτομέρειες",
     "Changelog" : "Αρχείο καταγραφής αλλαγών",
     "by {author}\n{license}" : "από {author}\n{license}",

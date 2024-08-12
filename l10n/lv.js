@@ -23,6 +23,7 @@ OC.L10N.register(
     "Network" : "Tīkls",
     "Confirm" : "Apstiprināt",
     "Save" : "Saglabāt",
+    "Documentation" : "Dokumentācija",
     "Details" : "Detaļas",
     "Changelog" : "Izmaiņu žurnāls",
     "Updates" : "Atjauninājumi",

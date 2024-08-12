@@ -37,6 +37,7 @@ OC.L10N.register(
     "Save" : "Gem",
     "Register" : "Registér",
     "Your apps" : "Dine apps",
+    "Documentation" : "Dokumentation",
     "Details" : "Detaljer",
     "Changelog" : "Ændringslog",
     "by {author}\n{license}" : "af {author}\n{licens}",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Edit" : "தொகுக்க",
     "Host" : "ஓம்புனர்",
     "Save" : "சேமிக்க ",
+    "Documentation" : "ஆவணமாக்கல்",
     "Details" : "விவரங்கள்",
     "Enable" : "இயலுமைப்படுத்துக",
     "Disable" : "இயலுமைப்ப"

@@ -40,6 +40,7 @@ OC.L10N.register(
     "Save" : "Shrani",
     "Register" : "Vpis računa",
     "Your apps" : "Vsi programi",
+    "Documentation" : "Dokumentacija",
     "Details" : "Podrobnosti",
     "Changelog" : "Dnevnik sprememb",
     "by {author}\n{license}" : "Razvoj: {author}\nDovoljenje: {license}",

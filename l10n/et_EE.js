@@ -30,6 +30,7 @@ OC.L10N.register(
     "Save" : "Salvesta",
     "Register" : "Registreeru",
     "Your apps" : "Sinu rakendused",
+    "Documentation" : "Dokumentatsioon",
     "Details" : "Üksikasjad",
     "Changelog" : "Muudatuste logi",
     "Disabled apps" : "Keelatud rakendused",

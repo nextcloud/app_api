@@ -27,6 +27,7 @@ OC.L10N.register(
     "Save" : "Salvează",
     "Register" : "Înregistrează-te",
     "Your apps" : "Aplicațiile tale",
+    "Documentation" : "Documentație",
     "Details" : "Detalii",
     "Changelog" : "Listă modificări",
     "Disabled apps" : "Aplicații inactive",

@@ -47,6 +47,7 @@ OC.L10N.register(
     "Save" : "保存",
     "Register" : "注册",
     "Your apps" : "您的应用",
+    "Documentation" : "文档",
     "Details" : "详情",
     "Changelog" : "更新日志",
     "by {author}\n{license}" : "按照 {author}\n{license}",

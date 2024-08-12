@@ -40,6 +40,7 @@ OC.L10N.register(
     "Save" : "Tallenna",
     "Register" : "Rekisteröidy",
     "Your apps" : "Sovelluksesi",
+    "Documentation" : "Dokumentaatio",
     "Details" : "Tiedot",
     "Changelog" : "Muutosloki",
     "by {author}\n{license}" : "tekijä {author}\n{license}",

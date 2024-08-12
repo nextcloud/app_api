@@ -38,6 +38,7 @@ OC.L10N.register(
     "Save" : "Opslaan",
     "Register" : "Aanmelden",
     "Your apps" : "Jouw apps",
+    "Documentation" : "Documentatie",
     "Details" : "Details",
     "Changelog" : "Wijzigingslog",
     "by {author}\n{license}" : "door {author}\n{license}",

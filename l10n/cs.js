@@ -59,7 +59,6 @@ OC.L10N.register(
     "Save" : "Uložit",
     "Register" : "Registrovat",
     "Your apps" : "Vaše aplikace",
-    "Admin settings" : "Nastavení pro správu",
     "Details" : "Podrobnosti",
     "Changelog" : "Souhrn změn",
     "Scopes" : "Rozsahy",

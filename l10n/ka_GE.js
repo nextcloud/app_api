@@ -30,6 +30,7 @@ OC.L10N.register(
     "Save" : "შენახვა",
     "Register" : "რეგისტრაცია",
     "Your apps" : "თქვენი აპლიკაციები",
+    "Documentation" : "დოკუმენტაცია",
     "Details" : "დეტალები",
     "Changelog" : "ცვლილებების ლოგი",
     "Disabled apps" : "არამოქმედი აპლიკაციები",

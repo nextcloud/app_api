@@ -10,6 +10,7 @@ OC.L10N.register(
     "Host" : "ម៉ាស៊ីន​ផ្ទុក",
     "Enabled" : "បាន​បើក",
     "Save" : "រក្សាទុក",
+    "Documentation" : "កម្រង​ឯកសារ",
     "Details" : "ព័ត៌មាន​លម្អិត",
     "Disable" : "បិទ"
 },

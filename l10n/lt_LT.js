@@ -40,6 +40,7 @@ OC.L10N.register(
     "Save" : "Įrašyti",
     "Register" : "Registruotis",
     "Your apps" : "Jūsų programėlės",
+    "Documentation" : "Dokumentacija",
     "Details" : "Išsamiau",
     "Changelog" : "Keitinių žurnalas",
     "by {author}\n{license}" : "pagal {author}\n{license}",

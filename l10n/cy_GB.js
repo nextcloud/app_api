@@ -14,6 +14,7 @@ OC.L10N.register(
     "Confirm" : "Cadarnhau",
     "Save" : "Cadw",
     "Register" : "Cofrestru",
+    "Documentation" : "Dogfennaeth",
     "Details" : "Manylion",
     "Changelog" : "Cofnod newid",
     "Featured apps" : "Apiau dan sylw",
