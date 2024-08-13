@@ -15,11 +15,13 @@ use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IPromise;
 use OCP\Http\Client\IResponse;
+use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\L10N\IFactory;
+use OCP\Log\ILogFactory;
 use OCP\Security\Bruteforce\IThrottler;
 use Psr\Log\LoggerInterface;
 
@@ -29,7 +31,9 @@ class AppAPIService {
 
 	public function __construct(
 		private readonly LoggerInterface         $logger,
+		private readonly ILogFactory			 $logFactory,
 		private readonly IThrottler              $throttler,
+		private readonly IConfig 				 $config,
 		IClientService                           $clientService,
 		private readonly IUserSession            $userSession,
 		private readonly ISession                $session,
@@ -342,7 +346,7 @@ class AppAPIService {
 				}
 			}
 
-			return $this->finalizeRequestToNC($userId, $request);
+			return $this->finalizeRequestToNC($exApp, $userId, $request);
 		} else {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
@@ -360,7 +364,7 @@ class AppAPIService {
 	 *  - sets active user (null if not a user context)
 	 *  - updates ExApp last response time
 	 */
-	private function finalizeRequestToNC(string $userId, IRequest $request): bool {
+	private function finalizeRequestToNC(ExApp $exApp, string $userId, IRequest $request): bool {
 		if ($userId !== '') {
 			$activeUser = $this->userManager->get($userId);
 			if ($activeUser === null) {
@@ -368,6 +372,7 @@ class AppAPIService {
 				return false;
 			}
 			$this->userSession->setUser($activeUser);
+			$this->logImpersonatingRequest($exApp->getAppid());
 		} else {
 			$this->userSession->setUser(null);
 		}
@@ -395,6 +400,18 @@ class AppAPIService {
 			return true;
 		}
 		return false;
+	}
+
+	private function getCustomLogger(string $name): LoggerInterface {
+		$path = $this->config->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/' . $name;
+		return $this->logFactory->getCustomPsrLogger($path);
+	}
+
+	private function logImpersonatingRequest(string $appId): void {
+		$exAppsImpersonationLogger = $this->getCustomLogger('exapp_impersonation.log');
+		$exAppsImpersonationLogger->warning('impersonation request', [
+			'app' => $appId,
+		]);
 	}
 
 	/**
