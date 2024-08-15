@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.0 - 2024-08-15]
+
+**Breaking change**: Task processing API for NC30 AI API. (llm2 and translate2 apps) 
+
+### Added
+
+- Added logging in a separate file of ExApp requests made on behalf of user. #360
+
+### Changed
+
+- Task processing API was finalized. #359
+
+### Fixed
+
+- ExAppProxy: Proxy: do not set timeout for requests to ExApps. #357
+- Bumped axios dependency from 1.6.2 to 1.7.4 #361
+
 ## [3.0.1 - 2024-08-07]
 
 ### Fixed
