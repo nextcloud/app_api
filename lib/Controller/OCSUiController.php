@@ -39,7 +39,7 @@ class OCSUiController extends OCSController {
 	/**
 	 * @throws OCSBadRequestException
 	 *
-	 * @depreacted since AppAPI 2.6.0, use registerFileActionMenuV2 instead
+	 * @deprecated since AppAPI 2.6.0, use registerFileActionMenuV2 instead
 	 */
 	#[AppAPIAuth]
 	#[PublicPage]
