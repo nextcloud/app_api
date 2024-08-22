@@ -16,7 +16,6 @@ use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
-use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
@@ -46,7 +45,6 @@ class ExAppsPageController extends Controller {
 	private CategoryFetcher $categoryFetcher;
 	private IFactory $l10nFactory;
 	private ExAppFetcher $exAppFetcher;
-	private ExAppApiScopeService $exAppApiScopeService;
 	private IL10N $l10n;
 	private LoggerInterface $logger;
 	private IAppManager $appManager;
@@ -57,7 +55,6 @@ class ExAppsPageController extends Controller {
 		IInitialState $initialStateService,
 		AppAPIService $service,
 		DaemonConfigService $daemonConfigService,
-		ExAppApiScopeService $exAppApiScopeService,
 		DockerActions $dockerActions,
 		CategoryFetcher $categoryFetcher,
 		IFactory $l10nFactory,
@@ -73,7 +70,6 @@ class ExAppsPageController extends Controller {
 		$this->config = $config;
 		$this->service = $service;
 		$this->daemonConfigService = $daemonConfigService;
-		$this->exAppApiScopeService = $exAppApiScopeService;
 		$this->dockerActions = $dockerActions;
 		$this->categoryFetcher = $categoryFetcher;
 		$this->l10nFactory = $l10nFactory;
@@ -192,11 +188,8 @@ class ExAppsPageController extends Controller {
 				$currentVersion = $app['releases'][0]['version'];
 			}
 
-			$scopes = null;
 			$daemon = null;
-
 			if ($exApp !== null) {
-				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes());
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 			}
 
@@ -237,7 +230,6 @@ class ExAppsPageController extends Controller {
 				'needsDownload' => !$existsLocally,
 				'fromAppStore' => true,
 				'appstoreData' => $app,
-				'scopes' => $scopes,
 				'daemon' => $daemon,
 				'status' => $exApp !== null ? $exApp->getStatus() : [],
 				'error' => $exApp !== null ? $exApp->getStatus()['error'] ?? '' : '',
@@ -330,7 +322,6 @@ class ExAppsPageController extends Controller {
 			if (!in_array($app['id'], $registeredAppsIds)) {
 				$exApp = $this->exAppService->getExApp($app['id']);
 				$daemon = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-				$scopes = $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes());
 
 				$formattedLocalApps[] = [
 					'id' => $app['id'],
@@ -368,7 +359,6 @@ class ExAppsPageController extends Controller {
 					'needsDownload' => false,
 					'fromAppStore' => false,
 					'appstoreData' => $app,
-					'scopes' => $scopes,
 					'daemon' => $daemon,
 					'exAppUrl' => $this->service->getExAppUrl($exApp, $exApp->getPort(), $auth),
 					'releases' => [],
@@ -387,7 +377,7 @@ class ExAppsPageController extends Controller {
 		$exApp = $this->exAppService->getExApp($appId);
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
-			if (!$this->service->runOccCommand(sprintf("app_api:app:register --force-scopes --silent %s", $appId))) {
+			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s", $appId))) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
 			$elapsedTime = 0;
@@ -432,7 +422,6 @@ class ExAppsPageController extends Controller {
 	/**
 	 * Default forced ExApp update process.
 	 * Update approval via password confirmation.
-	 * Scopes approval does not applied in UI for now.
 	 */
 	#[PasswordConfirmationRequired]
 	#[NoCSRFRequired]
@@ -446,7 +435,7 @@ class ExAppsPageController extends Controller {
 		}
 
 		$exAppOldVersion = $this->exAppService->getExApp($appId)->getVersion();
-		if (!$this->service->runOccCommand(sprintf("app_api:app:update --force-scopes --silent %s", $appId))) {
+		if (!$this->service->runOccCommand(sprintf("app_api:app:update --silent %s", $appId))) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting update of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 

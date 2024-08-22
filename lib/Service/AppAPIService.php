@@ -40,7 +40,6 @@ class AppAPIService {
 		private readonly IUserManager            $userManager,
 		private readonly IFactory                $l10nFactory,
 		private readonly ExAppService            $exAppService,
-		private readonly ExAppApiScopeService    $exAppApiScopeService,
 		private readonly DockerActions           $dockerActions,
 		private readonly ManualActions           $manualActions,
 		private readonly AppAPICommonService     $commonService,
@@ -277,7 +276,6 @@ class AppAPIService {
 	 *  - checks if ExApp exists and is enabled
 	 *  - checks if ExApp version changed and updates it in database
 	 *  - checks if ExApp shared secret valid
-	 *  - checks ExApp scopes <-> ExApp API copes
 	 *
 	 * More info in docs: https://cloud-py-api.github.io/app_api/authentication.html
 	 */
@@ -316,36 +314,14 @@ class AppAPIService {
 					$this->logger->error(sprintf('Error getting path info. Error: %s', $e->getMessage()), ['exception' => $e]);
 					return false;
 				}
-			} else {
-				$path = '/dav/';
-			}
-
-			if (($this->exAppApiScopeService->sanitizeOcsRoute($path) !== '/apps/app_api/ex-app/state') && !$exApp->getEnabled()) {
-				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
-				return false;
+				if (($this->sanitizeOcsRoute($path) !== '/apps/app_api/ex-app/state') && !$exApp->getEnabled()) {
+					$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
+					return false;
+				}
 			}
 			if (!$this->handleExAppVersionChange($request, $exApp)) {
 				return false;
 			}
-
-			$allScopesFlag = (bool)$this->getByScope($exApp, ExAppApiScopeService::ALL_API_SCOPE);
-			$apiScope = $this->exAppApiScopeService->getApiScopeByRoute($path);
-
-			if (!$allScopesFlag) {
-				if ($apiScope === null) {
-					$this->logger->error(sprintf('Failed to check apiScope %s', $path));
-					return false;
-				}
-
-				// BASIC ApiScope is granted to all ExApps (all API routes with BASIC scope group).
-				if ($apiScope['scope_group'] !== ExAppApiScopeService::BASIC_API_SCOPE) {
-					if (!$this->passesScopeCheck($exApp, $apiScope['scope_group'])) {
-						$this->logger->error(sprintf('ExApp %s not passed scope group check %s', $exApp->getAppid(), $path));
-						return false;
-					}
-				}
-			}
-
 			return $this->finalizeRequestToNC($exApp, $userId, $request, $delay);
 		} else {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
@@ -388,20 +364,14 @@ class AppAPIService {
 		return true;
 	}
 
-	public function getByScope(ExApp $exApp, int $apiScope): ?int {
-		foreach ($exApp->getApiScopes() as $scope) {
-			if ($scope === $apiScope) {
-				return $scope;
-			}
+	/**
+	 * Check if the given route has ocs prefix and cut it off
+	 */
+	private function sanitizeOcsRoute(string $route): string {
+		if (preg_match("/\/ocs\/v([12])\.php/", $route, $matches)) {
+			return str_replace($matches[0], '', $route);
 		}
-		return null;
-	}
-
-	public function passesScopeCheck(ExApp $exApp, int $apiScope): bool {
-		if (in_array($apiScope, $exApp->getApiScopes(), true)) {
-			return true;
-		}
-		return false;
+		return $route;
 	}
 
 	private function getCustomLogger(string $name): LoggerInterface {
