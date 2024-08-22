@@ -37,6 +37,7 @@ class ExAppMapper extends QBMapper {
 			'r.verb',
 			'r.access_level',
 			'r.headers_to_exclude',
+			'r.bruteforce_protection',
 		)
 			->from($this->tableName, 'a')
 			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
@@ -68,6 +69,7 @@ class ExAppMapper extends QBMapper {
 			'r.verb',
 			'r.access_level',
 			'r.headers_to_exclude',
+			'r.bruteforce_protection',
 		)
 			->from($this->tableName, 'a')
 			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
@@ -125,6 +127,7 @@ class ExAppMapper extends QBMapper {
 					'verb' => $row['verb'],
 					'access_level' => $row['access_level'],
 					'headers_to_exclude' => $row['headers_to_exclude'],
+					'bruteforce_protection' => $row['bruteforce_protection'],
 				];
 				$lastAppRoutes = $lastApp->getRoutes();
 				$lastAppRoutes[] = $route;
@@ -195,6 +198,9 @@ class ExAppMapper extends QBMapper {
 		$qb = $this->db->getQueryBuilder();
 		$count = 0;
 		foreach ($routes as $route) {
+			if (isset($route['bruteforce_protection']) && is_string($route['bruteforce_protection'])) {
+				$route['bruteforce_protection'] = json_decode($route['bruteforce_protection'], false);
+			}
 			$qb->insert('ex_apps_routes')
 				->values([
 					'appid' => $qb->createNamedParameter($exApp->getAppid()),
@@ -202,6 +208,11 @@ class ExAppMapper extends QBMapper {
 					'verb' => $qb->createNamedParameter($route['verb']),
 					'access_level' => $qb->createNamedParameter($route['access_level']),
 					'headers_to_exclude' => $qb->createNamedParameter(is_array($route['headers_to_exclude']) ? json_encode($route['headers_to_exclude']) : '[]'),
+					'bruteforce_protection' => $qb->createNamedParameter(
+						isset($route['bruteforce_protection']) && is_array($route['bruteforce_protection'])
+							? json_encode($route['bruteforce_protection'])
+							: '[]'
+					),
 				]);
 			$count += $qb->executeStatement();
 		}

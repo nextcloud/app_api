@@ -24,6 +24,7 @@ use OCP\Files\IMimeTypeDetector;
 use OCP\Http\Client\IResponse;
 use OCP\IGroupManager;
 use OCP\IRequest;
+use OCP\Security\Bruteforce\IThrottler;
 use Psr\Log\LoggerInterface;
 
 class ExAppProxyController extends Controller {
@@ -37,6 +38,7 @@ class ExAppProxyController extends Controller {
 		private readonly ?string                           $userId,
 		private readonly IGroupManager                     $groupManager,
 		private readonly LoggerInterface                   $logger,
+		private readonly IThrottler              		   $throttler,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -84,7 +86,10 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppGet(string $appId, string $other): Response {
-		$exApp = $this->checkAccess($appId, $other);
+		$route = [];
+		$bruteforceProtection = [];
+		$delay = 0;
+		$exApp = $this->prepareProxy($appId, $other, $route, $bruteforceProtection, $delay);
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
@@ -92,7 +97,7 @@ class ExAppProxyController extends Controller {
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
-				RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
+				RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 				RequestOptions::TIMEOUT => 0,
 			],
 			request: $this->request,
@@ -100,6 +105,8 @@ class ExAppProxyController extends Controller {
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
+
+		$this->processBruteforce($bruteforceProtection, $delay, $response->getStatusCode());
 		return $this->createProxyResponse($other, $response);
 	}
 
@@ -107,14 +114,17 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppPost(string $appId, string $other): Response {
-		$exApp = $this->checkAccess($appId, $other);
+		$route = [];
+		$bruteforceProtection = [];
+		$delay = 0;
+		$exApp = $this->prepareProxy($appId, $other, $route, $bruteforceProtection, $delay);
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
 
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
-			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
+			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
 		];
 		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
@@ -136,6 +146,8 @@ class ExAppProxyController extends Controller {
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
+
+		$this->processBruteforce($bruteforceProtection, $delay, $response->getStatusCode());
 		return $this->createProxyResponse($other, $response);
 	}
 
@@ -143,7 +155,10 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppPut(string $appId, string $other): Response {
-		$exApp = $this->checkAccess($appId, $other);
+		$route = [];
+		$bruteforceProtection = [];
+		$delay = 0;
+		$exApp = $this->prepareProxy($appId, $other, $route, $bruteforceProtection, $delay);
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
@@ -152,7 +167,7 @@ class ExAppProxyController extends Controller {
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::BODY => $stream,
-			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
+			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
 		];
 		$response = $this->service->requestToExApp2(
@@ -163,6 +178,8 @@ class ExAppProxyController extends Controller {
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
+
+		$this->processBruteforce($bruteforceProtection, $delay, $response->getStatusCode());
 		return $this->createProxyResponse($other, $response);
 	}
 
@@ -170,7 +187,10 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppDelete(string $appId, string $other): Response {
-		$exApp = $this->checkAccess($appId, $other);
+		$route = [];
+		$bruteforceProtection = [];
+		$delay = 0;
+		$exApp = $this->prepareProxy($appId, $other, $route, $bruteforceProtection, $delay);
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
@@ -179,7 +199,7 @@ class ExAppProxyController extends Controller {
 		$options = [
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::BODY => $stream,
-			RequestOptions::HEADERS => $this->buildHeadersWithExclude($exApp, $other, getallheaders()),
+			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
 		];
 		$response = $this->service->requestToExApp2(
@@ -190,10 +210,15 @@ class ExAppProxyController extends Controller {
 		if (is_array($response)) {
 			return (new Response())->setStatus(500);
 		}
+
+		$this->processBruteforce($bruteforceProtection, $delay, $response->getStatusCode());
 		return $this->createProxyResponse($other, $response);
 	}
 
-	private function checkAccess(string $appId, string $other): ?ExApp {
+	private function prepareProxy(
+		string $appId, string $other, array &$route, array &$bruteforceProtection, int &$delay
+	): ?ExApp {
+		$delay = 0;
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			$this->logger->debug(
@@ -205,13 +230,31 @@ class ExAppProxyController extends Controller {
 				sprintf('Returning status 404 for "%s": ExApp is not enabled.', $other)
 			);
 			return null;
-		} elseif (!$this->passesExAppProxyRoutesChecks($exApp, $other)) {
+		}
+		$route = $this->passesExAppProxyRoutesChecks($exApp, $other);
+		if (empty($route)) {
 			$this->logger->debug(
 				sprintf('Returning status 404 for "%s": route does not pass the access check.', $other)
 			);
 			return null;
 		}
+		$bruteforceProtection = isset($route['bruteforce_protection'])
+			? json_decode($route['bruteforce_protection'], true)
+			: [];
+		if (!empty($bruteforceProtection)) {
+			$delay = $this->throttler->sleepDelayOrThrowOnMax($this->request->getRemoteAddress(), Application::APP_ID);
+		}
 		return $exApp;
+	}
+
+	private function processBruteforce(array $bruteforceProtection, int $delay, int $status): void {
+		if (!empty($bruteforceProtection)) {
+			if ($delay > 0 && ($status >= 200 && $status < 300)) {
+				$this->throttler->resetDelay($this->request->getRemoteAddress(), Application::APP_ID, []);
+			} elseif (in_array($status, $bruteforceProtection)) {
+				$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress());
+			}
+		}
 	}
 
 	private function buildProxyCookiesJar(array $cookies, string $domain): CookieJar {
@@ -250,16 +293,16 @@ class ExAppProxyController extends Controller {
 		return $multipart;
 	}
 
-	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): bool {
+	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): array {
 		foreach ($exApp->getRoutes() as $route) {
 			if (preg_match('/' . $route['url'] . '/i', $exAppRoute) === 1 &&
 				str_contains(strtolower($route['verb']), strtolower($this->request->getMethod())) &&
 				$this->passesExAppProxyRouteAccessLevelCheck($route['access_level'])
 			) {
-				return true;
+				return $route;
 			}
 		}
-		return false;
+		return [];
 	}
 
 	private function passesExAppProxyRouteAccessLevelCheck(int $accessLevel): bool {
@@ -271,18 +314,8 @@ class ExAppProxyController extends Controller {
 		};
 	}
 
-	private function buildHeadersWithExclude(ExApp $exApp, string $exAppRoute, array $headers): array {
-		$headersToExclude = [];
-		foreach ($exApp->getRoutes() as $route) {
-			$matchesUrlPattern = preg_match('/' . $route['url'] . '/i', $exAppRoute) === 1;
-			$matchesVerb = str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()));
-			if ($matchesUrlPattern && $matchesVerb) {
-				$headersToExclude = array_map(function ($headerName) {
-					return strtolower($headerName);
-				}, json_decode($route['headers_to_exclude'], true));
-				break;
-			}
-		}
+	private function buildHeadersWithExclude(array $route, array $headers): array {
+		$headersToExclude = json_decode($route['headers_to_exclude'], true);
 		if (!in_array('x-origin-ip', $headersToExclude)) {
 			$headersToExclude[] = 'x-origin-ip';
 		}
