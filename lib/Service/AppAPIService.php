@@ -282,7 +282,7 @@ class AppAPIService {
 	 * More info in docs: https://cloud-py-api.github.io/app_api/authentication.html
 	 */
 	public function validateExAppRequestToNC(IRequest $request, bool $isDav = false): bool {
-		$this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
+		$delay = $this->throttler->sleepDelayOrThrowOnMax($request->getRemoteAddress(), Application::APP_ID);
 
 		$exAppId = $request->getHeader('EX-APP-ID');
 		if (!$exAppId) {
@@ -346,7 +346,7 @@ class AppAPIService {
 				}
 			}
 
-			return $this->finalizeRequestToNC($exApp, $userId, $request);
+			return $this->finalizeRequestToNC($exApp, $userId, $request, $delay);
 		} else {
 			$this->logger->error(sprintf('Invalid signature for ExApp: %s and user: %s.', $exApp->getAppid(), $userId !== '' ? $userId : 'null'));
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
@@ -364,7 +364,7 @@ class AppAPIService {
 	 *  - sets active user (null if not a user context)
 	 *  - updates ExApp last response time
 	 */
-	private function finalizeRequestToNC(ExApp $exApp, string $userId, IRequest $request): bool {
+	private function finalizeRequestToNC(ExApp $exApp, string $userId, IRequest $request, int $delay): bool {
 		if ($userId !== '') {
 			$activeUser = $this->userManager->get($userId);
 			if ($activeUser === null) {
@@ -379,10 +379,12 @@ class AppAPIService {
 		$this->session->set('app_api', true);
 		$this->session->set('app_api_system', true); // TODO: Remove after drop support NC29
 
-		$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
-			'appid' => $request->getHeader('EX-APP-ID'),
-			'userid' => $userId,
-		]);
+		if ($delay) {
+			$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
+				'appid' => $request->getHeader('EX-APP-ID'),
+				'userid' => $userId,
+			]);
+		}
 		return true;
 	}
 
