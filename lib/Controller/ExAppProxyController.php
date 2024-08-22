@@ -24,6 +24,7 @@ use OCP\Files\IMimeTypeDetector;
 use OCP\Http\Client\IResponse;
 use OCP\IGroupManager;
 use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 class ExAppProxyController extends Controller {
 
@@ -35,6 +36,7 @@ class ExAppProxyController extends Controller {
 		private readonly ContentSecurityPolicyNonceManager $nonceManager,
 		private readonly ?string                           $userId,
 		private readonly IGroupManager                     $groupManager,
+		private readonly LoggerInterface                   $logger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -82,8 +84,8 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppGet(string $appId, string $other): Response {
-		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($exApp, $other)) {
+		$exApp = $this->checkAccess($appId, $other);
+		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
 
@@ -105,8 +107,8 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppPost(string $appId, string $other): Response {
-		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($exApp, $other)) {
+		$exApp = $this->checkAccess($appId, $other);
+		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
 
@@ -141,8 +143,8 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppPut(string $appId, string $other): Response {
-		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($exApp, $other)) {
+		$exApp = $this->checkAccess($appId, $other);
+		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
 
@@ -168,8 +170,8 @@ class ExAppProxyController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function ExAppDelete(string $appId, string $other): Response {
-		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null || !$exApp->getEnabled() || !$this->passesExAppProxyRoutesChecks($exApp, $other)) {
+		$exApp = $this->checkAccess($appId, $other);
+		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
 
@@ -189,6 +191,27 @@ class ExAppProxyController extends Controller {
 			return (new Response())->setStatus(500);
 		}
 		return $this->createProxyResponse($other, $response);
+	}
+
+	private function checkAccess(string $appId, string $other): ?ExApp {
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp === null) {
+			$this->logger->debug(
+				sprintf('Returning status 404 for "%s": ExApp is not found.', $other)
+			);
+			return null;
+		} elseif (!$exApp->getEnabled()) {
+			$this->logger->debug(
+				sprintf('Returning status 404 for "%s": ExApp is not enabled.', $other)
+			);
+			return null;
+		} elseif (!$this->passesExAppProxyRoutesChecks($exApp, $other)) {
+			$this->logger->debug(
+				sprintf('Returning status 404 for "%s": route does not pass the access check.', $other)
+			);
+			return null;
+		}
+		return $exApp;
 	}
 
 	private function buildProxyCookiesJar(array $cookies, string $domain): CookieJar {
