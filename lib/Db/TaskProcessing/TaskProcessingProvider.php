@@ -41,6 +41,9 @@ class TaskProcessingProvider extends Entity implements JsonSerializable {
 		$this->addType('provider', 'string');
 		$this->addType('custom_task_type', 'string');
 
+		if (isset($params['id'])) {
+			$this->setId($params['id']);
+		}
 		if (isset($params['app_id'])) {
 			$this->setAppId($params['app_id']);
 		}
@@ -63,6 +66,7 @@ class TaskProcessingProvider extends Entity implements JsonSerializable {
 
 	public function jsonSerialize(): array {
 		return [
+			'id' => $this->id,
 			'app_id' => $this->appId,
 			'name' => $this->name,
 			'display_name' => $this->displayName,
