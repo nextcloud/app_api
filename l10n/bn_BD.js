@@ -11,6 +11,7 @@ OC.L10N.register(
     "Host" : "হোস্ট",
     "Enabled" : "কার্যকর",
     "Save" : "সংরক্ষণ",
+    "Documentation" : "নথিবদ্ধকরণ",
     "Details" : "বিসতারিত",
     "Disable" : "নিষ্ক্রিয়"
 },

@@ -32,6 +32,7 @@ OC.L10N.register(
     "Confirm" : "Kadarnañ",
     "Save" : "Enrollañ",
     "Your apps" : "Ho meziantoù",
+    "Documentation" : "Diellvadur",
     "Details" : "Munudoù",
     "by {author}\n{license}" : "great gant {author}\n{license}",
     "Active apps" : "Meziantoù lakaet en dro",

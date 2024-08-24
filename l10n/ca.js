@@ -52,6 +52,7 @@ OC.L10N.register(
     "Save" : "Desar",
     "Register" : "Registra",
     "Your apps" : "Les vostres aplicacions",
+    "Documentation" : "Documentació",
     "Details" : "Detalls",
     "Changelog" : "Registre de canvis",
     "by {author}\n{license}" : "{author}\n{license}",

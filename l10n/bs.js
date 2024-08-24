@@ -10,6 +10,7 @@ OC.L10N.register(
     "Edit" : "Izmjeni",
     "Enabled" : "Aktivirano",
     "Save" : "Spremi",
+    "Documentation" : "Dokumentacija",
     "Updates" : "Ažuriranja",
     "Disable" : "Onemogući"
 },
