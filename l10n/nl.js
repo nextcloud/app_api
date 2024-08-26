@@ -1,6 +1,9 @@
 OC.L10N.register(
     "app_api",
     {
+    "External Apps" : "Externe apps",
+    "Daemon config not found" : "Daemon configuratie niet gevonden",
+    "Error starting install of ExApp" : "Fout bij starten installatie van ExApp",
     "Update to {version}" : "Update naar {version}",
     "Remove" : "Verwijderen",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Deze app heeft geen minimum Nextcloud versie toegewezen gekregen. In de toekomst wordt dit wordt een fout.",
