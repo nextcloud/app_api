@@ -40,7 +40,6 @@ class ExAppService {
 		private readonly ExAppFetcher               $exAppFetcher,
 		private readonly ExAppArchiveFetcher        $exAppArchiveFetcher,
 		private readonly ExAppMapper                $exAppMapper,
-		private readonly ExAppApiScopeService       $exAppApiScopeService,
 		private readonly TopMenuService             $topMenuService,
 		private readonly InitialStateService        $initialStateService,
 		private readonly ScriptsService             $scriptsService,
@@ -89,7 +88,6 @@ class ExAppService {
 			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install', 'error' => '']),
 			'created_time' => time(),
 			'last_check_time' => time(),
-			'api_scopes' => $appInfo['api_scopes'],
 		]);
 		try {
 			$this->exAppMapper->insert($exApp);
@@ -194,9 +192,7 @@ class ExAppService {
 			'version' => $exApp->getVersion(),
 			'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
 			'last_check_time' => $exApp->getLastCheckTime(),
-			'system' => true, // TODO: Remove later
 			'status' => $exApp->getStatus(),
-			'scopes' => $this->exAppApiScopeService->mapScopeGroupsToNames($exApp->getApiScopes()),
 		];
 	}
 
@@ -209,14 +205,13 @@ class ExAppService {
 	public function updateExAppInfo(ExApp $exApp, array $appInfo): bool {
 		$exApp->setVersion($appInfo['version']);
 		$exApp->setName($appInfo['name']);
-		$exApp->setApiScopes($appInfo['api_scopes']);
-		if (!$this->updateExApp($exApp, ['version', 'name', 'api_scopes'])) {
+		if (!$this->updateExApp($exApp, ['version', 'name'])) {
 			return false;
 		}
 		return true;
 	}
 
-	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time', 'api_scopes']): bool {
+	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time']): bool {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
 			$this->cache?->remove('/ex_apps');
@@ -266,7 +261,7 @@ class ExAppService {
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'scopes', 'system_app', 'translations_folder', 'routes'] as $key) {
+			foreach (['docker-install', 'translations_folder', 'routes'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);
@@ -285,13 +280,6 @@ class ExAppService {
 				}
 			}
 			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
-			if (isset($appInfo['external-app']['scopes']['value'])) {
-				if (is_array($appInfo['external-app']['scopes']['value'])) {
-					$appInfo['external-app']['scopes'] = $appInfo['external-app']['scopes']['value'];
-				} else {
-					$appInfo['external-app']['scopes'] = [$appInfo['external-app']['scopes']['value']];
-				}
-			}
 			if (isset($appInfo['external-app']['routes']['route'])) {
 				if (isset($appInfo['external-app']['routes']['route'][0])) {
 					$appInfo['external-app']['routes'] = $appInfo['external-app']['routes']['route'];

@@ -125,7 +125,7 @@ class DaemonConfigController extends ApiController {
 		}
 
 		if (!$this->service->runOccCommand(
-			sprintf("app_api:app:register --force-scopes --silent %s %s --info-xml %s --test-deploy-mode",
+			sprintf("app_api:app:register --silent %s %s --info-xml %s --test-deploy-mode",
 				Application::TEST_DEPLOY_APPID, $daemonConfig->getName(), Application::TEST_DEPLOY_INFO_XML)
 		)) {
 			return new JSONResponse(['error' => $this->l10n->t('Error starting install of ExApp')], Http::STATUS_INTERNAL_SERVER_ERROR);

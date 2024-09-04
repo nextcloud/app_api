@@ -1,6 +1,6 @@
 import api from './api.js'
 import Vue from 'vue'
-import { generateUrl, generateOcsUrl } from '@nextcloud/router'
+import { generateUrl } from '@nextcloud/router'
 import { showError, showInfo } from '@nextcloud/dialogs'
 
 const state = {
@@ -70,7 +70,6 @@ const mutations = {
 				init: 0,
 				deploy: 0,
 			}
-			app.scopes = null
 		}
 		app.active = true
 		app.canUnInstall = false
@@ -94,7 +93,6 @@ const mutations = {
 		state.apps.find(app => app.id === appId).canInstall = true
 		state.apps.find(app => app.id === appId).daemon = null
 		state.apps.find(app => app.id === appId).status = {}
-		state.apps.find(app => app.id === appId).scopes = null
 		if (state.apps.find(app => app.id === appId).update !== null) {
 			state.updateCount--
 		}
@@ -112,7 +110,6 @@ const mutations = {
 			init: 0,
 			deploy: 0,
 		}
-		app.scopes = null
 		app.error = null
 		state.updateCount--
 	},
@@ -151,13 +148,6 @@ const mutations = {
 			app.removable = true
 		}
 		app.status = status
-	},
-
-	setExAppInfo(state, { appId, exAppInfo }) {
-		const app = state.apps.find(app => app.id === appId)
-		if (exAppInfo.scopes) {
-			app.scopes = exAppInfo.scopes
-		}
 	},
 
 	setIntervalUpdater(state, updater) {
@@ -359,12 +349,6 @@ const actions = {
 		return context.state.gettingCategoriesPromise
 	},
 
-	getExAppInfo(context, { appId }) {
-		return api.get(generateOcsUrl(`/apps/app_api/api/v1/ex-app/info/${appId}`)).then((response) => {
-			context.commit('setExAppInfo', { appId, exAppInfo: response.data?.ocs.data })
-		})
-	},
-
 	getAppStatus(context, { appId }) {
 		return api.get(generateUrl(`/apps/app_api/apps/status/${appId}`))
 			.then((response) => {
@@ -397,11 +381,6 @@ const actions = {
 			console.debug('initializingOrDeployingApps', initializingOrDeployingApps)
 			Array.from(initializingOrDeployingApps).forEach(app => {
 				context.dispatch('getAppStatus', { appId: app.id })
-				if ((app.status.deploy === 100 && app.status.init === 0) || app.status.type === 'update') {
-					console.debug('getExAppInfo', app.id)
-					// get ExApp info once app is deployed or during update
-					context.dispatch('getExAppInfo', { appId: app.id })
-				}
 			})
 		}, 2000))
 	},

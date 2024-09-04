@@ -10,26 +10,22 @@ use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
-use OCA\AppAPI\Service\ExAppApiScopeService;
 use OCA\AppAPI\Service\ExAppService;
 
 use OCP\IConfig;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Register extends Command {
 
 	public function __construct(
 		private readonly AppAPIService  	  $service,
 		private readonly DaemonConfigService  $daemonConfigService,
-		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DockerActions        $dockerActions,
 		private readonly ManualActions        $manualActions,
 		private readonly IConfig              $config,
@@ -48,7 +44,7 @@ class Register extends Command {
 		$this->addArgument('appid', InputArgument::REQUIRED);
 		$this->addArgument('daemon-config-name', InputArgument::OPTIONAL);
 
-		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval');
+		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force scopes approval[deprecated]');
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, 'Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp info.xml in JSON format');
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
@@ -109,32 +105,9 @@ class Register extends Command {
 			return 2;
 		}
 
-		$confirmRequiredScopes = (bool) $input->getOption('force-scopes');
-		if (!$confirmRequiredScopes && $input->isInteractive()) {
-			/** @var QuestionHelper $helper */
-			$helper = $this->getHelper('question');
-
-			// Prompt to approve required ExApp scopes
-			if (count($appInfo['external-app']['scopes']) > 0) {
-				$output->writeln(
-					sprintf('ExApp %s requested required scopes: %s', $appId, implode(', ', $appInfo['external-app']['scopes']))
-				);
-				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-				$confirmRequiredScopes = $helper->ask($input, $output, $question);
-			} else {
-				$confirmRequiredScopes = true;
-			}
-		}
-
-		if (!$confirmRequiredScopes && count($appInfo['external-app']['scopes']) > 0) {
-			$output->writeln(sprintf('ExApp %s required scopes not approved.', $appId));
-			return 1;
-		}
-
 		$appInfo['port'] = $appInfo['port'] ?? $this->exAppService->getExAppFreePort();
 		$appInfo['secret'] = $appInfo['secret'] ?? $this->random->generate(128);
 		$appInfo['daemon_config_name'] = $appInfo['daemon_config_name'] ?? $daemonConfigName;
-		$appInfo['api_scopes'] = array_values($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']));
 		$exApp = $this->exAppService->registerExApp($appInfo);
 		if (!$exApp) {
 			$this->logger->error(sprintf('Error during registering ExApp %s.', $appId));
@@ -142,16 +115,6 @@ class Register extends Command {
 				$output->writeln(sprintf('Error during registering ExApp %s.', $appId));
 			}
 			return 3;
-		}
-		if (count($appInfo['external-app']['scopes']) > 0) {
-			$this->logger->info(
-				sprintf('ExApp %s scope groups successfully set: %s', $exApp->getAppid(), implode(', ', $appInfo['external-app']['scopes']))
-			);
-			if ($outputConsole) {
-				$output->writeln(
-					sprintf('ExApp %s scope groups successfully set: %s', $exApp->getAppid(), implode(', ', $appInfo['external-app']['scopes']))
-				);
-			}
 		}
 
 		if (!empty($appInfo['external-app']['translations_folder'])) {

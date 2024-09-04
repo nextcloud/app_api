@@ -43,7 +43,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 *Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
-	<version>3.1.1</version>
+	<version>3.2.0</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
@@ -88,7 +88,6 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		<command>OCA\AppAPI\Command\ExApp\Disable</command>
 		<command>OCA\AppAPI\Command\ExApp\ListExApps</command>
 		<command>OCA\AppAPI\Command\ExApp\Notify</command>
-		<command>OCA\AppAPI\Command\ExApp\Scopes\ListScopes</command>
 		<command>OCA\AppAPI\Command\ExAppConfig\GetConfig</command>
 		<command>OCA\AppAPI\Command\ExAppConfig\SetConfig</command>
 		<command>OCA\AppAPI\Command\ExAppConfig\DeleteConfig</command>

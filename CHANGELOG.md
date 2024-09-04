@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.0 - 2024-09-06]
+
+### Added
+
+- ExAppProxy: added bruteforce protection option for ExApp routes. #368
+
+### Changed
+
+- AppAPIAuth optimization: use throttler only when needed to lower the number of requests. #369
+- ExAppProxy: the order of checks of the ExApp routes was changed. #366
+- ExAppProxy: improve logic and logging with more explicit messages. #365
+- Drop support for Nextcloud 27. #374
+
+### Fixed
+
+- TaskProcessing: fixed bug when provider wasn't removed on unregister. #370
+
+### Removed
+
+- ApiScopes are deprecated and removed. #373
+
+
 ## [3.1.0 - 2024-08-15]
 
 **Breaking change**: Task processing API for NC30 AI API. (llm2 and translate2 apps) 

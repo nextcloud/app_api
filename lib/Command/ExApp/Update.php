@@ -10,24 +10,20 @@ use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
-use OCA\AppAPI\Service\ExAppApiScopeService;
 
 use OCA\AppAPI\Service\ExAppService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Update extends Command {
 
 	public function __construct(
 		private readonly AppAPIService  	  $service,
 		private readonly ExAppService         $exAppService,
-		private readonly ExAppApiScopeService $exAppApiScopeService,
 		private readonly DaemonConfigService  $daemonConfigService,
 		private readonly DockerActions        $dockerActions,
 		private readonly ManualActions        $manualActions,
@@ -46,7 +42,7 @@ class Update extends Command {
 
 		$this->addOption('info-xml', null, InputOption::VALUE_REQUIRED, 'Path to ExApp info.xml file (url or local absolute path)');
 		$this->addOption('json-info', null, InputOption::VALUE_REQUIRED, 'ExApp info.xml in JSON format');
-		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force new ExApp scopes approval');
+		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force new ExApp scopes approval[deprecated]');
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Do not print to console');
 		$this->addOption('all', null, InputOption::VALUE_NONE, 'Update all updatable apps');
@@ -138,30 +134,6 @@ class Update extends Command {
 			return 0;
 		}
 
-		// Default scopes approval process (compare new ExApp scopes)
-		$currentExAppScopes = $exApp->getApiScopes();
-		// Prepare for prompt of newly requested ExApp scopes
-		$requiredScopes = array_values(array_diff($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']), $currentExAppScopes));
-
-		$confirmScopes = (bool) $input->getOption('force-scopes');
-		if (!$confirmScopes && $input->isInteractive()) {
-			/** @var QuestionHelper $helper */
-			$helper = $this->getHelper('question');
-
-			if (count($requiredScopes) > 0) {
-				$output->writeln(sprintf('ExApp %s requested scopes: %s', $appId, implode(', ',
-					$this->exAppApiScopeService->mapScopeGroupsToNames($requiredScopes))));
-				$question = new ConfirmationQuestion('Do you want to approve it? [y/N] ', false);
-				$confirmScopes = $helper->ask($input, $output, $question);
-			} else {
-				$confirmScopes = true;
-			}
-		}
-		if (!$confirmScopes && count($requiredScopes) > 0) {
-			$output->writeln(sprintf('ExApp %s required scopes not approved. Failed to finish ExApp update.', $appId));
-			return 1;
-		}
-
 		$status = $exApp->getStatus();
 		$status['type'] = 'update';
 		$status['error'] = '';
@@ -197,7 +169,6 @@ class Update extends Command {
 			}
 		}
 
-		$appInfo['api_scopes'] = array_values($this->exAppApiScopeService->mapScopeGroupsToNumbers($appInfo['external-app']['scopes']));
 		if (!$this->exAppService->updateExAppInfo($exApp, $appInfo)) {
 			$this->logger->error(sprintf('Failed to update ExApp %s info', $appId));
 			if ($outputConsole) {
