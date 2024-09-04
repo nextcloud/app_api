@@ -36,12 +36,7 @@ class LoadFilesPluginListener implements IEventListener {
 				'fileActions' => $exFilesActions,
 				'instanceId' => $this->config->getSystemValue('instanceid'),
 			]);
-			$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
-			if (version_compare($ncVersion, '28.0', '<')) {
-				Util::addScript(Application::APP_ID, Application::APP_ID . '-filesplugin');
-			} else {
-				Util::addScript(Application::APP_ID, Application::APP_ID . '-filesplugin28');
-			}
+			Util::addScript(Application::APP_ID, Application::APP_ID . '-filesplugin');
 			Util::addStyle(Application::APP_ID, 'filesactions');
 		}
 	}
