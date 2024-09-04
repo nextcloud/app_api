@@ -41,7 +41,7 @@ It should contain the following fields:
 			<image>cloud-py-api/skeleton</image>
 			<image-tag>latest</image-tag>
 		</docker-install>
-		<scopes>
+		<scopes> // deprecated and removed since AppAPI 3.2.0
 			<value>FILES</value>
 			<value>AI_PROVIDERS</value>
 			...

@@ -3,6 +3,10 @@
 Api Scopes
 ==========
 
+.. warning::
+
+	ApiScopes are deprecated and removed since AppAPI 3.2.0.
+
 AppAPI design's focus on simplicity and necessity highlights the benefits of defining API scopes.
 which simplify the development and integration of applications into the Nextcloud ecosystem.
 

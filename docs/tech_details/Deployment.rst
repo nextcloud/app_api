@@ -150,7 +150,7 @@ It has the same structure as Nextcloud appinfo/info.xml file, but with some addi
 			<image>cloud-py-api/talk_bot</image>
 			<image-tag>latest</image-tag>
 		</docker-install>
-		<scopes>
+		<scopes> // deprecated since AppAPI 3.2.0
 			<value>TALK</value>
 			<value>TALK_BOT</value>
 		</scopes>
