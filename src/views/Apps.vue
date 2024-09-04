@@ -128,13 +128,6 @@
 				:order="1">
 				<DaemonDetails :app="app" />
 			</NcAppSidebarTab>
-			<NcAppSidebarTab v-if="app.scopes"
-				id="scopes"
-				icon="icon-category-security"
-				:name="t('app_api', 'Scopes')"
-				:order="2">
-				<ScopesDetails :app="app" />
-			</NcAppSidebarTab>
 		</NcAppSidebar>
 	</NcContent>
 </template>
@@ -160,7 +153,6 @@ import AppManagement from '../mixins/AppManagement.js'
 import AppScore from '../components/Apps/AppScore.vue'
 import Markdown from '../components/Apps/Markdown.vue'
 import DaemonDetails from '../components/Apps/DaemonDetails.vue'
-import ScopesDetails from '../components/Apps/ScopesDetails.vue'
 
 import { APPS_SECTION_ENUM } from '../constants/AppsConstants.js'
 import { loadState } from '@nextcloud/initial-state'
@@ -184,7 +176,6 @@ export default {
 		NcContent,
 		Markdown,
 		DaemonDetails,
-		ScopesDetails,
 		Alert,
 	},
 
