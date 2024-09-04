@@ -63,8 +63,6 @@ Authentication flow in details
 		AppAPI-->>Nextcloud: Reject if ExApp not exists or disabled
 		AppAPI-->>AppAPI: Validate shared secret from AUTHORIZATION-APP-API
 		AppAPI-->>Nextcloud: Reject if secret does not match
-		AppAPI-->>AppAPI: Check API scope
-		AppAPI-->>Nextcloud: Reject if API scope not match
 		AppAPI-->>AppAPI: Check if user is not empty and active
 		AppAPI-->>Nextcloud: Set active user
 		AppAPI->>-Nextcloud: Request accepted/rejected
