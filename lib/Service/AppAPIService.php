@@ -572,9 +572,7 @@ class AppAPIService {
 			$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 30]);
 			if ($exAppEnabled instanceof IResponse) {
 				$response = json_decode($exAppEnabled->getBody(), true);
-				if (empty($response['error'])) {
-					$this->exAppService->updateExApp($exApp, ['last_check_time']);
-				} else {
+				if (!empty($response['error'])) {
 					$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
 					$this->exAppService->disableExAppInternal($exApp);
 					return false;
@@ -633,8 +631,7 @@ class AppAPIService {
 			$status['type'] = '';
 		}
 		$exApp->setStatus($status);
-		$exApp->setLastCheckTime(time());
-		$this->exAppService->updateExApp($exApp, ['status', 'last_check_time']);
+		$this->exAppService->updateExApp($exApp, ['status']);
 		if ($progress === 100) {
 			$this->enableExApp($exApp);
 		}

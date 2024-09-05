@@ -113,7 +113,6 @@ class ExAppMapper extends QBMapper {
 					'status' => $row['status'],
 					'enabled' => $row['enabled'],
 					'created_time' => $row['created_time'],
-					'last_check_time' => $row['last_check_time'],
 					'deploy_config' => $row['deploy_config'],
 					'accepts_deploy_id' => $row['accepts_deploy_id'],
 					'routes' => [],
@@ -181,8 +180,6 @@ class ExAppMapper extends QBMapper {
 				$qb = $qb->set('status', $qb->createNamedParameter($exApp->getStatus(), IQueryBuilder::PARAM_JSON));
 			} elseif ($field === 'enabled') {
 				$qb = $qb->set('enabled', $qb->createNamedParameter($exApp->getEnabled(), IQueryBuilder::PARAM_INT));
-			} elseif ($field === 'last_check_time') {
-				$qb = $qb->set('last_check_time', $qb->createNamedParameter($exApp->getLastCheckTime(), IQueryBuilder::PARAM_INT));
 			}
 		}
 		return $qb->where($qb->expr()->eq('appid', $qb->createNamedParameter($exApp->getAppid())))->executeStatement();

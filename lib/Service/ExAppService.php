@@ -87,7 +87,6 @@ class ExAppService {
 			'secret' => $appInfo['secret'],
 			'status' => json_encode(['deploy' => 0, 'init' => 0, 'action' => '', 'type' => 'install', 'error' => '']),
 			'created_time' => time(),
-			'last_check_time' => time(),
 		]);
 		try {
 			$this->exAppMapper->insert($exApp);
@@ -152,14 +151,12 @@ class ExAppService {
 		$status = $exApp->getStatus();
 		$status['error'] = '';
 		$exApp->setStatus($status);
-		$exApp->setLastCheckTime(time());
-		return $this->updateExApp($exApp, ['enabled', 'status', 'last_check_time']);
+		return $this->updateExApp($exApp, ['enabled', 'status']);
 	}
 
 	public function disableExAppInternal(ExApp $exApp): void {
 		$exApp->setEnabled(0);
-		$exApp->setLastCheckTime(time());
-		$this->updateExApp($exApp, ['enabled', 'last_check_time']);
+		$this->updateExApp($exApp, ['enabled']);
 	}
 
 	public function getExAppsByDaemonName(string $daemonName): array {
@@ -191,7 +188,6 @@ class ExAppService {
 			'name' => $exApp->getName(),
 			'version' => $exApp->getVersion(),
 			'enabled' => filter_var($exApp->getEnabled(), FILTER_VALIDATE_BOOLEAN),
-			'last_check_time' => $exApp->getLastCheckTime(),
 			'status' => $exApp->getStatus(),
 		];
 	}
@@ -211,7 +207,7 @@ class ExAppService {
 		return true;
 	}
 
-	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled', 'last_check_time']): bool {
+	public function updateExApp(ExApp $exApp, array $fields = ['version', 'name', 'port', 'status', 'enabled']): bool {
 		try {
 			$this->exAppMapper->updateExApp($exApp, $fields);
 			$this->cache?->remove('/ex_apps');
@@ -335,13 +331,11 @@ class ExAppService {
 			}
 			$status['deploy'] = $progress;
 		}
-		unset($status['active']);  # TO-DO: Remove in AppAPI 2.4.0
 		if ($progress === 100) {
 			$status['action'] = 'healthcheck';
 		}
 		$exApp->setStatus($status);
-		$exApp->setLastCheckTime(time());
-		$this->updateExApp($exApp, ['status', 'last_check_time']);
+		$this->updateExApp($exApp, ['status']);
 	}
 
 	public function waitInitStepFinish(string $appId): string {
