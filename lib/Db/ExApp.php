@@ -23,7 +23,6 @@ use OCP\AppFramework\Db\Entity;
  * @method array getStatus()
  * @method int getEnabled()
  * @method int getCreatedTime()
- * @method int getLastCheckTime()
  * @method array getDeployConfig()
  * @method string getAcceptsDeployId()
  * @method array getRoutes()
@@ -38,7 +37,6 @@ use OCP\AppFramework\Db\Entity;
  * @method void setStatus(array $status)
  * @method void setEnabled(int $enabled)
  * @method void setCreatedTime(int $createdTime)
- * @method void setLastCheckTime(int $lastCheckTime)
  * @method void setDeployConfig(array $deployConfig)
  * @method void setAcceptsDeployId(string $acceptsDeployId)
  * @method void setRoutes(array $routes)
@@ -116,9 +114,6 @@ class ExApp extends Entity implements JsonSerializable {
 		if (isset($params['created_time'])) {
 			$this->setCreatedTime($params['created_time']);
 		}
-		if (isset($params['last_check_time'])) {
-			$this->setLastCheckTime($params['last_check_time']);
-		}
 		if (isset($params['deploy_config'])) {
 			$this->setDeployConfig($params['deploy_config']);
 		}
@@ -144,7 +139,6 @@ class ExApp extends Entity implements JsonSerializable {
 			'status' => $this->getStatus(),
 			'enabled' => $this->getEnabled(),
 			'created_time' => $this->getCreatedTime(),
-			'last_check_time' => $this->getLastCheckTime(),
 			'deploy_config' => $this->getDeployConfig(),
 			'accepts_deploy_id' => $this->getAcceptsDeployId(),
 			'routes' => $this->getRoutes(),
