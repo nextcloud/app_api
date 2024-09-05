@@ -74,7 +74,6 @@ OC.L10N.register(
     "Documentation" : "Documentation",
     "Details" : "Détails",
     "Changelog" : "Journal des modifications",
-    "Scopes" : "Portées",
     "by {author}\n{license}" : "par {author}\n{license}",
     "Active apps" : "Applications actives",
     "Disabled apps" : "Applications désactivées",

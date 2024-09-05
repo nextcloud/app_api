@@ -62,7 +62,6 @@ OC.L10N.register(
     "Documentation" : "Документация",
     "Details" : "Свойства",
     "Changelog" : "Журнал изменений",
-    "Scopes" : "Области",
     "by {author}\n{license}" : "автор: {author}\n{license}",
     "Active apps" : "Активные приложения",
     "Disabled apps" : "Отключённые приложения",
