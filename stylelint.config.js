@@ -2,7 +2,6 @@ module.exports = {
 	extends: 'stylelint-config-recommended-vue',
 	rules: {
 		'selector-type-no-unknown': null,
-		'number-leading-zero': null,
 		'rule-empty-line-before': [
 			'always',
 			{
@@ -17,7 +16,6 @@ module.exports = {
 		],
 		'comment-empty-line-before': null,
 		'selector-type-case': null,
-		'selector-list-comma-newline-after': null,
 		'no-descending-specificity': null,
 		'selector-pseudo-element-no-unknown': [
 			true,
