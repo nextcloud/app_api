@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - TaskProcessing: fixed bug when provider wasn't removed on unregister. #370
+- OCC: ExApp unregister command now doesn't remove volume by default. #381
 
 ### Removed
 

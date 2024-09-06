@@ -45,7 +45,7 @@ Options
 Unregister
 ----------
 
-Command: ``app_api:app:unregister [--keep-data] [--force] [--silent] [--] <appid>``
+Command: ``app_api:app:unregister [--rm-data] [--force] [--silent] [--] <appid>``
 
 To remove an ExApp you can use the unregister command.
 There are additional options to keep the ExApp persistent storage (data volume).
@@ -58,7 +58,7 @@ Arguments
 Options
 *******
 
-    * ``--keep-data`` *[optional]* - keep ExApp persistent storage (data volume)
+    * ``--rm-data`` *[optional]* - remove ExApp persistent storage (data volume)
 	* ``--force`` *[optional]* - continue removal even if some error occurs.
 	* ``--silent`` *[optional]* - print a minimum of information, display only some errors, if any.
 

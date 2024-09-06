@@ -65,14 +65,14 @@ if __name__ == "__main__":
     r = run("php occ --no-warnings app_api:app:unregister skeleton".split(), stdout=PIPE)
     assert r.returncode
     assert r.stdout.decode("UTF-8"), "Output should be non empty"
-    # testing if "--keep-data" works.
+    # testing if volume is kept by default
     deploy_register()
-    r = run("php occ --no-warnings app_api:app:unregister skeleton --keep-data".split(), stdout=PIPE, check=True)
+    r = run("php occ --no-warnings app_api:app:unregister skeleton".split(), stdout=PIPE, check=True)
     assert r.stdout.decode("UTF-8"), "Output should be non empty"
     run("docker volume inspect nc_app_skeleton_data".split(), check=True)
-    # test if volume will be removed without "--keep-data"
+    # test if volume will be removed with "--rm-data"
     deploy_register()
-    run("php occ --no-warnings app_api:app:unregister skeleton".split(), check=True)
+    run("php occ --no-warnings app_api:app:unregister skeleton --rm-data".split(), check=True)
     r = run("docker volume inspect nc_app_skeleton_data".split())
     assert r.returncode
     # test "--force" option
