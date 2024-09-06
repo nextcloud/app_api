@@ -42,7 +42,7 @@ class Unregister extends Command {
 			null,
 			InputOption::VALUE_NONE,
 			'Continue removal even if errors.');
-		$this->addOption('keep-data', null, InputOption::VALUE_NONE, 'Keep ExApp data (volume) [deprecated, data always kept].');
+		$this->addOption('keep-data', null, InputOption::VALUE_NONE, 'Keep ExApp data (volume) [deprecated, data is kept by default].');
 		$this->addOption('rm-data', null, InputOption::VALUE_NONE, 'Remove ExApp data (persistent storage volume).');
 
 		$this->addUsage('test_app');
