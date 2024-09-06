@@ -42,19 +42,20 @@ class Unregister extends Command {
 			null,
 			InputOption::VALUE_NONE,
 			'Continue removal even if errors.');
-		$this->addOption('keep-data', null, InputOption::VALUE_NONE, 'Keep ExApp data (volume)');
+		$this->addOption('keep-data', null, InputOption::VALUE_NONE, 'Keep ExApp data (volume) [deprecated, data always kept].');
+		$this->addOption('rm-data', null, InputOption::VALUE_NONE, 'Remove ExApp data (persistent storage volume).');
 
 		$this->addUsage('test_app');
 		$this->addUsage('test_app --silent');
-		$this->addUsage('test_app --keep-data');
-		$this->addUsage('test_app --silent --force --keep-data');
+		$this->addUsage('test_app --rm-data');
+		$this->addUsage('test_app --silent --force --rm-data');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		$silent = $input->getOption('silent');
 		$force = $input->getOption('force');
-		$keep_data = $input->getOption('keep-data');
+		$rmData = $input->getOption('rm-data');
 
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
@@ -104,7 +105,7 @@ class Unregister extends Command {
 			} elseif (!$silent) {
 				$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
 			}
-			if (!$keep_data) {
+			if ($rmData) {
 				$volumeName = $this->dockerActions->buildExAppVolumeName($appId);
 				$removeVolumeResult = $this->dockerActions->removeVolume(
 					$this->dockerActions->buildDockerUrl($daemonConfig), $volumeName
