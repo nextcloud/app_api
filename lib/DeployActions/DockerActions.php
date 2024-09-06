@@ -226,6 +226,7 @@ class DockerActions implements IDeployActions {
 					$this->logger->info(sprintf('Successfully pulled "extended" image in a new name format: %s', $imageId));
 					return '';
 				}
+				$this->logger->info(sprintf('Failed to pull "extended" image(%s): %s', $imageId, $r));
 			} catch (GuzzleException $e) {
 				$this->logger->info(
 					sprintf('Failed to pull "extended" image(%s), GuzzleException occur: %s', $imageId, $e->getMessage())
@@ -240,17 +241,20 @@ class DockerActions implements IDeployActions {
 					$this->logger->info(sprintf('Successfully pulled "extended" image in an old name format: %s', $imageId));
 					return '';
 				}
+				$this->logger->info(sprintf('Failed to pull "extended" image(%s): %s', $imageId, $r));
 			} catch (GuzzleException $e) {
 				$this->logger->info(
 					sprintf('Failed to pull "extended" image(%s), GuzzleException occur: %s', $imageId, $e->getMessage())
 				);
 			}
 		}
-		$this->logger->info(sprintf('Failed to pull "extended" image for %s: %s', $imageId, $r));
 		$imageId = $this->buildBaseImageName($params);
 		$this->logger->info(sprintf('Pulling "base" image: %s', $imageId));
 		try {
 			$r = $this->pullImageInternal($dockerUrl, $exApp, $startPercent, $maxPercent, $imageId);
+			if ($r === '') {
+				$this->logger->info(sprintf('Image(%s) pulled successfully.', $imageId));
+			}
 		} catch (GuzzleException $e) {
 			$r = sprintf('Failed to pull image, GuzzleException occur: %s', $e->getMessage());
 		}
