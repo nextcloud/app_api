@@ -1,10 +1,11 @@
 <template>
-	<div class="daemon" :class="{'daemon-default': isDefault }">
+	<div class="daemon">
 		<NcListItem
 			:name="itemTitle"
 			:details="isDefault ? t('app_api', 'Default') : ''"
 			:force-display-actions="true"
 			:counter-number="daemon.exAppsCount"
+			:class="{'daemon-default': isDefault }"
 			counter-type="highlighted"
 			@click="showDaemonConfigDetailsModal(daemon)">
 			<template #subname>
@@ -194,9 +195,8 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
-.daemon-default {
+<style lang="scss">
+.daemon-default > .list-item {
 	background-color: var(--color-background-dark);
-	border-radius: var(--border-radius-pill);
 }
 </style>
