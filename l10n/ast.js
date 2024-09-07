@@ -51,6 +51,7 @@ OC.L10N.register(
     "Verify connection" : "Verificar la conexón",
     "Daemon connection successful" : "La conexón del degorriu foi correuta",
     "Register Daemon" : "Rexistrar el degorriu",
+    "More info" : "Más información",
     "Enabled" : "Activóse",
     "Display name" : "Nome visible",
     "Daemon host" : "Agospiador del degorriu",
