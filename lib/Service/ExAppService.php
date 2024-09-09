@@ -403,6 +403,9 @@ class ExAppService {
 		}
 	}
 
+	/**
+	 * @psalm-suppress UndefinedClass
+	 */
 	private function unregisterExAppWebhooks(string $appId): void {
 		// webhook_listeners app since NC30 only
 		if (version_compare($this->config->getSystemValueString('version', '0.0.0'), '30.0', '<')) {
