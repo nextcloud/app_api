@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.0 - 2024-09-06]
+## [3.2.0 - 2024-09-09]
 
 ### Added
 
@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - TaskProcessing: fixed bug when provider wasn't removed on unregister. #370
 - OCC: ExApp unregister command now doesn't remove volume by default. #381
+- WebhooksListener: added removal of the webhook listeners on ExApp unregister. #382
 
 ### Removed
 
