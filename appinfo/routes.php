@@ -64,6 +64,7 @@ return [
 		['name' => 'OCSApi#getEnabledState', 'url' => '/ex-app/state', 'verb' => 'GET'],
 
 		// ExApps
+		['name' => 'OCSExApp#getNextcloudUrl', 'url' => '/api/v1/info/nextcloud_url', 'verb' => 'GET'],
 		['name' => 'OCSExApp#getExAppsList', 'url' => '/api/v1/ex-app/{list}', 'verb' => 'GET'],
 		['name' => 'OCSExApp#getExApp', 'url' => '/api/v1/ex-app/info/{appId}', 'verb' => 'GET'],
 

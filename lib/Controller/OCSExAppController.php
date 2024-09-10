@@ -14,6 +14,7 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 
 class OCSExAppController extends OCSController {
 	protected $request;
@@ -22,6 +23,7 @@ class OCSExAppController extends OCSController {
 		IRequest                       $request,
 		private readonly AppAPIService $service,
 		private readonly ExAppService  $exAppService,
+		private readonly IURLGenerator $urlGenerator,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -43,6 +45,13 @@ class OCSExAppController extends OCSController {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 		return new DataResponse($this->exAppService->formatExAppInfo($exApp), Http::STATUS_OK);
+	}
+
+	#[NoCSRFRequired]
+	public function getNextcloudUrl(): DataResponse {
+		return new DataResponse([
+			'base_url' => $this->urlGenerator->getBaseUrl(),
+		], Http::STATUS_OK);
 	}
 
 	/**

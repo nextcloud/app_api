@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.0 - 2024-09-09]
+## [3.2.0 - 2024-09-10]
 
 ### Added
 
 - ExAppProxy: added bruteforce protection option for ExApp routes. #368
+- ExAppOCS: added miscellaneous method to get Nextcloud instance base URL. #383
 
 ### Changed
 

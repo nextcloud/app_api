@@ -59,6 +59,24 @@ Response data
 
 Returns HTTP 200 on success, HTTP 404 - on error.
 
+Get Nextcloud URL
+^^^^^^^^^^^^^^^^^
+
+It might be necessary for ExApp to know (or update) the Nextcloud URL.
+
+OCS endpoint: ``GET /apps/app_api/api/v1/info/nextcloud_url``
+
+Response data
+*************
+
+Returns the base URL of the Nextcloud instance:
+
+.. code-block:: json
+
+	{
+		"base_url": "http(s)://nextcloud.example.com"
+	}
+
 
 Make Requests to ExApps
 ^^^^^^^^^^^^^^^^^^^^^^^
