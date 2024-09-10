@@ -27,6 +27,8 @@ use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IUser;
 use OCP\IUserManager;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
@@ -121,6 +123,7 @@ class ExAppService {
 		$this->exAppArchiveFetcher->removeExAppFolder($appId);
 		$this->eventsListenerService->unregisterExAppEventListeners($appId);
 		$this->occService->unregisterExAppOccCommands($appId);
+		$this->unregisterExAppWebhooks($appId);
 		$r = $this->exAppMapper->deleteExApp($appId);
 		if ($r !== 1) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
@@ -397,6 +400,23 @@ class ExAppService {
 			return $exApp;
 		} catch (Exception) {
 			return null;
+		}
+	}
+
+	/**
+	 * @psalm-suppress UndefinedClass
+	 */
+	private function unregisterExAppWebhooks(string $appId): void {
+		// webhook_listeners app since NC30 only
+		if (version_compare($this->config->getSystemValueString('version', '0.0.0'), '30.0', '<')) {
+			return;
+		}
+		try {
+			$webhookListenerMapper = \OCP\Server::get(\OCA\WebhookListeners\Db\WebhookListenerMapper::class);
+			$webhookListenerMapper->deleteByAppId($appId);
+		} catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+		} catch (Exception $e) {
+			$this->logger->debug(sprintf('Error while unregistering ExApp %s webhooks: %s', $appId, $e->getMessage()));
 		}
 	}
 }
