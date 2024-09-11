@@ -413,6 +413,9 @@ class ExAppService {
 		}
 		try {
 			$webhookListenerMapper = \OCP\Server::get(\OCA\WebhookListeners\Db\WebhookListenerMapper::class);
+			if (!method_exists($webhookListenerMapper, 'deleteByAppId')) {
+				return;
+			}
 			$webhookListenerMapper->deleteByAppId($appId);
 		} catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
 		} catch (Exception $e) {
