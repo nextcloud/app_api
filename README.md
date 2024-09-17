@@ -1,8 +1,8 @@
 # Nextcloud AppAPI
 
-[![Tests - Deploy](https://github.com/cloud-py-api/app_api/actions/workflows/tests-deploy.yml/badge.svg)](https://github.com/cloud-py-api/app_api/actions/workflows/tests-deploy.yml)
-[![Tests](https://github.com/cloud-py-api/app_api/actions/workflows/tests.yml/badge.svg)](https://github.com/cloud-py-api/app_api/actions/workflows/tests.yml)
-[![Docs](https://github.com/cloud-py-api/app_api/actions/workflows/docs.yml/badge.svg)](https://cloud-py-api.github.io/app_api/)
+[![Tests - Deploy](https://github.com/nextcloud/app_api/actions/workflows/tests-deploy.yml/badge.svg)](https://github.com/nextcloud/app_api/actions/workflows/tests-deploy.yml)
+[![Tests](https://github.com/nextcloud/app_api/actions/workflows/tests.yml/badge.svg)](https://github.com/nextcloud/app_api/actions/workflows/tests.yml)
+[![Docs](https://github.com/nextcloud/app_api/actions/workflows/docs.yml/badge.svg)](https://nextcloud.github.io/app_api/)
 
 ### Supercharge your Nextcloud with AppAPI and applications specifically designed for it.
 
@@ -23,22 +23,22 @@
 
 ## Documentation
 
-- [List of External Applications](https://github.com/cloud-py-api/app_api/blob/main/APPS.md)
-- [Documentation](https://cloud-py-api.github.io/app_api/)
-	- [Installation](https://cloud-py-api.github.io/app_api/Installation.html)
-	- [Creation of Deploy Daemon](https://cloud-py-api.github.io/app_api/ManagingExternalApplications.html)
-	- [Managing External Applications](https://cloud-py-api.github.io/app_api/CreationOfDeployDaemon.html)
-- [Technical Details](https://cloud-py-api.github.io/app_api/tech_details/index.html)
-	- [Concepts](https://cloud-py-api.github.io/app_api/Concepts.html)
-	- [Api Scopes](https://cloud-py-api.github.io/app_api/tech_details/ApiScopes.html)
-	- [AppAPI Nextcloud APIs](https://cloud-py-api.github.io/app_api/tech_details/api/index.html)
-    - [Authentication](https://cloud-py-api.github.io/app_api/tech_details/Authentication.html)
-    - [Deployment](https://cloud-py-api.github.io/app_api/tech_details/Deployment.html)
-- [Contribute](https://github.com/cloud-py-api/app_api/blob/main/.github/CONTRIBUTING.md)
-	- [Discussions](https://github.com/cloud-py-api/app_api/discussions)
-	- [Issues](https://github.com/cloud-py-api/app_api/issues)
-    - [Setting up dev environment](https://cloud-py-api.github.io/app_api/DevSetup.html)
-- [Changelog](https://github.com/cloud-py-api/app_api/blob/main/CHANGELOG.md)
+- [List of External Applications](https://github.com/nextcloud/app_api/blob/main/APPS.md)
+- [Documentation](https://nextcloud.github.io/app_api/)
+	- [Installation](https://nextcloud.github.io/app_api/Installation.html)
+	- [Creation of Deploy Daemon](https://nextcloud.github.io/app_api/ManagingExternalApplications.html)
+	- [Managing External Applications](https://nextcloud.github.io/app_api/CreationOfDeployDaemon.html)
+- [Technical Details](https://nextcloud.github.io/app_api/tech_details/index.html)
+	- [Concepts](https://nextcloud.github.io/app_api/Concepts.html)
+	- [Api Scopes](https://nextcloud.github.io/app_api/tech_details/ApiScopes.html)
+	- [AppAPI Nextcloud APIs](https://nextcloud.github.io/app_api/tech_details/api/index.html)
+    - [Authentication](https://nextcloud.github.io/app_api/tech_details/Authentication.html)
+    - [Deployment](https://nextcloud.github.io/app_api/tech_details/Deployment.html)
+- [Contribute](https://github.com/nextcloud/app_api/blob/main/.github/CONTRIBUTING.md)
+	- [Discussions](https://github.com/nextcloud/app_api/discussions)
+	- [Issues](https://github.com/nextcloud/app_api/issues)
+    - [Setting up dev environment](https://nextcloud.github.io/app_api/DevSetup.html)
+- [Changelog](https://github.com/nextcloud/app_api/blob/main/CHANGELOG.md)
 
 ### Support
 
