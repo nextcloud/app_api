@@ -6,6 +6,7 @@
     "AppAPI ExApp notifier" : "AppAPI 外部程序通知",
     "AppAPI" : "AppAPI",
     "Nextcloud AppAPI" : "Nextcloud AppAPI",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud." : "AppAPI 项目是一项令人兴奋的计划，旨在彻底改变为 Nextcloud 开发应用程序的方式。",
     "Update to {version}" : "更新至 {version}",
     "Remove" : "移除",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "该应用没有指定支持的 Nextcloud 最低版本。可能会在将来出现问题。",

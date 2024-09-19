@@ -170,7 +170,7 @@ OC.L10N.register(
     "Your apps" : "As súas aplicacións",
     "Documentation" : "Documentación",
     "Details" : "Detalles",
-    "Changelog" : "Rexistro de cambios",
+    "Changelog" : "Notas da versión",
     "by {author}\n{license}" : "por {author}\n{license}",
     "Active apps" : "Aplicacións activas",
     "Disabled apps" : "Aplicacións desactivadas",
