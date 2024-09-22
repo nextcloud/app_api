@@ -92,7 +92,7 @@
 				:aria-label="enableButtonTooltip"
 				type="primary"
 				:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
-				@click="showSelectModal">
+				@click="showSelectionModal()">
 				{{ enableButtonText }}
 			</NcButton>
 			<NcButton v-else-if="!app.active"
@@ -103,21 +103,9 @@
 				@click.stop="forceEnable(app.id)">
 				{{ forceEnableButtonText }}
 			</NcButton>
-			<NcModal
-				v-if="selectDaemonModal"
-				@close="closeSelectModal">
-				<div class="select-modal-body">
-					<h3>Please choose a deploy daemon</h3>
-					<div class="form-group">
-						<NcSelect v-model="selectedDaemon" input-id="pizza" :options="['Cheese', 'Tomatoes', 'Pineapples']" />
-					</div>
-					<NcButton
-						type="primary"
-						@click="closeSelectModal">
-						Deploy and Enable on chosen daemon
-					</NcButton>
-				</div>
-			</NcModal>
+			<DaemonSelectionModal
+				v-show="selectDaemonModal"
+				:show.sync="selectDaemonModal" />
 		</component>
 	</component>
 </template>
@@ -127,16 +115,14 @@ import AppScore from './AppScore.vue'
 import AppManagement from '../../mixins/AppManagement.js'
 import SvgFilterMixin from './SvgFilterMixin.vue'
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
+import DaemonSelectionModal from './DaemonSelectionModal.vue'
 
 export default {
 	name: 'AppItem',
 	components: {
 		AppScore,
 		NcButton,
-		NcModal,
-		NcSelect,
+		DaemonSelectionModal,
 	},
 	mixins: [AppManagement, SvgFilterMixin],
 	props: {
@@ -170,8 +156,6 @@ export default {
 			scrolled: false,
 			screenshotLoaded: false,
 			selectDaemonModal: false,
-			firstName: '',
-			selectedDaemon: 'Cheese',
 		}
 	},
 	computed: {
@@ -218,13 +202,9 @@ export default {
 		getDataItemHeaders(columnName) {
 			return this.useBundleView ? [this.headers, columnName].join(' ') : null
 		},
-		showSelectModal() {
+		showSelectionModal() {
 			this.selectDaemonModal = true
 		},
-		closeSelectModal() {
-			this.selectDaemonModal = false
-		},
-
 	},
 }
 </script>
@@ -252,18 +232,4 @@ export default {
 	padding: 3px 6px;
 }
 
-.sele {
-	margin: 50px;
-}
-
-.select-modal-body h2 {
-	text-align: center;
-}
-
-.form-group {
-	margin: calc(var(--default-grid-baseline) * 4) 0;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-}
 </style>
