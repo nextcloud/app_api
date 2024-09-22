@@ -28,7 +28,7 @@
 					type="button"
 					:value="enableButtonText"
 					:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
-					@click="enable(app.id)">
+					@click="showSelectionModal">
 				<input v-else-if="!app.active && !app.canInstall"
 					:title="forceEnableButtonTooltip"
 					:aria-label="forceEnableButtonTooltip"
@@ -37,6 +37,9 @@
 					:value="forceEnableButtonText"
 					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
 					@click="forceEnable(app.id)">
+				<DaemonSelectionModal
+					v-show="selectDaemonModal"
+					:show.sync="selectDaemonModal" />
 				<NcCheckboxRadioSwitch v-if="app.canUnInstall"
 					:checked="removeData"
 					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
@@ -110,6 +113,7 @@ import { NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import AppManagement from '../../mixins/AppManagement.js'
 import PrefixMixin from './PrefixMixin.vue'
 import Markdown from './Markdown.vue'
+import DaemonSelectionModal from './DaemonSelectionModal.vue'
 
 export default {
 	name: 'AppDetails',
@@ -117,6 +121,7 @@ export default {
 	components: {
 		Markdown,
 		NcCheckboxRadioSwitch,
+		DaemonSelectionModal,
 	},
 	mixins: [AppManagement, PrefixMixin],
 
@@ -130,6 +135,7 @@ export default {
 	data() {
 		return {
 			removeData: false,
+			selectDaemonModal: false,
 		}
 	},
 
@@ -167,6 +173,9 @@ export default {
 	methods: {
 		toggleRemoveData() {
 			this.removeData = !this.removeData
+		},
+		showSelectionModal() {
+			this.selectDaemonModal = true
 		},
 	},
 }

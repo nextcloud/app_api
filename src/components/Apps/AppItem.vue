@@ -92,7 +92,7 @@
 				:aria-label="enableButtonTooltip"
 				type="primary"
 				:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
-				@click="showSelectionModal()">
+				@click="showSelectionModal">
 				{{ enableButtonText }}
 			</NcButton>
 			<NcButton v-else-if="!app.active"
