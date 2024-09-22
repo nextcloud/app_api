@@ -1,16 +1,12 @@
 <template>
 	<div class="daemon-selection-modal">
-		<NcModal :show="show" @close="closeModal">
+		<NcModal name="selectionModal" :show="show" @close="closeModal">
 			<div class="select-modal-body">
 				<h3>Please choose a deploy daemon</h3>
-				<div class="form-group">
-					<NcSelect v-model="selectedDaemon" input-id="pizza" :options="['Cheese', 'Tomatoes', 'Pineapples']" />
-				</div>
-				<NcButton
-					type="primary"
-					@click="closeSelectModal">
-					Deploy and Enable on chosen daemon
-				</NcButton>
+				<DaemonSelectionList
+					:daemons.sync="daemons"
+					:default-daemon.sync="default_daemon_config"
+					@close="closeModal" />
 			</div>
 		</NcModal>
 	</div>
@@ -18,15 +14,16 @@
 
 <script>
 import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
+
+import axios from '@nextcloud/axios'
+import { generateUrl } from '@nextcloud/router'
+import DaemonSelectionList from './DaemonSelectionList.vue'
 
 export default {
 	name: 'DaemonSelectionModal',
 	components: {
 		NcModal,
-		NcButton,
-		NcSelect,
+		DaemonSelectionList,
 	},
 	props: {
 		show: {
@@ -39,28 +36,33 @@ export default {
 		return {
 			selectDaemonModal: false,
 			selectedDaemon: 'Cheese',
+			daemons: [],
+			default_daemon_config: '',
 		}
+	},
+
+	mounted() {
+		this.getAllDaemons()
+
 	},
 	methods: {
 		closeModal() {
 			this.$emit('update:show', false)
 		},
+		getAllDaemons() {
+			return axios.get(generateUrl('/apps/app_api/daemons'))
+				.then(res => {
+					this.daemons = res.data.daemons
+					this.default_daemon_config = res.data.default_daemon_config
+				})
+		},
 	},
 }
 </script>
 <style scoped>
-.select-modal-body {
-	margin: 50px;
-}
 
-.select-modal-body h2 {
+.select-modal-body h3 {
 	text-align: center;
 }
 
-.form-group {
-	margin: calc(var(--default-grid-baseline) * 4) 0;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-}
 </style>
