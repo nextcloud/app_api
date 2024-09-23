@@ -12,6 +12,7 @@ use OC\Files\AppData\Factory;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Http\Client\IClientService;
 use OCP\IConfig;
+use OCP\ServerVersion;
 use OCP\Support\Subscription\IRegistry;
 use Psr\Log\LoggerInterface;
 
@@ -26,7 +27,8 @@ class ExAppFetcher extends AppAPIFetcher {
 		IConfig $config,
 		CompareVersion $compareVersion,
 		LoggerInterface $logger,
-		protected IRegistry $registry
+		protected IRegistry $registry,
+		protected ServerVersion $serverVersion,
 	) {
 		parent::__construct(
 			$appDataFactory,
@@ -34,7 +36,8 @@ class ExAppFetcher extends AppAPIFetcher {
 			$timeFactory,
 			$config,
 			$logger,
-			$registry
+			$registry,
+			$serverVersion
 		);
 
 		$this->compareVersion = $compareVersion;

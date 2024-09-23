@@ -15,6 +15,7 @@ use OCP\Files\NotFoundException;
 use OCP\Files\NotPermittedException;
 use OCP\Http\Client\IClientService;
 use OCP\IConfig;
+use OCP\ServerVersion;
 use OCP\Support\Subscription\IRegistry;
 use Psr\Log\LoggerInterface;
 
@@ -35,7 +36,8 @@ abstract class AppAPIFetcher {
 		protected ITimeFactory $timeFactory,
 		protected IConfig $config,
 		protected LoggerInterface $logger,
-		protected IRegistry $registry
+		protected IRegistry $registry,
+		protected ServerVersion $serverVersion,
 	) {
 		$this->appData = $appDataFactory->get('appstore');
 	}
@@ -184,7 +186,7 @@ abstract class AppAPIFetcher {
 	 */
 	protected function getChannel(): string {
 		if ($this->channel === null) {
-			$this->channel = \OC_Util::getChannel();
+			$this->channel = $this->serverVersion->getChannel();
 		}
 		return $this->channel;
 	}
