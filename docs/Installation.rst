@@ -54,7 +54,7 @@ where ``<version-tag>`` is the version you want to install.
 To install it in development mode, follow the instructions on this page: :ref:`dev-setup`.
 
 4. Setup Deploy daemon
-----------------------
+**********************
 
 Upon the successful installation of the AppAPI, a one-time configuration is essential.
 Details on this configuration can be found in the subsequent section: :ref:`create-deploy-daemon`.
