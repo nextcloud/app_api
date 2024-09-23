@@ -9,6 +9,7 @@
 				:daemon="daemon"
 				:is-default="defaultDaemon === daemon.name"
 				:daemons="daemons"
+				:app-id="appId"
 				@close="closeModal" />
 		</ul>
 		<NcEmptyContent
@@ -41,6 +42,10 @@ export default {
 			default: () => [],
 		},
 		defaultDaemon: {
+			type: String,
+			required: true,
+		},
+		appId: {
 			type: String,
 			required: true,
 		},

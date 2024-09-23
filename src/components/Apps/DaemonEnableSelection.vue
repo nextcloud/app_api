@@ -7,7 +7,7 @@
 			:counter-number="daemon.exAppsCount"
 			:class="{'daemon-default': isDefault }"
 			counter-type="highlighted"
-			@click="enableApp(daemon)">
+			@click.stop="closeModal(), enable(appId, daemon.name)">
 			<template #subname>
 				{{ daemon.accepts_deploy_id }}
 			</template>
@@ -17,12 +17,14 @@
 
 <script>
 import NcListItem from '@nextcloud/vue/dist/Components/NcListItem.js'
+import AppManagement from '../../mixins/AppManagement.js'
 
 export default {
 	name: 'DaemonEnableSelection',
 	components: {
 		NcListItem,
 	},
+	mixins: [AppManagement],
 	props: {
 		daemon: {
 			type: Object,
@@ -39,6 +41,10 @@ export default {
 			required: true,
 			default: () => [],
 		},
+		appId: {
+			type: String,
+			required: true,
+		},
 	},
 	computed: {
 		itemTitle() {
@@ -46,8 +52,7 @@ export default {
 		},
 	},
 	methods: {
-		enableApp() {
-			// hier enable-Aufruf
+		closeModal() {
 			this.$emit('close')
 		},
 	},

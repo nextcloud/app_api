@@ -39,7 +39,8 @@
 					@click="forceEnable(app.id)">
 				<DaemonSelectionModal
 					v-show="selectDaemonModal"
-					:show.sync="selectDaemonModal" />
+					:show.sync="selectDaemonModal"
+					:app-id="app.id" />
 				<NcCheckboxRadioSwitch v-if="app.canUnInstall"
 					:checked="removeData"
 					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"

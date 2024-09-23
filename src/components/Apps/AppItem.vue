@@ -105,7 +105,8 @@
 			</NcButton>
 			<DaemonSelectionModal
 				v-show="selectDaemonModal"
-				:show.sync="selectDaemonModal" />
+				:show.sync="selectDaemonModal"
+				:app-id="app.id" />
 		</component>
 	</component>
 </template>

@@ -58,12 +58,12 @@ const mutations = {
 		})
 	},
 
-	enableApp(state, { appId }) {
+	enableApp(state, { appId, daemonId }) {
 		const app = state.apps.find(app => app.id === appId)
 		if (!app.installed) {
 			app.installed = true
 			app.needsDownload = false
-			app.daemon = state.defaultDaemon
+			app.daemon = daemonId
 			app.status = {
 				type: 'install',
 				action: 'deploy',
@@ -193,16 +193,16 @@ const getters = {
 
 const actions = {
 
-	enableApp(context, { appId }) {
+	enableApp(context, { appId, daemonId }) {
 		return api.requireAdmin().then((response) => {
 			context.commit('startLoading', appId)
 			context.commit('startLoading', 'install')
-			return api.post(generateUrl(`/apps/app_api/apps/enable/${appId}`))
+			return api.post(generateUrl(`/apps/app_api/apps/enable/${appId}/${daemonId}`))
 				.then((response) => {
 					context.commit('stopLoading', appId)
 					context.commit('stopLoading', 'install')
 
-					context.commit('enableApp', { appId })
+					context.commit('enableApp', { appId, daemonId })
 
 					context.dispatch('updateAppsStatus')
 

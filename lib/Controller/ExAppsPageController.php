@@ -372,12 +372,12 @@ class ExAppsPageController extends Controller {
 	}
 
 	#[PasswordConfirmationRequired]
-	public function enableApp(string $appId): JSONResponse {
+	public function enableApp(string $appId, string $daemonId): JSONResponse {
 		$updateRequired = false;
 		$exApp = $this->exAppService->getExApp($appId);
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
-			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s", $appId))) {
+			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s %s", $appId, $daemonId))) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
 			$elapsedTime = 0;

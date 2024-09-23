@@ -6,6 +6,7 @@
 				<DaemonSelectionList
 					:daemons.sync="daemons"
 					:default-daemon.sync="default_daemon_config"
+					:app-id="appId"
 					@close="closeModal" />
 			</div>
 		</NcModal>
@@ -30,6 +31,10 @@ export default {
 			type: Boolean,
 			required: true,
 			default: false,
+		},
+		appId: {
+			type: String,
+			required: true,
 		},
 	},
 	data() {
