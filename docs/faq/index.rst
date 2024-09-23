@@ -10,7 +10,7 @@ or provide a brief answer.
 
 	This section will be updated with time, as new questions arise.
 	If you have a question that is not listed here or the answer is not enough for you, please feel free to
-	ask it by creating an issue in the `AppAPI repository <https://github.com/cloud-py-api/app_api/issues>`_.
+	ask it by creating an issue in the `AppAPI repository <https://github.com/nextcloud/app_api/issues>`_.
 
 
 .. toctree::
@@ -20,4 +20,5 @@ or provide a brief answer.
 	DockerSocketProxy
 	GpuSupport
 	Scaling
+	BehindCompanyProxy
 	Troubleshooting
