@@ -10,7 +10,7 @@ OC.L10N.register(
     "Nextcloud AppAPI" : "AppAPI de Nextcloud",
     "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud." : "El proyeutu AppAPI ye una iniciativa emocionante que tien l'oxetivu de revolucionar la forma na que se desendolquen les aplicaciones pa Nextcloud.",
     "External Apps management" : "Xestión d'aplicaciones esternes",
-    "Update to {version}" : "Anovar a la versión {versión}",
+    "Update to {version}" : "Anovar a la versión {version}",
     "Remove" : "Quitar",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Esta aplicación nun se pue instalar porque nun se cumplen les dependencies siguientes:",
     "View in store" : "Ver na tienda",
