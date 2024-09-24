@@ -381,7 +381,7 @@ class ExAppsPageController extends Controller {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
 			$elapsedTime = 0;
-			while ($elapsedTime < 5000000 && !$this->exAppService->getExApp($appId)) {
+			while ($elapsedTime < 50000000 && !$this->exAppService->getExApp($appId)) {
 				usleep(150000); // 0.15
 				$elapsedTime += 150000;
 			}
