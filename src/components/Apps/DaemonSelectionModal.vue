@@ -2,11 +2,11 @@
 	<div class="daemon-selection-modal">
 		<NcModal name="selectionModal" :show="show" @close="closeModal">
 			<div class="select-modal-body">
-				<h3>Please choose a deploy daemon</h3>
+				<h3>{{ t('app_api', 'Choose Deploy Daemon for {appName}', {appName: app.name }) }}</h3>
 				<DaemonSelectionList
 					:daemons.sync="daemons"
 					:default-daemon.sync="default_daemon_config"
-					:app-id="appId"
+					:app-id="app.id"
 					@close="closeModal" />
 			</div>
 		</NcModal>
@@ -32,8 +32,8 @@ export default {
 			required: true,
 			default: false,
 		},
-		appId: {
-			type: String,
+		app: {
+			type: Object,
 			required: true,
 		},
 	},

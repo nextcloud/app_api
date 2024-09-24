@@ -106,7 +106,7 @@
 			<DaemonSelectionModal
 				v-show="selectDaemonModal"
 				:show.sync="selectDaemonModal"
-				:app-id="app.id" />
+				:app="app" />
 		</component>
 	</component>
 </template>
