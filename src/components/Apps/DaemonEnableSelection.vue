@@ -7,7 +7,7 @@
 			:counter-number="daemon.exAppsCount"
 			:class="{'daemon-default': isDefault }"
 			counter-type="highlighted"
-			@click.stop="closeModal(), enable(appId, daemon.name)">
+			@click.stop="closeModal(), enable(appId, daemon)">
 			<template #subname>
 				{{ daemon.accepts_deploy_id }}
 			</template>
