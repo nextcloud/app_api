@@ -40,7 +40,7 @@
 				<DaemonSelectionModal
 					v-if="selectDaemonModal"
 					:show.sync="selectDaemonModal"
-					:app-id="app.id" />
+					:app="app" />
 				<NcCheckboxRadioSwitch v-if="app.canUnInstall"
 					:checked="removeData"
 					:disabled="installing || isLoading || !defaultDeployDaemonAccessible"
