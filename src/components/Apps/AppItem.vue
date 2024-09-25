@@ -104,7 +104,7 @@
 				{{ forceEnableButtonText }}
 			</NcButton>
 			<DaemonSelectionModal
-				v-show="selectDaemonModal"
+				v-if="selectDaemonModal"
 				:show.sync="selectDaemonModal"
 				:app="app" />
 		</component>
