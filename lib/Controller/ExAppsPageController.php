@@ -375,7 +375,7 @@ class ExAppsPageController extends Controller {
 	 * Default ExApp enabling process.
 	 * Enabling approval via password confirmation.
 	 * @param string $appId name of the app that will be enabled
- 	 * @param string daemonId ID of the daemon the app will be deployed on
+	 * @param string daemonId ID of the daemon the app will be deployed on
 	 * @return JSONResponse empty when successful, HTTP Error when not
 	 */
 	#[PasswordConfirmationRequired]
