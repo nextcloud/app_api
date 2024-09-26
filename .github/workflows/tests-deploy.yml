@@ -2,8 +2,9 @@ name: Tests - Deploy
 
 on:
   pull_request:
+    branches: [stable29]
   push:
-    branches: [main]
+    branches: [stable29]
   workflow_dispatch:
 
 permissions:
@@ -25,8 +26,6 @@ jobs:
         include:
           - server-version: "stable29"
             php-version: "8.2"
-          - server-version: "master"
-            php-version: "8.3"
 
     services:
       postgres:
