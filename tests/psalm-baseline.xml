@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.24.0@462c80e31c34e58cc4f750c656be3927e80e550e">
+<files psalm-version="5.25.0@01a8eb06b9e9cc6cfb6a320bf9fb14331919d505">
   <file src="lib/AppInfo/Application.php">
     <InvalidArgument>
       <code><![CDATA[LoadFilesPluginListener::class]]></code>
@@ -54,10 +54,11 @@
     <UndefinedClass>
       <code><![CDATA[$appDataFactory]]></code>
       <code><![CDATA[$e]]></code>
+      <code><![CDATA[$this->serverVersion]]></code>
       <code><![CDATA[ConnectException]]></code>
       <code><![CDATA[ConnectException]]></code>
       <code><![CDATA[Factory]]></code>
-      <code><![CDATA[\OC_Util]]></code>
+      <code><![CDATA[protected]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Fetcher/ExAppFetcher.php">
@@ -72,6 +73,7 @@
       <code><![CDATA[CompareVersion]]></code>
       <code><![CDATA[Factory]]></code>
       <code><![CDATA[VersionParser]]></code>
+      <code><![CDATA[protected]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Listener/FileEventsListener.php">
