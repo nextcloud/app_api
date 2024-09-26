@@ -2,6 +2,7 @@ name: Tests
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -28,13 +29,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: [ '8.1' ]
-        server-version: [ 'stable28' ]
-        include:
-          - server-version: "stable29"
-            php-version: "8.2"
-          - server-version: "master"
-            php-version: "8.3"
+        php-version: [ '8.3' ]
+        server-version: [ 'master' ]
     env:
       DATABASE_PGSQL: 1
 
@@ -158,11 +154,11 @@ jobs:
 
   nc-py-api-mysql:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • stable28 • 8.1 • MySQL
+    name: NC_Py_API • master • 8.3 • MySQL
 
     services:
       mysql:
-        image: ghcr.io/nextcloud/continuous-integration-mysql-8.1:latest
+        image: ghcr.io/nextcloud/continuous-integration-mysql-8.3:latest
         ports:
           - 4444:3306/tcp
         env:
@@ -182,13 +178,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: stable28
+          ref: master
 
       - name: Checkout Notifications
         uses: actions/checkout@v3
         with:
           repository: nextcloud/notifications
-          ref: stable28
+          ref: master
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -196,10 +192,10 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.1
+      - name: Set up php 8.3
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: '8.1'
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, mysql, pdo_mysql
           coverage: none
           ini-file: development
@@ -265,17 +261,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: mysql_nc_py_api_stable28_8.1_nextcloud.log
+          name: mysql_nc_py_api_master_8.3_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-py-api-mysql-apcu:
     runs-on: ubuntu-22.04
-    name: APCu • NC_Py_API • stable29 • 8.1 • MySQL
+    name: APCu • NC_Py_API • master • 8.3 • MySQL
 
     services:
       mysql:
-        image: ghcr.io/nextcloud/continuous-integration-mysql-8.1:latest
+        image: ghcr.io/nextcloud/continuous-integration-mysql-8.3:latest
         ports:
           - 4444:3306/tcp
         env:
@@ -295,13 +291,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: stable29
+          ref: master
 
       - name: Checkout Notifications
         uses: actions/checkout@v3
         with:
           repository: nextcloud/notifications
-          ref: stable28
+          ref: master
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -309,10 +305,10 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.1
+      - name: Set up php 8.3
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: '8.1'
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, mysql, pdo_mysql, apcu
           coverage: none
           ini-file: development
@@ -381,17 +377,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: apcu_mysql_nc_py_api_stable29_8.1_nextcloud.log
+          name: apcu_mysql_nc_py_api_master_8.3_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-py-api-oci:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • ${{ matrix.server-version }} • 8.2 • Oracle
+    name: NC_Py_API • ${{ matrix.server-version }} • 8.3 • Oracle
     strategy:
       fail-fast: false
       matrix:
-        server-version: [ 'stable28', 'stable29' ]
+        server-version: [ 'master' ]
 
     services:
       oracle:
@@ -438,7 +434,7 @@ jobs:
       - name: Set up php
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, \
             posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, oci8
 
@@ -497,7 +493,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: oci_nc_py_api_${{ matrix.server-version }}_8.2_nextcloud.log
+          name: oci_nc_py_api_${{ matrix.server-version }}_8.3_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 

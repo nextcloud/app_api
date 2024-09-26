@@ -2,6 +2,7 @@ name: Tests Special
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -50,7 +51,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: 'stable28'
+          ref: 'master'
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -60,7 +61,7 @@ jobs:
       - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: '8.1'
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
           coverage: none
           ini-file: development
