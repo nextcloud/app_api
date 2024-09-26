@@ -43,7 +43,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 *Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
-	<version>3.2.0</version>
+	<version>5.0.0</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
@@ -63,7 +63,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_4.png</screenshot>
 	<dependencies>
 		<php min-version="8.1"/>
-		<nextcloud min-version="28" max-version="31"/>
+		<nextcloud min-version="31" max-version="31"/>
 	</dependencies>
 	<background-jobs>
 		<job>OCA\AppAPI\BackgroundJob\ExAppInitStatusCheckJob</job>
