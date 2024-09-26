@@ -4,7 +4,7 @@
 			v-if="daemons.length > 0"
 			:aria-label="t('app_api', 'Registered Deploy daemons list')">
 			<DaemonEnableSelection
-				v-for="daemon in daemons"
+				v-for="daemon in dockerDaemons"
 				:key="daemon.id"
 				:daemon="daemon"
 				:is-default="defaultDaemon === daemon.name"
@@ -50,8 +50,16 @@ export default {
 			required: true,
 		},
 	},
+	computed: {
+		dockerDaemons() {
+			return this.daemons.filter(function(daemon) {
+				return daemon.accepts_deploy_id === 'docker-install'
+			})
+		},
+	},
 	methods: {
 		closeModal() {
+			console.warn(this.daemons)
 			this.$emit('close')
 		},
 	},

@@ -477,8 +477,16 @@ __webpack_require__.r(__webpack_exports__);
       required: true
     }
   },
+  computed: {
+    dockerDaemons() {
+      return this.daemons.filter(function (daemon) {
+        return daemon.accepts_deploy_id === 'docker-install';
+      });
+    }
+  },
   methods: {
     closeModal() {
+      console.warn(this.daemons);
       this.$emit('close');
     }
   }
@@ -1540,7 +1548,7 @@ var render = function render() {
     attrs: {
       "aria-label": _vm.t("app_api", "Registered Deploy daemons list")
     }
-  }, _vm._l(_vm.daemons, function (daemon) {
+  }, _vm._l(_vm.dockerDaemons, function (daemon) {
     return _c("DaemonEnableSelection", {
       key: daemon.id,
       attrs: {
@@ -4135,4 +4143,4 @@ __webpack_require__.r(__webpack_exports__);
 /***/ })
 
 }]);
-//# sourceMappingURL=app_api-src_views_Apps_vue.js.map?v=fe0d605e039a1bd49604
+//# sourceMappingURL=app_api-src_views_Apps_vue.js.map?v=c83d1d4fb9f3473331b9
