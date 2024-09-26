@@ -59,7 +59,6 @@ export default {
 	},
 	methods: {
 		closeModal() {
-			console.warn(this.daemons)
 			this.$emit('close')
 		},
 	},

@@ -4,7 +4,7 @@
 			<div class="select-modal-body">
 				<h3>{{ t('app_api', 'Choose Deploy Daemon for {appName}', {appName: app.name }) }}</h3>
 				<DaemonSelectionList
-					:daemons.sync="daemons"
+					:daemons="daemons"
 					:default-daemon.sync="default_daemon_config"
 					:app-id="app.id"
 					@close="closeModal" />
@@ -16,8 +16,6 @@
 <script>
 import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
 
-import axios from '@nextcloud/axios'
-import { generateUrl } from '@nextcloud/router'
 import DaemonSelectionList from './DaemonSelectionList.vue'
 
 export default {
@@ -36,30 +34,23 @@ export default {
 			type: Object,
 			required: true,
 		},
+		daemons: {
+			type: Array,
+			required: true,
+		},
 	},
 	data() {
 		return {
 			selectDaemonModal: false,
-			selectedDaemon: 'Cheese',
-			daemons: [],
-			default_daemon_config: '',
 		}
 	},
 
 	mounted() {
-		this.getAllDaemons()
 
 	},
 	methods: {
 		closeModal() {
 			this.$emit('update:show', false)
-		},
-		getAllDaemons() {
-			return axios.get(generateUrl('/apps/app_api/daemons'))
-				.then(res => {
-					this.daemons = res.data.daemons
-					this.default_daemon_config = res.data.default_daemon_config
-				})
 		},
 	},
 }

@@ -97,6 +97,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _SvgFilterMixin_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SvgFilterMixin.vue */ "./src/components/Apps/SvgFilterMixin.vue");
 /* harmony import */ var _nextcloud_vue_dist_Components_NcButton_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @nextcloud/vue/dist/Components/NcButton.js */ "./node_modules/@nextcloud/vue/dist/Components/NcButton.mjs");
 /* harmony import */ var _DaemonSelectionModal_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./DaemonSelectionModal.vue */ "./src/components/Apps/DaemonSelectionModal.vue");
+/* harmony import */ var _nextcloud_axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @nextcloud/axios */ "./node_modules/@nextcloud/axios/dist/index.mjs");
+/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/router/dist/index.mjs");
+
+
 
 
 
@@ -140,7 +144,8 @@ __webpack_require__.r(__webpack_exports__);
       removeData: false,
       scrolled: false,
       screenshotLoaded: false,
-      selectDaemonModal: false
+      selectDaemonModal: false,
+      dockerDaemons: []
     };
   },
   computed: {
@@ -165,6 +170,7 @@ __webpack_require__.r(__webpack_exports__);
       };
       image.src = this.app.screenshot;
     }
+    this.getAllDockerDaemons();
   },
   methods: {
     async showAppDetails(event) {
@@ -191,6 +197,20 @@ __webpack_require__.r(__webpack_exports__);
     },
     showSelectionModal() {
       this.selectDaemonModal = true;
+    },
+    getAllDockerDaemons() {
+      return _nextcloud_axios__WEBPACK_IMPORTED_MODULE_5__["default"].get((0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_6__.generateUrl)('/apps/app_api/daemons')).then(res => {
+        this.dockerDaemons = res.data.daemons.filter(function (daemon) {
+          return daemon.accepts_deploy_id === 'docker-install';
+        });
+      });
+    },
+    enableButtonAction() {
+      if (this.dockerDaemons.length === 1) {
+        this.enable(this.app.id, this.dockerDaemons[0]);
+      } else {
+        this.showSelectionModal();
+      }
     }
   }
 });
@@ -486,7 +506,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     closeModal() {
-      console.warn(this.daemons);
       this.$emit('close');
     }
   }
@@ -505,18 +524,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _nextcloud_vue_dist_Components_NcModal_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @nextcloud/vue/dist/Components/NcModal.js */ "./node_modules/@nextcloud/vue/dist/Components/NcModal.mjs");
-/* harmony import */ var _nextcloud_axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @nextcloud/axios */ "./node_modules/@nextcloud/axios/dist/index.mjs");
-/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/router/dist/index.mjs");
-/* harmony import */ var _DaemonSelectionList_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./DaemonSelectionList.vue */ "./src/components/Apps/DaemonSelectionList.vue");
-
-
+/* harmony import */ var _DaemonSelectionList_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DaemonSelectionList.vue */ "./src/components/Apps/DaemonSelectionList.vue");
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'DaemonSelectionModal',
   components: {
     NcModal: _nextcloud_vue_dist_Components_NcModal_js__WEBPACK_IMPORTED_MODULE_0__["default"],
-    DaemonSelectionList: _DaemonSelectionList_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
+    DaemonSelectionList: _DaemonSelectionList_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   props: {
     show: {
@@ -527,28 +542,21 @@ __webpack_require__.r(__webpack_exports__);
     app: {
       type: Object,
       required: true
+    },
+    daemons: {
+      type: Array,
+      required: true
     }
   },
   data() {
     return {
-      selectDaemonModal: false,
-      selectedDaemon: 'Cheese',
-      daemons: [],
-      default_daemon_config: ''
+      selectDaemonModal: false
     };
   },
-  mounted() {
-    this.getAllDaemons();
-  },
+  mounted() {},
   methods: {
     closeModal() {
       this.$emit('update:show', false);
-    },
-    getAllDaemons() {
-      return _nextcloud_axios__WEBPACK_IMPORTED_MODULE_1__["default"].get((0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_2__.generateUrl)('/apps/app_api/daemons')).then(res => {
-        this.daemons = res.data.daemons;
-        this.default_daemon_config = res.data.default_daemon_config;
-      });
     }
   }
 });
@@ -1215,7 +1223,7 @@ var render = function render() {
       disabled: !_vm.app.canInstall || _vm.installing || _vm.isLoading || !_vm.defaultDeployDaemonAccessible || _vm.isInitializing || _vm.isDeploying
     },
     on: {
-      click: _vm.showSelectionModal
+      click: _vm.enableButtonAction
     }
   }, [_vm._v("\n\t\t\t" + _vm._s(_vm.enableButtonText) + "\n\t\t")]) : !_vm.app.active ? _c("NcButton", {
     attrs: {
@@ -1233,6 +1241,7 @@ var render = function render() {
   }, [_vm._v("\n\t\t\t" + _vm._s(_vm.forceEnableButtonText) + "\n\t\t")]) : _vm._e(), _vm._v(" "), _vm.selectDaemonModal ? _c("DaemonSelectionModal", {
     attrs: {
       show: _vm.selectDaemonModal,
+      daemons: _vm.dockerDaemons,
       app: _vm.app
     },
     on: {
@@ -1619,9 +1628,6 @@ var render = function render() {
       "app-id": _vm.app.id
     },
     on: {
-      "update:daemons": function ($event) {
-        _vm.daemons = $event;
-      },
       "update:defaultDaemon": function ($event) {
         _vm.default_daemon_config = $event;
       },
@@ -4143,4 +4149,4 @@ __webpack_require__.r(__webpack_exports__);
 /***/ })
 
 }]);
-//# sourceMappingURL=app_api-src_views_Apps_vue.js.map?v=c83d1d4fb9f3473331b9
+//# sourceMappingURL=app_api-src_views_Apps_vue.js.map?v=1db7dec7e96ddf8caad3

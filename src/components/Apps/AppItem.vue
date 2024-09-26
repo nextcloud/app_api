@@ -92,7 +92,7 @@
 				:aria-label="enableButtonTooltip"
 				type="primary"
 				:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
-				@click="showSelectionModal">
+				@click="enableButtonAction">
 				{{ enableButtonText }}
 			</NcButton>
 			<NcButton v-else-if="!app.active"
@@ -106,6 +106,7 @@
 			<DaemonSelectionModal
 				v-if="selectDaemonModal"
 				:show.sync="selectDaemonModal"
+				:daemons="dockerDaemons"
 				:app="app" />
 		</component>
 	</component>
@@ -117,6 +118,9 @@ import AppManagement from '../../mixins/AppManagement.js'
 import SvgFilterMixin from './SvgFilterMixin.vue'
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import DaemonSelectionModal from './DaemonSelectionModal.vue'
+
+import axios from '@nextcloud/axios'
+import { generateUrl } from '@nextcloud/router'
 
 export default {
 	name: 'AppItem',
@@ -157,6 +161,7 @@ export default {
 			scrolled: false,
 			screenshotLoaded: false,
 			selectDaemonModal: false,
+			dockerDaemons: [],
 		}
 	},
 	computed: {
@@ -181,6 +186,7 @@ export default {
 			}
 			image.src = this.app.screenshot
 		}
+		this.getAllDockerDaemons()
 	},
 	methods: {
 		async showAppDetails(event) {
@@ -205,6 +211,21 @@ export default {
 		},
 		showSelectionModal() {
 			this.selectDaemonModal = true
+		},
+		getAllDockerDaemons() {
+			return axios.get(generateUrl('/apps/app_api/daemons'))
+				.then(res => {
+					this.dockerDaemons = res.data.daemons.filter(function(daemon) {
+						return daemon.accepts_deploy_id === 'docker-install'
+					})
+				})
+		},
+		enableButtonAction() {
+			if (this.dockerDaemons.length === 1) {
+				this.enable(this.app.id, this.dockerDaemons[0])
+			} else {
+				this.showSelectionModal()
+			}
 		},
 	},
 }
