@@ -2,6 +2,7 @@ name: Tests - Deploy
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -20,13 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: [ '8.1' ]
-        server-version: [ 'stable28' ]
-        include:
-          - server-version: "stable29"
-            php-version: "8.2"
-          - server-version: "master"
-            php-version: "8.3"
+        php-version: [ '8.3' ]
+        server-version: [ 'master' ]
 
     services:
       postgres:
@@ -144,9 +140,9 @@ jobs:
 
   nc-docker-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker • 🐘8.1
+    name: NC In Julius Docker • 🐘8.3
     env:
-      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
+      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php83:master
 
     steps:
       - name: Set app env
@@ -220,9 +216,9 @@ jobs:
 
   nc-docker-dsp-http:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker(DSP-HTTP) • 🐘8.1
+    name: NC In Julius Docker(DSP-HTTP) • 🐘8.3
     env:
-      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
+      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php83:master
 
     steps:
       - name: Set app env
@@ -299,9 +295,9 @@ jobs:
 
   nc-docker-dsp-https:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker(DSP-HTTPS) • 🐘8.1
+    name: NC In Julius Docker(DSP-HTTPS) • 🐘8.3
     env:
-      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
+      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php83:master
 
     steps:
       - name: Set app env
@@ -402,7 +398,7 @@ jobs:
 
   nc-host-app-docker-redis:
     runs-on: ubuntu-22.04
-    name: NC In Host(Redis) • stable28 • 🐘8.1
+    name: NC In Host(Redis) • master • 🐘8.3
 
     services:
       postgres:
@@ -434,17 +430,17 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: stable28
+          ref: master
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.1
+      - name: Set up php 8.3
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: 8.1
+          php-version: 8.3
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql, redis
           coverage: none
           ini-file: development
@@ -520,7 +516,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable28_8.1_container.json
+          name: nc_host_app_docker_redis_master_8.3_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -528,7 +524,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable28_8.1_container.log
+          name: nc_host_app_docker_redis_master_8.3_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -536,13 +532,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable28_8.1_nextcloud.log
+          name: nc_host_app_docker_redis_master_8.3_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-host-network-host:
     runs-on: ubuntu-22.04
-    name: NC In Host(network=host)  • master • 🐘8.2
+    name: NC In Host(network=host)  • master • 🐘8.3
 
     services:
       postgres:
@@ -571,10 +567,10 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.2
+      - name: Set up php 8.3
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: 8.2
+          php-version: 8.3
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql, redis
           coverage: none
           ini-file: development
