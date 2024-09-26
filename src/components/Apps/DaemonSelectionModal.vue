@@ -1,6 +1,6 @@
 <template>
 	<div class="daemon-selection-modal">
-		<NcModal name="selectionModal" :show="show" @close="closeModal">
+		<NcModal :show="show" @close="closeModal">
 			<div class="select-modal-body">
 				<h3>{{ t('app_api', 'Choose Deploy Daemon for {appName}', {appName: app.name }) }}</h3>
 				<DaemonSelectionList
