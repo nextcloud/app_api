@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.1 - 2024-09-27]
+
+Last release to pin Nextcloud versions. Since NC 30.0.1 AppAPI will be bundled with server.
+
+### Changed
+
+- Changed NC compatible versions (28, 29, 30.0.0)
+
 ## [3.2.0 - 2024-09-10]
 
 ### Added
