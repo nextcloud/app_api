@@ -538,7 +538,7 @@ jobs:
 
   nc-host-network-host:
     runs-on: ubuntu-22.04
-    name: NC In Host(network=host)  • master • 🐘8.2
+    name: NC In Host(network=host)  • stable30 • 🐘8.2
 
     services:
       postgres:
@@ -560,7 +560,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable30
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -636,7 +636,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_master_8.2_container.json
+          name: nc_host_network_host_stable30_8.2_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -644,7 +644,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_master_8.2_container.log
+          name: nc_host_network_host_stable30_8.2_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -652,7 +652,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_master_8.2_nextcloud.log
+          name: nc_host_network_host_stable30_8.2_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
