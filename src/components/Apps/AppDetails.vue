@@ -28,7 +28,7 @@
 					type="button"
 					:value="enableButtonText"
 					:disabled="!app.canInstall || installing || isLoading || !defaultDeployDaemonAccessible || isInitializing || isDeploying"
-					@click="showSelectionModal">
+					@click="enableButtonAction">
 				<input v-else-if="!app.active && !app.canInstall"
 					:title="forceEnableButtonTooltip"
 					:aria-label="forceEnableButtonTooltip"
@@ -40,6 +40,7 @@
 				<DaemonSelectionModal
 					v-if="selectDaemonModal"
 					:show.sync="selectDaemonModal"
+					:daemons="dockerDaemons"
 					:app="app" />
 				<NcCheckboxRadioSwitch v-if="app.canUnInstall"
 					:checked="removeData"
@@ -116,6 +117,9 @@ import PrefixMixin from './PrefixMixin.vue'
 import Markdown from './Markdown.vue'
 import DaemonSelectionModal from './DaemonSelectionModal.vue'
 
+import axios from '@nextcloud/axios'
+import { generateUrl } from '@nextcloud/router'
+
 export default {
 	name: 'AppDetails',
 
@@ -137,6 +141,7 @@ export default {
 		return {
 			removeData: false,
 			selectDaemonModal: false,
+			dockerDaemons: [],
 		}
 	},
 
@@ -170,6 +175,9 @@ export default {
 			this.removeData = false
 		},
 	},
+	mounted() {
+		this.getAllDockerDaemons()
+	},
 
 	methods: {
 		toggleRemoveData() {
@@ -177,6 +185,21 @@ export default {
 		},
 		showSelectionModal() {
 			this.selectDaemonModal = true
+		},
+		getAllDockerDaemons() {
+			return axios.get(generateUrl('/apps/app_api/daemons'))
+				.then(res => {
+					this.dockerDaemons = res.data.daemons.filter(function(daemon) {
+						return daemon.accepts_deploy_id === 'docker-install'
+					})
+				})
+		},
+		enableButtonAction() {
+			if (this.dockerDaemons.length === 1) {
+				this.enable(this.app.id, this.dockerDaemons[0])
+			} else {
+				this.showSelectionModal()
+			}
 		},
 	},
 }

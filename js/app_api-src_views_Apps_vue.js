@@ -16,6 +16,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _PrefixMixin_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PrefixMixin.vue */ "./src/components/Apps/PrefixMixin.vue");
 /* harmony import */ var _Markdown_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Markdown.vue */ "./src/components/Apps/Markdown.vue");
 /* harmony import */ var _DaemonSelectionModal_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./DaemonSelectionModal.vue */ "./src/components/Apps/DaemonSelectionModal.vue");
+/* harmony import */ var _nextcloud_axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @nextcloud/axios */ "./node_modules/@nextcloud/axios/dist/index.mjs");
+/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/router/dist/index.mjs");
+
+
 
 
 
@@ -38,7 +42,8 @@ __webpack_require__.r(__webpack_exports__);
   data() {
     return {
       removeData: false,
-      selectDaemonModal: false
+      selectDaemonModal: false,
+      dockerDaemons: []
     };
   },
   computed: {
@@ -70,12 +75,29 @@ __webpack_require__.r(__webpack_exports__);
       this.removeData = false;
     }
   },
+  mounted() {
+    this.getAllDockerDaemons();
+  },
   methods: {
     toggleRemoveData() {
       this.removeData = !this.removeData;
     },
     showSelectionModal() {
       this.selectDaemonModal = true;
+    },
+    getAllDockerDaemons() {
+      return _nextcloud_axios__WEBPACK_IMPORTED_MODULE_5__["default"].get((0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_6__.generateUrl)('/apps/app_api/daemons')).then(res => {
+        this.dockerDaemons = res.data.daemons.filter(function (daemon) {
+          return daemon.accepts_deploy_id === 'docker-install';
+        });
+      });
+    },
+    enableButtonAction() {
+      if (this.dockerDaemons.length === 1) {
+        this.enable(this.app.id, this.dockerDaemons[0]);
+      } else {
+        this.showSelectionModal();
+      }
     }
   }
 });
@@ -964,7 +986,7 @@ var render = function render() {
       disabled: !_vm.app.canInstall || _vm.installing || _vm.isLoading || !_vm.defaultDeployDaemonAccessible || _vm.isInitializing || _vm.isDeploying
     },
     on: {
-      click: _vm.showSelectionModal
+      click: _vm.enableButtonAction
     }
   }) : !_vm.app.active && !_vm.app.canInstall ? _c("input", {
     staticClass: "enable force",
@@ -983,6 +1005,7 @@ var render = function render() {
   }) : _vm._e(), _vm._v(" "), _vm.selectDaemonModal ? _c("DaemonSelectionModal", {
     attrs: {
       show: _vm.selectDaemonModal,
+      daemons: _vm.dockerDaemons,
       app: _vm.app
     },
     on: {
@@ -4149,4 +4172,4 @@ __webpack_require__.r(__webpack_exports__);
 /***/ })
 
 }]);
-//# sourceMappingURL=app_api-src_views_Apps_vue.js.map?v=1db7dec7e96ddf8caad3
+//# sourceMappingURL=app_api-src_views_Apps_vue.js.map?v=8689f414e7e4cfca4b6d
