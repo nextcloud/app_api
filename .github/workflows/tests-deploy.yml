@@ -2,8 +2,9 @@ name: Tests - Deploy
 
 on:
   pull_request:
+    branches: [stable29]
   push:
-    branches: [main]
+    branches: [stable29]
   workflow_dispatch:
 
 permissions:
@@ -25,8 +26,6 @@ jobs:
         include:
           - server-version: "stable29"
             php-version: "8.2"
-          - server-version: "master"
-            php-version: "8.3"
 
     services:
       postgres:
@@ -155,7 +154,7 @@ jobs:
       - name: Create container
         run: |
           docker network create master_bridge
-          docker run --net master_bridge --name nextcloud --rm -d -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud --rm -d -v /var/run/docker.sock:/var/run/docker.sock -e SERVER_BRANCH=stable29 ${{ env.docker-image }}
           sudo chmod 766 /var/run/docker.sock
           sleep 120s
 
@@ -235,7 +234,7 @@ jobs:
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             --net master_bridge --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/cloud-py-api/nextcloud-appapi-dsp:latest
-          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud --rm -d -e SERVER_BRANCH=stable29 ${{ env.docker-image }}
           sleep 60s
 
       - name: Install AppAPI
@@ -322,7 +321,7 @@ jobs:
             -e EX_APPS_NET="ipv4@localhost" \
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/cloud-py-api/nextcloud-appapi-dsp:latest
-          docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
+          docker run --net=bridge --name=nextcloud -p 8080:80 -e SERVER_BRANCH=stable29 --rm -d ${{ env.docker-image }}
           sleep 60s
           hostname -I
           docker exec nextcloud-appapi-dsp ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
@@ -542,7 +541,7 @@ jobs:
 
   nc-host-network-host:
     runs-on: ubuntu-22.04
-    name: NC In Host(network=host)  • master • 🐘8.2
+    name: NC In Host(network=host)  • stable29 • 🐘8.2
 
     services:
       postgres:
@@ -564,7 +563,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable29
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3

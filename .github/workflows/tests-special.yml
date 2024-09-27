@@ -2,8 +2,9 @@ name: Tests Special
 
 on:
   pull_request:
+    branches: [stable29]
   push:
-    branches: [main]
+    branches: [stable29]
   workflow_dispatch:
 
 permissions:
