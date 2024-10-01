@@ -41,6 +41,7 @@
 					v-if="selectDaemonModal"
 					:show.sync="selectDaemonModal"
 					:daemons="dockerDaemons"
+					:default-daemon="defaultDaemon"
 					:app="app" />
 				<NcCheckboxRadioSwitch v-if="app.canUnInstall"
 					:checked="removeData"
@@ -142,6 +143,7 @@ export default {
 			removeData: false,
 			selectDaemonModal: false,
 			dockerDaemons: [],
+			defaultDaemon: '',
 		}
 	},
 
@@ -175,9 +177,6 @@ export default {
 			this.removeData = false
 		},
 	},
-	mounted() {
-		this.getAllDockerDaemons()
-	},
 
 	methods: {
 		toggleRemoveData() {
@@ -192,9 +191,11 @@ export default {
 					this.dockerDaemons = res.data.daemons.filter(function(daemon) {
 						return daemon.accepts_deploy_id === 'docker-install'
 					})
+					this.defaultDaemon = res.data.default_daemon_config
 				})
 		},
-		enableButtonAction() {
+		async enableButtonAction() {
+			await this.getAllDockerDaemons()
 			if (this.dockerDaemons.length === 1) {
 				this.enable(this.app.id, this.dockerDaemons[0])
 			} else {

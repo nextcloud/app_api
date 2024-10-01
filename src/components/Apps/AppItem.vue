@@ -107,6 +107,7 @@
 				v-if="selectDaemonModal"
 				:show.sync="selectDaemonModal"
 				:daemons="dockerDaemons"
+				:default-daemon="defaultDaemon"
 				:app="app" />
 		</component>
 	</component>
@@ -162,6 +163,7 @@ export default {
 			screenshotLoaded: false,
 			selectDaemonModal: false,
 			dockerDaemons: [],
+			defaultDaemon: '',
 		}
 	},
 	computed: {
@@ -186,7 +188,6 @@ export default {
 			}
 			image.src = this.app.screenshot
 		}
-		this.getAllDockerDaemons()
 	},
 	methods: {
 		async showAppDetails(event) {
@@ -218,9 +219,11 @@ export default {
 					this.dockerDaemons = res.data.daemons.filter(function(daemon) {
 						return daemon.accepts_deploy_id === 'docker-install'
 					})
+					this.defaultDaemon = res.data.default_daemon_config
 				})
 		},
-		enableButtonAction() {
+		async enableButtonAction() {
+			await this.getAllDockerDaemons()
 			if (this.dockerDaemons.length === 1) {
 				this.enable(this.app.id, this.dockerDaemons[0])
 			} else {

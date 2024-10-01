@@ -43,7 +43,8 @@ __webpack_require__.r(__webpack_exports__);
     return {
       removeData: false,
       selectDaemonModal: false,
-      dockerDaemons: []
+      dockerDaemons: [],
+      defaultDaemon: ''
     };
   },
   computed: {
@@ -75,9 +76,6 @@ __webpack_require__.r(__webpack_exports__);
       this.removeData = false;
     }
   },
-  mounted() {
-    this.getAllDockerDaemons();
-  },
   methods: {
     toggleRemoveData() {
       this.removeData = !this.removeData;
@@ -90,9 +88,11 @@ __webpack_require__.r(__webpack_exports__);
         this.dockerDaemons = res.data.daemons.filter(function (daemon) {
           return daemon.accepts_deploy_id === 'docker-install';
         });
+        this.defaultDaemon = res.data.default_daemon_config;
       });
     },
-    enableButtonAction() {
+    async enableButtonAction() {
+      await this.getAllDockerDaemons();
       if (this.dockerDaemons.length === 1) {
         this.enable(this.app.id, this.dockerDaemons[0]);
       } else {
@@ -167,7 +167,8 @@ __webpack_require__.r(__webpack_exports__);
       scrolled: false,
       screenshotLoaded: false,
       selectDaemonModal: false,
-      dockerDaemons: []
+      dockerDaemons: [],
+      defaultDaemon: ''
     };
   },
   computed: {
@@ -192,7 +193,6 @@ __webpack_require__.r(__webpack_exports__);
       };
       image.src = this.app.screenshot;
     }
-    this.getAllDockerDaemons();
   },
   methods: {
     async showAppDetails(event) {
@@ -225,9 +225,11 @@ __webpack_require__.r(__webpack_exports__);
         this.dockerDaemons = res.data.daemons.filter(function (daemon) {
           return daemon.accepts_deploy_id === 'docker-install';
         });
+        this.defaultDaemon = res.data.default_daemon_config;
       });
     },
-    enableButtonAction() {
+    async enableButtonAction() {
+      await this.getAllDockerDaemons();
       if (this.dockerDaemons.length === 1) {
         this.enable(this.app.id, this.dockerDaemons[0]);
       } else {
@@ -567,6 +569,10 @@ __webpack_require__.r(__webpack_exports__);
     },
     daemons: {
       type: Array,
+      required: true
+    },
+    defaultDaemon: {
+      type: String,
       required: true
     }
   },
@@ -1006,6 +1012,7 @@ var render = function render() {
     attrs: {
       show: _vm.selectDaemonModal,
       daemons: _vm.dockerDaemons,
+      "default-daemon": _vm.defaultDaemon,
       app: _vm.app
     },
     on: {
@@ -1265,6 +1272,7 @@ var render = function render() {
     attrs: {
       show: _vm.selectDaemonModal,
       daemons: _vm.dockerDaemons,
+      "default-daemon": _vm.defaultDaemon,
       app: _vm.app
     },
     on: {
@@ -1647,16 +1655,10 @@ var render = function render() {
   })))]), _vm._v(" "), _c("DaemonSelectionList", {
     attrs: {
       daemons: _vm.daemons,
-      "default-daemon": _vm.default_daemon_config,
+      "default-daemon": _vm.defaultDaemon,
       "app-id": _vm.app.id
     },
     on: {
-      "update:defaultDaemon": function ($event) {
-        _vm.default_daemon_config = $event;
-      },
-      "update:default-daemon": function ($event) {
-        _vm.default_daemon_config = $event;
-      },
       close: _vm.closeModal
     }
   })], 1)])], 1);
@@ -4172,4 +4174,4 @@ __webpack_require__.r(__webpack_exports__);
 /***/ })
 
 }]);
-//# sourceMappingURL=app_api-src_views_Apps_vue.js.map?v=8689f414e7e4cfca4b6d
+//# sourceMappingURL=app_api-src_views_Apps_vue.js.map?v=95995ab556ab0695508e

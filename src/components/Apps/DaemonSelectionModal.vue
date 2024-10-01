@@ -5,7 +5,7 @@
 				<h3>{{ t('app_api', 'Choose Deploy Daemon for {appName}', {appName: app.name }) }}</h3>
 				<DaemonSelectionList
 					:daemons="daemons"
-					:default-daemon.sync="default_daemon_config"
+					:default-daemon="defaultDaemon"
 					:app-id="app.id"
 					@close="closeModal" />
 			</div>
@@ -36,6 +36,10 @@ export default {
 		},
 		daemons: {
 			type: Array,
+			required: true,
+		},
+		defaultDaemon: {
+			type: String,
 			required: true,
 		},
 	},
