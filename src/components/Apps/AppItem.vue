@@ -224,10 +224,12 @@ export default {
 		},
 		async enableButtonAction() {
 			await this.getAllDockerDaemons()
-			if (this.dockerDaemons.length === 1) {
+			if (this.dockerDaemons.length === 1 && this.app.needsDownload) {
 				this.enable(this.app.id, this.dockerDaemons[0])
-			} else {
+			} else if (this.app.needsDownload) {
 				this.showSelectionModal()
+			} else {
+				this.enable(this.app.id, this.app.daemon)
 			}
 		},
 	},
