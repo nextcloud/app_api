@@ -20,7 +20,9 @@ use Psr\Log\LoggerInterface;
 
 abstract class AppAPIFetcher {
 	public const INVALIDATE_AFTER_SECONDS = 3600;
+	public const INVALIDATE_AFTER_SECONDS_UNSTABLE = 900;
 	public const RETRY_AFTER_FAILURE_SECONDS = 300;
+	public const APP_STORE_URL = 'https://apps.nextcloud.com/api/v1';
 
 	protected IAppData $appData;
 
@@ -42,8 +44,6 @@ abstract class AppAPIFetcher {
 
 	/**
 	 * Fetches the response from the server
-	 *
-	 * @throws Exception
 	 */
 	protected function fetch(string $ETag, string $content): array {
 		$appstoreenabled = $this->config->getSystemValueBool('appstoreenabled', true);
@@ -70,7 +70,8 @@ abstract class AppAPIFetcher {
 			$response = $client->get($this->getEndpoint(), $options);
 		} catch (ConnectException $e) {
 			$this->config->setAppValue(Application::APP_ID, 'appstore-appapi-fetcher-lastFailure', (string)time());
-			throw $e;
+			$this->logger->error('Failed to connect to the appstore' , ['exception' => $e, 'app' => 'appstoreExAppFetcher']);
+			return [];
 		}
 
 		$responseJson = [];
@@ -100,8 +101,10 @@ abstract class AppAPIFetcher {
 	public function get(bool $allowUnstable = false): array {
 		$appstoreenabled = $this->config->getSystemValueBool('appstoreenabled', true);
 		$internetavailable = $this->config->getSystemValueBool('has_internet_connection', true);
+		$isDefaultAppStore = $this->config->getSystemValueString('appstoreurl', self::APP_STORE_URL) === self::APP_STORE_URL;
 
-		if (!$appstoreenabled || !$internetavailable) {
+		if (!$appstoreenabled || (!$internetavailable && $isDefaultAppStore)) {
+			$this->logger->info('AppStore is disabled or this instance has no Internet connection to access the default app store', ['app' => 'appstoreExAppFetcher']);
 			return [];
 		}
 
@@ -115,12 +118,18 @@ abstract class AppAPIFetcher {
 			$file = $rootFolder->getFile($this->fileName);
 			$jsonBlob = json_decode($file->getContent(), true);
 
-			// Always get latests apps info if $allowUnstable
-			if (!$allowUnstable && is_array($jsonBlob)) {
+
+			if (is_array($jsonBlob)) {
 				// No caching when the version has been updated
 				if (isset($jsonBlob['ncversion']) && $jsonBlob['ncversion'] === $this->getVersion()) {
 					// If the timestamp is older than 3600 seconds request the files new
-					if ((int)$jsonBlob['timestamp'] > ($this->timeFactory->getTime() - self::INVALIDATE_AFTER_SECONDS)) {
+					$invalidateAfterSeconds = self::INVALIDATE_AFTER_SECONDS;
+
+					if ($allowUnstable) {
+						$invalidateAfterSeconds = self::INVALIDATE_AFTER_SECONDS_UNSTABLE;
+					}
+
+					if ((int)$jsonBlob['timestamp'] > ($this->timeFactory->getTime() - $invalidateAfterSeconds)) {
 						return $jsonBlob['data'];
 					}
 
@@ -139,24 +148,19 @@ abstract class AppAPIFetcher {
 		try {
 			$responseJson = $this->fetch($ETag, $content, $allowUnstable);
 
-			if (empty($responseJson)) {
+			if (empty($responseJson) || empty($responseJson['data'])) {
 				return [];
-			}
-
-			// Don't store the apps request file
-			if ($allowUnstable) {
-				return $responseJson['data'];
 			}
 
 			$file->putContent(json_encode($responseJson));
 			return json_decode($file->getContent(), true)['data'];
 		} catch (ConnectException $e) {
-			$this->logger->warning('Could not connect to appstore: ' . $e->getMessage(), ['app' => 'appstoreFetcher']);
+			$this->logger->warning('Could not connect to appstore: ' . $e->getMessage(), ['app' => 'appstoreExAppFetcher']);
 			return [];
 		} catch (Exception $e) {
 			$this->logger->warning($e->getMessage(), [
 				'exception' => $e,
-				'app' => 'appstoreFetcher',
+				'app' => 'appstoreExAppFetcher',
 			]);
 			return [];
 		}

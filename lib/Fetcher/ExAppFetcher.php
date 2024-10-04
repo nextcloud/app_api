@@ -16,7 +16,6 @@ use OCP\Support\Subscription\IRegistry;
 use Psr\Log\LoggerInterface;
 
 class ExAppFetcher extends AppAPIFetcher {
-	private CompareVersion $compareVersion;
 	private bool $ignoreMaxVersion;
 
 	public function __construct(
@@ -24,7 +23,7 @@ class ExAppFetcher extends AppAPIFetcher {
 		IClientService $clientService,
 		ITimeFactory $timeFactory,
 		IConfig $config,
-		CompareVersion $compareVersion,
+		private CompareVersion $compareVersion,
 		LoggerInterface $logger,
 		protected IRegistry $registry
 	) {
@@ -46,14 +45,13 @@ class ExAppFetcher extends AppAPIFetcher {
 
 	/**
 	 * Only returns the latest compatible app release in the releases array
-	 *
-	 * @throws Exception
 	 */
 	protected function fetch(string $ETag, string $content, bool $allowUnstable = false): array {
 		/** @var mixed[] $response */
 		$response = parent::fetch($ETag, $content);
 
-		if (empty($response)) {
+		if (!isset($response['data']) || $response['data'] === null) {
+			$this->logger->warning('Response from appstore is invalid, ExApps could not be retrieved. Try again later.', ['app' => 'appstoreExAppFetcher']);
 			return [];
 		}
 
@@ -147,6 +145,9 @@ class ExAppFetcher extends AppAPIFetcher {
 		$allowPreReleases = $allowUnstable || $this->getChannel() === 'beta' || $this->getChannel() === 'daily' || $this->getChannel() === 'git';
 
 		$apps = parent::get($allowPreReleases);
+		if (empty($apps))  {
+			return [];
+		}
 		$allowList = $this->config->getSystemValue('appsallowlist');
 
 		// If the admin specified a allow list, filter apps from the appstore
