@@ -181,7 +181,7 @@ class AppAPIService {
 
 		if ((!array_key_exists('multipart', $options)) && (count($params)) > 0) {
 			if ($method === 'GET') {
-				$url .= '?' . $this->getUriEncodedParams($params);
+				$url .= '?' . http_build_query($params);
 			} else {
 				$options['json'] = $params;
 			}
@@ -231,7 +231,7 @@ class AppAPIService {
 
 		if ((!array_key_exists('multipart', $options))) {
 			if (count($queryParams) > 0) {
-				$url .= '?' . $this->getUriEncodedParams($queryParams);
+				$url .= '?' . http_build_query($queryParams);
 			}
 			if ($method !== 'GET' && count($bodyParams) > 0) {
 				$options['json'] = $bodyParams;
@@ -256,19 +256,6 @@ class AppAPIService {
 			}
 		}
 		return $headers;
-	}
-
-	private function getUriEncodedParams(array $params): string {
-		$paramsContent = '';
-		foreach ($params as $key => $value) {
-			if (is_array($value)) {
-				foreach ($value as $oneArrayValue) {
-					$paramsContent .= $key . '[]=' . urlencode($oneArrayValue) . '&';
-				}
-				unset($params[$key]);
-			}
-		}
-		return $paramsContent . http_build_query($params);
 	}
 
 	/**
