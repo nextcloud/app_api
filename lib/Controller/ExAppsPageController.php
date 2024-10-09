@@ -195,8 +195,9 @@ class ExAppsPageController extends Controller {
 
 			$formattedApps[] = [
 				'id' => $app['id'],
+				'app_api' => true,
 				'installed' => $exApp !== null, // if ExApp registered then it's assumed that it was already deployed (installed)
-				'appstore' => true,
+				'appstore' => true, // TODO: check if needed
 				'name' => $app['translations'][$currentLanguage]['name'] ?? $app['translations']['en']['name'],
 				'description' => $app['translations'][$currentLanguage]['description'] ?? $app['translations']['en']['description'],
 				'summary' => $app['translations'][$currentLanguage]['summary'] ?? $app['translations']['en']['summary'],
@@ -228,6 +229,7 @@ class ExAppsPageController extends Controller {
 				'removable' => $existsLocally,
 				'active' => $exApp !== null && $exApp->getEnabled() === 1,
 				'needsDownload' => !$existsLocally,
+				'groups' => [],
 				'fromAppStore' => true,
 				'appstoreData' => $app,
 				'daemon' => $daemon,
@@ -325,6 +327,7 @@ class ExAppsPageController extends Controller {
 
 				$formattedLocalApps[] = [
 					'id' => $app['id'],
+					'app_api' => true,
 					'appstore' => false,
 					'installed' => true,
 					'name' => $exApp->getName(),
@@ -357,6 +360,7 @@ class ExAppsPageController extends Controller {
 					'removable' => true, // to allow "remove" command for manual-install
 					'active' => $exApp->getEnabled() === 1,
 					'needsDownload' => false,
+					'groups' => [],
 					'fromAppStore' => false,
 					'appstoreData' => $app,
 					'daemon' => $daemon,
