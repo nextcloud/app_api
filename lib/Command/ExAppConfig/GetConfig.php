@@ -49,7 +49,7 @@ class GetConfig extends Command {
 		$defaultValue = $input->getOption('default-value');
 		if ($exAppConfig === null) {
 			if (isset($defaultValue)) {
-				$output->writeln($defaultValue);
+				$output->writeln((string)$defaultValue);
 				return 0;
 			}
 			$output->writeln(sprintf('ExApp %s config %s not found', $appId, $configKey));
@@ -58,7 +58,7 @@ class GetConfig extends Command {
 
 		$value = $exAppConfig->getConfigvalue() ?? $defaultValue;
 
-		$output->writeln($value);
+		$output->writeln((string)$value);
 		return 0;
 	}
 }
