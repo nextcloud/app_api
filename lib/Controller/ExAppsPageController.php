@@ -79,49 +79,6 @@ class ExAppsPageController extends Controller {
 		$this->appManager = $appManager;
 	}
 
-	#[NoCSRFRequired]
-	public function viewApps(): TemplateResponse {
-		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
-
-		$appInitialData = [
-			'appstoreEnabled' => $this->config->getSystemValueBool('appstoreenabled', true),
-			'updateCount' => count($this->getExAppsWithUpdates()),
-		];
-
-		if ($defaultDaemonConfigName !== '') {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
-			if ($daemonConfig !== null) {
-				$this->dockerActions->initGuzzleClient($daemonConfig);
-				$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
-				$appInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
-				$appInitialData['default_daemon_config'] = $daemonConfig->jsonSerialize();
-				unset($appInitialData['default_daemon_config']['deploy_config']['haproxy_password']); // do not expose password
-				if (!$daemonConfigAccessible) {
-					$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please verify its configuration', $daemonConfig->getName()));
-				}
-			}
-		}
-
-		$this->initialStateService->provideInitialState('apps', $appInitialData);
-
-		$templateResponse = new TemplateResponse(Application::APP_ID, 'main');
-		$policy = new ContentSecurityPolicy();
-		$policy->addAllowedImageDomain('https://usercontent.apps.nextcloud.com');
-		$templateResponse->setContentSecurityPolicy($policy);
-
-		return $templateResponse;
-	}
-
-	private function getExAppsWithUpdates(): array {
-		$apps = $this->exAppFetcher->get();
-		$appsWithUpdates = array_filter($apps, function (array $app) {
-			$exApp = $this->exAppService->getExApp($app['id']);
-			$newestVersion = $app['releases'][0]['version'];
-			return $exApp !== null && isset($app['releases'][0]['version']) && version_compare($newestVersion, $exApp->getVersion(), '>');
-		});
-		return array_values($appsWithUpdates);
-	}
-
 	/**
 	 * Using the same algorithm of ExApps listing as for regular apps.
 	 * Returns all apps for a category from the App Store
@@ -197,7 +154,7 @@ class ExAppsPageController extends Controller {
 				'id' => $app['id'],
 				'app_api' => true,
 				'installed' => $exApp !== null, // if ExApp registered then it's assumed that it was already deployed (installed)
-				'appstore' => true, // TODO: check if needed
+				'appstore' => true,
 				'name' => $app['translations'][$currentLanguage]['name'] ?? $app['translations']['en']['name'],
 				'description' => $app['translations'][$currentLanguage]['description'] ?? $app['translations']['en']['description'],
 				'summary' => $app['translations'][$currentLanguage]['summary'] ?? $app['translations']['en']['summary'],
@@ -244,7 +201,7 @@ class ExAppsPageController extends Controller {
 	#[NoCSRFRequired]
 	public function listApps(): JSONResponse {
 		$apps = $this->getAppsForCategory('');
-		$appsWithUpdate = $this->getExAppsWithUpdates();
+		$appsWithUpdate = $this->exAppFetcher->getExAppsWithUpdates();
 
 		$exApps = $this->exAppService->getExAppsList('all');
 		$dependencyAnalyzer = new DependencyAnalyzer(new Platform($this->config), $this->l10n);
@@ -395,7 +352,7 @@ class ExAppsPageController extends Controller {
 			return new JSONResponse([]);
 		}
 
-		$appsWithUpdate = $this->getExAppsWithUpdates();
+		$appsWithUpdate = $this->exAppFetcher->getExAppsWithUpdates();
 		$appIdsWithUpdate = array_map(function (array $appWithUpdate) {
 			return $appWithUpdate['id'];
 		}, $appsWithUpdate);
@@ -430,7 +387,7 @@ class ExAppsPageController extends Controller {
 	#[PasswordConfirmationRequired]
 	#[NoCSRFRequired]
 	public function updateApp(string $appId): JSONResponse {
-		$appsWithUpdate = $this->getExAppsWithUpdates();
+		$appsWithUpdate = $this->exAppFetcher->getExAppsWithUpdates();
 		$appIdsWithUpdate = array_map(function (array $appWithUpdate) {
 			return $appWithUpdate['id'];
 		}, $appsWithUpdate);
