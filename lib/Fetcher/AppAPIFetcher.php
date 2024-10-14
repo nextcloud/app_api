@@ -70,7 +70,7 @@ abstract class AppAPIFetcher {
 			$response = $client->get($this->getEndpoint(), $options);
 		} catch (ConnectException $e) {
 			$this->config->setAppValue(Application::APP_ID, 'appstore-appapi-fetcher-lastFailure', (string)time());
-			$this->logger->error('Failed to connect to the appstore' , ['exception' => $e, 'app' => 'appstoreExAppFetcher']);
+			$this->logger->error('Failed to connect to the appstore', ['exception' => $e, 'app' => 'appstoreExAppFetcher']);
 			return [];
 		}
 
