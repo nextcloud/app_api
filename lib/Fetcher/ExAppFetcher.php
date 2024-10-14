@@ -37,8 +37,6 @@ class ExAppFetcher extends AppAPIFetcher {
 			$registry,
 		);
 
-		$this->compareVersion = $compareVersion;
-
 		$this->fileName = 'appapi_apps.json';
 		$this->endpointName = 'appapi_apps.json';
 		$this->ignoreMaxVersion = true;
@@ -146,7 +144,7 @@ class ExAppFetcher extends AppAPIFetcher {
 		$allowPreReleases = $allowUnstable || $this->getChannel() === 'beta' || $this->getChannel() === 'daily' || $this->getChannel() === 'git';
 
 		$apps = parent::get($allowPreReleases);
-		if (empty($apps))  {
+		if (empty($apps)) {
 			return [];
 		}
 		$allowList = $this->config->getSystemValue('appsallowlist');
