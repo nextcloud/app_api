@@ -1,6 +1,8 @@
 OC.L10N.register(
     "app_api",
     {
+    "External Apps" : "Externa appar",
+    "External Apps management" : "Hantering av externa appar",
     "Update to {version}" : "Uppdatera till {version}",
     "Remove" : "Ta bort",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Denna app har ingen lägsta Nextcloud-version tilldelad. Detta kommer att innebära ett problem i framtiden.",
