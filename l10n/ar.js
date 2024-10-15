@@ -30,7 +30,7 @@ OC.L10N.register(
     "ExApp initialization process timeout after which AppAPI will mark it as failed" : "مُهلة بدء التطبيقات الخارجية ExApp حيث بعدها سيتعامل AppAPI معها كعملية فاشلة",
     "ExApp init timeout" : "مهلة بدء التطبيقات الخارجية ExApp",
     "ExApp container restart policy" : "سياسة إعادة تشغيل حاوية container التطبيقات الخارجية ExApp",
-    "Specify container restart policy, e.g. 'always' to ensure ExApp running after daemon server reboot" : "حدِّد سياسة إعادة تشغيل الحاوية. مثلاً: \"دائماً always\" تضمن تشغيل التطبيق الخارجي ExApp بعد إعادة تشغيل خادوم البرنامج الخفي ",
+    "Specify container restart policy, e.g. 'always' to ensure ExApp running after daemon server reboot" : "قم بتحديد سياسة إعادة تشغيل الحاوية. مثلاً: \"دائماً always\" تضمن تشغيل التطبيق الخارجي ExApp بعد إعادة تشغيل خادوم البرنامج الخفي ",
     "This settings changes are reflected only for newly created containers" : "التعديلات في هذا الإعداد تنعكس فقط على الحاويات المُنشأة حديثاً",
     "External Apps management" : "إدارة التطبيقات الخارجية",
     "Admin options saved" : "تمّ حفظ خيارات المشرف",
