@@ -15,7 +15,7 @@
     "AppAPI authentication failed" : "فشل تصديق الهُويَّة في AppAPI",
     "AppAPI ExApp notifier" : "مُنبِّه واجهة AppAPI التطبيق الخارجي ExApp",
     "AppAPI" : "واجهة AppAPO",
-    "AI Integration Team" : "فريق مُكاملة الذكاء الاصطناعي",
+    "AI Integration Team" : "فريق تكامل الذكاء الاصطناعي",
     "ExApps Settings" : "إعدادات التطبيقات الخارجية ExApps",
     "Nextcloud AppAPI" : "واجهة تطبيقات نكست كلاود AppAPI",
     "### Boost your Nextcloud with AppAPI and its specially designed applications.\n\n\nThe AppAPI is a project within the Nextcloud ecosystem designed to streamline and enhance the process of\napplication development, deployment, and management.\n\nIt introduces a new methodology that allows developers to create\napplications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.\n\n\n### List of applications that require AppAPI:\n\n- [talk_bot_ai_example](https://github.com/cloud-py-api/talk_bot_ai_example)\n- [upscaler_example](https://github.com/cloud-py-api/upscaler_example)\n- [image_to_text_example](https://github.com/cloud-py-api/file_to_text_example)\n- [ai_image_generator_bot](https://github.com/cloud-py-api/ai_image_generator_bot)\n- [SummarAI](https://github.com/nextcloud/sumupbot)\n\n_If you wish to develop an application, we will gladly help and assist you._\n\n### Support\n\nWe appreciate any support for this project:\n\n- ⭐ Star our work on GitHub\n- ❗ Create an Issue or feature request\n- 💁 Resolve an Issue and create a Pull Request\n- 🧑‍💻 Develop your own application using AppAPI\n\nWe are genuinely excited about the future of the AppAPI project and its potential to transform\nthe way applications are developed and experienced within Nextcloud.\n\nAs we embark on this journey, we warmly invite you - developers, thinkers, creators, and visionaries -\nto join us in shaping a more versatile, stable, and secure app landscape.\n\n*Your insights, suggestions, and contributions are invaluable to us.*" : "### عزّز نكست كلاود خاصّتك باستعمال AppAPI وتطبيقاته المصممة خصيصًا.\n\nAppAPI هو مشروع ضمن نظام نكست كلاود مصمم لتبسيط وتعزيز عملية تطوير التطبيقات ونشرها وإدارتها. \nيقدم منهجية جديدة تسمح للمطورين بإنشاء التطبيقات المبنية بأنواع متعددة من لغات البرمجة، لا تقتصر على PHP، والتي كانت تستخدم تقليديًا في تطوير نكست كلاود. \n\n### قائمة التطبيقات التي تتطلب AppAPI: \n\n- [talk_bot_ai_example] (https://github.com/cloud-py-api/talk_bot_ai_example)- [upscaler_example] (https://github.com/cloud-py-api/upscaler_example)- [image_to_text_example] (https://github.com/cloud-py-api/file_to_text_example)- [ai_image_generator_bot] (https://github.com/cloud-py-api/ai_image_generator_bot)- [SummarAI] (https://github.com/nextcloud/sumupbot)\nإذا كنت ترغب في تطوير تطبيق، فستسعدنا مساعدتك._ \n\n\n### الدعم \n\nنحن نقدر أي دعم لهذا المشروع؛  مثلاً عبر: \n- ⭐ التقييم الإيجابي لمشروعنا على GitHub\n- ❗ إنشاء مشكلة أو طلب ميزة\n- 💁 حل مشكلة وإنشاء طلب سحب pull request\n- 🧑‍💻 تطوير تطبيقك الخاص باستخدام AppAPI \n\nنحن متحمسون حقًا لمستقبل مشروع AppAPI وقدرته على تحسين طريقة تطوير التطبيقات وتجربتها داخل نكست كلاود. \nبينما نبدأ هذه الرحلة، ندعوكم بحرارة - أيها المطورون و الباحثون و المبدعون و أصحاب الرؤى - للانضمام إلينا في تشكيل مشهد تطبيقات أكثر تنوعًا واستقرارًا وأمانًا. \n\n*أفكارك واقتراحاتك ومساهماتك لا تقدر بثمن بالنسبة لنا.*",
@@ -28,7 +28,7 @@
     "ExApp initialization process timeout after which AppAPI will mark it as failed" : "مُهلة بدء التطبيقات الخارجية ExApp حيث بعدها سيتعامل AppAPI معها كعملية فاشلة",
     "ExApp init timeout" : "مهلة بدء التطبيقات الخارجية ExApp",
     "ExApp container restart policy" : "سياسة إعادة تشغيل حاوية container التطبيقات الخارجية ExApp",
-    "Specify container restart policy, e.g. 'always' to ensure ExApp running after daemon server reboot" : "قم بتحديد سياسة إعادة تشغيل الحاوية. مثلاً: \"دائماً always\" تضمن تشغيل التطبيق الخارجي ExApp بعد إعادة تشغيل خادوم البرنامج الخفي ",
+    "Specify container restart policy, e.g. 'always' to ensure ExApp running after daemon server reboot" : "قم بتحديد سياسة إعادة تشغيل الحاوية. مثلاً: \"دائماً always\" تضمن تشغيل التطبيق الخارجي ExApp بعد إعادة تشغيل خادم البرنامج الخفي ",
     "This settings changes are reflected only for newly created containers" : "التعديلات في هذا الإعداد تنعكس فقط على الحاويات المُنشأة حديثاً",
     "External Apps management" : "إدارة التطبيقات الخارجية",
     "Admin options saved" : "تمّ حفظ خيارات المشرف",
@@ -50,7 +50,7 @@
     "This app is supported via your current Nextcloud subscription." : "هذا التطبيق مدعوم من خلال اشتراكك الحالي في نكست كلود.",
     "Supported" : "مدعومٌ",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "تم تطوير التطبيقات المميزة من قبل المجتمع وداخله. و هي توفر وظائف مركزية وجاهزة للعمل في بيئة العمل الفعلية.",
-    "Featured" : "مُميّزةٌ",
+    "Featured" : "مميزة",
     "Update to {update}" : "التحديث إلى {update}",
     "All ExApps are up-to-date." : "جميع التطبيقات الخارجية مُحدّثة حتى آخر إصدار.",
     "Default Deploy daemon is not accessible" : "الوصول إلى البرنامج الخفي التلقائي لنشر التطبيقات Default Deploy Daemon غير ممكن.",
@@ -173,7 +173,7 @@
     "Active apps" : "التطبيقات النشطة",
     "Disabled apps" : "التطبيقات المعطلة",
     "Updates" : "التحديثات",
-    "Featured apps" : "تطبيقات مُميّزة",
+    "Featured apps" : "تطبيقات مميزة",
     "Supported apps" : "التطبيقات المدعومة",
     "manual-install apps cannot be updated" : "التطبيقات المثبية يدويّاً لا يمكن تحديثها",
     "{progress}% Deploying" : "{progress}% في طور النشر",
@@ -189,6 +189,6 @@
     "Your ExApps" : "تطبيقاتك الخارجية",
     "An error occurred during the request. Unable to proceed." : "حدث خطأ أثناء الطلب. الاستمرار غير ممكنٍ.",
     "The app has been enabled but needs to be updated." : "هذا البرنامج سبق تمكينه لكنه بحاجة إلى تحديث.",
-    "Error: This app cannot be enabled because it makes the server unstable" : "خطأ: لا يمكن تمكين هذا التطبيق لأنه يجعل الخادوم غير مستقر"
+    "Error: This app cannot be enabled because it makes the server unstable" : "خطأ: لا يمكن تمكين هذا التطبيق لأنه يجعل الخادم غير مستقر"
 },"pluralForm" :"nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;"
 }
