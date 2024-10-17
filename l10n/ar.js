@@ -189,7 +189,7 @@ OC.L10N.register(
     "The app will be downloaded from the App Store and deployed on default Deploy Daemon" : "سيتم تنزيل التطبيق من متجر التطبيقات و سيتم نشره على البرنامج الخفي التلقائي للنشر",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "لم يتم التعرّف على هذا التطبيق باعتباره متوافقاً مع إصدار نكست كلاود الخاص بك. إذا تابعت، فسيظل بإمكانك تنصيب التطبيق. ولكن يجب ملاحظة أن التطبيق قد لا يعمل بالشكل المتوقع.",
     "Your ExApps" : "تطبيقاتك الخارجية",
-    "An error occurred during the request. Unable to proceed." : "حدث خطأ أثناء الطلب. الاستمرار غير ممكنٍ.",
+    "An error occurred during the request. Unable to proceed." : "حدث خطأ أثناء الطلب. لا يمكن الاستمرار.",
     "The app has been enabled but needs to be updated." : "هذا البرنامج سبق تمكينه لكنه بحاجة إلى تحديث.",
     "Error: This app cannot be enabled because it makes the server unstable" : "خطأ: لا يمكن تمكين هذا التطبيق لأنه يجعل الخادم غير مستقر"
 },
