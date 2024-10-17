@@ -36,29 +36,24 @@
   <file src="lib/Controller/ExAppsPageController.php">
     <UndefinedClass>
       <code><![CDATA[$this->categoryFetcher]]></code>
-      <code><![CDATA[CategoryFetcher]]></code>
-      <code><![CDATA[CategoryFetcher]]></code>
       <code><![CDATA[DependencyAnalyzer]]></code>
       <code><![CDATA[OC_App]]></code>
       <code><![CDATA[Platform]]></code>
       <code><![CDATA[VersionParser]]></code>
+      <code><![CDATA[private]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Fetcher/AppAPIFetcher.php">
-    <InvalidThrow>
-      <code><![CDATA[throw $e;]]></code>
-    </InvalidThrow>
     <TooManyArguments>
       <code><![CDATA[fetch]]></code>
     </TooManyArguments>
     <UndefinedClass>
       <code><![CDATA[$appDataFactory]]></code>
       <code><![CDATA[$e]]></code>
-      <code><![CDATA[$this->serverVersion]]></code>
       <code><![CDATA[ConnectException]]></code>
       <code><![CDATA[ConnectException]]></code>
       <code><![CDATA[Factory]]></code>
-      <code><![CDATA[protected]]></code>
+      <code><![CDATA[ServerVersion]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Fetcher/ExAppFetcher.php">
@@ -69,11 +64,9 @@
       <code><![CDATA[$this->compareVersion]]></code>
       <code><![CDATA[$versionParser]]></code>
       <code><![CDATA[$versionParser]]></code>
-      <code><![CDATA[CompareVersion]]></code>
-      <code><![CDATA[CompareVersion]]></code>
       <code><![CDATA[Factory]]></code>
       <code><![CDATA[VersionParser]]></code>
-      <code><![CDATA[protected]]></code>
+      <code><![CDATA[private]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Listener/FileEventsListener.php">
