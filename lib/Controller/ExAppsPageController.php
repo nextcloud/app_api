@@ -35,46 +35,22 @@ use Psr\Log\LoggerInterface;
  * ExApps actions controller similar to default one with project-specific changes and additions
  */
 class ExAppsPageController extends Controller {
-	private IInitialState $initialStateService;
-	private IConfig $config;
-	private AppAPIService $service;
-	private DaemonConfigService $daemonConfigService;
-	private DockerActions $dockerActions;
-	private CategoryFetcher $categoryFetcher;
-	private IFactory $l10nFactory;
-	private ExAppFetcher $exAppFetcher;
-	private IL10N $l10n;
-	private LoggerInterface $logger;
-	private IAppManager $appManager;
 
 	public function __construct(
 		IRequest $request,
-		IConfig $config,
-		IInitialState $initialStateService,
-		AppAPIService $service,
-		DaemonConfigService $daemonConfigService,
-		DockerActions $dockerActions,
-		CategoryFetcher $categoryFetcher,
-		IFactory $l10nFactory,
-		ExAppFetcher $exAppFetcher,
-		IL10N $l10n,
-		LoggerInterface $logger,
-		IAppManager $appManager,
+		private readonly IConfig $config,
+		private readonly AppAPIService $service,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly DockerActions $dockerActions,
+		private readonly CategoryFetcher $categoryFetcher,
+		private readonly IFactory $l10nFactory,
+		private readonly ExAppFetcher $exAppFetcher,
+		private readonly IL10N $l10n,
+		private readonly LoggerInterface $logger,
+		private readonly IAppManager $appManager,
 		private readonly ExAppService $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
-
-		$this->initialStateService = $initialStateService;
-		$this->config = $config;
-		$this->service = $service;
-		$this->daemonConfigService = $daemonConfigService;
-		$this->dockerActions = $dockerActions;
-		$this->categoryFetcher = $categoryFetcher;
-		$this->l10nFactory = $l10nFactory;
-		$this->l10n = $l10n;
-		$this->exAppFetcher = $exAppFetcher;
-		$this->logger = $logger;
-		$this->appManager = $appManager;
 	}
 
 	/**
@@ -228,7 +204,7 @@ class ExAppsPageController extends Controller {
 				}))[0]['releases'][0]['version'];
 			}
 
-			$appData['canUnInstall'] = !$appData['active'] && $appData['removable']
+			$appData['canUninstall'] = !$appData['active'] && $appData['removable']
 				&& (isset($appData['status']['action']) && $appData['status']['action'] !== 'deploy')
 				|| (isset($appData['status']['action']) && $appData['status']['action'] === 'init')
 				|| !empty($appData['status']['error']);
@@ -286,9 +262,10 @@ class ExAppsPageController extends Controller {
 					'appstore' => false,
 					'installed' => true,
 					'name' => $exApp->getName(),
-					'description' => '',
+					'description' => $this->l10n->t('This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed.'),
 					'summary' => '',
 					'license' => '',
+					'licence' => '',
 					'author' => '',
 					'shipped' => false,
 					'version' => $exApp->getVersion(),
@@ -306,7 +283,7 @@ class ExAppsPageController extends Controller {
 					'missingMaxOwnCloudVersion' => false,
 					'missingMinOwnCloudVersion' => false,
 					'canInstall' => true, // to allow "remove" command for manual-install
-					'canUnInstall' => !($exApp->getEnabled() === 1),
+					'canUninstall' => !($exApp->getEnabled() === 1),
 					'isCompatible' => true,
 					'screenshot' => '',
 					'score' => 0,
