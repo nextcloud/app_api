@@ -36,12 +36,6 @@ use OCP\Files\Events\Node\NodeRenamedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\IConfig;
-use OCP\IGroupManager;
-use OCP\IL10N;
-use OCP\INavigationManager;
-use OCP\IURLGenerator;
-use OCP\IUser;
-use OCP\IUserSession;
 use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
@@ -110,9 +104,7 @@ class Application extends App implements IBootstrap {
 	}
 
 	public function boot(IBootContext $context): void {
-		$server = $context->getServerContainer();
 		try {
-			$context->injectFn($this->registerExAppsManagementNavigation(...));
 			$context->injectFn($this->registerExAppsMenuEntries(...));
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|Throwable) {
 		}
@@ -125,35 +117,6 @@ class Application extends App implements IBootstrap {
 		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
 			$event->getServer()->addPlugin($container->query(DavPlugin::class));
 		});
-	}
-
-	/**
-	 * Register ExApps management navigation entry right after default Apps management link.
-	 *
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
-	 */
-	private function registerExAppsManagementNavigation(IUserSession $userSession): void {
-		$container = $this->getContainer();
-		/** @var IGroupManager $groupManager */
-		$groupManager = $container->get(IGroupManager::class);
-		/** @var IUser $user */
-		$user = $userSession->getUser();
-		if ($groupManager->isInGroup($user->getUID(), 'admin')) {
-			$container->get(INavigationManager::class)->add(function () use ($container) {
-				$urlGenerator = $container->get(IURLGenerator::class);
-				$l10n = $container->get(IL10N::class);
-				return [
-					'id' => self::APP_ID,
-					'type' => 'settings',
-					'order' => 6,
-					'href' => $urlGenerator->linkToRoute('app_api.ExAppsPage.viewApps'),
-					'icon' => $urlGenerator->imagePath('app_api', 'app-dark.svg'),
-					'target' => '_blank',
-					'name' => $l10n->t('External Apps'),
-				];
-			});
-		}
 	}
 
 	private function registerExAppsMenuEntries(): void {
