@@ -36,6 +36,7 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["全部更新"],
     "Type" : "类型",
     "Display Name" : "显示名称",
+    "GPUs support" : "GPU 支持",
     "Cancel" : "取消",
     "Delete" : "删除",
     "Edit" : "编辑",
