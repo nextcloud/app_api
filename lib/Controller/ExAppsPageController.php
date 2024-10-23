@@ -203,7 +203,7 @@ class ExAppsPageController extends Controller {
 				}))[0]['releases'][0]['version'];
 			}
 
-			$appData['canUninstall'] = !$appData['active'] && $appData['removable']
+			$appData['canUnInstall'] = !$appData['active'] && $appData['removable']
 				&& (isset($appData['status']['action']) && $appData['status']['action'] !== 'deploy')
 				|| (isset($appData['status']['action']) && $appData['status']['action'] === 'init')
 				|| !empty($appData['status']['error']);
@@ -282,7 +282,7 @@ class ExAppsPageController extends Controller {
 					'missingMaxOwnCloudVersion' => false,
 					'missingMinOwnCloudVersion' => false,
 					'canInstall' => true, // to allow "remove" command for manual-install
-					'canUninstall' => !($exApp->getEnabled() === 1),
+					'canUnInstall' => !($exApp->getEnabled() === 1),
 					'isCompatible' => true,
 					'screenshot' => '',
 					'score' => 0,
