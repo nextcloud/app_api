@@ -22,11 +22,8 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Services\IInitialState;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IRequest;
@@ -37,89 +34,22 @@ use Psr\Log\LoggerInterface;
  * ExApps actions controller similar to default one with project-specific changes and additions
  */
 class ExAppsPageController extends Controller {
-	private IInitialState $initialStateService;
-	private IConfig $config;
-	private AppAPIService $service;
-	private DaemonConfigService $daemonConfigService;
-	private DockerActions $dockerActions;
-	private CategoryFetcher $categoryFetcher;
-	private IFactory $l10nFactory;
-	private ExAppFetcher $exAppFetcher;
-	private IL10N $l10n;
-	private LoggerInterface $logger;
-	private IAppManager $appManager;
 
 	public function __construct(
 		IRequest $request,
-		IConfig $config,
-		IInitialState $initialStateService,
-		AppAPIService $service,
-		DaemonConfigService $daemonConfigService,
-		DockerActions $dockerActions,
-		CategoryFetcher $categoryFetcher,
-		IFactory $l10nFactory,
-		ExAppFetcher $exAppFetcher,
-		IL10N $l10n,
-		LoggerInterface $logger,
-		IAppManager $appManager,
+		private readonly IConfig $config,
+		private readonly AppAPIService $service,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly DockerActions $dockerActions,
+		private readonly CategoryFetcher $categoryFetcher,
+		private readonly IFactory $l10nFactory,
+		private readonly ExAppFetcher $exAppFetcher,
+		private readonly IL10N $l10n,
+		private readonly LoggerInterface $logger,
+		private readonly IAppManager $appManager,
 		private readonly ExAppService $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
-
-		$this->initialStateService = $initialStateService;
-		$this->config = $config;
-		$this->service = $service;
-		$this->daemonConfigService = $daemonConfigService;
-		$this->dockerActions = $dockerActions;
-		$this->categoryFetcher = $categoryFetcher;
-		$this->l10nFactory = $l10nFactory;
-		$this->l10n = $l10n;
-		$this->exAppFetcher = $exAppFetcher;
-		$this->logger = $logger;
-		$this->appManager = $appManager;
-	}
-
-	#[NoCSRFRequired]
-	public function viewApps(): TemplateResponse {
-		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
-
-		$appInitialData = [
-			'appstoreEnabled' => $this->config->getSystemValueBool('appstoreenabled', true),
-			'updateCount' => count($this->getExAppsWithUpdates()),
-		];
-
-		if ($defaultDaemonConfigName !== '') {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
-			if ($daemonConfig !== null) {
-				$this->dockerActions->initGuzzleClient($daemonConfig);
-				$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
-				$appInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
-				$appInitialData['default_daemon_config'] = $daemonConfig->jsonSerialize();
-				unset($appInitialData['default_daemon_config']['deploy_config']['haproxy_password']); // do not expose password
-				if (!$daemonConfigAccessible) {
-					$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please verify its configuration', $daemonConfig->getName()));
-				}
-			}
-		}
-
-		$this->initialStateService->provideInitialState('apps', $appInitialData);
-
-		$templateResponse = new TemplateResponse(Application::APP_ID, 'main');
-		$policy = new ContentSecurityPolicy();
-		$policy->addAllowedImageDomain('https://usercontent.apps.nextcloud.com');
-		$templateResponse->setContentSecurityPolicy($policy);
-
-		return $templateResponse;
-	}
-
-	private function getExAppsWithUpdates(): array {
-		$apps = $this->exAppFetcher->get();
-		$appsWithUpdates = array_filter($apps, function (array $app) {
-			$exApp = $this->exAppService->getExApp($app['id']);
-			$newestVersion = $app['releases'][0]['version'];
-			return $exApp !== null && isset($app['releases'][0]['version']) && version_compare($newestVersion, $exApp->getVersion(), '>');
-		});
-		return array_values($appsWithUpdates);
 	}
 
 	/**
@@ -195,6 +125,7 @@ class ExAppsPageController extends Controller {
 
 			$formattedApps[] = [
 				'id' => $app['id'],
+				'app_api' => true,
 				'installed' => $exApp !== null, // if ExApp registered then it's assumed that it was already deployed (installed)
 				'appstore' => true,
 				'name' => $app['translations'][$currentLanguage]['name'] ?? $app['translations']['en']['name'],
@@ -228,6 +159,7 @@ class ExAppsPageController extends Controller {
 				'removable' => $existsLocally,
 				'active' => $exApp !== null && $exApp->getEnabled() === 1,
 				'needsDownload' => !$existsLocally,
+				'groups' => [],
 				'fromAppStore' => true,
 				'appstoreData' => $app,
 				'daemon' => $daemon,
@@ -242,7 +174,7 @@ class ExAppsPageController extends Controller {
 	#[NoCSRFRequired]
 	public function listApps(): JSONResponse {
 		$apps = $this->getAppsForCategory('');
-		$appsWithUpdate = $this->getExAppsWithUpdates();
+		$appsWithUpdate = $this->exAppFetcher->getExAppsWithUpdates();
 
 		$exApps = $this->exAppService->getExAppsList('all');
 		$dependencyAnalyzer = new DependencyAnalyzer(new Platform($this->config), $this->l10n);
@@ -325,12 +257,14 @@ class ExAppsPageController extends Controller {
 
 				$formattedLocalApps[] = [
 					'id' => $app['id'],
+					'app_api' => true,
 					'appstore' => false,
 					'installed' => true,
 					'name' => $exApp->getName(),
-					'description' => '',
+					'description' => $this->l10n->t('This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed.'),
 					'summary' => '',
 					'license' => '',
+					'licence' => '',
 					'author' => '',
 					'shipped' => false,
 					'version' => $exApp->getVersion(),
@@ -357,6 +291,7 @@ class ExAppsPageController extends Controller {
 					'removable' => true, // to allow "remove" command for manual-install
 					'active' => $exApp->getEnabled() === 1,
 					'needsDownload' => false,
+					'groups' => [],
 					'fromAppStore' => false,
 					'appstoreData' => $app,
 					'daemon' => $daemon,
@@ -391,7 +326,7 @@ class ExAppsPageController extends Controller {
 			return new JSONResponse([]);
 		}
 
-		$appsWithUpdate = $this->getExAppsWithUpdates();
+		$appsWithUpdate = $this->exAppFetcher->getExAppsWithUpdates();
 		$appIdsWithUpdate = array_map(function (array $appWithUpdate) {
 			return $appWithUpdate['id'];
 		}, $appsWithUpdate);
@@ -426,7 +361,7 @@ class ExAppsPageController extends Controller {
 	#[PasswordConfirmationRequired]
 	#[NoCSRFRequired]
 	public function updateApp(string $appId): JSONResponse {
-		$appsWithUpdate = $this->getExAppsWithUpdates();
+		$appsWithUpdate = $this->exAppFetcher->getExAppsWithUpdates();
 		$appIdsWithUpdate = array_map(function (array $appWithUpdate) {
 			return $appWithUpdate['id'];
 		}, $appsWithUpdate);
