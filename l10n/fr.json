@@ -92,6 +92,7 @@
     "Additional options" : "Options supplémentaires",
     "Verify connection" : "Vérifier la connexion",
     "Daemon connection successful" : "Connexion au Deamon réussie",
+    "Failed to connect to Daemon. Check the logs" : "Échec de la connexion au Daemon. Vérifiez les logs",
     "Failed to check connection to Daemon. Check the logs" : "Échec de la vérification de la connexion au Daemon. Vérifiez les logs",
     "Registered Deploy daemons list" : "Liste des services de déploiement enregistrés",
     "No Deploy daemons configured" : "Aucun service de déploiement configuré",
