@@ -141,7 +141,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: NC In Julius Docker • 🐘8.1
     env:
-      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
+      docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
 
     steps:
       - name: Set app env
@@ -217,7 +217,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: NC In Julius Docker(DSP-HTTP) • 🐘8.1
     env:
-      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
+      docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
 
     steps:
       - name: Set app env
@@ -296,7 +296,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: NC In Julius Docker(DSP-HTTPS) • 🐘8.1
     env:
-      docker-image: ghcr.io/juliushaertl/nextcloud-dev-php81:20231202-1
+      docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
 
     steps:
       - name: Set app env
