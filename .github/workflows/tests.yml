@@ -24,7 +24,7 @@ env:
 jobs:
   nc-py-api-pgsql:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • stable30 • 🐘${{ matrix.php-version }} • PgSQL
+    name: NC_Py_API • 🐘${{ matrix.php-version }} • PgSQL
     strategy:
       fail-fast: false
       matrix:
@@ -140,7 +140,7 @@ jobs:
 
   nc-py-api-mysql:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • stable30 • 🐘8.1 • MySQL
+    name: NC_Py_API • 🐘8.1 • MySQL
 
     services:
       mysql:
@@ -253,7 +253,7 @@ jobs:
 
   nc-py-api-mysql-apcu:
     runs-on: ubuntu-22.04
-    name: APCu • NC_Py_API • stable30 • 🐘8.1 • MySQL
+    name: APCu • NC_Py_API • 🐘8.1 • MySQL
 
     services:
       mysql:
@@ -369,7 +369,7 @@ jobs:
 
   nc-py-api-oci:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • stable30 • 🐘8.2 • Oracle
+    name: NC_Py_API • 🐘8.2 • Oracle
 
     services:
       oracle:

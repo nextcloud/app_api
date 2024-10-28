@@ -15,7 +15,7 @@ concurrency:
 jobs:
   nc-host-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Host • stable30 • 🐘8.2
+    name: NC In Host • 🐘8.2
 
     services:
       postgres:
@@ -150,7 +150,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps nextcloud git clone --branch stable30 https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -229,7 +229,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps nextcloud git clone --branch stable30 https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -318,7 +318,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps nextcloud git clone --branch stable30 https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -391,7 +391,7 @@ jobs:
 
   nc-host-app-docker-redis:
     runs-on: ubuntu-22.04
-    name: NC In Host(Redis) • stable30 • 🐘8.1
+    name: NC In Host(Redis) • 🐘8.1
 
     services:
       postgres:
@@ -531,7 +531,7 @@ jobs:
 
   nc-host-network-host:
     runs-on: ubuntu-22.04
-    name: NC In Host(network=host)  • stable30 • 🐘8.2
+    name: NC In Host(network=host) • 🐘8.2
 
     services:
       postgres:
