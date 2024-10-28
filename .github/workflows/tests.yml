@@ -134,7 +134,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: pgsql_nc_py_api_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          name: pgsql_nc_py_api_${{ matrix.php-version }}_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -178,7 +178,7 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.1
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: '8.1'
@@ -247,7 +247,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: mysql_nc_py_api_8.1_nextcloud.log
+          name: mysql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -291,7 +291,7 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.1
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: '8.1'
@@ -363,7 +363,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: apcu_mysql_nc_py_api_8.1_nextcloud.log
+          name: apcu_mysql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -475,7 +475,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: oci_nc_py_api_${{ matrix.server-version }}_8.2_nextcloud.log
+          name: oci_nc_py_api_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 

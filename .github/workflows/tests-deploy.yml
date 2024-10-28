@@ -15,11 +15,7 @@ concurrency:
 jobs:
   nc-host-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Host • stable30 • 🐘${{ matrix.php-version }}
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: [ '8.1', '8.2', '8.3' ]
+    name: NC In Host • stable30 • 🐘8.2
 
     services:
       postgres:
@@ -48,10 +44,10 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php ${{ matrix.php-version }}
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: 8.2
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
           coverage: none
           ini-file: development
@@ -115,7 +111,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+          name: nc_host_app_docker_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -123,7 +119,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+          name: nc_host_app_docker_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -131,7 +127,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          name: nc_host_app_docker_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -154,7 +150,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git -b ${{ github.head_ref }}
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -233,7 +229,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git -b ${{ github.head_ref }}
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -322,7 +318,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git -b ${{ github.head_ref }}
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -434,7 +430,7 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.1
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: 8.1
@@ -521,7 +517,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable30_8.1_container.log
+          name: nc_host_app_docker_redis_8.1_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -529,7 +525,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable30_8.1_nextcloud.log
+          name: nc_host_app_docker_redis_8.1_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -564,7 +560,7 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.2
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: 8.2
@@ -633,7 +629,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_stable30_8.2_container.json
+          name: nc_host_network_host_8.2_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -641,7 +637,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_stable30_8.2_container.log
+          name: nc_host_network_host_8.2_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -649,7 +645,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_stable30_8.2_nextcloud.log
+          name: nc_host_network_host_8.2_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
