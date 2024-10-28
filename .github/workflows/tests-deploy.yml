@@ -3,7 +3,7 @@ name: Tests - Deploy
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [stable30]
 
 permissions:
   contents: read
