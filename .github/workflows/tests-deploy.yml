@@ -136,6 +136,7 @@ jobs:
     name: NC In Julius Docker • 🐘8.1
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
+      SERVER_BRANCH: stable30
 
     steps:
       - name: Set app env
@@ -212,6 +213,7 @@ jobs:
     name: NC In Julius Docker(DSP-HTTP) • 🐘8.1
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
+      SERVER_BRANCH: stable30
 
     steps:
       - name: Set app env
@@ -291,6 +293,7 @@ jobs:
     name: NC In Julius Docker(DSP-HTTPS) • 🐘8.1
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
+      SERVER_BRANCH: stable30
 
     steps:
       - name: Set app env
