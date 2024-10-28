@@ -5,7 +5,6 @@ on:
     branches: [stable29]
   push:
     branches: [stable29]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -51,7 +50,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: 'stable28'
+          ref: 'stable29'
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
