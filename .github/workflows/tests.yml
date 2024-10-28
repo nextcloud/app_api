@@ -249,7 +249,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: mysql_nc_py_api_stable28_8.1_nextcloud.log
+          name: mysql_nc_py_api_8.1_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -366,7 +366,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: apcu_mysql_nc_py_api_stable29_8.1_nextcloud.log
+          name: apcu_mysql_nc_py_api_8.1_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
