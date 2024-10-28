@@ -90,7 +90,7 @@ jobs:
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:app:register skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/app-skeleton-python/main/appinfo/info.xml
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           ./occ app_api:app:enable skeleton
           ./occ app_api:app:disable skeleton
 
@@ -156,7 +156,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git -b stable30
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git -b stable30
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -165,7 +165,7 @@ jobs:
             --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/app-skeleton-python/main/appinfo/info.xml
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
@@ -229,13 +229,13 @@ jobs:
           docker run -v /var/run/docker.sock:/var/run/docker.sock \
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             --net master_bridge --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
-            --privileged -d ghcr.io/cloud-py-api/nextcloud-appapi-dsp:latest
+            --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
           sleep 60s
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git -b stable30
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git -b stable30
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -244,7 +244,7 @@ jobs:
             --net=master_bridge --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/app-skeleton-python/main/appinfo/info.xml
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
@@ -316,7 +316,7 @@ jobs:
             -e BIND_ADDRESS="172.17.0.1" \
             -e EX_APPS_NET="ipv4@localhost" \
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
-            --privileged -d ghcr.io/cloud-py-api/nextcloud-appapi-dsp:latest
+            --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
           docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
           sleep 60s
           hostname -I
@@ -324,7 +324,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git -b stable30
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git -b stable30
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -335,7 +335,7 @@ jobs:
             --net=host --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud sudo -u www-data php occ app_api:app:register skeleton docker_by_port \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/app-skeleton-python/main/appinfo/info.xml
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable skeleton
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable skeleton
 
@@ -485,7 +485,7 @@ jobs:
           ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
           ./occ app_api:daemon:list
           ./occ app_api:app:register skeleton docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/app-skeleton-python/main/appinfo/info.xml
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           ./occ app_api:app:enable skeleton
           ./occ app_api:app:disable skeleton
 
@@ -610,7 +610,7 @@ jobs:
             --net=host --set-default
           ./occ app_api:daemon:list
           ./occ app_api:app:register skeleton \
-            --info-xml https://raw.githubusercontent.com/cloud-py-api/app-skeleton-python/main/appinfo/info.xml
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           ./occ app_api:app:enable skeleton
           ./occ app_api:app:disable skeleton
 
