@@ -2,6 +2,7 @@ name: Tests - Deploy
 
 on:
   pull_request:
+    branches: [stable30]
   push:
     branches: [stable30]
 
