@@ -137,7 +137,6 @@ jobs:
     name: NC In Julius Docker • 🐘8.1
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
-      SERVER_BRANCH: stable30
 
     steps:
       - name: Set app env
@@ -214,7 +213,6 @@ jobs:
     name: NC In Julius Docker(DSP-HTTP) • 🐘8.1
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
-      SERVER_BRANCH: stable30
 
     steps:
       - name: Set app env
@@ -294,7 +292,6 @@ jobs:
     name: NC In Julius Docker(DSP-HTTPS) • 🐘8.1
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php81:20231202-1
-      SERVER_BRANCH: stable30
 
     steps:
       - name: Set app env
@@ -513,7 +510,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_stable30_8.1_container.json
+          name: nc_host_app_docker_redis_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -521,7 +518,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_8.1_container.log
+          name: nc_host_app_docker_redis_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -529,7 +526,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_app_docker_redis_8.1_nextcloud.log
+          name: nc_host_app_docker_redis_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -633,7 +630,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_8.2_container.json
+          name: nc_host_network_host_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -641,7 +638,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_8.2_container.log
+          name: nc_host_network_host_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -649,7 +646,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: nc_host_network_host_8.2_nextcloud.log
+          name: nc_host_network_host_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
