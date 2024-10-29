@@ -12,6 +12,7 @@ use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Http\Client\IClientService;
 use OCP\IConfig;
+use OCP\Server;
 use OCP\Support\Subscription\IRegistry;
 use Psr\Log\LoggerInterface;
 
