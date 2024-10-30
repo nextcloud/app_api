@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Fetcher;
 
-use Exception;
 use InvalidArgumentException;
 use OC\App\AppStore\Version\VersionParser;
 use OC\App\CompareVersion;
 use OC\Files\AppData\Factory;
+use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Http\Client\IClientService;
 use OCP\IConfig;
+use OCP\Server;
 use OCP\Support\Subscription\IRegistry;
 use Psr\Log\LoggerInterface;
 
 class ExAppFetcher extends AppAPIFetcher {
-	private CompareVersion $compareVersion;
 	private bool $ignoreMaxVersion;
 
 	public function __construct(
@@ -24,7 +24,7 @@ class ExAppFetcher extends AppAPIFetcher {
 		IClientService $clientService,
 		ITimeFactory $timeFactory,
 		IConfig $config,
-		CompareVersion $compareVersion,
+		private CompareVersion $compareVersion,
 		LoggerInterface $logger,
 		protected IRegistry $registry
 	) {
@@ -37,8 +37,6 @@ class ExAppFetcher extends AppAPIFetcher {
 			$registry
 		);
 
-		$this->compareVersion = $compareVersion;
-
 		$this->fileName = 'appapi_apps.json';
 		$this->endpointName = 'appapi_apps.json';
 		$this->ignoreMaxVersion = true;
@@ -46,14 +44,13 @@ class ExAppFetcher extends AppAPIFetcher {
 
 	/**
 	 * Only returns the latest compatible app release in the releases array
-	 *
-	 * @throws Exception
 	 */
 	protected function fetch(string $ETag, string $content, bool $allowUnstable = false): array {
 		/** @var mixed[] $response */
 		$response = parent::fetch($ETag, $content);
 
-		if (empty($response)) {
+		if (!isset($response['data']) || $response['data'] === null) {
+			$this->logger->warning('Response from appstore is invalid, ExApps could not be retrieved. Try again later.', ['app' => 'appstoreExAppFetcher']);
 			return [];
 		}
 
@@ -147,6 +144,9 @@ class ExAppFetcher extends AppAPIFetcher {
 		$allowPreReleases = $allowUnstable || $this->getChannel() === 'beta' || $this->getChannel() === 'daily' || $this->getChannel() === 'git';
 
 		$apps = parent::get($allowPreReleases);
+		if (empty($apps)) {
+			return [];
+		}
 		$allowList = $this->config->getSystemValue('appsallowlist');
 
 		// If the admin specified a allow list, filter apps from the appstore
@@ -157,5 +157,16 @@ class ExAppFetcher extends AppAPIFetcher {
 		}
 
 		return $apps;
+	}
+
+	public function getExAppsWithUpdates(): array {
+		$apps = $this->get();
+		$appsWithUpdates = array_filter($apps, function (array $app) {
+			$exAppService = Server::get(ExAppService::class);
+			$exApp = $exAppService->getExApp($app['id']);
+			$newestVersion = $app['releases'][0]['version'];
+			return $exApp !== null && isset($app['releases'][0]['version']) && version_compare($newestVersion, $exApp->getVersion(), '>');
+		});
+		return array_values($appsWithUpdates);
 	}
 }

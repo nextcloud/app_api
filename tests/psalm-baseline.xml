@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.24.0@462c80e31c34e58cc4f750c656be3927e80e550e">
+<files psalm-version="5.25.0@01a8eb06b9e9cc6cfb6a320bf9fb14331919d505">
   <file src="lib/AppInfo/Application.php">
     <InvalidArgument>
       <code><![CDATA[LoadFilesPluginListener::class]]></code>
@@ -36,18 +36,14 @@
   <file src="lib/Controller/ExAppsPageController.php">
     <UndefinedClass>
       <code><![CDATA[$this->categoryFetcher]]></code>
-      <code><![CDATA[CategoryFetcher]]></code>
-      <code><![CDATA[CategoryFetcher]]></code>
       <code><![CDATA[DependencyAnalyzer]]></code>
       <code><![CDATA[OC_App]]></code>
       <code><![CDATA[Platform]]></code>
       <code><![CDATA[VersionParser]]></code>
+      <code><![CDATA[private]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Fetcher/AppAPIFetcher.php">
-    <InvalidThrow>
-      <code><![CDATA[throw $e;]]></code>
-    </InvalidThrow>
     <TooManyArguments>
       <code><![CDATA[fetch]]></code>
     </TooManyArguments>
@@ -68,10 +64,9 @@
       <code><![CDATA[$this->compareVersion]]></code>
       <code><![CDATA[$versionParser]]></code>
       <code><![CDATA[$versionParser]]></code>
-      <code><![CDATA[CompareVersion]]></code>
-      <code><![CDATA[CompareVersion]]></code>
       <code><![CDATA[Factory]]></code>
       <code><![CDATA[VersionParser]]></code>
+      <code><![CDATA[private]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Listener/FileEventsListener.php">
