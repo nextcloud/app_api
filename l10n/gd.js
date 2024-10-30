@@ -1,15 +1,15 @@
 OC.L10N.register(
     "app_api",
     {
-    "Remove" : "Thoir air falbh",
-    "Name" : "Ainm",
-    "Version" : "Tionndadh",
-    "Type" : "Seòrsa",
     "Cancel" : "Sguir dheth",
     "Delete" : "Sguab às",
     "Default" : "Bunaiteach",
     "Edit" : "Deasaich",
+    "Name" : "Ainm",
     "Save" : "Sàbhail",
+    "Remove" : "Thoir air falbh",
+    "Version" : "Tionndadh",
+    "Type" : "Seòrsa",
     "Details" : "Mion-fhiosrachadh",
     "Disable" : "Cuir à comas"
 },
