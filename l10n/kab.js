@@ -1,15 +1,15 @@
 OC.L10N.register(
     "app_api",
     {
-    "Remove" : "Kkes",
-    "Name" : "Nom",
-    "Type" : "Anaw",
     "Delete" : "Kkes",
     "Default" : "Prédéfini(e)",
     "Edit" : "Ẓreg",
+    "Name" : "Nom",
     "Enabled" : "Yermed",
     "Confirm" : "Serggeg",
     "Save" : "Sekles",
+    "Remove" : "Kkes",
+    "Type" : "Anaw",
     "Details" : "Talqayt",
     "Disable" : "Désactiver"
 },

@@ -1,6 +1,12 @@
 OC.L10N.register(
     "app_api",
     {
+    "Delete" : "Deler",
+    "Edit" : "Modificar",
+    "Host" : "Hospite",
+    "Enabled" : "Activate",
+    "Confirm" : "Confirmar",
+    "Save" : "Salveguardar",
     "Visit website" : "Visitar sito web",
     "Report a bug" : "Reportar un defecto",
     "User documentation" : "Documentation de usator",
@@ -9,12 +15,6 @@ OC.L10N.register(
     "Version" : "Version",
     "Actions" : "Actiones",
     "Type" : "Typo",
-    "Delete" : "Deler",
-    "Edit" : "Modificar",
-    "Host" : "Hospite",
-    "Enabled" : "Activate",
-    "Confirm" : "Confirmar",
-    "Save" : "Salveguardar",
     "Documentation" : "Documentation",
     "Details" : "Detalios",
     "Disable" : "Disactivar"

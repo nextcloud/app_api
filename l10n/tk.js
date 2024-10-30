@@ -1,14 +1,14 @@
 OC.L10N.register(
     "app_api",
     {
-    "Remove" : "Aýyrmak",
-    "Name" : "Ady",
-    "Type" : "Görnüşi",
     "Cancel" : "ýatyrmak",
     "Delete" : "Pozmak",
     "Default" : "Bellenen",
     "Edit" : "Redaktirläň",
+    "Name" : "Ady",
     "Save" : "Saklamak",
+    "Remove" : "Aýyrmak",
+    "Type" : "Görnüşi",
     "Details" : "Jikme-jiklikler",
     "Disable" : "Öçürmek"
 },

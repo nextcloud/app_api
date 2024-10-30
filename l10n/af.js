@@ -1,6 +1,11 @@
 OC.L10N.register(
     "app_api",
     {
+    "Delete" : "Skrap",
+    "Host" : "Gasheer",
+    "Confirm" : "Bevestig",
+    "Save" : "Stoor",
+    "Register" : "Registreer",
     "Update to {version}" : "Werk by na {version}",
     "View in store" : "Bekyk in winkel",
     "Visit website" : "Besoek webwerf",
@@ -11,11 +16,6 @@ OC.L10N.register(
     "Version" : "Weergawe",
     "Actions" : "Aksies",
     "Display Name" : "Vertoonnaam",
-    "Delete" : "Skrap",
-    "Host" : "Gasheer",
-    "Confirm" : "Bevestig",
-    "Save" : "Stoor",
-    "Register" : "Registreer",
     "Your apps" : "U toeps",
     "Documentation" : "Dokumentasie",
     "Details" : "Besonderhede",

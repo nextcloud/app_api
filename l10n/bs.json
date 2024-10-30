@@ -1,13 +1,13 @@
 { "translations": {
-    "This app cannot be installed because the following dependencies are not fulfilled:" : "Ova aplikacija se ne može instalirati zbog slijedećih neispunjenih ovisnosti:",
-    "Name" : "Ime",
-    "Version" : "Verzija",
-    "Actions" : "Radnje",
     "Cancel" : "Odustani",
     "Delete" : "Obriši",
     "Edit" : "Izmjeni",
+    "Name" : "Ime",
     "Enabled" : "Aktivirano",
     "Save" : "Spremi",
+    "This app cannot be installed because the following dependencies are not fulfilled:" : "Ova aplikacija se ne može instalirati zbog slijedećih neispunjenih ovisnosti:",
+    "Version" : "Verzija",
+    "Actions" : "Radnje",
     "Documentation" : "Dokumentacija",
     "Updates" : "Ažuriranja",
     "Disable" : "Onemogući"
