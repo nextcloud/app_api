@@ -1,17 +1,17 @@
 OC.L10N.register(
     "app_api",
     {
+    "Cancel" : "Cancel",
+    "Delete" : "Delete",
+    "Name" : "Name",
+    "Confirm" : "Confirm",
     "Update to {version}" : "Update to {version}",
     "Remove" : "Remove",
     "Visit website" : "Visit website",
     "User documentation" : "Foydalanuvchi hujjatlari",
     "Admin documentation" : "Admin documentation",
     "Developer documentation" : "developer hujjatlari",
-    "Name" : "Name",
     "Actions" : "Actions",
-    "Cancel" : "Cancel",
-    "Delete" : "Delete",
-    "Confirm" : "Confirm",
     "Details" : "Details",
     "Enable" : "Enable",
     "Disable" : "Oʻchirish"

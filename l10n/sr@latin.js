@@ -1,15 +1,15 @@
 OC.L10N.register(
     "app_api",
     {
-    "Update to {version}" : "Ažuriraj na verziju {version}",
-    "Report a bug" : "Prijavi grešku",
-    "Name" : "Ime",
-    "Version" : "Verzija",
-    "Type" : "Tip",
     "Cancel" : "Poništi",
     "Delete" : "Obriši",
     "Edit" : "Izmeni",
+    "Name" : "Ime",
     "Save" : "Sačuvaj",
+    "Update to {version}" : "Ažuriraj na verziju {version}",
+    "Report a bug" : "Prijavi grešku",
+    "Version" : "Verzija",
+    "Type" : "Tip",
     "Documentation" : "Dokumentacija",
     "Details" : "Detalji",
     "Disable" : "Isključi"
