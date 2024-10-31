@@ -5,6 +5,7 @@ OC.L10N.register(
     "Error starting install of ExApp" : "Fehler beim Starten der Installation von ExApp",
     "ExApp failed to register, check the NC logs" : "ExApp konnte nicht registriert werden, NC-Protokolle überprüfen.",
     "ExApp not found, failed to get status" : "ExApp nicht gefunden, Status konnte nicht abgerufen werden",
+    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Diese App ist nicht aus dem App-Store installiert. Keine weiteren Informationen verfügbar. Nur die Aktionen Aktivieren/Deaktivieren und Entfernen sind zulässig.",
     "Could not perform installation of ExApp" : "Installation von ExApp konnte nicht durchgeführt werden",
     "Failed to enable ExApp" : "Fehler beim Aktivieren von ExApp",
     "Failed to disable ExApp" : "Fehler beim Deaktivieren von ExApp",
