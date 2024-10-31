@@ -5,6 +5,7 @@ OC.L10N.register(
     "Error starting install of ExApp" : "開始安裝 ExApp 時發生錯誤",
     "ExApp failed to register, check the NC logs" : "ExApp 註冊失敗，請檢查 Nextcloud 紀錄檔",
     "ExApp not found, failed to get status" : "找不到 ExApp，無法取得狀態",
+    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "此應用程式未從 AppStore 安裝。未提供額外資訊。僅允許啟用/停用與移除動作。",
     "Could not perform installation of ExApp" : "無法執行 ExApp 的安裝",
     "Failed to enable ExApp" : "啟用 ExApp 失敗",
     "Failed to disable ExApp" : "停用 ExApp 失敗",
