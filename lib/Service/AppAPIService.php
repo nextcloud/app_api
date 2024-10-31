@@ -560,7 +560,23 @@ class AppAPIService {
 			if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 				$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 				$this->dockerActions->initGuzzleClient($daemonConfig);
-				$this->dockerActions->startContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+				$containerName = $this->dockerActions->buildExAppContainerName($exApp->getAppid());
+				$this->dockerActions->startContainer($this->dockerActions->buildDockerUrl($daemonConfig), $containerName);
+				if (!$this->dockerActions->waitTillContainerStart($containerName, $daemonConfig)) {
+					$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
+					return false;
+				}
+				if (!$this->dockerActions->healthcheckContainer($containerName, $daemonConfig, true)) {
+					$this->logger->error(sprintf('ExApp %s container healthcheck failed.', $exApp->getAppid()));
+					return false;
+				}
+			}
+
+			$auth = [];
+			$exAppRootUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
+			if (!$this->heartbeatExApp($exAppRootUrl, $auth, $exApp->getAppid())) {
+				$this->logger->error(sprintf('ExApp %s heartbeat failed.', $exApp->getAppid()));
+				return false;
 			}
 
 			$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 60]);
