@@ -43,6 +43,7 @@ class AppAPIService {
 		private readonly DockerActions           $dockerActions,
 		private readonly ManualActions           $manualActions,
 		private readonly AppAPICommonService     $commonService,
+		private readonly DaemonConfigService	 $daemonConfigService,
 	) {
 		$this->client = $clientService->newClient();
 	}
@@ -556,7 +557,13 @@ class AppAPIService {
 	 */
 	public function enableExApp(ExApp $exApp): bool {
 		if ($this->exAppService->enableExAppInternal($exApp)) {
-			$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 30]);
+			if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+				$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+				$this->dockerActions->initGuzzleClient($daemonConfig);
+				$this->dockerActions->startContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+			}
+
+			$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 60]);
 			if ($exAppEnabled instanceof IResponse) {
 				$response = json_decode($exAppEnabled->getBody(), true);
 				if (!empty($response['error'])) {
@@ -579,7 +586,7 @@ class AppAPIService {
 	 */
 	public function disableExApp(ExApp $exApp): bool {
 		$result = true;
-		$exAppDisabled = $this->requestToExApp($exApp, '/enabled?enabled=0', null, 'PUT', options: ['timeout' => 30]);
+		$exAppDisabled = $this->requestToExApp($exApp, '/enabled?enabled=0', null, 'PUT', options: ['timeout' => 60]);
 		if ($exAppDisabled instanceof IResponse) {
 			$response = json_decode($exAppDisabled->getBody(), true);
 			if (isset($response['error']) && strlen($response['error']) !== 0) {
@@ -589,6 +596,11 @@ class AppAPIService {
 		} elseif (isset($exAppDisabled['error'])) {
 			$this->logger->error(sprintf('Failed to disable ExApp %s. Error: %s', $exApp->getAppid(), $exAppDisabled['error']));
 			$result = false;
+		}
+		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+			$this->dockerActions->initGuzzleClient($daemonConfig);
+			$this->dockerActions->stopContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
 		}
 		$this->exAppService->disableExAppInternal($exApp);
 		return $result;
