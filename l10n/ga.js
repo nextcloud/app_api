@@ -5,6 +5,7 @@ OC.L10N.register(
     "Error starting install of ExApp" : "Earráid agus suiteáil ExApp á thosú",
     "ExApp failed to register, check the NC logs" : "Theip ar ExApp clárú, seiceáil na logaí NC",
     "ExApp not found, failed to get status" : "ExApp gan aimsiú, níor éirigh leis an stádas a fháil",
+    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Níl an aip seo suiteáilte ón AppStore. Níl aon eolas breise ar fáil. Ní cheadaítear ach gníomhartha a chumasú/a dhíchumasú agus a bhaint.",
     "Could not perform installation of ExApp" : "Níorbh fhéidir ExApp a shuiteáil",
     "Failed to enable ExApp" : "Theip ar chumasú ExApp",
     "Failed to disable ExApp" : "Theip ar ExApp a dhíchumasú",
