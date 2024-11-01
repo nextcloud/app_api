@@ -3,6 +3,7 @@
     "Error starting install of ExApp" : "Erro ao iniciar a instalação do ExApp",
     "ExApp failed to register, check the NC logs" : "ExApp falhou ao registrar, verifique os logs NC",
     "ExApp not found, failed to get status" : "ExApp não encontrado, falha ao obter status",
+    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Este aplicativo não está instalado na AppStore. Sem informações extras disponíveis. Somente ativar/desativar e remover ações são permitidas.",
     "Could not perform installation of ExApp" : "Não foi possível realizar a instalação do ExApp",
     "Failed to enable ExApp" : "Falha ao habilitar ExApp",
     "Failed to disable ExApp" : "Falha ao desativar ExApp",
