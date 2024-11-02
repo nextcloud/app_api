@@ -3,6 +3,7 @@
     "Error starting install of ExApp" : "حدث خطأ عند البدء في تثبيت ExApp",
     "ExApp failed to register, check the NC logs" : "التطبيق الخارجي ExApp فشل في التسجيل. تحقق من سجل الحركات في نكست كلاود.",
     "ExApp not found, failed to get status" : "تعذّر العثور على التطبيقات الخارجية ExApp، و تعذّر الحصول على حالتها",
+    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "لم يتم تثبيت هذا التطبيق من متجر التطبيقات. لا تتوفر معلومات إضافية عنه. يُسمح فقط بإجراءات التمكين/التعطيل والإزالة.",
     "Could not perform installation of ExApp" : "تعذّر تنفيذ عملية تثبيت ExApp",
     "Failed to enable ExApp" : "تعذّر تمكين تطبيق خارجي ExApp",
     "Failed to disable ExApp" : "تعذّر تعطيل تطبيق خارجي ExApp",
