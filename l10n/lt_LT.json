@@ -46,6 +46,7 @@
     "Disabled apps" : "Išjungtos programėlės",
     "Updates" : "Atnaujinimai",
     "Featured apps" : "Siūlomos programėlės",
+    "Supported apps" : "Palaikomos programėlės",
     "Enable" : "Aktyvuoti",
     "Disable" : "Išjungti",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Ši programėlė nėra pažymėta kaip suderinama su jūsų Nextcloud versija. Jei tęsite, vis tiek galėsite įdiegti programėlę. Turėkite omenyje, kad programėlė gali neveikti taip, kaip tikimasi.",
