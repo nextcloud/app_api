@@ -21,6 +21,7 @@ use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
@@ -53,6 +54,7 @@ class ExAppsPageController extends Controller {
 		private readonly LoggerInterface $logger,
 		private readonly IAppManager $appManager,
 		private readonly ExAppService $exAppService,
+		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -312,12 +314,29 @@ class ExAppsPageController extends Controller {
 	}
 
 	#[PasswordConfirmationRequired]
-	public function enableApp(string $appId): JSONResponse {
+	public function enableApp(string $appId, array $deployOptions = []): JSONResponse {
 		$updateRequired = false;
 		$exApp = $this->exAppService->getExApp($appId);
+
+		$envOptions = isset($deployOptions['environment_variables'])
+			? array_keys($deployOptions['environment_variables']) : [];
+		$envOptionsString = '';
+		foreach ($envOptions as $envOption) {
+			$envOptionsString .= sprintf(' --env %s=%s', $envOption, $deployOptions['environment_variables'][$envOption]);
+		}
+		$envOptionsString = trim($envOptionsString);
+
+		$mountOptions = $deployOptions['mounts'] ?? [];
+		$mountOptionsString = '';
+		foreach ($mountOptions as $mountOption) {
+			$readonlyModifier = $mountOption['readonly'] ? 'ro' : 'rw';
+			$mountOptionsString .= sprintf(' --mount %s:%s:%s', $mountOption['hostPath'], $mountOption['containerPath'], $readonlyModifier);
+		}
+		$mountOptionsString = trim($mountOptionsString);
+
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
-			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s", $appId))) {
+			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s %s %s", $appId, $envOptionsString, $mountOptionsString))) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
 			$elapsedTime = 0;
@@ -479,6 +498,38 @@ class ExAppsPageController extends Controller {
 				'text/plain'
 			);
 		}
+	}
+
+	public function getAppDeployOptions(string $appId) {
+		$exApp = $this->exAppService->getExApp($appId);
+		if (is_null($exApp)) {
+			return new JSONResponse(['error' => $this->l10n->t('ExApp not found, failed to get deploy options')], Http::STATUS_NOT_FOUND);
+		}
+
+		$deployOptions = $this->exAppDeployOptionsService->formatDeployOptions(
+			$this->exAppDeployOptionsService->getDeployOptions($appId)
+		);
+
+		$envs = [];
+		if (isset($deployOptions['environment_variables'])) {
+			$envs = $deployOptions['environment_variables'];
+		}
+
+		$mounts = [];
+		if (isset($deployOptions['mounts'])) {
+			foreach ($deployOptions['mounts'] as $mount) {
+				$mounts[] = [
+					'hostPath' => $mount['source'],
+					'containerPath' => $mount['target'],
+					'readonly' => $mount['mode'] === 'ro'
+				];
+			}
+		}
+
+		return new JSONResponse([
+			'environment_variables' => $envs,
+			'mounts' => $mounts,
+		]);
 	}
 
 	/**

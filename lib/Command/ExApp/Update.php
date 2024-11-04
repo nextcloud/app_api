@@ -16,6 +16,7 @@ use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 
+use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -27,14 +28,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Update extends Command {
 
 	public function __construct(
-		private readonly AppAPIService  	  $service,
-		private readonly ExAppService         $exAppService,
-		private readonly DaemonConfigService  $daemonConfigService,
-		private readonly DockerActions        $dockerActions,
-		private readonly ManualActions        $manualActions,
-		private readonly LoggerInterface      $logger,
-		private readonly ExAppArchiveFetcher  $exAppArchiveFetcher,
-		private readonly ExAppFetcher		  $exAppFetcher,
+		private readonly AppAPIService  	       $service,
+		private readonly ExAppService              $exAppService,
+		private readonly DaemonConfigService       $daemonConfigService,
+		private readonly DockerActions             $dockerActions,
+		private readonly ManualActions             $manualActions,
+		private readonly LoggerInterface           $logger,
+		private readonly ExAppArchiveFetcher       $exAppArchiveFetcher,
+		private readonly ExAppFetcher		       $exAppFetcher,
+		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 	) {
 		parent::__construct();
 	}
@@ -90,8 +92,12 @@ class Update extends Command {
 
 	private function updateExApp(InputInterface $input, OutputInterface $output, string $appId): int {
 		$outputConsole = !$input->getOption('silent');
+		$deployOptions = $this->exAppDeployOptionsService->formatDeployOptions(
+			$this->exAppDeployOptionsService->getDeployOptions()
+		);
 		$appInfo = $this->exAppService->getAppInfo(
-			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
+			$appId, $input->getOption('info-xml'), $input->getOption('json-info'),
+			$deployOptions
 		);
 		if (isset($appInfo['error'])) {
 			$this->logger->error($appInfo['error']);
