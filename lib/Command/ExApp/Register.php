@@ -55,6 +55,11 @@ class Register extends Command {
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Do not print to console');
 		$this->addOption('test-deploy-mode', null, InputOption::VALUE_NONE, 'Test deploy mode with additional status checks and slightly different logic');
+
+		// Advanced deploy options
+		$this->addOption('env', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional deploy options (ENV_NAME=ENV_VALUE), passed to ExApp container as environment variables');
+		$this->addOption('mount', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional mount options (SRC_PATH=DST_PATH), passed to ExApp container as volume mounts');
+		$this->addOption('port', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional port mapping HOST_PORT;OPTIONAL_HOST_IP;CONTAINER_PORT (e.g. 443/tcp;9443, 80/udp;0.0.0.0;8080)');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -73,9 +78,51 @@ class Register extends Command {
 			$this->exAppService->unregisterExApp($appId);
 		}
 
+		$deployOptions = [];
+		$envs = $input->getOption('env');
+		// Parse array of deploy options strings (ENV_NAME=ENV_VALUE) to array key => value
+		$deployOptions = array_reduce($envs, function ($carry, $item) {
+			$parts = explode('=', $item, 2);
+			if (count($parts) === 2) {
+				$carry[$parts[0]] = $parts[1];
+			}
+			return $carry;
+		}, []);
+		$deployOptions['environment_variables'] = $envs;
+
+		$mounts = $input->getOption('mount');
+		// Parse array of mount options strings (HOST_PATH:CONTAINER_PATH:ro|rw)
+		// to array of arrays ['source' => HOST_PATH, 'target' => CONTAINER_PATH, 'mode' => ro|rw]
+		$mounts = array_map(function ($item) {
+			$parts = explode(':', $item, 3);
+			if (count($parts) === 3) {
+				return ['source' => $parts[0], 'target' => $parts[1], 'mode' => $parts[2]];
+			}
+			return []; // invalid mount option
+		}, $mounts);
+		$deployOptions['mounts'] = $mounts;
+
+		$ports = $input->getOption('port');
+		// Parse array of port options strings (HOST_PORT;OPTIONAL_HOST_IP;CONTAINER_PORT)
+		// to array of arrays ['HostPort' => HOST_PORT, 'HostIp' => OPTIONAL_HOST_IP, 'ContainerPort' => CONTAINER_PORT]
+		// It could be two (without optional) or three parts separated by semicolon
+		$ports = array_map(function ($item) {
+			$parts = explode(';', $item, 3);
+			if (count($parts) === 2) {
+				return ['HostPort' => $parts[0], 'ContainerPort' => $parts[1]];
+			}
+			if (count($parts) === 3) {
+				return ['HostPort' => $parts[0], 'HostIp' => $parts[1], 'ContainerPort' => $parts[2]];
+			}
+			return []; // invalid port binding option
+		}, $ports);
+		$deployOptions['ports'] = $ports;
+
 		$appInfo = $this->exAppService->getAppInfo(
-			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
+			$appId, $input->getOption('info-xml'), $input->getOption('json-info'),
+			$deployOptions
 		);
+		return 1; // TODO: Remove this line
 		if (isset($appInfo['error'])) {
 			$this->logger->error($appInfo['error']);
 			if ($outputConsole) {
@@ -86,7 +133,7 @@ class Register extends Command {
 		$appId = $appInfo['id'];  # value from $appInfo should have higher priority
 
 		$daemonConfigName = $input->getArgument('daemon-config-name');
-		if (!isset($daemonConfigName)) {
+		if (!isset($daemonConfigName) || $daemonConfigName === '') {
 			$daemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
@@ -137,6 +184,7 @@ class Register extends Command {
 		$auth = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
+			return 1; // TODO: remove this line
 			$deployResult = $this->dockerActions->deployExApp($exApp, $daemonConfig, $deployParams);
 			if ($deployResult) {
 				$this->logger->error(sprintf('ExApp %s deployment failed. Error: %s', $appId, $deployResult));

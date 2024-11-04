@@ -168,6 +168,30 @@ class DockerActions implements IDeployActions {
 			}
 		}
 
+		if (isset($params['mounts'])) {
+			$containerParams['HostConfig']['Mounts'] = array_map(function ($mount) {
+				return [
+					'Source' => $mount['source'],
+					'Target' => $mount['target'],
+					'Type' => 'bind', // we don't support other types for now
+					'ReadOnly' => $mount['mode'] === 'ro',
+				];
+			}, $params['mounts']);
+		}
+
+		if (isset($params['ports'])) {
+			$containerParams['HostConfig']['PortBindings'] = array_map(function ($port) {
+				$portBinding = [
+					'HostPort' => $port['HostPort'],
+					'ContainerPort' => $port['ContainerPort'],
+				];
+				if (isset($port['HostIp'])) {
+					$portBinding['HostIp'] = $port['HostIp'];
+				}
+				return $portBinding;
+			}, $params['ports']);
+		}
+
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
 		try {
 			$options['json'] = $containerParams;
@@ -495,6 +519,7 @@ class DockerActions implements IDeployActions {
 			'port' => $appInfo['port'],
 			'storage' => $storage,
 			'secret' => $appInfo['secret'],
+			'environment_variables' => $appInfo['external-app']['environment-variables'] ?? [],
 		], $deployConfig);
 
 		$containerParams = [
@@ -506,6 +531,8 @@ class DockerActions implements IDeployActions {
 			'computeDevice' => $deployConfig['computeDevice'] ?? null,
 			'devices' => $devices,
 			'deviceRequests' => $deviceRequests,
+			'mounts' => $appInfo['external-app']['mounts'] ?? [],
+			'ports' => $appInfo['external-app']['ports'] ?? [],
 		];
 
 		return [
@@ -536,6 +563,14 @@ class DockerActions implements IDeployActions {
 				$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
 			}
 		}
+
+		// Appending additional deploy options to container envs
+		if (count($params['environment_variables']) > 0) {
+			foreach ($params['environment_variables'] as $key => $value) {
+				$autoEnvs[] = sprintf('%s=%s', $key, $value);
+			}
+		}
+
 		return $autoEnvs;
 	}
 

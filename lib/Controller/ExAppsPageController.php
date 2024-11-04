@@ -312,12 +312,45 @@ class ExAppsPageController extends Controller {
 	}
 
 	#[PasswordConfirmationRequired]
-	public function enableApp(string $appId): JSONResponse {
+	public function enableApp(string $appId, array $deployOptions = []): JSONResponse {
 		$updateRequired = false;
 		$exApp = $this->exAppService->getExApp($appId);
+
+		$envOptions = isset($deployOptions['environment_variables'])
+			? array_keys($deployOptions['environment_variables']) : [];
+		$envOptionsString = '';
+		if (count($envOptions) > 0) {
+			// build --deploy-option ENV_NAME=ENV_VALUE string
+			foreach ($envOptions as $envOption) {
+				$envOptionsString .= sprintf(' --env %s=%s', $envOption, $deployOptions[$envOption]);
+			}
+		}
+
+		$mountOptions = $deployOptions['mounts'] ?? [];
+		$mountOptionsString = '';
+		// build --mount SRC_PATH=DST_PATH string
+		foreach ($mountOptions as $mountOption) {
+			$readonlyModifier = $mountOption['readonly'] ? 'ro' : 'rw';
+			$mountOptionsString .= sprintf(' --mount %s:%s:%s', $mountOption['hostPath'], $mountOption['containerPath'], $readonlyModifier);
+		}
+
+		// port options in $deployOptions['ports'], array of ['hostPort' => '', 'hostIp' => '', 'containerPort' => '']
+		// convert to array of strings with --port HOST_PORT;CONTAINER_PORT or --port HOST_PORT;HOST_IP;CONTAINER_PORT
+		$portOptions = $deployOptions['ports'] ?? [];
+		$portOptionsString = '';
+		// build --port HOST_PORT;CONTAINER_PORT string
+		foreach ($portOptions as $portOption) {
+			if (isset($portOption['hostIp']) && $portOption['hostIp'] !== '') {
+				$portOptionsString .= sprintf('--port %s;%s;%s', $portOption['hostPort'], $portOption['hostIp'], $portOption['containerPort']);
+			} else {
+				$portOptionsString .= sprintf('--port %s;%s', $portOption['hostPort'], $portOption['containerPort']);
+			}
+		}
+
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
-			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s", $appId))) {
+			$command = sprintf("app_api:app:register --silent %s %s %s %s", $appId, $envOptionsString, $mountOptionsString, $portOptionsString);
+			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s %s %s %s", $appId, $envOptionsString, $mountOptionsString, $portOptionsString))) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
 			$elapsedTime = 0;

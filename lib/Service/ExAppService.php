@@ -258,13 +258,15 @@ class ExAppService {
 		$this->occService->resetCacheEnabled();
 	}
 
-	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo): array {
+	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo, ?array $deployOptions): array {
+		// TODO: Add check for environmentVariables in infoXml, for jsonInfo not needed, compose the key-values pairs
 		$extractedDir = '';
 		if ($jsonInfo !== null) {
 			$appInfo = json_decode($jsonInfo, true);
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
+			// TODO: Do we need to add here new Advanced deploy options (environment_variables, mounts, ports)?
 			foreach (['docker-install', 'translations_folder', 'routes'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
@@ -299,6 +301,29 @@ class ExAppService {
 						$this->logger->error(sprintf('Invalid access level `%s` for route `%s` in ExApp `%s`', $route['access_level'], $route['url'], $appId));
 					}
 				}, $appInfo['external-app']['routes']);
+			}
+			// Advanced deploy options
+			if (isset($appInfo['external-app']['environment-variables']['variable'])) {
+				// compose the key-values pairs
+				$envVars = [];
+				foreach ($appInfo['external-app']['environment-variables']['variable'] as $envVar) {
+					$envVars[$envVar['name']] = $envVar['default'] ?? '';
+				}
+				if (isset($deployOptions['environment_variables']) && count(array_keys($deployOptions)) > 0) {
+					// override with given deploy options values
+					foreach ($deployOptions as $key => $value) {
+						if (array_key_exists($key, $envVars)) {
+							$envVars[$key] = $value;
+						}
+					}
+				}
+				$appInfo['external-app']['environment-variables'] = $envVars;
+			}
+			if (isset($deployOptions['mounts'])) {
+				$appInfo['external-app']['mounts'] = $deployOptions['mounts'];
+			}
+			if (isset($deployOptions['ports'])) {
+				$appInfo['external-app']['ports'] = $deployOptions['ports'];
 			}
 			if ($extractedDir) {
 				if (file_exists($extractedDir . '/l10n')) {
