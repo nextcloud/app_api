@@ -5,6 +5,7 @@ OC.L10N.register(
     "Error starting install of ExApp" : "Грешка приликом покретања инсталације ExApp",
     "ExApp failed to register, check the NC logs" : "Није успела регистрација ExApp, погледајте NC дневнике",
     "ExApp not found, failed to get status" : "ExApp није пронађена, није успело добављање статуса",
+    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Ова апликација није инсталирана из Продавнице апликација. Нема доступних додатних информација. Дозвољене су само акције укључи/искључи и уклони.",
     "Could not perform installation of ExApp" : "Није могла да се изврши инсталација ExApp",
     "Failed to enable ExApp" : "Није успело укључивање ExApp",
     "Failed to disable ExApp" : "Није успело искључивање ExApp",
