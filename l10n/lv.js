@@ -16,7 +16,7 @@ OC.L10N.register(
     "Visit website" : "Apmeklējiet vietni",
     "Report a bug" : "Ziņot par kļūdu",
     "User documentation" : "Lietotāja dokumentācija",
-    "Admin documentation" : "Administratora dokumentācija",
+    "Admin documentation" : "Pārvaldītāja dokumentācija",
     "Developer documentation" : "Izstrādātāja dokumentācija",
     "Update to {update}" : "Atjaunināt uz {update}",
     "Icon" : "Ikona",
