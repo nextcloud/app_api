@@ -309,9 +309,9 @@ class ExAppService {
 				foreach ($appInfo['external-app']['environment-variables']['variable'] as $envVar) {
 					$envVars[$envVar['name']] = $envVar['default'] ?? '';
 				}
-				if (isset($deployOptions['environment_variables']) && count(array_keys($deployOptions)) > 0) {
+				if (isset($deployOptions['environment_variables']) && count(array_keys($deployOptions['environment_variables'])) > 0) {
 					// override with given deploy options values
-					foreach ($deployOptions as $key => $value) {
+					foreach ($deployOptions['environment_variables'] as $key => $value) {
 						if (array_key_exists($key, $envVars)) {
 							$envVars[$key] = $value;
 						}

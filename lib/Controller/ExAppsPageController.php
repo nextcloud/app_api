@@ -319,12 +319,11 @@ class ExAppsPageController extends Controller {
 		$envOptions = isset($deployOptions['environment_variables'])
 			? array_keys($deployOptions['environment_variables']) : [];
 		$envOptionsString = '';
-		if (count($envOptions) > 0) {
-			// build --deploy-option ENV_NAME=ENV_VALUE string
-			foreach ($envOptions as $envOption) {
-				$envOptionsString .= sprintf(' --env %s=%s', $envOption, $deployOptions[$envOption]);
-			}
+		// build --deploy-option ENV_NAME=ENV_VALUE string
+		foreach ($envOptions as $envOption) {
+			$envOptionsString .= sprintf(' --env %s=%s', $envOption, $deployOptions['environment_variables'][$envOption]);
 		}
+		$envOptionsString = trim($envOptionsString);
 
 		$mountOptions = $deployOptions['mounts'] ?? [];
 		$mountOptionsString = '';
@@ -333,6 +332,7 @@ class ExAppsPageController extends Controller {
 			$readonlyModifier = $mountOption['readonly'] ? 'ro' : 'rw';
 			$mountOptionsString .= sprintf(' --mount %s:%s:%s', $mountOption['hostPath'], $mountOption['containerPath'], $readonlyModifier);
 		}
+		$mountOptionsString = trim($mountOptionsString);
 
 		// port options in $deployOptions['ports'], array of ['hostPort' => '', 'hostIp' => '', 'containerPort' => '']
 		// convert to array of strings with --port HOST_PORT;CONTAINER_PORT or --port HOST_PORT;HOST_IP;CONTAINER_PORT
@@ -341,15 +341,16 @@ class ExAppsPageController extends Controller {
 		// build --port HOST_PORT;CONTAINER_PORT string
 		foreach ($portOptions as $portOption) {
 			if (isset($portOption['hostIp']) && $portOption['hostIp'] !== '') {
-				$portOptionsString .= sprintf('--port %s;%s;%s', $portOption['hostPort'], $portOption['hostIp'], $portOption['containerPort']);
+				$portOptionsString .= sprintf(' --port %s;%s;%s', $portOption['hostPort'], $portOption['hostIp'], $portOption['containerPort']);
 			} else {
-				$portOptionsString .= sprintf('--port %s;%s', $portOption['hostPort'], $portOption['containerPort']);
+				$portOptionsString .= sprintf(' --port %s;%s', $portOption['hostPort'], $portOption['containerPort']);
 			}
 		}
+		$portOptionsString = trim($portOptionsString);
 
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
-			$command = sprintf("app_api:app:register --silent %s %s %s %s", $appId, $envOptionsString, $mountOptionsString, $portOptionsString);
+//			$command = sprintf("app_api:app:register --silent %s %s %s %s", $appId, $envOptionsString, $mountOptionsString, $portOptionsString);
 			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s %s %s %s", $appId, $envOptionsString, $mountOptionsString, $portOptionsString))) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}

@@ -446,10 +446,10 @@ class AppAPIService {
 			$occDirectory = dirname(__FILE__, 5);
 		}
 		$this->logger->info(sprintf('Calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
-		$env = 'PHP_IDE_CONFIG=serverName=master ';
-		$xDebug = '-dxdebug.mode=debug -dxdebug.client_host=host.docker.internal -dxdebug.start_with_request=yes -dxdebug.idekey=PHPSTORM';
-		$cmd = $env . 'php ' . $xDebug . ' console.php ' . $args;
-		$process = proc_open($cmd, $descriptors, $pipes, $occDirectory);
+//		$env = 'PHP_IDE_CONFIG=serverName=master ';
+//		$xDebug = '-dxdebug.mode=debug -dxdebug.client_host=host.docker.internal -dxdebug.start_with_request=yes -dxdebug.idekey=PHPSTORM';
+//		$cmd = $env . 'php ' . $xDebug . ' console.php ' . $args;
+		$process = proc_open('php console.php ' . $args, $descriptors, $pipes, $occDirectory);
 		if (!is_resource($process)) {
 			$this->logger->error(sprintf('Error calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
 			return false;

@@ -169,27 +169,30 @@ class DockerActions implements IDeployActions {
 		}
 
 		if (isset($params['mounts'])) {
-			$containerParams['HostConfig']['Mounts'] = array_map(function ($mount) {
-				return [
-					'Source' => $mount['source'],
-					'Target' => $mount['target'],
-					'Type' => 'bind', // we don't support other types for now
-					'ReadOnly' => $mount['mode'] === 'ro',
-				];
-			}, $params['mounts']);
+			$containerParams['HostConfig']['Mounts'] = array_merge(
+				$containerParams['HostConfig']['Mounts'] ?? [],
+				array_map(function ($mount) {
+					return [
+						'Source' => $mount['source'],
+						'Target' => $mount['target'],
+						'Type' => 'bind', // we don't support other types for now
+						'ReadOnly' => $mount['mode'] === 'ro',
+					];
+				}, $params['mounts'])
+			);
 		}
 
 		if (isset($params['ports'])) {
-			$containerParams['HostConfig']['PortBindings'] = array_map(function ($port) {
-				$portBinding = [
-					'HostPort' => $port['HostPort'],
-					'ContainerPort' => $port['ContainerPort'],
-				];
-				if (isset($port['HostIp'])) {
-					$portBinding['HostIp'] = $port['HostIp'];
+			$customPortBindings = [];
+			foreach ($params['ports'] as $port) {
+				if (!isset($customPortBindings[$port['ContainerPort']])) {
+					$customPortBindings[$port['ContainerPort']] = [['HostPort' => $port['HostPort']]];
 				}
-				return $portBinding;
-			}, $params['ports']);
+			}
+			$containerParams['HostConfig']['PortBindings'] = array_merge(
+				$containerParams['HostConfig']['PortBindings'] ?? [],
+				$customPortBindings,
+			);
 		}
 
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
@@ -565,10 +568,8 @@ class DockerActions implements IDeployActions {
 		}
 
 		// Appending additional deploy options to container envs
-		if (count($params['environment_variables']) > 0) {
-			foreach ($params['environment_variables'] as $key => $value) {
-				$autoEnvs[] = sprintf('%s=%s', $key, $value);
-			}
+		foreach ($params['environment_variables'] as $key => $value) {
+			$autoEnvs[] = sprintf('%s=%s', $key, $value);
 		}
 
 		return $autoEnvs;
