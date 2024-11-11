@@ -61,7 +61,7 @@ jobs:
           ref: ${{ matrix.server-version }}
 
       - name: Checkout Notifications
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
           ref: ${{ matrix.server-version }}
@@ -120,7 +120,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
@@ -146,7 +146,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pgsql_nc_py_api_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
           path: data/nextcloud.log
@@ -181,7 +181,7 @@ jobs:
           ref: master
 
       - name: Checkout Notifications
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
           ref: master
@@ -233,7 +233,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
@@ -259,7 +259,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mysql_nc_py_api_master_8.3_nextcloud.log
           path: data/nextcloud.log
@@ -294,7 +294,7 @@ jobs:
           ref: master
 
       - name: Checkout Notifications
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
           ref: master
@@ -349,7 +349,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
@@ -375,7 +375,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: apcu_mysql_nc_py_api_master_8.3_nextcloud.log
           path: data/nextcloud.log
@@ -420,7 +420,7 @@ jobs:
           ref: ${{ matrix.server-version }}
 
       - name: Checkout Notifications
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
           ref: ${{ matrix.server-version }}
@@ -465,7 +465,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
@@ -491,7 +491,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: oci_nc_py_api_${{ matrix.server-version }}_8.3_nextcloud.log
           path: data/nextcloud.log
