@@ -102,7 +102,7 @@
     "Select daemon deploy method" : "إختَر طريقة نشر البرنامج الخفي",
     "Daemon host" : "مُضِيف البرنامج الخفي",
     "Set daemon as default" : "إختَر البرنامج الخفي كقيمة تلقائية",
-    "Set as default daemon" : "عيِّنه كبرنامج خفي تلقائي",
+    "Set as default daemon" : "تعيين كبرنامج خفي تلقائي",
     "Enable https" : "تمكين https",
     "Show deploy config" : "أظهِر تهيئة النشر deploy config",
     "Hide deploy config" : "إخْفِ تهيئة النشر deploy config",
