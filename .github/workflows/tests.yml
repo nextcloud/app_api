@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pgsql_nc_py_api_${{ matrix.php-version }}_nextcloud.log
           path: data/nextcloud.log
@@ -245,7 +245,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mysql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
@@ -361,7 +361,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: apcu_mysql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
@@ -473,7 +473,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: oci_nc_py_api_nextcloud.log
           path: data/nextcloud.log
