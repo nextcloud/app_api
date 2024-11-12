@@ -185,7 +185,7 @@ OC.L10N.register(
     "Deploy and Enable" : "قُم بالنشر و التمكين",
     "Enable" : "تمكين",
     "Disable" : "تعطيل",
-    "Allow untested app" : "إسمَح للتطبيقات غير المُجازة untested app",
+    "Allow untested app" : "السماح للتطبيقات غير المجازة",
     "Default Deploy daemon is not accessible. Please verify configuration" : "لا يمكن الوصول إلى البرنامج الخفي التلقائي لنشر التطبيقات. راجع التهيئة من فضلك",
     "The app will be downloaded from the App Store and deployed on default Deploy Daemon" : "سيتم تنزيل التطبيق من متجر التطبيقات و سيتم نشره على البرنامج الخفي التلقائي للنشر",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "لم يتم التعرّف على هذا التطبيق باعتباره متوافقاً مع إصدار نكست كلاود الخاص بك. إذا تابعت، فسيظل بإمكانك تنصيب التطبيق. ولكن يجب ملاحظة أن التطبيق قد لا يعمل بالشكل المتوقع.",
