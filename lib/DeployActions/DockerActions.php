@@ -131,6 +131,12 @@ class DockerActions implements IDeployActions {
 			'Env' => $params['env'],
 		];
 
+		if ($params['net'] === 'bridge') {
+			$containerParams['ExposedPorts'] = [
+				$params['port'] . '/tcp' => (object) [],
+			];
+		}
+
 		if (!in_array($params['net'], ['host', 'bridge'])) {
 			$networkingConfig = [
 				'EndpointsConfig' => [
@@ -494,7 +500,7 @@ class DockerActions implements IDeployActions {
 			'name' => $appId,
 			'hostname' => $appId,
 			'port' => $appInfo['port'],
-			'net' => $deployConfig['net'] ?? 'host',
+			'net' => $deployConfig['net'] ?? 'bridge',
 			'env' => $envs,
 			'computeDevice' => $deployConfig['computeDevice'] ?? null,
 			'devices' => $devices,

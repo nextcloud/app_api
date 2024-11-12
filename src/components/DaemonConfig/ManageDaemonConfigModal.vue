@@ -309,7 +309,7 @@ export default {
 			nextcloud_url: window.location.origin + generateUrl('').slice(0, -1),
 			deployConfigSettingsOpened: false,
 			deployConfig: {
-				net: 'host',
+				net: 'bridge',
 				haproxy_password: '',
 				computeDevice: {
 					id: 'cpu',
