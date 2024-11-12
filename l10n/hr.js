@@ -42,7 +42,7 @@ OC.L10N.register(
     "Documentation" : "Dokumentacija",
     "Details" : "Pojedinosti",
     "Changelog" : "Zapis promjena",
-    "by {author}\n{license}" : "{autor}\n{licenca}",
+    "by {author}\n{license}" : "{author}\n{license}",
     "Active apps" : "Aktivne aplikacije",
     "Disabled apps" : "Onemogućene aplikacije",
     "Updates" : "Ažuriranja",
