@@ -19,6 +19,7 @@
     "ExApp init timeout" : "外部应用初始化超时",
     "ExApp container restart policy" : "外部应用容器重启策略",
     "Specify container restart policy, e.g. 'always' to ensure ExApp running after daemon server reboot" : "指定容器重启策略，例如“always”，以确保外部应用在守护进程服务重启后运行",
+    "This settings changes are reflected only for newly created containers" : "此设置更改仅适用于新创建的容器",
     "External Apps management" : "外部应用管理",
     "Admin options saved" : "已保存管理员选项",
     "Failed to save admin options" : "保存管理员选项失败",
