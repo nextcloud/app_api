@@ -1,6 +1,7 @@
 OC.L10N.register(
     "app_api",
     {
+    "Cancel" : "Atcelt",
     "Delete" : "Dzēst",
     "Edit" : "Labot",
     "Name" : "Nosaukums",
