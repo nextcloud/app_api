@@ -3,6 +3,7 @@
     "Error starting install of ExApp" : "Chyba při zahajování instalace ExApp",
     "ExApp failed to register, check the NC logs" : "ExApp se nepodařilo zaregistrovat – nahlédněte do záznamů událostí v Nextcloud",
     "ExApp not found, failed to get status" : "ExApp nenalezena, nepodařilo se získat stav",
+    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Tato aplikace nebyla nainstalována z katalogu aplikací. Tím nejsou k dispozici žádné další informace. Je možné pouze zapnout/vypnout a odebrat.",
     "Could not perform installation of ExApp" : "Nebylo možné provést instalaci ExApp",
     "Failed to enable ExApp" : "Nepodařilo se zapnout ExApp",
     "Failed to disable ExApp" : "Nepodařil ose vypnout ExApp",

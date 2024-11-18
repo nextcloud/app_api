@@ -5,7 +5,7 @@ OC.L10N.register(
     "Error starting install of ExApp" : "Produciuse un erro ao iniciar a instalación da aplicación externa (ExApp)",
     "ExApp failed to register, check the NC logs" : "Produciuse un fallo ao rexistrar a aplicación externa (ExApp), comprobe os rexistros de Nextcloud",
     "ExApp not found, failed to get status" : "Non se atopou a aplicación externa (ExApp), produciuse un fallo ao obter o estado",
-    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Esta aplicación non foi instalada dende a tenda de aplicacións. Non hai información adicional dispoñíbel. Só se permiten as accións de activar/desactivar e eliminar.",
+    "This app is not installed from the AppStore. No extra information available. Only enable/disable and remove actions are allowed." : "Esta aplicación non foi instalada desde a tenda de aplicacións. Non hai información adicional dispoñíbel. Só se permiten as accións de activar/desactivar e eliminar.",
     "Could not perform installation of ExApp" : "Non foi posíbel realizar a instalación da aplicación externa (ExApp)",
     "Failed to enable ExApp" : "Produciuse un fallo ao activar a aplicación externa (ExApp)",
     "Failed to disable ExApp" : "Produciuse un fallo ao desactivar a aplicación externa (ExApp)",
