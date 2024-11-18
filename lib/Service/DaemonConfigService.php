@@ -81,10 +81,18 @@ class DaemonConfigService {
 			$carry[$exApp->getDaemonConfigName()] += 1;
 			return $carry;
 		}, []);
+
 		return array_map(function (DaemonConfig $daemonConfig) use ($daemonsExAppsCount) {
+			$serializedConfig = $daemonConfig->jsonSerialize();
+
+			// Check if "haproxy_password" exists in "deployConfig" and mask it
+			if (!empty($serializedConfig['deploy_config']['haproxy_password'])) {
+				$serializedConfig['deploy_config']['haproxy_password'] = 'dummySecret123';
+			}
+
 			return [
-				...$daemonConfig->jsonSerialize(),
-				'exAppsCount' => isset($daemonsExAppsCount[$daemonConfig->getName()]) ? $daemonsExAppsCount[$daemonConfig->getName()] : 0,
+				...$serializedConfig,
+				'exAppsCount' => $daemonsExAppsCount[$daemonConfig->getName()] ?? 0,
 			];
 		}, $this->getRegisteredDaemonConfigs());
 	}
