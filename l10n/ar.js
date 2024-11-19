@@ -41,7 +41,7 @@ OC.L10N.register(
     "Cancel" : "إلغاء",
     "Delete" : "حذف",
     "Default" : "التلقائي",
-    "Set as default" : "عَيِّن كقيمة تلقائية",
+    "Set as default" : "ضبط كقيمة تلقائية",
     "Test deploy" : "نشر تجريبي",
     "Edit" : "تحرير",
     "\"manual-install\" Deploy Daemon cannot be set as default" : "تطبيق النشر الخارجي \"التثبيت اليدوي\" \"manual-install\" لا يمكن تعيينه كافتراضي",
