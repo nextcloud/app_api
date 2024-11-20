@@ -19,6 +19,7 @@ use OCP\AppFramework\Http\Response;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IRequest;
+use OCP\Security\ICrypto;
 
 /**
  * DaemonConfig actions (for UI)
@@ -33,6 +34,7 @@ class DaemonConfigController extends ApiController {
 		private readonly AppAPIService       $service,
 		private readonly ExAppService        $exAppService,
 		private readonly IL10N               $l10n,
+		private readonly ICrypto			 $crypto,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -66,6 +68,9 @@ class DaemonConfigController extends ApiController {
 		// Restore the original password if "dummySecret123" is provided
 		if ($haproxyPassword === 'dummySecret123') {
 			$daemonConfigParams['deploy_config']['haproxy_password'] = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
+		} elseif (!empty($haproxyPassword)) {
+			// New password provided, encrypt it
+			$daemonConfigParams['deploy_config']['haproxy_password'] = $this->crypto->encrypt($haproxyPassword);
 		}
 
 		// Create and update DaemonConfig instance
@@ -129,16 +134,22 @@ class DaemonConfigController extends ApiController {
 		$haproxyPassword = $daemonParams['deploy_config']['haproxy_password'] ?? null;
 
 		if ($haproxyPassword === 'dummySecret123') {
-			// If the secret is "dummySecret123" we check if such record is present in DB
+			// For cases when the password itself is 'dummySecret123'
+			$daemonParams['deploy_config']['haproxy_password'] = $this->crypto->encrypt($haproxyPassword);
+
+			// Check if such record is present in the DB
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonParams['name']);
 			if ($daemonConfig !== null) {
+				// such Daemon config already present in the DB
 				$haproxyPasswordDB = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
 				if ($haproxyPasswordDB) {
-					// if there is a record in the DB and there is a password,
-					// then we request it from the DB instead of the “masked” one
+					// get password from the DB instead of the “masked” one
 					$daemonParams['deploy_config']['haproxy_password'] = $haproxyPasswordDB;
 				}
 			}
+		} elseif (!empty($haproxyPassword)) {
+			// New password provided, encrypt it, as "initGuzzleClient" expects to receive encrypted password
+			$daemonParams['deploy_config']['haproxy_password'] = $this->crypto->encrypt($haproxyPassword);
 		}
 
 		$daemonConfig = new DaemonConfig([
