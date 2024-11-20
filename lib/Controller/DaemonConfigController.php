@@ -61,11 +61,11 @@ class DaemonConfigController extends ApiController {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 
 		// Safely check if "haproxy_password" exists before accessing it
-		$haproxyPassword = $daemonConfigParams['deployConfig']['haproxy_password'] ?? null;
+		$haproxyPassword = $daemonConfigParams['deploy_config']['haproxy_password'] ?? null;
 
 		// Restore the original password if "dummySecret123" is provided
 		if ($haproxyPassword === 'dummySecret123') {
-			$daemonConfigParams['deployConfig']['haproxy_password'] = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
+			$daemonConfigParams['deploy_config']['haproxy_password'] = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
 		}
 
 		// Create and update DaemonConfig instance
