@@ -59,11 +59,37 @@ class DaemonConfigController extends ApiController {
 	#[PasswordConfirmationRequired]
 	public function updateDaemonConfig(string $name, array $daemonConfigParams): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+
+		// Safely check if "haproxy_password" exists before accessing it
+		$haproxyPassword = $daemonConfigParams['deploy_config']['haproxy_password'] ?? null;
+
+		// Restore the original password if "dummySecret123" is provided
+		if ($haproxyPassword === 'dummySecret123') {
+			$daemonConfigParams['deploy_config']['haproxy_password'] = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
+		}
+
+		// Create and update DaemonConfig instance
 		$updatedDaemonConfig = new DaemonConfig($daemonConfigParams);
 		$updatedDaemonConfig->setId($daemonConfig->getId());
 		$updatedDaemonConfig = $this->daemonConfigService->updateDaemonConfig($updatedDaemonConfig);
+
+		// Check if update was successful before proceeding
+		if ($updatedDaemonConfig === null) {
+			return new JSONResponse([
+				'success' => false,
+				'daemonConfig' => null,
+			]);
+		}
+
+		// Mask the password with "dummySecret123" if it is set
+		$updatedDeployConfig = $updatedDaemonConfig->getDeployConfig();
+		if (!empty($updatedDeployConfig['haproxy_password'] ?? null)) {
+			$updatedDeployConfig['haproxy_password'] = 'dummySecret123';
+			$updatedDaemonConfig->setDeployConfig($updatedDeployConfig);
+		}
+
 		return new JSONResponse([
-			'success' => $updatedDaemonConfig !== null,
+			'success' => true,
 			'daemonConfig' => $updatedDaemonConfig,
 		]);
 	}
@@ -98,6 +124,23 @@ class DaemonConfigController extends ApiController {
 	}
 
 	public function checkDaemonConnection(array $daemonParams): Response {
+		// Safely check if "haproxy_password" exists before accessing it
+		// note: UI passes here 'deploy_config' instead of 'deployConfig'
+		$haproxyPassword = $daemonParams['deploy_config']['haproxy_password'] ?? null;
+
+		if ($haproxyPassword === 'dummySecret123') {
+			// If the secret is "dummySecret123" we check if such record is present in DB
+			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonParams['name']);
+			if ($daemonConfig !== null) {
+				$haproxyPasswordDB = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
+				if ($haproxyPasswordDB) {
+					// if there is a record in the DB and there is a password,
+					// then we request it from the DB instead of the “masked” one
+					$daemonParams['deploy_config']['haproxy_password'] = $haproxyPasswordDB;
+				}
+			}
+		}
+
 		$daemonConfig = new DaemonConfig([
 			'name' => $daemonParams['name'],
 			'display_name' => $daemonParams['display_name'],
