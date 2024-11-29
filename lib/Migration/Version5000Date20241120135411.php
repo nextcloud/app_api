@@ -34,8 +34,7 @@ class Version5000Date20241120135411 extends SimpleMigrationStep {
 		// encrypt "haproxy_password" in the "ex_apps_daemons" table
 		$qbSelect = $this->connection->getQueryBuilder();
 		$qbSelect->select(['id', 'deploy_config'])
-			->from('ex_apps_daemons')
-			->where(1);
+			->from('ex_apps_daemons');
 		$req = $qbSelect->executeQuery();
 
 		while ($row = $req->fetch()) {
