@@ -381,19 +381,25 @@ class TaskProcessingService {
 			}
 
 			public function getInputShape(): array {
-				return array_map(static fn (array $shape) => new ShapeDescriptor(
-					$shape['name'],
-					$shape['description'],
-					EShapeType::from($shape['shape_type']),
-				), $this->customTaskType['input_shape']);
+				return array_reduce($this->customTaskType['input_shape'], static function (array $input, array $shape) {
+					$input[$shape['name']] = new ShapeDescriptor(
+						$shape['name'],
+						$shape['description'],
+						EShapeType::from($shape['shape_type']),
+					);
+					return $input;
+				}, []);
 			}
 
 			public function getOutputShape(): array {
-				return array_map(static fn (array $shape) => new ShapeDescriptor(
-					$shape['name'],
-					$shape['description'],
-					EShapeType::from($shape['shape_type']),
-				), $this->customTaskType['output_shape']);
+				return array_reduce($this->customTaskType['output_shape'], static function (array $output, array $shape) {
+					$output[$shape['name']] = new ShapeDescriptor(
+						$shape['name'],
+						$shape['description'],
+						EShapeType::from($shape['shape_type']),
+					);
+					return $output;
+				}, []);
 			}
 		};
 	}
