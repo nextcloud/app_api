@@ -381,7 +381,7 @@ class TaskProcessingService {
 			}
 
 			public function getInputShape(): array {
-				return array_reduce($this->customTaskType['input_shape'], static function (array $input, array $shape) => {
+				return array_reduce($this->customTaskType['input_shape'], static function (array $input, array $shape) {
 					$input[$shape['name']] = new ShapeDescriptor(
 						$shape['name'],
 						$shape['description'],
@@ -392,7 +392,7 @@ class TaskProcessingService {
 			}
 
 			public function getOutputShape(): array {
-				return array_reduce($this->customTaskType['output_shape'], static function (array $output, array $shape) => {
+				return array_reduce($this->customTaskType['output_shape'], static function (array $output, array $shape) {
 					$output[$shape['name']] = new ShapeDescriptor(
 						$shape['name'],
 						$shape['description'],
