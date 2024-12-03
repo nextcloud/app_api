@@ -384,7 +384,7 @@ class TaskProcessingService {
 				return array_map(static fn (array $shape) => new ShapeDescriptor(
 					$shape['name'],
 					$shape['description'],
-					EShapeType::from($shape['type']),
+					EShapeType::from($shape['shape_type']),
 				), $this->customTaskType['input_shape']);
 			}
 
@@ -392,7 +392,7 @@ class TaskProcessingService {
 				return array_map(static fn (array $shape) => new ShapeDescriptor(
 					$shape['name'],
 					$shape['description'],
-					EShapeType::from($shape['type']),
+					EShapeType::from($shape['shape_type']),
 				), $this->customTaskType['output_shape']);
 			}
 		};
