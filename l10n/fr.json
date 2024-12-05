@@ -57,6 +57,7 @@
     "Nextcloud URL" : "URL Nextcloud",
     "HaProxy password" : "Mot de passe HAProxy",
     "GPUs support" : "Prise en charge des cartes graphiques",
+    "Compute device" : "Equipement de calcul",
     "Additional options" : "Options supplémentaires",
     "Verify connection" : "Vérifier la connexion",
     "Daemon connection successful" : "Connexion au Deamon réussie",
