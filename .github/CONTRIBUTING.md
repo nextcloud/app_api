@@ -1,3 +1,7 @@
+<!--
+  - SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
 We always welcome contributions. Have an issue or an idea for a feature? Let us know. Additionally, we happily accept pull requests.
 
 In order to make the process run more smoothly, you can make sure of the following things:

@@ -15,7 +15,7 @@
 		"type": "git",
 		"url": "https://github.com/nextcloud/app_api"
 	},
-	"license": "AGPL-3.0",
+	"license": " AGPL-3.0-or-later",
 	"private": true,
 	"author": "Alexander Piskun <bigcat88@icloud.com>",
 	"contributors": [

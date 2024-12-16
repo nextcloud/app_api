@@ -1,4 +1,6 @@
-name: Feature request
+# SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: 🚀 Feature request
 description: Suggest a new feature, enhancement to an existing, etc.
 labels: ['New Feature', 'Needs Triage']
 
