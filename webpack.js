@@ -48,6 +48,7 @@ if (!isDev) {
 	webpackConfig.plugins.push(new WebpackSPDXPlugin({
 		override: {
 			select2: 'MIT',
+			'@nextcloud/axios': 'GPL-3.0-or-later',
 		},
 	}))
 
