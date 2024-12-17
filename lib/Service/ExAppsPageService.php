@@ -53,6 +53,8 @@ class ExAppsPageService {
 		}
 
 		$initialState->provideInitialState('defaultDaemonConfigAccessible', $daemonConfigAccessible);
-		$initialState->provideInitialState('defaultDaemonConfig', $defaultDaemonConfig);
+		if ($defaultDaemonConfig !== null) {
+			$initialState->provideInitialState('defaultDaemonConfig', $defaultDaemonConfig);
+		}
 	}
 }
