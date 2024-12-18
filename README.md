@@ -1,5 +1,10 @@
+<!--
+  - SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
 # Nextcloud AppAPI
 
+[![REUSE status](https://api.reuse.software/badge/github.com/nextcloud/app_api)](https://api.reuse.software/info/github.com/nextcloud/app_api)
 [![Tests - Deploy](https://github.com/nextcloud/app_api/actions/workflows/tests-deploy.yml/badge.svg)](https://github.com/nextcloud/app_api/actions/workflows/tests-deploy.yml)
 [![Tests](https://github.com/nextcloud/app_api/actions/workflows/tests.yml/badge.svg)](https://github.com/nextcloud/app_api/actions/workflows/tests.yml)
 [![Docs](https://github.com/nextcloud/app_api/actions/workflows/docs.yml/badge.svg)](https://nextcloud.github.io/app_api/)

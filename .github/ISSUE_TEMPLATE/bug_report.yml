@@ -1,4 +1,6 @@
-name: Bug Report
+# SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: 🐞 Bug report
 description: Create a report to help reproduce and correct the bug
 labels: ['Bug', 'Needs Triage']
 

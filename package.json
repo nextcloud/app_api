@@ -15,7 +15,7 @@
 		"type": "git",
 		"url": "https://github.com/nextcloud/app_api"
 	},
-	"license": "AGPL-3.0",
+	"license": " AGPL-3.0-or-later",
 	"private": true,
 	"author": "Alexander Piskun <bigcat88@icloud.com>",
 	"contributors": [
@@ -24,6 +24,7 @@
 	],
 	"scripts": {
 		"build": "NODE_ENV=production webpack --progress --config webpack.js",
+		"postbuild": "build-js/npm-post-build.sh",
 		"dev": "NODE_ENV=development webpack --progress --config webpack.js",
 		"watch": "NODE_ENV=development webpack --progress --watch --config webpack.js",
 		"lint": "eslint --ext .js,.vue src",
