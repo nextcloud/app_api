@@ -259,7 +259,6 @@ class ExAppService {
 	}
 
 	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo, ?array $deployOptions): array {
-		// TODO: Add check for environmentVariables in infoXml, for jsonInfo not needed, compose the key-values pairs
 		$extractedDir = '';
 		if ($jsonInfo !== null) {
 			$appInfo = json_decode($jsonInfo, true);

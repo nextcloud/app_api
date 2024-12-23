@@ -335,13 +335,13 @@ class ExAppsPageController extends Controller {
 		$mountOptionsString = trim($mountOptionsString);
 
 		// port options in $deployOptions['ports'], array of ['hostPort' => '', 'hostIp' => '', 'containerPort' => '']
-		// convert to array of strings with --port HOST_PORT;CONTAINER_PORT or --port HOST_PORT;HOST_IP;CONTAINER_PORT
+		// convert to array of strings with --port HOST_PORT;CONTAINER_PORT or --port HOST_IP;HOST_PORT;CONTAINER_PORT
 		$portOptions = $deployOptions['ports'] ?? [];
 		$portOptionsString = '';
 		// build --port HOST_PORT;CONTAINER_PORT string
 		foreach ($portOptions as $portOption) {
 			if (isset($portOption['hostIp']) && $portOption['hostIp'] !== '') {
-				$portOptionsString .= sprintf(' --port %s;%s;%s', $portOption['hostPort'], $portOption['hostIp'], $portOption['containerPort']);
+				$portOptionsString .= sprintf(' --port %s;%s;%s', $portOption['hostIp'], $portOption['hostPort'], $portOption['containerPort']);
 			} else {
 				$portOptionsString .= sprintf(' --port %s;%s', $portOption['hostPort'], $portOption['containerPort']);
 			}
@@ -513,6 +513,29 @@ class ExAppsPageController extends Controller {
 				'text/plain'
 			);
 		}
+	}
+
+	/**
+	 * Returns ExApp Advanced deploy options (only for docker-install), container environment variables, mounts and ports
+	 */
+	public function getAppDeployOptions(string $appId) {
+		$exApp = $this->exAppService->getExApp($appId);
+		if (is_null($exApp)) {
+			return new JSONResponse(['error' => $this->l10n->t('ExApp not found, failed to get deploy options')], Http::STATUS_NOT_FOUND);
+		}
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
+			return new JSONResponse(['error' => $this->l10n->t('ExApp deploy options are not supported by the daemon')], Http::STATUS_NOT_IMPLEMENTED);
+		}
+
+		$this->dockerActions->initGuzzleClient($daemonConfig);
+		$deployOptions = $this->dockerActions->getDeployOptions($appId, $daemonConfig);
+
+		if (isset($deployOptions['error'])) {
+			return new JSONResponse(['error' => $deployOptions['error']], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+
+		return new JSONResponse($deployOptions);
 	}
 
 	/**

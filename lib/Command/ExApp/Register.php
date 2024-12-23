@@ -59,7 +59,7 @@ class Register extends Command {
 		// Advanced deploy options
 		$this->addOption('env', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional deploy options (ENV_NAME=ENV_VALUE), passed to ExApp container as environment variables');
 		$this->addOption('mount', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional mount options (SRC_PATH=DST_PATH), passed to ExApp container as volume mounts');
-		$this->addOption('port', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional port mapping HOST_PORT;OPTIONAL_HOST_IP;CONTAINER_PORT (e.g. 443/tcp;9443, 80/udp;0.0.0.0;8080)');
+		$this->addOption('port', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional port mapping OPTIONAL_HOST_IP;HOST_PORT;CONTAINER_PORT (e.g. 443;9443/tcp, 0.0.0.0;80;8080/udp)');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -103,7 +103,7 @@ class Register extends Command {
 		$deployOptions['mounts'] = $mounts;
 
 		$ports = $input->getOption('port') ?? [];
-		// Parse array of port options strings (HOST_PORT;OPTIONAL_HOST_IP;CONTAINER_PORT)
+		// Parse array of port options strings (OPTIONAL_HOST_IP;HOST_PORT;CONTAINER_PORT)
 		// to array of arrays ['HostPort' => HOST_PORT, 'HostIp' => OPTIONAL_HOST_IP, 'ContainerPort' => CONTAINER_PORT]
 		// It could be two (without optional) or three parts separated by semicolon
 		$ports = array_map(function ($item) {
@@ -112,7 +112,7 @@ class Register extends Command {
 				return ['HostPort' => $parts[0], 'ContainerPort' => $parts[1]];
 			}
 			if (count($parts) === 3) {
-				return ['HostPort' => $parts[0], 'HostIp' => $parts[1], 'ContainerPort' => $parts[2]];
+				return ['HostIp' => $parts[0], 'HostPort' => $parts[1], 'ContainerPort' => $parts[2]];
 			}
 			return []; // invalid port binding option
 		}, $ports);

@@ -31,6 +31,21 @@ class DockerActions implements IDeployActions {
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
 
+	public const RESERVED_ENV_KEYS = [
+		'AA_VERSION',
+		'APP_SECRET',
+		'APP_ID',
+		'APP_DISPLAY_NAME',
+		'APP_VERSION',
+		'APP_HOST',
+		'APP_PORT',
+		'APP_PERSISTENT_STORAGE',
+		'NEXTCLOUD_URL',
+		'COMPUTE_DEVICE',
+		'NVIDIA_VISIBLE_DEVICES',
+		'NVIDIA_DRIVER_CAPABILITIES',
+	];
+
 	private Client $guzzleClient;
 	private bool $useSocket = false;  # for `pullImage` function, to detect can be stream used or not.
 
@@ -186,13 +201,28 @@ class DockerActions implements IDeployActions {
 			$customPortBindings = [];
 			foreach ($params['ports'] as $port) {
 				if (!isset($customPortBindings[$port['ContainerPort']])) {
-					$customPortBindings[$port['ContainerPort']] = [['HostPort' => $port['HostPort']]];
+					$customPortBindings[$port['ContainerPort']] = [
+						['HostPort' => $port['HostPort']]
+					];
+					if (isset($port['HostIp'])) {
+						$customPortBindings[$port['ContainerPort']][0]['HostIp'] = $port['HostIp'];
+					}
+				} else { // append additional port bindings
+					$customPortBindings[$port['ContainerPort']][] = [
+						'HostPort' => $port['HostPort']
+					];
+					if (isset($port['HostIp'])) {
+						$customPortBindings[$port['ContainerPort']][count($customPortBindings[$port['ContainerPort']]) - 1]['HostIp'] = $port['HostIp'];
+					}
 				}
 			}
-			$containerParams['HostConfig']['PortBindings'] = array_merge(
-				$containerParams['HostConfig']['PortBindings'] ?? [],
-				$customPortBindings,
-			);
+			if (count($customPortBindings) > 0) {
+				$containerParams['HostConfig']['PortBindings'] = $customPortBindings;
+				$containerParams['ExposedPorts'] = array_reduce($params['ports'], function ($carry, $port) {
+					$carry[$port['ContainerPort']] = new \stdClass();
+					return $carry;
+				}, []);
+			}
 		}
 
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
@@ -720,6 +750,50 @@ class DockerActions implements IDeployActions {
 				'Count' => -1, // All available GPUs
 				'Capabilities' => [['compute', 'utility']], // Compute and utility capabilities
 			],
+		];
+	}
+
+	public function getDeployOptions(string $appId, DaemonConfig $daemonConfig) {
+		$containerInfo = $this->inspectContainer(
+			$this->buildDockerUrl($daemonConfig),
+			$this->buildExAppContainerName($appId)
+		);
+
+		$envs = array_reduce($containerInfo['Config']['Env'], function ($carry, $env) {
+			$envParts = explode('=', $env);
+			if (in_array($envParts[0], self::RESERVED_ENV_KEYS)) {
+				return $carry;
+			}
+			$carry[] = $env;
+			return $carry;
+		}, []);
+
+		$mounts = [];
+		foreach ($containerInfo['Mounts'] as $mount) {
+			$mounts[] = [
+				'hostPath' => $mount['Source'],
+				'containerPath' => $mount['Destination'],
+				'readonly' => $mount['RW'] === false
+			];
+		}
+
+		$ports = [];
+		foreach ($containerInfo['HostConfig']['PortBindings'] as $containerPort => $hostPorts) {
+			foreach ($hostPorts as $hostPort) {
+				$ports[] = [
+					'hostPort' => $hostPort['HostPort'],
+					'containerPort' => $containerPort
+				];
+				if (isset($hostPort['HostIp'])) {
+					$ports[count($ports) - 1]['hostIp'] = $hostPort['HostIp'];
+				}
+			}
+		}
+
+		return [
+			'environment_variables' => $envs,
+			'mounts' => $mounts,
+			'ports' => $ports,
 		];
 	}
 }
