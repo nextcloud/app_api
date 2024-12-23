@@ -33,7 +33,7 @@ OC.L10N.register(
     "Specify container restart policy, e.g. 'always' to ensure ExApp running after daemon server reboot" : "Наведите политику поновног покретања, нпр. ’увек’ тако да се обезбеди да се ExApp извршава након поновног покретања даемона сервера",
     "This settings changes are reflected only for newly created containers" : "Ове измене подешавања се примењују само на контејнере који се креирају накнадно",
     "External Apps management" : "Управљање спољним апликацијама",
-    "Admin options saved" : "Сауване су админ опције",
+    "Admin options saved" : "Сачуване су админ опције",
     "Failed to save admin options" : "Није успело чување админ опција",
     "Are you sure you want delete Deploy Daemon" : "Да ли сте сигурни да желите да обришете Даемон за постављање",
     "All ExApps on this daemon will be removed" : "Обрисаће се све ExApps на овом даемону",
