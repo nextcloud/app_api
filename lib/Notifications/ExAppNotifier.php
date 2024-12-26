@@ -2,15 +2,20 @@
 
 declare(strict_types=1);
 
+/**
+ * SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 namespace OCA\AppAPI\Notifications;
 
-use InvalidArgumentException;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\IURLGenerator;
 use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
 use OCP\Notification\INotifier;
+use OCP\Notification\UnknownNotificationException;
 
 class ExAppNotifier implements INotifier {
 
@@ -33,10 +38,10 @@ class ExAppNotifier implements INotifier {
 	public function prepare(INotification $notification, string $languageCode): INotification {
 		$exApp = $this->service->getExApp($notification->getApp());
 		if ($exApp === null) {
-			throw new InvalidArgumentException();
+			throw new UnknownNotificationException();
 		}
 		if (!$exApp->getEnabled()) { // Only enabled ExApps can render notifications
-			throw new InvalidArgumentException('ExApp is disabled');
+			throw new UnknownNotificationException('ExApp is disabled');
 		}
 
 		$l = $this->l10nFactory->get($notification->getApp(), $languageCode);

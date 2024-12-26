@@ -1,0 +1,70 @@
+SPDX-License-Identifier: MIT
+SPDX-License-Identifier: ISC
+SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: BSD-3-Clause
+SPDX-License-Identifier: (MPL-2.0 OR Apache-2.0)
+SPDX-License-Identifier: ( AGPL-3.0-or-later)
+SPDX-FileCopyrightText: escape-html developers
+SPDX-FileCopyrightText: Tobias Koppers @sokra
+SPDX-FileCopyrightText: T. Jameson Little <t.jameson.little@gmail.com>
+SPDX-FileCopyrightText: Roman Shtylman <shtylman@gmail.com>
+SPDX-FileCopyrightText: Roeland Jago Douma
+SPDX-FileCopyrightText: Matt Zabriskie
+SPDX-FileCopyrightText: James Halliday
+SPDX-FileCopyrightText: GitHub Inc.
+SPDX-FileCopyrightText: Feross Aboukhadijeh
+SPDX-FileCopyrightText: Dr.-Ing. Mario Heiderich, Cure53 <mario@cure53.de> (https://cure53.de/)
+SPDX-FileCopyrightText: Christoph Wurst
+SPDX-FileCopyrightText: Alkemics
+SPDX-FileCopyrightText: Alexander Piskun <bigcat88@icloud.com>
+
+
+This file is generated from multiple sources. Included packages:
+- @nextcloud/browser-storage
+	- version: 0.4.0
+	- license: GPL-3.0-or-later
+- @nextcloud/capabilities
+	- version: 1.2.0
+	- license: GPL-3.0-or-later
+- semver
+	- version: 7.6.3
+	- license: ISC
+- @nextcloud/initial-state
+	- version: 2.2.0
+	- license: GPL-3.0-or-later
+- @nextcloud/l10n
+	- version: 3.1.0
+	- license: GPL-3.0-or-later
+- axios
+	- version: 1.7.4
+	- license: MIT
+- base64-js
+	- version: 1.5.1
+	- license: MIT
+- buffer
+	- version: 6.0.3
+	- license: MIT
+- cancelable-promise
+	- version: 4.3.1
+	- license: MIT
+- dompurify
+	- version: 3.1.6
+	- license: (MPL-2.0 OR Apache-2.0)
+- escape-html
+	- version: 1.0.3
+	- license: MIT
+- ieee754
+	- version: 1.2.1
+	- license: BSD-3-Clause
+- path-browserify
+	- version: 1.0.1
+	- license: MIT
+- process
+	- version: 0.11.10
+	- license: MIT
+- webpack
+	- version: 5.94.0
+	- license: MIT
+- app_api
+	- version: 1.0.0
+	- license: ( AGPL-3.0-or-later)

@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\DeployActions\DockerActions;
@@ -53,6 +58,8 @@ class ExAppsPageService {
 		}
 
 		$initialState->provideInitialState('defaultDaemonConfigAccessible', $daemonConfigAccessible);
-		$initialState->provideInitialState('defaultDaemonConfig', $defaultDaemonConfig);
+		if ($defaultDaemonConfig !== null) {
+			$initialState->provideInitialState('defaultDaemonConfig', $defaultDaemonConfig);
+		}
 	}
 }

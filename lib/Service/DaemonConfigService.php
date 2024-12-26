@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\Db\DaemonConfig;
@@ -10,6 +15,7 @@ use OCA\AppAPI\Db\DaemonConfigMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
+use OCP\Security\ICrypto;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,6 +26,7 @@ class DaemonConfigService {
 		private readonly LoggerInterface    $logger,
 		private readonly DaemonConfigMapper $mapper,
 		private readonly ExAppService       $exAppService,
+		private readonly ICrypto			$crypto,
 	) {
 	}
 
@@ -38,6 +45,9 @@ class DaemonConfigService {
 		}
 		$params['deploy_config']['nextcloud_url'] = rtrim($params['deploy_config']['nextcloud_url'], '/');
 		try {
+			if (isset($params['deploy_config']['haproxy_password']) && $params['deploy_config']['haproxy_password'] !== '') {
+				$params['deploy_config']['haproxy_password'] = $this->crypto->encrypt($params['deploy_config']['haproxy_password']);
+			}
 			return $this->mapper->insert(new DaemonConfig([
 				'name' => $params['name'],
 				'display_name' => $params['display_name'],
@@ -81,10 +91,18 @@ class DaemonConfigService {
 			$carry[$exApp->getDaemonConfigName()] += 1;
 			return $carry;
 		}, []);
+
 		return array_map(function (DaemonConfig $daemonConfig) use ($daemonsExAppsCount) {
+			$serializedConfig = $daemonConfig->jsonSerialize();
+
+			// Check if "haproxy_password" exists in "deployConfig" and mask it
+			if (!empty($serializedConfig['deploy_config']['haproxy_password'])) {
+				$serializedConfig['deploy_config']['haproxy_password'] = 'dummySecret123';
+			}
+
 			return [
-				...$daemonConfig->jsonSerialize(),
-				'exAppsCount' => isset($daemonsExAppsCount[$daemonConfig->getName()]) ? $daemonsExAppsCount[$daemonConfig->getName()] : 0,
+				...$serializedConfig,
+				'exAppsCount' => $daemonsExAppsCount[$daemonConfig->getName()] ?? 0,
 			];
 		}, $this->getRegisteredDaemonConfigs());
 	}

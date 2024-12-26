@@ -7,6 +7,7 @@ OC.L10N.register(
     "Nextcloud AppAPI" : "Nextcloud AppAPI",
     "Cancel" : "Zrušiť",
     "Delete" : "Vymazať",
+    "Default" : "Predvolené",
     "Edit" : "Upraviť",
     "Deploy Daemon" : "Nasadiť proces služby",
     "Name" : "Názov",

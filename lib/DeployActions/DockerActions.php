@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 namespace OCA\AppAPI\DeployActions;
 
 use Exception;
@@ -19,6 +24,7 @@ use OCP\ICertificateManager;
 use OCP\IConfig;
 use OCP\ITempManager;
 use OCP\IURLGenerator;
+use OCP\Security\ICrypto;
 use Phar;
 use PharData;
 use Psr\Log\LoggerInterface;
@@ -40,6 +46,7 @@ class DockerActions implements IDeployActions {
 		private readonly AppAPICommonService $service,
 		private readonly ExAppService		 $exAppService,
 		private readonly ITempManager        $tempManager,
+		private readonly ICrypto			 $crypto,
 	) {
 	}
 
@@ -719,7 +726,8 @@ class DockerActions implements IDeployActions {
 		}
 		if ($protocol == 'https' && isset($deployConfig['haproxy_password']) && $deployConfig['haproxy_password'] !== '') {
 			// we only set haproxy auth for remote installations, when all requests come through HaProxy.
-			$auth = [self::APP_API_HAPROXY_USER, $deployConfig['haproxy_password']];
+			$haproxyPass = $this->crypto->decrypt($deployConfig['haproxy_password']);
+			$auth = [self::APP_API_HAPROXY_USER, $haproxyPass];
 		}
 		return sprintf('%s://%s:%s', $protocol, $exAppHost, $port);
 	}
@@ -783,7 +791,8 @@ class DockerActions implements IDeployActions {
 			$guzzleParams = $this->setupCerts($guzzleParams);
 		}
 		if (isset($daemonConfig->getDeployConfig()['haproxy_password']) && $daemonConfig->getDeployConfig()['haproxy_password'] !== '') {
-			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $daemonConfig->getDeployConfig()['haproxy_password']];
+			$haproxyPass = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
+			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $haproxyPass];
 		}
 		$this->guzzleClient = new Client($guzzleParams);
 	}

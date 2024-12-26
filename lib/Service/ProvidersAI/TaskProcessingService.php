@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 namespace OCA\AppAPI\Service\ProvidersAI;
 
 use JsonException;
@@ -381,19 +386,25 @@ class TaskProcessingService {
 			}
 
 			public function getInputShape(): array {
-				return array_map(static fn (array $shape) => new ShapeDescriptor(
-					$shape['name'],
-					$shape['description'],
-					EShapeType::from($shape['type']),
-				), $this->customTaskType['input_shape']);
+				return array_reduce($this->customTaskType['input_shape'], static function (array $input, array $shape) {
+					$input[$shape['name']] = new ShapeDescriptor(
+						$shape['name'],
+						$shape['description'],
+						EShapeType::from($shape['shape_type']),
+					);
+					return $input;
+				}, []);
 			}
 
 			public function getOutputShape(): array {
-				return array_map(static fn (array $shape) => new ShapeDescriptor(
-					$shape['name'],
-					$shape['description'],
-					EShapeType::from($shape['type']),
-				), $this->customTaskType['output_shape']);
+				return array_reduce($this->customTaskType['output_shape'], static function (array $output, array $shape) {
+					$output[$shape['name']] = new ShapeDescriptor(
+						$shape['name'],
+						$shape['description'],
+						EShapeType::from($shape['shape_type']),
+					);
+					return $output;
+				}, []);
 			}
 		};
 	}

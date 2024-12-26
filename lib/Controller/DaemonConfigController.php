@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
@@ -19,6 +24,7 @@ use OCP\AppFramework\Http\Response;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IRequest;
+use OCP\Security\ICrypto;
 
 /**
  * DaemonConfig actions (for UI)
@@ -33,6 +39,7 @@ class DaemonConfigController extends ApiController {
 		private readonly AppAPIService       $service,
 		private readonly ExAppService        $exAppService,
 		private readonly IL10N               $l10n,
+		private readonly ICrypto			 $crypto,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -59,11 +66,40 @@ class DaemonConfigController extends ApiController {
 	#[PasswordConfirmationRequired]
 	public function updateDaemonConfig(string $name, array $daemonConfigParams): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+
+		// Safely check if "haproxy_password" exists before accessing it
+		$haproxyPassword = $daemonConfigParams['deploy_config']['haproxy_password'] ?? null;
+
+		// Restore the original password if "dummySecret123" is provided
+		if ($haproxyPassword === 'dummySecret123') {
+			$daemonConfigParams['deploy_config']['haproxy_password'] = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
+		} elseif (!empty($haproxyPassword)) {
+			// New password provided, encrypt it
+			$daemonConfigParams['deploy_config']['haproxy_password'] = $this->crypto->encrypt($haproxyPassword);
+		}
+
+		// Create and update DaemonConfig instance
 		$updatedDaemonConfig = new DaemonConfig($daemonConfigParams);
 		$updatedDaemonConfig->setId($daemonConfig->getId());
 		$updatedDaemonConfig = $this->daemonConfigService->updateDaemonConfig($updatedDaemonConfig);
+
+		// Check if update was successful before proceeding
+		if ($updatedDaemonConfig === null) {
+			return new JSONResponse([
+				'success' => false,
+				'daemonConfig' => null,
+			]);
+		}
+
+		// Mask the password with "dummySecret123" if it is set
+		$updatedDeployConfig = $updatedDaemonConfig->getDeployConfig();
+		if (!empty($updatedDeployConfig['haproxy_password'] ?? null)) {
+			$updatedDeployConfig['haproxy_password'] = 'dummySecret123';
+			$updatedDaemonConfig->setDeployConfig($updatedDeployConfig);
+		}
+
 		return new JSONResponse([
-			'success' => $updatedDaemonConfig !== null,
+			'success' => true,
 			'daemonConfig' => $updatedDaemonConfig,
 		]);
 	}
@@ -98,6 +134,29 @@ class DaemonConfigController extends ApiController {
 	}
 
 	public function checkDaemonConnection(array $daemonParams): Response {
+		// Safely check if "haproxy_password" exists before accessing it
+		// note: UI passes here 'deploy_config' instead of 'deployConfig'
+		$haproxyPassword = $daemonParams['deploy_config']['haproxy_password'] ?? null;
+
+		if ($haproxyPassword === 'dummySecret123') {
+			// For cases when the password itself is 'dummySecret123'
+			$daemonParams['deploy_config']['haproxy_password'] = $this->crypto->encrypt($haproxyPassword);
+
+			// Check if such record is present in the DB
+			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonParams['name']);
+			if ($daemonConfig !== null) {
+				// such Daemon config already present in the DB
+				$haproxyPasswordDB = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
+				if ($haproxyPasswordDB) {
+					// get password from the DB instead of the “masked” one
+					$daemonParams['deploy_config']['haproxy_password'] = $haproxyPasswordDB;
+				}
+			}
+		} elseif (!empty($haproxyPassword)) {
+			// New password provided, encrypt it, as "initGuzzleClient" expects to receive encrypted password
+			$daemonParams['deploy_config']['haproxy_password'] = $this->crypto->encrypt($haproxyPassword);
+		}
+
 		$daemonConfig = new DaemonConfig([
 			'name' => $daemonParams['name'],
 			'display_name' => $daemonParams['display_name'],
