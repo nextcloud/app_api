@@ -50,10 +50,9 @@ class Update extends Command {
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force new ExApp scopes approval[deprecated]');
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Do not print to console');
-		$this->addOption('all', null, InputOption::VALUE_NONE, 'Update all enabled and updatable apps');
+		$this->addOption('all', null, InputOption::VALUE_NONE, 'Updates all enabled and updatable apps');
 		$this->addOption('showonly', null, InputOption::VALUE_NONE, 'Additional flag for "--all" to only show all updatable apps');
-		$this->addOption('include-disabled', null, InputOption::VALUE_NONE, 'Update also disabled apps (use --enable-after-update to enable ExApp after update)');
-		$this->addOption('enable-after-update', null, InputOption::VALUE_NONE, 'Enable ExApp after update if it was disabled before. Use with --include-disabled');
+		$this->addOption('include-disabled', null, InputOption::VALUE_NONE, 'Additional flag for "--all" to also update disabled apps');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -156,9 +155,8 @@ class Update extends Command {
 		$exApp->setStatus($status);
 		$this->exAppService->updateExApp($exApp, ['status']);
 
-		$wasEnabled = false;
+		$wasEnabled = $exApp->getEnabled();
 		if ($exApp->getEnabled()) {
-			$wasEnabled = true;
 			if ($this->service->disableExApp($exApp)) {
 				$this->logger->info(sprintf('ExApp %s successfully disabled.', $appId));
 				if ($outputConsole) {
@@ -269,8 +267,7 @@ class Update extends Command {
 
 		if ($includeDisabledApps) {
 			$exApp = $this->exAppService->getExApp($appId);
-			$enableAfterUpdate = $input->getOption('enable-after-update');
-			if (!$enableAfterUpdate && !$wasEnabled && $exApp->getEnabled()) {
+			if (!$wasEnabled && $exApp->getEnabled()) {
 				if ($this->service->disableExApp($exApp)) {
 					$this->logger->info(sprintf('ExApp %s successfully disabled after update.', $appId));
 					if ($outputConsole) {
