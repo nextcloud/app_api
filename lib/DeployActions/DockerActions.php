@@ -12,18 +12,21 @@ namespace OCA\AppAPI\DeployActions;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
+
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
-
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
+
 use OCP\ICertificateManager;
 use OCP\IConfig;
+use OCP\ITempManager;
 use OCP\IURLGenerator;
 use OCP\Security\ICrypto;
+use Phar;
+use PharData;
 use Psr\Log\LoggerInterface;
 
 class DockerActions implements IDeployActions {
@@ -42,6 +45,7 @@ class DockerActions implements IDeployActions {
 		private readonly IURLGenerator       $urlGenerator,
 		private readonly AppAPICommonService $service,
 		private readonly ExAppService		 $exAppService,
+		private readonly ITempManager        $tempManager,
 		private readonly ICrypto			 $crypto,
 	) {
 	}
@@ -69,9 +73,10 @@ class DockerActions implements IDeployActions {
 		}
 
 		$this->exAppService->setAppDeployProgress($exApp, 95);
-		$containerInfo = $this->inspectContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+		$containerName = $this->buildExAppContainerName($params['container_params']['name']);
+		$containerInfo = $this->inspectContainer($dockerUrl, $containerName);
 		if (isset($containerInfo['Id'])) {
-			$result = $this->removeContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+			$result = $this->removeContainer($dockerUrl, $containerName);
 			if ($result) {
 				return $result;
 			}
@@ -82,16 +87,174 @@ class DockerActions implements IDeployActions {
 			return $result['error'];
 		}
 		$this->exAppService->setAppDeployProgress($exApp, 97);
-		$result = $this->startContainer($dockerUrl, $this->buildExAppContainerName($params['container_params']['name']));
+
+		$this->updateCerts($dockerUrl, $containerName);
+		$this->exAppService->setAppDeployProgress($exApp, 98);
+
+		$result = $this->startContainer($dockerUrl, $containerName);
 		if (isset($result['error'])) {
 			return $result['error'];
 		}
 		$this->exAppService->setAppDeployProgress($exApp, 99);
-		if (!$this->waitTillContainerStart($this->buildExAppContainerName($exApp->getAppid()), $daemonConfig)) {
+		if (!$this->waitTillContainerStart($containerName, $daemonConfig)) {
 			return 'container startup failed';
 		}
 		$this->exAppService->setAppDeployProgress($exApp, 100);
 		return '';
+	}
+
+	private function updateCerts(string $dockerUrl, string $containerName): void {
+		try {
+			$this->startContainer($dockerUrl, $containerName);
+
+			$osInfo = $this->getContainerOsInfo($dockerUrl, $containerName);
+			if (!$this->isSupportedOs($osInfo)) {
+				$this->logger->warning(sprintf(
+					"Unsupported OS detected for container: %s. OS info: %s",
+					$containerName,
+					$osInfo
+				));
+				return;
+			}
+
+			$bundlePath = $this->certificateManager->getAbsoluteBundlePath();
+			$targetDir = $this->getTargetCertDir($osInfo); // Determine target directory based on OS
+			$this->executeCommandInContainer($dockerUrl, $containerName, ['mkdir', '-p', $targetDir]);
+			$this->installParsedCertificates($dockerUrl, $containerName, $bundlePath, $targetDir);
+
+			$updateCommand = $this->getCertificateUpdateCommand($osInfo);
+			$this->executeCommandInContainer($dockerUrl, $containerName, $updateCommand);
+		} catch (Exception $e) {
+			$this->logger->warning(sprintf(
+				"Failed to update certificates in container: %s. Error: %s",
+				$containerName,
+				$e->getMessage()
+			));
+		} finally {
+			$this->stopContainer($dockerUrl, $containerName);
+		}
+	}
+
+	private function parseCertificatesFromBundle(string $bundlePath): array {
+		$contents = file_get_contents($bundlePath);
+
+		// Match only certificates
+		preg_match_all('/-----BEGIN CERTIFICATE-----(.+?)-----END CERTIFICATE-----/s', $contents, $matches);
+
+		return $matches[0] ?? [];
+	}
+
+	private function installParsedCertificates(string $dockerUrl, string $containerId, string $bundlePath, string $targetDir): void {
+		$certificates = $this->parseCertificatesFromBundle($bundlePath);
+		$tempDir = sys_get_temp_dir();
+
+		foreach ($certificates as $index => $certificate) {
+			$tempFile = $tempDir . "/{$containerId}_cert_{$index}.crt";
+			if (file_exists($tempFile)) {
+				unlink($tempFile);
+			}
+			file_put_contents($tempFile, $certificate);
+
+			// Build the path in the container
+			$pathInContainer = $targetDir . "/custom_cert_$index.crt";
+
+			$this->dockerCopy($dockerUrl, $containerId, $tempFile, $pathInContainer);
+			unlink($tempFile);
+		}
+	}
+
+	private function dockerCopy(string $dockerUrl, string $containerId, string $sourcePath, string $pathInContainer): void {
+		$archivePath = $this->createTarArchive($sourcePath, $pathInContainer);
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s/archive?path=%s', $containerId, urlencode('/')));
+
+		try {
+			$archiveData = file_get_contents($archivePath);
+			$this->guzzleClient->put($url, [
+				'body' => $archiveData,
+				'headers' => ['Content-Type' => 'application/x-tar']
+			]);
+		} catch (Exception $e) {
+			throw new Exception(sprintf("Failed to copy %s to container %s: %s", $sourcePath, $containerId, $e->getMessage()));
+		} finally {
+			if (file_exists($archivePath)) {
+				unlink($archivePath);
+			}
+		}
+	}
+
+	private function getTargetCertDir(string $osInfo): string {
+		if (stripos($osInfo, 'alpine') !== false) {
+			return '/usr/local/share/ca-certificates'; // Alpine Linux
+		}
+
+		if (stripos($osInfo, 'debian') !== false || stripos($osInfo, 'ubuntu') !== false) {
+			return '/usr/local/share/ca-certificates'; // Debian and Ubuntu
+		}
+
+		if (stripos($osInfo, 'centos') !== false || stripos($osInfo, 'almalinux') !== false) {
+			return '/etc/pki/ca-trust/source/anchors'; // CentOS and AlmaLinux
+		}
+
+		throw new Exception(sprintf('Unsupported OS: %s', $osInfo));
+	}
+
+	private function createTarArchive(string $filePath, string $pathInContainer): string {
+		$tempFile = $this->tempManager->getTemporaryFile('.tar');
+
+		try {
+			if (file_exists($tempFile)) {
+				unlink($tempFile);
+			}
+
+			$archive = new PharData($tempFile, 0, null, Phar::TAR);
+			$relativePathInArchive = ltrim($pathInContainer, '/');
+			$archive->addFile($filePath, $relativePathInArchive);
+		} catch (\Exception $e) {
+			// Clean up the temporary file in case of an error
+			if (file_exists($tempFile)) {
+				unlink($tempFile);
+			}
+			throw new Exception(sprintf("Failed to create tar archive: %s", $e->getMessage()));
+		}
+		return $tempFile; // Return the path to the TAR archive
+	}
+
+	private function getCertificateUpdateCommand(string $osInfo): string {
+		if (stripos($osInfo, 'alpine') !== false) {
+			return 'update-ca-certificates';
+		}
+		if (stripos($osInfo, 'debian') !== false || stripos($osInfo, 'ubuntu') !== false) {
+			return 'update-ca-certificates';
+		}
+		if (stripos($osInfo, 'centos') !== false || stripos($osInfo, 'almalinux') !== false) {
+			return 'update-ca-trust extract';
+		}
+		throw new Exception('Unsupported OS');
+	}
+
+	private function getContainerOsInfo(string $dockerUrl, string $containerId): string {
+		$command = ['cat', '/etc/os-release'];
+		return $this->executeCommandInContainer($dockerUrl, $containerId, $command);
+	}
+
+	private function isSupportedOs(string $osInfo): bool {
+		return (bool) preg_match('/(alpine|debian|ubuntu|centos|almalinux)/i', $osInfo);
+	}
+
+	private function executeCommandInContainer(string $dockerUrl, string $containerId, $command): string {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s/exec', $containerId));
+		$payload = [
+			'Cmd' => is_array($command) ? $command : explode(' ', $command),
+			'AttachStdout' => true,
+			'AttachStderr' => true,
+		];
+		$response = $this->guzzleClient->post($url, ['json' => $payload]);
+		$execId = json_decode((string) $response->getBody(), true)['Id'];
+
+		// Start the exec process
+		$startUrl = $this->buildApiUrl($dockerUrl, sprintf('exec/%s/start', $execId));
+		$startResponse = $this->guzzleClient->post($startUrl, ['json' => ['Detach' => false, 'Tty' => false]]);
+		return (string) $startResponse->getBody();
 	}
 
 	public function buildApiUrl(string $dockerUrl, string $route): string {

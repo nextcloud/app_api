@@ -340,6 +340,15 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_by_port \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
+
+      - name: Checking if ExApp container can access HTTPS DSP
+        run: |
+          docker exec nc_app_app-skeleton-python apt update
+          docker exec nc_app_app-skeleton-python apt install curl -y
+          docker exec nc_app_app-skeleton-python curl --resolve host.docker.internal:2375:172.17.0.1 https://host.docker.internal:2375
+
+      - name: Disable ExApp
+        run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
 
       - name: Copy NC log to host
