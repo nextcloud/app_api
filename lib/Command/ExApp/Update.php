@@ -113,7 +113,7 @@ class Update extends Command {
 
 		$includeDisabledApps = $input->getOption('include-disabled');
 		if ($input->getOption('all') && !$exApp->getEnabled() && !$includeDisabledApps) {
-			$this->logger->error(sprintf('ExApp %s is disabled. Update skipped (use --include-disabled to update disabled apps).', $appId));
+			$this->logger->info(sprintf('ExApp %s is disabled. Update skipped (use --include-disabled to update disabled apps).', $appId));
 			if ($outputConsole) {
 				$output->writeln(sprintf('ExApp %s is disabled. Update skipped (use --include-disabled to update disabled apps).', $appId));
 			}
@@ -156,7 +156,7 @@ class Update extends Command {
 		$this->exAppService->updateExApp($exApp, ['status']);
 
 		$wasEnabled = $exApp->getEnabled();
-		if ($exApp->getEnabled()) {
+		if ($wasEnabled) {
 			if ($this->service->disableExApp($exApp)) {
 				$this->logger->info(sprintf('ExApp %s successfully disabled.', $appId));
 				if ($outputConsole) {
