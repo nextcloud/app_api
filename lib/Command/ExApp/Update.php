@@ -50,8 +50,9 @@ class Update extends Command {
 		$this->addOption('force-scopes', null, InputOption::VALUE_NONE, 'Force new ExApp scopes approval[deprecated]');
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Do not print to console');
-		$this->addOption('all', null, InputOption::VALUE_NONE, 'Update all updatable apps');
+		$this->addOption('all', null, InputOption::VALUE_NONE, 'Updates all enabled and updatable apps');
 		$this->addOption('showonly', null, InputOption::VALUE_NONE, 'Additional flag for "--all" to only show all updatable apps');
+		$this->addOption('include-disabled', null, InputOption::VALUE_NONE, 'Additional flag for "--all" to also update disabled apps');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -110,6 +111,15 @@ class Update extends Command {
 			return 1;
 		}
 
+		$includeDisabledApps = $input->getOption('include-disabled');
+		if ($input->getOption('all') && !$exApp->getEnabled() && !$includeDisabledApps) {
+			$this->logger->info(sprintf('ExApp %s is disabled. Update skipped (use --include-disabled to update disabled apps).', $appId));
+			if ($outputConsole) {
+				$output->writeln(sprintf('ExApp %s is disabled. Update skipped (use --include-disabled to update disabled apps).', $appId));
+			}
+			return 0;
+		}
+
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 		if ($daemonConfig === null) {
 			$this->logger->error(sprintf('Daemon config %s not found.', $exApp->getDaemonConfigName()));
@@ -145,7 +155,8 @@ class Update extends Command {
 		$exApp->setStatus($status);
 		$this->exAppService->updateExApp($exApp, ['status']);
 
-		if ($exApp->getEnabled()) {
+		$wasEnabled = $exApp->getEnabled();
+		if ($wasEnabled) {
 			if ($this->service->disableExApp($exApp)) {
 				$this->logger->info(sprintf('ExApp %s successfully disabled.', $appId));
 				if ($outputConsole) {
@@ -253,6 +264,19 @@ class Update extends Command {
 		if ($outputConsole) {
 			$output->writeln(sprintf('ExApp %s successfully updated.', $appId));
 		}
+
+		if ($includeDisabledApps) {
+			$exApp = $this->exAppService->getExApp($appId);
+			if (!$wasEnabled && $exApp->getEnabled()) {
+				if ($this->service->disableExApp($exApp)) {
+					$this->logger->info(sprintf('ExApp %s successfully disabled after update.', $appId));
+					if ($outputConsole) {
+						$output->writeln(sprintf('ExApp %s successfully disabled after update.', $appId));
+					}
+				}
+			}
+		}
+
 		return 0;
 	}
 }
