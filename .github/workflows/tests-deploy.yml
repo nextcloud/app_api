@@ -159,7 +159,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -167,9 +167,19 @@ jobs:
             docker_local_sock Docker docker-install http /var/run/docker.sock http://nextcloud/index.php \
             --net=master_bridge
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
+
+      - name: Registering and enabling Skeleton ExApp
+        run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_local_sock \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
+
+      - name: Docker inspect output
+        if: always()
+        run: docker inspect nc_app_app-skeleton-python
+
+      - name: Disable ExApp
+        run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
 
       - name: Copy NC log to host
@@ -238,7 +248,7 @@ jobs:
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -246,9 +256,20 @@ jobs:
             docker_by_port Docker docker-install http nextcloud-appapi-dsp:2375 http://nextcloud/index.php \
             --net=master_bridge --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
+          docker exec nextcloud ping -c 1 nextcloud-appapi-dsp
+
+      - name: Registering and enabling Skeleton ExApp
+        run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_by_port \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
+
+      - name: Docker inspect output
+        if: always()
+        run: docker inspect nc_app_app-skeleton-python
+
+      - name: Disable ExApp
+        run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
 
       - name: Copy NC log to host
@@ -295,6 +316,136 @@ jobs:
           path: nextcloud.log
           if-no-files-found: warn
 
+  nc-docker-dsp-https-bridge:
+    runs-on: ubuntu-22.04
+    name: NC In Julius Docker(DSP-HTTPS-BRIDGE) • 🐘8.3
+    env:
+      docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
+
+    steps:
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Create certificates
+        run: |
+          mkdir certs
+          openssl req -nodes -new -x509 -subj '/CN=host.docker.internal' -sha256 -keyout certs/privkey.pem -out certs/fullchain.pem -days 365000 > /dev/null 2>&1
+          cat certs/fullchain.pem certs/privkey.pem | tee certs/cert.pem > /dev/null 2>&1
+
+      - name: Create containers
+        run: |
+          docker network create master_bridge
+          docker run -v /var/run/docker.sock:/var/run/docker.sock \
+            -v `pwd`/certs/cert.pem:/certs/cert.pem \
+            -e NC_HAPROXY_PASSWORD="some_secure_password" \
+            -e BIND_ADDRESS="172.18.0.1" \
+            -e EX_APPS_NET="ipv4@localhost" \
+            --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
+            --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
+          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
+          sleep 60s
+
+      - name: Debug information
+        run: |
+          echo "hostname -I:"
+          hostname -I
+          echo ""
+          echo "DSP networks:"
+          docker exec nextcloud-appapi-dsp ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
+          echo ""
+          echo "Open ports:"
+          netstat -lntu
+
+      - name: Install AppAPI
+        run: |
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
+          docker exec nextcloud sudo -u www-data php occ app:enable app_api
+          docker cp ./certs/cert.pem nextcloud:/
+          docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
+            docker_by_port Docker docker-install https host.docker.internal:2375 http://nextcloud/index.php \
+            --net=master_bridge --haproxy_password=some_secure_password
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
+          docker exec nextcloud ping -c 1 host.docker.internal
+
+      - name: Registering and enabling Skeleton ExApp
+        run: |
+          docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_by_port \
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
+          docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
+
+      - name: Docker inspect output
+        if: always()
+        run: docker inspect nc_app_app-skeleton-python
+
+      - name: Checking if ExApp container can access HTTPS DSP
+        run: |
+          docker exec nc_app_app-skeleton-python apt update
+          docker exec nc_app_app-skeleton-python apt install curl -y
+          docker exec nc_app_app-skeleton-python curl --resolve host.docker.internal:2375:172.18.0.1 https://host.docker.internal:2375
+
+      - name: Disable ExApp
+        run: |
+          docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
+
+      - name: Copy NC log to host
+        if: always()
+        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
+
+      - name: Check logs
+        run: |
+          grep -q 'Hello from app-skeleton-python :)' nextcloud.log || error
+          grep -q 'Bye bye from app-skeleton-python :(' nextcloud.log || error
+
+      - name: Save HaProxy logs
+        if: always()
+        run: docker logs nextcloud-appapi-dsp > haproxy.log 2>&1
+
+      - name: Save container info & logs
+        if: always()
+        run: |
+          docker inspect nc_app_app-skeleton-python | json_pp > container.json
+          docker logs nc_app_app-skeleton-python > container.log 2>&1
+
+      - name: Unregister Skeleton & Daemon
+        run: |
+          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister app-skeleton-python
+          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
+
+      - name: Upload HaProxy logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsp_https_bridge_haproxy.log
+          path: haproxy.log
+          if-no-files-found: warn
+
+      - name: Upload Container info
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsp_https_bridge_container.json
+          path: container.json
+          if-no-files-found: warn
+
+      - name: Upload Container logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsp_https_bridge_container.log
+          path: container.log
+          if-no-files-found: warn
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsp_https_bridge_nextcloud.log
+          path: nextcloud.log
+          if-no-files-found: warn
+
   nc-docker-dsp-https:
     runs-on: ubuntu-22.04
     name: NC In Julius Docker(DSP-HTTPS) • 🐘8.3
@@ -322,12 +473,19 @@ jobs:
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
           docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
           sleep 60s
+
+      - name: Debug information
+        run: |
+          echo "Hostname:"
           hostname -I
+          echo "DSP networks:"
           docker exec nextcloud-appapi-dsp ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
+          echo "Open ports:"
+          netstat -lntu
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/cloud-py-api/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
@@ -337,6 +495,10 @@ jobs:
             docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost:8080/index.php \
             --net=host --haproxy_password=some_secure_password
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
+          docker exec nextcloud ping -c 1 host.docker.internal
+
+      - name: Registering and enabling Skeleton ExApp
+        run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_by_port \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
