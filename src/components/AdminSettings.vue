@@ -15,7 +15,7 @@
 			:name="t('app_api', 'Deploy Daemons')"
 			:description="t('app_api', 'Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon.')"
 			:aria-label="t('app_api', 'Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon.')"
-			:doc-url="'https://cloud-py-api.github.io/app_api/CreationOfDeployDaemon.html'">
+			doc-url="https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon">
 			<NcNoteCard v-if="state.default_daemon_config !== '' && !state?.daemon_config_accessible" type="error">
 				<p>{{ t('app_api', 'Default Deploy Daemon is not accessible. Please verify its configuration') }}</p>
 			</NcNoteCard>
