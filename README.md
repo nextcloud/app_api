@@ -15,10 +15,9 @@
 1. **Enhanced stability** This ecosystem is committed to maintaining API stability over extended periods.
    This ensures a reliable and consistent user experience as developers won't need to constantly update their apps with each new release.
 
-2. **Enhanced security.** Unlike the traditional method, which allowed direct interaction with the core Nextcloud code,
-   this approach emphasizes more specialized API scopes, resulting in greater application stability and a more focused user experience.
+2. **Enhanced security** Unlike the traditional method, which allowed direct interaction with the core Nextcloud code, this approach uses controlled APIs to manage access, ensuring greater application stability and delivering a more focused user experience.
 
-3. **Reliable computing power.** The ecosystem is designed to solve resource-intensive problems.
+3. **Reliable computing power** The ecosystem is designed to solve resource-intensive problems.
    Developers can easily integrate complex computing functions, including advanced machine learning models, and run them on external hardware.
 
 4. **Community friendly** The project aims to attract a diverse and broader developer community by creating applications
