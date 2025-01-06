@@ -161,7 +161,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#register',
+					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#register',
 				},
 				image_pull: {
 					id: 'image_pull',
@@ -171,7 +171,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#image-pull',
+					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#image-pull',
 					progress: null,
 				},
 				container_started: {
@@ -182,7 +182,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#container-started',
+					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#container-started',
 				},
 				heartbeat: {
 					id: 'heartbeat',
@@ -192,7 +192,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#heartbeat',
+					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#heartbeat',
 					heartbeat_count: null,
 				},
 				init: {
@@ -203,7 +203,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#init',
+					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#init',
 					progress: null,
 				},
 				enabled: {
@@ -214,7 +214,7 @@ export default {
 					loading: false,
 					error: false,
 					error_message: '',
-					help_url: 'https://cloud-py-api.github.io/app_api/TestDeploy.html#enabled',
+					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#enabled',
 				},
 			},
 		}
