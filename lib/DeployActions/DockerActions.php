@@ -82,7 +82,7 @@ class DockerActions implements IDeployActions {
 			}
 		}
 		$this->exAppService->setAppDeployProgress($exApp, 96);
-		$result = $this->createContainer($dockerUrl, $imageId, $params['container_params']);
+		$result = $this->createContainer($dockerUrl, $imageId, $daemonConfig, $params['container_params']);
 		if (isset($result['error'])) {
 			return $result['error'];
 		}
@@ -282,7 +282,7 @@ class DockerActions implements IDeployActions {
 			$imageParams['image_name'] . ':' . $imageParams['image_tag'] . '-' . $daemonConfig->getDeployConfig()['computeDevice']['id'];
 	}
 
-	public function createContainer(string $dockerUrl, string $imageId, array $params = []): array {
+	public function createContainer(string $dockerUrl, string $imageId, DaemonConfig $daemonConfig, array $params = []): array {
 		$createVolumeResult = $this->createVolume($dockerUrl, $this->buildExAppVolumeName($params['name']));
 		if (isset($createVolumeResult['error'])) {
 			return $createVolumeResult;
@@ -300,6 +300,25 @@ class DockerActions implements IDeployActions {
 			],
 			'Env' => $params['env'],
 		];
+
+		// Exposing the ExApp's primary port when the installation type is remote and the network is not a "host"
+		if (($params['net'] !== 'host') && ($daemonConfig->getProtocol() === 'https')) {
+			$exAppMainPort = $params['port'];
+			$containerParams['ExposedPorts'] = [
+				sprintf('%d/tcp', $exAppMainPort) => (object) [],
+				sprintf('%d/udp', $exAppMainPort) => (object) [],
+			];
+			$containerParams['HostConfig']['PortBindings'] = [
+				sprintf('%d/tcp', $exAppMainPort) => [
+					['HostPort' => (string)$exAppMainPort, 'HostIp' => '127.0.0.1'],
+					['HostPort' => (string)$exAppMainPort, 'HostIp' => '::1'],
+				],
+				sprintf('%d/udp', $exAppMainPort) => [
+					['HostPort' => (string)$exAppMainPort, 'HostIp' => '127.0.0.1'],
+					['HostPort' => (string)$exAppMainPort, 'HostIp' => '::1'],
+				],
+			];
+		}
 
 		if (!in_array($params['net'], ['host', 'bridge'])) {
 			$networkingConfig = [

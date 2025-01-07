@@ -103,7 +103,6 @@
 								<NcInputField
 									id="deploy-config-net"
 									:value.sync="deployConfig.net"
-									:disabled="daemonProtocol === 'https'"
 									:placeholder="t('app_api', 'Docker network name')"
 									:aria-label="t('app_api', 'Docker network name')"
 									:helper-text="getNetworkHelperText || t('app_api', 'Docker network name')"
@@ -385,10 +384,6 @@ export default {
 			return this.isHaProxyPasswordValid ? t('app_api', 'AppAPI Docker Socket Proxy authentication password') : t('app_api', 'Password must be at least 12 characters long')
 		},
 		getNetworkHelperText() {
-			if (this.httpsEnabled) {
-				return t('app_api', 'With https enabled network is set to host')
-			}
-
 			if (this.isEdit && this.deployConfig.net !== this.daemon.deploy_config.net) {
 				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
 			}
