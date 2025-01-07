@@ -310,10 +310,12 @@ class DockerActions implements IDeployActions {
 			];
 			$containerParams['HostConfig']['PortBindings'] = [
 				sprintf('%d/tcp', $exAppMainPort) => [
-					['HostPort' => (string)$exAppMainPort, 'HostIp' => '127.0.0.1']
+					['HostPort' => (string)$exAppMainPort, 'HostIp' => '127.0.0.1'],
+					['HostPort' => (string)$exAppMainPort, 'HostIp' => '::1'],
 				],
 				sprintf('%d/udp', $exAppMainPort) => [
-					['HostPort' => (string)$exAppMainPort, 'HostIp' => '127.0.0.1']
+					['HostPort' => (string)$exAppMainPort, 'HostIp' => '127.0.0.1'],
+					['HostPort' => (string)$exAppMainPort, 'HostIp' => '::1'],
 				],
 			];
 		}
