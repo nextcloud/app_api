@@ -4,9 +4,9 @@ name: Tests - Deploy
 
 on:
   pull_request:
-    branches: [main]
+    branches: [stable31]
   push:
-    branches: [main]
+    branches: [stable31]
   workflow_dispatch:
 
 permissions:
@@ -19,12 +19,7 @@ concurrency:
 jobs:
   nc-host-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Host • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: [ '8.3' ]
-        server-version: [ 'master' ]
+    name: NC In Host
 
     services:
       postgres:
@@ -46,17 +41,17 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ matrix.server-version }}
+          ref: ${{ github.ref_name }}
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php ${{ matrix.php-version }}
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
           coverage: none
           ini-file: development
@@ -120,7 +115,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+          name: nc_host_app_docker_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -128,7 +123,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+          name: nc_host_app_docker_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -136,7 +131,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          name: nc_host_app_docker_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -153,7 +148,7 @@ jobs:
       - name: Create container
         run: |
           docker network create master_bridge
-          docker run --net master_bridge --name nextcloud --rm -d -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud -e SERVER_BRANCH=${{ github.ref_name }} --rm -d -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
           sudo chmod 766 /var/run/docker.sock
           sleep 120s
 
@@ -243,7 +238,7 @@ jobs:
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             --net master_bridge --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud -e SERVER_BRANCH=${{ github.ref_name }} --rm -d ${{ env.docker-image }}
           sleep 60s
 
       - name: Install AppAPI
@@ -342,7 +337,7 @@ jobs:
             -e EX_APPS_NET="ipv4@localhost" \
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud -e SERVER_BRANCH=${{ github.ref_name }} --rm -d ${{ env.docker-image }}
           sleep 60s
 
       - name: Debug information
@@ -471,7 +466,7 @@ jobs:
             -e EX_APPS_NET="ipv4@localhost" \
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
+          docker run --net=bridge --name=nextcloud -e SERVER_BRANCH=${{ github.ref_name }} -p 8080:80 --rm -d ${{ env.docker-image }}
           sleep 60s
 
       - name: Debug information
@@ -571,7 +566,7 @@ jobs:
 
   nc-host-app-docker-redis:
     runs-on: ubuntu-22.04
-    name: NC In Host(Redis) • master • 🐘8.3
+    name: NC In Host(Redis)
 
     services:
       postgres:
@@ -603,17 +598,17 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: ${{ github.ref_name }}
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.3
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: 8.3
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql, redis
           coverage: none
           ini-file: development
@@ -689,7 +684,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_master_8.3_container.json
+          name: nc_host_app_docker_redis_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -697,7 +692,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_master_8.3_container.log
+          name: nc_host_app_docker_redis_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -705,13 +700,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_master_8.3_nextcloud.log
+          name: nc_host_app_docker_redis_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-host-network-host:
     runs-on: ubuntu-22.04
-    name: NC In Host(network=host)  • master • 🐘8.3
+    name: NC In Host(network=host) • 🐘8.3
 
     services:
       postgres:
@@ -733,17 +728,17 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: ${{ github.ref_name }}
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.3
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: 8.3
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql, redis
           coverage: none
           ini-file: development
@@ -809,7 +804,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_network_host_master_8.2_container.json
+          name: nc_host_network_host_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -817,7 +812,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_network_host_master_8.2_container.log
+          name: nc_host_network_host_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -825,7 +820,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_network_host_master_8.2_nextcloud.log
+          name: nc_host_network_host_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
