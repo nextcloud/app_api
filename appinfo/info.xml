@@ -18,15 +18,6 @@ application development, deployment, and management.
 It introduces a new methodology that allows developers to create
 applications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.
 
-
-### List of applications that require AppAPI:
-
-- [talk_bot_ai_example](https://github.com/cloud-py-api/talk_bot_ai_example)
-- [upscaler_example](https://github.com/cloud-py-api/upscaler_example)
-- [image_to_text_example](https://github.com/cloud-py-api/file_to_text_example)
-- [ai_image_generator_bot](https://github.com/cloud-py-api/ai_image_generator_bot)
-- [SummarAI](https://github.com/nextcloud/sumupbot)
-
 _If you wish to develop an application, we will gladly help and assist you._
 
 ### Support
@@ -53,21 +44,21 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
 	<namespace>AppAPI</namespace>
 	<documentation>
-		<developer>https://cloud-py-api.github.io/app_api/</developer>
+		<developer>https://docs.nextcloud.com/server/latest/developer_manual/exapp_development/l</developer>
 	</documentation>
 	<category>integration</category>
 	<category>tools</category>
-	<website>https://github.com/cloud-py-api/app_api</website>
-	<discussion>https://github.com/cloud-py-api/app_api/discussions</discussion>
-	<bugs>https://github.com/cloud-py-api/app_api/issues</bugs>
-	<repository type="git">https://github.com/cloud-py-api/app_api.git</repository>
-	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_1.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_2.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_3.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/cloud-py-api/app_api/main/screenshots/app_api_4.png</screenshot>
+	<website>https://github.com/nextcloud/app_api</website>
+	<discussion>https://github.com/nextcloud/app_api/discussions</discussion>
+	<bugs>https://github.com/nextcloud/app_api/issues</bugs>
+	<repository type="git">https://github.com/nextcloud/app_api.git</repository>
+	<screenshot>https://raw.githubusercontent.com/nextcloud/app_api/main/screenshots/app_api_1.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nextcloud/app_api/main/screenshots/app_api_2.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nextcloud/app_api/main/screenshots/app_api_3.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nextcloud/app_api/main/screenshots/app_api_4.png</screenshot>
 	<dependencies>
 		<php min-version="8.1"/>
-		<nextcloud min-version="32" max-version="32"/>
+		<nextcloud min-version="31" max-version="32"/>
 	</dependencies>
 	<background-jobs>
 		<job>OCA\AppAPI\BackgroundJob\ExAppInitStatusCheckJob</job>
