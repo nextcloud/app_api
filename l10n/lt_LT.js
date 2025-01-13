@@ -1,6 +1,7 @@
 OC.L10N.register(
     "app_api",
     {
+    "Daemon config not found" : "Nerasta tarnybos konfigūracija",
     "Cancel" : "Atsisakyti",
     "Delete" : "Ištrinti",
     "Default" : "Numatytasis",
@@ -8,11 +9,13 @@ OC.L10N.register(
     "Name" : "Vardas",
     "Host" : "Serveris",
     "Nextcloud URL" : "Nextcloud URL",
+    "More info" : "Daugiau informacijos",
     "Enabled" : "Įjungta",
     "Network" : "Tinklas",
     "Confirm" : "Patvirtinti",
     "Save" : "Įrašyti",
     "Register" : "Registruotis",
+    "Check connection" : "Tikrinti ryšį",
     "Update to {version}" : "Atnaujinti į versiją {version}",
     "Remove" : "Šalinti",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Ši programėlė neturi priskirtos žemiausios „Nextcloud“ versijos. Ateityje tai bus klaida.",
