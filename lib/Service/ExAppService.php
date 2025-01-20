@@ -60,6 +60,7 @@ class ExAppService {
 		private readonly SettingsService            $settingsService,
 		private readonly ExAppEventsListenerService $eventsListenerService,
 		private readonly ExAppOccService            $occService,
+		private readonly ExAppDeployOptionsService  $deployOptionsService,
 		private readonly IConfig                    $config,
 	) {
 		if ($cacheFactory->isAvailable()) {
@@ -128,6 +129,7 @@ class ExAppService {
 		$this->exAppArchiveFetcher->removeExAppFolder($appId);
 		$this->eventsListenerService->unregisterExAppEventListeners($appId);
 		$this->occService->unregisterExAppOccCommands($appId);
+		$this->deployOptionsService->removeExAppDeployOptions($appId);
 		$this->unregisterExAppWebhooks($appId);
 		$r = $this->exAppMapper->deleteExApp($appId);
 		if ($r !== 1) {
@@ -256,9 +258,10 @@ class ExAppService {
 		$this->settingsService->resetCacheEnabled();
 		$this->eventsListenerService->resetCacheEnabled();
 		$this->occService->resetCacheEnabled();
+		$this->deployOptionsService->resetCache();
 	}
 
-	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo): array {
+	public function getAppInfo(string $appId, ?string $infoXml, ?string $jsonInfo, ?array $deployOptions = null): array {
 		$extractedDir = '';
 		if ($jsonInfo !== null) {
 			$appInfo = json_decode($jsonInfo, true);
@@ -299,6 +302,34 @@ class ExAppService {
 						$this->logger->error(sprintf('Invalid access level `%s` for route `%s` in ExApp `%s`', $route['access_level'], $route['url'], $appId));
 					}
 				}, $appInfo['external-app']['routes']);
+			}
+			// Advanced deploy options
+			if (isset($appInfo['external-app']['environment-variables']['variable'])) {
+				$envVars = [];
+				foreach ($appInfo['external-app']['environment-variables']['variable'] as $envVar) {
+					$envVars[$envVar['name']] = [
+						'name' => $envVar['name'],
+						'displayName' => $envVar['display-name'] ?? '',
+						'description' => $envVar['description'] ?? '',
+						'default' => $envVar['default'] ?? '',
+						'value' => $envVar['default'] ?? '',
+					];
+				}
+				if (isset($deployOptions['environment_variables']) && count(array_keys($deployOptions['environment_variables'])) > 0) {
+					// override with given deploy options values
+					foreach ($deployOptions['environment_variables'] as $key => $value) {
+						if (array_key_exists($key, $envVars)) {
+							$envVars[$key]['value'] = $value['value'] ?? $value ?? '';
+						}
+					}
+				}
+				$envVars = array_filter($envVars, function ($envVar) {
+					return $envVar['value'] !== '';
+				});
+				$appInfo['external-app']['environment-variables'] = $envVars;
+			}
+			if (isset($deployOptions['mounts'])) {
+				$appInfo['external-app']['mounts'] = $deployOptions['mounts'];
 			}
 			if ($extractedDir) {
 				if (file_exists($extractedDir . '/l10n')) {

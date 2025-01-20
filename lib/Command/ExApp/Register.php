@@ -55,6 +55,10 @@ class Register extends Command {
 		$this->addOption('wait-finish', null, InputOption::VALUE_NONE, 'Wait until finish');
 		$this->addOption('silent', null, InputOption::VALUE_NONE, 'Do not print to console');
 		$this->addOption('test-deploy-mode', null, InputOption::VALUE_NONE, 'Test deploy mode with additional status checks and slightly different logic');
+
+		// Advanced deploy options
+		$this->addOption('env', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional deploy options (ENV_NAME=ENV_VALUE), passed to ExApp container as environment variables');
+		$this->addOption('mount', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Optional mount options (SRC_PATH:DST_PATH or SRC_PATH:DST_PATH:ro|rw), passed to ExApp container as volume mounts only if the app declares those variables in its info.xml');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -73,8 +77,35 @@ class Register extends Command {
 			$this->exAppService->unregisterExApp($appId);
 		}
 
+		$deployOptions = [];
+		$envs = $input->getOption('env') ?? [];
+		// Parse array of deploy options strings (ENV_NAME=ENV_VALUE) to array key => value
+		$envs = array_reduce($envs, function ($carry, $item) {
+			$parts = explode('=', $item, 2);
+			if (count($parts) === 2) {
+				$carry[$parts[0]] = $parts[1];
+			}
+			return $carry;
+		}, []);
+		$deployOptions['environment_variables'] = $envs;
+
+		$mounts = $input->getOption('mount') ?? [];
+		// Parse array of mount options strings (HOST_PATH:CONTAINER_PATH:ro|rw)
+		// to array of arrays ['source' => HOST_PATH, 'target' => CONTAINER_PATH, 'mode' => ro|rw]
+		$mounts = array_reduce($mounts, function ($carry, $item) {
+			$parts = explode(':', $item, 3);
+			if (count($parts) === 3) {
+				$carry[] = ['source' => $parts[0], 'target' => $parts[1], 'mode' => $parts[2]];
+			} elseif (count($parts) === 2) {
+				$carry[] = ['source' => $parts[0], 'target' => $parts[1], 'mode' => 'rw'];
+			}
+			return $carry;
+		}, );
+		$deployOptions['mounts'] = $mounts;
+
 		$appInfo = $this->exAppService->getAppInfo(
-			$appId, $input->getOption('info-xml'), $input->getOption('json-info')
+			$appId, $input->getOption('info-xml'), $input->getOption('json-info'),
+			$deployOptions
 		);
 		if (isset($appInfo['error'])) {
 			$this->logger->error($appInfo['error']);
@@ -86,7 +117,7 @@ class Register extends Command {
 		$appId = $appInfo['id'];  # value from $appInfo should have higher priority
 
 		$daemonConfigName = $input->getArgument('daemon-config-name');
-		if (!isset($daemonConfigName)) {
+		if (!isset($daemonConfigName) || $daemonConfigName === '') {
 			$daemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
 		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);

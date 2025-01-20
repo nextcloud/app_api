@@ -17,6 +17,7 @@ use OCA\AppAPI\Db\DaemonConfig;
 
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
+use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
 
@@ -38,15 +39,16 @@ class DockerActions implements IDeployActions {
 	private bool $useSocket = false;  # for `pullImage` function, to detect can be stream used or not.
 
 	public function __construct(
-		private readonly LoggerInterface     $logger,
-		private readonly IConfig             $config,
-		private readonly ICertificateManager $certificateManager,
-		private readonly IAppManager         $appManager,
-		private readonly IURLGenerator       $urlGenerator,
-		private readonly AppAPICommonService $service,
-		private readonly ExAppService		 $exAppService,
-		private readonly ITempManager        $tempManager,
-		private readonly ICrypto			 $crypto,
+		private readonly LoggerInterface           $logger,
+		private readonly IConfig                   $config,
+		private readonly ICertificateManager       $certificateManager,
+		private readonly IAppManager               $appManager,
+		private readonly IURLGenerator             $urlGenerator,
+		private readonly AppAPICommonService       $service,
+		private readonly ExAppService		       $exAppService,
+		private readonly ITempManager              $tempManager,
+		private readonly ICrypto			       $crypto,
+		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 	) {
 	}
 
@@ -95,6 +97,10 @@ class DockerActions implements IDeployActions {
 		if (isset($result['error'])) {
 			return $result['error'];
 		}
+
+		$this->exAppDeployOptionsService->removeExAppDeployOptions($exApp->getAppid());
+		$this->exAppDeployOptionsService->addExAppDeployOptions($exApp->getAppid(), $params['deploy_options']);
+
 		$this->exAppService->setAppDeployProgress($exApp, 99);
 		if (!$this->waitTillContainerStart($containerName, $daemonConfig)) {
 			return 'container startup failed';
@@ -348,6 +354,20 @@ class DockerActions implements IDeployActions {
 					$containerParams['HostConfig']['Devices'] = $this->buildDevicesParams(['/dev/kfd', '/dev/dri']);
 				}
 			}
+		}
+
+		if (isset($params['mounts'])) {
+			$containerParams['HostConfig']['Mounts'] = array_merge(
+				$containerParams['HostConfig']['Mounts'] ?? [],
+				array_map(function ($mount) {
+					return [
+						'Source' => $mount['source'],
+						'Target' => $mount['target'],
+						'Type' => 'bind', // we don't support other types for now
+						'ReadOnly' => $mount['mode'] === 'ro',
+					];
+				}, $params['mounts'])
+			);
 		}
 
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
@@ -677,6 +697,7 @@ class DockerActions implements IDeployActions {
 			'port' => $appInfo['port'],
 			'storage' => $storage,
 			'secret' => $appInfo['secret'],
+			'environment_variables' => $appInfo['external-app']['environment-variables'] ?? [],
 		], $deployConfig);
 
 		$containerParams = [
@@ -688,11 +709,16 @@ class DockerActions implements IDeployActions {
 			'computeDevice' => $deployConfig['computeDevice'] ?? null,
 			'devices' => $devices,
 			'deviceRequests' => $deviceRequests,
+			'mounts' => $appInfo['external-app']['mounts'] ?? [],
 		];
 
 		return [
 			'image_params' => $imageParams,
 			'container_params' => $containerParams,
+			'deploy_options' => [
+				'environment_variables' => $appInfo['external-app']['environment-variables'] ?? [],
+				'mounts' => $appInfo['external-app']['mounts'] ?? [],
+			]
 		];
 	}
 
@@ -718,6 +744,12 @@ class DockerActions implements IDeployActions {
 				$autoEnvs[] = sprintf('NVIDIA_DRIVER_CAPABILITIES=%s', 'compute,utility');
 			}
 		}
+
+		// Appending additional deploy options to container envs
+		foreach (array_keys($params['environment_variables']) as $envKey) {
+			$autoEnvs[] = sprintf('%s=%s', $envKey, $params['environment_variables'][$envKey]['value'] ?? '');
+		}
+
 		return $autoEnvs;
 	}
 
