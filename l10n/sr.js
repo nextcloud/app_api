@@ -89,7 +89,7 @@ OC.L10N.register(
     "Wait for initialization step to finish" : "Чека се да се заврши корак иницијализације",
     "Enabled" : "укључено",
     "Check if ExApp successfully handled the enabled event and registered all stuff properly" : "Проверава да ли је ExApp успешно обрадила уљкучени догађај и регистровала све ствари како треба",
-    "Only if ExApp container is preset" : "Само ако је присутан ExApp контејтнер",
+    "Only if ExApp container is preset" : "Само ако је присутан ExApp контејнер",
     "Deploy test passed successfully!" : "Тест постављања је успешно прошао!",
     "Deploy test failed at step \"{step}\"" : "Тест постављања је пао на кораку „{step}”",
     "Edit Deploy Daemon" : "Уреди Даемона за постављање",

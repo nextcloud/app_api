@@ -14,6 +14,7 @@ OC.L10N.register(
     "Could not perform update of ExApp" : "無法執行 ExApp 的更新",
     "ExApp not found, failed to get logs" : "找不到 ExApp，無法取得紀錄檔",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "無法取得容器紀錄檔。注意：下載 Docker 容器僅適用於有 json 檔案或 journald 紀錄檔驅動程式的容器。錯誤：%s",
+    "ExApp not found, failed to get deploy options" : "找不到 ExApp，無法取得部署選項",
     "AppAPI authentication failed" : "AppAPI 驗證失敗",
     "AppAPI ExApp notifier" : "AppAPI ExApp 通知",
     "AppAPI" : "AppAPI",
