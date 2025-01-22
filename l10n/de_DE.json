@@ -12,6 +12,7 @@
     "Could not perform update of ExApp" : "Update von ExApp konnte nicht durchgeführt werden",
     "ExApp not found, failed to get logs" : "ExApp nicht gefunden, Protokolle konnten nicht abgerufen werden",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Containerprotokolle konnten nicht abgerufen werden. Hinweis: Das Herunterladen des Docker-Containers funktioniert nur für Container mit der JSON-Datei oder dem Journald-Protokollierungstreiber. Fehler: %s",
+    "ExApp not found, failed to get deploy options" : "ExApp nicht gefunden, Bereitstellungsoptionen konnten nicht abgerufen werden",
     "AppAPI authentication failed" : "AppAPI-Authentifizierung fehlgeschlagen",
     "AppAPI ExApp notifier" : "AppAPI ExApp Benachrichtigung",
     "AppAPI" : "AppAPI",
