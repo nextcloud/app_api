@@ -12,6 +12,7 @@
     "Could not perform update of ExApp" : "Níorbh fhéidir nuashonrú ExApp a dhéanamh",
     "ExApp not found, failed to get logs" : "ExApp gan aimsiú, theip ar logaí a fháil",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Theip ar logaí coimeádán a fháil. Nóta: Ní oibríonn íoslódálacha coimeádán Docker ach do shoithí a bhfuil an tiománaí logála json-file nó journald acu. Earráid: %s",
+    "ExApp not found, failed to get deploy options" : "ExApp gan aimsiú, theip ar na roghanna imlonnaithe a fháil",
     "AppAPI authentication failed" : "Theip ar fhíordheimhniú AppAPI",
     "AppAPI ExApp notifier" : "AppAPI fógra exApp",
     "AppAPI" : "AppAPI",

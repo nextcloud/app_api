@@ -68,7 +68,7 @@ OC.L10N.register(
     "Failed to connect to Daemon. Check the logs" : "Produciuse un fallo ao conectar o servizo. Comprobe os rexistros",
     "Failed to check connection to Daemon. Check the logs" : "Produciuse un fallo ao comprobar a conexión co servizo. Comprobe os rexistros",
     "Registered Deploy daemons list" : "Lista de servizos de despregadura rexistrados",
-    "No Deploy daemons configured" : "Non se configurou ningún servizo de despregadura",
+    "No Deploy daemons configured" : "Non hai ningún servizo de despregadura configurado",
     "Register a custom one or setup from available templates" : "Rexistre un personalizado ou configúreo a partir dos modelos dispoñíbeis",
     "Register Daemon" : "Rexistrar o servizo",
     "AppAPI will try to install small skeleton ExApp to verify Daemon configured correctly and deployment steps are passing." : "AppAPI tentará instalar un pequeno esqueleto de aplicación externa (ExApp) para verificar que o servizo está configurado correctamente e que se están a cumprir os pasos da despregadura.",
