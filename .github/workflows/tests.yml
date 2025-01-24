@@ -55,13 +55,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ github.ref_name }}
+          ref: stable31
 
       - name: Checkout Notifications
         uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
-          ref: ${{ github.ref_name }}
+          ref: stable31
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -163,13 +163,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ github.ref_name }}
+          ref: stable31
 
       - name: Checkout Notifications
         uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
-          ref: ${{ github.ref_name }}
+          ref: stable31
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -276,13 +276,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ github.ref_name }}
+          ref: stable31
 
       - name: Checkout Notifications
         uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
-          ref: ${{ github.ref_name }}
+          ref: stable31
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -398,13 +398,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ github.ref_name }}
+          ref: stable31
 
       - name: Checkout Notifications
         uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
-          ref: ${{ github.ref_name }}
+          ref: stable31
           path: apps/notifications
 
       - name: Checkout AppAPI
