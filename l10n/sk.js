@@ -9,6 +9,7 @@ OC.L10N.register(
     "Delete" : "Vymazať",
     "Default" : "Predvolené",
     "Edit" : "Upraviť",
+    "Password confirmation failed" : "Overenie hesla zlyhalo",
     "Deploy Daemon" : "Nasadiť proces služby",
     "Name" : "Názov",
     "Host" : "Adresa servera",
