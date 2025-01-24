@@ -4,9 +4,9 @@ name: Tests
 
 on:
   pull_request:
-    branches: [main]
+    branches: [stable31]
   push:
-    branches: [main]
+    branches: [stable31]
   workflow_dispatch:
 
 permissions:
@@ -27,12 +27,7 @@ env:
 jobs:
   nc-py-api-pgsql:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }} • PgSQL
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: [ '8.3' ]
-        server-version: [ 'master' ]
+    name: NC_Py_API • PgSQL
     env:
       DATABASE_PGSQL: 1
 
@@ -60,13 +55,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ matrix.server-version }}
+          ref: stable31
 
       - name: Checkout Notifications
         uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
-          ref: ${{ matrix.server-version }}
+          ref: stable31
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -74,18 +69,10 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Checkout Notes
-        uses: actions/checkout@v4
-        if: ${{ !startsWith(matrix.server-version, 'master') }}
-        with:
-          repository: nextcloud/notes
-          ref: "main"
-          path: apps/notes
-
-      - name: Set up php ${{ matrix.php-version }}
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
           coverage: none
           ini-file: development
@@ -113,10 +100,6 @@ jobs:
             --admin-user admin --admin-pass admin
           ./occ app:enable notifications
           ./occ app:enable --force ${{ env.APP_NAME }}
-
-      - name: Enable Notes
-        if: ${{ !startsWith(matrix.server-version, 'master') }}
-        run: ./occ app:enable notes
 
       - name: Run Nextcloud
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
@@ -150,13 +133,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pgsql_nc_py_api_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          name: pgsql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-py-api-mysql:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • master • 8.3 • MySQL
+    name: NC_Py_API • MySQL
 
     services:
       mysql:
@@ -180,13 +163,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable31
 
       - name: Checkout Notifications
         uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
-          ref: master
+          ref: stable31
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -194,7 +177,7 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.3
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: '8.3'
@@ -263,13 +246,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mysql_nc_py_api_master_8.3_nextcloud.log
+          name: mysql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-py-api-mysql-apcu:
     runs-on: ubuntu-22.04
-    name: APCu • NC_Py_API • master • 8.3 • MySQL
+    name: APCu • NC_Py_API • MySQL
 
     services:
       mysql:
@@ -293,13 +276,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable31
 
       - name: Checkout Notifications
         uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
-          ref: master
+          ref: stable31
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -307,7 +290,7 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php 8.3
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: '8.3'
@@ -379,17 +362,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: apcu_mysql_nc_py_api_master_8.3_nextcloud.log
+          name: apcu_mysql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-py-api-oci:
     runs-on: ubuntu-22.04
-    name: NC_Py_API • ${{ matrix.server-version }} • 8.3 • Oracle
-    strategy:
-      fail-fast: false
-      matrix:
-        server-version: [ 'master' ]
+    name: NC_Py_API • Oracle
 
     services:
       oracle:
@@ -419,13 +398,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ matrix.server-version }}
+          ref: stable31
 
       - name: Checkout Notifications
         uses: actions/checkout@v4
         with:
           repository: nextcloud/notifications
-          ref: ${{ matrix.server-version }}
+          ref: stable31
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -495,7 +474,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: oci_nc_py_api_${{ matrix.server-version }}_8.3_nextcloud.log
+          name: oci_nc_py_api_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
