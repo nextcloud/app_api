@@ -128,6 +128,7 @@ OC.L10N.register(
     "External Apps" : "Apps Externas",
     "Update to {version}" : "Actualizar a {version}",
     "Remove" : "Quitar",
+    "Delete data on remove" : "Eliminar datos al borrar",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Esta app no tiene una versión mínima de Nextcloud asignada. Esto será un error en el futuro.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Esta app no tiene una versión máxima de Nextcloud asignada. Esto será un error en el futuro.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Esta aplicación no puede instalarse porque las siguientes dependencias no están cumplimentadas:",
