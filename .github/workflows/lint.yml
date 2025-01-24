@@ -5,7 +5,7 @@ name: Lint
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [stable31]
   workflow_dispatch:
 
 permissions:
