@@ -12,6 +12,7 @@
     "Could not perform update of ExApp" : "ExApp güncellemesi yapılamadı",
     "ExApp not found, failed to get logs" : "ExApp bulunamadı. Günlük kayıtları alınamadı",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Kapsayıcı günlükleri alınamadı. Not: Docker kapsayıcısının indirilmesi yalnızca json-file veya journald günlük sürücüsünü kullanan kapsayıcılarla çalışır. Hata: %s",
+    "ExApp not found, failed to get deploy options" : "ExApp bulunamadı. dağıtım seçenekleri alınamadı",
     "AppAPI authentication failed" : "AppAPI kimliği doğrulanamadı ",
     "AppAPI ExApp notifier" : "AppAPI ExApp bildirimi",
     "AppAPI" : "AppAPI",
