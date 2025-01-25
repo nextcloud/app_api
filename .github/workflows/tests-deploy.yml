@@ -19,12 +19,7 @@ concurrency:
 jobs:
   nc-host-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Host • ${{ matrix.server-version }} • 🐘${{ matrix.php-version }}
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: [ '8.3' ]
-        server-version: [ 'master' ]
+    name: NC In Host
 
     services:
       postgres:
@@ -46,17 +41,17 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: ${{ matrix.server-version }}
+          ref: master
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Set up php ${{ matrix.php-version }}
+      - name: Set up php
         uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
           coverage: none
           ini-file: development
@@ -120,7 +115,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.json
+          name: nc_host_app_docker_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -128,7 +123,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_container.log
+          name: nc_host_app_docker_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -136,13 +131,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_${{ matrix.server-version }}_${{ matrix.php-version }}_nextcloud.log
+          name: nc_host_app_docker_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-docker-app-docker:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker • 🐘8.3
+    name: NC In Julius Docker
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
 
@@ -228,7 +223,7 @@ jobs:
 
   nc-docker-dsp-http:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker(DSP-HTTP) • 🐘8.3
+    name: NC In Julius Docker(DSP-HTTP)
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
 
@@ -318,7 +313,7 @@ jobs:
 
   nc-docker-dsp-https-bridge:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker(DSP-HTTPS-BRIDGE) • 🐘8.3
+    name: NC In Julius Docker(DSP-HTTPS-BRIDGE)
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
 
@@ -448,7 +443,7 @@ jobs:
 
   nc-docker-dsp-https:
     runs-on: ubuntu-22.04
-    name: NC In Julius Docker(DSP-HTTPS) • 🐘8.3
+    name: NC In Julius Docker(DSP-HTTPS)
     env:
       docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
 
@@ -571,7 +566,7 @@ jobs:
 
   nc-host-app-docker-redis:
     runs-on: ubuntu-22.04
-    name: NC In Host(Redis) • master • 🐘8.3
+    name: NC In Host(Redis)
 
     services:
       postgres:
@@ -689,7 +684,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_master_8.3_container.json
+          name: nc_host_app_docker_redis_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -697,7 +692,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_master_8.3_container.log
+          name: nc_host_app_docker_redis_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -705,13 +700,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_master_8.3_nextcloud.log
+          name: nc_host_app_docker_redis_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-host-app-docker-redis-deploy-options:
     runs-on: ubuntu-22.04
-    name: NC In Host(Redis) Deploy options • master • 🐘8.3
+    name: NC In Host(Redis) Deploy options
 
     services:
       postgres:
@@ -849,7 +844,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_deploy_options_master_8.3_container.json
+          name: nc_host_app_docker_redis_deploy_options_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -857,7 +852,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_deploy_options_master_8.3_container.log
+          name: nc_host_app_docker_redis_deploy_options_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -865,13 +860,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_app_docker_redis_deploy_options_master_8.3_nextcloud.log
+          name: nc_host_app_docker_redis_deploy_options_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
   nc-host-network-host:
     runs-on: ubuntu-22.04
-    name: NC In Host(network=host)  • master • 🐘8.3
+    name: NC In Host(network=host)
 
     services:
       postgres:
@@ -969,7 +964,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_network_host_master_8.2_container.json
+          name: nc_host_network_host_container.json
           path: container.json
           if-no-files-found: warn
 
@@ -977,7 +972,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_network_host_master_8.2_container.log
+          name: nc_host_network_host_container.log
           path: container.log
           if-no-files-found: warn
 
@@ -985,7 +980,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nc_host_network_host_master_8.2_nextcloud.log
+          name: nc_host_network_host_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
