@@ -6,7 +6,8 @@ OC.L10N.register(
     "Delete" : "Ištrinti",
     "Default" : "Numatytasis",
     "Edit" : "Taisyti",
-    "Name" : "Vardas",
+    "Name" : "Pavadinimas",
+    "Protocol" : "Protokolas",
     "Host" : "Serveris",
     "Nextcloud URL" : "Nextcloud URL",
     "More info" : "Daugiau informacijos",
@@ -56,6 +57,7 @@ OC.L10N.register(
     "Disable" : "Išjungti",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Ši programėlė nėra pažymėta kaip suderinama su jūsų Nextcloud versija. Jei tęsite, vis tiek galėsite įdiegti programėlę. Turėkite omenyje, kad programėlė gali neveikti taip, kaip tikimasi.",
     "An error occurred during the request. Unable to proceed." : "Užklausos metu įvyko klaida. Nepavyksta tęsti.",
+    "The app has been enabled but needs to be updated." : "Programėlė įjungta, bet turi būti atnaujinta.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Klaida: Ši programėlė negali būti įjungta, nes ji neigiamai veikia serverio stabilumą"
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");
