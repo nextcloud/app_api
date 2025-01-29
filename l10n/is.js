@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Hætta við",
     "Delete" : "Eyða",
+    "Default" : "Sjálfgefið",
     "Edit" : "Breyta",
     "Name" : "Heiti",
     "Host" : "Þjónn",
