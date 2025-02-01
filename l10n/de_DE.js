@@ -78,7 +78,7 @@ OC.L10N.register(
     "Remove test ExApp" : "Test-ExApp entfernen",
     "Start Deploy test" : "Bereitstellungstest starten",
     "Stop Deploy test" : "Bereitstellungstest anhalten",
-    "ExApp is unregistered and container is removed on \"Stop deploy test\"" : "ExApp ist nicht registriert und der Container wird bei Auswahl von „Bereitstellungstest beenden“ entfernt.",
+    "ExApp is unregistered and container is removed on \"Stop deploy test\"" : "ExApp ist nicht registriert und der Container wird bei Auswahl von \"Bereitstellungstest beenden\" entfernt.",
     "Register ExApp in Nextcloud" : "ExApp in Nextcloud registrieren",
     "Check if the ExApp is registered in Nextcloud before deployment" : "Überprüfen Sie vor der Bereitstellung, ob die ExApp in Nextcloud registriert ist",
     "Image pull" : "Image abrufen",
