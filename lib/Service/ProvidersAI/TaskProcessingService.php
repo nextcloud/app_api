@@ -24,6 +24,7 @@ use Psr\Log\LoggerInterface;
 
 class TaskProcessingService {
 	private ?ICache $cache = null;
+	private ?array $registeredProviders = null;
 
 	public function __construct(
 		ICacheFactory $cacheFactory,
@@ -42,6 +43,9 @@ class TaskProcessingService {
 	 */
 	public function getRegisteredTaskProcessingProviders(): array {
 		try {
+			if ($this->registeredProviders !== null) {
+				return $this->registeredProviders;
+			}
 			$cacheKey = '/ex_task_processing_providers';
 			$records = $this->cache?->get($cacheKey);
 			if ($records === null) {
@@ -49,7 +53,7 @@ class TaskProcessingService {
 				$this->cache?->set($cacheKey, $records);
 			}
 
-			return array_map(static function ($record) {
+			return $this->registeredProviders = array_map(static function ($record) {
 				return new TaskProcessingProvider($record);
 			}, $records);
 		} catch (Exception) {
