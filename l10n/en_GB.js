@@ -14,6 +14,7 @@ OC.L10N.register(
     "Could not perform update of ExApp" : "Could not perform update of ExApp",
     "ExApp not found, failed to get logs" : "ExApp not found, failed to get logs",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s",
+    "ExApp not found, failed to get deploy options" : "ExApp not found, failed to get deploy options",
     "AppAPI authentication failed" : "AppAPI authentication failed",
     "AppAPI ExApp notifier" : "AppAPI ExApp notifier",
     "AppAPI" : "AppAPI",

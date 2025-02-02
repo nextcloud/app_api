@@ -14,6 +14,7 @@ OC.L10N.register(
     "Could not perform update of ExApp" : "تعذّر تنفيذ عملية تحديث ExApp",
     "ExApp not found, failed to get logs" : "تعذّر العثور على التطبيق الخارحي ExApp. و فشل في الحصول على سجلات الحركة logs",
     "Failed to get container logs. Note: Downloading Docker container works only for containers with the json-file or journald logging driver. Error: %s" : "تعذّر الحصول على سجلات الحاوية container logs. ملاحظة: تنزيل حاوية Docker يعمل فقط مع الحاويات التي تحتوي على ملف json أو برنامج تشغيل تسجيل Journald. الخطأ: %s",
+    "ExApp not found, failed to get deploy options" : "التطبيق الخارجي ExApp غير موجود. تعذّر الحصول على خيارات النشر",
     "AppAPI authentication failed" : "فشل تصديق الهُويَّة في AppAPI",
     "AppAPI ExApp notifier" : "مُنبِّه واجهة AppAPI التطبيق الخارجي ExApp",
     "AppAPI" : "واجهة AppAPO",
