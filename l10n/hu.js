@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Mégse",
     "Delete" : "Törlés",
+    "Default" : "Alapértelmezett",
     "Edit" : "Szerkesztés",
     "Name" : "Név",
     "Host" : "Kiszolgáló",

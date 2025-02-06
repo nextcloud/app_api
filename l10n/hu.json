@@ -1,6 +1,7 @@
 { "translations": {
     "Cancel" : "Mégse",
     "Delete" : "Törlés",
+    "Default" : "Alapértelmezett",
     "Edit" : "Szerkesztés",
     "Name" : "Név",
     "Host" : "Kiszolgáló",
