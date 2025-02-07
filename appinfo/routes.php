@@ -60,7 +60,7 @@ return [
 		['name' => 'DaemonConfig#getTestDeployStatus', 'url' => '/daemons/{name}/test_deploy/status', 'verb' => 'GET'],
 
 		// HaRP actions
-		['name' => 'Harp#getExAppsMetadata', 'url' => '/harp/exapps-meta', 'verb' => 'GET'],
+		['name' => 'Harp#getExAppMetadata', 'url' => '/harp/exapp-meta', 'verb' => 'GET'],
 	],
 	'ocs' => [
 		// Logging

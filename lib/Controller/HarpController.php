@@ -10,8 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
-use OCA\AppAPI\Db\ExAppMapper;
-
+use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -24,9 +23,9 @@ class HarpController extends Controller {
 	protected $request;
 
 	public function __construct(
-		IRequest                     $request,
-		private readonly IAppConfig  $appConfig,
-		private readonly ExAppMapper $exAppMapper,
+		IRequest                      $request,
+		private readonly IAppConfig   $appConfig,
+		private readonly ExAppService $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -45,7 +44,7 @@ class HarpController extends Controller {
 
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function getExAppsMetadata(): DataResponse {
+	public function getExAppMetadata(string $appId): DataResponse {
 		// todo: temporary solution to use app config
 		$harpKey = $this->appConfig->getValueString(Application::APP_ID, 'harp_shared_key');
 		$headerHarpKey = $this->request->getHeader('HARP-SHARED-KEY');
@@ -53,25 +52,20 @@ class HarpController extends Controller {
 			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
 		}
 
-		$exApps = $this->exAppMapper->findAll();
-		$resp = ['ex_apps' => []];
-		foreach ($exApps as $exApp) {
-			$resp['ex_apps'][$exApp->getAppid()] = [
-				'exapp_token' => $exApp->getSecret(),
-				'exapp_version' => $exApp->getVersion(),
-				'port' => $exApp->getPort(),
-				'routes' => array_map(function ($route) {
-					$accessLevel = $this->mapExAppRouteAccessLevelNumberToName($route['access_level']);
-					$bruteforceList = json_decode($route['bruteforce_protection'], true) ?? [];
-					return [
-						'url' => $route['url'],
-						'access_level' => $accessLevel,
-						'bruteforce_protection' => $bruteforceList,
-					];
-				}, $exApp->getRoutes()),
-			];
-		}
-
-		return new DataResponse($resp);
+		$exApp = $this->exAppService->getExApp($appId);
+		return new DataResponse([
+			'exapp_token' => $exApp->getSecret(),
+			'exapp_version' => $exApp->getVersion(),
+			'port' => $exApp->getPort(),
+			'routes' => array_map(function ($route) {
+				$accessLevel = $this->mapExAppRouteAccessLevelNumberToName($route['access_level']);
+				$bruteforceList = json_decode($route['bruteforce_protection'], true) ?? [];
+				return [
+					'url' => $route['url'],
+					'access_level' => $accessLevel,
+					'bruteforce_protection' => $bruteforceList,
+				];
+			}, $exApp->getRoutes()),
+		]);
 	}
 }
