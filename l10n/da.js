@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Annullér",
     "Delete" : "Slet",
+    "Default" : "Standard",
     "Edit" : "Redigér",
     "Name" : "Navn",
     "Host" : "Vært",
