@@ -306,6 +306,9 @@ class ExAppService {
 			// Advanced deploy options
 			if (isset($appInfo['external-app']['environment-variables']['variable'])) {
 				$envVars = [];
+				if (!isset($appInfo['external-app']['environment-variables']['variable'][0])) {
+					$appInfo['external-app']['environment-variables']['variable'] = [$appInfo['external-app']['environment-variables']['variable']];
+				}
 				foreach ($appInfo['external-app']['environment-variables']['variable'] as $envVar) {
 					$envVars[$envVar['name']] = [
 						'name' => $envVar['name'],
