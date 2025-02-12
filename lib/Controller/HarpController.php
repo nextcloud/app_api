@@ -41,16 +41,6 @@ class HarpController extends Controller {
 		$this->request = $request;
 	}
 
-	public function mapExAppRouteAccessLevelNumberToName(int $accessLevel): string {
-		return match($accessLevel) {
-			0 => 'PUBLIC',
-			1 => 'USER',
-			2 => 'ADMIN',
-			// most restrictive access level
-			default => 'ADMIN',
-		};
-	}
-
 	private function validateHarpSharedKey(array $metadata = []): bool {
 		$harpKey = $this->appConfig->getValueString(Application::APP_ID, 'harp_shared_key');
 		$headerHarpKey = $this->request->getHeader('HARP-SHARED-KEY');
@@ -79,23 +69,26 @@ class HarpController extends Controller {
 			return new DataResponse(['message' => 'ExApp not found'], Http::STATUS_NOT_FOUND);
 		}
 
-		return new DataResponse([
+		// todo
+		$val = [
 			'exapp_token' => $exApp->getSecret(),
 			'exapp_version' => $exApp->getVersion(),
 			'port' => $exApp->getPort(),
 			'routes' => array_map(function ($route) {
-				$accessLevel = $this->mapExAppRouteAccessLevelNumberToName($route['access_level']);
 				$bruteforceList = json_decode($route['bruteforce_protection'], true);
 				if (!$bruteforceList) {
 					$bruteforceList = [];
 				}
 				return [
 					'url' => $route['url'],
-					'access_level' => $accessLevel,
+					'access_level' => $route['access_level'],
 					'bruteforce_protection' => $bruteforceList,
 				];
 			}, $exApp->getRoutes()),
-		]);
+		];
+		// todo
+		$this->logger->error('ExApp metadata', $val);
+		return new DataResponse($val);
 	}
 
 	protected function isUserEnabled(string $userId): bool {
@@ -113,41 +106,15 @@ class HarpController extends Controller {
 		return true;
 	}
 
-	// todo: remove this
-	// protected function validateToken(string $tokenId): bool {
-	// 	try {
-	// 		$dbToken = $this->tokenProvider->getToken($tokenId);
-	// 	} catch (InvalidTokenException $ex) {
-	// 		$this->logger->debug('Invalid token', ['exception' => $ex]);
-	// 		return false;
-	// 	}
-
-	// 	try {
-	// 		$pwd = $this->tokenProvider->getPassword($dbToken, $tokenId);
-	// 	} catch (InvalidTokenException $ex) {
-	// 		$this->logger->debug('Invalid token', ['exception' => $ex]);
-	// 		return false;
-	// 	} catch (PasswordlessTokenException $ex) {
-	// 		$this->logger->debug('Password-less token, accepting', ['exception' => $ex]);
-	// 		if ($this->isUserEnabled($dbToken->getUID())) {
-	// 			return true;
-	// 		}
-	// 		return false;
-	// 	}
-
-	// 	if ($this->userManager->checkPassword($dbToken->getLoginName(), $pwd) === false) {
-	// 		// don't do anything, just return false
-	// 		return false;
-	// 	}
-
-	// 	return $this->isUserEnabled($dbToken->getUID());
-	// }
-
 	/**
-	 * @return DataResponse { user_id: string|null, access_level: string }
+	 * access_level:
+	 * 0: PUBLIC
+	 * 1: USER
+	 * 2: ADMIN
+	 * @return DataResponse { user_id: string|null, access_level: int }
 	 */
 	#[PublicPage]
-	#[NoCSRFRequired]
+	// #[NoCSRFRequired]
 	public function getUserInfo(string $tokenId): DataResponse {
 		if (!$this->validateHarpSharedKey(['tokenId' => $tokenId])) {
 			return new DataResponse(['message' => 'Invalid token'], Http::STATUS_UNAUTHORIZED);
@@ -157,7 +124,7 @@ class HarpController extends Controller {
 			$this->logger->debug('No user found in the harp request');
 			return new DataResponse([
 				'user_id' => null,
-				'access_level' => 'PUBLIC',
+				'access_level' => 0, // PUBLIC
 			]);
 		}
 
@@ -165,20 +132,20 @@ class HarpController extends Controller {
 			$this->logger->debug('User is not enabled in the harp request', ['userId' => $this->userId]);
 			return new DataResponse([
 				'user_id' => $this->userId,
-				'access_level' => 'PUBLIC',
+				'access_level' => 0, // PUBLIC
 			]);
 		}
 
 		if ($this->groupManager->isAdmin($this->userId)) {
 			return new DataResponse([
 				'user_id' => $this->userId,
-				'access_level' => 'ADMIN',
+				'access_level' => 2, // ADMIN
 			]);
 		}
 
 		return new DataResponse([
 			'user_id' => $this->userId,
-			'access_level' => 'USER',
+			'access_level' => 1, // USER
 		]);
 	}
 }
