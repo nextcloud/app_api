@@ -37,6 +37,7 @@ class DockerActions implements IDeployActions {
 
 	private Client $guzzleClient;
 	private bool $useSocket = false;  # for `pullImage` function, to detect can be stream used or not.
+	private string $socketAddress;
 
 	public function __construct(
 		private readonly LoggerInterface           $logger,
@@ -465,7 +466,8 @@ class DockerActions implements IDeployActions {
 				$this->logger->info(sprintf('Image(%s) pulled successfully.', $imageId));
 			}
 		} catch (GuzzleException $e) {
-			$r = sprintf('Failed to pull image, GuzzleException occur: %s', $e->getMessage());
+			$urlToLog = $this->useSocket ? $this->socketAddress : $dockerUrl;
+			$r = sprintf('Failed to pull image via "%s", GuzzleException occur: %s', $urlToLog, $e->getMessage());
 		}
 		return $r;
 	}
@@ -661,7 +663,8 @@ class DockerActions implements IDeployActions {
 				return true;
 			}
 		} catch (Exception $e) {
-			$this->logger->error('Could not connect to Docker daemon', ['exception' => $e]);
+			$urlToLog = $this->useSocket ? $this->socketAddress : $url;
+			$this->logger->error('Could not connect to Docker daemon via {url}', ['exception' => $e, 'url' => $urlToLog]);
 			error_log($e->getMessage());
 		}
 		return false;
@@ -823,21 +826,20 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
-		if (file_exists($daemonConfig->getHost())) {
-			return 'http://localhost';
-		}
-		return $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		// When using local socket, we the curl URL needs to be set to http://localhost
+		return $this->isLocalSocket($daemonConfig->getHost()) ? 'http://localhost' : $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
 	}
 
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
 		$guzzleParams = [];
-		if (file_exists($daemonConfig->getHost())) {
+		if ($this->isLocalSocket($daemonConfig->getHost())) {
 			$guzzleParams = [
 				'curl' => [
 					CURLOPT_UNIX_SOCKET_PATH => $daemonConfig->getHost(),
 				],
 			];
 			$this->useSocket = true;
+			$this->socketAddress = $daemonConfig->getHost();
 		} elseif ($daemonConfig->getProtocol() === 'https') {
 			$guzzleParams = $this->setupCerts($guzzleParams);
 		}
@@ -899,5 +901,17 @@ class DockerActions implements IDeployActions {
 				'Capabilities' => [['compute', 'utility']], // Compute and utility capabilities
 			],
 		];
+	}
+
+	private function isLocalSocket(string $host): bool {
+		$isLocalPath = strpos($host, '/') === 0;
+		if ($isLocalPath) {
+			if (!file_exists($host)) {
+				$this->logger->error('Local docker socket path {path} does not exist', ['path' => $host]);
+			} elseif (!is_writable($host)) {
+				$this->logger->error('Local docker socket path {path} is not writable', ['path' => $host]);
+			}
+		}
+		return $isLocalPath;
 	}
 }
