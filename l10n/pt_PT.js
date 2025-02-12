@@ -7,7 +7,7 @@ OC.L10N.register(
     "Edit" : "Editar",
     "Name" : "Nome",
     "Host" : "Anfitrião",
-    "Enabled" : "Activo",
+    "Enabled" : "Ativado",
     "Display name" : "Nome a exibir",
     "Network" : "Rede",
     "Confirm" : "Confirmar",
@@ -29,7 +29,7 @@ OC.L10N.register(
     "Update to {update}" : "Atualizar para {update}",
     "Version" : "Versão",
     "Level" : "Nível",
-    "Actions" : "Acções",
+    "Actions" : "Ações",
     "Results from other categories" : "Resultados de outras categorias",
     "_Update_::_Update all_" : ["Atualizar","Atualizar todos","Atualizar todos"],
     "Type" : "Tipo",
@@ -39,7 +39,7 @@ OC.L10N.register(
     "Changelog" : "Registo de alterações",
     "Disabled apps" : "Apps desativadas",
     "Updates" : "Atualizações",
-    "Enable" : "Activar",
+    "Enable" : "Ativar",
     "Disable" : "Desativar"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
