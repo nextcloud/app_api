@@ -107,7 +107,7 @@ class HarpController extends Controller {
 	 * 0: PUBLIC
 	 * 1: USER
 	 * 2: ADMIN
-	 * @return DataResponse { user_id: string|null, access_level: int }
+	 * @return DataResponse array{ user_id: string, access_level: int }
 	 */
 	#[PublicPage]
 	#[NoCSRFRequired]
@@ -119,7 +119,7 @@ class HarpController extends Controller {
 		if ($this->userId === null) {
 			$this->logger->debug('No user found in the harp request');
 			return new DataResponse([
-				'user_id' => null,
+				'user_id' => '',
 				'access_level' => ExAppRouteAccessLevel::PUBLIC->value,
 			]);
 		}
