@@ -17,6 +17,7 @@ OC.L10N.register(
     "Save" : "Vista",
     "Register" : "Nýskráning",
     "Update to {version}" : "Uppfæra í {version}",
+    "Remove" : "Fjarlægja",
     "Delete data on remove" : "Eyða gögnum við fjarlægingu",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Þetta vorrit er ekki með tiltekna neina lágmarksútgáfu Nextcloud. Þetta mun gefa villu í framtíðinni.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Þetta vorrit er ekki með tiltekna neina hámarksútgáfu Nextcloud. Þetta mun gefa villu í framtíðinni.",
