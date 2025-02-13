@@ -69,8 +69,7 @@ class HarpController extends Controller {
 			return new DataResponse(['message' => 'ExApp not found'], Http::STATUS_NOT_FOUND);
 		}
 
-		// todo
-		$val = [
+		return new DataResponse([
 			'exapp_token' => $exApp->getSecret(),
 			'exapp_version' => $exApp->getVersion(),
 			'port' => $exApp->getPort(),
@@ -85,10 +84,7 @@ class HarpController extends Controller {
 					'bruteforce_protection' => $bruteforceList,
 				];
 			}, $exApp->getRoutes()),
-		];
-		// todo
-		$this->logger->error('ExApp metadata', $val);
-		return new DataResponse($val);
+		]);
 	}
 
 	protected function isUserEnabled(string $userId): bool {
@@ -114,9 +110,9 @@ class HarpController extends Controller {
 	 * @return DataResponse { user_id: string|null, access_level: int }
 	 */
 	#[PublicPage]
-	// #[NoCSRFRequired]
-	public function getUserInfo(string $tokenId): DataResponse {
-		if (!$this->validateHarpSharedKey(['tokenId' => $tokenId])) {
+	#[NoCSRFRequired]
+	public function getUserInfo(): DataResponse {
+		if (!$this->validateHarpSharedKey()) {
 			return new DataResponse(['message' => 'Invalid token'], Http::STATUS_UNAUTHORIZED);
 		}
 
@@ -124,7 +120,7 @@ class HarpController extends Controller {
 			$this->logger->debug('No user found in the harp request');
 			return new DataResponse([
 				'user_id' => null,
-				'access_level' => 0, // PUBLIC
+				'access_level' => ExAppRouteAccessLevel::PUBLIC->value,
 			]);
 		}
 
@@ -132,20 +128,26 @@ class HarpController extends Controller {
 			$this->logger->debug('User is not enabled in the harp request', ['userId' => $this->userId]);
 			return new DataResponse([
 				'user_id' => $this->userId,
-				'access_level' => 0, // PUBLIC
+				'access_level' => ExAppRouteAccessLevel::PUBLIC->value,
 			]);
 		}
 
 		if ($this->groupManager->isAdmin($this->userId)) {
 			return new DataResponse([
 				'user_id' => $this->userId,
-				'access_level' => 2, // ADMIN
+				'access_level' => ExAppRouteAccessLevel::ADMIN->value,
 			]);
 		}
 
 		return new DataResponse([
 			'user_id' => $this->userId,
-			'access_level' => 1, // USER
+			'access_level' => ExAppRouteAccessLevel::USER->value,
 		]);
 	}
+}
+
+enum ExAppRouteAccessLevel: int {
+	case PUBLIC = 0;
+	case USER = 1;
+	case ADMIN = 2;
 }

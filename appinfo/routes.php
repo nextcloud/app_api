@@ -61,7 +61,7 @@ return [
 
 		// HaRP actions
 		['name' => 'Harp#getExAppMetadata', 'url' => '/harp/exapp-meta', 'verb' => 'GET'],
-		['name' => 'Harp#getUserInfo', 'url' => '/harp/user-info', 'verb' => 'POST'],
+		['name' => 'Harp#getUserInfo', 'url' => '/harp/user-info', 'verb' => 'GET'],
 	],
 	'ocs' => [
 		// Logging
