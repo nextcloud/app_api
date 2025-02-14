@@ -445,7 +445,7 @@ class ExAppsPageController extends Controller {
 	#[PasswordConfirmationRequired]
 	public function force(string $appId): JSONResponse {
 		$appId = OC_App::cleanAppId($appId);
-		$this->appManager->ignoreNextcloudRequirementForApp($appId);
+		$this->appManager->overwriteNextcloudRequirement($appId);
 		return new JSONResponse();
 	}
 
