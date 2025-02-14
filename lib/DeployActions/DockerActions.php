@@ -829,7 +829,14 @@ class DockerActions implements IDeployActions {
 
 	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
 		// When using local socket, we the curl URL needs to be set to http://localhost
-		return $this->isLocalSocket($daemonConfig->getHost()) ? 'http://localhost' : $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		$url = $this->isLocalSocket($daemonConfig->getHost())
+			? 'http://localhost'
+			: $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+			// if there is a trailling slash, remove it
+			$url = rtrim($url, '/') . '/exapps/app_api';
+		}
+		return $url;
 	}
 
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
@@ -848,6 +855,12 @@ class DockerActions implements IDeployActions {
 		if (isset($daemonConfig->getDeployConfig()['haproxy_password']) && $daemonConfig->getDeployConfig()['haproxy_password'] !== '') {
 			$haproxyPass = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
 			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $haproxyPass];
+		}
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+			$guzzleParams['headers'] = [
+				'harp-shared-key' => $guzzleParams['auth'][1],
+				'docker-engine-port' => $daemonConfig->getDeployConfig()['harp_docker_socket_port'],
+			];
 		}
 		$this->guzzleClient = new Client($guzzleParams);
 	}

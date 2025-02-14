@@ -48,6 +48,7 @@ class RegisterDaemon extends Command {
 		$this->addOption('harp', null, InputOption::VALUE_NONE, 'Set daemon to use HaRP for all docker and exapp communication');
 		$this->addOption('harp_frp_address', null, InputOption::VALUE_REQUIRED, '[host]:[port] of the HaRP FRP server, default host is same as HaRP host and port is 8782');
 		$this->addOption('harp_shared_key', null, InputOption::VALUE_REQUIRED, 'HaRP shared key for secure communication between HaRP and AppAPI');
+		$this->addOption('harp_docker_socket_port', null, InputOption::VALUE_REQUIRED, '\'remotePort\' of the FRP client of the remote docker socket proxy. There is one included in the harp container so this can be skipped for default setups.', '24000');
 
 		$this->addUsage('manual_install "Manual Install" "manual-install" "http" null "http://nextcloud.local"');
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
@@ -103,6 +104,7 @@ class RegisterDaemon extends Command {
 			'computeDevice' => $this->buildComputeDevice($input->getOption('compute_device') ?? 'cpu'),
 			'harp' => $isHarp,
 			'harp_frp_address' => $input->getOption('harp_frp_address') ?? '',
+			'harp_docker_socket_port' => $input->getOption('harp_docker_socket_port'),
 		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
