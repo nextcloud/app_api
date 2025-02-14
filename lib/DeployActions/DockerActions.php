@@ -736,6 +736,7 @@ class DockerActions implements IDeployActions {
 			sprintf('APP_PORT=%s', $params['port']),
 			sprintf('APP_PERSISTENT_STORAGE=%s', $params['storage']),
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
+			// todo: add frp envs
 		];
 
 		// Always set COMPUTE_DEVICE=CPU|CUDA|ROCM
@@ -759,6 +760,7 @@ class DockerActions implements IDeployActions {
 	public function resolveExAppUrl(
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
+		// todo: check
 		$auth = [];
 		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
 			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
