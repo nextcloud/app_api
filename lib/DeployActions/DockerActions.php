@@ -692,6 +692,13 @@ class DockerActions implements IDeployActions {
 			'image_tag' => (string) ($externalApp['docker-install']['image-tag'] ?? 'latest'),
 		];
 
+		$harpEnvVars = [];
+		if (boolval($deployConfig['harp'] ?? false)) {
+			$harpEnvVars['HP_FRP_ADDRESS'] = explode(':', $deployConfig['harp_frp_address'])[0];
+			$harpEnvVars['HP_FRP_PORT'] = explode(':', $deployConfig['harp_frp_address'])[1];
+			$harpEnvVars['HP_SHARED_KEY'] = $this->crypto->decrypt($deployConfig['haproxy_password']);
+		}
+
 		$envs = $this->buildDeployEnvs([
 			'appid' => $appId,
 			'name' => (string) $appInfo['name'],
@@ -701,6 +708,7 @@ class DockerActions implements IDeployActions {
 			'storage' => $storage,
 			'secret' => $appInfo['secret'],
 			'environment_variables' => $appInfo['external-app']['environment-variables'] ?? [],
+			'harp_env_vars' => $harpEnvVars,
 		], $deployConfig);
 
 		$containerParams = [
@@ -736,7 +744,6 @@ class DockerActions implements IDeployActions {
 			sprintf('APP_PORT=%s', $params['port']),
 			sprintf('APP_PERSISTENT_STORAGE=%s', $params['storage']),
 			sprintf('NEXTCLOUD_URL=%s', $deployConfig['nextcloud_url'] ?? str_replace('https', 'http', $this->urlGenerator->getAbsoluteURL(''))),
-			// todo: add frp envs
 		];
 
 		// Always set COMPUTE_DEVICE=CPU|CUDA|ROCM
@@ -752,6 +759,11 @@ class DockerActions implements IDeployActions {
 		// Appending additional deploy options to container envs
 		foreach (array_keys($params['environment_variables']) as $envKey) {
 			$autoEnvs[] = sprintf('%s=%s', $envKey, $params['environment_variables'][$envKey]['value'] ?? '');
+		}
+
+		// HaRP specific environment variables
+		foreach ($params['harp_env_vars'] as $envKey => $envValue) {
+			$autoEnvs[] = sprintf('%s=%s', $envKey, $envValue);
 		}
 
 		return $autoEnvs;
