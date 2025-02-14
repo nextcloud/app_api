@@ -692,6 +692,13 @@ class DockerActions implements IDeployActions {
 			'image_tag' => (string) ($externalApp['docker-install']['image-tag'] ?? 'latest'),
 		];
 
+		$harpEnvVars = [];
+		if (boolval($deployConfig['harp'] ?? false)) {
+			$harpEnvVars['HP_FRP_ADDRESS'] = explode(':', $deployConfig['harp_frp_address'])[0];
+			$harpEnvVars['HP_FRP_PORT'] = explode(':', $deployConfig['harp_frp_address'])[1];
+			$harpEnvVars['HP_SHARED_KEY'] = $this->crypto->decrypt($deployConfig['haproxy_password']);
+		}
+
 		$envs = $this->buildDeployEnvs([
 			'appid' => $appId,
 			'name' => (string) $appInfo['name'],
@@ -701,6 +708,7 @@ class DockerActions implements IDeployActions {
 			'storage' => $storage,
 			'secret' => $appInfo['secret'],
 			'environment_variables' => $appInfo['external-app']['environment-variables'] ?? [],
+			'harp_env_vars' => $harpEnvVars,
 		], $deployConfig);
 
 		$containerParams = [
@@ -753,12 +761,18 @@ class DockerActions implements IDeployActions {
 			$autoEnvs[] = sprintf('%s=%s', $envKey, $params['environment_variables'][$envKey]['value'] ?? '');
 		}
 
+		// HaRP specific environment variables
+		foreach ($params['harp_env_vars'] as $envKey => $envValue) {
+			$autoEnvs[] = sprintf('%s=%s', $envKey, $envValue);
+		}
+
 		return $autoEnvs;
 	}
 
 	public function resolveExAppUrl(
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
+		// todo: check
 		$auth = [];
 		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
 			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
@@ -827,7 +841,14 @@ class DockerActions implements IDeployActions {
 
 	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
 		// When using local socket, we the curl URL needs to be set to http://localhost
-		return $this->isLocalSocket($daemonConfig->getHost()) ? 'http://localhost' : $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		$url = $this->isLocalSocket($daemonConfig->getHost())
+			? 'http://localhost'
+			: $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+			// if there is a trailling slash, remove it
+			$url = rtrim($url, '/') . '/exapps/app_api';
+		}
+		return $url;
 	}
 
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
@@ -846,6 +867,12 @@ class DockerActions implements IDeployActions {
 		if (isset($daemonConfig->getDeployConfig()['haproxy_password']) && $daemonConfig->getDeployConfig()['haproxy_password'] !== '') {
 			$haproxyPass = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
 			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $haproxyPass];
+		}
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+			$guzzleParams['headers'] = [
+				'harp-shared-key' => $guzzleParams['auth'][1],
+				'docker-engine-port' => $daemonConfig->getDeployConfig()['harp_docker_socket_port'],
+			];
 		}
 		$this->guzzleClient = new Client($guzzleParams);
 	}
