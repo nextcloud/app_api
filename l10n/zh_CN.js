@@ -27,6 +27,7 @@ OC.L10N.register(
     "Failed to save admin options" : "保存管理员选项失败",
     "Cancel" : "取消",
     "Delete" : "删除",
+    "Default" : "默认",
     "Edit" : "编辑",
     "Deploy Daemon" : "部署守护进程",
     "Name" : "名称",
