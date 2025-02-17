@@ -116,7 +116,7 @@ class ExAppArchiveFetcher {
 	}
 
 	public function removeExAppFolder(string $appId): void {
-		foreach ($this->config->getSystemValue('apps_paths') as $appPath) {
+		foreach ($this->config->getSystemValue('apps_paths', []) as $appPath) {
 			if ($appPath['writable']) {
 				if (file_exists($appPath['path'] . '/' . $appId)) {
 					$this->rmdirr($appPath['path'] . '/' . $appId);
