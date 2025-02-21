@@ -19,6 +19,7 @@ use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
+use OCA\AppAPI\Service\HarpService;
 use OCP\App\IAppManager;
 
 use OCP\ICertificateManager;
@@ -34,6 +35,7 @@ class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
+	public const FRP_TARGET_DIR = '/certs/frp';
 
 	private Client $guzzleClient;
 	private bool $useSocket = false;  # for `pullImage` function, to detect can be stream used or not.
@@ -46,10 +48,11 @@ class DockerActions implements IDeployActions {
 		private readonly IAppManager               $appManager,
 		private readonly IURLGenerator             $urlGenerator,
 		private readonly AppAPICommonService       $service,
-		private readonly ExAppService		       $exAppService,
+		private readonly ExAppService              $exAppService,
 		private readonly ITempManager              $tempManager,
-		private readonly ICrypto			       $crypto,
+		private readonly ICrypto                   $crypto,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
+		private readonly HarpService               $harpService,
 	) {
 	}
 
@@ -91,7 +94,7 @@ class DockerActions implements IDeployActions {
 		}
 		$this->exAppService->setAppDeployProgress($exApp, 97);
 
-		$this->updateCerts($dockerUrl, $containerName);
+		$this->updateCerts($daemonConfig, $dockerUrl, $containerName);
 		$this->exAppService->setAppDeployProgress($exApp, 98);
 
 		$result = $this->startContainer($dockerUrl, $containerName);
@@ -110,7 +113,7 @@ class DockerActions implements IDeployActions {
 		return '';
 	}
 
-	private function updateCerts(string $dockerUrl, string $containerName): void {
+	private function updateCerts(DaemonConfig $daemonConfig, string $dockerUrl, string $containerName): void {
 		try {
 			$this->startContainer($dockerUrl, $containerName);
 
@@ -128,6 +131,11 @@ class DockerActions implements IDeployActions {
 			$targetDir = $this->getTargetCertDir($osInfo); // Determine target directory based on OS
 			$this->executeCommandInContainer($dockerUrl, $containerName, ['mkdir', '-p', $targetDir]);
 			$this->installParsedCertificates($dockerUrl, $containerName, $bundlePath, $targetDir);
+
+			if (HarpService::isHarp($daemonConfig)) {
+				$this->executeCommandInContainer($dockerUrl, $containerName, ['mkdir', '-p', self::FRP_TARGET_DIR]);
+				$this->installFRPCertificates($daemonConfig, $dockerUrl, $containerName, self::FRP_TARGET_DIR);
+			}
 
 			$updateCommand = $this->getCertificateUpdateCommand($osInfo);
 			$this->executeCommandInContainer($dockerUrl, $containerName, $updateCommand);
@@ -164,6 +172,30 @@ class DockerActions implements IDeployActions {
 
 			// Build the path in the container
 			$pathInContainer = $targetDir . "/custom_cert_$index.crt";
+
+			$this->dockerCopy($dockerUrl, $containerId, $tempFile, $pathInContainer);
+			unlink($tempFile);
+		}
+	}
+
+	private function installFRPCertificates(DaemonConfig $daemonConfig, string $dockerUrl, string $containerId, string $targetDir): void {
+		$certificates = $this->harpService->getFrpCertificates($daemonConfig);
+		if ($certificates === null) {
+			$this->logger->info('No FRP certificates found for container: ' . $containerId . '. Skipping cert copy.');
+			return;
+		}
+		$tempDir = sys_get_temp_dir();
+
+		foreach (['ca_crt', 'client_crt', 'client_key'] as $key) {
+			$filename = str_replace('_', '.', $key);
+			$tempFile = $tempDir . "/{$containerId}_frp_{$filename}";
+			if (file_exists($tempFile)) {
+				unlink($tempFile);
+			}
+			file_put_contents($tempFile, $certificates[$key]);
+
+			// Build the path in the container
+			$pathInContainer = "$targetDir/$filename";
 
 			$this->dockerCopy($dockerUrl, $containerId, $tempFile, $pathInContainer);
 			unlink($tempFile);

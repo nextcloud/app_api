@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCP\ICertificateManager;
@@ -109,8 +110,48 @@ class HarpService {
 			} else {
 				$this->guzzleClient->delete($url);
 			}
+		} catch (ClientException $e) {
+			if (!$added && $e->getResponse()->getStatusCode() === 404) {
+				$this->logger->info("HarpService: harpExAppUpdate ($addedStr) - 404 Not Found: " . $url);
+			} else {
+				$this->logger->error("HarpService: harpExAppUpdate ($addedStr) failed: " . $e->getMessage());
+			}
 		} catch (\Exception $e) {
 			$this->logger->error("HarpService: harpExAppUpdate ($addedStr) failed: " . $e->getMessage());
+		}
+	}
+
+	/**
+	 * @param DaemonConfig $daemonConfig
+	 * @return array{tls_enabled: bool, ca_crt: string, client_crt: string, client_key: string}|null
+	 */
+	public function getFrpCertificates(DaemonConfig $daemonConfig): ?array {
+		if (!self::isHarp($daemonConfig)) {
+			return null;
+		}
+		$this->initGuzzleClient($daemonConfig);
+		$url = $this->buildHarpUrl($daemonConfig, '/frp_certificates');
+		try {
+			$response = $this->guzzleClient->get($url);
+			$body = $response->getBody()->getContents();
+			$certs = json_decode($body, true);
+			if (!is_array($certs)) {
+				$this->logger->error('HarpService: getFrpCertificates failed: invalid response');
+				return null;
+			}
+			if (!array_reduce(['tls_enabled', 'ca_crt', 'client_crt', 'client_key'], function ($carry, $key) use ($certs) {
+				return $carry && array_key_exists($key, $certs);
+			}, true)) {
+				$this->logger->error(
+					'HarpService: getFrpCertificates failed: missing keys',
+					['missing' => array_diff(['tls_enabled', 'ca_crt', 'client_crt', 'client_key'], array_keys($certs))],
+				);
+				return null;
+			}
+			return $certs;
+		} catch (\Exception $e) {
+			$this->logger->error('HarpService: getFrpCertificates failed: ' . $e->getMessage());
+			return null;
 		}
 	}
 }
