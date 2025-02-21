@@ -11,6 +11,7 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\ExAppService;
+use OCA\AppAPI\Service\HarpService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -69,22 +70,7 @@ class HarpController extends Controller {
 			return new DataResponse(['message' => 'ExApp not found'], Http::STATUS_NOT_FOUND);
 		}
 
-		return new DataResponse([
-			'exapp_token' => $exApp->getSecret(),
-			'exapp_version' => $exApp->getVersion(),
-			'port' => $exApp->getPort(),
-			'routes' => array_map(function ($route) {
-				$bruteforceList = json_decode($route['bruteforce_protection'], true);
-				if (!$bruteforceList) {
-					$bruteforceList = [];
-				}
-				return [
-					'url' => $route['url'],
-					'access_level' => $route['access_level'],
-					'bruteforce_protection' => $bruteforceList,
-				];
-			}, $exApp->getRoutes()),
-		]);
+		return new DataResponse(HarpService::getHarpExApp($exApp));
 	}
 
 	protected function isUserEnabled(string $userId): bool {

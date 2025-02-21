@@ -276,7 +276,11 @@ class ExAppService {
 			}
 		} else {
 			if ($infoXml !== null) {
-				$xmlAppInfo = simplexml_load_string(file_get_contents($infoXml));
+				$infoXmlContents = file_get_contents($infoXml);
+				if ($infoXmlContents === false) {
+					return ['error' => sprintf('Failed to read info.xml from %s', $infoXml)];
+				}
+				$xmlAppInfo = simplexml_load_string($infoXmlContents);
 				if ($xmlAppInfo === false) {
 					return ['error' => sprintf('Failed to load info.xml from %s', $infoXml)];
 				}

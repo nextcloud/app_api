@@ -35,20 +35,21 @@ class AppAPIService {
 	private IClient $client;
 
 	public function __construct(
-		private readonly LoggerInterface         $logger,
-		private readonly ILogFactory			 $logFactory,
-		private readonly IThrottler              $throttler,
-		private readonly IConfig 				 $config,
-		IClientService                           $clientService,
-		private readonly IUserSession            $userSession,
-		private readonly ISession                $session,
-		private readonly IUserManager            $userManager,
-		private readonly IFactory                $l10nFactory,
-		private readonly ExAppService            $exAppService,
-		private readonly DockerActions           $dockerActions,
-		private readonly ManualActions           $manualActions,
-		private readonly AppAPICommonService     $commonService,
-		private readonly DaemonConfigService	 $daemonConfigService,
+		private readonly LoggerInterface     $logger,
+		private readonly ILogFactory         $logFactory,
+		private readonly IThrottler          $throttler,
+		private readonly IConfig             $config,
+		IClientService                       $clientService,
+		private readonly IUserSession        $userSession,
+		private readonly ISession            $session,
+		private readonly IUserManager        $userManager,
+		private readonly IFactory            $l10nFactory,
+		private readonly ExAppService        $exAppService,
+		private readonly DockerActions       $dockerActions,
+		private readonly ManualActions       $manualActions,
+		private readonly AppAPICommonService $commonService,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly HarpService         $harpService,
 	) {
 		$this->client = $clientService->newClient();
 	}
@@ -561,43 +562,52 @@ class AppAPIService {
 	 * Removes ExApp from cache.
 	 */
 	public function enableExApp(ExApp $exApp): bool {
-		if ($this->exAppService->enableExAppInternal($exApp)) {
-			if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-				$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-				$this->dockerActions->initGuzzleClient($daemonConfig);
-				$containerName = $this->dockerActions->buildExAppContainerName($exApp->getAppid());
-				$this->dockerActions->startContainer($this->dockerActions->buildDockerUrl($daemonConfig), $containerName);
-				if (!$this->dockerActions->waitTillContainerStart($containerName, $daemonConfig)) {
-					$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
-					return false;
-				}
-				if (!$this->dockerActions->healthcheckContainer($containerName, $daemonConfig, true)) {
-					$this->logger->error(sprintf('ExApp %s container healthcheck failed.', $exApp->getAppid()));
-					return false;
-				}
-			}
+		if (!$this->exAppService->enableExAppInternal($exApp)) {
+			return false;
+		}
 
-			$auth = [];
-			$exAppRootUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
-			if (!$this->heartbeatExApp($exAppRootUrl, $auth, $exApp->getAppid())) {
-				$this->logger->error(sprintf('ExApp %s heartbeat failed.', $exApp->getAppid()));
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		if ($daemonConfig === null) {
+			$this->logger->error(sprintf('DaemonConfig %s not found.', $exApp->getDaemonConfigName()));
+			return false;
+		}
+
+		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$this->dockerActions->initGuzzleClient($daemonConfig);
+			$containerName = $this->dockerActions->buildExAppContainerName($exApp->getAppid());
+			$this->dockerActions->startContainer($this->dockerActions->buildDockerUrl($daemonConfig), $containerName);
+			if (!$this->dockerActions->waitTillContainerStart($containerName, $daemonConfig)) {
+				$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
 				return false;
 			}
-
-			$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 60]);
-			if ($exAppEnabled instanceof IResponse) {
-				$response = json_decode($exAppEnabled->getBody(), true);
-				if (!empty($response['error'])) {
-					$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
-					$this->exAppService->disableExAppInternal($exApp);
-					return false;
-				}
-			} elseif (isset($exAppEnabled['error'])) {
-				$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $exAppEnabled['error']));
-				$this->exAppService->disableExAppInternal($exApp);
+			if (!$this->dockerActions->healthcheckContainer($containerName, $daemonConfig, true)) {
+				$this->logger->error(sprintf('ExApp %s container healthcheck failed.', $exApp->getAppid()));
 				return false;
 			}
 		}
+
+		$auth = [];
+		$exAppRootUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
+		if (!$this->heartbeatExApp($exAppRootUrl, $auth, $exApp->getAppid())) {
+			$this->logger->error(sprintf('ExApp %s heartbeat failed.', $exApp->getAppid()));
+			return false;
+		}
+
+		$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 60]);
+		if ($exAppEnabled instanceof IResponse) {
+			$response = json_decode($exAppEnabled->getBody(), true);
+			if (!empty($response['error'])) {
+				$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
+				$this->exAppService->disableExAppInternal($exApp);
+				return false;
+			}
+		} elseif (isset($exAppEnabled['error'])) {
+			$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $exAppEnabled['error']));
+			$this->exAppService->disableExAppInternal($exApp);
+			return false;
+		}
+
+		$this->harpService->harpExAppUpdate($daemonConfig, $exApp, true);
 		return true;
 	}
 
@@ -618,12 +628,20 @@ class AppAPIService {
 			$this->logger->error(sprintf('Failed to disable ExApp %s. Error: %s', $exApp->getAppid(), $exAppDisabled['error']));
 			$result = false;
 		}
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		if ($daemonConfig === null) {
+			$this->logger->error(sprintf('DaemonConfig %s not found.', $exApp->getDaemonConfigName()));
+			return false;
+		}
 		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 			$this->dockerActions->initGuzzleClient($daemonConfig);
 			$this->dockerActions->stopContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
 		}
 		$this->exAppService->disableExAppInternal($exApp);
+
+		if($result) {
+			$this->harpService->harpExAppUpdate($daemonConfig, $exApp, false);
+		}
 		return $result;
 	}
 
