@@ -725,9 +725,9 @@ class DockerActions implements IDeployActions {
 		];
 
 		$harpEnvVars = [];
-		if (boolval($deployConfig['harp'] ?? false)) {
-			$harpEnvVars['HP_FRP_ADDRESS'] = explode(':', $deployConfig['harp_frp_address'])[0];
-			$harpEnvVars['HP_FRP_PORT'] = explode(':', $deployConfig['harp_frp_address'])[1];
+		if (isset($deployConfig['harp'])) {
+			$harpEnvVars['HP_FRP_ADDRESS'] = explode(':', $deployConfig['harp']['frp_address'])[0];
+			$harpEnvVars['HP_FRP_PORT'] = explode(':', $deployConfig['harp']['frp_address'])[1];
 			$harpEnvVars['HP_SHARED_KEY'] = $this->crypto->decrypt($deployConfig['haproxy_password']);
 		}
 

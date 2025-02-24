@@ -54,9 +54,9 @@ class ListDaemons extends Command {
 				$daemon->getProtocol(),
 				$daemon->getHost(),
 				$daemon->getDeployConfig()['nextcloud_url'],
-				boolval($daemon->getDeployConfig()['harp'] ?? false) ? 'yes' : 'no',
-				$daemon->getDeployConfig()['harp_frp_address'] ?? '(none)',
-				$daemon->getDeployConfig()['harp_docker_socket_port'] ?? '(none)',
+				isset($daemon->getDeployConfig()['harp']) ? 'yes' : 'no',
+				$daemon->getDeployConfig()['harp']['frp_address'] ?? '(none)',
+				$daemon->getDeployConfig()['harp']['docker_socket_port'] ?? '(none)',
 			];
 		}
 

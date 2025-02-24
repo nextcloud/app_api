@@ -102,9 +102,10 @@ class RegisterDaemon extends Command {
 			'nextcloud_url' => $nextcloudUrl,
 			'haproxy_password' => $secret,
 			'computeDevice' => $this->buildComputeDevice($input->getOption('compute_device') ?? 'cpu'),
-			'harp' => $isHarp,
-			'harp_frp_address' => $input->getOption('harp_frp_address') ?? '',
-			'harp_docker_socket_port' => $input->getOption('harp_docker_socket_port'),
+			'harp' => [
+				'frp_address' => $input->getOption('harp_frp_address') ?? '',
+				'docker_socket_port' => $input->getOption('harp_docker_socket_port'),
+			],
 		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([

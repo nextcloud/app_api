@@ -33,7 +33,7 @@ class DaemonConfigService {
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
 		$bad_patterns = ['http', 'https', 'tcp', 'udp', 'ssh'];
 		$docker_host = (string)$params['host'];
-		$frp_host = (string)$params['host'];
+		$frp_host = (string)($params['harp']['frp_address'] ?? '');
 		foreach ($bad_patterns as $bad_pattern) {
 			if (str_starts_with($docker_host, $bad_pattern . '://')) {
 				$this->logger->error('Failed to register daemon configuration. `host` must not include a protocol.');
