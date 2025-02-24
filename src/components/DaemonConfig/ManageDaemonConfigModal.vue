@@ -58,6 +58,19 @@
 							:helper-text="daemonHostHelperText"
 							style="max-width: 70%;" />
 					</div>
+					<div v-if="['http', 'https'].includes(daemonProtocol)"
+						class="external-label"
+						:aria-label="t('app_api', 'HaProxy password')">
+						<label for="deploy-config-haproxy-password">{{ t('app_api', 'HaProxy password') }}</label>
+						<NcPasswordField
+							id="deploy-config-haproxy-password"
+							:value.sync="deployConfig.haproxy_password"
+							:error="isHaProxyPasswordValid === false"
+							:placeholder="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
+							:aria-label="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
+							:helper-text="haProxyPasswordHelperText"
+							autocomplete="off" />
+					</div>
 					<div class="external-label" :aria-label="t('app_api', 'Nextcloud URL')">
 						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
 						<NcInputField
@@ -107,19 +120,6 @@
 									:aria-label="t('app_api', 'Docker network name')"
 									:helper-text="getNetworkHelperText || t('app_api', 'Docker network name')"
 									:input-class="getNetworkHelperText !== '' ? 'text-warning' : ''" />
-							</div>
-							<div v-if="['http', 'https'].includes(daemonProtocol)"
-								class="external-label"
-								:aria-label="t('app_api', 'HaProxy password')">
-								<label for="deploy-config-haproxy-password">{{ t('app_api', 'HaProxy password') }}</label>
-								<NcPasswordField
-									id="deploy-config-haproxy-password"
-									:value.sync="deployConfig.haproxy_password"
-									:error="isHaProxyPasswordValid === false"
-									:placeholder="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
-									:aria-label="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
-									:helper-text="haProxyPasswordHelperText"
-									autocomplete="off" />
 							</div>
 							<NcSelect
 								id="compute-device"
@@ -236,26 +236,26 @@
 
 <script>
 import axios from '@nextcloud/axios'
-import { showSuccess, showError } from '@nextcloud/dialogs'
-import { generateUrl } from '@nextcloud/router'
+import { showError, showSuccess } from '@nextcloud/dialogs'
 import { confirmPassword } from '@nextcloud/password-confirmation'
+import { generateUrl } from '@nextcloud/router'
 
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
-import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
+import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
+import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
+import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
 
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
+import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
 
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import Check from 'vue-material-design-icons/Check.vue'
+import Close from 'vue-material-design-icons/Close.vue'
 import Connection from 'vue-material-design-icons/Connection.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-import Close from 'vue-material-design-icons/Close.vue'
 import UnfoldLessHorizontal from 'vue-material-design-icons/UnfoldLessHorizontal.vue'
 import UnfoldMoreHorizontal from 'vue-material-design-icons/UnfoldMoreHorizontal.vue'
-import { DAEMON_TEMPLATES, DAEMON_COMPUTE_DEVICES } from '../../constants/daemonTemplates.js'
+import { DAEMON_COMPUTE_DEVICES, DAEMON_TEMPLATES } from '../../constants/daemonTemplates.js'
 
 export default {
 	name: 'ManageDaemonConfigModal',
@@ -302,24 +302,10 @@ export default {
 	},
 	data() {
 		const data = {
-			name: 'docker_local',
-			displayName: 'Docker Local',
-			acceptsDeployId: 'docker-install',
+			...DAEMON_TEMPLATES[0],
 			deployMethods: ['docker-install', 'manual-install'],
-			httpsEnabled: false,
-			host: 'nextcloud-appapi-dsp:2375',
 			// replace last slash with empty string
 			nextcloud_url: window.location.origin + generateUrl('').slice(0, -1),
-			deployConfigSettingsOpened: false,
-			deployConfig: {
-				net: 'host',
-				haproxy_password: '',
-				computeDevice: {
-					id: 'cpu',
-					label: 'CPU',
-				},
-			},
-			defaultDaemon: false,
 			registeringDaemon: false,
 			configurationTab: { id: DAEMON_TEMPLATES[0].id, label: DAEMON_TEMPLATES[0].displayName },
 			configurationTemplateOptions: [
