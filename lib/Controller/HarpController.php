@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
 use OCP\AppFramework\Controller;
@@ -22,32 +23,64 @@ use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\Security\Bruteforce\IThrottler;
+use OCP\Security\ICrypto;
 use Psr\Log\LoggerInterface;
 
 class HarpController extends Controller {
 	protected $request;
 
 	public function __construct(
-		IRequest                         $request,
-		private readonly IAppConfig      $appConfig,
-		private readonly ExAppService    $exAppService,
-		private readonly LoggerInterface $logger,
-		private readonly IThrottler      $throttler,
-		private readonly IUserManager    $userManager,
-		private readonly IGroupManager   $groupManager,
-		private readonly ?string         $userId,
+		IRequest                             $request,
+		private readonly IAppConfig          $appConfig,
+		private readonly ExAppService        $exAppService,
+		private readonly LoggerInterface     $logger,
+		private readonly IThrottler          $throttler,
+		private readonly IUserManager        $userManager,
+		private readonly IGroupManager       $groupManager,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly ICrypto             $crypto,
+		private readonly ?string             $userId,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
 	}
 
-	private function validateHarpSharedKey(array $metadata = []): bool {
-		$harpKey = $this->appConfig->getValueString(Application::APP_ID, 'harp_shared_key');
+	private function validateHarpSharedKey(string $appId): bool {
+		// todo: cache
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp === null) {
+			$this->logger->error(sprintf('ExApp with appId %s not found.', $appId));
+			// Protection for guessing installed ExApps list
+			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
+				'appid' => $appId,
+			]);
+			return new DataResponse(['message' => 'ExApp not found'], Http::STATUS_NOT_FOUND);
+		}
+
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		if ($daemonConfig === null) {
+			$this->logger->error(sprintf('Daemon config with name %s not found.', $exApp->getDaemonConfigName()));
+			return false;
+		}
+
+		try {
+			if (!isset($daemonConfig->getDeployConfig()['haproxy_password'])) {
+				$this->logger->error('Harp shared key is not set. Invalid daemon config.');
+				return false;
+			}
+			$harpKey = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
+		} catch (\Exception $e) {
+			$this->logger->error('Failed to decrypt harp shared key. Invalid daemon config.', ['exception' => $e]);
+			return false;
+		}
+
 		$headerHarpKey = $this->request->getHeader('HARP-SHARED-KEY');
 		if ($headerHarpKey === '' || $headerHarpKey !== $harpKey) {
 			$this->logger->error('Harp shared key is not valid');
-			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), $metadata);
+			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
+				'appid' => $appId,
+			]);
 			return false;
 		}
 		return true;
@@ -56,7 +89,7 @@ class HarpController extends Controller {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getExAppMetadata(string $appId): DataResponse {
-		if (!$this->validateHarpSharedKey(['appid' => $appId])) {
+		if (!$this->validateHarpSharedKey($appId)) {
 			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
 		}
 
@@ -97,8 +130,8 @@ class HarpController extends Controller {
 	 */
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function getUserInfo(): DataResponse {
-		if (!$this->validateHarpSharedKey()) {
+	public function getUserInfo(string $appId): DataResponse {
+		if (!$this->validateHarpSharedKey($appId)) {
 			return new DataResponse(['message' => 'Invalid token'], Http::STATUS_UNAUTHORIZED);
 		}
 

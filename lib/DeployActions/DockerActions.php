@@ -131,11 +131,7 @@ class DockerActions implements IDeployActions {
 			$targetDir = $this->getTargetCertDir($osInfo); // Determine target directory based on OS
 			$this->executeCommandInContainer($dockerUrl, $containerName, ['mkdir', '-p', $targetDir]);
 			$this->installParsedCertificates($dockerUrl, $containerName, $bundlePath, $targetDir);
-
-			if (HarpService::isHarp($daemonConfig)) {
-				$this->executeCommandInContainer($dockerUrl, $containerName, ['mkdir', '-p', self::FRP_TARGET_DIR]);
-				$this->installFRPCertificates($daemonConfig, $dockerUrl, $containerName, self::FRP_TARGET_DIR);
-			}
+			$this->installFRPCertificates($daemonConfig, $dockerUrl, $containerName, self::FRP_TARGET_DIR);
 
 			$updateCommand = $this->getCertificateUpdateCommand($osInfo);
 			$this->executeCommandInContainer($dockerUrl, $containerName, $updateCommand);
@@ -179,12 +175,16 @@ class DockerActions implements IDeployActions {
 	}
 
 	private function installFRPCertificates(DaemonConfig $daemonConfig, string $dockerUrl, string $containerId, string $targetDir): void {
+		if (!HarpService::isHarp($daemonConfig)) {
+			return;
+		}
 		$certificates = $this->harpService->getFrpCertificates($daemonConfig);
 		if ($certificates === null) {
 			$this->logger->info('No FRP certificates found for container: ' . $containerId . '. Skipping cert copy.');
 			return;
 		}
 		$tempDir = sys_get_temp_dir();
+		$this->executeCommandInContainer($dockerUrl, $containerId, ['mkdir', '-p', self::FRP_TARGET_DIR]);
 
 		foreach (['ca_crt', 'client_crt', 'client_key'] as $key) {
 			$filename = str_replace('_', '.', $key);
@@ -903,7 +903,7 @@ class DockerActions implements IDeployActions {
 		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
 			$guzzleParams['headers'] = [
 				'harp-shared-key' => $guzzleParams['auth'][1],
-				'docker-engine-port' => $daemonConfig->getDeployConfig()['harp_docker_socket_port'],
+				'docker-engine-port' => $daemonConfig->getDeployConfig()['harp']['docker_socket_port'],
 			];
 		}
 		$this->guzzleClient = new Client($guzzleParams);
