@@ -4,7 +4,7 @@
 -->
 <template>
 	<div class="register-daemon-config">
-		<NcModal :show="show" @close="closeModal">
+		<NcModal :show="show" name="register-deploy-daemon" @close="closeModal">
 			<div class="register-daemon-config-body">
 				<h2>{{ isEdit ? t('app_api', 'Edit Deploy Daemon') : t('app_api', 'Register Deploy Daemon') }}</h2>
 				<div v-if="!isEdit" class="templates">
@@ -20,9 +20,13 @@
 				</div>
 				<form class="daemon-register-form" :aria-label="t('app_api', 'Daemon registration form')">
 					<div class="external-label" :aria-label="t('app_api', 'Name')">
-						<label for="daemon-name">{{ t('app_api', 'Name') }}</label>
+						<label for="daemon-name">
+							{{ t('app_api', 'Name') }}
+							<InfoTooltip :text="t('app_api', 'A unique deploy daemon identifier')" placement="bottom" />
+						</label>
 						<NcInputField
 							id="daemon-name"
+							class="ex-input-field"
 							:disabled="isEdit"
 							:value.sync="name"
 							:placeholder="t('app_api', 'Unique Deploy Daemon Name')"
@@ -34,6 +38,7 @@
 						<label for="daemon-display-name">{{ t('app_api', 'Display name') }}</label>
 						<NcInputField
 							id="daemon-display-name"
+							class="ex-input-field"
 							:value.sync="displayName"
 							:placeholder="t('app_api', 'Display name')"
 							:aria-label="t('app_api', 'Display name')" />
@@ -43,6 +48,7 @@
 						<NcSelect
 							id="daemon-deploy-id"
 							v-model="acceptsDeployId"
+							class="ex-input-field"
 							:disabled="configurationTab.id === 'manual_install' || isEdit"
 							:options="deployMethods"
 							:label-outside="true"
@@ -52,6 +58,7 @@
 						<label for="daemon-host">{{ t('app_api', 'Daemon host') }}</label>
 						<NcInputField
 							id="daemon-host"
+							class="ex-input-field"
 							:value.sync="host"
 							:placeholder="daemonHostHelperText"
 							:aria-label="daemonHostHelperText"
@@ -64,6 +71,7 @@
 						<label for="deploy-config-haproxy-password">{{ t('app_api', 'HaProxy password') }}</label>
 						<NcPasswordField
 							id="deploy-config-haproxy-password"
+							class="ex-input-field"
 							:value.sync="deployConfig.haproxy_password"
 							:error="isHaProxyPasswordValid === false"
 							:placeholder="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
@@ -75,6 +83,7 @@
 						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
 						<NcInputField
 							id="nextcloud-url"
+							class="ex-input-field"
 							:helper-text="getNextcloudUrlHelperText"
 							:input-class="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
 							:value.sync="nextcloud_url"
@@ -86,6 +95,7 @@
 						<NcCheckboxRadioSwitch
 							v-if="isNotManualInstall && !isEdit"
 							id="default-deploy-config"
+							class="ex-input-field"
 							:checked.sync="defaultDaemon"
 							:placeholder="t('app_api', 'Set daemon as default')"
 							:aria-label="t('app_api', 'Set daemon as default')">
@@ -115,22 +125,25 @@
 								<label for="deploy-config-net">{{ t('app_api', 'Network') }}</label>
 								<NcInputField
 									id="deploy-config-net"
+									class="ex-input-field"
 									:value.sync="deployConfig.net"
 									:placeholder="t('app_api', 'Docker network name')"
 									:aria-label="t('app_api', 'Docker network name')"
 									:helper-text="getNetworkHelperText || t('app_api', 'Docker network name')"
 									:input-class="getNetworkHelperText !== '' ? 'text-warning' : ''" />
 							</div>
-							<NcSelect
-								id="compute-device"
-								v-model="deployConfig.computeDevice"
-								:options="computeDevices"
-								:input-label="t('app_api', 'Compute device')" />
-							<p v-if="getComputeDeviceHelperText !== ''"
-								class="hint">
-								{{ getComputeDeviceHelperText }}
-							</p>
-
+							<div class="external-label" :aria-label="t('app_api', 'Compute device')">
+								<label for="compute-device">{{ t('app_api', 'Compute device') }}</label>
+								<NcSelect
+									id="compute-device"
+									v-model="deployConfig.computeDevice"
+									class="ex-input-field"
+									:options="computeDevices" />
+								<p v-if="getComputeDeviceHelperText !== ''"
+									class="hint">
+									{{ getComputeDeviceHelperText }}
+								</p>
+							</div>
 							<template v-if="additionalOptions.length > 0">
 								<div class="row" style="flex-direction: column;">
 									<div
@@ -240,12 +253,11 @@ import { showError, showSuccess } from '@nextcloud/dialogs'
 import { confirmPassword } from '@nextcloud/password-confirmation'
 import { generateUrl } from '@nextcloud/router'
 
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
 import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
 import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
 import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
-
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
 
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
@@ -256,6 +268,7 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import UnfoldLessHorizontal from 'vue-material-design-icons/UnfoldLessHorizontal.vue'
 import UnfoldMoreHorizontal from 'vue-material-design-icons/UnfoldMoreHorizontal.vue'
 import { DAEMON_COMPUTE_DEVICES, DAEMON_TEMPLATES } from '../../constants/daemonTemplates.js'
+import InfoTooltip from './InfoTooltip.vue'
 
 export default {
 	name: 'ManageDaemonConfigModal',
@@ -269,6 +282,7 @@ export default {
 		NcCheckboxRadioSwitch,
 		NcSelect,
 		NcButton,
+		InfoTooltip,
 		Check,
 		Connection,
 		Plus,
@@ -331,6 +345,7 @@ export default {
 			data.deployConfig.net = this.daemon.deploy_config.net
 			data.deployConfig.haproxy_password = this.daemon.deploy_config.haproxy_password
 			data.deployConfig.computeDevice = this.daemon.deploy_config.computeDevice
+			data.deployConfig.harp = this.daemon.deploy_config.harp ?? null
 			data.defaultDaemon = this.isDefaultDaemon
 			data.additionalOptions = Object.entries(this.daemon.deploy_config.additional_options ?? {}).map(([key, value]) => ({ key, value }))
 		}
@@ -520,6 +535,7 @@ export default {
 					nextcloud_url: this.nextcloud_url,
 					haproxy_password: this.deployConfig.haproxy_password ?? '',
 					computeDevice: this.deployConfig.computeDevice,
+					harp: this.deployConfig.harp ?? null,
 				},
 			}
 			if (this.additionalOptions.length > 0) {
@@ -584,20 +600,25 @@ export default {
 .register-daemon-config-body {
 	padding: 20px;
 
+	.daemon-register-form {
+		display: flex;
+		flex-direction: column;
+		flex: fit-content;
+	}
+
 	.external-label {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
-		margin-top: 1rem;
+		padding: .25rem 0;
 
 		label {
 			flex: fit-content;
-			margin-right: 10px;
-		}
-
-		.input-field {
-			flex: fit-content;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			gap: .5rem;
 		}
 	}
 
@@ -620,10 +641,9 @@ export default {
 
 	.templates {
 		display: flex;
-		margin: 0 auto;
-		width: fit-content;
-		border-bottom: 1px solid var(--color-border-dark);
-		padding-bottom: 20px;
+		border-bottom: 2px solid var(--color-border-dark);
+		padding-bottom: 15px;
+		margin-bottom: 10px;
 	}
 
 	.additional-options {
@@ -633,6 +653,10 @@ export default {
 
 	.additional-option {
 		display: flex;
+	}
+
+	.ex-input-field {
+		width: 350px;
 	}
 }
 </style>

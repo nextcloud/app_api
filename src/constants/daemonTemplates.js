@@ -9,7 +9,7 @@ export const DAEMON_TEMPLATES = [
 		displayName: 'HaRP Proxy with DSP',
 		acceptsDeployId: 'docker-install',
 		httpsEnabled: false,
-		host: 'nextcloud-appapi-harp:8782',
+		host: 'nextcloud-appapi-harp:8780',
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',
@@ -22,6 +22,10 @@ export const DAEMON_TEMPLATES = [
 		},
 		deployConfigSettingsOpened: true,
 		defaultDaemon: true,
+		harp: {
+			frp_address: 'nextcloud-appapi-harp:8782',
+			docker_socket_proxy_port: 24000,
+		},
 	},
 	{
 		name: 'docker_socket_proxy',
