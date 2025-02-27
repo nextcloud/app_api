@@ -5,23 +5,27 @@
 
 export const DAEMON_TEMPLATES = [
 	{
-		name: 'custom',
-		displayName: 'Custom default',
+		name: 'harp_proxy',
+		displayName: 'HaRP Proxy with DSP',
 		acceptsDeployId: 'docker-install',
 		httpsEnabled: false,
-		host: 'nextcloud-appapi-dsp:2375',
+		host: 'nextcloud-appapi-harp:8780',
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',
-			haproxy_password: 'some_secure_password',
+			haproxy_password: 'harp_shared_key',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',
 				label: 'CPU',
 			},
 		},
-		deployConfigSettingsOpened: false,
+		deployConfigSettingsOpened: true,
 		defaultDaemon: true,
+		harp: {
+			frp_address: 'nextcloud-appapi-harp:8782',
+			docker_socket_proxy_port: 24000,
+		},
 	},
 	{
 		name: 'docker_socket_proxy',
@@ -33,6 +37,25 @@ export const DAEMON_TEMPLATES = [
 		deployConfig: {
 			net: 'host',
 			haproxy_password: 'enter_haproxy_password',
+			gpu: false,
+			computeDevice: {
+				id: 'cpu',
+				label: 'CPU',
+			},
+		},
+		deployConfigSettingsOpened: false,
+		defaultDaemon: true,
+	},
+	{
+		name: 'custom',
+		displayName: 'Custom default',
+		acceptsDeployId: 'docker-install',
+		httpsEnabled: false,
+		host: 'nextcloud-appapi-dsp:2375',
+		nextcloud_url: null,
+		deployConfig: {
+			net: 'host',
+			haproxy_password: 'some_secure_password',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',
