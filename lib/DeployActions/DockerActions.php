@@ -876,7 +876,7 @@ class DockerActions implements IDeployActions {
 		$url = $this->isLocalSocket($daemonConfig->getHost())
 			? 'http://localhost'
 			: $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
-		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+		if (isset($daemonConfig->getDeployConfig()['harp'])) {
 			// if there is a trailling slash, remove it
 			$url = rtrim($url, '/') . '/exapps/app_api';
 		}
@@ -900,7 +900,7 @@ class DockerActions implements IDeployActions {
 			$haproxyPass = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
 			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $haproxyPass];
 		}
-		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+		if (isset($daemonConfig->getDeployConfig()['harp'])) {
 			$guzzleParams['headers'] = [
 				'harp-shared-key' => $guzzleParams['auth'][1],
 				'docker-engine-port' => $daemonConfig->getDeployConfig()['harp']['docker_socket_port'],

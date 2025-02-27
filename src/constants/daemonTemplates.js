@@ -21,7 +21,7 @@ export const DAEMON_TEMPLATES = [
 			},
 			harp: {
 				frp_address: 'appapi-harp:8782',
-				docker_socket_proxy_port: 24000,
+				docker_socket_port: 24000,
 			},
 		},
 		deployConfigSettingsOpened: true,

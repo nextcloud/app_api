@@ -153,7 +153,7 @@
 									<NcInputField
 										id="harp-dsp-port"
 										class="ex-input-field"
-										:value.sync="deployConfig.harp.docker_socket_proxy_port"
+										:value.sync="deployConfig.harp.docker_socket_port"
 										:placeholder="t('app_api', 'Docker socket proxy port')"
 										:aria-label="t('app_api', 'Docker socket proxy port')" />
 								</div>
