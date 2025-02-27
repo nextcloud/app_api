@@ -22,7 +22,7 @@
 					<div class="external-label" :aria-label="t('app_api', 'Name')">
 						<label for="daemon-name">
 							{{ t('app_api', 'Name') }}
-							<InfoTooltip :text="t('app_api', 'A unique deploy daemon identifier')" placement="bottom" />
+							<InfoTooltip :text="t('app_api', 'Unique Deploy Daemon Name')" />
 						</label>
 						<NcInputField
 							id="daemon-name"
@@ -54,29 +54,34 @@
 							:label-outside="true"
 							:placeholder="t('app_api', 'Select daemon deploy method')" />
 					</div>
-					<div class="external-label" :aria-label="t('app_api', 'Daemon host')">
-						<label for="daemon-host">{{ t('app_api', 'Daemon host') }}</label>
+					<div class="external-label" :aria-label="isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host')">
+						<label for="daemon-host">
+							{{ isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host') }}
+							<InfoTooltip :text="daemonHostHelperText" />
+						</label>
 						<NcInputField
 							id="daemon-host"
 							class="ex-input-field"
 							:value.sync="host"
 							:placeholder="daemonHostHelperText"
 							:aria-label="daemonHostHelperText"
-							:helper-text="daemonHostHelperText"
 							style="max-width: 70%;" />
 					</div>
 					<div v-if="['http', 'https'].includes(daemonProtocol)"
 						class="external-label"
-						:aria-label="t('app_api', 'HaProxy password')">
-						<label for="deploy-config-haproxy-password">{{ t('app_api', 'HaProxy password') }}</label>
+						:aria-label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')">
+						<label for="deploy-config-haproxy-password">
+							{{ isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password') }}
+							<InfoTooltip :text="haProxyPasswordHelperText" />
+						</label>
 						<NcPasswordField
 							id="deploy-config-haproxy-password"
 							class="ex-input-field"
 							:value.sync="deployConfig.haproxy_password"
 							:error="isHaProxyPasswordValid === false"
-							:placeholder="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
-							:aria-label="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
-							:helper-text="haProxyPasswordHelperText"
+							:placeholder="haProxyPasswordHelperText"
+							:aria-label="haProxyPasswordHelperText"
+							:helper-text="!isHaProxyPasswordValid ? t('app_api', 'Password must be at least 12 characters long') : ''"
 							autocomplete="off" />
 					</div>
 					<div class="external-label" :aria-label="t('app_api', 'Nextcloud URL')">
@@ -120,29 +125,73 @@
 							</template>
 						</NcButton>
 						<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy config')">
+							<NcCheckboxRadioSwitch
+								:checked="isHarp"
+								:placeholder="t('app_api', 'Enable HaRP')"
+								:aria-label="t('app_api', 'Enable HaRP')"
+								@update:checked="toggleHarp">
+								{{ t('app_api', 'Enable HaRP') }}
+							</NcCheckboxRadioSwitch>
+							<div v-if="isHarp" class="harp-options">
+								<div class="external-label" :aria-label="t('app_api', 'FRP server address')">
+									<label for="frp-address">
+										{{ t('app_api', 'FRP server address') }}
+										<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server inside the HaRP container.')" />
+									</label>
+									<NcInputField
+										id="frp-address"
+										class="ex-input-field"
+										:value.sync="deployConfig.harp.frp_address"
+										:placeholder="t('app_api', 'FRP server address')"
+										:aria-label="t('app_api', 'FRP server address')" />
+								</div>
+								<div class="external-label" :aria-label="t('app_api', 'Docker socket proxy port')">
+									<label for="harp-port">
+										{{ t('app_api', 'Docker socket proxy port') }}
+										<InfoTooltip :text="t('app_api', 'The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
+									</label>
+									<NcInputField
+										id="harp-dsp-port"
+										class="ex-input-field"
+										:value.sync="deployConfig.harp.docker_socket_proxy_port"
+										:placeholder="t('app_api', 'Docker socket proxy port')"
+										:aria-label="t('app_api', 'Docker socket proxy port')" />
+								</div>
+							</div>
 							<div class="external-label"
-								:aria-label="t('app_api', 'Network')">
-								<label for="deploy-config-net">{{ t('app_api', 'Network') }}</label>
+								:aria-label="t('app_api', 'Docker network')">
+								<label for="deploy-config-net">
+									{{ t('app_api', 'Docker network') }}
+									<InfoTooltip :text="getNetworkHelperText"
+										:type="isEditDifferentNetwork ? 'warning' : 'info'" />
+								</label>
 								<NcInputField
 									id="deploy-config-net"
+									ref="deploy-config-net"
 									class="ex-input-field"
 									:value.sync="deployConfig.net"
-									:placeholder="t('app_api', 'Docker network name')"
-									:aria-label="t('app_api', 'Docker network name')"
-									:helper-text="getNetworkHelperText || t('app_api', 'Docker network name')"
-									:input-class="getNetworkHelperText !== '' ? 'text-warning' : ''" />
+									:placeholder="t('app_api', 'Docker network')"
+									:aria-label="t('app_api', 'Docker network')"
+									:show-trailing-button="isEditDifferentNetwork"
+									@trailing-button-click="deployConfig.net = daemon.deploy_config.net">
+									<template #trailing-button-icon>
+										<Replay :size="20" />
+									</template>
+								</NcInputField>
 							</div>
 							<div class="external-label" :aria-label="t('app_api', 'Compute device')">
-								<label for="compute-device">{{ t('app_api', 'Compute device') }}</label>
+								<label for="compute-device">
+									{{ t('app_api', 'Compute device') }}
+									<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
+										:text="getComputeDeviceHelperText"
+										:type="getComputeDeviceHelperText !== '' ? 'warning' : 'info'" />
+								</label>
 								<NcSelect
 									id="compute-device"
 									v-model="deployConfig.computeDevice"
 									class="ex-input-field"
+									:aria-label="t('app_api', 'Compute device')"
 									:options="computeDevices" />
-								<p v-if="getComputeDeviceHelperText !== ''"
-									class="hint">
-									{{ getComputeDeviceHelperText }}
-								</p>
 							</div>
 							<template v-if="additionalOptions.length > 0">
 								<div class="row" style="flex-direction: column;">
@@ -160,7 +209,7 @@
 												:value.sync="option.value"
 												:placeholder="option.value"
 												:aria-label="option.value"
-												style="margin: 0 5px 0 0; width: fit-content;" />
+												style="margin: 0 5px 0 0;" />
 											<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
 												<template #icon>
 													<Close :size="20" />
@@ -265,6 +314,7 @@ import Check from 'vue-material-design-icons/Check.vue'
 import Close from 'vue-material-design-icons/Close.vue'
 import Connection from 'vue-material-design-icons/Connection.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+import Replay from 'vue-material-design-icons/Replay.vue'
 import UnfoldLessHorizontal from 'vue-material-design-icons/UnfoldLessHorizontal.vue'
 import UnfoldMoreHorizontal from 'vue-material-design-icons/UnfoldMoreHorizontal.vue'
 import { DAEMON_COMPUTE_DEVICES, DAEMON_TEMPLATES } from '../../constants/daemonTemplates.js'
@@ -287,6 +337,7 @@ export default {
 		Connection,
 		Plus,
 		Close,
+		Replay,
 	},
 	props: {
 		show: {
@@ -316,7 +367,7 @@ export default {
 	},
 	data() {
 		const data = {
-			...DAEMON_TEMPLATES[0],
+			...JSON.parse(JSON.stringify(DAEMON_TEMPLATES[0])),
 			deployMethods: ['docker-install', 'manual-install'],
 			// replace last slash with empty string
 			nextcloud_url: window.location.origin + generateUrl('').slice(0, -1),
@@ -342,10 +393,7 @@ export default {
 			data.httpsEnabled = this.daemon.protocol === 'https'
 			data.host = this.daemon.host
 			data.nextcloud_url = this.daemon.deploy_config.nextcloud_url
-			data.deployConfig.net = this.daemon.deploy_config.net
-			data.deployConfig.haproxy_password = this.daemon.deploy_config.haproxy_password
-			data.deployConfig.computeDevice = this.daemon.deploy_config.computeDevice
-			data.deployConfig.harp = this.daemon.deploy_config.harp ?? null
+			data.deployConfig = JSON.parse(JSON.stringify(this.daemon.deploy_config))
 			data.defaultDaemon = this.isDefaultDaemon
 			data.additionalOptions = Object.entries(this.daemon.deploy_config.additional_options ?? {}).map(([key, value]) => ({ key, value }))
 		}
@@ -358,9 +406,12 @@ export default {
 				if (this.acceptsDeployId === 'manual-install') {
 					return t('app_api', 'Hostname to access ExApps')
 				}
-				return t('app_api', 'Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
+				return t('app_api', 'The hostname (and port) at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server. (e.g. {host})', {
+					name: this.isHarp ? 'HaRP' : 'Docker Socket Proxy',
+					host: this.isHarp ? 'appapi-harp:8780' : 'nextcloud-appapi-dsp:2375',
+				})
 			}
-			return ''
+			return t('app_api', 'The hostname (and port) or path at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server. It can also be a path to the docker socket. (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
 		},
 		daemonProtocol() {
 			return this.httpsEnabled ? 'https' : 'http'
@@ -382,14 +433,16 @@ export default {
 			return true
 		},
 		haProxyPasswordHelperText() {
-			return this.isHaProxyPasswordValid ? t('app_api', 'AppAPI Docker Socket Proxy authentication password') : t('app_api', 'Password must be at least 12 characters long')
+			return this.isHarp ? t('app_api', 'The secret key for the HaRP container communication (HP_SHARED_KEY).') : t('app_api', 'AppAPI Docker Socket Proxy authentication password')
+		},
+		isEditDifferentNetwork() {
+			return this.isEdit && this.deployConfig.net !== this.daemon.deploy_config.net
 		},
 		getNetworkHelperText() {
-			if (this.isEdit && this.deployConfig.net !== this.daemon.deploy_config.net) {
+			if (this.isEditDifferentNetwork) {
 				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
 			}
-
-			return ''
+			return t('app_api', 'The docker network that the deployed ex-apps would use.')
 		},
 		canRegister() {
 			return this.isDaemonNameValid === true || this.isHaProxyPasswordValid === false
@@ -426,6 +479,9 @@ export default {
 		isEdit() {
 			return this.daemon !== null
 		},
+		isHarp() {
+			return this.deployConfig.harp !== null
+		},
 	},
 	watch: {
 		configurationTab(newConfigurationTab) {
@@ -438,6 +494,11 @@ export default {
 		show(newShow) {
 			if (newShow === true) {
 				this.resetData()
+			}
+		},
+		acceptsDeployId(newAcceptsDeployId) {
+			if (newAcceptsDeployId === 'manual-install') {
+				this.deployConfig.harp = null
 			}
 		},
 	},
@@ -558,9 +619,7 @@ export default {
 			this.host = template.host
 			this.nextcloud_url = template.nextcloud_url ?? window.location.origin + generateUrl('').slice(0, -1)
 			this.deployConfigSettingsOpened = template.deployConfigSettingsOpened
-			this.deployConfig.net = template.deployConfig.net
-			this.deployConfig.haproxy_password = template.deployConfig.haproxy_password
-			this.deployConfig.computeDevice = template.deployConfig.computeDevice
+			this.deployConfig = { ...template.deployConfig }
 			this.defaultDaemon = template.defaultDaemon
 		},
 		onProtocolChange() {
@@ -591,6 +650,16 @@ export default {
 		},
 		closeModal() {
 			this.$emit('update:show', false)
+		},
+		toggleHarp(value) {
+			if (value === true) {
+				const harpDeployTempl = DAEMON_TEMPLATES.find(template => template.name === 'harp_proxy')
+				this.deployConfig.harp = {
+					...harpDeployTempl.deployConfig.harp,
+				}
+			} else {
+				this.deployConfig.harp = null
+			}
 		},
 	},
 }
@@ -637,6 +706,8 @@ export default {
 	.hint {
 		color: var(--color-warning-text);
 		padding: 10px;
+		width: 320px;
+		max-width: 320px;
 	}
 
 	.templates {
@@ -647,16 +718,21 @@ export default {
 	}
 
 	.additional-options {
-		margin: 20px 0;
 		padding: 10px 0;
 	}
 
 	.additional-option {
 		display: flex;
+		width: 320px;
+		max-width: 320px;
 	}
 
 	.ex-input-field {
-		width: 350px;
+		width: 320px;
+	}
+
+	:deep .v-select.select {
+		margin: 0 !important;
 	}
 }
 </style>

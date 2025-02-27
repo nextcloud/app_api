@@ -4,28 +4,30 @@
 -->
 <template>
 	<NcButton
-		v-tooltip="{ content: text, trigger: 'click focus', delay: 0, placement: placement, autoHide: false }"
+		v-tooltip="{ content: text, triggers: ['hover'], delay: 50, placement: placement, autoHide: true }"
 		type="tertiary"
 		:aria-label="text">
 		<template #icon>
-			<Information :size="20" />
+			<component :is="iconComponent" :fill-color="iconColor" :size="20" />
 		</template>
 	</NcButton>
 </template>
 
 <script>
-import Information from 'vue-material-design-icons/Information.vue'
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import Tooltip from '@nextcloud/vue/dist/Directives/Tooltip.js'
+import Warning from 'vue-material-design-icons/Alert.vue'
+import Information from 'vue-material-design-icons/Information.vue'
 
 export default {
 	name: 'InfoTooltip',
 	components: {
 		NcButton,
 		Information,
+		Warning,
 	},
 	directives: {
-		Tooltip,
+		tooltip: Tooltip,
 	},
 	props: {
 		text: {
@@ -36,10 +38,22 @@ export default {
 			type: String,
 			default: 'top',
 		},
+		type: {
+			type: String,
+			default: 'info',
+		},
 	},
 	data() {
 		return {
 		}
+	},
+	computed: {
+		iconComponent() {
+			return this.type === 'warning' ? Warning : Information
+		},
+		iconColor() {
+			return this.type === 'warning' ? 'var(--color-warning)' : 'var(--color-primary)'
+		},
 	},
 }
 </script>
