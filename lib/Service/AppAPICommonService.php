@@ -51,6 +51,9 @@ class AppAPICommonService {
 	}
 
 	public function buildExAppHost(array $deployConfig): string {
+		if (boolval($deployConfig['harp'] ?? false)) {
+			return '127.0.0.1';
+		}
 		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST'])) {
 			return $deployConfig['additional_options']['OVERRIDE_APP_HOST'];
 		}
