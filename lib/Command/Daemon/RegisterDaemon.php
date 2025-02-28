@@ -64,7 +64,7 @@ class RegisterDaemon extends Command {
 		$protocol = $input->getArgument('protocol');
 		$host = $input->getArgument('host');
 		$nextcloudUrl = $input->getArgument('nextcloud_url');
-		$isHarp = $input->getOption('harp') !== null;
+		$isHarp = $input->getOption('harp');
 
 		if (($protocol !== 'http') && ($protocol !== 'https')) {
 			$output->writeln('Value error: The protocol must be `http` or `https`.');
