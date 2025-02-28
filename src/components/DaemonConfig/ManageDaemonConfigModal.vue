@@ -136,7 +136,7 @@
 								<div class="external-label" :aria-label="t('app_api', 'FRP server address')">
 									<label for="frp-address">
 										{{ t('app_api', 'FRP server address') }}
-										<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server inside the HaRP container.')" />
+										<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in \'Docker network\'.')" />
 									</label>
 									<NcInputField
 										id="frp-address"
@@ -426,7 +426,7 @@ export default {
 			return this.isDaemonNameValid === true ? t('app_api', 'Daemon with this name already exists') : ''
 		},
 		isHaProxyPasswordValid() {
-			if (this.daemonProtocol === 'https') {
+			if (this.daemonProtocol === 'https' || this.isHarp) {
 				return this.deployConfig.haproxy_password !== null && this.deployConfig.haproxy_password.length >= 12
 			}
 			// HaProxy password required only for https

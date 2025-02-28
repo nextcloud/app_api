@@ -20,7 +20,7 @@ export const DAEMON_TEMPLATES = [
 				label: 'CPU',
 			},
 			harp: {
-				frp_address: 'appapi-harp:8782',
+				frp_address: 'localhost:8782',
 				docker_socket_port: 24000,
 			},
 		},
