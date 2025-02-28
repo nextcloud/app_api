@@ -10,24 +10,43 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
 use OCP\App\IAppManager;
 use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 class AppAPICommonService {
 
 	public function __construct(
-		private readonly IAppManager             $appManager,
+		private readonly IAppManager         $appManager,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly LoggerInterface     $logger,
+		private readonly HarpService         $harpService,
 	) {
 	}
 
-	public function buildAppAPIAuthHeaders(?IRequest $request, ?string $userId, string $appId, string $appVersion, string $appSecret): array {
-		return [
+	public function buildAppAPIAuthHeaders(?IRequest $request, ?string $userId, ExApp $exApp): array {
+		$headers = [
 			'AA-VERSION' => $this->appManager->getAppVersion(Application::APP_ID, false),
-			'EX-APP-ID' => $appId,
-			'EX-APP-VERSION' => $appVersion,
-			'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $appSecret),
+			'EX-APP-ID' => $exApp->getAppid(),
+			'EX-APP-VERSION' => $exApp->getVersion(),
+			'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $exApp->getSecret()),
 			'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
 		];
+
+		// todo: cache
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByAppId($exApp->getAppid());
+		if ($daemonConfig === null) {
+			$this->logger->error(sprintf('Daemon config with name %s not found.', $exApp->getDaemonConfigName()));
+			return false;
+		}
+		if ($this->harpService->isHarp($daemonConfig)) {
+			$harpKey = $this->harpService->getHarpSharedKey($daemonConfig);
+			$headers['HARP-SHARED-KEY'] = $harpKey;
+			$headers['EX-APP-PORT'] = $exApp->getPort();
+		}
+
+		return $headers;
 	}
 
 	public function buildExAppHost(array $deployConfig): string {

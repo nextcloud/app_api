@@ -804,7 +804,14 @@ class DockerActions implements IDeployActions {
 	public function resolveExAppUrl(
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
-		// todo: check
+		if (boolval($deployConfig['harp'] ?? false)) {
+			return sprintf(
+				'%s/exapps/%s',
+				rtrim(rtrim($deployConfig['nextcloud_url'], '/'), '/index.php'),
+				$appId,
+			);
+		}
+
 		$auth = [];
 		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
 			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
@@ -876,7 +883,7 @@ class DockerActions implements IDeployActions {
 		$url = $this->isLocalSocket($daemonConfig->getHost())
 			? 'http://localhost'
 			: $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
-		if (isset($daemonConfig->getDeployConfig()['harp'])) {
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
 			// if there is a trailling slash, remove it
 			$url = rtrim($url, '/') . '/exapps/app_api';
 		}
@@ -900,7 +907,7 @@ class DockerActions implements IDeployActions {
 			$haproxyPass = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
 			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $haproxyPass];
 		}
-		if (isset($daemonConfig->getDeployConfig()['harp'])) {
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
 			$guzzleParams['headers'] = [
 				'harp-shared-key' => $guzzleParams['auth'][1],
 				'docker-engine-port' => $daemonConfig->getDeployConfig()['harp']['docker_socket_port'],

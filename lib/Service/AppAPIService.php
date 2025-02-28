@@ -166,9 +166,9 @@ class AppAPIService {
 		}
 
 		if (isset($options['headers']) && is_array($options['headers'])) {
-			$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret())];
+			$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp)];
 		} else {
-			$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret());
+			$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp);
 		}
 		$lang = $this->l10nFactory->findLanguage($exApp->getAppid());
 		if (!isset($options['headers']['Accept-Language'])) {
@@ -216,9 +216,9 @@ class AppAPIService {
 		}
 
 		if (isset($options['headers']) && is_array($options['headers'])) {
-			$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret())];
+			$options['headers'] = [...$options['headers'], ...$this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp)];
 		} else {
-			$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret());
+			$options['headers'] = $this->commonService->buildAppAPIAuthHeaders($request, $userId, $exApp);
 		}
 		$lang = $this->l10nFactory->findLanguage($exApp->getAppid());
 		if (!isset($options['headers']['Accept-Language'])) {
@@ -401,7 +401,7 @@ class AppAPIService {
 		$auth = [];
 		$initUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth) . '/init';
 		$options = [
-			'headers' => $this->commonService->buildAppAPIAuthHeaders(null, null, $exApp->getAppid(), $exApp->getVersion(), $exApp->getSecret()),
+			'headers' => $this->commonService->buildAppAPIAuthHeaders(null, null, $exApp),
 			'nextcloud' => [
 				'allow_local_address' => true,
 			],
@@ -485,6 +485,20 @@ class AppAPIService {
 			$options['auth'] = $auth;
 		}
 		$this->logger->info(sprintf('Performing heartbeat on: %s', $exAppUrl . '/heartbeat'));
+
+		// todo: cache
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByAppId($appId);
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+			$exApp = $this->exAppService->getExApp($appId);
+			if ($exApp === null) {
+				$this->logger->error(sprintf('ExApp with appId %s not found.', $appId));
+				return false;
+			}
+			$options['headers'] = array_merge(
+				$options['headers'],
+				$this->commonService->buildAppAPIAuthHeaders(null, null, $exApp),
+			);
+		}
 
 		$failedHeartbeatCount = 0;
 		while ($heartbeatAttempts < $maxHeartbeatAttempts) {

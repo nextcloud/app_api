@@ -25,7 +25,9 @@ class HarpService {
 		private readonly LoggerInterface     $logger,
 		private readonly IConfig             $config,
 		private readonly ICertificateManager $certificateManager,
-		private readonly ICrypto			       $crypto,
+		private readonly ICrypto             $crypto,
+		private readonly ExAppService        $exAppService,
+		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}
 
@@ -38,6 +40,19 @@ class HarpService {
 
 		$guzzleParams['verify'] = $certs;
 		return $guzzleParams;
+	}
+
+	/**
+	 * @param DaemonConfig $daemonConfig
+	 * @return string|null
+	 * @throws \Exception
+	 */
+	public function getHarpSharedKey(DaemonConfig $daemonConfig): ?string {
+		try {
+			return $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
+		} catch (\Exception $e) {
+			throw new \Exception('Failed to decrypt harp shared key', 0, $e);
+		}
 	}
 
 	/**
