@@ -48,19 +48,13 @@ class HarpController extends Controller {
 
 	private function validateHarpSharedKey(string $appId): bool {
 		// todo: cache
-		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null) {
-			$this->logger->error(sprintf('ExApp with appId %s not found.', $appId));
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByAppId($appId);
+		if ($daemonConfig === null) {
+			$this->logger->error('Daemon config not found for the app', ['appId' => $appId]);
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
 				'appid' => $appId,
 			]);
-			return new DataResponse(['message' => 'ExApp not found'], Http::STATUS_NOT_FOUND);
-		}
-
-		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-		if ($daemonConfig === null) {
-			$this->logger->error(sprintf('Daemon config with name %s not found.', $exApp->getDaemonConfigName()));
 			return false;
 		}
 

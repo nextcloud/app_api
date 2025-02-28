@@ -37,8 +37,9 @@ class AppAPICommonService {
 		// todo: cache
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByAppId($exApp->getAppid());
 		if ($daemonConfig === null) {
+			// this should not happen
 			$this->logger->error(sprintf('Daemon config with name %s not found.', $exApp->getDaemonConfigName()));
-			return false;
+			return $headers;
 		}
 		if ($this->harpService->isHarp($daemonConfig)) {
 			$harpKey = $this->harpService->getHarpSharedKey($daemonConfig);
