@@ -37,6 +37,7 @@
     "Changelog" : "Registo de alterações",
     "Disabled apps" : "Apps desativadas",
     "Updates" : "Atualizações",
+    "Featured apps" : "Aplicações principais",
     "Enable" : "Ativar",
     "Disable" : "Desativar"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
