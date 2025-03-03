@@ -13,7 +13,7 @@ export const DAEMON_TEMPLATES = [
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',
-			haproxy_password: 'harp_shared_key',
+			haproxy_password: 'some_very_secure_password',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',
