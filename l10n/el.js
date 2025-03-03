@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Ακύρωση",
     "Delete" : "Διαγραφή",
+    "Password confirmation failed" : "Η επιβεβαίωση του κωδικού πρόσβασης απέτυχε",
     "Default" : "Προεπιλογή",
     "Edit" : "Επεξεργασία",
     "Name" : "Όνομα",
