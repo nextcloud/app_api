@@ -32,17 +32,16 @@ class RegisterDaemon extends Command {
 		$this->setName('app_api:daemon:register');
 		$this->setDescription('Register daemon config for ExApp deployment');
 
-		// todo: add docs
-		$this->addArgument('name', InputArgument::REQUIRED);
+		$this->addArgument('name', InputArgument::REQUIRED, 'Unique deploy daemon name');
 		$this->addArgument('display-name', InputArgument::REQUIRED);
-		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED);
-		$this->addArgument('protocol', InputArgument::REQUIRED);
-		$this->addArgument('host', InputArgument::REQUIRED);
+		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED, 'The deployment method that the daemon accepts. Can be "manual-install" or "docker-install". "docker-install" is for Docker Socket Proxy and HaRP.');
+		$this->addArgument('protocol', InputArgument::REQUIRED, 'The protocol used to connect to the daemon. Can be "http" or "https".');
+		$this->addArgument('host', InputArgument::REQUIRED, 'The hostname (and port) or path at which the docker socket proxy or harp or the manual-install app is/would be available. This need not be a public host, just a host accessible by the Nextcloud server. It can also be a path to the docker socket. (e.g. appapi-harp:8780, /var/run/docker.sock)');
 		$this->addArgument('nextcloud_url', InputArgument::REQUIRED);
 
 		// daemon-config settings
-		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'DeployConfig, the name of the docker network to attach App to');
-		$this->addOption('haproxy_password', null, InputOption::VALUE_REQUIRED, 'AppAPI Docker Socket Proxy password for HAProxy Basic auth');
+		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'The name of the docker network the ex-apps installed by this daemon should use. Default is "host".');
+		$this->addOption('haproxy_password', null, InputOption::VALUE_REQUIRED, 'AppAPI Docker Socket Proxy password for HAProxy Basic auth. Only for docker socket proxy daemon.');
 		$this->addOption('compute_device', null, InputOption::VALUE_REQUIRED, 'Compute device for GPU support (cpu|cuda|rocm)');
 		$this->addOption('set-default', null, InputOption::VALUE_NONE, 'Set DaemonConfig as default');
 		$this->addOption('harp', null, InputOption::VALUE_NONE, 'Set daemon to use HaRP for all docker and exapp communication');
@@ -54,7 +53,7 @@ class RegisterDaemon extends Command {
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
 		$this->addUsage('docker_install "Docker Socket Proxy" "docker-install" "http" "nextcloud-appapi-dsp:2375" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
-		$this->addUsage('harp_install "Harp Install" "docker-install" "http" "nextcloud-appapi-harp:8780" "http://nextcloud.local" --harp --harp_frp_address "nextcloud-appapi-harp:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
+		$this->addUsage('harp_proxy "Harp Install" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --harp --harp_frp_address "localhost:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
