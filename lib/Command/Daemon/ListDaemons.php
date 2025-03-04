@@ -43,7 +43,7 @@ class ListDaemons extends Command {
 
 		$output->writeln('Registered ExApp daemon configs:');
 		$table = new Table($output);
-		$table->setHeaders(['Def', 'Name', 'Display name', 'Deploy ID', 'Protocol', 'Host', 'NC Url']);
+		$table->setHeaders(['Def', 'Name', 'Display name', 'Deploy ID', 'Protocol', 'Host', 'NC Url', 'Is HaRP', 'HaRP FRP Address', 'HaRP Docker Socket Port']);
 		$rows = [];
 
 		foreach ($daemonConfigs as $daemon) {
@@ -53,7 +53,10 @@ class ListDaemons extends Command {
 				$daemon->getAcceptsDeployId(),
 				$daemon->getProtocol(),
 				$daemon->getHost(),
-				$daemon->getDeployConfig()['nextcloud_url']
+				$daemon->getDeployConfig()['nextcloud_url'],
+				isset($daemon->getDeployConfig()['harp']) ? 'yes' : 'no',
+				$daemon->getDeployConfig()['harp']['frp_address'] ?? '(none)',
+				$daemon->getDeployConfig()['harp']['docker_socket_port'] ?? '(none)',
 			];
 		}
 
