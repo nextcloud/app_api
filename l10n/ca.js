@@ -27,6 +27,7 @@ OC.L10N.register(
     "Confirm" : "Confirma",
     "Save" : "Desar",
     "Register" : "Registra",
+    "Check connection" : "Comproveu la connexió",
     "External Apps" : "Apps externes",
     "{license}-licensed" : "sota la llicència - {license}",
     "Update to {version}" : "Actualització a la versió {version}",

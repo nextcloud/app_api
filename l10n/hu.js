@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Mégse",
     "Delete" : "Törlés",
+    "Password confirmation failed" : "A jelszó megerősítése nem sikerült",
     "Default" : "Alapértelmezett",
     "Edit" : "Szerkesztés",
     "Name" : "Név",
