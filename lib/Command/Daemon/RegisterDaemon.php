@@ -53,7 +53,7 @@ class RegisterDaemon extends Command {
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
 		$this->addUsage('docker_install "Docker Socket Proxy" "docker-install" "http" "nextcloud-appapi-dsp:2375" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
-		$this->addUsage('harp_proxy "Harp Install" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --harp --harp_frp_address "localhost:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
+		$this->addUsage('harp_proxy "Harp Proxy with DSP" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --harp --harp_frp_address "localhost:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
