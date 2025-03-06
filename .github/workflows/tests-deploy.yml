@@ -42,28 +42,28 @@ jobs:
             --restart unless-stopped \
             -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
           docker run --net master_bridge --name nextcloud-docker --rm -d ${{ env.docker-image }}
-          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
-          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
+          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
           docker run --net master_bridge --name nextcloud --rm -d nginx \
             -v ./tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
-          sleep 60s
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
+          sleep 60s
+          docker exec -w /var/www/html/apps nextcloud-docker git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git fetch origin $GITHUB_REF
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git checkout FETCH_HEAD
+          docker exec nextcloud-docker sudo -u www-data php occ app:enable app_api
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:register \
             harp_proxy "Harp Proxy with DSP" "docker-install" "http" "appapi-harp:8780" "http://nextcloud" \
             --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" \
             --net=master_bridge --set-default
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          docker exec nextcloud ping -c 1 appapi-harp
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:list
+          docker exec nextcloud-docker ping -c 1 appapi-harp
 
       - name: Registering and enabling Skeleton ExApp
         run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python harp_proxy \
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:app:register app-skeleton-python harp_proxy \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
             --wait-finish
 
@@ -73,11 +73,11 @@ jobs:
 
       - name: Disable ExApp
         run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:app:disable app-skeleton-python
 
       - name: Copy NC log to host
         if: always()
-        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
+        run: docker cp nextcloud-docker:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
         run: |
@@ -94,8 +94,8 @@ jobs:
 
       - name: Unregister Skeleton & Daemon
         run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister app-skeleton-python
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister harp_proxy
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:app:unregister app-skeleton-python
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:unregister harp_proxy
 
       - name: Upload Container info
         if: always()
@@ -152,8 +152,6 @@ jobs:
 
       - name: Create containers
         run: |
-          pwd
-          ls -la *
           docker network create master_bridge
           docker run \
             -e HP_SHARED_KEY="some_very_secure_password" \
@@ -165,28 +163,28 @@ jobs:
             --restart unless-stopped \
             -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
           docker run --net master_bridge --name nextcloud-docker --rm -d ${{ env.docker-image }}
-          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
-          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
+          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
           docker run --net master_bridge --name nextcloud --rm -d nginx \
             -v tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
-          sleep 60s
 
       - name: Install AppAPI
         run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
+          sleep 60s
+          docker exec -w /var/www/html/apps nextcloud-docker git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git fetch origin $GITHUB_REF
+          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git checkout FETCH_HEAD
+          docker exec nextcloud-docker sudo -u www-data php occ app:enable app_api
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:register \
             harp_proxy "Harp Proxy with DSP" "docker-install" "http" "appapi-harp:8780" "http://nextcloud" \
             --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" \
             --net=master_bridge --set-default
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          docker exec nextcloud ping -c 1 appapi-harp
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:list
+          docker exec nextcloud-docker ping -c 1 appapi-harp
 
       - name: Registering and enabling Skeleton ExApp
         run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python harp_proxy \
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:app:register app-skeleton-python harp_proxy \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
             --wait-finish
 
@@ -196,11 +194,11 @@ jobs:
 
       - name: Disable ExApp
         run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:app:disable app-skeleton-python
 
       - name: Copy NC log to host
         if: always()
-        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
+        run: docker cp nextcloud-docker:/var/www/html/data/nextcloud.log nextcloud.log
 
       - name: Check logs
         run: |
@@ -217,8 +215,8 @@ jobs:
 
       - name: Unregister Skeleton & Daemon
         run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister app-skeleton-python
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister harp_proxy
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:app:unregister app-skeleton-python
+          docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:unregister harp_proxy
 
       - name: Upload HaRP Container info
         if: always()
@@ -256,7 +254,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harp_bridge_nextcloud.log
+          name: harp_bridge_no_tls_nextcloud.log
           path: nextcloud.log
           if-no-files-found: warn
 
