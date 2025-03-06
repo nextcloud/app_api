@@ -429,8 +429,9 @@ class AppAPIService {
 	 */
 	public function runOccCommand(string $command): bool {
 		$args = array_map(function ($arg) {
-			return escapeshellarg($arg);
+			return $arg === '' ? null : escapeshellarg($arg);
 		}, explode(' ', $command));
+		$args = array_filter($args, fn ($arg) => $arg !== null);
 		$args[] = '--no-ansi --no-warnings';
 		return $this->runOccCommandInternal($args);
 	}
@@ -448,13 +449,28 @@ class AppAPIService {
 		}
 		$this->logger->info(sprintf('Calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
 		$process = proc_open('php console.php ' . $args, $descriptors, $pipes, $occDirectory);
+		
 		if (!is_resource($process)) {
 			$this->logger->error(sprintf('Error calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
 			return false;
 		}
+
+		$stdout = stream_get_contents($pipes[1]);
+		$stderr = stream_get_contents($pipes[2]);
+
 		fclose($pipes[0]);
 		fclose($pipes[1]);
 		fclose($pipes[2]);
+
+		$returnCode = proc_close($process);
+
+		if ($returnCode !== 0) {
+			$this->logger->error(sprintf('Error executing occ command. Return code: %d, stdout: %s, stderr: %s', $returnCode, $stdout, $stderr));
+			return false;
+		}
+
+		$this->logger->info(sprintf('OCC command executed successfully. stdout: %s, stderr: %s', $stdout, $stderr));
+		
 		return true;
 	}
 

@@ -39,6 +39,7 @@ OC.L10N.register(
     "Changelog" : "Registo de alterações",
     "Disabled apps" : "Apps desativadas",
     "Updates" : "Atualizações",
+    "Featured apps" : "Aplicações principais",
     "Enable" : "Ativar",
     "Disable" : "Desativar"
 },
