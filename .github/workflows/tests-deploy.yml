@@ -49,8 +49,9 @@ jobs:
           sed -i '/location \/expps\//,/}/ s/^\s*proxy_set_header Host \$host;//' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
           cat tests/simple-nginx-NOT-FOR-PRODUCTION.conf
 
-          docker run --net master_bridge --name nextcloud --rm -d nginx \
-            -v ./tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
+          docker run --net master_bridge --name nextcloud --rm \
+            -v $(pwd)/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
+            -d nginx
 
       - name: Install AppAPI
         run: |
@@ -65,6 +66,10 @@ jobs:
             --net=master_bridge --set-default
           docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud-docker ping -c 1 appapi-harp
+          docker exec nextcloud-docker ping -c 1 nextcloud
+
+      - name: debug session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Registering and enabling Skeleton ExApp
         run: |
