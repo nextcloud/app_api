@@ -68,9 +68,6 @@ jobs:
           docker exec nextcloud-docker ping -c 1 appapi-harp
           docker exec nextcloud-docker ping -c 1 nextcloud
 
-      - name: debug session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Registering and enabling Skeleton ExApp
         run: |
           docker exec nextcloud-docker sudo -u www-data php occ app_api:app:register app-skeleton-python harp_proxy \
@@ -101,6 +98,8 @@ jobs:
           docker logs appapi-harp > harp_bridge_container.log 2>&1
           docker inspect nc_app_app-skeleton-python | json_pp > app_harp_bridge_container.json
           docker logs nc_app_app-skeleton-python > app_harp_bridge_container.log 2>&1
+          # nginx
+          docker logs nextcloud > nginx.log 2>&1
 
       - name: Unregister Skeleton & Daemon
         run: |
@@ -145,6 +144,14 @@ jobs:
         with:
           name: harp_bridge_nextcloud.log
           path: nextcloud.log
+          if-no-files-found: warn
+
+      - name: Upload nginx logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harp_bridge_nginx.log
+          path: nginx.log
           if-no-files-found: warn
 
 #  nc-docker-harp-bridge-no-tls:
