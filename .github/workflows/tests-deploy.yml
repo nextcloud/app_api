@@ -994,6 +994,11 @@ jobs:
       - name: Set app env
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
       - name: Create containers
         run: |
           docker network create master_bridge
@@ -1004,12 +1009,12 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             --net master_bridge --name appapi-harp -h appapi-harp \
             --restart unless-stopped \
-            --rm -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+            -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
           docker run --net master_bridge --name nextcloud-docker --rm -d ${{ env.docker-image }}
-          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' /var/www/html/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
-          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' /var/www/html/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
           docker run --net master_bridge --name nextcloud --rm -d nginx \
-            -v /var/www/html/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
+            -v apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
           sleep 60s
 
       - name: Install AppAPI
@@ -1028,8 +1033,8 @@ jobs:
       - name: Registering and enabling Skeleton ExApp
         run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python harp_proxy \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
+            --wait-finish
 
       - name: Docker inspect output
         if: always()
@@ -1051,10 +1056,10 @@ jobs:
       - name: Save app and HaRP container info & logs
         if: always()
         run: |
-          docker inspect appapi-harp | json_pp > harp_container.json
-          docker logs appapi-harp > harp_container.log 2>&1
-          docker inspect nc_app_app-skeleton-python | json_pp > container.json
-          docker logs nc_app_app-skeleton-python > container.log 2>&1
+          docker inspect appapi-harp | json_pp > harp_bridge_container.json
+          docker logs appapi-harp > harp_bridge_container.log 2>&1
+          docker inspect nc_app_app-skeleton-python | json_pp > app_harp_bridge_container.json
+          docker logs nc_app_app-skeleton-python > app_harp_bridge_container.log 2>&1
 
       - name: Unregister Skeleton & Daemon
         run: |
@@ -1065,16 +1070,16 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harp_bridge_app_container.json
-          path: app_container.json
+          name: app_harp_bridge_container.json
+          path: app_harp_bridge_container.json
           if-no-files-found: warn
 
       - name: Upload app container logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harp_bridge_app_container.log
-          path: app_container.log
+          name: app_harp_bridge_container.log
+          path: app_harp_bridge_container.log
           if-no-files-found: warn
 
       - name: Upload HaRP Container info
@@ -1082,7 +1087,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: harp_bridge_container.json
-          path: harp_container.json
+          path: harp_bridge_container.json
           if-no-files-found: warn
 
       - name: Upload HaRP container logs
@@ -1090,7 +1095,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: harp_bridge_container.log
-          path: harp_container.log
+          path: harp_bridge_container.log
           if-no-files-found: warn
 
       - name: Upload NC logs
@@ -1111,6 +1116,11 @@ jobs:
       - name: Set app env
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
       - name: Create containers
         run: |
           docker network create master_bridge
@@ -1122,12 +1132,12 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             --net master_bridge --name appapi-harp -h appapi-harp \
             --restart unless-stopped \
-            --rm -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+            -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
           docker run --net master_bridge --name nextcloud-docker --rm -d ${{ env.docker-image }}
-          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' /var/www/html/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
-          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' /var/www/html/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
           docker run --net master_bridge --name nextcloud --rm -d nginx \
-            -v /var/www/html/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
+            -v apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
           sleep 60s
 
       - name: Install AppAPI
@@ -1146,8 +1156,8 @@ jobs:
       - name: Registering and enabling Skeleton ExApp
         run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python harp_proxy \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
+            --wait-finish
 
       - name: Docker inspect output
         if: always()
@@ -1169,46 +1179,46 @@ jobs:
       - name: Save app and HaRP container info & logs
         if: always()
         run: |
-          docker inspect appapi-harp | json_pp > harp_container.json
-          docker logs appapi-harp > harp_container.log 2>&1
-          docker inspect nc_app_app-skeleton-python | json_pp > container.json
-          docker logs nc_app_app-skeleton-python > container.log 2>&1
+          docker inspect appapi-harp | json_pp > harp_bridge_no_tls_container.json
+          docker logs appapi-harp > harp_bridge_no_tls_container.log 2>&1
+          docker inspect nc_app_app-skeleton-python | json_pp > app_harp_bridge_no_tls_container.json
+          docker logs nc_app_app-skeleton-python > app_harp_bridge_no_tls_container.log 2>&1
 
       - name: Unregister Skeleton & Daemon
         run: |
           docker exec nextcloud sudo -u www-data php occ app_api:app:unregister app-skeleton-python
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister harp_proxy
 
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: harp_bridge_app_container.json
-          path: app_container.json
-          if-no-files-found: warn
-
-      - name: Upload app container logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: harp_bridge_app_container.log
-          path: app_container.log
-          if-no-files-found: warn
-
       - name: Upload HaRP Container info
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harp_bridge_container.json
-          path: harp_container.json
+          name: harp_bridge_no_tls_container.json
+          path: harp_bridge_no_tls_container.json
           if-no-files-found: warn
 
       - name: Upload HaRP container logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harp_bridge_container.log
-          path: harp_container.log
+          name: harp_bridge_no_tls_container.log
+          path: harp_bridge_no_tls_container.log
+          if-no-files-found: warn
+
+      - name: Upload app container info
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app_harp_bridge_no_tls_container.json
+          path: app_harp_bridge_no_tls_container.json
+          if-no-files-found: warn
+
+      - name: Upload app container logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app_harp_bridge_no_tls_container.log
+          path: app_harp_bridge_no_tls_container.log
           if-no-files-found: warn
 
       - name: Upload NC logs
@@ -1293,7 +1303,7 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             --net host --name appapi-harp \
             --restart unless-stopped \
-            --rm -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+            -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
           docker run --net host --name nextcloud --rm -d nginx \
             -v /var/www/html/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
 
@@ -1305,9 +1315,9 @@ jobs:
             --harp --harp_frp_address "127.0.0.1:8782" --harp_shared_key "some_very_secure_password" \
             --net host --set-default
           ./occ app_api:daemon:list
-          ./occ app_api:app:register app-skeleton-python \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          ./occ app_api:app:enable app-skeleton-python
+          ./occ app_api:app:register app-skeleton-python harp_proxy \
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
+            --wait-finish
           ./occ app_api:app:disable app-skeleton-python
 
       - name: Check logs
@@ -1318,10 +1328,10 @@ jobs:
       - name: Save app and HaRP container info & logs
         if: always()
         run: |
-          docker inspect appapi-harp | json_pp > harp_container.json
-          docker logs appapi-harp > harp_container.log 2>&1
-          docker inspect nc_app_app-skeleton-python | json_pp > app_container.json
-          docker logs nc_app_app-skeleton-python > app_container.log 2>&1
+          docker inspect appapi-harp | json_pp > harp_host_container.json
+          docker logs appapi-harp > harp_host_container.log 2>&1
+          docker inspect nc_app_app-skeleton-python | json_pp > app_host_container.json
+          docker logs nc_app_app-skeleton-python > app_host_container.log 2>&1
 
       - name: Unregister Skeleton & Daemon
         run: |
@@ -1331,44 +1341,44 @@ jobs:
       - name: Test OCC commands(docker)
         run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
 
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: harp_bridge_app_container.json
-          path: app_container.json
-          if-no-files-found: warn
-
-      - name: Upload app container logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: harp_bridge_app_container.log
-          path: app_container.log
-          if-no-files-found: warn
-
       - name: Upload HaRP Container info
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harp_bridge_container.json
-          path: harp_container.json
+          name: harp_host_container.json
+          path: harp_host_container.json
           if-no-files-found: warn
 
       - name: Upload HaRP container logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harp_bridge_container.log
-          path: harp_container.log
+          name: harp_host_container.log
+          path: harp_host_container.log
+          if-no-files-found: warn
+
+      - name: Upload app container info
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app_host_container.json
+          path: app_host_container.json
+          if-no-files-found: warn
+
+      - name: Upload app container logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app_host_container.log
+          path: app_host_container.log
           if-no-files-found: warn
 
       - name: Upload NC logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harp_bridge_nextcloud.log
-          path: nextcloud.log
+          name: nextcloud.log
+          path: data/nextcloud.log
           if-no-files-found: warn
 
   tests-deploy-success:
