@@ -805,11 +805,11 @@ class DockerActions implements IDeployActions {
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
 		if (boolval($deployConfig['harp'] ?? false)) {
-			return sprintf(
-				'%s/exapps/%s',
-				rtrim(rtrim($deployConfig['nextcloud_url'], '/'), '/index.php'),
-				$appId,
-			);
+			$url = rtrim($deployConfig['nextcloud_url'], '/');
+			if (str_ends_with($url, '/index.php')) {
+				$url = substr($url, 0, -10);
+			}
+			return sprintf('%s/exapps/%s', $url, $appId);
 		}
 
 		$auth = [];
