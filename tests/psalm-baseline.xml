@@ -121,4 +121,11 @@
       <code><![CDATA[\OC\Memcache\APCu]]></code>
     </UndefinedClass>
   </file>
+  <file src="lib/Service/HarpService.php">
+    <UndefinedClass>
+      <code><![CDATA[ClientException]]></code>
+      <code><![CDATA[$e]]></code>
+      <code><![CDATA[$e]]></code>
+    </UndefinedClass>
+  </file>
 </files>
