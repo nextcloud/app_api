@@ -996,8 +996,6 @@ jobs:
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          path: apps/${{ env.APP_NAME }}
 
       - name: Create containers
         run: |
@@ -1011,10 +1009,10 @@ jobs:
             --restart unless-stopped \
             -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
           docker run --net master_bridge --name nextcloud-docker --rm -d ${{ env.docker-image }}
-          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
-          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
           docker run --net master_bridge --name nextcloud --rm -d nginx \
-            -v apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
+            -v ./tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
           sleep 60s
 
       - name: Install AppAPI
@@ -1118,11 +1116,11 @@ jobs:
 
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          path: apps/${{ env.APP_NAME }}
 
       - name: Create containers
         run: |
+          pwd
+          ls -la *
           docker network create master_bridge
           docker run \
             -e HP_SHARED_KEY="some_very_secure_password" \
@@ -1134,10 +1132,10 @@ jobs:
             --restart unless-stopped \
             -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
           docker run --net master_bridge --name nextcloud-docker --rm -d ${{ env.docker-image }}
-          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
-          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
+          sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf'
           docker run --net master_bridge --name nextcloud --rm -d nginx \
-            -v apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
+            -v tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
           sleep 60s
 
       - name: Install AppAPI
@@ -1315,6 +1313,10 @@ jobs:
             --harp --harp_frp_address "127.0.0.1:8782" --harp_shared_key "some_very_secure_password" \
             --net host --set-default
           ./occ app_api:daemon:list
+
+          # todo: monitor port binds
+          lsof -i -P -n | grep LISTEN 2>&1 | tee lsof.log
+
           ./occ app_api:app:register app-skeleton-python harp_proxy \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
             --wait-finish
@@ -1328,6 +1330,10 @@ jobs:
       - name: Save app and HaRP container info & logs
         if: always()
         run: |
+          # todo
+          cat lsof.log
+          echo '---'
+
           docker inspect appapi-harp | json_pp > harp_host_container.json
           docker logs appapi-harp > harp_host_container.log 2>&1
           docker inspect nc_app_app-skeleton-python | json_pp > app_host_container.json
