@@ -1,0 +1,153 @@
+# SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+name: Lint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  xml-lint:
+    runs-on: ubuntu-22.04
+    name: info.xml lint
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download xml appinfo schema
+        run: wget https://raw.githubusercontent.com/nextcloud/appstore/master/nextcloudappstore/api/v1/release/info.xsd
+
+      - name: Lint appinfo/info.xml
+        uses: ChristophWurst/xmllint-action@v1.1
+        with:
+          xml-file: ./appinfo/info.xml
+          xml-schema-file: ./info.xsd
+
+  php-lint:
+    runs-on: ubuntu-22.04
+    name: php-lint
+    strategy:
+      matrix:
+        php-versions: ["8.1"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+
+      - name: Lint
+        run: composer run lint
+
+  php-cs:
+    runs-on: ubuntu-22.04
+    name: php-cs
+    strategy:
+      matrix:
+        php-versions: ["8.1"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+
+      - name: Install dependencies
+        run: composer i
+
+      - name: Lint
+        run: composer run cs:check || ( echo 'Please run `composer run cs:fix` to format your code' && exit 1 )
+
+  php-psalm-analysis:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        php-versions: ["8.1"]
+    name: php-psalm-analysis
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+
+      - name: Install dependencies
+        run: composer i
+
+      - name: Run coding standards check
+        run: composer run psalm
+
+  php-security-analysis:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    name: security analysis
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Psalm
+        uses: docker://vimeo/psalm-github-actions:4.30.0
+        with:
+          security_analysis: true
+          composer_ignore_platform_reqs: false
+          report_file: results.sarif
+
+      - name: Upload Security Analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+
+  js-eslint:
+    runs-on: ubuntu-22.04
+    name: eslint
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+  stylelint:
+    runs-on: ubuntu-22.04
+
+    name: stylelint
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run stylelint
+
+  lint-success:
+    permissions:
+      contents: none
+    runs-on: ubuntu-22.04
+    needs: [xml-lint, php-lint, php-cs, php-psalm-analysis, php-security-analysis, js-eslint, stylelint]
+    name: Lint-OK
+    steps:
+      - run: echo "Lint passed successfully"

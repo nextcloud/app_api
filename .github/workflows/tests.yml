@@ -1,0 +1,497 @@
+# SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  NEXTCLOUD_URL: "http://localhost:8080/"
+  APP_ID: "nc_py_api"
+  APP_PORT: 9009
+  APP_VERSION: "1.0.0"
+  APP_SECRET: "tC6vkwPhcppjMykD1r0n9NlI95uJMBYjs5blpIcA1PAdoPDmc5qoAjaBAkyocZ6E"
+  SKIP_NC_CLIENT_TESTS: 1
+
+jobs:
+  nc-py-api-pgsql:
+    runs-on: ubuntu-22.04
+    name: NC_Py_API • PgSQL
+    env:
+      DATABASE_PGSQL: 1
+
+    services:
+      postgres:
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        ports:
+          - 4444:5432/tcp
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: nextcloud
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
+
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: master
+
+      - name: Checkout Notifications
+        uses: actions/checkout@v4
+        with:
+          repository: nextcloud/notifications
+          ref: master
+          path: apps/notifications
+
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Checkout Notes
+        uses: actions/checkout@v4
+        with:
+          repository: nextcloud/notes
+          ref: "main"
+          path: apps/notes
+
+      - name: Set up php
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        with:
+          php-version: '8.3'
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
+          coverage: none
+          ini-file: development
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
+            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
+          ./occ app:enable notifications
+          ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Enable Notes
+        run: ./occ app:enable --force notes
+
+      - name: Run Nextcloud
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+
+      - name: Checkout NcPyApi
+        uses: actions/checkout@v4
+        with:
+          path: nc_py_api
+          repository: cloud-py-api/nc_py_api
+
+      - name: Install NcPyApi
+        working-directory: nc_py_api
+        run: python3 -m pip -v install ".[dev]"
+
+      - name: Register NcPyApi
+        run: |
+          cd nc_py_api
+          python3 tests/_install.py &
+          echo $! > /tmp/_install.pid
+          python3 tests/_install_wait.py http://127.0.0.1:$APP_PORT/heartbeat "\"status\":\"ok\"" 15 0.5
+          cd ..
+          sh nc_py_api/scripts/ci_register.sh "$APP_ID" "$APP_VERSION" "$APP_SECRET" "localhost" "$APP_PORT"
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Run NC_Py_API tests
+        working-directory: nc_py_api
+        run: python3 -m pytest
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pgsql_nc_py_api_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
+  nc-py-api-mysql:
+    runs-on: ubuntu-22.04
+    name: NC_Py_API • MySQL
+
+    services:
+      mysql:
+        image: ghcr.io/nextcloud/continuous-integration-mysql-8.3:latest
+        ports:
+          - 4444:3306/tcp
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+        options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
+
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: master
+
+      - name: Checkout Notifications
+        uses: actions/checkout@v4
+        with:
+          repository: nextcloud/notifications
+          ref: master
+          path: apps/notifications
+
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        with:
+          php-version: '8.3'
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, mysql, pdo_mysql
+          coverage: none
+          ini-file: development
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable ONLY_FULL_GROUP_BY MySQL option
+        run: |
+          echo "SET GLOBAL sql_mode=(SELECT CONCAT(@@sql_mode,',ONLY_FULL_GROUP_BY'));" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
+          echo "SELECT @@sql_mode;" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=mysql --database-name=nextcloud \
+            --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
+          ./occ app:enable notifications
+          ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Run Nextcloud
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+
+      - name: Checkout NcPyApi
+        uses: actions/checkout@v4
+        with:
+          path: nc_py_api
+          repository: cloud-py-api/nc_py_api
+
+      - name: Install NcPyApi
+        working-directory: nc_py_api
+        run: python3 -m pip -v install ".[dev]"
+
+      - name: Register NcPyApi
+        run: |
+          cd nc_py_api
+          python3 tests/_install.py &
+          echo $! > /tmp/_install.pid
+          python3 tests/_install_wait.py http://127.0.0.1:$APP_PORT/heartbeat "\"status\":\"ok\"" 15 0.5
+          cd ..
+          sh nc_py_api/scripts/ci_register.sh "$APP_ID" "$APP_VERSION" "$APP_SECRET" "localhost" "$APP_PORT"
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Run NC_Py_API tests
+        working-directory: nc_py_api
+        run: python3 -m pytest
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mysql_nc_py_api_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
+  nc-py-api-mysql-apcu:
+    runs-on: ubuntu-22.04
+    name: APCu • NC_Py_API • MySQL
+
+    services:
+      mysql:
+        image: ghcr.io/nextcloud/continuous-integration-mysql-8.3:latest
+        ports:
+          - 4444:3306/tcp
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+        options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
+
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: master
+
+      - name: Checkout Notifications
+        uses: actions/checkout@v4
+        with:
+          repository: nextcloud/notifications
+          ref: master
+          path: apps/notifications
+
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        with:
+          php-version: '8.3'
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, mysql, pdo_mysql, apcu
+          coverage: none
+          ini-file: development
+          ini-values:
+            apc.enabled=on, apc.enable_cli=on
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable ONLY_FULL_GROUP_BY MySQL option
+        run: |
+          echo "SET GLOBAL sql_mode=(SELECT CONCAT(@@sql_mode,',ONLY_FULL_GROUP_BY'));" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
+          echo "SELECT @@sql_mode;" | mysql -h 127.0.0.1 -P 4444 -u root -prootpassword
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=mysql --database-name=nextcloud \
+            --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
+          ./occ config:system:set memcache.local --value "\\OC\\Memcache\\APCu" --type string
+          ./occ app:enable notifications
+          ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Run Nextcloud
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+
+      - name: Checkout NcPyApi
+        uses: actions/checkout@v4
+        with:
+          path: nc_py_api
+          repository: cloud-py-api/nc_py_api
+
+      - name: Install NcPyApi
+        working-directory: nc_py_api
+        run: python3 -m pip -v install ".[dev]"
+
+      - name: Register NcPyApi
+        run: |
+          cd nc_py_api
+          python3 tests/_install.py &
+          echo $! > /tmp/_install.pid
+          python3 tests/_install_wait.py http://127.0.0.1:$APP_PORT/heartbeat "\"status\":\"ok\"" 15 0.5
+          cd ..
+          sh nc_py_api/scripts/ci_register.sh "$APP_ID" "$APP_VERSION" "$APP_SECRET" "localhost" "$APP_PORT"
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Run NC_Py_API tests
+        working-directory: nc_py_api
+        run: python3 -m pytest
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apcu_mysql_nc_py_api_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
+  nc-py-api-oci:
+    runs-on: ubuntu-22.04
+    name: NC_Py_API • Oracle
+    services:
+      oracle:
+        image: ghcr.io/gvenzl/oracle-xe:11
+        env:
+          ORACLE_RANDOM_PASSWORD: true
+          APP_USER: useroracle
+          APP_USER_PASSWORD: userpassword
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 1521:1521/tcp
+
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: master
+
+      - name: Checkout Notifications
+        uses: actions/checkout@v4
+        with:
+          repository: nextcloud/notifications
+          ref: master
+          path: apps/notifications
+
+      - name: Checkout AppAPI
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, \
+            posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, oci8
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=oci --database-name=XE \
+            --database-host=127.0.0.1 --database-port=1521 --database-user=useroracle --database-pass=userpassword \
+            --admin-user admin --admin-pass admin
+          ./occ app:enable --force ${{ env.APP_NAME }}
+          ./occ app:enable notifications
+          ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Run Nextcloud
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+
+      - name: Checkout NcPyApi
+        uses: actions/checkout@v4
+        with:
+          path: nc_py_api
+          repository: cloud-py-api/nc_py_api
+
+      - name: Install NcPyApi
+        working-directory: nc_py_api
+        run: python3 -m pip -v install ".[dev]"
+
+      - name: Register NcPyApi
+        run: |
+          cd nc_py_api
+          python3 tests/_install.py &
+          echo $! > /tmp/_install.pid
+          python3 tests/_install_wait.py http://127.0.0.1:$APP_PORT/heartbeat "\"status\":\"ok\"" 15 0.5
+          cd ..
+          sh nc_py_api/scripts/ci_register.sh "$APP_ID" "$APP_VERSION" "$APP_SECRET" "localhost" "$APP_PORT"
+          kill -15 $(cat /tmp/_install.pid)
+          timeout 3m tail --pid=$(cat /tmp/_install.pid) -f /dev/null
+
+      - name: Run NC_Py_API tests
+        working-directory: nc_py_api
+        run: python3 -m pytest
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oci_nc_py_api_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
+  tests-success:
+    permissions:
+      contents: none
+    runs-on: ubuntu-22.04
+    needs: [nc-py-api-pgsql, nc-py-api-mysql, nc-py-api-oci]
+    name: Tests-OK
+    steps:
+      - run: echo "Tests passed successfully"
