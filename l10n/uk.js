@@ -38,6 +38,7 @@ OC.L10N.register(
     "Results from other categories" : "Результати з інших категорій",
     "_Update_::_Update all_" : ["Оновити","Оновити все","Оновити все","Оновити все"],
     "Type" : "Тип",
+    "Display Name" : "Назва для показу",
     "by {author}\n{license}" : "Автор: {author}\n{license}",
     "Your apps" : "Ваші застосунки",
     "Documentation" : "Документація",
