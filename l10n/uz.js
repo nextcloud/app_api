@@ -3,8 +3,10 @@ OC.L10N.register(
     {
     "Cancel" : "Cancel",
     "Delete" : "Delete",
+    "Edit" : "Tahrirlash",
     "Name" : "Name",
     "Confirm" : "Confirm",
+    "Save" : "Saqlash",
     "Update to {version}" : "Update to {version}",
     "Remove" : "Remove",
     "Visit website" : "Visit website",
