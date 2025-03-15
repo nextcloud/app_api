@@ -13,6 +13,7 @@ OC.L10N.register(
     "User documentation" : "Foydalanuvchi hujjatlari",
     "Admin documentation" : "Admin documentation",
     "Developer documentation" : "developer hujjatlari",
+    "Update to {update}" : " {update}ni yangilash",
     "Actions" : "Actions",
     "Details" : "Details",
     "Enable" : "Enable",
