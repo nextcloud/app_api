@@ -14,7 +14,9 @@ OC.L10N.register(
     "Admin documentation" : "Admin documentation",
     "Developer documentation" : "developer hujjatlari",
     "Update to {update}" : " {update}ni yangilash",
+    "Version" : "Versiya",
     "Actions" : "Actions",
+    "Type" : "Turi",
     "Details" : "Details",
     "Enable" : "Enable",
     "Disable" : "Oʻchirish"
