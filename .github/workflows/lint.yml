@@ -21,13 +21,13 @@ jobs:
     name: info.xml lint
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Download xml appinfo schema
         run: wget https://raw.githubusercontent.com/nextcloud/appstore/master/nextcloudappstore/api/v1/release/info.xsd
 
       - name: Lint appinfo/info.xml
-        uses: ChristophWurst/xmllint-action@v1.1
+        uses: ChristophWurst/xmllint-action@7c54ff113fc0f6d4588a15cb4dfe31b6ecca5212 # v1.2.1
         with:
           xml-file: ./appinfo/info.xml
           xml-schema-file: ./info.xsd
@@ -40,10 +40,10 @@ jobs:
         php-versions: ["8.1"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
@@ -59,10 +59,10 @@ jobs:
         php-versions: ["8.1"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
@@ -81,9 +81,9 @@ jobs:
     name: php-psalm-analysis
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
@@ -102,7 +102,7 @@ jobs:
       security-events: write
     name: security analysis
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           submodules: recursive
 
@@ -114,7 +114,7 @@ jobs:
           report_file: results.sarif
 
       - name: Upload Security Analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@6bb031afdd8eb862ea3fc1848194185e076637e5 # v3.28.11
         with:
           sarif_file: results.sarif
 
@@ -123,7 +123,7 @@ jobs:
     name: eslint
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Install dependencies
         run: npm ci
 
@@ -136,7 +136,7 @@ jobs:
     name: stylelint
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Install dependencies
         run: npm ci
 
