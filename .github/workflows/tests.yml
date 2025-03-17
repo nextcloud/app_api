@@ -43,7 +43,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
 
     steps:
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@b64ffcaf5b410884ad320a9cfac8866006a109aa # v4.8.0
         with:
           python-version: '3.11'
 
@@ -51,26 +51,26 @@ jobs:
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
       - name: Checkout server
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           submodules: true
           repository: nextcloud/server
           ref: master
 
       - name: Checkout Notifications
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: nextcloud/notifications
           ref: master
           path: apps/notifications
 
       - name: Checkout AppAPI
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: apps/${{ env.APP_NAME }}
 
       - name: Checkout Notes
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: nextcloud/notes
           ref: "main"
@@ -115,7 +115,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
@@ -141,7 +141,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: pgsql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
@@ -161,7 +161,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
 
     steps:
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@b64ffcaf5b410884ad320a9cfac8866006a109aa # v4.8.0
         with:
           python-version: '3.10'
 
@@ -169,21 +169,21 @@ jobs:
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
       - name: Checkout server
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           submodules: true
           repository: nextcloud/server
           ref: master
 
       - name: Checkout Notifications
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: nextcloud/notifications
           ref: master
           path: apps/notifications
 
       - name: Checkout AppAPI
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: apps/${{ env.APP_NAME }}
 
@@ -228,7 +228,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
@@ -254,7 +254,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: mysql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
@@ -274,7 +274,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
 
     steps:
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@b64ffcaf5b410884ad320a9cfac8866006a109aa # v4.8.0
         with:
           python-version: '3.10'
 
@@ -282,21 +282,21 @@ jobs:
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
       - name: Checkout server
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           submodules: true
           repository: nextcloud/server
           ref: master
 
       - name: Checkout Notifications
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: nextcloud/notifications
           ref: master
           path: apps/notifications
 
       - name: Checkout AppAPI
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: apps/${{ env.APP_NAME }}
 
@@ -344,7 +344,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
@@ -370,7 +370,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: apcu_mysql_nc_py_api_nextcloud.log
           path: data/nextcloud.log
@@ -395,7 +395,7 @@ jobs:
           - 1521:1521/tcp
 
     steps:
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@b64ffcaf5b410884ad320a9cfac8866006a109aa # v4.8.0
         with:
           python-version: '3.11'
 
@@ -403,26 +403,26 @@ jobs:
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
       - name: Checkout server
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           submodules: true
           repository: nextcloud/server
           ref: master
 
       - name: Checkout Notifications
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: nextcloud/notifications
           ref: master
           path: apps/notifications
 
       - name: Checkout AppAPI
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
         with:
           php-version: '8.3'
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, \
@@ -455,7 +455,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
@@ -481,7 +481,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: oci_nc_py_api_nextcloud.log
           path: data/nextcloud.log

@@ -113,7 +113,7 @@ jobs:
 
       - name: Upload Container info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_container.json
           path: container.json
@@ -121,7 +121,7 @@ jobs:
 
       - name: Upload Container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_container.log
           path: container.log
@@ -129,7 +129,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_nextcloud.log
           path: data/nextcloud.log
@@ -199,7 +199,7 @@ jobs:
 
       - name: Upload Container info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_docker_app_docker_container.json
           path: container.json
@@ -207,7 +207,7 @@ jobs:
 
       - name: Upload Container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_docker_app_docker_container.log
           path: container.log
@@ -215,7 +215,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_docker_app_docker_nextcloud.log
           path: nextcloud.log
@@ -289,7 +289,7 @@ jobs:
 
       - name: Upload Container info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_http_container.json
           path: container.json
@@ -297,7 +297,7 @@ jobs:
 
       - name: Upload Container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_http_container.log
           path: container.log
@@ -305,7 +305,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_http_nextcloud.log
           path: nextcloud.log
@@ -411,7 +411,7 @@ jobs:
 
       - name: Upload HaProxy logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_https_bridge_haproxy.log
           path: haproxy.log
@@ -419,7 +419,7 @@ jobs:
 
       - name: Upload Container info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_https_bridge_container.json
           path: container.json
@@ -427,7 +427,7 @@ jobs:
 
       - name: Upload Container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_https_bridge_container.log
           path: container.log
@@ -435,7 +435,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_https_bridge_nextcloud.log
           path: nextcloud.log
@@ -534,7 +534,7 @@ jobs:
 
       - name: Upload HaProxy logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_https_haproxy.log
           path: haproxy.log
@@ -542,7 +542,7 @@ jobs:
 
       - name: Upload Container info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_https_container.json
           path: container.json
@@ -550,7 +550,7 @@ jobs:
 
       - name: Upload Container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_https_container.log
           path: container.log
@@ -558,7 +558,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: dsp_https_nextcloud.log
           path: nextcloud.log
@@ -682,7 +682,7 @@ jobs:
 
       - name: Upload Container info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_redis_container.json
           path: container.json
@@ -690,7 +690,7 @@ jobs:
 
       - name: Upload Container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_redis_container.log
           path: container.log
@@ -698,7 +698,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_redis_nextcloud.log
           path: data/nextcloud.log
@@ -842,7 +842,7 @@ jobs:
 
       - name: Upload Container info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_redis_deploy_options_container.json
           path: container.json
@@ -850,7 +850,7 @@ jobs:
 
       - name: Upload Container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_redis_deploy_options_container.log
           path: container.log
@@ -858,7 +858,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_app_docker_redis_deploy_options_nextcloud.log
           path: data/nextcloud.log
@@ -962,7 +962,7 @@ jobs:
 
       - name: Upload Container info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_network_host_container.json
           path: container.json
@@ -970,7 +970,7 @@ jobs:
 
       - name: Upload Container logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_network_host_container.log
           path: container.log
@@ -978,7 +978,7 @@ jobs:
 
       - name: Upload NC logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1  # v4.6.1
         with:
           name: nc_host_network_host_nextcloud.log
           path: data/nextcloud.log
