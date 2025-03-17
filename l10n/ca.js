@@ -14,6 +14,7 @@ OC.L10N.register(
     "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud." : "El projecte AppAPI és una iniciativa emocionant que pretén revolucionar la manera com es desenvolupen les aplicacions per a Nextcloud.",
     "Cancel" : "Cancelar",
     "Delete" : "Suprimir",
+    "Default" : "Per defecte",
     "Edit" : "Edició",
     "Deploy Daemon" : "Desplega Dimoni",
     "Name" : "Nom",
