@@ -1,6 +1,7 @@
 { "translations": {
     "Cancel" : "Peruuta",
     "Delete" : "Poista",
+    "Default" : "Oletus",
     "Edit" : "Muokkaa",
     "Name" : "Nimi",
     "Host" : "Palvelin",
