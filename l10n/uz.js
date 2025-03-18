@@ -17,6 +17,7 @@ OC.L10N.register(
     "Version" : "Versiya",
     "Actions" : "Actions",
     "Type" : "Turi",
+    "Documentation" : "Hujjatlar",
     "Details" : "Details",
     "Enable" : "Enable",
     "Disable" : "Oʻchirish"
