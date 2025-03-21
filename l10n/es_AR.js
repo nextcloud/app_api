@@ -20,6 +20,7 @@ OC.L10N.register(
     "User documentation" : "Documentación del usuario",
     "Admin documentation" : "Documentación del administrador",
     "Developer documentation" : "Documentación del desarrollador",
+    "Supported" : "Soportado",
     "Featured" : "Destacado",
     "Icon" : "Ícono",
     "Version" : "Versión",
@@ -31,9 +32,14 @@ OC.L10N.register(
     "Documentation" : "Documentación",
     "Details" : "Detalles",
     "Changelog" : "Bitácora de cambios",
+    "Active apps" : "Aplicaciones activas",
     "Disabled apps" : "Aplicaciones deshabilitadas",
     "Updates" : "Actualizaciones",
+    "Featured apps" : "Aplicaciones destacadas",
+    "Supported apps" : "Aplicaciones soportadas",
+    "Deploy and Enable" : "Desplegar y habilitar",
     "Enable" : "Activar",
-    "Disable" : "Deshabilitar"
+    "Disable" : "Deshabilitar",
+    "Allow untested app" : "Permitir aplicación no probada"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
