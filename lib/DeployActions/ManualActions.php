@@ -47,6 +47,14 @@ class ManualActions implements IDeployActions {
 	public function resolveExAppUrl(
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
+		if (boolval($deployConfig['harp'] ?? false)) {
+			$url = rtrim($deployConfig['nextcloud_url'], '/');
+			if (str_ends_with($url, '/index.php')) {
+				$url = substr($url, 0, -10);
+			}
+			return sprintf('%s/exapps/%s', $url, $appId);
+		}
+
 		$auth = [];
 		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
 			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''

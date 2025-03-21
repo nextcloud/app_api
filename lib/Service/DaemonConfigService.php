@@ -33,9 +33,14 @@ class DaemonConfigService {
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
 		$bad_patterns = ['http', 'https', 'tcp', 'udp', 'ssh'];
 		$docker_host = (string)$params['host'];
+		$frp_host = (string)($params['harp']['frp_address'] ?? '');
 		foreach ($bad_patterns as $bad_pattern) {
 			if (str_starts_with($docker_host, $bad_pattern . '://')) {
 				$this->logger->error('Failed to register daemon configuration. `host` must not include a protocol.');
+				return null;
+			}
+			if (str_starts_with($frp_host, $bad_pattern . '://')) {
+				$this->logger->error('Failed to register daemon configuration. FRP\'s address must not include a protocol.');
 				return null;
 			}
 		}
@@ -121,6 +126,15 @@ class DaemonConfigService {
 			return $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to update DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
+			return null;
+		}
+	}
+
+	public function getDaemonConfigByAppId(string $appId): ?DaemonConfig {
+		try {
+			return $this->mapper->findByAppId($appId);
+		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
+			$this->logger->debug('Failed to get daemon config by appId. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
 	}
