@@ -49,11 +49,13 @@ class RegisterDaemon extends Command {
 		$this->addOption('harp_shared_key', null, InputOption::VALUE_REQUIRED, 'HaRP shared key for secure communication between HaRP and AppAPI');
 		$this->addOption('harp_docker_socket_port', null, InputOption::VALUE_REQUIRED, '\'remotePort\' of the FRP client of the remote docker socket proxy. There is one included in the harp container so this can be skipped for default setups.', '24000');
 
+		$this->addUsage('harp_proxy_docker "Harp Proxy (Docker)" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --net nextcloud --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
+		$this->addUsage('harp_proxy_host "Harp Proxy (Host)" "docker-install" "http" "localhost:8780" "http://nextcloud.local" --harp --harp_frp_address "localhost:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
+		$this->addUsage('manual_install_harp "Harp Manual Install" "manual-install" "http" "appapi-harp:8780" "http://nextcloud.local" --net nextcloud --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password"');
+		$this->addUsage('docker_install "Docker Socket Proxy" "docker-install" "http" "nextcloud-appapi-dsp:2375" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
 		$this->addUsage('manual_install "Manual Install" "manual-install" "http" null "http://nextcloud.local"');
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
-		$this->addUsage('docker_install "Docker Socket Proxy" "docker-install" "http" "nextcloud-appapi-dsp:2375" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
-		$this->addUsage('harp_proxy "Harp Proxy with DSP" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --harp --harp_frp_address "localhost:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -71,11 +73,6 @@ class RegisterDaemon extends Command {
 		}
 		if ($acceptsDeployId === 'manual-install' && $protocol !== 'http') {
 			$output->writeln('Value error: Manual-install daemon supports only `http` protocol.');
-			return 1;
-		}
-		// todo:
-		if ($acceptsDeployId === 'manual-install' && $isHarp) {
-			$output->writeln('Value error: Manual-install daemon does not support HaRP.');
 			return 1;
 		}
 		if ($isHarp && !$input->getOption('harp_shared_key')) {

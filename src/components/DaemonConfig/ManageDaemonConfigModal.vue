@@ -31,7 +31,7 @@
 							:value.sync="name"
 							:placeholder="t('app_api', 'Unique Deploy Daemon Name')"
 							:aria-label="t('app_api', 'Unique Deploy Daemon Name')"
-							:error="isDaemonNameValid === true"
+							:error="isDaemonNameInvalid === true"
 							:helper-text="isDaemonNameValidHelperText" />
 					</div>
 					<div class="external-label" :aria-label="t('app_api', 'Display name')">
@@ -98,7 +98,7 @@
 					</div>
 					<div class="row">
 						<NcCheckboxRadioSwitch
-							v-if="isNotManualInstall && !isEdit"
+							v-if="!isEdit"
 							id="default-deploy-config"
 							class="ex-input-field"
 							:checked.sync="defaultDaemon"
@@ -107,7 +107,7 @@
 							{{ t('app_api', 'Set as default daemon') }}
 						</NcCheckboxRadioSwitch>
 						<div v-if="isEdit" />
-						<NcCheckboxRadioSwitch v-if="isNotManualInstall && !isHarp"
+						<NcCheckboxRadioSwitch v-if="!isHarp"
 							id="https-enabled"
 							:checked.sync="httpsEnabled"
 							:placeholder="t('app_api', 'Enable https')"
@@ -116,165 +116,165 @@
 							{{ t('app_api', 'Enable https') }}
 						</NcCheckboxRadioSwitch>
 					</div>
-					<template v-if="isNotManualInstall">
-						<NcButton :aria-label="t('app_api', 'Deploy config')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
-							{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy config') : t('app_api', 'Hide deploy config') }}
-							<template #icon>
-								<UnfoldLessHorizontal v-if="deployConfigSettingsOpened" :size="20" />
-								<UnfoldMoreHorizontal v-else :size="20" />
-							</template>
-						</NcButton>
-						<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy config')">
-							<NcCheckboxRadioSwitch
-								:checked="isHarp"
-								:placeholder="t('app_api', 'Enable HaRP')"
-								:aria-label="t('app_api', 'Enable HaRP')"
-								@update:checked="toggleHarp">
-								{{ t('app_api', 'Enable HaRP') }}
-							</NcCheckboxRadioSwitch>
-							<div v-if="isHarp" class="harp-options">
-								<div class="external-label" :aria-label="t('app_api', 'FRP server address')">
-									<label for="frp-address">
-										{{ t('app_api', 'FRP server address') }}
-										<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in \'Docker network\'.')" />
-									</label>
-									<NcInputField
-										id="frp-address"
-										class="ex-input-field"
-										:value.sync="deployConfig.harp.frp_address"
-										:placeholder="t('app_api', 'FRP server address')"
-										:aria-label="t('app_api', 'FRP server address')" />
-								</div>
-								<div class="external-label" :aria-label="t('app_api', 'Docker socket proxy port')">
-									<label for="harp-port">
-										{{ t('app_api', 'Docker socket proxy port') }}
-										<InfoTooltip :text="t('app_api', 'The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
-									</label>
-									<NcInputField
-										id="harp-dsp-port"
-										class="ex-input-field"
-										:value.sync="deployConfig.harp.docker_socket_port"
-										:placeholder="t('app_api', 'Docker socket proxy port')"
-										:aria-label="t('app_api', 'Docker socket proxy port')" />
-								</div>
-							</div>
-							<div class="external-label"
-								:aria-label="t('app_api', 'Docker network')">
-								<label for="deploy-config-net">
-									{{ t('app_api', 'Docker network') }}
-									<InfoTooltip :text="getNetworkHelperText"
-										:type="isEditDifferentNetwork ? 'warning' : 'info'" />
+					<NcButton :aria-label="t('app_api', 'Deploy config')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
+						{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy config') : t('app_api', 'Hide deploy config') }}
+						<template #icon>
+							<UnfoldLessHorizontal v-if="deployConfigSettingsOpened" :size="20" />
+							<UnfoldMoreHorizontal v-else :size="20" />
+						</template>
+					</NcButton>
+					<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy config')">
+						<NcCheckboxRadioSwitch
+							:checked="isHarp"
+							:placeholder="t('app_api', 'Enable HaRP')"
+							:aria-label="t('app_api', 'Enable HaRP')"
+							@update:checked="toggleHarp">
+							{{ t('app_api', 'Enable HaRP') }}
+						</NcCheckboxRadioSwitch>
+						<div v-if="isHarp" class="harp-options">
+							<div class="external-label" :aria-label="t('app_api', 'FRP server address')">
+								<label for="frp-address">
+									{{ t('app_api', 'FRP server address') }}
+									<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in \'Docker network\'.')" />
 								</label>
 								<NcInputField
-									id="deploy-config-net"
-									ref="deploy-config-net"
+									id="frp-address"
 									class="ex-input-field"
-									:value.sync="deployConfig.net"
-									:placeholder="t('app_api', 'Docker network')"
-									:aria-label="t('app_api', 'Docker network')"
-									:show-trailing-button="isEditDifferentNetwork"
-									@trailing-button-click="deployConfig.net = daemon.deploy_config.net">
-									<template #trailing-button-icon>
-										<Replay :size="20" />
-									</template>
-								</NcInputField>
+									:value.sync="deployConfig.harp.frp_address"
+									:placeholder="t('app_api', 'FRP server address')"
+									:aria-label="t('app_api', 'FRP server address')" />
 							</div>
-							<div class="external-label" :aria-label="t('app_api', 'Compute device')">
-								<label for="compute-device">
-									{{ t('app_api', 'Compute device') }}
-									<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
-										:text="getComputeDeviceHelperText"
-										:type="getComputeDeviceHelperText !== '' ? 'warning' : 'info'" />
+							<div class="external-label" :aria-label="t('app_api', 'Docker socket proxy port')">
+								<label for="harp-port">
+									{{ t('app_api', 'Docker socket proxy port') }}
+									<InfoTooltip :text="t('app_api', 'The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
 								</label>
-								<NcSelect
-									id="compute-device"
-									v-model="deployConfig.computeDevice"
+								<NcInputField
+									id="harp-dsp-port"
 									class="ex-input-field"
-									:aria-label="t('app_api', 'Compute device')"
-									:options="computeDevices" />
+									:value.sync="deployConfig.harp.docker_socket_port"
+									:placeholder="t('app_api', 'Docker socket proxy port')"
+									:aria-label="t('app_api', 'Docker socket proxy port')" />
 							</div>
-							<template v-if="additionalOptions.length > 0">
-								<div class="row" style="flex-direction: column;">
-									<div
-										v-for="(option, index) in additionalOptions"
-										:id="option.key"
-										:key="index"
-										class="external-label"
-										:aria-label="t('app_api', 'Additional option')">
-										<label :for="option.key">{{ option.key }}</label>
-										<div class="additional-option">
-											<NcInputField
-												:id="option.key"
-												:disabled="isEdit"
-												:value.sync="option.value"
-												:placeholder="option.value"
-												:aria-label="option.value"
-												style="margin: 0 5px 0 0;" />
-											<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
-												<template #icon>
-													<Close :size="20" />
-												</template>
-											</NcButton>
-										</div>
-									</div>
-								</div>
-							</template>
-
-							<div v-if="!isEdit" class="additional-options">
-								<div style="display: flex; justify-content: flex-end;">
-									<NcButton type="tertiary" @click="addAdditionalOption">
-										<template #icon>
-											<Plus :size="20" />
-										</template>
-										{{ t('app_api', 'Add additional option') }}
-									</NcButton>
-								</div>
-								<template v-if="addingAdditionalOption">
-									<div class="row" style="align-items: start;">
+						</div>
+						<div class="external-label"
+							:aria-label="t('app_api', 'Docker network')">
+							<label for="deploy-config-net">
+								{{ t('app_api', 'Docker network') }}
+								<InfoTooltip :text="getNetworkHelperText"
+									:type="isEditDifferentNetwork ? 'warning' : 'info'" />
+							</label>
+							<NcInputField
+								id="deploy-config-net"
+								ref="deploy-config-net"
+								class="ex-input-field"
+								:value.sync="deployConfig.net"
+								:placeholder="t('app_api', 'Docker network')"
+								:aria-label="t('app_api', 'Docker network')"
+								:show-trailing-button="isEditDifferentNetwork"
+								:error="isHarp && !deployConfig.net"
+								:helper-text="(isHarp && !deployConfig.net) ? t('app_api', 'Docker network for ex-app deployment must be defined') : ''"
+								@trailing-button-click="deployConfig.net = daemon.deploy_config.net">
+								<template #trailing-button-icon>
+									<Replay :size="20" />
+								</template>
+							</NcInputField>
+						</div>
+						<div class="external-label" :aria-label="t('app_api', 'Compute device')">
+							<label for="compute-device">
+								{{ t('app_api', 'Compute device') }}
+								<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
+									:text="getComputeDeviceHelperText"
+									:type="getComputeDeviceHelperText !== '' ? 'warning' : 'info'" />
+							</label>
+							<NcSelect
+								id="compute-device"
+								v-model="deployConfig.computeDevice"
+								class="ex-input-field"
+								:aria-label="t('app_api', 'Compute device')"
+								:options="computeDevices" />
+						</div>
+						<template v-if="additionalOptions.length > 0">
+							<div class="row" style="flex-direction: column;">
+								<div
+									v-for="(option, index) in additionalOptions"
+									:id="option.key"
+									:key="index"
+									class="external-label"
+									:aria-label="t('app_api', 'Additional option')">
+									<label :for="option.key">{{ option.key }}</label>
+									<div class="additional-option">
 										<NcInputField
-											id="additional-option-key"
-											ref="additionalOptionKey"
-											:value.sync="additionalOption.key"
-											:label="t('app_api', 'Option key (unique)')"
-											:placeholder="t('app_api', 'Option key (unique, e.g. my_key)')"
-											:error="additionalOption.key.trim() === ''"
-											:helper-text="additionalOption.key.trim() === '' ? t('app_api', 'Option key is required') : ''"
+											:id="option.key"
+											:disabled="isEdit"
+											:value.sync="option.value"
+											:placeholder="option.value"
+											:aria-label="option.value"
 											style="margin: 0 5px 0 0;" />
-										<NcInputField
-											id="additional-option-value"
-											:value.sync="additionalOption.value"
-											:label="t('app_api', 'Option value')"
-											:placeholder="t('app_api', 'Option value')"
-											:error="additionalOption.value.trim() === ''"
-											:helper-text="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
-											style="margin: 0 5px 0 0;" />
-										<NcButton
-											type="tertiary"
-											:aria-label="t('app_api', 'Confirm')"
-											:disabled="isAdditionalOptionValid === false"
-											@click="confirmAddingAdditionalOption">
-											<template #icon>
-												<Check :size="20" />
-											</template>
-										</NcButton>
-										<NcButton
-											type="tertiary"
-											:aria-label="t('app_api', 'Cancel')"
-											@click="cancelAddingAdditionalOption">
+										<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
 											<template #icon>
 												<Close :size="20" />
 											</template>
 										</NcButton>
 									</div>
-								</template>
+								</div>
 							</div>
+						</template>
+
+						<div v-if="!isEdit" class="additional-options">
+							<div style="display: flex; justify-content: flex-end;">
+								<NcButton type="tertiary" @click="addAdditionalOption">
+									<template #icon>
+										<Plus :size="20" />
+									</template>
+									{{ t('app_api', 'Add additional option') }}
+								</NcButton>
+							</div>
+							<template v-if="addingAdditionalOption">
+								<div class="row" style="align-items: start;">
+									<NcInputField
+										id="additional-option-key"
+										ref="additionalOptionKey"
+										:value.sync="additionalOption.key"
+										:label="t('app_api', 'Option key (unique)')"
+										:placeholder="t('app_api', 'Option key (unique, e.g. my_key)')"
+										:error="additionalOption.key.trim() === ''"
+										:helper-text="additionalOption.key.trim() === '' ? t('app_api', 'Option key is required') : ''"
+										style="margin: 0 5px 0 0;" />
+									<NcInputField
+										id="additional-option-value"
+										:value.sync="additionalOption.value"
+										:label="t('app_api', 'Option value')"
+										:placeholder="t('app_api', 'Option value')"
+										:error="additionalOption.value.trim() === ''"
+										:helper-text="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
+										style="margin: 0 5px 0 0;" />
+									<NcButton
+										type="tertiary"
+										:aria-label="t('app_api', 'Confirm')"
+										:disabled="isAdditionalOptionValid === false"
+										@click="confirmAddingAdditionalOption">
+										<template #icon>
+											<Check :size="20" />
+										</template>
+									</NcButton>
+									<NcButton
+										type="tertiary"
+										:aria-label="t('app_api', 'Cancel')"
+										@click="cancelAddingAdditionalOption">
+										<template #icon>
+											<Close :size="20" />
+										</template>
+									</NcButton>
+								</div>
+							</template>
 						</div>
-					</template>
+					</div>
 
 					<div class="row">
 						<NcButton
 							type="primary"
-							:disabled="canRegister"
+							:disabled="cannotRegister"
 							@click="isEdit ? updateDaemon() : registerDaemon()">
 							{{ isEdit ? t('app_api', 'Save') : t('app_api', 'Register') }}
 							<template #icon>
@@ -282,7 +282,7 @@
 								<Check v-else :size="20" />
 							</template>
 						</NcButton>
-						<NcButton v-if="isNotManualInstall" type="secondary" @click="verifyDaemonConnection">
+						<NcButton type="secondary" @click="verifyDaemonConnection">
 							{{ t('app_api', 'Check connection') }}
 							<template #icon>
 								<NcLoadingIcon v-if="verifyingDaemonConnection" :size="20" />
@@ -403,10 +403,10 @@ export default {
 	computed: {
 		daemonHostHelperText() {
 			if (['http', 'https'].includes(this.daemonProtocol)) {
-				if (this.acceptsDeployId === 'manual-install') {
+				if (this.acceptsDeployId === 'manual-install' && !this.isHarp) {
 					return t('app_api', 'Hostname to access ExApps')
 				}
-				return t('app_api', 'The hostname (and port) at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server. (e.g. {host})', {
+				return t('app_api', 'The hostname (and port) at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server, e.g. {host}.', {
 					name: this.isHarp ? 'HaRP' : 'Docker Socket Proxy',
 					host: this.isHarp ? 'appapi-harp:8780' : 'nextcloud-appapi-dsp:2375',
 				})
@@ -416,14 +416,11 @@ export default {
 		daemonProtocol() {
 			return this.httpsEnabled ? 'https' : 'http'
 		},
-		isNotManualInstall() {
-			return this.acceptsDeployId !== 'manual-install'
-		},
-		isDaemonNameValid() {
+		isDaemonNameInvalid() {
 			return this.daemons.some(daemon => daemon.name === this.name && daemon.name !== this.daemon?.name)
 		},
 		isDaemonNameValidHelperText() {
-			return this.isDaemonNameValid === true ? t('app_api', 'Daemon with this name already exists') : ''
+			return this.isDaemonNameInvalid === true ? t('app_api', 'Daemon with this name already exists') : ''
 		},
 		isHaProxyPasswordValid() {
 			if (this.daemonProtocol === 'https' || this.isHarp) {
@@ -444,8 +441,8 @@ export default {
 			}
 			return t('app_api', 'The docker network that the deployed ex-apps would use.')
 		},
-		canRegister() {
-			return this.isDaemonNameValid === true || this.isHaProxyPasswordValid === false
+		cannotRegister() {
+			return this.isDaemonNameInvalid === true || this.isHaProxyPasswordValid === false || (this.isHarp && !this.deployConfig.net)
 		},
 		isAdditionalOptionValid() {
 			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
@@ -494,11 +491,6 @@ export default {
 		show(newShow) {
 			if (newShow === true) {
 				this.resetData()
-			}
-		},
-		acceptsDeployId(newAcceptsDeployId) {
-			if (newAcceptsDeployId === 'manual-install') {
-				this.deployConfig.harp = null
 			}
 		},
 	},

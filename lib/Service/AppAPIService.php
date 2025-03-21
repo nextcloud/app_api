@@ -713,7 +713,7 @@ class AppAPIService {
 			}
 			foreach ($targetDaemonExApps as $exApp) {
 				$this->disableExApp($exApp);
-				if ($daemonConfig->getAcceptsDeployId() === 'docker-install') {
+				if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
 					$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
 					$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));

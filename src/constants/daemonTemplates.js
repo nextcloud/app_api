@@ -5,9 +5,78 @@
 
 export const DAEMON_TEMPLATES = [
 	{
-		name: 'harp_proxy',
-		displayName: 'HaRP Proxy with DSP',
+		name: 'harp_proxy_host',
+		displayName: 'HaRP Proxy (Host)',
 		acceptsDeployId: 'docker-install',
+		httpsEnabled: false,
+		host: 'localhost:8780',
+		nextcloud_url: null,
+		deployConfig: {
+			net: 'host',
+			haproxy_password: 'some_very_secure_password',
+			gpu: false,
+			computeDevice: {
+				id: 'cpu',
+				label: 'CPU',
+			},
+			harp: {
+				frp_address: 'localhost:8782',
+				docker_socket_port: 24000,
+			},
+		},
+		deployConfigSettingsOpened: true,
+		defaultDaemon: true,
+	},
+	{
+		name: 'harp_proxy_docker',
+		displayName: 'HaRP Proxy (Docker)',
+		acceptsDeployId: 'docker-install',
+		httpsEnabled: false,
+		host: 'appapi-harp:8780',
+		nextcloud_url: null,
+		deployConfig: {
+			net: '',
+			haproxy_password: 'some_very_secure_password',
+			gpu: false,
+			computeDevice: {
+				id: 'cpu',
+				label: 'CPU',
+			},
+			harp: {
+				frp_address: 'appapi-harp:8782',
+				docker_socket_port: 24000,
+			},
+		},
+		deployConfigSettingsOpened: true,
+		defaultDaemon: true,
+	},
+	{
+		name: 'harp_aio',
+		displayName: 'HaRP All-in-One',
+		acceptsDeployId: 'docker-install',
+		httpsEnabled: false,
+		host: 'nextcloud-aio-harp:8780',
+		nextcloud_url: null,
+		deployConfig: {
+			net: 'nextcloud-aio',
+			haproxy_password: 'some_very_secure_password',
+			gpu: false,
+			computeDevice: {
+				id: 'cpu',
+				label: 'CPU',
+			},
+			harp: {
+				frp_address: 'nextcloud-aio-harp:8782',
+				docker_socket_port: 24000,
+			},
+		},
+		deployConfigSettingsOpened: false,
+		defaultDaemon: true,
+	},
+	{
+		name: 'manual_install_harp',
+		displayName: 'HaRP Manual Install',
+		acceptsDeployId: 'manual-install',
 		httpsEnabled: false,
 		host: 'appapi-harp:8780',
 		nextcloud_url: null,
@@ -25,7 +94,7 @@ export const DAEMON_TEMPLATES = [
 			},
 		},
 		deployConfigSettingsOpened: true,
-		defaultDaemon: true,
+		defaultDaemon: false,
 	},
 	{
 		name: 'docker_socket_proxy',
@@ -49,7 +118,7 @@ export const DAEMON_TEMPLATES = [
 	},
 	{
 		name: 'custom',
-		displayName: 'Custom default',
+		displayName: 'Custom Default',
 		acceptsDeployId: 'docker-install',
 		httpsEnabled: false,
 		host: 'nextcloud-appapi-dsp:2375',
@@ -89,7 +158,7 @@ export const DAEMON_TEMPLATES = [
 	},
 	{
 		name: 'manual_install',
-		displayName: 'Manual install',
+		displayName: 'Manual Install',
 		acceptsDeployId: 'manual-install',
 		httpsEnabled: false,
 		host: 'host.docker.internal',
