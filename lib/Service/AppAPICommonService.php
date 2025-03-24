@@ -34,15 +34,8 @@ class AppAPICommonService {
 			'AA-REQUEST-ID' => $request instanceof IRequest ? $request->getId() : 'CLI',
 		];
 
-		// todo: cache
-		$daemonConfig = $this->daemonConfigService->getDaemonConfigByAppId($exApp->getAppid());
-		if ($daemonConfig === null) {
-			// this should not happen
-			$this->logger->error(sprintf('Daemon config with name %s not found.', $exApp->getDaemonConfigName()));
-			return $headers;
-		}
-		if ($this->harpService->isHarp($daemonConfig)) {
-			$harpKey = $this->harpService->getHarpSharedKey($daemonConfig);
+		if ($this->harpService->isHarp($exApp->getDeployConfig())) {
+			$harpKey = $this->harpService->getHarpSharedKey($exApp->getDeployConfig());
 			$headers['HARP-SHARED-KEY'] = $harpKey;
 			$headers['EX-APP-PORT'] = $exApp->getPort();
 		}

@@ -502,14 +502,13 @@ class AppAPIService {
 		}
 		$this->logger->info(sprintf('Performing heartbeat on: %s', $exAppUrl . '/heartbeat'));
 
-		// todo: cache
-		$daemonConfig = $this->daemonConfigService->getDaemonConfigByAppId($appId);
-		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp === null) {
+			$this->logger->error(sprintf('ExApp with appId %s not found.', $appId));
+			return false;
+		}
+		if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
 			$exApp = $this->exAppService->getExApp($appId);
-			if ($exApp === null) {
-				$this->logger->error(sprintf('ExApp with appId %s not found.', $appId));
-				return false;
-			}
 			$options['headers'] = array_merge(
 				$options['headers'],
 				$this->commonService->buildAppAPIAuthHeaders(null, null, $exApp),

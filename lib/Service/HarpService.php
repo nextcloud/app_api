@@ -47,9 +47,9 @@ class HarpService {
 	 * @return string|null
 	 * @throws \Exception
 	 */
-	public function getHarpSharedKey(DaemonConfig $daemonConfig): ?string {
+	public function getHarpSharedKey(array $deployConfig): ?string {
 		try {
-			return $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
+			return $this->crypto->decrypt($deployConfig['haproxy_password']);
 		} catch (\Exception $e) {
 			throw new \Exception('Failed to decrypt harp shared key', 0, $e);
 		}
@@ -84,8 +84,8 @@ class HarpService {
 			. ltrim($path, '/');
 	}
 
-	public static function isHarp(DaemonConfig $daemonConfig): bool {
-		return boolval($daemonConfig->getDeployConfig()['harp'] ?? false);
+	public static function isHarp(array $deployConfig): bool {
+		return boolval($deployConfig['harp'] ?? false);
 	}
 
 	public static function getHarpExApp(ExApp $exApp): array {
@@ -108,7 +108,7 @@ class HarpService {
 	}
 
 	public function harpExAppUpdate(DaemonConfig $daemonConfig, ExApp $exApp, bool $added): void {
-		if (!self::isHarp($daemonConfig)) {
+		if (!self::isHarp($daemonConfig->getDeployConfig())) {
 			return;
 		}
 		$this->initGuzzleClient($daemonConfig);
@@ -141,7 +141,7 @@ class HarpService {
 	 * @return array{tls_enabled: bool, ca_crt: string, client_crt: string, client_key: string}|null
 	 */
 	public function getFrpCertificates(DaemonConfig $daemonConfig): ?array {
-		if (!self::isHarp($daemonConfig)) {
+		if (!self::isHarp($daemonConfig->getDeployConfig())) {
 			return null;
 		}
 		$this->initGuzzleClient($daemonConfig);

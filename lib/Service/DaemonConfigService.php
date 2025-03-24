@@ -129,13 +129,4 @@ class DaemonConfigService {
 			return null;
 		}
 	}
-
-	public function getDaemonConfigByAppId(string $appId): ?DaemonConfig {
-		try {
-			return $this->mapper->findByAppId($appId);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception $e) {
-			$this->logger->debug('Failed to get daemon config by appId. Error: ' . $e->getMessage(), ['exception' => $e]);
-			return null;
-		}
-	}
 }

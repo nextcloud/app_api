@@ -47,10 +47,9 @@ class HarpController extends Controller {
 	}
 
 	private function validateHarpSharedKey(string $appId): bool {
-		// todo: cache
-		$daemonConfig = $this->daemonConfigService->getDaemonConfigByAppId($appId);
-		if ($daemonConfig === null) {
-			$this->logger->error('Daemon config not found for the app', ['appId' => $appId]);
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp === null) {
+			$this->logger->error('ExApp not found', ['appId' => $appId]);
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
 				'appid' => $appId,
@@ -59,11 +58,11 @@ class HarpController extends Controller {
 		}
 
 		try {
-			if (!isset($daemonConfig->getDeployConfig()['haproxy_password'])) {
+			if (!isset($exApp->getDeployConfig()['haproxy_password'])) {
 				$this->logger->error('Harp shared key is not set. Invalid daemon config.');
 				return false;
 			}
-			$harpKey = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
+			$harpKey = $this->crypto->decrypt($exApp->getDeployConfig()['haproxy_password']);
 		} catch (\Exception $e) {
 			$this->logger->error('Failed to decrypt harp shared key. Invalid daemon config.', ['exception' => $e]);
 			return false;

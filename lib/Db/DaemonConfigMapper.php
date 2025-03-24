@@ -54,23 +54,4 @@ class DaemonConfigMapper extends QBMapper {
 			);
 		return $this->findEntity($qb);
 	}
-
-	/**
-	 * @param string $appId
-	 *
-	 * @throws DoesNotExistException
-	 * @throws Exception
-	 * @throws MultipleObjectsReturnedException
-	 *
-	 * @return DaemonConfig
-	 */
-	public function findByAppId(string $appId): DaemonConfig {
-		$qb = $this->db->getQueryBuilder();
-		$qb->select('d.*')
-			->from('ex_apps', 'a')
-			->where($qb->expr()->eq('a.appid', $qb->createNamedParameter($appId)))
-			->leftJoin('a', $this->tableName, 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
-			->setMaxResults(1);
-		return $this->findEntity($qb);
-	}
 }

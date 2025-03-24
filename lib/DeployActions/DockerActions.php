@@ -175,7 +175,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	private function installFRPCertificates(DaemonConfig $daemonConfig, string $dockerUrl, string $containerId, string $targetDir): void {
-		if (!HarpService::isHarp($daemonConfig)) {
+		if (!HarpService::isHarp($daemonConfig->getDeployConfig())) {
 			return;
 		}
 		$certificates = $this->harpService->getFrpCertificates($daemonConfig);
