@@ -265,8 +265,8 @@ class ExAppService {
 		$extractedDir = '';
 		if ($jsonInfo !== null) {
 			$appInfo = json_decode($jsonInfo, true);
-			if ($appInfo === false) {
-				return ['error' => 'Invalid app info JSON'];
+			if (!$appInfo) {
+				return ['error' => 'Invalid app info provided in JSON format'];
 			}
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
