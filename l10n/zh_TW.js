@@ -71,7 +71,7 @@ OC.L10N.register(
     "Register ExApp in Nextcloud" : "在 Nextcloud 註冊 ExApp",
     "Check if the ExApp is registered in Nextcloud before deployment" : "部署前檢查 ExApp 是否已在 Nextcloud 中註冊",
     "Image pull" : "拉取映像檔",
-    "Check if the image is successfully pulled" : "撿茶室否成功拉取映像檔",
+    "Check if the image is successfully pulled" : "檢查是否成功拉取映像檔",
     "Container started" : "容器已啟動",
     "Check if the image successfully pulled and container is created and started" : "檢查是否成功拉取映像檔，以及容器是否已建立並啟動",
     "Heartbeat" : "心跳",
