@@ -31,12 +31,6 @@ def unregister_daemon():
 
 def deploy_register():
     run(
-        f"php occ app_api:app:deploy app-skeleton-python docker_local_sock --info-xml {SKELETON_XML_URL}".split(),
-        stderr=DEVNULL,
-        stdout=DEVNULL,
-        check=True,
-    )
-    run(
         f"php occ app_api:app:register app-skeleton-python docker_local_sock --info-xml {SKELETON_XML_URL}".split(),
         stderr=DEVNULL,
         stdout=DEVNULL,

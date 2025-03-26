@@ -75,7 +75,6 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		</install>
 	</repair-steps>
 	<commands>
-		<command>OCA\AppAPI\Command\ExApp\Deploy</command>
 		<command>OCA\AppAPI\Command\ExApp\Register</command>
 		<command>OCA\AppAPI\Command\ExApp\Unregister</command>
 		<command>OCA\AppAPI\Command\ExApp\Update</command>
