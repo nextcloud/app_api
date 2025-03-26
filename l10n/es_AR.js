@@ -40,6 +40,10 @@ OC.L10N.register(
     "Deploy and Enable" : "Desplegar y habilitar",
     "Enable" : "Activar",
     "Disable" : "Deshabilitar",
-    "Allow untested app" : "Permitir aplicación no probada"
+    "Allow untested app" : "Permitir aplicación no probada",
+    "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Esta aplicación no está marcada como compatible con tu versión de Nextcloud. Si continuás podrás instalar la aplicación, pero tené en cuenta que podría no funcionar según lo esperado.",
+    "An error occurred during the request. Unable to proceed." : "Ocurrió un error durante la solicitud. No se puede continuar.",
+    "The app has been enabled but needs to be updated." : "La aplicación ha sido habilitada pero necesita actualizarse.",
+    "Error: This app cannot be enabled because it makes the server unstable" : "Error: Esta aplicación no se puede habilitar porque genera inestabilidad en el servidor"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
