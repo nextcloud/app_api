@@ -49,7 +49,7 @@
 							id="daemon-deploy-id"
 							v-model="acceptsDeployId"
 							class="ex-input-field"
-							:disabled="configurationTab.id === 'manual_install' || isEdit"
+							:disabled="isEdit"
 							:options="deployMethods"
 							:label-outside="true"
 							:placeholder="t('app_api', 'Select daemon deploy method')" />
@@ -67,7 +67,7 @@
 							:aria-label="daemonHostHelperText"
 							style="max-width: 70%;" />
 					</div>
-					<div v-if="['http', 'https'].includes(daemonProtocol)"
+					<div v-if="['http', 'https'].includes(daemonProtocol) && !isPureManual"
 						class="external-label"
 						:aria-label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')">
 						<label for="deploy-config-haproxy-password">
@@ -98,7 +98,7 @@
 					</div>
 					<div class="row">
 						<NcCheckboxRadioSwitch
-							v-if="!isEdit"
+							v-if="!isEdit && acceptsDeployId === 'docker-install'"
 							id="default-deploy-config"
 							class="ex-input-field"
 							:checked.sync="defaultDaemon"
@@ -157,118 +157,120 @@
 									:aria-label="t('app_api', 'Docker socket proxy port')" />
 							</div>
 						</div>
-						<div class="external-label"
-							:aria-label="t('app_api', 'Docker network')">
-							<label for="deploy-config-net">
-								{{ t('app_api', 'Docker network') }}
-								<InfoTooltip :text="getNetworkHelperText"
-									:type="isEditDifferentNetwork ? 'warning' : 'info'" />
-							</label>
-							<NcInputField
-								id="deploy-config-net"
-								ref="deploy-config-net"
-								class="ex-input-field"
-								:value.sync="deployConfig.net"
-								:placeholder="t('app_api', 'Docker network')"
-								:aria-label="t('app_api', 'Docker network')"
-								:show-trailing-button="isEditDifferentNetwork"
-								:error="isHarp && !deployConfig.net"
-								:helper-text="(isHarp && !deployConfig.net) ? t('app_api', 'Docker network for ex-app deployment must be defined') : ''"
-								@trailing-button-click="deployConfig.net = daemon.deploy_config.net">
-								<template #trailing-button-icon>
-									<Replay :size="20" />
-								</template>
-							</NcInputField>
-						</div>
-						<div class="external-label" :aria-label="t('app_api', 'Compute device')">
-							<label for="compute-device">
-								{{ t('app_api', 'Compute device') }}
-								<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
-									:text="getComputeDeviceHelperText"
-									:type="getComputeDeviceHelperText !== '' ? 'warning' : 'info'" />
-							</label>
-							<NcSelect
-								id="compute-device"
-								v-model="deployConfig.computeDevice"
-								class="ex-input-field"
-								:aria-label="t('app_api', 'Compute device')"
-								:options="computeDevices" />
-						</div>
-						<template v-if="additionalOptions.length > 0">
-							<div class="row" style="flex-direction: column;">
-								<div
-									v-for="(option, index) in additionalOptions"
-									:id="option.key"
-									:key="index"
-									class="external-label"
-									:aria-label="t('app_api', 'Additional option')">
-									<label :for="option.key">{{ option.key }}</label>
-									<div class="additional-option">
+						<template v-if="!isPureManual">
+							<div class="external-label"
+								:aria-label="t('app_api', 'Docker network')">
+								<label for="deploy-config-net">
+									{{ t('app_api', 'Docker network') }}
+									<InfoTooltip :text="getNetworkHelperText"
+										:type="isEditDifferentNetwork ? 'warning' : 'info'" />
+								</label>
+								<NcInputField
+									id="deploy-config-net"
+									ref="deploy-config-net"
+									class="ex-input-field"
+									:value.sync="deployConfig.net"
+									:placeholder="t('app_api', 'Docker network')"
+									:aria-label="t('app_api', 'Docker network')"
+									:show-trailing-button="isEditDifferentNetwork"
+									:error="isHarp && !deployConfig.net"
+									:helper-text="(isHarp && !deployConfig.net) ? t('app_api', 'Docker network for ex-app deployment must be defined') : ''"
+									@trailing-button-click="deployConfig.net = daemon.deploy_config.net">
+									<template #trailing-button-icon>
+										<Replay :size="20" />
+									</template>
+								</NcInputField>
+							</div>
+							<div class="external-label" :aria-label="t('app_api', 'Compute device')">
+								<label for="compute-device">
+									{{ t('app_api', 'Compute device') }}
+									<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
+										:text="getComputeDeviceHelperText"
+										:type="getComputeDeviceHelperText !== '' ? 'warning' : 'info'" />
+								</label>
+								<NcSelect
+									id="compute-device"
+									v-model="deployConfig.computeDevice"
+									class="ex-input-field"
+									:aria-label="t('app_api', 'Compute device')"
+									:options="computeDevices" />
+							</div>
+							<template v-if="additionalOptions.length > 0">
+								<div class="row" style="flex-direction: column;">
+									<div
+										v-for="(option, index) in additionalOptions"
+										:id="option.key"
+										:key="index"
+										class="external-label"
+										:aria-label="t('app_api', 'Additional option')">
+										<label :for="option.key">{{ option.key }}</label>
+										<div class="additional-option">
+											<NcInputField
+												:id="option.key"
+												:disabled="isEdit"
+												:value.sync="option.value"
+												:placeholder="option.value"
+												:aria-label="option.value"
+												style="margin: 0 5px 0 0;" />
+											<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
+												<template #icon>
+													<Close :size="20" />
+												</template>
+											</NcButton>
+										</div>
+									</div>
+								</div>
+							</template>
+
+							<div v-if="!isEdit" class="additional-options">
+								<div style="display: flex; justify-content: flex-end;">
+									<NcButton type="tertiary" @click="addAdditionalOption">
+										<template #icon>
+											<Plus :size="20" />
+										</template>
+										{{ t('app_api', 'Add additional option') }}
+									</NcButton>
+								</div>
+								<template v-if="addingAdditionalOption">
+									<div class="row" style="align-items: start;">
 										<NcInputField
-											:id="option.key"
-											:disabled="isEdit"
-											:value.sync="option.value"
-											:placeholder="option.value"
-											:aria-label="option.value"
+											id="additional-option-key"
+											ref="additionalOptionKey"
+											:value.sync="additionalOption.key"
+											:label="t('app_api', 'Option key (unique)')"
+											:placeholder="t('app_api', 'Option key (unique, e.g. my_key)')"
+											:error="additionalOption.key.trim() === ''"
+											:helper-text="additionalOption.key.trim() === '' ? t('app_api', 'Option key is required') : ''"
 											style="margin: 0 5px 0 0;" />
-										<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
+										<NcInputField
+											id="additional-option-value"
+											:value.sync="additionalOption.value"
+											:label="t('app_api', 'Option value')"
+											:placeholder="t('app_api', 'Option value')"
+											:error="additionalOption.value.trim() === ''"
+											:helper-text="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
+											style="margin: 0 5px 0 0;" />
+										<NcButton
+											type="tertiary"
+											:aria-label="t('app_api', 'Confirm')"
+											:disabled="isAdditionalOptionValid === false"
+											@click="confirmAddingAdditionalOption">
+											<template #icon>
+												<Check :size="20" />
+											</template>
+										</NcButton>
+										<NcButton
+											type="tertiary"
+											:aria-label="t('app_api', 'Cancel')"
+											@click="cancelAddingAdditionalOption">
 											<template #icon>
 												<Close :size="20" />
 											</template>
 										</NcButton>
 									</div>
-								</div>
+								</template>
 							</div>
 						</template>
-
-						<div v-if="!isEdit" class="additional-options">
-							<div style="display: flex; justify-content: flex-end;">
-								<NcButton type="tertiary" @click="addAdditionalOption">
-									<template #icon>
-										<Plus :size="20" />
-									</template>
-									{{ t('app_api', 'Add additional option') }}
-								</NcButton>
-							</div>
-							<template v-if="addingAdditionalOption">
-								<div class="row" style="align-items: start;">
-									<NcInputField
-										id="additional-option-key"
-										ref="additionalOptionKey"
-										:value.sync="additionalOption.key"
-										:label="t('app_api', 'Option key (unique)')"
-										:placeholder="t('app_api', 'Option key (unique, e.g. my_key)')"
-										:error="additionalOption.key.trim() === ''"
-										:helper-text="additionalOption.key.trim() === '' ? t('app_api', 'Option key is required') : ''"
-										style="margin: 0 5px 0 0;" />
-									<NcInputField
-										id="additional-option-value"
-										:value.sync="additionalOption.value"
-										:label="t('app_api', 'Option value')"
-										:placeholder="t('app_api', 'Option value')"
-										:error="additionalOption.value.trim() === ''"
-										:helper-text="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
-										style="margin: 0 5px 0 0;" />
-									<NcButton
-										type="tertiary"
-										:aria-label="t('app_api', 'Confirm')"
-										:disabled="isAdditionalOptionValid === false"
-										@click="confirmAddingAdditionalOption">
-										<template #icon>
-											<Check :size="20" />
-										</template>
-									</NcButton>
-									<NcButton
-										type="tertiary"
-										:aria-label="t('app_api', 'Cancel')"
-										@click="cancelAddingAdditionalOption">
-										<template #icon>
-											<Close :size="20" />
-										</template>
-									</NcButton>
-								</div>
-							</template>
-						</div>
 					</div>
 
 					<div class="row">
@@ -396,6 +398,11 @@ export default {
 			data.deployConfig = JSON.parse(JSON.stringify(this.daemon.deploy_config))
 			data.defaultDaemon = this.isDefaultDaemon
 			data.additionalOptions = Object.entries(this.daemon.deploy_config.additional_options ?? {}).map(([key, value]) => ({ key, value }))
+			data.deployConfigSettingsOpened = true
+		}
+		if (!data.deployConfig.harp) {
+			data.deployConfig.harp = null
+			data.deployConfigSettingsOpened = false
 		}
 
 		return data
@@ -479,9 +486,15 @@ export default {
 		isHarp() {
 			return this.deployConfig.harp !== null
 		},
+		isPureManual() {
+			return this.acceptsDeployId === 'manual-install' && !this.isHarp
+		},
 	},
 	watch: {
 		configurationTab(newConfigurationTab) {
+			if (this.isEdit) {
+				return
+			}
 			this.setupFormConfiguration(newConfigurationTab)
 		},
 		httpsEnabled(newHttpsEnabled) {
@@ -611,7 +624,7 @@ export default {
 			this.host = template.host
 			this.nextcloud_url = template.nextcloud_url ?? window.location.origin + generateUrl('').slice(0, -1)
 			this.deployConfigSettingsOpened = template.deployConfigSettingsOpened
-			this.deployConfig = { ...template.deployConfig }
+			this.deployConfig = JSON.parse(JSON.stringify(template.deployConfig))
 			this.defaultDaemon = template.defaultDaemon
 		},
 		onProtocolChange() {
