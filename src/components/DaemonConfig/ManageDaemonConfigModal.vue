@@ -372,7 +372,7 @@ export default {
 			// replace last slash with empty string
 			nextcloud_url: window.location.origin + generateUrl('').slice(0, -1),
 			registeringDaemon: false,
-			configurationTab: { id: DAEMON_TEMPLATES[0].id, label: DAEMON_TEMPLATES[0].displayName },
+			configurationTab: { id: DAEMON_TEMPLATES[0].name, label: DAEMON_TEMPLATES[0].displayName },
 			configurationTemplateOptions: [
 				...DAEMON_TEMPLATES.map(template => { return { id: template.name, label: template.displayName } }),
 			],
@@ -644,11 +644,10 @@ export default {
 			this.$emit('update:show', false)
 		},
 		toggleHarp(value) {
-			if (value === true) {
-				const harpDeployTempl = DAEMON_TEMPLATES.find(template => template.name === 'harp_proxy')
-				this.deployConfig.harp = {
-					...harpDeployTempl.deployConfig.harp,
-				}
+			if (value) {
+				const toFind = this.configurationTab.id.includes('harp') ? this.configurationTab.id : 'harp_proxy_host'
+				const harpDeployTempl = DAEMON_TEMPLATES.find(template => template.name === toFind)
+				this.deployConfig.harp = { ...harpDeployTempl.deployConfig.harp }
 			} else {
 				this.deployConfig.harp = null
 			}
