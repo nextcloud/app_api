@@ -38,7 +38,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 *Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
-	<version>32.0.0-dev.2</version>
+	<version>32.0.0-dev.3</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
@@ -62,7 +62,6 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	</dependencies>
 	<background-jobs>
 		<job>OCA\AppAPI\BackgroundJob\ExAppInitStatusCheckJob</job>
-		<job>OCA\AppAPI\BackgroundJob\ProvidersAICleanUpJob</job>
 	</background-jobs>
 	<repair-steps>
 		<post-migration>
