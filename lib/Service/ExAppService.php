@@ -253,6 +253,9 @@ class ExAppService {
 		$extractedDir = '';
 		if ($jsonInfo !== null) {
 			$appInfo = json_decode($jsonInfo, true);
+			if (!$appInfo) {
+				return ['error' => 'Invalid app info provided in JSON format'];
+			}
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
@@ -264,7 +267,11 @@ class ExAppService {
 			}
 		} else {
 			if ($infoXml !== null) {
-				$xmlAppInfo = simplexml_load_string(file_get_contents($infoXml));
+				$infoXmlContents = file_get_contents($infoXml);
+				if ($infoXmlContents === false) {
+					return ['error' => sprintf('Failed to read info.xml from %s', $infoXml)];
+				}
+				$xmlAppInfo = simplexml_load_string($infoXmlContents);
 				if ($xmlAppInfo === false) {
 					return ['error' => sprintf('Failed to load info.xml from %s', $infoXml)];
 				}

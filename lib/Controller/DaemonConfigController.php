@@ -121,11 +121,6 @@ class DaemonConfigController extends ApiController {
 
 	public function verifyDaemonConnection(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
-		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
-			return new JSONResponse([
-				'error' => sprintf('Only "%s" is supported', $this->dockerActions->getAcceptsDeployId()),
-			]);
-		}
 		$this->dockerActions->initGuzzleClient($daemonConfig);
 		$dockerDaemonAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 		return new JSONResponse([
@@ -165,11 +160,6 @@ class DaemonConfigController extends ApiController {
 			'host' => $daemonParams['host'],
 			'deploy_config' => $daemonParams['deploy_config'],
 		]);
-		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
-			return new JSONResponse([
-				'error' => sprintf('Only "%s" is supported', $this->dockerActions->getAcceptsDeployId()),
-			]);
-		}
 		$this->dockerActions->initGuzzleClient($daemonConfig);
 		$dockerDaemonAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 		return new JSONResponse([

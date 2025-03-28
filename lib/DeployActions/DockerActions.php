@@ -19,6 +19,7 @@ use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
+use OCA\AppAPI\Service\HarpService;
 use OCP\App\IAppManager;
 
 use OCP\ICertificateManager;
@@ -34,6 +35,7 @@ class DockerActions implements IDeployActions {
 	public const DOCKER_API_VERSION = 'v1.41';
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
+	public const FRP_TARGET_DIR = '/certs/frp';
 
 	private Client $guzzleClient;
 	private bool $useSocket = false;  # for `pullImage` function, to detect can be stream used or not.
@@ -46,10 +48,11 @@ class DockerActions implements IDeployActions {
 		private readonly IAppManager               $appManager,
 		private readonly IURLGenerator             $urlGenerator,
 		private readonly AppAPICommonService       $service,
-		private readonly ExAppService		       $exAppService,
+		private readonly ExAppService              $exAppService,
 		private readonly ITempManager              $tempManager,
-		private readonly ICrypto			       $crypto,
+		private readonly ICrypto                   $crypto,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
+		private readonly HarpService               $harpService,
 	) {
 	}
 
@@ -91,7 +94,7 @@ class DockerActions implements IDeployActions {
 		}
 		$this->exAppService->setAppDeployProgress($exApp, 97);
 
-		$this->updateCerts($dockerUrl, $containerName);
+		$this->updateCerts($daemonConfig, $dockerUrl, $containerName);
 		$this->exAppService->setAppDeployProgress($exApp, 98);
 
 		$result = $this->startContainer($dockerUrl, $containerName);
@@ -110,7 +113,7 @@ class DockerActions implements IDeployActions {
 		return '';
 	}
 
-	private function updateCerts(string $dockerUrl, string $containerName): void {
+	private function updateCerts(DaemonConfig $daemonConfig, string $dockerUrl, string $containerName): void {
 		try {
 			$this->startContainer($dockerUrl, $containerName);
 
@@ -128,6 +131,7 @@ class DockerActions implements IDeployActions {
 			$targetDir = $this->getTargetCertDir($osInfo); // Determine target directory based on OS
 			$this->executeCommandInContainer($dockerUrl, $containerName, ['mkdir', '-p', $targetDir]);
 			$this->installParsedCertificates($dockerUrl, $containerName, $bundlePath, $targetDir);
+			$this->installFRPCertificates($daemonConfig, $dockerUrl, $containerName, self::FRP_TARGET_DIR);
 
 			$updateCommand = $this->getCertificateUpdateCommand($osInfo);
 			$this->executeCommandInContainer($dockerUrl, $containerName, $updateCommand);
@@ -164,6 +168,34 @@ class DockerActions implements IDeployActions {
 
 			// Build the path in the container
 			$pathInContainer = $targetDir . "/custom_cert_$index.crt";
+
+			$this->dockerCopy($dockerUrl, $containerId, $tempFile, $pathInContainer);
+			unlink($tempFile);
+		}
+	}
+
+	private function installFRPCertificates(DaemonConfig $daemonConfig, string $dockerUrl, string $containerId, string $targetDir): void {
+		if (!HarpService::isHarp($daemonConfig->getDeployConfig())) {
+			return;
+		}
+		$certificates = $this->harpService->getFrpCertificates($daemonConfig);
+		if ($certificates === null) {
+			$this->logger->info('No FRP certificates found for container: ' . $containerId . '. Skipping cert copy.');
+			return;
+		}
+		$tempDir = sys_get_temp_dir();
+		$this->executeCommandInContainer($dockerUrl, $containerId, ['mkdir', '-p', self::FRP_TARGET_DIR]);
+
+		foreach (['ca_crt', 'client_crt', 'client_key'] as $key) {
+			$filename = str_replace('_', '.', $key);
+			$tempFile = $tempDir . "/{$containerId}_frp_{$filename}";
+			if (file_exists($tempFile)) {
+				unlink($tempFile);
+			}
+			file_put_contents($tempFile, $certificates[$key]);
+
+			// Build the path in the container
+			$pathInContainer = "$targetDir/$filename";
 
 			$this->dockerCopy($dockerUrl, $containerId, $tempFile, $pathInContainer);
 			unlink($tempFile);
@@ -692,6 +724,13 @@ class DockerActions implements IDeployActions {
 			'image_tag' => (string) ($externalApp['docker-install']['image-tag'] ?? 'latest'),
 		];
 
+		$harpEnvVars = [];
+		if (isset($deployConfig['harp'])) {
+			$harpEnvVars['HP_FRP_ADDRESS'] = explode(':', $deployConfig['harp']['frp_address'])[0];
+			$harpEnvVars['HP_FRP_PORT'] = explode(':', $deployConfig['harp']['frp_address'])[1];
+			$harpEnvVars['HP_SHARED_KEY'] = $this->crypto->decrypt($deployConfig['haproxy_password']);
+		}
+
 		$envs = $this->buildDeployEnvs([
 			'appid' => $appId,
 			'name' => (string) $appInfo['name'],
@@ -701,6 +740,7 @@ class DockerActions implements IDeployActions {
 			'storage' => $storage,
 			'secret' => $appInfo['secret'],
 			'environment_variables' => $appInfo['external-app']['environment-variables'] ?? [],
+			'harp_env_vars' => $harpEnvVars,
 		], $deployConfig);
 
 		$containerParams = [
@@ -753,12 +793,25 @@ class DockerActions implements IDeployActions {
 			$autoEnvs[] = sprintf('%s=%s', $envKey, $params['environment_variables'][$envKey]['value'] ?? '');
 		}
 
+		// HaRP specific environment variables
+		foreach ($params['harp_env_vars'] as $envKey => $envValue) {
+			$autoEnvs[] = sprintf('%s=%s', $envKey, $envValue);
+		}
+
 		return $autoEnvs;
 	}
 
 	public function resolveExAppUrl(
 		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
 	): string {
+		if (boolval($deployConfig['harp'] ?? false)) {
+			$url = rtrim($deployConfig['nextcloud_url'], '/');
+			if (str_ends_with($url, '/index.php')) {
+				$url = substr($url, 0, -10);
+			}
+			return sprintf('%s/exapps/%s', $url, $appId);
+		}
+
 		$auth = [];
 		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
 			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
@@ -827,7 +880,14 @@ class DockerActions implements IDeployActions {
 
 	public function buildDockerUrl(DaemonConfig $daemonConfig): string {
 		// When using local socket, we the curl URL needs to be set to http://localhost
-		return $this->isLocalSocket($daemonConfig->getHost()) ? 'http://localhost' : $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		$url = $this->isLocalSocket($daemonConfig->getHost())
+			? 'http://localhost'
+			: $daemonConfig->getProtocol() . '://' . $daemonConfig->getHost();
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+			// if there is a trailling slash, remove it
+			$url = rtrim($url, '/') . '/exapps/app_api';
+		}
+		return $url;
 	}
 
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
@@ -846,6 +906,12 @@ class DockerActions implements IDeployActions {
 		if (isset($daemonConfig->getDeployConfig()['haproxy_password']) && $daemonConfig->getDeployConfig()['haproxy_password'] !== '') {
 			$haproxyPass = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
 			$guzzleParams['auth'] = [self::APP_API_HAPROXY_USER, $haproxyPass];
+		}
+		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+			$guzzleParams['headers'] = [
+				'harp-shared-key' => $guzzleParams['auth'][1],
+				'docker-engine-port' => $daemonConfig->getDeployConfig()['harp']['docker_socket_port'],
+			];
 		}
 		$this->guzzleClient = new Client($guzzleParams);
 	}
