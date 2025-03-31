@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
@@ -46,17 +47,7 @@ class HarpController extends Controller {
 		$this->request = $request;
 	}
 
-	private function validateHarpSharedKey(string $appId): bool {
-		$exApp = $this->exAppService->getExApp($appId);
-		if ($exApp === null) {
-			$this->logger->error('ExApp not found', ['appId' => $appId]);
-			// Protection for guessing installed ExApps list
-			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
-				'appid' => $appId,
-			]);
-			return false;
-		}
-
+	private function validateHarpSharedKey(ExApp $exApp): bool {
 		try {
 			if (!isset($exApp->getDeployConfig()['haproxy_password'])) {
 				$this->logger->error('Harp shared key is not set. Invalid daemon config.');
@@ -72,7 +63,7 @@ class HarpController extends Controller {
 		if ($headerHarpKey === '' || $headerHarpKey !== $harpKey) {
 			$this->logger->error('Harp shared key is not valid');
 			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
-				'appid' => $appId,
+				'appid' => $exApp->getAppid(),
 			]);
 			return false;
 		}
@@ -82,18 +73,19 @@ class HarpController extends Controller {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getExAppMetadata(string $appId): DataResponse {
-		if (!$this->validateHarpSharedKey($appId)) {
-			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
-		}
-
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
-			$this->logger->error(sprintf('ExApp with appId %s not found.', $appId));
+			$this->logger->error('ExApp not found', ['appId' => $appId]);
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
 				'appid' => $appId,
 			]);
-			return new DataResponse(['message' => 'ExApp not found'], Http::STATUS_NOT_FOUND);
+			// return the same response as invalid harp key to prevent ex-app guessing
+			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
+		}
+
+		if (!$this->validateHarpSharedKey($exApp)) {
+			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
 		}
 
 		return new DataResponse(HarpService::getHarpExApp($exApp));
@@ -124,8 +116,19 @@ class HarpController extends Controller {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getUserInfo(string $appId): DataResponse {
-		if (!$this->validateHarpSharedKey($appId)) {
-			return new DataResponse(['message' => 'Invalid token'], Http::STATUS_UNAUTHORIZED);
+		$exApp = $this->exAppService->getExApp($appId);
+		if ($exApp === null) {
+			$this->logger->error('ExApp not found', ['appId' => $appId]);
+			// Protection for guessing installed ExApps list
+			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
+				'appid' => $appId,
+			]);
+			// return the same response as invalid harp key to prevent ex-app guessing
+			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
+		}
+
+		if (!$this->validateHarpSharedKey($exApp)) {
+			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
 		}
 
 		if ($this->userId === null) {
