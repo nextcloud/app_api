@@ -38,6 +38,7 @@ OC.L10N.register(
     "Disabled apps" : "Keelatud rakendused",
     "Updates" : "Uuendused",
     "Featured apps" : "Esiletõstetud rakendused",
+    "Enable" : "Lülita sisse",
     "Disable" : "Lülita välja"
 },
 "nplurals=2; plural=(n != 1);");
