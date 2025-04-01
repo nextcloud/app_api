@@ -324,13 +324,16 @@ class ExAppProxyController extends Controller {
 		if (!in_array('x-origin-ip', $headersToExclude)) {
 			$headersToExclude[] = 'x-origin-ip';
 		}
+		if (!in_array('content-length', $headersToExclude)) {
+			$headersToExclude[] = 'content-length';
+		}
 		$headersToExclude[] = 'authorization-app-api';
 		foreach ($headers as $key => $value) {
 			if (in_array(strtolower($key), $headersToExclude)) {
 				unset($headers[$key]);
 			}
 		}
-		$headers['X-Origin-IP'] = $this->request->getRemoteAddress();
+		$headers['x-origin-ip'] = $this->request->getRemoteAddress();
 		return $headers;
 	}
 }
