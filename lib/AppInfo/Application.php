@@ -24,6 +24,7 @@ use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
 use OCA\AppAPI\Service\UI\TopMenuService;
+use OCA\AppAPI\SetupChecks\DaemonCheck;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -87,6 +88,8 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(NodeDeletedEvent::class, FileEventsListener::class);
 		$context->registerEventListener(NodeRenamedEvent::class, FileEventsListener::class);
 		$context->registerEventListener(NodeCopiedEvent::class, FileEventsListener::class);
+
+		$context->registerSetupCheck(DaemonCheck::class);
 	}
 
 	public function boot(IBootContext $context): void {

@@ -58,6 +58,10 @@ return [
 		['name' => 'DaemonConfig#startTestDeploy', 'url' => '/daemons/{name}/test_deploy', 'verb' => 'POST'],
 		['name' => 'DaemonConfig#stopTestDeploy', 'url' => '/daemons/{name}/test_deploy', 'verb' => 'DELETE'],
 		['name' => 'DaemonConfig#getTestDeployStatus', 'url' => '/daemons/{name}/test_deploy/status', 'verb' => 'GET'],
+
+		// HaRP actions
+		['name' => 'Harp#getExAppMetadata', 'url' => '/harp/exapp-meta', 'verb' => 'GET'],
+		['name' => 'Harp#getUserInfo', 'url' => '/harp/user-info', 'verb' => 'GET'],
 	],
 	'ocs' => [
 		// Logging

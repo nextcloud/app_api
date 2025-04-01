@@ -4,7 +4,7 @@
 -->
 <template>
 	<div class="register-daemon-config">
-		<NcModal :show="show" @close="closeModal">
+		<NcModal :show="show" name="register-deploy-daemon" @close="closeModal">
 			<div class="register-daemon-config-body">
 				<h2>{{ isEdit ? t('app_api', 'Edit Deploy Daemon') : t('app_api', 'Register Deploy Daemon') }}</h2>
 				<div v-if="!isEdit" class="templates">
@@ -20,20 +20,25 @@
 				</div>
 				<form class="daemon-register-form" :aria-label="t('app_api', 'Daemon registration form')">
 					<div class="external-label" :aria-label="t('app_api', 'Name')">
-						<label for="daemon-name">{{ t('app_api', 'Name') }}</label>
+						<label for="daemon-name">
+							{{ t('app_api', 'Name') }}
+							<InfoTooltip :text="t('app_api', 'Unique Deploy Daemon Name')" />
+						</label>
 						<NcInputField
 							id="daemon-name"
+							class="ex-input-field"
 							:disabled="isEdit"
 							:value.sync="name"
 							:placeholder="t('app_api', 'Unique Deploy Daemon Name')"
 							:aria-label="t('app_api', 'Unique Deploy Daemon Name')"
-							:error="isDaemonNameValid === true"
+							:error="isDaemonNameInvalid === true"
 							:helper-text="isDaemonNameValidHelperText" />
 					</div>
 					<div class="external-label" :aria-label="t('app_api', 'Display name')">
 						<label for="daemon-display-name">{{ t('app_api', 'Display name') }}</label>
 						<NcInputField
 							id="daemon-display-name"
+							class="ex-input-field"
 							:value.sync="displayName"
 							:placeholder="t('app_api', 'Display name')"
 							:aria-label="t('app_api', 'Display name')" />
@@ -43,25 +48,47 @@
 						<NcSelect
 							id="daemon-deploy-id"
 							v-model="acceptsDeployId"
-							:disabled="configurationTab.id === 'manual_install' || isEdit"
+							class="ex-input-field"
+							:disabled="isEdit"
 							:options="deployMethods"
 							:label-outside="true"
 							:placeholder="t('app_api', 'Select daemon deploy method')" />
 					</div>
-					<div class="external-label" :aria-label="t('app_api', 'Daemon host')">
-						<label for="daemon-host">{{ t('app_api', 'Daemon host') }}</label>
+					<div class="external-label" :aria-label="isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host')">
+						<label for="daemon-host">
+							{{ isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host') }}
+							<InfoTooltip :text="daemonHostHelperText" />
+						</label>
 						<NcInputField
 							id="daemon-host"
+							class="ex-input-field"
 							:value.sync="host"
 							:placeholder="daemonHostHelperText"
 							:aria-label="daemonHostHelperText"
-							:helper-text="daemonHostHelperText"
 							style="max-width: 70%;" />
+					</div>
+					<div v-if="['http', 'https'].includes(daemonProtocol) && !isPureManual"
+						class="external-label"
+						:aria-label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')">
+						<label for="deploy-config-haproxy-password">
+							{{ isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password') }}
+							<InfoTooltip :text="haProxyPasswordHelperText" />
+						</label>
+						<NcPasswordField
+							id="deploy-config-haproxy-password"
+							class="ex-input-field"
+							:value.sync="deployConfig.haproxy_password"
+							:error="isHaProxyPasswordValid === false"
+							:placeholder="haProxyPasswordHelperText"
+							:aria-label="haProxyPasswordHelperText"
+							:helper-text="!isHaProxyPasswordValid ? t('app_api', 'Password must be at least 12 characters long') : ''"
+							autocomplete="off" />
 					</div>
 					<div class="external-label" :aria-label="t('app_api', 'Nextcloud URL')">
 						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
 						<NcInputField
 							id="nextcloud-url"
+							class="ex-input-field"
 							:helper-text="getNextcloudUrlHelperText"
 							:input-class="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
 							:value.sync="nextcloud_url"
@@ -71,15 +98,16 @@
 					</div>
 					<div class="row">
 						<NcCheckboxRadioSwitch
-							v-if="isNotManualInstall && !isEdit"
+							v-if="!isEdit && acceptsDeployId === 'docker-install'"
 							id="default-deploy-config"
+							class="ex-input-field"
 							:checked.sync="defaultDaemon"
 							:placeholder="t('app_api', 'Set daemon as default')"
 							:aria-label="t('app_api', 'Set daemon as default')">
 							{{ t('app_api', 'Set as default daemon') }}
 						</NcCheckboxRadioSwitch>
 						<div v-if="isEdit" />
-						<NcCheckboxRadioSwitch v-if="isNotManualInstall"
+						<NcCheckboxRadioSwitch v-if="!isHarp"
 							id="https-enabled"
 							:checked.sync="httpsEnabled"
 							:placeholder="t('app_api', 'Enable https')"
@@ -88,49 +116,85 @@
 							{{ t('app_api', 'Enable https') }}
 						</NcCheckboxRadioSwitch>
 					</div>
-					<template v-if="isNotManualInstall">
-						<NcButton :aria-label="t('app_api', 'Deploy config')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
-							{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy config') : t('app_api', 'Hide deploy config') }}
-							<template #icon>
-								<UnfoldLessHorizontal v-if="deployConfigSettingsOpened" :size="20" />
-								<UnfoldMoreHorizontal v-else :size="20" />
-							</template>
-						</NcButton>
-						<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy config')">
+					<NcButton :aria-label="t('app_api', 'Deploy config')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
+						{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy config') : t('app_api', 'Hide deploy config') }}
+						<template #icon>
+							<UnfoldLessHorizontal v-if="deployConfigSettingsOpened" :size="20" />
+							<UnfoldMoreHorizontal v-else :size="20" />
+						</template>
+					</NcButton>
+					<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy config')">
+						<NcCheckboxRadioSwitch
+							:checked="isHarp"
+							:placeholder="t('app_api', 'Enable HaRP')"
+							:aria-label="t('app_api', 'Enable HaRP')"
+							@update:checked="toggleHarp">
+							{{ t('app_api', 'Enable HaRP') }}
+						</NcCheckboxRadioSwitch>
+						<div v-if="isHarp" class="harp-options">
+							<div class="external-label" :aria-label="t('app_api', 'FRP server address')">
+								<label for="frp-address">
+									{{ t('app_api', 'FRP server address') }}
+									<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in \'Docker network\'.')" />
+								</label>
+								<NcInputField
+									id="frp-address"
+									class="ex-input-field"
+									:value.sync="deployConfig.harp.frp_address"
+									:placeholder="t('app_api', 'FRP server address')"
+									:aria-label="t('app_api', 'FRP server address')" />
+							</div>
+							<div class="external-label" :aria-label="t('app_api', 'Docker socket proxy port')">
+								<label for="harp-port">
+									{{ t('app_api', 'Docker socket proxy port') }}
+									<InfoTooltip :text="t('app_api', 'The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
+								</label>
+								<NcInputField
+									id="harp-dsp-port"
+									class="ex-input-field"
+									:value.sync="deployConfig.harp.docker_socket_port"
+									:placeholder="t('app_api', 'Docker socket proxy port')"
+									:aria-label="t('app_api', 'Docker socket proxy port')" />
+							</div>
+						</div>
+						<template v-if="!isPureManual">
 							<div class="external-label"
-								:aria-label="t('app_api', 'Network')">
-								<label for="deploy-config-net">{{ t('app_api', 'Network') }}</label>
+								:aria-label="t('app_api', 'Docker network')">
+								<label for="deploy-config-net">
+									{{ t('app_api', 'Docker network') }}
+									<InfoTooltip :text="getNetworkHelperText"
+										:type="isEditDifferentNetwork ? 'warning' : 'info'" />
+								</label>
 								<NcInputField
 									id="deploy-config-net"
+									ref="deploy-config-net"
+									class="ex-input-field"
 									:value.sync="deployConfig.net"
-									:placeholder="t('app_api', 'Docker network name')"
-									:aria-label="t('app_api', 'Docker network name')"
-									:helper-text="getNetworkHelperText || t('app_api', 'Docker network name')"
-									:input-class="getNetworkHelperText !== '' ? 'text-warning' : ''" />
+									:placeholder="t('app_api', 'Docker network')"
+									:aria-label="t('app_api', 'Docker network')"
+									:show-trailing-button="isEditDifferentNetwork"
+									:error="isHarp && !deployConfig.net"
+									:helper-text="(isHarp && !deployConfig.net) ? t('app_api', 'Docker network for ex-app deployment must be defined') : ''"
+									@trailing-button-click="deployConfig.net = daemon.deploy_config.net">
+									<template #trailing-button-icon>
+										<Replay :size="20" />
+									</template>
+								</NcInputField>
 							</div>
-							<div v-if="['http', 'https'].includes(daemonProtocol)"
-								class="external-label"
-								:aria-label="t('app_api', 'HaProxy password')">
-								<label for="deploy-config-haproxy-password">{{ t('app_api', 'HaProxy password') }}</label>
-								<NcPasswordField
-									id="deploy-config-haproxy-password"
-									:value.sync="deployConfig.haproxy_password"
-									:error="isHaProxyPasswordValid === false"
-									:placeholder="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
-									:aria-label="t('app_api', 'AppAPI Docker Socket Proxy authentication password')"
-									:helper-text="haProxyPasswordHelperText"
-									autocomplete="off" />
+							<div class="external-label" :aria-label="t('app_api', 'Compute device')">
+								<label for="compute-device">
+									{{ t('app_api', 'Compute device') }}
+									<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
+										:text="getComputeDeviceHelperText"
+										:type="getComputeDeviceHelperText !== '' ? 'warning' : 'info'" />
+								</label>
+								<NcSelect
+									id="compute-device"
+									v-model="deployConfig.computeDevice"
+									class="ex-input-field"
+									:aria-label="t('app_api', 'Compute device')"
+									:options="computeDevices" />
 							</div>
-							<NcSelect
-								id="compute-device"
-								v-model="deployConfig.computeDevice"
-								:options="computeDevices"
-								:input-label="t('app_api', 'Compute device')" />
-							<p v-if="getComputeDeviceHelperText !== ''"
-								class="hint">
-								{{ getComputeDeviceHelperText }}
-							</p>
-
 							<template v-if="additionalOptions.length > 0">
 								<div class="row" style="flex-direction: column;">
 									<div
@@ -147,7 +211,7 @@
 												:value.sync="option.value"
 												:placeholder="option.value"
 												:aria-label="option.value"
-												style="margin: 0 5px 0 0; width: fit-content;" />
+												style="margin: 0 5px 0 0;" />
 											<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
 												<template #icon>
 													<Close :size="20" />
@@ -206,13 +270,13 @@
 									</div>
 								</template>
 							</div>
-						</div>
-					</template>
+						</template>
+					</div>
 
 					<div class="row">
 						<NcButton
 							type="primary"
-							:disabled="canRegister"
+							:disabled="cannotRegister"
 							@click="isEdit ? updateDaemon() : registerDaemon()">
 							{{ isEdit ? t('app_api', 'Save') : t('app_api', 'Register') }}
 							<template #icon>
@@ -220,7 +284,7 @@
 								<Check v-else :size="20" />
 							</template>
 						</NcButton>
-						<NcButton v-if="isNotManualInstall" type="secondary" @click="verifyDaemonConnection">
+						<NcButton type="secondary" @click="verifyDaemonConnection">
 							{{ t('app_api', 'Check connection') }}
 							<template #icon>
 								<NcLoadingIcon v-if="verifyingDaemonConnection" :size="20" />
@@ -236,26 +300,27 @@
 
 <script>
 import axios from '@nextcloud/axios'
-import { showSuccess, showError } from '@nextcloud/dialogs'
-import { generateUrl } from '@nextcloud/router'
+import { showError, showSuccess } from '@nextcloud/dialogs'
 import { confirmPassword } from '@nextcloud/password-confirmation'
+import { generateUrl } from '@nextcloud/router'
 
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
-import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
-
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
+import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
+import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
+import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
+import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
 
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import Check from 'vue-material-design-icons/Check.vue'
+import Close from 'vue-material-design-icons/Close.vue'
 import Connection from 'vue-material-design-icons/Connection.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-import Close from 'vue-material-design-icons/Close.vue'
+import Replay from 'vue-material-design-icons/Replay.vue'
 import UnfoldLessHorizontal from 'vue-material-design-icons/UnfoldLessHorizontal.vue'
 import UnfoldMoreHorizontal from 'vue-material-design-icons/UnfoldMoreHorizontal.vue'
-import { DAEMON_TEMPLATES, DAEMON_COMPUTE_DEVICES } from '../../constants/daemonTemplates.js'
+import { DAEMON_COMPUTE_DEVICES, DAEMON_TEMPLATES } from '../../constants/daemonTemplates.js'
+import InfoTooltip from './InfoTooltip.vue'
 
 export default {
 	name: 'ManageDaemonConfigModal',
@@ -269,10 +334,12 @@ export default {
 		NcCheckboxRadioSwitch,
 		NcSelect,
 		NcButton,
+		InfoTooltip,
 		Check,
 		Connection,
 		Plus,
 		Close,
+		Replay,
 	},
 	props: {
 		show: {
@@ -302,26 +369,12 @@ export default {
 	},
 	data() {
 		const data = {
-			name: 'docker_local',
-			displayName: 'Docker Local',
-			acceptsDeployId: 'docker-install',
+			...JSON.parse(JSON.stringify(DAEMON_TEMPLATES[0])),
 			deployMethods: ['docker-install', 'manual-install'],
-			httpsEnabled: false,
-			host: 'nextcloud-appapi-dsp:2375',
 			// replace last slash with empty string
 			nextcloud_url: window.location.origin + generateUrl('').slice(0, -1),
-			deployConfigSettingsOpened: false,
-			deployConfig: {
-				net: 'host',
-				haproxy_password: '',
-				computeDevice: {
-					id: 'cpu',
-					label: 'CPU',
-				},
-			},
-			defaultDaemon: false,
 			registeringDaemon: false,
-			configurationTab: { id: DAEMON_TEMPLATES[0].id, label: DAEMON_TEMPLATES[0].displayName },
+			configurationTab: { id: DAEMON_TEMPLATES[0].name, label: DAEMON_TEMPLATES[0].displayName },
 			configurationTemplateOptions: [
 				...DAEMON_TEMPLATES.map(template => { return { id: template.name, label: template.displayName } }),
 			],
@@ -342,11 +395,14 @@ export default {
 			data.httpsEnabled = this.daemon.protocol === 'https'
 			data.host = this.daemon.host
 			data.nextcloud_url = this.daemon.deploy_config.nextcloud_url
-			data.deployConfig.net = this.daemon.deploy_config.net
-			data.deployConfig.haproxy_password = this.daemon.deploy_config.haproxy_password
-			data.deployConfig.computeDevice = this.daemon.deploy_config.computeDevice
+			data.deployConfig = JSON.parse(JSON.stringify(this.daemon.deploy_config))
 			data.defaultDaemon = this.isDefaultDaemon
 			data.additionalOptions = Object.entries(this.daemon.deploy_config.additional_options ?? {}).map(([key, value]) => ({ key, value }))
+			data.deployConfigSettingsOpened = true
+		}
+		if (!data.deployConfig.harp) {
+			data.deployConfig.harp = null
+			data.deployConfigSettingsOpened = false
 		}
 
 		return data
@@ -354,44 +410,46 @@ export default {
 	computed: {
 		daemonHostHelperText() {
 			if (['http', 'https'].includes(this.daemonProtocol)) {
-				if (this.acceptsDeployId === 'manual-install') {
+				if (this.acceptsDeployId === 'manual-install' && !this.isHarp) {
 					return t('app_api', 'Hostname to access ExApps')
 				}
-				return t('app_api', 'Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
+				return t('app_api', 'The hostname (and port) at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server, e.g. {host}.', {
+					name: this.isHarp ? 'HaRP' : 'Docker Socket Proxy',
+					host: this.isHarp ? 'appapi-harp:8780' : 'nextcloud-appapi-dsp:2375',
+				})
 			}
-			return ''
+			return t('app_api', 'The hostname (and port) or path at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server. It can also be a path to the docker socket. (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
 		},
 		daemonProtocol() {
 			return this.httpsEnabled ? 'https' : 'http'
 		},
-		isNotManualInstall() {
-			return this.acceptsDeployId !== 'manual-install'
-		},
-		isDaemonNameValid() {
+		isDaemonNameInvalid() {
 			return this.daemons.some(daemon => daemon.name === this.name && daemon.name !== this.daemon?.name)
 		},
 		isDaemonNameValidHelperText() {
-			return this.isDaemonNameValid === true ? t('app_api', 'Daemon with this name already exists') : ''
+			return this.isDaemonNameInvalid === true ? t('app_api', 'Daemon with this name already exists') : ''
 		},
 		isHaProxyPasswordValid() {
-			if (this.daemonProtocol === 'https') {
+			if (this.daemonProtocol === 'https' || this.isHarp) {
 				return this.deployConfig.haproxy_password !== null && this.deployConfig.haproxy_password.length >= 12
 			}
 			// HaProxy password required only for https
 			return true
 		},
 		haProxyPasswordHelperText() {
-			return this.isHaProxyPasswordValid ? t('app_api', 'AppAPI Docker Socket Proxy authentication password') : t('app_api', 'Password must be at least 12 characters long')
+			return this.isHarp ? t('app_api', 'The secret key for the HaRP container communication (HP_SHARED_KEY).') : t('app_api', 'AppAPI Docker Socket Proxy authentication password')
+		},
+		isEditDifferentNetwork() {
+			return this.isEdit && this.deployConfig.net !== this.daemon.deploy_config.net
 		},
 		getNetworkHelperText() {
-			if (this.isEdit && this.deployConfig.net !== this.daemon.deploy_config.net) {
+			if (this.isEditDifferentNetwork) {
 				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
 			}
-
-			return ''
+			return t('app_api', 'The docker network that the deployed ex-apps would use.')
 		},
-		canRegister() {
-			return this.isDaemonNameValid === true || this.isHaProxyPasswordValid === false
+		cannotRegister() {
+			return this.isDaemonNameInvalid === true || this.isHaProxyPasswordValid === false || (this.isHarp && !this.deployConfig.net)
 		},
 		isAdditionalOptionValid() {
 			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
@@ -425,9 +483,18 @@ export default {
 		isEdit() {
 			return this.daemon !== null
 		},
+		isHarp() {
+			return this.deployConfig.harp !== null
+		},
+		isPureManual() {
+			return this.acceptsDeployId === 'manual-install' && !this.isHarp
+		},
 	},
 	watch: {
 		configurationTab(newConfigurationTab) {
+			if (this.isEdit) {
+				return
+			}
 			this.setupFormConfiguration(newConfigurationTab)
 		},
 		httpsEnabled(newHttpsEnabled) {
@@ -534,6 +601,7 @@ export default {
 					nextcloud_url: this.nextcloud_url,
 					haproxy_password: this.deployConfig.haproxy_password ?? '',
 					computeDevice: this.deployConfig.computeDevice,
+					harp: this.deployConfig.harp ?? null,
 				},
 			}
 			if (this.additionalOptions.length > 0) {
@@ -556,9 +624,7 @@ export default {
 			this.host = template.host
 			this.nextcloud_url = template.nextcloud_url ?? window.location.origin + generateUrl('').slice(0, -1)
 			this.deployConfigSettingsOpened = template.deployConfigSettingsOpened
-			this.deployConfig.net = template.deployConfig.net
-			this.deployConfig.haproxy_password = template.deployConfig.haproxy_password
-			this.deployConfig.computeDevice = template.deployConfig.computeDevice
+			this.deployConfig = JSON.parse(JSON.stringify(template.deployConfig))
 			this.defaultDaemon = template.defaultDaemon
 		},
 		onProtocolChange() {
@@ -590,6 +656,15 @@ export default {
 		closeModal() {
 			this.$emit('update:show', false)
 		},
+		toggleHarp(value) {
+			if (value) {
+				const toFind = this.configurationTab.id.includes('harp') ? this.configurationTab.id : 'harp_proxy_host'
+				const harpDeployTempl = DAEMON_TEMPLATES.find(template => template.name === toFind)
+				this.deployConfig.harp = { ...harpDeployTempl.deployConfig.harp }
+			} else {
+				this.deployConfig.harp = null
+			}
+		},
 	},
 }
 </script>
@@ -598,20 +673,25 @@ export default {
 .register-daemon-config-body {
 	padding: 20px;
 
+	.daemon-register-form {
+		display: flex;
+		flex-direction: column;
+		flex: fit-content;
+	}
+
 	.external-label {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
-		margin-top: 1rem;
+		padding: .25rem 0;
 
 		label {
 			flex: fit-content;
-			margin-right: 10px;
-		}
-
-		.input-field {
-			flex: fit-content;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			gap: .5rem;
 		}
 	}
 
@@ -630,23 +710,33 @@ export default {
 	.hint {
 		color: var(--color-warning-text);
 		padding: 10px;
+		width: 320px;
+		max-width: 320px;
 	}
 
 	.templates {
 		display: flex;
-		margin: 0 auto;
-		width: fit-content;
-		border-bottom: 1px solid var(--color-border-dark);
-		padding-bottom: 20px;
+		border-bottom: 2px solid var(--color-border-dark);
+		padding-bottom: 15px;
+		margin-bottom: 10px;
 	}
 
 	.additional-options {
-		margin: 20px 0;
 		padding: 10px 0;
 	}
 
 	.additional-option {
 		display: flex;
+		width: 320px;
+		max-width: 320px;
+	}
+
+	.ex-input-field {
+		width: 320px;
+	}
+
+	:deep .v-select.select {
+		margin: 0 !important;
 	}
 }
 </style>
