@@ -14,10 +14,7 @@ use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
-use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
 use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
-use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
-use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
 use OCA\AppAPI\Service\UI\ScriptsService;
@@ -52,9 +49,6 @@ class ExAppService {
 		private readonly ScriptsService             $scriptsService,
 		private readonly StylesService              $stylesService,
 		private readonly FilesActionsMenuService    $filesActionsMenuService,
-		private readonly SpeechToTextService        $speechToTextService,
-		private readonly TextProcessingService      $textProcessingService,
-		private readonly TranslationService         $translationService,
 		private readonly TaskProcessingService      $taskProcessingService,
 		private readonly TalkBotsService            $talkBotsService,
 		private readonly SettingsService            $settingsService,
@@ -121,9 +115,6 @@ class ExAppService {
 		$this->initialStateService->deleteExAppInitialStates($appId);
 		$this->scriptsService->deleteExAppScripts($appId);
 		$this->stylesService->deleteExAppStyles($appId);
-		$this->speechToTextService->unregisterExAppSpeechToTextProviders($appId);
-		$this->textProcessingService->unregisterExAppTextProcessingProviders($appId);
-		$this->translationService->unregisterExAppTranslationProviders($appId);
 		$this->taskProcessingService->unregisterExAppTaskProcessingProviders($appId);
 		$this->settingsService->unregisterExAppForms($appId);
 		$this->exAppArchiveFetcher->removeExAppFolder($appId);
@@ -252,9 +243,6 @@ class ExAppService {
 	private function resetCaches(): void {
 		$this->topMenuService->resetCacheEnabled();
 		$this->filesActionsMenuService->resetCacheEnabled();
-		$this->textProcessingService->resetCacheEnabled();
-		$this->speechToTextService->resetCacheEnabled();
-		$this->translationService->resetCacheEnabled();
 		$this->settingsService->resetCacheEnabled();
 		$this->eventsListenerService->resetCacheEnabled();
 		$this->occService->resetCacheEnabled();

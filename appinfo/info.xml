@@ -38,7 +38,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 *Your insights, suggestions, and contributions are invaluable to us.*
 
 	]]></description>
-	<version>32.0.0-dev.2</version>
+	<version>32.0.0-dev.3</version>
 	<licence>agpl</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
@@ -58,11 +58,10 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<screenshot>https://raw.githubusercontent.com/nextcloud/app_api/main/screenshots/app_api_4.png</screenshot>
 	<dependencies>
 		<php min-version="8.1"/>
-		<nextcloud min-version="31" max-version="32"/>
+		<nextcloud min-version="32" max-version="32"/>
 	</dependencies>
 	<background-jobs>
 		<job>OCA\AppAPI\BackgroundJob\ExAppInitStatusCheckJob</job>
-		<job>OCA\AppAPI\BackgroundJob\ProvidersAICleanUpJob</job>
 	</background-jobs>
 	<repair-steps>
 		<post-migration>
@@ -75,7 +74,6 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		</install>
 	</repair-steps>
 	<commands>
-		<command>OCA\AppAPI\Command\ExApp\Deploy</command>
 		<command>OCA\AppAPI\Command\ExApp\Register</command>
 		<command>OCA\AppAPI\Command\ExApp\Unregister</command>
 		<command>OCA\AppAPI\Command\ExApp\Update</command>

@@ -14,6 +14,7 @@ OC.L10N.register(
     "Register" : "Registreeru",
     "{license}-licensed" : "{license} litsents",
     "Update to {version}" : "Uuenda versioonile {version}",
+    "Remove" : "Eemalda",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Sellel rakendusel pole määratud minimaalset Nextcloudi versiooni. See põhjustab tulevikus veateateid.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Sellel rakendusel pole määratud maksimaalset Nextcloudi versiooni. See põhjustab tulevikus veateateid.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Seda rakendust ei saa paigaldada, sest järgmised sõltuvusel ei ole täidetud:",
@@ -36,6 +37,8 @@ OC.L10N.register(
     "Changelog" : "Muudatuste logi",
     "Disabled apps" : "Keelatud rakendused",
     "Updates" : "Uuendused",
+    "Featured apps" : "Esiletõstetud rakendused",
+    "Enable" : "Lülita sisse",
     "Disable" : "Lülita välja"
 },
 "nplurals=2; plural=(n != 1);");

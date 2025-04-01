@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Peruuta",
     "Delete" : "Poista",
+    "Default" : "Oletus",
     "Edit" : "Muokkaa",
     "Name" : "Nimi",
     "Host" : "Palvelin",

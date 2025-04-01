@@ -141,24 +141,6 @@ return [
 		['name' => 'OCSSettings#unregisterForm', 'url' => '/api/v1/ui/settings', 'verb' => 'DELETE'],
 		['name' => 'OCSSettings#getForm', 'url' => '/api/v1/ui/settings', 'verb' => 'GET'],
 
-		// Speech-To-Text
-		['name' => 'speechToText#registerProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'POST'],
-		['name' => 'speechToText#unregisterProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'DELETE'],
-		['name' => 'speechToText#getProvider', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'GET'],
-		['name' => 'speechToText#reportResult', 'url' => '/api/v1/ai_provider/speech_to_text', 'verb' => 'PUT'],
-
-		// Text-Processing
-		['name' => 'textProcessing#registerProvider', 'url' => '/api/v1/ai_provider/text_processing', 'verb' => 'POST'],
-		['name' => 'textProcessing#unregisterProvider', 'url' => '/api/v1/ai_provider/text_processing', 'verb' => 'DELETE'],
-		['name' => 'textProcessing#getProvider', 'url' => '/api/v1/ai_provider/text_processing', 'verb' => 'GET'],
-		['name' => 'textProcessing#reportResult', 'url' => '/api/v1/ai_provider/text_processing', 'verb' => 'PUT'],
-
-		// Machine-Translation
-		['name' => 'Translation#registerProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'POST'],
-		['name' => 'Translation#unregisterProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'DELETE'],
-		['name' => 'Translation#getProvider', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'GET'],
-		['name' => 'Translation#reportResult', 'url' => '/api/v1/ai_provider/translation', 'verb' => 'PUT'],
-
 		// Task-Processing
 		['name' => 'taskProcessing#registerProvider', 'url' => '/api/v1/ai_provider/task_processing', 'verb' => 'POST'],
 		['name' => 'taskProcessing#unregisterProvider', 'url' => '/api/v1/ai_provider/task_processing', 'verb' => 'DELETE'],

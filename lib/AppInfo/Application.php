@@ -22,10 +22,7 @@ use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
 use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
-use OCA\AppAPI\Service\ProvidersAI\SpeechToTextService;
 use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
-use OCA\AppAPI\Service\ProvidersAI\TextProcessingService;
-use OCA\AppAPI\Service\ProvidersAI\TranslationService;
 use OCA\AppAPI\Service\UI\TopMenuService;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
@@ -41,7 +38,6 @@ use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeRenamedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
-use OCP\IConfig;
 use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
@@ -80,25 +76,10 @@ class Application extends App implements IBootstrap {
 
 		$container = $this->getContainer();
 		try {
-			/** @var SpeechToTextService $speechToTextService */
-			$speechToTextService = $container->get(SpeechToTextService::class);
-			$speechToTextService->registerExAppSpeechToTextProviders($context, $container->getServer());
-
-			/** @var TextProcessingService $textProcessingService */
-			$textProcessingService = $container->get(TextProcessingService::class);
-			$textProcessingService->registerExAppTextProcessingProviders($context, $container->getServer());
-
-			/** @var TranslationService $translationService */
-			$translationService = $container->get(TranslationService::class);
-			$translationService->registerExAppTranslationProviders($context, $container->getServer());
-
-			$config = $this->getContainer()->query(IConfig::class);
-			if (version_compare($config->getSystemValueString('version', '0.0.0'), '30.0', '>=')) {
-				/** @var TaskProcessingService $taskProcessingService */
-				$taskProcessingService = $container->get(TaskProcessingService::class);
-				$taskProcessingService->registerExAppTaskProcessingProviders($context, $container->getServer());
-				$taskProcessingService->registerExAppTaskProcessingCustomTaskTypes($context);
-			}
+			/** @var TaskProcessingService $taskProcessingService */
+			$taskProcessingService = $container->get(TaskProcessingService::class);
+			$taskProcessingService->registerExAppTaskProcessingProviders($context, $container->getServer());
+			$taskProcessingService->registerExAppTaskProcessingCustomTaskTypes($context);
 		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
 		}
 		$context->registerEventListener(NodeCreatedEvent::class, FileEventsListener::class);

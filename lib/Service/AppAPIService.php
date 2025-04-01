@@ -347,7 +347,6 @@ class AppAPIService {
 			$this->userSession->setUser(null);
 		}
 		$this->session->set('app_api', true);
-		$this->session->set('app_api_system', true); // TODO: Remove after drop support NC29
 
 		if ($delay) {
 			$this->throttler->resetDelay($request->getRemoteAddress(), Application::APP_ID, [
@@ -449,7 +448,7 @@ class AppAPIService {
 		}
 		$this->logger->info(sprintf('Calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
 		$process = proc_open('php console.php ' . $args, $descriptors, $pipes, $occDirectory);
-		
+
 		if (!is_resource($process)) {
 			$this->logger->error(sprintf('Error calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));
 			return false;
@@ -470,7 +469,7 @@ class AppAPIService {
 		}
 
 		$this->logger->info(sprintf('OCC command executed successfully. stdout: %s, stderr: %s', $stdout, $stderr));
-		
+
 		return true;
 	}
 
