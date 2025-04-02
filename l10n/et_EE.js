@@ -8,7 +8,6 @@ OC.L10N.register(
     "Host" : "Host",
     "Enabled" : "Sisse lülitatud",
     "Display name" : "Kuvatav nimi",
-    "Network" : "Võrk",
     "Confirm" : "Kinnita",
     "Save" : "Salvesta",
     "Register" : "Registreeru",
@@ -29,8 +28,10 @@ OC.L10N.register(
     "Version" : "Versioon",
     "Level" : "Tase",
     "Actions" : "Tegevused",
+    "_Update_::_Update all_" : ["Uuenda","Uuenda kõik"],
     "Type" : "Tüüp",
     "Display Name" : "Kuvatav nimi",
+    "Network" : "Võrk",
     "Your apps" : "Sinu rakendused",
     "Documentation" : "Dokumentatsioon",
     "Details" : "Üksikasjad",
@@ -38,7 +39,10 @@ OC.L10N.register(
     "Disabled apps" : "Keelatud rakendused",
     "Updates" : "Uuendused",
     "Featured apps" : "Esiletõstetud rakendused",
+    "Supported apps" : "Toetatud rakendused",
     "Enable" : "Lülita sisse",
-    "Disable" : "Lülita välja"
+    "Disable" : "Lülita välja",
+    "Allow untested app" : "Luba testimata rakenduse kasutamine",
+    "An error occurred during the request. Unable to proceed." : "Päringu ajal tekkis viga. Jätkamine pole võimalik."
 },
 "nplurals=2; plural=(n != 1);");
