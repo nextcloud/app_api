@@ -18,7 +18,6 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\OCSController;
-use OCP\IConfig;
 use OCP\IRequest;
 
 class TaskProcessingController extends OCSController {
@@ -26,7 +25,6 @@ class TaskProcessingController extends OCSController {
 
 	public function __construct(
 		IRequest                                           $request,
-		private readonly IConfig                           $config,
 		private readonly TaskProcessingService             $taskProcessingService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
@@ -41,10 +39,6 @@ class TaskProcessingController extends OCSController {
 		array $provider,
 		?array $customTaskType,
 	): DataResponse {
-		if (!$this->isSupported()) {
-			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
-		}
-
 		$providerObj = $this->taskProcessingService->registerTaskProcessingProvider(
 			$this->request->getHeader('EX-APP-ID'),
 			$provider,
@@ -62,10 +56,6 @@ class TaskProcessingController extends OCSController {
 	#[PublicPage]
 	#[AppAPIAuth]
 	public function unregisterProvider(string $name): Response {
-		if (!$this->isSupported()) {
-			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
-		}
-
 		$unregistered = $this->taskProcessingService->unregisterTaskProcessingProvider(
 			$this->request->getHeader('EX-APP-ID'), $name
 		);
@@ -81,9 +71,6 @@ class TaskProcessingController extends OCSController {
 	#[PublicPage]
 	#[AppAPIAuth]
 	public function getProvider(string $name): DataResponse {
-		if (!$this->isSupported()) {
-			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
-		}
 		$result = $this->taskProcessingService->getExAppTaskProcessingProvider(
 			$this->request->getHeader('EX-APP-ID'), $name
 		);
@@ -91,10 +78,5 @@ class TaskProcessingController extends OCSController {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 		return new DataResponse($result, Http::STATUS_OK);
-	}
-
-	private function isSupported() {
-		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
-		return version_compare($ncVersion, '30.0', '>=');
 	}
 }

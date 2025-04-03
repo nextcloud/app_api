@@ -17,7 +17,6 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
-use OCP\IConfig;
 use OCP\IRequest;
 
 class OCSSettingsController extends OCSController {
@@ -26,7 +25,6 @@ class OCSSettingsController extends OCSController {
 	public function __construct(
 		IRequest                         $request,
 		private readonly SettingsService $settingsService,
-		private readonly IConfig         $config,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -37,10 +35,6 @@ class OCSSettingsController extends OCSController {
 	#[PublicPage]
 	#[AppAPIAuth]
 	public function registerForm(array $formScheme): DataResponse {
-		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
-		if (version_compare($ncVersion, '29.0', '<')) {
-			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
-		}
 		$settingsForm = $this->settingsService->registerForm(
 			$this->request->getHeader('EX-APP-ID'), $formScheme);
 		if ($settingsForm === null) {
@@ -53,10 +47,6 @@ class OCSSettingsController extends OCSController {
 	#[PublicPage]
 	#[AppAPIAuth]
 	public function unregisterForm(string $formId): DataResponse {
-		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
-		if (version_compare($ncVersion, '29.0', '<')) {
-			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
-		}
 		$unregistered = $this->settingsService->unregisterForm(
 			$this->request->getHeader('EX-APP-ID'), $formId);
 		if ($unregistered === null) {
@@ -69,10 +59,6 @@ class OCSSettingsController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function getForm(string $formId): DataResponse {
-		$ncVersion = $this->config->getSystemValueString('version', '0.0.0');
-		if (version_compare($ncVersion, '29.0', '<')) {
-			return new DataResponse([], Http::STATUS_NOT_IMPLEMENTED);
-		}
 		$result = $this->settingsService->getForm(
 			$this->request->getHeader('EX-APP-ID'), $formId);
 		if (!$result) {
