@@ -7,6 +7,7 @@
   <file src="lib/AppInfo/Application.php">
     <InvalidArgument>
       <code><![CDATA[LoadFilesPluginListener::class]]></code>
+      <code><![CDATA[LoadMenuEntriesListener::class]]></code>
       <code><![CDATA[SabrePluginAuthInitListener::class]]></code>
     </InvalidArgument>
     <MissingDependency>
@@ -97,6 +98,23 @@
       <code><![CDATA[LoadAdditionalScriptsEvent]]></code>
     </UndefinedClass>
   </file>
+  <file src="lib/Listener/LoadMenuEntriesListener.php">
+    <ImplementedParamTypeMismatch>
+      <code><![CDATA[$event]]></code>
+    </ImplementedParamTypeMismatch>
+    <InvalidDocblock>
+      <code><![CDATA[class LoadMenuEntriesListener implements IEventListener {]]></code>
+    </InvalidDocblock>
+    <InvalidTemplateParam>
+      <code><![CDATA[IEventListener]]></code>
+    </InvalidTemplateParam>
+    <MissingTemplateParam>
+      <code><![CDATA[IEventListener]]></code>
+    </MissingTemplateParam>
+    <UndefinedClass>
+      <code><![CDATA[LoadAdditionalEntriesEvent]]></code>
+    </UndefinedClass>
+  </file>
   <file src="lib/Listener/SabrePluginAuthInitListener.php">
     <ImplementedParamTypeMismatch>
       <code><![CDATA[$event]]></code>
@@ -123,9 +141,9 @@
   </file>
   <file src="lib/Service/HarpService.php">
     <UndefinedClass>
+      <code><![CDATA[$e]]></code>
+      <code><![CDATA[$e]]></code>
       <code><![CDATA[ClientException]]></code>
-      <code><![CDATA[$e]]></code>
-      <code><![CDATA[$e]]></code>
     </UndefinedClass>
   </file>
 </files>
