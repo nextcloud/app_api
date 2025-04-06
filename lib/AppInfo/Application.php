@@ -16,6 +16,7 @@ use OCA\AppAPI\Listener\DeclarativeSettings\RegisterDeclarativeSettingsListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
 use OCA\AppAPI\Listener\FileEventsListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
+use OCA\AppAPI\Listener\LoadMenuEntriesListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
@@ -23,7 +24,6 @@ use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
-use OCA\AppAPI\Service\UI\TopMenuService;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
@@ -38,13 +38,13 @@ use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeRenamedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
+use OCP\Navigation\Events\LoadAdditionalEntriesEvent;
 use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Throwable;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_api';
@@ -61,6 +61,7 @@ class Application extends App implements IBootstrap {
 	 * @psalm-suppress UndefinedClass
 	 */
 	public function register(IRegistrationContext $context): void {
+		$context->registerEventListener(LoadAdditionalEntriesEvent::class, LoadMenuEntriesListener::class);
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
 		$context->registerCapability(PublicCapabilities::class);
@@ -93,10 +94,6 @@ class Application extends App implements IBootstrap {
 	}
 
 	public function boot(IBootContext $context): void {
-		try {
-			$context->injectFn($this->registerExAppsMenuEntries(...));
-		} catch (NotFoundExceptionInterface|ContainerExceptionInterface|Throwable) {
-		}
 	}
 
 	public function registerDavAuth(): void {
@@ -106,11 +103,5 @@ class Application extends App implements IBootstrap {
 		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
 			$event->getServer()->addPlugin($container->query(DavPlugin::class));
 		});
-	}
-
-	private function registerExAppsMenuEntries(): void {
-		$container = $this->getContainer();
-		$menuEntryService = $container->get(TopMenuService::class);
-		$menuEntryService->registerMenuEntries($container);
 	}
 }
