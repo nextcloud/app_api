@@ -29,7 +29,7 @@ OC.L10N.register(
     "Version" : "Stumm",
     "Actions" : "Oberoù",
     "Results from other categories" : "Disoc'hoù evit rummadoù all",
-    "Type" : "Stumm",
+    "Type" : "Seurt",
     "Network" : "Rouedad",
     "by {author}\n{license}" : "great gant {author}\n{license}",
     "Your apps" : "Ho meziantoù",
