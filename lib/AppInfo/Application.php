@@ -15,6 +15,7 @@ use OCA\AppAPI\Listener\DeclarativeSettings\GetValueListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\RegisterDeclarativeSettingsListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
 use OCA\AppAPI\Listener\FileEventsListener;
+use OCA\AppAPI\Listener\GetTaskProcessingProvidersListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\LoadMenuEntriesListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
@@ -23,7 +24,6 @@ use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
 use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
-use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
@@ -43,8 +43,7 @@ use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use OCP\TaskProcessing\Events\GetTaskProcessingProvidersEvent;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_api';
@@ -61,6 +60,7 @@ class Application extends App implements IBootstrap {
 	 * @psalm-suppress UndefinedClass
 	 */
 	public function register(IRegistrationContext $context): void {
+		$context->registerEventListener(GetTaskProcessingProvidersEvent::class, GetTaskProcessingProvidersListener::class);
 		$context->registerEventListener(LoadAdditionalEntriesEvent::class, LoadMenuEntriesListener::class);
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
@@ -75,14 +75,6 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(DeclarativeSettingsGetValueEvent::class, GetValueListener::class);
 		$context->registerEventListener(DeclarativeSettingsSetValueEvent::class, SetValueListener::class);
 
-		$container = $this->getContainer();
-		try {
-			/** @var TaskProcessingService $taskProcessingService */
-			$taskProcessingService = $container->get(TaskProcessingService::class);
-			$taskProcessingService->registerExAppTaskProcessingProviders($context, $container->getServer());
-			$taskProcessingService->registerExAppTaskProcessingCustomTaskTypes($context);
-		} catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
-		}
 		$context->registerEventListener(NodeCreatedEvent::class, FileEventsListener::class);
 		$context->registerEventListener(NodeTouchedEvent::class, FileEventsListener::class);
 		$context->registerEventListener(NodeWrittenEvent::class, FileEventsListener::class);
