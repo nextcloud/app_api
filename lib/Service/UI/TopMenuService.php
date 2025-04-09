@@ -17,15 +17,6 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\IGroupManager;
-use OCP\INavigationManager;
-use OCP\IURLGenerator;
-use OCP\IUser;
-use OCP\IUserSession;
-use OCP\L10N\IFactory;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 
 class TopMenuService {
@@ -41,47 +32,6 @@ class TopMenuService {
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_top_menus');
-		}
-	}
-
-	/**
-	 * @throws NotFoundExceptionInterface
-	 * @throws ContainerExceptionInterface
-	 * @throws Exception
-	 */
-	public function registerMenuEntries(ContainerInterface $container): void {
-		/** @var TopMenu $menuEntry */
-		foreach ($this->getExAppMenuEntries() as $menuEntry) {
-			$userSession = $container->get(IUserSession::class);
-			/** @var IGroupManager $groupManager */
-			$groupManager = $container->get(IGroupManager::class);
-			/** @var IUser $user */
-			$user = $userSession->getUser();
-			if ($menuEntry->getAdminRequired() === 1 && !$groupManager->isAdmin($user->getUID())) {
-				continue; // Skip this entry if user is not admin and entry requires admin privileges
-			}
-			$container->get(INavigationManager::class)->add(function () use ($container, $menuEntry) {
-				$urlGenerator = $container->get(IURLGenerator::class);
-				/** @var IFactory $l10nFactory */
-				$l10nFactory = $container->get(IFactory::class);
-				$appId = $menuEntry->getAppid();
-				$entryName = $menuEntry->getName();
-				$icon = $menuEntry->getIcon();
-				return [
-					'id' => Application::APP_ID . '_' . $appId . '_' . $entryName,
-					'type' => 'link',
-					'app' => Application::APP_ID,
-					'href' => $urlGenerator->linkToRoute(
-						'app_api.TopMenu.viewExAppPage', ['appId' => $appId, 'name' => $entryName]
-					),
-					'icon' => $icon === '' ?
-						$urlGenerator->imagePath('app_api', 'app.svg') :
-						$urlGenerator->linkToRoute(
-							'app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => $icon]
-						),
-					'name' => $l10nFactory->get($appId)->t($menuEntry->getDisplayName()),
-				];
-			});
 		}
 	}
 

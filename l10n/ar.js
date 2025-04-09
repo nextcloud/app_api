@@ -20,6 +20,10 @@ OC.L10N.register(
     "AppAPI" : "واجهة AppAPO",
     "AI Integration Team" : "فريق تكامل الذكاء الاصطناعي",
     "ExApps Settings" : "إعدادات التطبيقات الخارجية ExApps",
+    "AppAPI deploy daemon" : "البرنامج الخفي daemon لنشر AppAPI",
+    "AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps)." : "البرنامج الخفي التلقائي لنشر AppAPI لم يتم تعيينه. رجاءً؛ قُم بتسجيله في الإعدادات ليمكنك تثبيت التطبيقات الخارجية (Ex-Apps).",
+    "AppAPI default deploy daemon \"%s\" is not accessible. Please check the daemon configuration." : "البرنامج الخفي لنشر AppAPI \"%s\" لايمكن الوصول إليه. رجاءً؛ قُم بفحص تهيئة البرنامج الخفي daemon.",
+    "AppAPI default deploy daemon is not using HaRP. Please consider upgrading to it for better performance." : "البرنامج الخفي التلقائي لنشر AppAPI لايستعمل HaRP. رجاءً؛ أدرُس إمكانية ترقيته لتحسين الأداء.",
     "Nextcloud AppAPI" : "واجهة تطبيقات نكست كلاود AppAPI",
     "### Boost your Nextcloud with AppAPI and its specially designed applications.\n\n\nThe AppAPI is a project within the Nextcloud ecosystem designed to streamline and enhance the process of\napplication development, deployment, and management.\n\nIt introduces a new methodology that allows developers to create\napplications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.\n\n_If you wish to develop an application, we will gladly help and assist you._\n\n### Support\n\nWe appreciate any support for this project:\n\n- ⭐ Star our work on GitHub\n- ❗ Create an Issue or feature request\n- 💁 Resolve an Issue and create a Pull Request\n- 🧑‍💻 Develop your own application using AppAPI\n\nWe are genuinely excited about the future of the AppAPI project and its potential to transform\nthe way applications are developed and experienced within Nextcloud.\n\nAs we embark on this journey, we warmly invite you - developers, thinkers, creators, and visionaries -\nto join us in shaping a more versatile, stable, and secure app landscape.\n\n*Your insights, suggestions, and contributions are invaluable to us.*" : "### عزِّز نكست كلاود خاصّتك باستخدام AppAPI وتطبيقاته المصممة خصيصاً. \n\nAppAPI هو مشروع ضمن النظام البيئي لنكست كلاود مصمم لتبسيط وتعزيز عملية تطوير التطبيقات ونشرها وإدارتها. \nوهو يقدم منهجية جديدة تسمح للمطورين بإنشاء التطبيقات باستخدام مجموعة متنوعة من لغات البرمجة، وليس فقط PHP، والتي كانت سابقاً تستخدم لوحدها في تطوير نكست كلاود. \n\n_إذا كنت ترغب في تطوير تطبيق، فسنكون سعداء بمساعدتك وتقديم المساعدة لك._ \n\n### الدعم \n\nنحن نقدر أي دعم لهذا المشروع: \n- ⭐ قم بتمييز عملنا على GitHub \n- ❗ قم بإنشاء مشكلة أو طلب ميزة \n- 💁 حل مشكلة وإنشاء طلب سحب \n- 🧑‍💻 تطوير تطبيقك الخاص باستخدام AppAPI \n\nنحن متحمسون حقًا لمستقبل مشروع AppAPI وإمكاناته لتحويل الطريقة التي يتم بها تطوير التطبيقات وتجربتها داخل نكست كلاود. \n\nبينما ننطلق في هذه الرحلة، ندعو بحرارة المطورين والمفكرين والمبدعين وأصحاب الرؤى للانضمام إلينا في تشكيل مشهد تطبيقات أكثر تنوعاً واستقراراً وأماناً. \n\n*أفكارك واقتراحاتك ومساهماتك لا تقدر بثمن بالنسبة لنا.*",
     "External Apps management" : "إدارة التطبيقات الخارجية",
@@ -92,11 +96,13 @@ OC.L10N.register(
     "Stop Deploy test" : "إيقاف النشر التجريبي",
     "ExApp is unregistered and container is removed on \"Stop deploy test\"" : "التطبيق الخارجي ExApp غير مسجل؛ و تمّت إزالة الحاوية في \"إيقاف تجربة النشر Stop deploy test\"",
     "Hostname to access ExApps" : "اسم المضيف Hostname للوصول إلى التطبيقات الخارجية ExApps",
-    "Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)" : "اسم المُضيف للوصول إلى البرنامج الخفي لـ\"دوكر\". مثلاً: (nextcloud-appapi-dsp:2375, /var/run/docker.sock)",
+    "The hostname (and port) at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server, e.g. {host}." : "اسم المضيف (والمنفذ) حيث يوجد {name} لايلزم أن يكون مُضيفاً عُموميّاً؛ يلزم فقط أن يكون الوصول إليه مُتاحاً من خادوم نكست كلاود. مثلاً: {host}.",
+    "The hostname (and port) or path at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server. It can also be a path to the docker socket. (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)" : "اسم المضيف (والمنفذ) أو المسار حيث يوجد {name} لايلزم أن يكون مُضيفاً عُموميّاً. يلزم فقط أن يكون الوصول إليه متاحاً من خادوم نكست كلاود. ويمكن أيضاً أن يكون مَقبَس \"دوكر\" docker socket. (مثلاً: nextcloud-appapi-dsp:2375, /var/run/docker.sock)",
     "Daemon with this name already exists" : "برنامج خفي آخر بنفس هذا الاسم موجود سلفاً",
+    "The secret key for the HaRP container communication (HP_SHARED_KEY)." : "المفتاح السّري لاتصالات حاوية HaRP؛ أي (HP_SHARES_KEY).",
     "AppAPI Docker Socket Proxy authentication password" : "كلمة مرور التصديق على وكيل مقبس \"دوكر\"  Docker Socket Proxy للواجهات AppAPI",
-    "Password must be at least 12 characters long" : "يجب ألّا يقل طول كلمة المرور عن 12 حرفاً",
     "Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated." : "سيتم تطبيق التغييرات فقط على التطبيقات الخارجية ExApps المثبتة حديثًا. أمّا بالنسبة إلى تلك الموجودة سلفاً، فتتوجب إعادة إنشاء حاويات Docker لها.",
+    "The docker network that the deployed ex-apps would use." : "شبكة \"دوكر\" docker التي ستستعملها التطبيقات الخارجية  ex-apps المثبتة.",
     "URL should start with http:// or https://" : "عناوين الويب يجب أن تبدأ بـ http:// أو بـ https://",
     "For HTTPS daemon, Nextcloud URL should be HTTPS" : "بالنسبة للبرنامج الخفي لـ HTTPS، عنوان URL لنكست كلاود يجب أن يكون HTTPS",
     "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "كل وحدات المعالجة الرسومية GPU على مُضيف البرنامج الخفي سيتم طلب تمكينها في حاويات التطبيقات الخارجية ExApp من قِبَل \"دوكر\" Docker.  ",
@@ -116,14 +122,21 @@ OC.L10N.register(
     "Display name" : "اسم العرض",
     "Deployment method" : "طُرُق النشر",
     "Select daemon deploy method" : "إختَر طريقة نشر البرنامج الخفي",
+    "HaRP host" : "مُضِيف HaRP",
     "Daemon host" : "مُضِيف البرنامج الخفي",
+    "HaRP shared key" : "مفتاح HaRP المُشتَرَك",
+    "Password must be at least 12 characters long" : "يجب ألّا يقل طول كلمة المرور عن 12 حرفاً",
     "Set daemon as default" : "إختَر البرنامج الخفي كقيمة تلقائية",
     "Set as default daemon" : "تعيين كبرنامج خفي تلقائي",
     "Enable https" : "تمكين https",
     "Show deploy config" : "أظهِر تهيئة النشر deploy config",
     "Hide deploy config" : "إخْفِ تهيئة النشر deploy config",
-    "Network" : "الشبكة",
-    "Docker network name" : "إسم شبكة \"دوكر\" Docker",
+    "Enable HaRP" : "تمكين HaRP",
+    "FRP server address" : "عنوان خادوم FRP",
+    "The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in 'Docker network'." : "عنوان خادوم FRP (أي المضيف: المنفذ) الذي يجب أن يكون الوصول إليه متاحاً بالنسبة للتطبيق الخارجي في الشبكة المُعرَّفة في 'شبكة دوكر Docker network'.",
+    "Docker socket proxy port" : "منفذ وكيل مقبس \"دوكر\" Docker",
+    "The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "المنفذ الذي يتصل من خلاله وكيل مقبس \"دوكر\". هذا يجب أن يكون مكشوفاً؛ لكن بالنسبة للجاهز built-in فلايحتاج لأن يكون مكشوفاً ولا أن يتم تغييره.",
+    "Docker network for ex-app deployment must be defined" : "يجب تعريف شبكة \"دوكر\" لتثبيت التطبيق الخارجي ex-app",
     "Additional option" : "خيار إضافي",
     "Add additional option" : "إضِف خياراً إضافيّاً",
     "Option key (unique)" : "مفتاح الخيار (غير متكرر)",
@@ -169,7 +182,10 @@ OC.L10N.register(
     "_Update_::_Update all_" : ["تحديث الكل","تحديث","تحديث الكل","تحديث الكل","تحديث الكل","تحديث الكل"],
     "Type" : "النوع",
     "Display Name" : "إسم العرض",
+    "Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)" : "اسم المُضيف للوصول إلى البرنامج الخفي لـ\"دوكر\". مثلاً: (nextcloud-appapi-dsp:2375, /var/run/docker.sock)",
     "With https enabled network is set to host" : "مع تعيين شبكة للمضيف يكون فيها بروتوكول https مٌمكّناً",
+    "Network" : "الشبكة",
+    "Docker network name" : "إسم شبكة \"دوكر\" Docker",
     "by {author}\n{license}" : "من قِبَل {author}\n{license}",
     "Your apps" : "تطبيقاتك",
     "Documentation" : "توثيق النظام",
