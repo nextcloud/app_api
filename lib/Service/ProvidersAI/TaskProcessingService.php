@@ -244,7 +244,7 @@ class TaskProcessingService {
 	/**
 	 * @psalm-suppress UndefinedClass, MissingDependency, InvalidReturnStatement, InvalidReturnType
 	 */
-	private function getAnonymousExAppProvider(
+	public function getAnonymousExAppProvider(
 		array $provider,
 	): IProvider {
 		return new class($provider) implements IProvider {
@@ -337,38 +337,7 @@ class TaskProcessingService {
 		return $result;
 	}
 
-	/**
-	 * @param IRegistrationContext $context
-	 *
-	 * @return void
-	 */
-	public function registerExAppTaskProcessingCustomTaskTypes(IRegistrationContext $context): void {
-		$exAppsProviders = $this->getRegisteredTaskProcessingProviders();
-		foreach ($exAppsProviders as $exAppProvider) {
-			$customTaskType = $exAppProvider->getCustomTaskType();
-			if ($customTaskType === null) {
-				continue;
-			}
-
-			/** @var class-string<ITaskType> $className */
-			$className = '\\OCA\\AppAPI\\' . $exAppProvider->getAppId() . '\\' . $exAppProvider->getName() . '\\TaskType';
-			try {
-				$taskType = $this->getAnonymousTaskType(json_decode($customTaskType, true, 512, JSON_THROW_ON_ERROR));
-			} catch (JsonException $e) {
-				$this->logger->debug('Failed to register ExApp TaskProcessing custom task type', ['exAppId' => $exAppProvider->getAppId(), 'taskType' => $exAppProvider->getName(), 'exception' => $e]);
-				continue;
-			} catch (\Throwable) {
-				continue;
-			}
-
-			$context->registerService($className, function () use ($taskType) {
-				return $taskType;
-			});
-			$context->registerTaskProcessingTaskType($className);
-		}
-	}
-
-	private function getAnonymousTaskType(
+	public function getAnonymousTaskType(
 		array $customTaskType,
 	): ITaskType {
 		return new class($customTaskType) implements ITaskType {

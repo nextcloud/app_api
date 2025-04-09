@@ -15,6 +15,7 @@ use OCA\AppAPI\Listener\DeclarativeSettings\GetValueListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\RegisterDeclarativeSettingsListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
 use OCA\AppAPI\Listener\FileEventsListener;
+use OCA\AppAPI\Listener\GetTaskProcessingProvidersListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\LoadMenuEntriesListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
@@ -46,8 +47,7 @@ use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use OCP\TaskProcessing\Events\GetTaskProcessingProvidersEvent;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_api';
@@ -64,6 +64,7 @@ class Application extends App implements IBootstrap {
 	 * @psalm-suppress UndefinedClass
 	 */
 	public function register(IRegistrationContext $context): void {
+		$context->registerEventListener(GetTaskProcessingProvidersEvent::class, GetTaskProcessingProvidersListener::class);
 		$context->registerEventListener(LoadAdditionalEntriesEvent::class, LoadMenuEntriesListener::class);
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
