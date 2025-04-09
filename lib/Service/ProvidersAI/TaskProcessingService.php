@@ -79,7 +79,7 @@ class TaskProcessingService {
 		}
 	}
 
-	private function everyElementHasKeys(array|null $array, array $keys): bool {
+	private function everyElementHasKeys(array|null $array, array $keys, bool $properties_have_array=true): bool {
 		if (!is_array($array)) {
 			return false;
 		}
@@ -88,12 +88,20 @@ class TaskProcessingService {
 			if (!is_string($propertyName) || !is_array($properties)) {
 				return false;
 			}
-			foreach ($properties as $property) {
-				if (!is_array($property)) {
-					return false;
+			if ($properties_have_array) {
+				foreach ($properties as $property) {
+					if (!is_array($property)) {
+						return false;
+					}
+					foreach ($keys as $key) {
+						if (!array_key_exists($key, $property)) {
+							return false;
+						}
+					}
 				}
+			} else {
 				foreach ($keys as $key) {
-					if (!array_key_exists($key, $property)) {
+					if (!array_key_exists($key, $properties)) {
 						return false;
 					}
 				}
@@ -116,10 +124,10 @@ class TaskProcessingService {
 		if (!isset($provider['expected_runtime']) || !is_int($provider['expected_runtime'])) {
 			throw new Exception('"expected_runtime" key must be an integer');
 		}
-		if (!$this->everyElementHasKeys($provider['optional_input_shape'], ['name', 'description', 'shape_type'])) {
+		if (!$this->everyElementHasKeys($provider['optional_input_shape'], ['name', 'description', 'shape_type'], false)) {
 			throw new Exception('"optional_input_shape" should be an array and must have "name", "description" and "shape_type" keys');
 		}
-		if (!$this->everyElementHasKeys($provider['optional_output_shape'], ['name', 'description', 'shape_type'])) {
+		if (!$this->everyElementHasKeys($provider['optional_output_shape'], ['name', 'description', 'shape_type'], false)) {
 			throw new Exception('"optional_output_shape" should be an array and must have "name", "description" and "shape_type" keys');
 		}
 		if (!$this->everyElementHasKeys($provider['input_shape_enum_values'], ['name', 'value'])) {
