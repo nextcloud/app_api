@@ -2,7 +2,7 @@ OC.L10N.register(
     "app_api",
     {
     "Cancel" : "Nullañ",
-    "Delete" : "Lemel",
+    "Delete" : "Dilemel",
     "Edit" : "Embann",
     "Name" : "Anv",
     "Host" : "Ostiz",
