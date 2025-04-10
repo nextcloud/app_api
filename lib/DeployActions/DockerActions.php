@@ -22,6 +22,7 @@ use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
 use OCP\App\IAppManager;
 
+use OCP\IAppConfig;
 use OCP\ICertificateManager;
 use OCP\IConfig;
 use OCP\ITempManager;
@@ -43,7 +44,8 @@ class DockerActions implements IDeployActions {
 
 	public function __construct(
 		private readonly LoggerInterface           $logger,
-		private readonly IConfig                   $config,
+		private readonly IAppConfig                $appConfig,
+		private readonly IConfig				   $config,
 		private readonly ICertificateManager       $certificateManager,
 		private readonly IAppManager               $appManager,
 		private readonly IURLGenerator             $urlGenerator,
@@ -334,7 +336,7 @@ class DockerActions implements IDeployActions {
 				'NetworkMode' => $params['net'],
 				'Mounts' => $this->buildDefaultExAppVolume($params['hostname']),
 				'RestartPolicy' => [
-					'Name' => $this->config->getAppValue(Application::APP_ID, 'container_restart_policy', 'unless-stopped'),
+					'Name' => $this->appConfig->getValueString(Application::APP_ID, 'container_restart_policy', 'unless-stopped', lazy: true),
 				],
 			],
 			'Env' => $params['env'],

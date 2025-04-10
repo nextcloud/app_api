@@ -22,12 +22,12 @@ use Psr\Log\LoggerInterface;
 
 class DaemonCheck implements ISetupCheck {
 	public function __construct(
-		private IL10N               $l10n,
-		private IConfig             $config,
-		private IAppConfig          $appConfig,
-		private DockerActions       $dockerActions,
-		private LoggerInterface     $logger,
-		private DaemonConfigService $daemonConfigService,
+		private readonly IL10N               $l10n,
+		private readonly IConfig             $config,
+		private readonly IAppConfig          $appConfig,
+		private readonly DockerActions       $dockerActions,
+		private readonly LoggerInterface     $logger,
+		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}
 
@@ -40,7 +40,7 @@ class DaemonCheck implements ISetupCheck {
 	}
 
 	public function getDefaultDaemonConfig(): ?DaemonConfig {
-		$defaultDaemonConfigName = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config');
+		$defaultDaemonConfigName = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true);
 		if ($defaultDaemonConfigName === '') {
 			return null;
 		}

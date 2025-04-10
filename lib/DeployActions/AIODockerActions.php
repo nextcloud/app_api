@@ -12,7 +12,7 @@ namespace OCA\AppAPI\DeployActions;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Service\DaemonConfigService;
-use OCP\IConfig;
+use OCP\IAppConfig;
 
 /**
  * Class with utils methods for AIO setup
@@ -22,7 +22,7 @@ class AIODockerActions {
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
 
 	public function __construct(
-		private readonly IConfig    $config,
+		private readonly IAppConfig    		 $appConfig,
 		private readonly DaemonConfigService $daemonConfigService
 	) {
 	}
@@ -38,7 +38,7 @@ class AIODockerActions {
 	 * Registers DaemonConfig with default params to use AIO Docker Socket Proxy
 	 */
 	public function registerAIODaemonConfig(): ?DaemonConfig {
-		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
+		$defaultDaemonConfig = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true);
 		if ($defaultDaemonConfig !== '') {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName(self::AIO_DAEMON_CONFIG_NAME);
 			if ($daemonConfig !== null) {
@@ -67,7 +67,7 @@ class AIODockerActions {
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
 		if ($daemonConfig !== null) {
-			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
+			$this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true);
 		}
 		return $daemonConfig;
 	}
