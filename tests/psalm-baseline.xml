@@ -9,6 +9,7 @@
       <code><![CDATA[LoadFilesPluginListener::class]]></code>
       <code><![CDATA[LoadMenuEntriesListener::class]]></code>
       <code><![CDATA[SabrePluginAuthInitListener::class]]></code>
+      <code><![CDATA[registerEventListener]]></code>
     </InvalidArgument>
     <MissingDependency>
       <code><![CDATA[DavPlugin]]></code>
@@ -80,6 +81,14 @@
       <code><![CDATA[$this->rootFolder]]></code>
       <code><![CDATA[private]]></code>
     </MissingDependency>
+  </file>
+  <file src="lib/Listener/GetTaskProcessingProvidersListener.php">
+    <MissingTemplateParam>
+      <code><![CDATA[IEventListener]]></code>
+    </MissingTemplateParam>
+    <UndefinedClass>
+      <code><![CDATA[GetTaskProcessingProvidersEvent]]></code>
+    </UndefinedClass>
   </file>
   <file src="lib/Listener/LoadFilesPluginListener.php">
     <ImplementedParamTypeMismatch>
