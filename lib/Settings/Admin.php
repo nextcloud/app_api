@@ -15,7 +15,7 @@ use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
-use OCP\IConfig;
+use OCP\IAppConfig;
 use OCP\Settings\ISettings;
 use Psr\Log\LoggerInterface;
 
@@ -24,7 +24,7 @@ class Admin implements ISettings {
 	public function __construct(
 		private readonly IInitialState       $initialStateService,
 		private readonly DaemonConfigService $daemonConfigService,
-		private readonly IConfig             $config,
+		private readonly IAppConfig          $appConfig,
 		private readonly DockerActions       $dockerActions,
 		private readonly LoggerInterface     $logger,
 	) {
@@ -33,12 +33,12 @@ class Admin implements ISettings {
 	public function getForm(): TemplateResponse {
 		$adminInitialData = [
 			'daemons' => $this->daemonConfigService->getDaemonConfigsWithAppsCount(),
-			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config'),
-			'init_timeout' => $this->config->getAppValue(Application::APP_ID, 'init_timeout', '40'),
-			'container_restart_policy' => $this->config->getAppValue(Application::APP_ID, 'container_restart_policy', 'unless-stopped'),
+			'default_daemon_config' => $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true),
+			'init_timeout' => $this->appConfig->getValueString(Application::APP_ID, 'init_timeout', '40'),
+			'container_restart_policy' => $this->appConfig->getValueString(Application::APP_ID, 'container_restart_policy', 'unless-stopped'),
 		];
 
-		$defaultDaemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
+		$defaultDaemonConfigName = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true);
 		if ($defaultDaemonConfigName !== '') {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
 			if ($daemonConfig !== null) {

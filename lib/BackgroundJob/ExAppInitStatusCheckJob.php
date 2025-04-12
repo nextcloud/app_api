@@ -15,7 +15,7 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCP\DB\Exception;
-use OCP\IConfig;
+use OCP\IAppConfig;
 
 class ExAppInitStatusCheckJob extends TimedJob {
 	private const everyMinuteInterval = 60;
@@ -24,7 +24,7 @@ class ExAppInitStatusCheckJob extends TimedJob {
 		ITimeFactory                   $time,
 		private readonly ExAppMapper   $mapper,
 		private readonly AppAPIService $service,
-		private readonly IConfig       $config,
+		private readonly IAppConfig    $appConfig,
 	) {
 		parent::__construct($time);
 
@@ -36,7 +36,7 @@ class ExAppInitStatusCheckJob extends TimedJob {
 		// set status.progress=0 and status.error message with timeout error
 		try {
 			$exApps = $this->mapper->findAll();
-			$initTimeoutMinutesSetting = intval($this->config->getAppValue(Application::APP_ID, 'init_timeout', '40'));
+			$initTimeoutMinutesSetting = intval($this->appConfig->getValueString(Application::APP_ID, 'init_timeout', '40', lazy: true));
 			foreach ($exApps as $exApp) {
 				$status = $exApp->getStatus();
 				if (isset($status['init']) && $status['init'] !== 100) {

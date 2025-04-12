@@ -13,7 +13,7 @@ use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Services\IInitialState;
-use OCP\IConfig;
+use OCP\IAppConfig;
 use OCP\IURLGenerator;
 use Psr\Log\LoggerInterface;
 
@@ -23,7 +23,7 @@ class ExAppsPageService {
 		private readonly ExAppFetcher $exAppFetcher,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions $dockerActions,
-		private readonly IConfig $config,
+		private readonly IAppConfig $appConfig,
 		private readonly IAppManager $appManager,
 		private readonly LoggerInterface $logger,
 		private readonly IURLGenerator $urlGenerator,
@@ -44,7 +44,7 @@ class ExAppsPageService {
 		if ($appApiEnabled) {
 			$initialState->provideInitialState('appstoreExAppUpdateCount', count($this->exAppFetcher->getExAppsWithUpdates()));
 
-			$defaultDaemonConfigName = $this->config->getAppValue('app_api', 'default_daemon_config');
+			$defaultDaemonConfigName = $this->appConfig->getValueString('app_api', 'default_daemon_config', lazy: true);
 			if ($defaultDaemonConfigName !== '') {
 				$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
 				if ($daemonConfig !== null) {

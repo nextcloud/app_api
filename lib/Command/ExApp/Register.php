@@ -17,7 +17,7 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 
-use OCP\IConfig;
+use OCP\IAppConfig;
 use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -33,7 +33,7 @@ class Register extends Command {
 		private readonly DaemonConfigService  $daemonConfigService,
 		private readonly DockerActions        $dockerActions,
 		private readonly ManualActions        $manualActions,
-		private readonly IConfig              $config,
+		private readonly IAppConfig           $appConfig,
 		private readonly ExAppService         $exAppService,
 		private readonly ISecureRandom        $random,
 		private readonly LoggerInterface      $logger,
@@ -118,7 +118,7 @@ class Register extends Command {
 
 		$daemonConfigName = $input->getArgument('daemon-config-name');
 		if (!isset($daemonConfigName) || $daemonConfigName === '') {
-			$daemonConfigName = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config');
+			$daemonConfigName = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true);
 		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonConfigName);
 		if ($daemonConfig === null) {

@@ -14,15 +14,15 @@ use OCA\AppAPI\AppInfo\Application;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\IConfig;
+use OCP\IAppConfig;
 use OCP\IRequest;
 
 class ConfigController extends Controller {
 
 	public function __construct(
-		string $appName,
-		IRequest $request,
-		private IConfig $config,
+		string                      $appName,
+		IRequest                    $request,
+		private readonly IAppConfig $appConfig,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -30,7 +30,7 @@ class ConfigController extends Controller {
 	#[NoCSRFRequired]
 	public function setAdminConfig(array $values): DataResponse {
 		foreach ($values as $key => $value) {
-			$this->config->setAppValue(Application::APP_ID, $key, $value);
+			$this->appConfig->setValueString(Application::APP_ID, $key, $value, lazy: true);
 		}
 		return new DataResponse(1);
 	}

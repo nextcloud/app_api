@@ -21,7 +21,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\Response;
-use OCP\IConfig;
+use OCP\IAppConfig;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\Security\ICrypto;
@@ -33,7 +33,7 @@ class DaemonConfigController extends ApiController {
 
 	public function __construct(
 		IRequest                             $request,
-		private readonly IConfig             $config,
+		private readonly IAppConfig          $appConfig,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions       $dockerActions,
 		private readonly AppAPIService       $service,
@@ -47,7 +47,7 @@ class DaemonConfigController extends ApiController {
 	public function getAllDaemonConfigs(): Response {
 		return new JSONResponse([
 			'daemons' => $this->daemonConfigService->getDaemonConfigsWithAppsCount(),
-			'default_daemon_config' => $this->config->getAppValue(Application::APP_ID, 'default_daemon_config'),
+			'default_daemon_config' => $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true),
 		]);
 	}
 
@@ -55,7 +55,7 @@ class DaemonConfigController extends ApiController {
 	public function registerDaemonConfig(array $daemonConfigParams, bool $defaultDaemon = false): Response {
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
 		if ($daemonConfig !== null && $defaultDaemon) {
-			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
+			$this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true);
 		}
 		return new JSONResponse([
 			'success' => $daemonConfig !== null,
@@ -107,10 +107,10 @@ class DaemonConfigController extends ApiController {
 	#[PasswordConfirmationRequired]
 	public function unregisterDaemonConfig(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
-		$defaultDaemonConfig = $this->config->getAppValue(Application::APP_ID, 'default_daemon_config', '');
+		$defaultDaemonConfig = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', '', lazy: true);
 		$this->service->removeExAppsByDaemonConfigName($daemonConfig);
 		if ($daemonConfig->getName() === $defaultDaemonConfig) {
-			$this->config->deleteAppValue(Application::APP_ID, 'default_daemon_config');
+			$this->appConfig->deleteKey(Application::APP_ID, 'default_daemon_config');
 		}
 		$daemonConfig = $this->daemonConfigService->unregisterDaemonConfig($daemonConfig);
 		return new JSONResponse([
