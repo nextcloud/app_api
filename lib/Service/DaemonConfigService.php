@@ -140,4 +140,58 @@ class DaemonConfigService {
 			return null;
 		}
 	}
+
+	public function addDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
+		try {
+			$deployConfig = $daemonConfig->getDeployConfig();
+
+			if (!isset($deployConfig['registries'])) {
+				$deployConfig['registries'] = [];
+			}
+
+			$fromExists = false;
+			foreach ($deployConfig['registries'] as $registry) {
+				if ($registry['from'] === $registryMap['from']) {
+					$fromExists = true;
+					break;
+				}
+			}
+			if ($fromExists) {
+				return ['error' => sprintf('This Docker registry map from "%s" already exists', $registryMap['from'])];
+			}
+			if ($registryMap['from'] === $registryMap['to']) {
+				return ['error' => 'The source and target registry cannot be the same'];
+			}
+			if (empty($registryMap['from']) || empty($registryMap['to'])) {
+				return ['error' => 'The source and target registry cannot be empty'];
+			}
+
+			$deployConfig['registries'][] = $registryMap;
+			$daemonConfig->setDeployConfig($deployConfig);
+
+			return $this->mapper->update($daemonConfig);
+		} catch (Exception $e) {
+			$this->logger->error('Failed to add registry to DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
+			return null;
+		}
+	}
+
+	public function removeDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
+		try {
+			$deployConfig = $daemonConfig->getDeployConfig();
+
+			if (!in_array($registryMap, $deployConfig['registries'])) {
+				return ['error' => 'This Docker registry map does not exist'];
+			}
+			$deployConfig['registries'] = array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
+				return !($registry['from'] === $registryMap['from'] && $registry['to'] === $registryMap['to']);
+			});
+			$daemonConfig->setDeployConfig($deployConfig);
+
+			return $this->mapper->update($daemonConfig);
+		} catch (Exception $e) {
+			$this->logger->error('Failed to remove registry from DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
+			return null;
+		}
+	}
 }

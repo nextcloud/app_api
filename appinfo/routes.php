@@ -53,6 +53,8 @@ return [
 		['name' => 'DaemonConfig#verifyDaemonConnection', 'url' => '/daemons/{name}/check', 'verb' => 'POST'],
 		['name' => 'DaemonConfig#checkDaemonConnection', 'url' => '/daemons/verify_connection', 'verb' => 'POST'],
 		['name' => 'DaemonConfig#updateDaemonConfig', 'url' => '/daemons/{name}', 'verb' => 'PUT'],
+		['name' => 'DaemonConfig#addDaemonDockerRegistry', 'url' => '/daemons/{name}/add-registry', 'verb' => 'POST'],
+		['name' => 'DaemonConfig#removeDaemonDockerRegistry', 'url' => '/daemons/{name}/remove-registry', 'verb' => 'POST'],
 
 		// Test Deploy actions
 		['name' => 'DaemonConfig#startTestDeploy', 'url' => '/daemons/{name}/test_deploy', 'verb' => 'POST'],
