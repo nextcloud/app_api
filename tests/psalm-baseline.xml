@@ -75,13 +75,6 @@
       <code><![CDATA[private]]></code>
     </UndefinedClass>
   </file>
-  <file src="lib/Listener/FileEventsListener.php">
-    <MissingDependency>
-      <code><![CDATA[$this->rootFolder]]></code>
-      <code><![CDATA[$this->rootFolder]]></code>
-      <code><![CDATA[private]]></code>
-    </MissingDependency>
-  </file>
   <file src="lib/Listener/GetTaskProcessingProvidersListener.php">
     <MissingTemplateParam>
       <code><![CDATA[IEventListener]]></code>
