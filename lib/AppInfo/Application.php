@@ -14,7 +14,6 @@ use OCA\AppAPI\DavPlugin;
 use OCA\AppAPI\Listener\DeclarativeSettings\GetValueListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\RegisterDeclarativeSettingsListener;
 use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
-use OCA\AppAPI\Listener\FileEventsListener;
 use OCA\AppAPI\Listener\GetTaskProcessingProvidersListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\LoadMenuEntriesListener;
@@ -32,12 +31,6 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\Files\Events\Node\NodeCopiedEvent;
-use OCP\Files\Events\Node\NodeCreatedEvent;
-use OCP\Files\Events\Node\NodeDeletedEvent;
-use OCP\Files\Events\Node\NodeRenamedEvent;
-use OCP\Files\Events\Node\NodeTouchedEvent;
-use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Navigation\Events\LoadAdditionalEntriesEvent;
 use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
@@ -74,13 +67,6 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(DeclarativeSettingsRegisterFormEvent::class, RegisterDeclarativeSettingsListener::class);
 		$context->registerEventListener(DeclarativeSettingsGetValueEvent::class, GetValueListener::class);
 		$context->registerEventListener(DeclarativeSettingsSetValueEvent::class, SetValueListener::class);
-
-		$context->registerEventListener(NodeCreatedEvent::class, FileEventsListener::class);
-		$context->registerEventListener(NodeTouchedEvent::class, FileEventsListener::class);
-		$context->registerEventListener(NodeWrittenEvent::class, FileEventsListener::class);
-		$context->registerEventListener(NodeDeletedEvent::class, FileEventsListener::class);
-		$context->registerEventListener(NodeRenamedEvent::class, FileEventsListener::class);
-		$context->registerEventListener(NodeCopiedEvent::class, FileEventsListener::class);
 
 		$context->registerSetupCheck(DaemonCheck::class);
 	}

@@ -52,7 +52,6 @@ class ExAppService {
 		private readonly TaskProcessingService      $taskProcessingService,
 		private readonly TalkBotsService            $talkBotsService,
 		private readonly SettingsService            $settingsService,
-		private readonly ExAppEventsListenerService $eventsListenerService,
 		private readonly ExAppOccService            $occService,
 		private readonly ExAppDeployOptionsService  $deployOptionsService,
 		private readonly IConfig                    $config,
@@ -118,7 +117,6 @@ class ExAppService {
 		$this->taskProcessingService->unregisterExAppTaskProcessingProviders($appId);
 		$this->settingsService->unregisterExAppForms($appId);
 		$this->exAppArchiveFetcher->removeExAppFolder($appId);
-		$this->eventsListenerService->unregisterExAppEventListeners($appId);
 		$this->occService->unregisterExAppOccCommands($appId);
 		$this->deployOptionsService->removeExAppDeployOptions($appId);
 		$this->unregisterExAppWebhooks($appId);
@@ -244,7 +242,6 @@ class ExAppService {
 		$this->topMenuService->resetCacheEnabled();
 		$this->filesActionsMenuService->resetCacheEnabled();
 		$this->settingsService->resetCacheEnabled();
-		$this->eventsListenerService->resetCacheEnabled();
 		$this->occService->resetCacheEnabled();
 		$this->deployOptionsService->resetCache();
 	}
