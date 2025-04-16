@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Service;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\DaemonConfigMapper;
 
+use OCA\AppAPI\DeployActions\ManualActions;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
@@ -52,7 +53,7 @@ class DaemonConfigService {
 			$this->logger->error('Failed to register daemon configuration: `protocol` must be `http` or `https`.');
 			return null;
 		}
-		if (isset($params['deploy_config']['harp']['exapp_direct']) && $params['deploy_config']['harp']['exapp_direct'] === 1) {
+		if ($params['accepts_deploy_id'] !== ManualActions::DEPLOY_ID && isset($params['deploy_config']['harp']['exapp_direct']) && $params['deploy_config']['harp']['exapp_direct'] === true) {
 			if ($params['deploy_config']['net'] === 'host') {
 				$this->logger->error('Failed to register daemon configuration: setting `net=host` in HaRP is not supported when communication with ExApps is done directly without FRP.');
 				return null;

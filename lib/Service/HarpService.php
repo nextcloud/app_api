@@ -88,7 +88,7 @@ class HarpService {
 	}
 
 	public static function isHarpDirectConnect(array $deployConfig): bool {
-		return isset($deployConfig['harp']['exapp_direct']) && $deployConfig['harp']['exapp_direct'] === 1;
+		return isset($deployConfig['harp']['exapp_direct']) && $deployConfig['harp']['exapp_direct'] === true;
 	}
 
 	public static function getExAppHost(ExApp $exApp): string {
@@ -102,10 +102,9 @@ class HarpService {
 					return $deployConfig['additional_options']['OVERRIDE_APP_HOST'];
 				}
 			}
-			if ($exApp->getAcceptsDeployId() === ManualActions::DEPLOY_ID) {
-				return $exApp->getHost();
+			if ($exApp->getAcceptsDeployId() !== ManualActions::DEPLOY_ID) {
+				return $exApp->getAppid();
 			}
-			return $exApp->getAppid();
 		}
 		return "127.0.0.1";
 	}

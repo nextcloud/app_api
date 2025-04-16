@@ -105,7 +105,7 @@ class RegisterDaemon extends Command {
 			$deployConfig['harp'] = [
 				'frp_address' => $input->getOption('harp_frp_address') ?? '',
 				'docker_socket_port' => $input->getOption('harp_docker_socket_port'),
-				'exapp_direct' => $input->getOption('harp_exapp_direct') ? 1 : 0,
+				'exapp_direct' => (bool)$input->getOption('harp_exapp_direct'),
 			];
 		}
 
