@@ -2,7 +2,7 @@ OC.L10N.register(
     "app_api",
     {
     "Cancel" : "Atcelt",
-    "Delete" : "Dzēst",
+    "Delete" : "Izdzēst",
     "Edit" : "Labot",
     "Name" : "Nosaukums",
     "Host" : "Resursdators",
