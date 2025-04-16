@@ -13,6 +13,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\DeployActions\ManualActions;
 use OCP\ICertificateManager;
 use OCP\IConfig;
 use OCP\Security\ICrypto;
@@ -26,8 +27,6 @@ class HarpService {
 		private readonly IConfig             $config,
 		private readonly ICertificateManager $certificateManager,
 		private readonly ICrypto             $crypto,
-		private readonly ExAppService        $exAppService,
-		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}
 
@@ -70,7 +69,7 @@ class HarpService {
 		}
 
 		$harpKey = $this->crypto->decrypt($daemonConfig->getDeployConfig()['haproxy_password']);
-		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
+		if ($daemonConfig->getDeployConfig()['harp'] ?? false) {
 			$guzzleParams['headers'] = [
 				'harp-shared-key' => $harpKey,
 			];
@@ -88,10 +87,34 @@ class HarpService {
 		return boolval($deployConfig['harp'] ?? false);
 	}
 
-	public static function getHarpExApp(ExApp $exApp): array {
+	public static function isHarpDirectConnect(array $deployConfig): bool {
+		return isset($deployConfig['harp']['exapp_direct']) && $deployConfig['harp']['exapp_direct'] === 1;
+	}
+
+	public static function getExAppHost(ExApp $exApp): string {
+		$deployConfig = $exApp->getDeployConfig();
+		if (HarpService::isHarpDirectConnect($deployConfig)) {
+			if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
+				$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
+			) {
+				$wideNetworkAddresses = ['0.0.0.0', '127.0.0.1', '::', '::1'];
+				if (!in_array($deployConfig['additional_options']['OVERRIDE_APP_HOST'], $wideNetworkAddresses)) {
+					return $deployConfig['additional_options']['OVERRIDE_APP_HOST'];
+				}
+			}
+			if ($exApp->getAcceptsDeployId() === ManualActions::DEPLOY_ID) {
+				return $exApp->getHost();
+			}
+			return $exApp->getAppid();
+		}
+		return "127.0.0.1";
+	}
+
+	public function getHarpExApp(ExApp $exApp): array {
 		return [
 			'exapp_token' => $exApp->getSecret(),
 			'exapp_version' => $exApp->getVersion(),
+			'host' => $this->getExAppHost($exApp),
 			'port' => $exApp->getPort(),
 			'routes' => array_map(function ($route) {
 				$bruteforceList = json_decode($route['bruteforce_protection'], true);
@@ -120,7 +143,7 @@ class HarpService {
 		try {
 			if ($added) {
 				$this->guzzleClient->post($url, [
-					'json' => self::getHarpExApp($exApp),
+					'json' => $this->getHarpExApp($exApp),
 				]);
 			} else {
 				$this->guzzleClient->delete($url);

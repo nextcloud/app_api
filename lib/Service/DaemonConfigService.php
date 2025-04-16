@@ -31,6 +31,10 @@ class DaemonConfigService {
 	}
 
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
+		if (!isset($params['deploy_config']['net'])) {
+			$this->logger->error('Failed to register daemon configuration: `net` key should be present in the deploy config.');
+			return null;
+		}
 		$bad_patterns = ['http', 'https', 'tcp', 'udp', 'ssh'];
 		$docker_host = (string)$params['host'];
 		$frp_host = (string)($params['harp']['frp_address'] ?? '');
@@ -45,8 +49,14 @@ class DaemonConfigService {
 			}
 		}
 		if ($params['protocol'] !== 'http' && $params['protocol'] !== 'https') {
-			$this->logger->error('Failed to register daemon configuration. `protocol` must be `http` or `https`.');
+			$this->logger->error('Failed to register daemon configuration: `protocol` must be `http` or `https`.');
 			return null;
+		}
+		if (isset($params['deploy_config']['harp']['exapp_direct']) && $params['deploy_config']['harp']['exapp_direct'] === 1) {
+			if ($params['deploy_config']['net'] === 'host') {
+				$this->logger->error('Failed to register daemon configuration: setting `net=host` in HaRP is not supported when communication with ExApps is done directly without FRP.');
+				return null;
+			}
 		}
 		$params['deploy_config']['nextcloud_url'] = rtrim($params['deploy_config']['nextcloud_url'], '/');
 		try {

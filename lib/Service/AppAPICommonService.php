@@ -13,14 +13,11 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCP\App\IAppManager;
 use OCP\IRequest;
-use Psr\Log\LoggerInterface;
 
 class AppAPICommonService {
 
 	public function __construct(
 		private readonly IAppManager         $appManager,
-		private readonly DaemonConfigService $daemonConfigService,
-		private readonly LoggerInterface     $logger,
 		private readonly HarpService         $harpService,
 	) {
 	}
@@ -36,15 +33,16 @@ class AppAPICommonService {
 
 		if ($this->harpService->isHarp($exApp->getDeployConfig())) {
 			$harpKey = $this->harpService->getHarpSharedKey($exApp->getDeployConfig());
-			$headers['HARP-SHARED-KEY'] = $harpKey;
-			$headers['EX-APP-PORT'] = $exApp->getPort();
+			$headers['harp-shared-key'] = $harpKey;
+			$headers['ex-app-port'] = $exApp->getPort();
+			$headers['ex-app-host'] = $this->harpService->getExAppHost($exApp);
 		}
 
 		return $headers;
 	}
 
 	public function buildExAppHost(array $deployConfig): string {
-		if (boolval($deployConfig['harp'] ?? false)) {
+		if (($deployConfig['harp'] ?? false) && !HarpService::isHarpDirectConnect($deployConfig)) {
 			return '127.0.0.1';
 		}
 		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST'])) {

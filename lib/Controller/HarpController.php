@@ -11,7 +11,6 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
-use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
 use OCP\AppFramework\Controller;
@@ -19,7 +18,6 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\IAppConfig;
 use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUserManager;
@@ -32,15 +30,14 @@ class HarpController extends Controller {
 
 	public function __construct(
 		IRequest                             $request,
-		private readonly IAppConfig          $appConfig,
 		private readonly ExAppService        $exAppService,
 		private readonly LoggerInterface     $logger,
 		private readonly IThrottler          $throttler,
 		private readonly IUserManager        $userManager,
 		private readonly IGroupManager       $groupManager,
-		private readonly DaemonConfigService $daemonConfigService,
 		private readonly ICrypto             $crypto,
 		private readonly ?string             $userId,
+		private readonly HarpService		 $harpService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -88,7 +85,7 @@ class HarpController extends Controller {
 			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
 		}
 
-		return new DataResponse(HarpService::getHarpExApp($exApp));
+		return new DataResponse($this->harpService->getHarpExApp($exApp));
 	}
 
 	protected function isUserEnabled(string $userId): bool {
