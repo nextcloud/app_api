@@ -156,6 +156,20 @@
 									:placeholder="t('app_api', 'Docker socket proxy port')"
 									:aria-label="t('app_api', 'Docker socket proxy port')" />
 							</div>
+							<div class="external-label" :aria-label="t('app_api', 'Disable FRP')">
+								<label for="disable-frp">
+									{{ t('app_api', 'Disable FRP') }}
+									<InfoTooltip :text="t('app_api', 'Flag for the advanced setups only. Disables the FRP tunnel between ExApps and HaRP.')" />
+								</label>
+								<NcCheckboxRadioSwitch
+									id="disable-frp"
+									:checked.sync="deployConfig.harp.exapp_direct"
+									:disabled="isEdit"
+									:placeholder="t('app_api', 'Disable FRP')"
+									:aria-label="t('app_api', 'Disable FRP')">
+									{{ t('app_api', 'Disabled') }}
+								</NcCheckboxRadioSwitch>
+							</div>
 						</div>
 						<template v-if="!isPureManual">
 							<div class="external-label"
