@@ -22,6 +22,7 @@ export const DAEMON_TEMPLATES = [
 			harp: {
 				frp_address: 'localhost:8782',
 				docker_socket_port: 24000,
+				exapp_direct: false,
 			},
 		},
 		deployConfigSettingsOpened: true,
@@ -45,6 +46,7 @@ export const DAEMON_TEMPLATES = [
 			harp: {
 				frp_address: 'appapi-harp:8782',
 				docker_socket_port: 24000,
+				exapp_direct: false,
 			},
 		},
 		deployConfigSettingsOpened: true,
@@ -68,6 +70,7 @@ export const DAEMON_TEMPLATES = [
 			harp: {
 				frp_address: 'nextcloud-aio-harp:8782',
 				docker_socket_port: 24000,
+				exapp_direct: false,
 			},
 		},
 		deployConfigSettingsOpened: false,
@@ -91,6 +94,7 @@ export const DAEMON_TEMPLATES = [
 			harp: {
 				frp_address: 'localhost:8782',
 				docker_socket_port: 24000,
+				exapp_direct: false,
 			},
 		},
 		deployConfigSettingsOpened: true,

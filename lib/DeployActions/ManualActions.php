@@ -18,13 +18,15 @@ use OCA\AppAPI\Service\ExAppService;
  */
 class ManualActions implements IDeployActions {
 
+	public const DEPLOY_ID = 'manual-install';
+
 	public function __construct(
 		private readonly ExAppService		 $exAppService,
 	) {
 	}
 
 	public function getAcceptsDeployId(): string {
-		return 'manual-install';
+		return self::DEPLOY_ID;
 	}
 
 	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): string {

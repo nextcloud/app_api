@@ -48,6 +48,7 @@ class RegisterDaemon extends Command {
 		$this->addOption('harp_frp_address', null, InputOption::VALUE_REQUIRED, '[host]:[port] of the HaRP FRP server, default host is same as HaRP host and port is 8782');
 		$this->addOption('harp_shared_key', null, InputOption::VALUE_REQUIRED, 'HaRP shared key for secure communication between HaRP and AppAPI');
 		$this->addOption('harp_docker_socket_port', null, InputOption::VALUE_REQUIRED, '\'remotePort\' of the FRP client of the remote docker socket proxy. There is one included in the harp container so this can be skipped for default setups.', '24000');
+		$this->addOption('harp_exapp_direct', null, InputOption::VALUE_NONE, 'Flag for the advanced setups only. Disables the FRP tunnel between ExApps and HaRP.');
 
 		$this->addUsage('harp_proxy_docker "Harp Proxy (Docker)" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --net nextcloud --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
 		$this->addUsage('harp_proxy_host "Harp Proxy (Host)" "docker-install" "http" "localhost:8780" "http://nextcloud.local" --harp --harp_frp_address "localhost:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
@@ -104,6 +105,7 @@ class RegisterDaemon extends Command {
 			$deployConfig['harp'] = [
 				'frp_address' => $input->getOption('harp_frp_address') ?? '',
 				'docker_socket_port' => $input->getOption('harp_docker_socket_port'),
+				'exapp_direct' => (bool)$input->getOption('harp_exapp_direct'),
 			];
 		}
 

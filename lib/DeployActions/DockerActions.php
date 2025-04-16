@@ -37,6 +37,7 @@ class DockerActions implements IDeployActions {
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
 	public const FRP_TARGET_DIR = '/certs/frp';
+	public const DEPLOY_ID = 'docker-install';
 
 	private Client $guzzleClient;
 	private bool $useSocket = false;  # for `pullImage` function, to detect can be stream used or not.
@@ -59,7 +60,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function getAcceptsDeployId(): string {
-		return 'docker-install';
+		return self::DEPLOY_ID;
 	}
 
 	public function deployExApp(ExApp $exApp, DaemonConfig $daemonConfig, array $params = []): string {
@@ -177,7 +178,11 @@ class DockerActions implements IDeployActions {
 	}
 
 	private function installFRPCertificates(DaemonConfig $daemonConfig, string $dockerUrl, string $containerId, string $targetDir): void {
-		if (!HarpService::isHarp($daemonConfig->getDeployConfig())) {
+		$deployConfig = $daemonConfig->getDeployConfig();
+		if (!HarpService::isHarp($deployConfig)) {
+			return;
+		}
+		if (HarpService::isHarpDirectConnect($deployConfig)) {
 			return;
 		}
 		$certificates = $this->harpService->getFrpCertificates($daemonConfig);
@@ -186,7 +191,7 @@ class DockerActions implements IDeployActions {
 			return;
 		}
 		$tempDir = sys_get_temp_dir();
-		$this->executeCommandInContainer($dockerUrl, $containerId, ['mkdir', '-p', self::FRP_TARGET_DIR]);
+		$this->executeCommandInContainer($dockerUrl, $containerId, ['mkdir', '-p', $targetDir]);
 
 		foreach (['ca_crt', 'client_crt', 'client_key'] as $key) {
 			$filename = str_replace('_', '.', $key);
@@ -704,7 +709,7 @@ class DockerActions implements IDeployActions {
 		];
 
 		$harpEnvVars = [];
-		if (isset($deployConfig['harp'])) {
+		if (isset($deployConfig['harp']) && !HarpService::isHarpDirectConnect($daemonConfig->getDeployConfig())) {
 			$harpEnvVars['HP_FRP_ADDRESS'] = explode(':', $deployConfig['harp']['frp_address'])[0];
 			$harpEnvVars['HP_FRP_PORT'] = explode(':', $deployConfig['harp']['frp_address'])[1];
 			$harpEnvVars['HP_SHARED_KEY'] = $this->crypto->decrypt($deployConfig['haproxy_password']);

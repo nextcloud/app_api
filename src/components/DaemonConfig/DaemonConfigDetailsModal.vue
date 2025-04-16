@@ -20,6 +20,7 @@
 				<p><b>{{ t('app_api', 'Name') }}: </b>{{ daemon.name }}</p>
 				<p><b>{{ t('app_api', 'Protocol') }}: </b>{{ daemon.protocol }}</p>
 				<p><b>{{ t('app_api', 'Host') }}: </b>{{ daemon.host }}</p>
+				<p v-if="daemon.deploy_config.harp"><b>{{ t('app_api', 'ExApp direct communication (FRP disabled)') }}: </b>{{ daemon.deploy_config.harp.exapp_direct ?? false }}</p>
 
 				<h3>{{ t('app_api', 'Deploy config') }}</h3>
 				<p><b>{{ t('app_api', 'Docker network') }}: </b>{{ daemon.deploy_config.net }}</p>
