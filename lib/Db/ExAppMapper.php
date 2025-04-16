@@ -195,6 +195,9 @@ class ExAppMapper extends QBMapper {
 			if (isset($route['bruteforce_protection']) && is_string($route['bruteforce_protection'])) {
 				$route['bruteforce_protection'] = json_decode($route['bruteforce_protection'], false);
 			}
+			if (!isset($route['headers_to_exclude'])) {
+				$route['headers_to_exclude'] = [];
+			}
 			$qb->insert('ex_apps_routes')
 				->values([
 					'appid' => $qb->createNamedParameter($exApp->getAppid()),
