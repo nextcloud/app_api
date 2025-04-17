@@ -8,6 +8,7 @@ OC.L10N.register(
     "Name" : "Emër",
     "Host" : "Strehë",
     "Enabled" : "E aktivizuar",
+    "Disabled" : "I/E çaktivizuar",
     "Confirm" : "Konfirmo",
     "Save" : "Ruaje",
     "Register" : "Regjistrohu",

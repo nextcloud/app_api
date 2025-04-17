@@ -15,6 +15,7 @@ OC.L10N.register(
     "GPUs support" : "GPUs support",
     "Enabled" : "Ingeschakeld",
     "More info" : "Meer info",
+    "Disabled" : "Uitgeschakeld",
     "Confirm" : "Bevestigen",
     "Save" : "Opslaan",
     "Register" : "Aanmelden",

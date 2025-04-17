@@ -134,6 +134,7 @@
     "The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in 'Docker network'." : "在「Docker network」中定義的網路裡，外部應用程式應該可以連線到的 FRP 伺服器位址（主機:連接埠）。",
     "Docker socket proxy port" : "Docker socket 代理伺服器連接埠",
     "The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "docker socket 代理伺服器連線到的 HaRP 連接埠。這應該是公開的，但對於內建的版本，則不需要公開或變更。",
+    "Disabled" : "停用",
     "Docker network for ex-app deployment must be defined" : "必須定義用於外部應用程式部署的 docker 網路",
     "Additional option" : "附加選項",
     "Add additional option" : "添加附加選項",

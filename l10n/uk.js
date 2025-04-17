@@ -8,6 +8,7 @@ OC.L10N.register(
     "Host" : "Хост",
     "Enabled" : "Увімкнено",
     "Display name" : "Ім'я для показу",
+    "Disabled" : "Вимкнено",
     "Confirm" : "Підтвердити",
     "Save" : "Зберегти",
     "Register" : "Зареєструватися",

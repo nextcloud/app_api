@@ -8,6 +8,7 @@ OC.L10N.register(
     "Host" : "Host",
     "Enabled" : "Sisse lülitatud",
     "Display name" : "Kuvatav nimi",
+    "Disabled" : "Välja lülitatud",
     "Confirm" : "Kinnita",
     "Save" : "Salvesta",
     "Register" : "Registreeru",

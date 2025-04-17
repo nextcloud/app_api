@@ -6,6 +6,7 @@ OC.L10N.register(
     "Name" : "Numm",
     "Host" : "Host",
     "Enabled" : "Aktivéiert",
+    "Disabled" : "Deaktivéiert",
     "Confirm" : "Konfirméieren",
     "Save" : "Späicheren",
     "Report a bug" : "E Feeler melden",

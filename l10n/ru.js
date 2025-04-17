@@ -119,6 +119,7 @@ OC.L10N.register(
     "Enable https" : "Использовать HTTPS",
     "Show deploy config" : "Показать конфигурацию развёртывания",
     "Hide deploy config" : "Скрыть конфигурацию развёртывания",
+    "Disabled" : "Отключено",
     "Additional option" : "Дополнительный вариант",
     "Add additional option" : "Добавить дополнительную опцию",
     "Option key (unique)" : "Ключевой параметр (уникальный)",

@@ -8,6 +8,7 @@ OC.L10N.register(
     "Host" : "Òste",
     "Nextcloud URL" : "URL Nextcloud",
     "Enabled" : "Activada",
+    "Disabled" : "Desactivat",
     "Confirm" : "Confirmar",
     "Save" : "Enregistrar",
     "Register" : "S'inscriure",

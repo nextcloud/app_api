@@ -8,6 +8,7 @@ OC.L10N.register(
     "Name" : "სახელი",
     "Host" : "ჰოსტი",
     "Enabled" : "მოქმედია",
+    "Disabled" : "არაა მოქმედი",
     "Confirm" : "დადასტურება",
     "Save" : "შენახვა",
     "Register" : "რეგისტრაცია",

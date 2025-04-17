@@ -10,6 +10,7 @@ OC.L10N.register(
     "Nextcloud URL" : "URL de Nextcloud",
     "Enabled" : "Ativadu",
     "Display name" : "Ammustra nùmene",
+    "Disabled" : "Disativadu",
     "Confirm" : "Cunfirma",
     "Save" : "Sarva",
     "Register" : "Registra",

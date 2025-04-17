@@ -136,6 +136,7 @@ OC.L10N.register(
     "The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in 'Docker network'." : "Seoladh (óstach:port) an fhreastalaí FRP ar cheart go mbeadh rochtain ag an sean-aip air sa líonra atá sainithe i 'líonra Docker'.",
     "Docker socket proxy port" : "Port seachfhreastalaí soicéad docker",
     "The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "An calafort i HaRP a nascann seachfhreastalaí an tsoicéid duga leis. Ba chóir go mbeadh sé seo nochtaithe ach don cheann ionsuite, ní gá é a nochtadh nó a athrú.",
+    "Disabled" : "Faoi mhíchumas",
     "Docker network for ex-app deployment must be defined" : "Ní mór líonra dugaí le haghaidh imscaradh ex-app a shainiú",
     "Additional option" : "Rogha breise",
     "Add additional option" : "Cuir rogha breise leis",

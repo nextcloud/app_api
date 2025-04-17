@@ -9,6 +9,7 @@ OC.L10N.register(
     "Host" : "Anfitrião",
     "Enabled" : "Ativado",
     "Display name" : "Nome a exibir",
+    "Disabled" : "Desativado",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Registar",

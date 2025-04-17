@@ -4,6 +4,7 @@
     "Name" : "Nombre",
     "Host" : "Servidor",
     "Enabled" : "Habilitado",
+    "Disabled" : "Deshabilitado",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Registrar",
