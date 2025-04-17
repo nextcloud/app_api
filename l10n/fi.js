@@ -10,6 +10,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloudin URL-osoite",
     "Enabled" : "Käytössä",
     "Display name" : "Näyttönimi",
+    "Disabled" : "Pois käytöstä",
     "Confirm" : "Vahvista",
     "Save" : "Tallenna",
     "Register" : "Rekisteröidy",

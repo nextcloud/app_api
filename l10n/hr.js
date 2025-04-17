@@ -9,6 +9,7 @@ OC.L10N.register(
     "Host" : "Glavno računalo",
     "Nextcloud URL" : "Nextcloud URL",
     "Enabled" : "Omogućeno",
+    "Disabled" : "Onemogućeno",
     "Confirm" : "Potvrdi",
     "Save" : "Spremi",
     "Register" : "Registriraj se",

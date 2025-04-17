@@ -121,6 +121,7 @@ OC.L10N.register(
     "Enable https" : "https kullanılsın",
     "Show deploy config" : "Dağıtım yapılandırmasını görüntüle",
     "Hide deploy config" : "Dağıtım yapılandırmasını gizle",
+    "Disabled" : "Kullanımdan kaldırılmış",
     "Additional option" : "Ek seçenek",
     "Add additional option" : "Ek seçenek ekle",
     "Option key (unique)" : "Seçenek anahtarı (benzersiz)",

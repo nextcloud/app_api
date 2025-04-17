@@ -9,6 +9,7 @@ OC.L10N.register(
     "Enabled" : "Iespējots",
     "More info" : "Vairāk informācijas",
     "Display name" : "Attēlojamais vārds",
+    "Disabled" : "Atspējots",
     "Confirm" : "Apstiprināt",
     "Save" : "Saglabāt",
     "Update to {version}" : "Atjaunināts uz {version}",

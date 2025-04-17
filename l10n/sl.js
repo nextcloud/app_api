@@ -10,6 +10,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Naslov URL Nextcloud",
     "Enabled" : "Omogočeno",
     "Display name" : "Prikazno ime",
+    "Disabled" : "Onemogočeno",
     "Confirm" : "Potrdi",
     "Save" : "Shrani",
     "Register" : "Vpis računa",

@@ -12,6 +12,7 @@ OC.L10N.register(
     "Compute device" : "計算デバイス",
     "Enabled" : "有効",
     "Display name" : "表示名",
+    "Disabled" : "無効",
     "Confirm" : "承認",
     "Save" : "保存する",
     "Register" : "登録",

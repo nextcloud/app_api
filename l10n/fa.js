@@ -10,6 +10,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Enabled" : "فعال شده",
     "Display name" : "Display name",
+    "Disabled" : "غیرفعال شده",
     "Confirm" : "تأیید",
     "Save" : "ذخیره",
     "Register" : "ثبت‌نام",

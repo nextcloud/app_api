@@ -37,6 +37,7 @@ OC.L10N.register(
     "Deployment method" : "Metoda wdrażania",
     "Select daemon deploy method" : "Wybierz metodę wdrażania demona",
     "Password must be at least 12 characters long" : "Hasło musi mieć co najmniej 12 znaków",
+    "Disabled" : "Wyłączone",
     "Additional option" : "Opcja dodatkowa",
     "Add additional option" : "Dodaj dodatkową opcję",
     "Option key is required" : "Wymagany jest klucz opcji",

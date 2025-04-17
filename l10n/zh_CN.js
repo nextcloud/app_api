@@ -43,6 +43,7 @@ OC.L10N.register(
     "Register Deploy Daemon" : "注册部署守护进程",
     "Display name" : "显示名称",
     "Deployment method" : "部署方式",
+    "Disabled" : "已禁用",
     "Confirm" : "确认",
     "Save" : "保存",
     "Register" : "注册",

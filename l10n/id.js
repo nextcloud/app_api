@@ -8,6 +8,7 @@ OC.L10N.register(
     "Name" : "Nama",
     "Host" : "Host",
     "Enabled" : "Diaktifkan",
+    "Disabled" : "Dinonaktifkan",
     "Confirm" : "Konfirmasi",
     "Save" : "Simpan",
     "Register" : "Daftar",

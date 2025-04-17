@@ -13,6 +13,7 @@ OC.L10N.register(
     "GPUs support" : "Υποστήριξη GPUs",
     "Compute device" : "Συσκευή υπολογισμού",
     "Enabled" : "Ενεργοποιημένο",
+    "Disabled" : "Απενεργοποιημένο",
     "Confirm" : "Επιβεβαίωση",
     "Save" : "Αποθήκευση",
     "Register" : "Εγγραφή",

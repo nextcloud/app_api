@@ -12,6 +12,7 @@ OC.L10N.register(
     "Compute device" : "Dispositivo de cómputo",
     "Enabled" : "Habilitado",
     "Display name" : "Nombre para mostrar",
+    "Disabled" : "Deshabilitado",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Registrar",

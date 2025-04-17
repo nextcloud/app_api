@@ -44,6 +44,7 @@ OC.L10N.register(
     "Deployment method" : "Zabalketa metodoa",
     "Daemon host" : "Daimonaren ostalaria",
     "Enable https" : "Gaitu https",
+    "Disabled" : "Desgaituta",
     "Additional option" : "Aukera gehiago",
     "Option value" : "Aukeraren balioa",
     "Confirm" : "Berretsi",

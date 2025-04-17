@@ -7,6 +7,7 @@ OC.L10N.register(
     "Name" : "ឈ្មោះ",
     "Host" : "ម៉ាស៊ីន​ផ្ទុក",
     "Enabled" : "បាន​បើក",
+    "Disabled" : "បាន​បិទ",
     "Save" : "រក្សាទុក",
     "Version" : "កំណែ",
     "Type" : "ប្រភេទ",

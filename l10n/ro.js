@@ -9,6 +9,7 @@ OC.L10N.register(
     "Host" : "Gazdă",
     "Enabled" : "Activat",
     "Display name" : "Nume afișat",
+    "Disabled" : "Dezactivați",
     "Confirm" : "Confirmă",
     "Save" : "Salvează",
     "Register" : "Înregistrează-te",
