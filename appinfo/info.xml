@@ -53,7 +53,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
 	<namespace>AppAPI</namespace>
 	<documentation>
-		<developer>https://cloud-py-api.github.io/app_api/</developer>
+		<developer>https://docs.nextcloud.com/server/latest/developer_manual/exapp_development</developer>
 	</documentation>
 	<category>integration</category>
 	<category>tools</category>
