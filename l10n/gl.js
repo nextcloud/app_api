@@ -121,6 +121,7 @@ OC.L10N.register(
     "Enable https" : "Activar https",
     "Show deploy config" : "Amosar a configuración da despregadura",
     "Hide deploy config" : "Agochar a configuración da despregadura",
+    "Disabled" : "Desactivado",
     "Additional option" : "Opción adicional",
     "Add additional option" : "Engadir unha opción adicional",
     "Option key (unique)" : "Clave de opción (única)",

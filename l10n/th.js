@@ -8,6 +8,7 @@ OC.L10N.register(
     "Host" : "โฮสต์",
     "Enabled" : "เปิดใช้งาน",
     "Display name" : "ชื่อที่แสดง",
+    "Disabled" : "ปิดใช้งาน",
     "Confirm" : "ยืนยัน",
     "Save" : "บันทึก",
     "Register" : "ลงทะเบียน",

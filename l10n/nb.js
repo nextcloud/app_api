@@ -118,6 +118,7 @@ OC.L10N.register(
     "Enable https" : "Aktiver https",
     "Show deploy config" : "Vis konfigurasjon for distribuering",
     "Hide deploy config" : "Skjul konfigurasjon for distribuering",
+    "Disabled" : "Deaktivert",
     "Additional option" : "Ytterligere alternativ",
     "Add additional option" : "Legg til ytterligere alternativ",
     "Option key (unique)" : "Alternativnøkkel (unik)",

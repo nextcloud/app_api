@@ -5,6 +5,7 @@ OC.L10N.register(
     "Edit" : "Rediger",
     "Name" : "Namn",
     "Host" : "Tenar",
+    "Disabled" : "Deaktivert",
     "Save" : "Lagre",
     "Visit website" : "Besøk nettstaden",
     "Report a bug" : "Rapporter feil",

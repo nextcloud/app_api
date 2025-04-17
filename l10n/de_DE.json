@@ -134,6 +134,7 @@
     "The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in 'Docker network'." : "Die Adresse (Host:Port) des FRP-Servers, der von der Ex-App im unter „Docker-Netzwerk“ definierten Netzwerk erreichbar sein soll.",
     "Docker socket proxy port" : "Docker-Socket-Proxy-Port",
     "The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "Der Port in HaRP, mit dem der Docker-Socket-Proxy eine Verbindung herstellt. Dieser sollte angegeben werden, für den integrierten Port ist dies jedoch nicht erforderlich.",
+    "Disabled" : "Deaktiviert",
     "Docker network for ex-app deployment must be defined" : "Docker-Netzwerk für Ex-App-Bereitstellung muss definiert werden",
     "Additional option" : "Zusatzoption",
     "Add additional option" : "Zusätzliche Option hinzufügen",

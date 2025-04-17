@@ -11,6 +11,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Enabled" : "Engedélyezve",
     "Display name" : "Megjelenítendő név",
+    "Disabled" : "Letiltva",
     "Confirm" : "Megerősítés",
     "Save" : "Mentés",
     "Register" : "Regisztráció",

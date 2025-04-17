@@ -12,6 +12,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Enabled" : "Įjungta",
     "More info" : "Daugiau informacijos",
+    "Disabled" : "Išjungta",
     "Confirm" : "Patvirtinti",
     "Save" : "Įrašyti",
     "Register" : "Registruotis",

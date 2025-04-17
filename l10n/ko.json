@@ -111,6 +111,7 @@
     "Enable https" : "https 활성화",
     "Show deploy config" : "배포 구성 표시",
     "Hide deploy config" : "배포 구성 숨기기",
+    "Disabled" : "비활성화됨",
     "Additional option" : "부가 옵션",
     "Add additional option" : "부가 옵션 추가",
     "Option key (unique)" : "옵션 키(고유)",

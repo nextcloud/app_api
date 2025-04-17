@@ -11,6 +11,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud-URL",
     "Enabled" : "Aktiverad",
     "Display name" : "Visningsnamn",
+    "Disabled" : "Inaktiverad",
     "Confirm" : "Bekräfta",
     "Save" : "Spara",
     "Register" : "Registrera",

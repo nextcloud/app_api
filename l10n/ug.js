@@ -119,6 +119,7 @@ OC.L10N.register(
     "Enable https" : "Https نى قوزغىتىڭ",
     "Show deploy config" : "ئورۇنلاشتۇرۇش سەپلىمىسىنى كۆرسەت",
     "Hide deploy config" : "ئورۇنلاشتۇرۇشنى يوشۇرۇش",
+    "Disabled" : "چەكلەنگەن",
     "Additional option" : "قوشۇمچە تاللاش",
     "Add additional option" : "قوشۇمچە تاللاش قوشۇڭ",
     "Option key (unique)" : "تاللاش كۇنۇپكىسى (ئۆزگىچە)",

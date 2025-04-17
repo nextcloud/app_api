@@ -6,6 +6,7 @@ OC.L10N.register(
     "Name" : "Nomo",
     "Host" : "Gastigo",
     "Display name" : "Vidiga nomo",
+    "Disabled" : "Malkapabligita",
     "Confirm" : "Konfirmi",
     "Save" : "Konservi",
     "Register" : "Registriĝi",

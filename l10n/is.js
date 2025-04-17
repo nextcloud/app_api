@@ -12,6 +12,7 @@ OC.L10N.register(
     "Compute device" : "Reiknitæki",
     "Enabled" : "Virkt",
     "Display name" : "Birtingarnafn",
+    "Disabled" : "Óvirkt",
     "Confirm" : "Staðfesta",
     "Save" : "Vista",
     "Register" : "Nýskráning",

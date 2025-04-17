@@ -136,6 +136,7 @@ OC.L10N.register(
     "The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in 'Docker network'." : "O endereço (host:porta) do servidor FRP que deve ser acessado pelo ex-app na rede definida em 'Rede de Docker'.",
     "Docker socket proxy port" : "Porta de proxy de soquete de Docker",
     "The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "A porta em HaRP à qual o proxy de soquete do docker se conecta. Ela deve ser exposta, mas para a porta incorporada, não é necessário que seja exposta ou alterada.",
+    "Disabled" : "Desativado",
     "Docker network for ex-app deployment must be defined" : "A rede de Docker para implantação de \"ex-app\" deve ser definida",
     "Additional option" : "Opção adicional",
     "Add additional option" : "Adicionar opção adicional",
