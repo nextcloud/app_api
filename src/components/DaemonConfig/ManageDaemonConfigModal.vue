@@ -107,7 +107,7 @@
 							{{ t('app_api', 'Set as default daemon') }}
 						</NcCheckboxRadioSwitch>
 						<div v-if="isEdit" />
-						<NcCheckboxRadioSwitch v-if="!isHarp"
+						<NcCheckboxRadioSwitch
 							id="https-enabled"
 							:checked.sync="httpsEnabled"
 							:placeholder="t('app_api', 'Enable https')"
