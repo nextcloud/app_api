@@ -307,17 +307,60 @@ class DockerActions implements IDeployActions {
 		return sprintf('%s/%s/%s', $dockerUrl, self::DOCKER_API_VERSION, $route);
 	}
 
-	public function buildBaseImageName(array $imageParams): string {
+	public function buildBaseImageName(array $imageParams, DaemonConfig $daemonConfig): string {
+		$deployConfig = $daemonConfig->getDeployConfig();
+		if (isset($deployConfig['registries'])) { // custom Docker registry, overrides ExApp's image_src
+			foreach ($deployConfig['registries'] as $registry) {
+				if ($registry['from'] === $imageParams['image_src'] && $registry['to'] !== 'local') { // local target skips image pull, imageId should be unchanged
+					$imageParams['image_src'] = rtrim($registry['to'], '/');
+					break;
+				}
+			}
+		}
 		return $imageParams['image_src'] . '/' .
 			$imageParams['image_name'] . ':' . $imageParams['image_tag'];
 	}
 
 	private function buildExtendedImageName(array $imageParams, DaemonConfig $daemonConfig): ?string {
-		if (empty($daemonConfig->getDeployConfig()['computeDevice']['id'])) {
+		$deployConfig = $daemonConfig->getDeployConfig();
+		if (empty($deployConfig['computeDevice']['id'])) {
 			return null;
+		}
+		if (isset($deployConfig['registries'])) { // custom Docker registry, overrides ExApp's image_src
+			foreach ($deployConfig['registries'] as $registry) {
+				if ($registry['from'] === $imageParams['image_src'] && $registry['to'] !== 'local') { // local target skips image pull, imageId should be unchanged
+					$imageParams['image_src'] = rtrim($registry['to'], '/');
+					break;
+				}
+			}
 		}
 		return $imageParams['image_src'] . '/' .
 			$imageParams['image_name'] . ':' . $imageParams['image_tag'] . '-' . $daemonConfig->getDeployConfig()['computeDevice']['id'];
+	}
+
+	private function shouldPullImage(array $imageParams, DaemonConfig $daemonConfig): bool {
+		$deployConfig = $daemonConfig->getDeployConfig();
+		if (isset($deployConfig['registries'])) { // custom Docker registry, overrides ExApp's image_src
+			foreach ($deployConfig['registries'] as $registry) {
+				if ($registry['from'] === $imageParams['image_src'] && $registry['to'] === 'local') { // local target skips image pull, imageId should be unchanged
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public function imageExists(string $dockerUrl, string $imageId): bool {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('images/%s/json', $imageId));
+		try {
+			$response = $this->guzzleClient->get($url);
+			return $response->getStatusCode() === 200;
+		} catch (GuzzleException $e) {
+			if ($e->getCode() !== 404) {
+				$this->logger->error('Failed to check image existence', ['exception' => $e]);
+			}
+			return false;
+		}
 	}
 
 	public function createContainer(string $dockerUrl, string $imageId, DaemonConfig $daemonConfig, array $params = []): array {
@@ -459,28 +502,48 @@ class DockerActions implements IDeployActions {
 	public function pullImage(
 		string $dockerUrl, array $params, ExApp $exApp, int $startPercent, int $maxPercent, DaemonConfig $daemonConfig, string &$imageId
 	): string {
+		$shouldPull = $this->shouldPullImage($params, $daemonConfig);
 		$urlToLog = $this->useSocket ? $this->socketAddress : $dockerUrl;
 		$imageId = $this->buildExtendedImageName($params, $daemonConfig);
+
 		if ($imageId) {
 			try {
-				$r = $this->pullImageInternal($dockerUrl, $exApp, $startPercent, $maxPercent, $imageId);
-				if ($r === '') {
-					$this->logger->info(sprintf('Successfully pulled "extended" image: %s', $imageId));
+				if ($shouldPull) {
+					$r = $this->pullImageInternal($dockerUrl, $exApp, $startPercent, $maxPercent, $imageId);
+					if ($r === '') {
+						$this->logger->info(sprintf('Successfully pulled "extended" image: %s', $imageId));
+						return '';
+					}
+					$this->logger->info(sprintf('Failed to pull "extended" image(%s): %s', $imageId, $r));
+				} elseif ($this->imageExists($dockerUrl, $imageId)) {
+					$this->logger->info('Daemon registry mapping set to "local", skipping image pull');
+					$this->exAppService->setAppDeployProgress($exApp, $maxPercent);
 					return '';
+				} else {
+					$this->logger->info(sprintf('Image(%s) not found, but daemon registry mapping set to "local", trying base image', $imageId));
 				}
-				$this->logger->info(sprintf('Failed to pull "extended" image(%s): %s', $imageId, $r));
 			} catch (GuzzleException $e) {
 				$this->logger->info(
 					sprintf('Failed to pull "extended" image via "%s", GuzzleException occur: %s', $urlToLog, $e->getMessage())
 				);
 			}
 		}
-		$imageId = $this->buildBaseImageName($params);
-		$this->logger->info(sprintf('Pulling "base" image: %s', $imageId));
+
+		$imageId = $this->buildBaseImageName($params, $daemonConfig);
 		try {
-			$r = $this->pullImageInternal($dockerUrl, $exApp, $startPercent, $maxPercent, $imageId);
-			if ($r === '') {
-				$this->logger->info(sprintf('Image(%s) pulled successfully.', $imageId));
+			if ($shouldPull) {
+				$this->logger->info(sprintf('Pulling "base" image: %s', $imageId));
+				$r = $this->pullImageInternal($dockerUrl, $exApp, $startPercent, $maxPercent, $imageId);
+				if ($r === '') {
+					$this->logger->info(sprintf('Image(%s) pulled successfully.', $imageId));
+				}
+			} elseif ($this->imageExists($dockerUrl, $imageId)) {
+				$this->logger->info('Daemon registry mapping set to "local", skipping image pull');
+				$this->exAppService->setAppDeployProgress($exApp, $maxPercent);
+				return '';
+			} else {
+				$this->logger->warning(sprintf('Image(%s) not found, but daemon registry mapping set to "local", skipping image pull', $imageId));
+				return '';
 			}
 		} catch (GuzzleException $e) {
 			$r = sprintf('Failed to pull image via "%s", GuzzleException occur: %s', $urlToLog, $e->getMessage());

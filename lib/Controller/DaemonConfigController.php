@@ -219,4 +219,30 @@ class DaemonConfigController extends ApiController {
 		}
 		return new JSONResponse($exApp->getStatus());
 	}
+
+	#[PasswordConfirmationRequired]
+	public function addDaemonDockerRegistry(string $name, array $registryMap): JSONResponse {
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+		if (!$daemonConfig) {
+			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
+		}
+		$daemonConfig = $this->daemonConfigService->addDockerRegistry($daemonConfig, $registryMap);
+		if ($daemonConfig === null) {
+			return new JSONResponse(['error' => $this->l10n->t('Error adding Docker registry')], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+		return new JSONResponse($daemonConfig, Http::STATUS_OK);
+	}
+
+	#[PasswordConfirmationRequired]
+	public function removeDaemonDockerRegistry(string $name, array $registryMap): JSONResponse {
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+		if (!$daemonConfig) {
+			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
+		}
+		$daemonConfig = $this->daemonConfigService->removeDockerRegistry($daemonConfig, $registryMap);
+		if ($daemonConfig === null) {
+			return new JSONResponse(['error' => $this->l10n->t('Error removing Docker registry')], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+		return new JSONResponse($daemonConfig, Http::STATUS_OK);
+	}
 }

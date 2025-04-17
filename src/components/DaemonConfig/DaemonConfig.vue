@@ -29,6 +29,12 @@
 						<TestTube :size="20" />
 					</template>
 				</NcActionButton>
+				<NcActionButton v-if="daemon.accepts_deploy_id === 'docker-install'" :close-after-click="true" @click="_showOverrideDockerRegistriesModal()">
+					{{ t('app_api', 'Docker registries') }}
+					<template #icon>
+						<Docker :size="20" />
+					</template>
+				</NcActionButton>
 				<NcActionButton :close-after-click="true" @click="showEditModal()">
 					{{ t('app_api', 'Edit') }}
 					<template #icon>
@@ -67,6 +73,12 @@
 			:get-all-daemons="getAllDaemons"
 			:daemon="daemon"
 			:is-default-daemon="isDefault" />
+		<DockerRegistriesModal
+			:show.sync="showOverrideDockerRegistriesModal"
+			:daemon="daemon"
+			:is-default="isDefault"
+			:get-all-daemons="getAllDaemons"
+			@close="showOverrideDockerRegistriesModal = false" />
 	</div>
 </template>
 
@@ -82,11 +94,13 @@ import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import CheckBold from 'vue-material-design-icons/CheckBold.vue'
 import TestTube from 'vue-material-design-icons/TestTube.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
+import Docker from 'vue-material-design-icons/Docker.vue'
 
 import DaemonConfigDetailsModal from './DaemonConfigDetailsModal.vue'
 import ConfirmDaemonDeleteModal from './ConfirmDaemonDeleteModal.vue'
 import DaemonTestDeploy from './DaemonTestDeploy.vue'
 import ManageDaemonConfigModal from './ManageDaemonConfigModal.vue'
+import DockerRegistriesModal from './DockerRegistriesModal.vue'
 
 export default {
 	name: 'DaemonConfig',
@@ -97,10 +111,12 @@ export default {
 		CheckBold,
 		DaemonConfigDetailsModal,
 		ConfirmDaemonDeleteModal,
+		DockerRegistriesModal,
 		DaemonTestDeploy,
 		NcLoadingIcon,
 		TestTube,
 		Pencil,
+		Docker,
 	},
 	props: {
 		daemon: {
@@ -136,6 +152,7 @@ export default {
 			removeExAppsOnDaemonDelete: false,
 			showTestDeployDialog: false,
 			showEditDialog: false,
+			showOverrideDockerRegistriesModal: false,
 		}
 	},
 	computed: {
@@ -194,6 +211,9 @@ export default {
 		},
 		showEditModal() {
 			this.showEditDialog = true
+		},
+		_showOverrideDockerRegistriesModal() {
+			this.showOverrideDockerRegistriesModal = true
 		},
 	},
 }

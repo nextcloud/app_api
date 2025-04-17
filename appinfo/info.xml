@@ -87,6 +87,9 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 		<command>OCA\AppAPI\Command\Daemon\RegisterDaemon</command>
 		<command>OCA\AppAPI\Command\Daemon\UnregisterDaemon</command>
 		<command>OCA\AppAPI\Command\Daemon\ListDaemons</command>
+		<command>OCA\AppAPI\Command\Daemon\AddRegistry</command>
+		<command>OCA\AppAPI\Command\Daemon\RemoveRegistry</command>
+		<command>OCA\AppAPI\Command\Daemon\ListRegistry</command>
 	</commands>
 	<settings>
 		<admin>OCA\AppAPI\Settings\Admin</admin>
