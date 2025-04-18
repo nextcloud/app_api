@@ -6,6 +6,7 @@ OC.L10N.register(
     "Edit" : "Izmjeni",
     "Name" : "Ime",
     "Enabled" : "Aktivirano",
+    "Disabled" : "Onemogućeno",
     "Save" : "Spremi",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Ova aplikacija se ne može instalirati zbog slijedećih neispunjenih ovisnosti:",
     "Version" : "Verzija",

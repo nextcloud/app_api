@@ -6,10 +6,10 @@ OC.L10N.register(
     "Edit" : "Ẓreg",
     "Name" : "Nom",
     "Enabled" : "Yermed",
+    "Remove" : "Kkes",
     "Disabled" : "Ittwarermed",
     "Confirm" : "Serggeg",
     "Save" : "Sekles",
-    "Remove" : "Kkes",
     "Type" : "Anaw",
     "Details" : "Talqayt",
     "Disable" : "Désactiver"

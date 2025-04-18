@@ -6,6 +6,7 @@ OC.L10N.register(
     "Name" : "Numm",
     "Host" : "Host",
     "Enabled" : "Aktivéiert",
+    "Add" : "Dobäisetzen",
     "Disabled" : "Deaktivéiert",
     "Confirm" : "Konfirméieren",
     "Save" : "Späicheren",
