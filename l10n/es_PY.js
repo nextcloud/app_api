@@ -6,6 +6,7 @@ OC.L10N.register(
     "Name" : "Nombre",
     "Host" : "Servidor",
     "Enabled" : "Habilitado",
+    "Add" : "Guardar",
     "Disabled" : "Deshabilitado",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",

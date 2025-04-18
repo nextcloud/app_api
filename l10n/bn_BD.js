@@ -7,6 +7,7 @@ OC.L10N.register(
     "Name" : "নাম",
     "Host" : "হোস্ট",
     "Enabled" : "কার্যকর",
+    "Disabled" : "অকার্যকর",
     "Save" : "সংরক্ষণ",
     "Version" : "ভার্সন",
     "Actions" : "পদক্ষেপসমূহ",
