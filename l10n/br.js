@@ -7,6 +7,7 @@ OC.L10N.register(
     "Name" : "Anv",
     "Host" : "Ostiz",
     "Display name" : "Anv ardivink",
+    "Disabled" : "Disaotreañ",
     "Confirm" : "Kadarnañ",
     "Save" : "Enrollañ",
     "{license}-licensed" : "{license}-aotre",

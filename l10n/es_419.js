@@ -5,6 +5,7 @@ OC.L10N.register(
     "Edit" : "Editar",
     "Name" : "Nombre",
     "Host" : "Servidor",
+    "Add" : "Guardar",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Registrar",
