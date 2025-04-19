@@ -3,6 +3,9 @@ OC.L10N.register(
     {
     "Delete" : "Skrap",
     "Host" : "Gasheer",
+    "From" : "Van",
+    "To" : "Aan",
+    "Add" : "Voeg toe",
     "Confirm" : "Bevestig",
     "Save" : "Stoor",
     "Register" : "Registreer",

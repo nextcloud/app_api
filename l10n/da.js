@@ -96,6 +96,7 @@ OC.L10N.register(
     "Stop Deploy test" : "Stop udgivelsestest",
     "ExApp is unregistered and container is removed on \"Stop deploy test\"" : "ExApp er ikke registreret og beholder fjernes ved \"Stop udgivelsestest\"",
     "Remove" : "Fjern",
+    "From" : "Fra",
     "To" : "Til",
     "Add" : "Tilføj",
     "Hostname to access ExApps" : "Hostnavn for at tilgå ExApps",
