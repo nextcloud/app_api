@@ -1,6 +1,8 @@
 OC.L10N.register(
     "app_api",
     {
+    "Daemon config not found" : "Taustateenuse seadistusi ei leidu",
+    "Error starting install of ExApp" : "ExApp'i paigaldamise alustamisel tekkis viga",
     "Cancel" : "Tühista",
     "Delete" : "Kustuta",
     "Edit" : "Redigeeri",
