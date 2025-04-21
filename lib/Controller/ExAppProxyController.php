@@ -316,6 +316,8 @@ class ExAppProxyController extends Controller {
 
 	private function buildHeadersWithExclude(array $route, array $headers): array {
 		$headersToExclude = json_decode($route['headers_to_exclude'], true);
+		$headersToExclude = array_map('strtolower', $headersToExclude);
+
 		if (!in_array('x-origin-ip', $headersToExclude)) {
 			$headersToExclude[] = 'x-origin-ip';
 		}
