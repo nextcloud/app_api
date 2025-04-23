@@ -5,6 +5,7 @@ OC.L10N.register(
     "Error starting install of ExApp" : "ExApp'i paigaldamise alustamisel tekkis viga",
     "Cancel" : "Tühista",
     "Delete" : "Kustuta",
+    "Default" : "Vaikimisi",
     "Edit" : "Redigeeri",
     "Name" : "Nimi",
     "Host" : "Host",
