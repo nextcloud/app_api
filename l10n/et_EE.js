@@ -30,6 +30,7 @@ OC.L10N.register(
     "User documentation" : "Kasutaja dokumentatsioon",
     "Admin documentation" : "Administraatori dokumentatsioon",
     "Developer documentation" : "Arendaja dokumentatsioon",
+    "Supported" : "Toetatud",
     "Featured" : "Esile tõstetud",
     "Icon" : "Ikoon",
     "Version" : "Versioon",
