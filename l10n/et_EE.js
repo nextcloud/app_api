@@ -44,6 +44,7 @@ OC.L10N.register(
     "Documentation" : "Dokumentatsioon",
     "Details" : "Üksikasjad",
     "Changelog" : "Muudatuste logi",
+    "Active apps" : "Aktiivsed rakendused",
     "Disabled apps" : "Keelatud rakendused",
     "Updates" : "Uuendused",
     "Featured apps" : "Esiletõstetud rakendused",
