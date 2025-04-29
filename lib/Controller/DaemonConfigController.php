@@ -183,10 +183,16 @@ class DaemonConfigController extends ApiController {
 			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
 		}
 
-		if (!$this->service->runOccCommand(
-			sprintf("app_api:app:register --silent %s %s --info-xml %s --test-deploy-mode",
-				Application::TEST_DEPLOY_APPID, $daemonConfig->getName(), Application::TEST_DEPLOY_INFO_XML)
-		)) {
+		$commandParts = [
+			'app_api:app:register',
+			'--silent',
+			Application::TEST_DEPLOY_APPID,
+			$daemonConfig->getName(),
+			'--info-xml',
+			Application::TEST_DEPLOY_INFO_XML,
+			'--test-deploy-mode',
+		];
+		if (!$this->service->runOccCommand($commandParts)) {
 			return new JSONResponse(['error' => $this->l10n->t('Error starting install of ExApp')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -209,7 +215,13 @@ class DaemonConfigController extends ApiController {
 	public function stopTestDeploy(string $name): Response {
 		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
 		if ($exApp !== null) {
-			$this->service->runOccCommand(sprintf("app_api:app:unregister --silent --force %s", Application::TEST_DEPLOY_APPID));
+			$commandParts = [
+				'app_api:app:unregister',
+				'--silent',
+				'--force',
+				Application::TEST_DEPLOY_APPID,
+			];
+			$this->service->runOccCommand($commandParts);
 			$elapsedTime = 0;
 			while ($elapsedTime < 5000000 && $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID) !== null) {
 				usleep(150000); // 0.15

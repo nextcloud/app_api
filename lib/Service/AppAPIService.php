@@ -426,17 +426,16 @@ class AppAPIService {
 	/**
 	 * Dispatch ExApp initialization step, that may take a long time to display the progress of initialization.
 	 */
-	public function runOccCommand(string $command): bool {
-		$args = array_map(function ($arg) {
-			return $arg === '' ? null : escapeshellarg($arg);
-		}, explode(' ', $command));
-		$args = array_filter($args, fn ($arg) => $arg !== null);
-		$args[] = '--no-ansi --no-warnings';
+	public function runOccCommand(array $commandParts): bool {
+		$args = array_filter($commandParts, static fn ($part) => $part !== null);
+		$args[] = '--no-ansi';
+		$args[] = '--no-warnings';
 		return $this->runOccCommandInternal($args);
 	}
 
 	public function runOccCommandInternal(array $args): bool {
-		$args = implode(' ', $args);
+		$escapedArgs = array_map('escapeshellarg', $args);
+		$args = implode(' ', $escapedArgs);
 		$descriptors = [
 			0 => ['pipe', 'r'],
 			1 => ['pipe', 'w'],
