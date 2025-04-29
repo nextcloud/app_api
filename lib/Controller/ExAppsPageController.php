@@ -370,7 +370,12 @@ class ExAppsPageController extends Controller {
 		}
 
 		$exAppOldVersion = $this->exAppService->getExApp($appId)->getVersion();
-		if (!$this->service->runOccCommand(sprintf("app_api:app:update --silent %s", $appId))) {
+		$commandParts = [
+			'app_api:app:update',
+			'--silent',
+			$appId,
+		];
+		if (!$this->service->runOccCommand($commandParts)) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting update of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 

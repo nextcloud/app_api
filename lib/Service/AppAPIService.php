@@ -430,7 +430,8 @@ class AppAPIService {
 	}
 
 	public function runOccCommandInternal(array $args): bool {
-		$args = implode(' ', $args);
+		$escapedArgs = array_map('escapeshellarg', $args);
+		$args = implode(' ', $escapedArgs);
 		$descriptors = [
 			0 => ['pipe', 'r'],
 			1 => ['pipe', 'w'],
