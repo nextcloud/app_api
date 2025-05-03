@@ -35,6 +35,7 @@ OC.L10N.register(
     "Results from other categories" : "Hasil dari kategori lainnya",
     "_Update_::_Update all_" : ["Perbarui semua"],
     "Type" : "tipe",
+    "Display Name" : "Nama Tampilan",
     "Your apps" : "Aplikasi Anda",
     "Documentation" : "Dokumentasi",
     "Details" : "Detail",
