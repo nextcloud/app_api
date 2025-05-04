@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Скасувати",
     "Delete" : "Вилучати",
+    "Default" : "Типово",
     "Edit" : "Редагувати",
     "Name" : "Назва",
     "Host" : "Хост",
