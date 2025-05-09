@@ -96,6 +96,7 @@ OC.L10N.register(
     "Stop Deploy test" : "Stop Deploy test",
     "ExApp is unregistered and container is removed on \"Stop deploy test\"" : "ExApp is unregistered and container is removed on \"Stop deploy test\"",
     "Remove" : "Remove",
+    "From" : "From",
     "To" : "To",
     "Add" : "Add",
     "Hostname to access ExApps" : "Hostname to access ExApps",
