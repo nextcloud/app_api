@@ -62,6 +62,7 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	</dependencies>
 	<background-jobs>
 		<job>OCA\AppAPI\BackgroundJob\ExAppInitStatusCheckJob</job>
+		<job>OCA\AppAPI\BackgroundJob\DockerImageCleanupJob</job>
 	</background-jobs>
 	<repair-steps>
 		<post-migration>

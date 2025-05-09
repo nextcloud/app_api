@@ -937,6 +937,47 @@ class DockerActions implements IDeployActions {
 		return $url;
 	}
 
+	/**
+	 * Prune unused Docker images
+	 *
+	 * @param string $dockerUrl Docker daemon URL
+	 * @param array $filters Optional filters to apply:
+	 *                      - dangling: bool - When true, prune only unused and untagged images
+	 *                      - until: string - Prune images created before this timestamp
+	 *                      - label: array - Prune images with specified labels
+	 * @return array{imagesDeleted: array<string>, spaceReclaimed: int} Result of the prune operation
+	 */
+	public function pruneImages(string $dockerUrl, array $filters = []): array {
+		try {
+			$url = $this->buildApiUrl($dockerUrl, 'images/prune');
+			if (!empty($filters)) {
+				$url .= '?' . http_build_query(['filters' => json_encode($filters)]);
+			}
+
+			$response = $this->guzzleClient->post($url);
+			$result = json_decode($response->getBody()->getContents(), true);
+
+			$this->logger->info(
+				sprintf(
+					'Pruned %d Docker images, reclaimed %d bytes',
+					count($result['ImagesDeleted'] ?? []),
+					$result['SpaceReclaimed'] ?? 0
+				)
+			);
+
+			return [
+				'imagesDeleted' => $result['ImagesDeleted'] ?? [],
+				'spaceReclaimed' => $result['SpaceReclaimed'] ?? 0
+			];
+		} catch (GuzzleException $e) {
+			$this->logger->error('Error pruning Docker images: ' . $e->getMessage());
+			return [
+				'imagesDeleted' => [],
+				'spaceReclaimed' => 0
+			];
+		}
+	}
+
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
 		$guzzleParams = [];
 		if ($this->isLocalSocket($daemonConfig->getHost())) {
