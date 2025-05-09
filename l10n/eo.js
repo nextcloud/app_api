@@ -5,6 +5,7 @@ OC.L10N.register(
     "Edit" : "Modifi",
     "Name" : "Nomo",
     "Host" : "Gastigo",
+    "From" : "De",
     "To" : "Al",
     "Display name" : "Vidiga nomo",
     "Disabled" : "Malkapabligita",
