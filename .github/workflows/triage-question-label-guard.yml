@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2025 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+name: Clear "question" & "missing information"
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+
+jobs:
+  clear-labels:
+    if: github.event.issue.state == 'open'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Load question config via yq
+        id: cfg
+        run: |
+          QUESTION=$(yq eval -o=json '.question' .github/triage-issue-bot-config.yml)
+          printf "question<<EOF\n%s\nEOF\n" "$QUESTION" >> $GITHUB_OUTPUT
+
+      - name: Remove stale labels
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const cfg   = JSON.parse(process.env.INPUT_QUESTION || '{}');
+            const allow = cfg.maintainers_allowlist.map(u => u.toLowerCase());
+            const user  = context.payload.comment.user.login.toLowerCase();
+            if (allow.includes(user)) return;
+
+            const labels = context.payload.issue.labels.map(l => l.name);
+            for (const name of ['question', 'question-reminded', cfg.missing_info_label]) {
+              if (labels.includes(name)) {
+                await github.rest.issues.removeLabel({
+                  ...context.repo,
+                  issue_number: context.issue.number,
+                  name
+                }).catch(() => {});
+              }
+            }
+        env:
+          INPUT_QUESTION: ${{ steps.cfg.outputs.question }}

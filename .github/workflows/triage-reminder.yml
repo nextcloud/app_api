@@ -1,0 +1,101 @@
+# SPDX-FileCopyrightText: 2025 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+name: Issue triage reminders
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 02:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Load triage config via yq
+        id: cfg
+        run: |
+          TRIAGE=$(yq eval -o=json '.triage' .github/triage-issue-bot-config.yml)
+          printf "triage<<EOF\n%s\nEOF\n" "$TRIAGE" >> $GITHUB_OUTPUT
+
+      - name: Find stale issues
+        id: search
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const cfg = JSON.parse(process.env.INPUT_TRIAGE || '{}');
+            const since = new Date(
+              Date.now() - cfg.first_ping_after_days * 24*3600*1000
+            ).toISOString();
+
+            const q = [
+              `repo:${context.repo.owner}/${context.repo.repo}`,
+              `is:issue is:open`,
+              `updated:<${since}`
+            ].join(' ');
+
+            const res = await github.rest.search.issuesAndPullRequests({
+              q, per_page: 100
+            });
+            core.setOutput('issues', JSON.stringify(
+              res.data.items.map(i => i.number)
+            ));
+        env:
+          INPUT_TRIAGE: ${{ steps.cfg.outputs.triage }}
+
+      - name: Ping & rotate labels
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issues = JSON.parse(process.env.ISSUES || '[]');
+            const cfg    = JSON.parse(process.env.INPUT_TRIAGE || '{}');
+
+            for (const num of issues) {
+              const { data: issue } = await github.rest.issues.get({
+                ...context.repo, issue_number: num
+              });
+
+              const labels = issue.labels.map(l => l.name);
+              if (labels.some(n => !/^reminder-\d+$/.test(n))) continue;
+
+              const cutoff = new Date(
+                Date.now() - cfg.repeat_every_days * 24*3600*1000
+              );
+              if (new Date(issue.updated_at) > cutoff) continue;
+
+              const remLabel = labels.find(n => /^reminder-\d+$/.test(n));
+              const current  = remLabel ? parseInt(remLabel.split('-')[1],10) : 0;
+              const next     = current + 1;
+
+              const mention = next >= cfg.escalation_ping
+                ? '\n\n' + (cfg.escalation_mentions || []).join(' ')
+                : '';
+
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: num,
+                body: `🔔 Friendly reminder – please triage this issue.${mention}`
+              });
+
+              if (remLabel) {
+                await github.rest.issues.removeLabel({
+                  ...context.repo,
+                  issue_number: num,
+                  name: remLabel
+                }).catch(() => {});
+              }
+              await github.rest.issues.addLabels({
+                ...context.repo,
+                issue_number: num,
+                labels: [`reminder-${next}`]
+              });
+            }
+        env:
+          ISSUES:       ${{ steps.search.outputs.issues }}
+          INPUT_TRIAGE: ${{ steps.cfg.outputs.triage }}
