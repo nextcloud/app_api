@@ -320,23 +320,32 @@ class ExAppsPageController extends Controller {
 
 		$envOptions = isset($deployOptions['environment_variables'])
 			? array_keys($deployOptions['environment_variables']) : [];
-		$envOptionsString = '';
+		$envArgs = [];
 		foreach ($envOptions as $envOption) {
-			$envOptionsString .= sprintf(' --env %s=%s', $envOption, $deployOptions['environment_variables'][$envOption]);
+			$envArgs[] = '--env';
+			$envArgs[] = sprintf('%s=%s', $envOption, $deployOptions['environment_variables'][$envOption]);
 		}
-		$envOptionsString = trim($envOptionsString);
 
 		$mountOptions = $deployOptions['mounts'] ?? [];
-		$mountOptionsString = '';
+		$mountArgs = [];
 		foreach ($mountOptions as $mountOption) {
 			$readonlyModifier = $mountOption['readonly'] ? 'ro' : 'rw';
-			$mountOptionsString .= sprintf(' --mount %s:%s:%s', $mountOption['hostPath'], $mountOption['containerPath'], $readonlyModifier);
+			$mountArgs[] = '--mount';
+			$mountArgs[] = sprintf('%s:%s:%s', $mountOption['hostPath'], $mountOption['containerPath'], $readonlyModifier);
 		}
-		$mountOptionsString = trim($mountOptionsString);
 
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
-			if (!$this->service->runOccCommand(sprintf("app_api:app:register --silent %s %s %s", $appId, $envOptionsString, $mountOptionsString))) {
+			$commandParts = array_merge(
+				[
+					'app_api:app:register',
+					'--silent',
+					$appId,
+				],
+				$envArgs,
+				$mountArgs
+			);
+			if (!$this->service->runOccCommand($commandParts)) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
 			$elapsedTime = 0;
@@ -394,7 +403,12 @@ class ExAppsPageController extends Controller {
 		}
 
 		$exAppOldVersion = $this->exAppService->getExApp($appId)->getVersion();
-		if (!$this->service->runOccCommand(sprintf("app_api:app:update --silent %s", $appId))) {
+		$commandParts = [
+			'app_api:app:update',
+			'--silent',
+			$appId,
+		];
+		if (!$this->service->runOccCommand($commandParts)) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting update of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
