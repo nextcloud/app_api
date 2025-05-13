@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2025 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+name: Flag stale "question" issues
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 02:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  mark-stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Load question config via yq
+        id: cfg
+        run: |
+          QUESTION=$(yq eval -o=json '.question' .github/triage-issue-bot-config.yml)
+          printf "question<<EOF\n%s\nEOF\n" "$QUESTION" >> $GITHUB_OUTPUT
+
+      - name: Label stale question issues
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const cfg = JSON.parse(process.env.INPUT_QUESTION || '{}');
+            const { data: issues } = await github.rest.issues.listForRepo({
+              ...context.repo,
+              labels: 'question',
+              state: 'open',
+              per_page: 100
+            });
+
+            const now = Date.now();
+            for (const issue of issues) {
+              const events = await github.rest.issues.listEventsForTimeline({
+                ...context.repo,
+                issue_number: issue.number,
+                per_page: 100
+              });
+              const humans = events.data
+                .filter(e => e.event === 'commented' && !e.actor.type.includes('Bot'))
+                .map(e => new Date(e.created_at).getTime());
+              const lastHuman = humans.length
+                ? Math.max(...humans)
+                : new Date(issue.created_at).getTime();
+              const ageDays = (now - lastHuman) / (24*3600*1000);
+
+              if (ageDays >= cfg.reminder_after_days) {
+                await github.rest.issues.removeLabel({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  name: 'question'
+                }).catch(() => {});
+                await github.rest.issues.addLabels({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  labels: [cfg.missing_info_label]
+                });
+              }
+            }
+        env:
+          INPUT_QUESTION: ${{ steps.cfg.outputs.question }}
