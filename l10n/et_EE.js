@@ -9,6 +9,7 @@ OC.L10N.register(
     "Edit" : "Redigeeri",
     "Name" : "Nimi",
     "Host" : "Host",
+    "Nextcloud URL" : "Nextcloudi võrguaadress",
     "Enabled" : "Sisse lülitatud",
     "Remove" : "Eemalda",
     "From" : "Saatja",
