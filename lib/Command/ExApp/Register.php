@@ -168,7 +168,11 @@ class Register extends Command {
 		$auth = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
-			$deployResult = $this->dockerActions->deployExApp($exApp, $daemonConfig, $deployParams);
+			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
+				$deployResult = $this->dockerActions->deployExAppHarp($exApp, $daemonConfig, $deployParams);
+			} else {
+				$deployResult = $this->dockerActions->deployExApp($exApp, $daemonConfig, $deployParams);
+			}
 			if ($deployResult) {
 				$this->logger->error(sprintf('ExApp %s deployment failed. Error: %s', $appId, $deployResult));
 				if ($outputConsole) {
