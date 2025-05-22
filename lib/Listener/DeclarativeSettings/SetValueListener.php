@@ -14,17 +14,21 @@ use OCA\AppAPI\Service\ExAppPreferenceService;
 use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\Security\ICrypto;
 use OCP\Settings\DeclarativeSettingsTypes;
 use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
+use Psr\Log\LoggerInterface;
 
 /**
  * @template-implements IEventListener<Event>
  */
 class SetValueListener implements IEventListener {
 	public function __construct(
-		private readonly SettingsService        $service,
+		private readonly SettingsService $service,
 		private readonly ExAppPreferenceService $preferenceService,
-		private readonly ExAppConfigService     $configService,
+		private readonly ExAppConfigService $configService,
+		private readonly ICrypto $crypto,
+		private readonly LoggerInterface $logger,
 	) {
 	}
 
@@ -38,11 +42,25 @@ class SetValueListener implements IEventListener {
 			return;
 		}
 		$formSchema = $settingsForm->getScheme();
+		$field = $settingsForm->getSchemaField($event->getFieldId());
+		$isSensitive = isset($field['sensitive']) && $field['sensitive'] === true;
+		$value = $event->getValue();
+		if ($isSensitive) {
+			try {
+				$value = $this->crypto->encrypt($value);
+			} catch (\Exception $e) {
+				$this->logger->warning(
+					sprintf('Failed to encrypt sensitive value for app %s, field %s', $event->getApp(), $event->getFieldId()),
+					['exception' => $e, 'app' => $event->getApp()]
+				);
+				return;
+			}
+		}
 		if ($formSchema['section_type'] === DeclarativeSettingsTypes::SECTION_TYPE_ADMIN) {
-			$this->configService->setAppConfigValue($event->getApp(), $event->getFieldId(), $event->getValue());
+			$this->configService->setAppConfigValue($event->getApp(), $event->getFieldId(), $value);
 		} else {
 			$this->preferenceService->setUserConfigValue(
-				$event->getUser()->getUID(), $event->getApp(), $event->getFieldId(), $event->getValue()
+				$event->getUser()->getUID(), $event->getApp(), $event->getFieldId(), $value
 			);
 		}
 	}

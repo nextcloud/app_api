@@ -15,6 +15,7 @@ use OCA\AppAPI\Db\ExAppConfigMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
+use OCP\Security\ICrypto;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,15 +26,25 @@ class ExAppConfigService {
 	public function __construct(
 		private ExAppConfigMapper $mapper,
 		private LoggerInterface $logger,
+		private ICrypto $crypto,
 	) {
 	}
 
 	public function getAppConfigValues(string $appId, array $configKeys): ?array {
 		try {
 			return array_map(function (ExAppConfig $exAppConfig) {
+				$value = $exAppConfig->getConfigvalue() ?? '';
+				if ($value !== '' && $exAppConfig->getSensitive()) {
+					try {
+						$value = $this->crypto->decrypt($value);
+					} catch (\Exception $e) {
+						$this->logger->warning(sprintf('Failed to decrypt sensitive value for app %s, config key %s', $exAppConfig->getAppid(), $exAppConfig->getConfigkey()), ['exception' => $e]);
+						$value = '';
+					}
+				}
 				return [
 					'configkey' => $exAppConfig->getConfigkey(),
-					'configvalue' => $exAppConfig->getConfigvalue() ?? '',
+					'configvalue' => $value,
 				];
 			}, $this->mapper->findByAppConfigKeys($appId, $configKeys));
 		} catch (Exception) {
@@ -43,12 +54,22 @@ class ExAppConfigService {
 
 	public function setAppConfigValue(string $appId, string $configKey, mixed $configValue, ?int $sensitive = null): ?ExAppConfig {
 		$appConfigEx = $this->getAppConfig($appId, $configKey);
+		if ($configValue !== '' && $sensitive) {
+			try {
+				$encryptedValue = $this->crypto->encrypt($configValue);
+			} catch (\Exception $e) {
+				$this->logger->error(sprintf('Failed to encrypt sensitive value for app %s, config key %s. Error: %s', $appId, $configKey, $e->getMessage()), ['exception' => $e]);
+				return null;
+			}
+		} else {
+			$encryptedValue = '';
+		}
 		if ($appConfigEx === null) {
 			try {
 				$appConfigEx = $this->mapper->insert(new ExAppConfig([
 					'appid' => $appId,
 					'configkey' => $configKey,
-					'configvalue' => $configValue ?? '',
+					'configvalue' => $sensitive ? $encryptedValue : $configValue ?? '',
 					'sensitive' => $sensitive ?? 0,
 				]));
 			} catch (Exception $e) {
@@ -56,7 +77,7 @@ class ExAppConfigService {
 				return null;
 			}
 		} else {
-			$appConfigEx->setConfigvalue($configValue);
+			$appConfigEx->setConfigvalue($sensitive ? $encryptedValue : $configValue);
 			if ($sensitive !== null) {
 				$appConfigEx->setSensitive($sensitive);
 			}
@@ -64,6 +85,10 @@ class ExAppConfigService {
 				$this->logger->error(sprintf('Error while updating appconfig_ex %s value.', $configKey));
 				return null;
 			}
+		}
+		if ($sensitive) {
+			// setting original unencrypted value for API
+			$appConfigEx->setConfigvalue($configValue);
 		}
 		return $appConfigEx;
 	}

@@ -47,6 +47,16 @@ class SettingsForm extends Entity implements \JsonSerializable {
 		}
 	}
 
+	public function getSchemaField(string $fieldId): ?array {
+		$scheme = $this->getScheme();
+		foreach ($scheme['fields'] as $field) {
+			if ($field['id'] === $fieldId) {
+				return $field;
+			}
+		}
+		return null;
+	}
+
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
