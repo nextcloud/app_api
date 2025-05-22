@@ -14,6 +14,7 @@ use OCA\AppAPI\Service\ExAppPreferenceService;
 use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\Security\ICrypto;
 use OCP\Settings\DeclarativeSettingsTypes;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 
@@ -22,9 +23,10 @@ use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
  */
 class GetValueListener implements IEventListener {
 	public function __construct(
-		private readonly SettingsService        $service,
+		private readonly SettingsService $service,
 		private readonly ExAppPreferenceService $preferenceService,
-		private readonly ExAppConfigService     $configService,
+		private readonly ExAppConfigService $configService,
+		private readonly ICrypto $crypto,
 	) {
 	}
 
@@ -38,9 +40,19 @@ class GetValueListener implements IEventListener {
 			return;
 		}
 		$formSchema = $settingsForm->getScheme();
+		$field = $settingsForm->getSchemaField($event->getFieldId());
+		$isSensitive = isset($field['sensitive']) && $field['sensitive'] === true;
 		if ($formSchema['section_type'] === DeclarativeSettingsTypes::SECTION_TYPE_ADMIN) {
 			$existingValue = $this->configService->getAppConfig($event->getApp(), $event->getFieldId());
 			if (!empty($existingValue)) {
+				if ($isSensitive) {
+					try {
+						$encryptedValue = $this->crypto->decrypt($existingValue->getConfigvalue());
+						$existingValue->setConfigvalue($encryptedValue);
+					} catch (\Exception $e) {
+						$existingValue->setConfigvalue('');
+					}
+				}
 				$event->setValue($existingValue->getConfigvalue());
 				return;
 			}
@@ -51,6 +63,14 @@ class GetValueListener implements IEventListener {
 				[$event->getFieldId()],
 			);
 			if (!empty($existingValue)) {
+				if ($isSensitive) {
+					try {
+						$encryptedValue = $this->crypto->decrypt($existingValue[0]['configvalue']);
+						$existingValue[0]['configvalue'] = $encryptedValue;
+					} catch (\Exception) {
+						$existingValue[0]['configvalue'] = '';
+					}
+				}
 				$event->setValue($existingValue[0]['configvalue']);
 				return;
 			}
