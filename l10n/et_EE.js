@@ -63,6 +63,7 @@ OC.L10N.register(
     "Enable" : "Lülita sisse",
     "Disable" : "Lülita välja",
     "Allow untested app" : "Luba testimata rakenduse kasutamine",
-    "An error occurred during the request. Unable to proceed." : "Päringu ajal tekkis viga. Jätkamine pole võimalik."
+    "An error occurred during the request. Unable to proceed." : "Päringu ajal tekkis viga. Jätkamine pole võimalik.",
+    "Error: This app cannot be enabled because it makes the server unstable" : "Viga: Kuna ta muudaks selle serveri mittetöökindlaks, siis seda rakendust ei saa sisse lülitada"
 },
 "nplurals=2; plural=(n != 1);");
