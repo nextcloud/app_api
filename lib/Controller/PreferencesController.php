@@ -43,13 +43,13 @@ class PreferencesController extends OCSController {
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
-	public function setUserConfigValue(string $configKey, mixed $configValue): DataResponse {
+	public function setUserConfigValue(string $configKey, mixed $configValue, ?int $sensitive = null): DataResponse {
 		if ($configKey === '') {
 			throw new OCSBadRequestException('Config key cannot be empty');
 		}
 		$userId = $this->userSession->getUser()->getUID();
 		$appId = $this->request->getHeader('EX-APP-ID');
-		$result = $this->exAppPreferenceService->setUserConfigValue($userId, $appId, $configKey, $configValue);
+		$result = $this->exAppPreferenceService->setUserConfigValue($userId, $appId, $configKey, $configValue, $sensitive);
 		if ($result instanceof ExAppPreference) {
 			return new DataResponse($result, Http::STATUS_OK);
 		}

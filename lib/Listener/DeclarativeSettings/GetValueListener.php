@@ -14,17 +14,21 @@ use OCA\AppAPI\Service\ExAppPreferenceService;
 use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\Security\ICrypto;
 use OCP\Settings\DeclarativeSettingsTypes;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
+use Psr\Log\LoggerInterface;
 
 /**
  * @template-implements IEventListener<Event>
  */
 class GetValueListener implements IEventListener {
 	public function __construct(
-		private readonly SettingsService        $service,
+		private readonly SettingsService $service,
 		private readonly ExAppPreferenceService $preferenceService,
-		private readonly ExAppConfigService     $configService,
+		private readonly ExAppConfigService $configService,
+		private readonly ICrypto $crypto,
+		private readonly LoggerInterface $logger,
 	) {
 	}
 
@@ -38,9 +42,20 @@ class GetValueListener implements IEventListener {
 			return;
 		}
 		$formSchema = $settingsForm->getScheme();
+		$field = $settingsForm->getSchemaField($event->getFieldId());
+		$isSensitive = isset($field['sensitive']) && $field['sensitive'] === true;
 		if ($formSchema['section_type'] === DeclarativeSettingsTypes::SECTION_TYPE_ADMIN) {
 			$existingValue = $this->configService->getAppConfig($event->getApp(), $event->getFieldId());
 			if (!empty($existingValue)) {
+				if ($isSensitive) {
+					try {
+						$decryptedValue = $this->crypto->decrypt($existingValue->getConfigvalue());
+						$existingValue->setConfigvalue($decryptedValue);
+					} catch (\Exception $e) {
+						$this->logger->warning(sprintf('Failed to decrypt declarative setting for app %s, field %s', $event->getApp(), $event->getFieldId()), ['exception' => $e]);
+						$existingValue->setConfigvalue('');
+					}
+				}
 				$event->setValue($existingValue->getConfigvalue());
 				return;
 			}
@@ -51,6 +66,15 @@ class GetValueListener implements IEventListener {
 				[$event->getFieldId()],
 			);
 			if (!empty($existingValue)) {
+				if ($isSensitive) {
+					try {
+						$decryptedValue = $this->crypto->decrypt($existingValue[0]['configvalue']);
+						$existingValue[0]['configvalue'] = $decryptedValue;
+					} catch (\Exception $e) {
+						$this->logger->warning('Failed to decrypt declarative setting for app ' . $event->getApp() . ', field ' . $event->getFieldId(), ['exception' => $e]);
+						$existingValue[0]['configvalue'] = '';
+					}
+				}
 				$event->setValue($existingValue[0]['configvalue']);
 				return;
 			}
