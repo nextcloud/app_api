@@ -602,10 +602,18 @@ class AppAPIService {
 		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$this->dockerActions->initGuzzleClient($daemonConfig);
 			$containerName = $this->dockerActions->buildExAppContainerName($exApp->getAppid());
-			$this->dockerActions->startContainer($this->dockerActions->buildDockerUrl($daemonConfig), $containerName);
-			if (!$this->dockerActions->waitTillContainerStart($containerName, $daemonConfig)) {
-				$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
-				return false;
+			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
+				$this->dockerActions->startExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
+				if (!$this->dockerActions->waitExAppStart($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid())) {
+					$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
+					return false;
+				}
+			} else {
+				$this->dockerActions->startContainer($this->dockerActions->buildDockerUrl($daemonConfig), $containerName);
+				if (!$this->dockerActions->waitTillContainerStart($containerName, $daemonConfig)) {
+					$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
+					return false;
+				}
 			}
 			if (!$this->dockerActions->healthcheckContainer($containerName, $daemonConfig, true)) {
 				$this->logger->error(sprintf('ExApp %s container healthcheck failed.', $exApp->getAppid()));
@@ -662,7 +670,11 @@ class AppAPIService {
 		}
 		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$this->dockerActions->initGuzzleClient($daemonConfig);
-			$this->dockerActions->stopContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
+				$this->dockerActions->stopExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
+			} else {
+				$this->dockerActions->stopContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+			}
 		}
 		$this->exAppService->disableExAppInternal($exApp);
 
@@ -712,8 +724,12 @@ class AppAPIService {
 				$this->disableExApp($exApp);
 				if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
-					$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
-					$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));
+					if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
+						$this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
+					} else {
+						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+						$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));
+					}
 				}
 				$this->exAppService->unregisterExApp($exApp->getAppid());
 			}

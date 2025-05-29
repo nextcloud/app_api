@@ -97,29 +97,45 @@ class Unregister extends Command {
 		}
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$this->dockerActions->initGuzzleClient($daemonConfig);
-			$removeResult = $this->dockerActions->removeContainer(
-				$this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId)
-			);
-			if ($removeResult) {
-				if (!$silent) {
-					$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
+
+			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
+				if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $rmData)) {
+					if (!$silent) {
+						$output->writeln(sprintf('Failed to remove ExApp %s', $appId));
+					}
+					if (!$force) {
+						return 1;
+					}
+				} else {
+					if (!$silent) {
+						$output->writeln(sprintf('ExApp %s successfully removed', $appId));
+					}
 				}
-				if (!$force) {
-					return 1;
-				}
-			} elseif (!$silent) {
-				$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
-			}
-			if ($rmData) {
-				$volumeName = $this->dockerActions->buildExAppVolumeName($appId);
-				$removeVolumeResult = $this->dockerActions->removeVolume(
-					$this->dockerActions->buildDockerUrl($daemonConfig), $volumeName
+			} else {
+				$removeResult = $this->dockerActions->removeContainer(
+					$this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId)
 				);
-				if (!$silent) {
-					if (isset($removeVolumeResult['error'])) {
-						$output->writeln(sprintf('Failed to remove ExApp %s volume: %s', $appId, $volumeName));
-					} else {
-						$output->writeln(sprintf('ExApp %s data volume successfully removed', $appId));
+				if ($removeResult) {
+					if (!$silent) {
+						$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
+					}
+					if (!$force) {
+						return 1;
+					}
+				} elseif (!$silent) {
+					$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
+				}
+				if ($rmData) {
+					$volumeName = $this->dockerActions->buildExAppVolumeName($appId);
+					$removeVolumeResult = $this->dockerActions->removeVolume(
+						$this->dockerActions->buildDockerUrl($daemonConfig), $volumeName
+					);
+					if (!$silent) {
+						if (isset($removeVolumeResult['error'])) {
+							$output->writeln(sprintf('Failed to remove ExApp %s volume: %s', $appId, $volumeName));
+						} else {
+							$output->writeln(sprintf('ExApp %s data volume successfully removed', $appId));
+						}
 					}
 				}
 			}
