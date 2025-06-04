@@ -803,24 +803,26 @@ class DockerActions implements IDeployActions {
 
 	public function healthcheckContainer(string $containerId, DaemonConfig $daemonConfig, bool $waitForSuccess): bool {
 		$dockerUrl = $this->buildDockerUrl($daemonConfig);
-		$containerInfo = $this->inspectContainer($dockerUrl, $containerId);
-		if (!isset($containerInfo['State']['Health']['Status'])) {
-			return true;  // container does not support Healthcheck
-		}
-		if (!$waitForSuccess) {
-			return $containerInfo['State']['Health']['Status'] === 'healthy';
-		}
-		$maxTotalAttempts = 900;
+		$maxTotalAttempts = $waitForSuccess ? 900 : 1;
 		while ($maxTotalAttempts > 0) {
 			$containerInfo = $this->inspectContainer($dockerUrl, $containerId);
-			if ($containerInfo['State']['Health']['Status'] === 'healthy') {
+			if (!isset($containerInfo['State']['Health']['Status'])) {
+				return true;  // container does not support Healthcheck
+			}
+			$status = $containerInfo['State']['Health']['Status'];
+			if ($status === '') {
+				return true;  // we treat empty status as 'success', see https://github.com/nextcloud/app_api/issues/439
+			}
+			if ($status === 'healthy') {
 				return true;
 			}
-			if ($containerInfo['State']['Health']['Status'] === 'unhealthy') {
+			if ($status === 'unhealthy') {
 				return false;
 			}
 			$maxTotalAttempts--;
-			sleep(1);
+			if ($maxTotalAttempts > 0) {
+				sleep(1);
+			}
 		}
 		return false;
 	}
