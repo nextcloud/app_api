@@ -3,13 +3,12 @@
   - SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
-<files psalm-version="5.25.0@01a8eb06b9e9cc6cfb6a320bf9fb14331919d505">
+<files psalm-version="6.7.1@a2f190972555ea01b0cfcc1913924d6c5fc1a64e">
   <file src="lib/AppInfo/Application.php">
     <InvalidArgument>
       <code><![CDATA[LoadFilesPluginListener::class]]></code>
       <code><![CDATA[LoadMenuEntriesListener::class]]></code>
       <code><![CDATA[SabrePluginAuthInitListener::class]]></code>
-      <code><![CDATA[registerEventListener]]></code>
     </InvalidArgument>
     <MissingDependency>
       <code><![CDATA[DavPlugin]]></code>
@@ -59,7 +58,6 @@
       <code><![CDATA[ConnectException]]></code>
       <code><![CDATA[ConnectException]]></code>
       <code><![CDATA[Factory]]></code>
-      <code><![CDATA[ServerVersion]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Fetcher/ExAppFetcher.php">
@@ -79,9 +77,6 @@
     <MissingTemplateParam>
       <code><![CDATA[IEventListener]]></code>
     </MissingTemplateParam>
-    <UndefinedClass>
-      <code><![CDATA[GetTaskProcessingProvidersEvent]]></code>
-    </UndefinedClass>
   </file>
   <file src="lib/Listener/LoadFilesPluginListener.php">
     <ImplementedParamTypeMismatch>
@@ -104,6 +99,28 @@
     <ImplementedParamTypeMismatch>
       <code><![CDATA[$event]]></code>
     </ImplementedParamTypeMismatch>
+    <InvalidArgument>
+      <code><![CDATA[static function () use ($menuEntry) {
+				$appId = $menuEntry->getAppid();
+				$entryName = $menuEntry->getName();
+				$icon = $menuEntry->getIcon();
+				$urlGenerator = Server::get(IURLGenerator::class);
+				return [
+					'id' => Application::APP_ID . '_' . $appId . '_' . $entryName,
+					'type' => 'link',
+					'app' => Application::APP_ID,
+					'href' => $urlGenerator->linkToRoute(
+						'app_api.TopMenu.viewExAppPage', ['appId' => $appId, 'name' => $entryName]
+					),
+					'icon' => $icon === '' ?
+						$urlGenerator->imagePath('app_api', 'app.svg') :
+						$urlGenerator->linkToRoute(
+							'app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => $icon]
+						),
+					'name' => Server::get(IFactory::class)->get($appId)->t($menuEntry->getDisplayName()),
+				];
+			}]]></code>
+    </InvalidArgument>
     <InvalidDocblock>
       <code><![CDATA[class LoadMenuEntriesListener implements IEventListener {]]></code>
     </InvalidDocblock>
@@ -113,9 +130,6 @@
     <MissingTemplateParam>
       <code><![CDATA[IEventListener]]></code>
     </MissingTemplateParam>
-    <UndefinedClass>
-      <code><![CDATA[LoadAdditionalEntriesEvent]]></code>
-    </UndefinedClass>
   </file>
   <file src="lib/Listener/SabrePluginAuthInitListener.php">
     <ImplementedParamTypeMismatch>
@@ -134,6 +148,14 @@
     <MissingTemplateParam>
       <code><![CDATA[IEventListener]]></code>
     </MissingTemplateParam>
+  </file>
+  <file src="lib/Middleware/ExAppUiMiddleware.php">
+    <InvalidNullableReturnType>
+      <code><![CDATA[beforeOutput]]></code>
+    </InvalidNullableReturnType>
+    <NullableReturnStatement>
+      <code><![CDATA[$output]]></code>
+    </NullableReturnStatement>
   </file>
   <file src="lib/Service/ExAppService.php">
     <UndefinedClass>

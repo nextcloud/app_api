@@ -51,7 +51,7 @@ class ExAppOccCommand extends Entity implements JsonSerializable {
 		$this->addType('appid', 'string');
 		$this->addType('name', 'string');
 		$this->addType('description', 'string');
-		$this->addType('hidden', 'int');
+		$this->addType('hidden', 'integer');
 		$this->addType('arguments', 'json');
 		$this->addType('options', 'json');
 		$this->addType('usages', 'json');

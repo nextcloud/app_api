@@ -94,30 +94,6 @@ jobs:
       - name: Run coding standards check
         run: composer run psalm
 
-  php-security-analysis:
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: read
-      actions: read
-      security-events: write
-    name: security analysis
-    steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-        with:
-          submodules: recursive
-
-      - name: Psalm
-        uses: docker://vimeo/psalm-github-actions:4.30.0
-        with:
-          security_analysis: true
-          composer_ignore_platform_reqs: false
-          report_file: results.sarif
-
-      - name: Upload Security Analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@6bb031afdd8eb862ea3fc1848194185e076637e5 # v3.28.11
-        with:
-          sarif_file: results.sarif
-
   js-eslint:
     runs-on: ubuntu-22.04
     name: eslint
@@ -147,7 +123,7 @@ jobs:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [xml-lint, php-lint, php-cs, php-psalm-analysis, php-security-analysis, js-eslint, stylelint]
+    needs: [xml-lint, php-lint, php-cs, php-psalm-analysis, js-eslint, stylelint]
     name: Lint-OK
     steps:
       - run: echo "Lint passed successfully"

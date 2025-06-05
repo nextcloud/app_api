@@ -73,12 +73,12 @@ class ExApp extends Entity implements JsonSerializable {
 		$this->addType('daemonConfigName', 'string');
 		$this->addType('protocol', 'string');
 		$this->addType('host', 'string');
-		$this->addType('port', 'int');
+		$this->addType('port', 'integer');
 		$this->addType('secret', 'string');
 		$this->addType('status', 'json');
-		$this->addType('enabled', 'int');
-		$this->addType('createdTime', 'int');
-		$this->addType('lastCheckTime', 'int');
+		$this->addType('enabled', 'integer');
+		$this->addType('createdTime', 'integer');
+		$this->addType('lastCheckTime', 'integer');
 		$this->addType('deployConfig', 'json');
 		$this->addType('acceptsDeployId', 'string');
 		$this->addType('routes', 'json');

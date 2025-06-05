@@ -89,12 +89,12 @@ class ScriptsService {
 		$mapResult = [];
 		$scripts = $this->mapper->findByAppIdTypeName($appId, $type, $name);
 		if (count($scripts) > self::MAX_JS_FILES) {
-			throw new LengthException('More than' . self::MAX_JS_FILES . 'JS files on one page are not supported.');
+			throw new LengthException('More than' . (string)self::MAX_JS_FILES . 'JS files on one page are not supported.');
 		}
 
 		$i = 0;
 		foreach ($scripts as $value) {
-			$fakeJsPath = 'proxy_js/' . $i;
+			$fakeJsPath = 'proxy_js/' . (string)$i;
 			if (empty($value['after_app_id'])) {
 				Util::addScript(Application::APP_ID, $fakeJsPath);
 			} else {

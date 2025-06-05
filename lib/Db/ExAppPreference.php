@@ -43,7 +43,7 @@ class ExAppPreference extends Entity implements JsonSerializable {
 		$this->addType('appid', 'string');
 		$this->addType('configkey', 'string');
 		$this->addType('configvalue', 'string');
-		$this->addType('sensitive', 'int');
+		$this->addType('sensitive', 'integer');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
