@@ -14,7 +14,7 @@ use OCP\AppFramework\Http\ICallbackResponse;
 use OCP\AppFramework\Http\IOutput;
 use OCP\AppFramework\Http\Response;
 
-/** @template-extends Response<int, array<string, mixed>> */
+/** @template-extends Response<HttpAlias::STATUS_*, array<string, mixed>> */
 class ProxyResponse extends Response implements ICallbackResponse {
 	private mixed $data;
 

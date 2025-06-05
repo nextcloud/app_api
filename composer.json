@@ -18,7 +18,7 @@
 	"require-dev": {
 		"nextcloud/ocp": "dev-master",
 		"roave/security-advisories": "dev-latest",
-		"psalm/phar": "^5.15",
+		"psalm/phar": "6.7.x",
 		"nextcloud/coding-standard": "^1.1",
 		"friendsofphp/php-cs-fixer": "3.16"
 	},
@@ -50,6 +50,7 @@
 		}
 	},
   "require": {
-    "ext-simplexml": "*"
+	  "ext-simplexml": "*",
+	  "php": ">=8.1.0"
   }
 }

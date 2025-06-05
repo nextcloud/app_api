@@ -56,7 +56,7 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		$this->addType('displayName', 'string');
 		$this->addType('mime', 'string');
 		$this->addType('permissions', 'string');
-		$this->addType('order', 'int');
+		$this->addType('order', 'integer');
 		$this->addType('icon', 'string');
 		$this->addType('actionHandler', 'string');
 		$this->addType('version', 'string');

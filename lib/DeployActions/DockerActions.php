@@ -354,6 +354,9 @@ class DockerActions implements IDeployActions {
 
 	private function createTarArchive(string $filePath, string $pathInContainer): string {
 		$tempFile = $this->tempManager->getTemporaryFile('.tar');
+		if ($tempFile === false) {
+			throw new Exception("Failed to create tar archive (getTemporaryFile fails).");
+		}
 
 		try {
 			if (file_exists($tempFile)) {
@@ -725,7 +728,7 @@ class DockerActions implements IDeployActions {
 			if (!$disableProgressTracking) {
 				$completedLayers = count(array_filter($layers));
 				$totalLayers = count($layers);
-				$newLastPercent = intval($totalLayers > 0 ? ($completedLayers / $totalLayers) * ($maxPercent - $startPercent) : 0);
+				$newLastPercent = intval($totalLayers > 0 ? (int)($completedLayers / $totalLayers) * ($maxPercent - $startPercent) : 0);
 				if ($lastPercent != $newLastPercent) {
 					$this->exAppService->setAppDeployProgress($exApp, $newLastPercent);
 					$lastPercent = $newLastPercent;

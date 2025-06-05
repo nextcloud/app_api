@@ -34,7 +34,7 @@ class ExAppUiMiddleware extends Middleware {
 				$output);
 			foreach ($controller->jsProxyMap as $key => $value) {
 				$output = preg_replace(
-					'/(src=")(\/.*?)(\/app_api\/js\/)(proxy_js\/' . $key . '.js)(.*")/',
+					'/(src=")(\/.*?)(\/app_api\/js\/)(proxy_js\/' . (string)$key . '.js)(.*")/',
 					'$1/index.php/apps/app_api/proxy/' . $value . '.js$5',
 					$output,
 					limit: 1);
