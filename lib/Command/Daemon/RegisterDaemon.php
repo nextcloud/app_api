@@ -68,10 +68,6 @@ class RegisterDaemon extends Command {
 		$nextcloudUrl = $input->getArgument('nextcloud_url');
 		$isHarp = $input->getOption('harp');
 
-		if (($protocol !== 'http') && ($protocol !== 'https')) {
-			$output->writeln('Value error: The protocol must be `http` or `https`.');
-			return 1;
-		}
 		if ($acceptsDeployId === 'manual-install' && $protocol !== 'http') {
 			$output->writeln('Value error: Manual-install daemon supports only `http` protocol.');
 			return 1;
