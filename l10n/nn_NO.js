@@ -1,6 +1,7 @@
 OC.L10N.register(
     "app_api",
     {
+    "Cancel" : "Cancel",
     "Delete" : "Slett",
     "Edit" : "Rediger",
     "Name" : "Namn",
