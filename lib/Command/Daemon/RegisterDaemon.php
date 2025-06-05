@@ -72,10 +72,6 @@ class RegisterDaemon extends Command {
 			$output->writeln('Value error: The protocol must be `http` or `https`.');
 			return 1;
 		}
-		if ($acceptsDeployId === 'manual-install' && $protocol !== 'http') {
-			$output->writeln('Value error: Manual-install daemon supports only `http` protocol.');
-			return 1;
-		}
 		if ($isHarp && !$input->getOption('harp_shared_key')) {
 			$output->writeln('Value error: HaRP enabled daemon requires `harp_shared_key` option.');
 			return 1;
