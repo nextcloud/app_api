@@ -101,7 +101,7 @@ OC.L10N.register(
     "Deploy and Enable" : "Wdróż i włącz",
     "Enable" : "Włącz",
     "Disable" : "Wyłącz",
-    "Allow untested app" : "Zezwól na nietestowane aplikacje",
+    "Allow untested app" : "Zezwalaj na nietestowane aplikacje",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Ta aplikacja jest niezgodna z wersją Nextcloud. Przy dalszej kontynuacji, możesz pozwolić na zainstalowanie tej aplikacji. Pamiętaj, że aplikacja może nie działać zgodnie z oczekiwaniami.",
     "Your ExApps" : "Twoje ExApps",
     "An error occurred during the request. Unable to proceed." : "Wystąpił błąd podczas żądania. Nie można kontynuować.",
