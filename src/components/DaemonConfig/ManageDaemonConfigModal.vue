@@ -616,6 +616,7 @@ export default {
 					haproxy_password: this.deployConfig.haproxy_password ?? '',
 					computeDevice: this.deployConfig.computeDevice,
 					harp: this.deployConfig.harp ?? null,
+					registries: this.deployConfig.registries || null,
 				},
 			}
 			if (this.additionalOptions.length > 0) {
