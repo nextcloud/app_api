@@ -88,6 +88,7 @@ OC.L10N.register(
     "Start Deploy test" : "Démarrer le test de déploiement",
     "Stop Deploy test" : "Arrêt du test de déploiement",
     "ExApp is unregistered and container is removed on \"Stop deploy test\"" : "ExApp n'est pas enregistré et le conteneur est supprimé lors de l' \"Arrêt du test de déploiement\"",
+    "Please enter a registry domain" : "Veuillez saisir un domaine de registre",
     "Remove" : "Retirer",
     "From" : "De",
     "To" : "À",
