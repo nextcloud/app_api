@@ -10,6 +10,8 @@ OC.L10N.register(
     "Add" : "Ongeza",
     "Confirm" : "Thibitisha",
     "Save" : "Hifadhi",
+    "Update to {version}" : "Sasisha kwenda {version}",
+    "Update to {update}" : "Sasisha kwenda {update}",
     "Actions" : "Utendekaji",
     "Type" : "Aina",
     "Details" : "Maelezo ya kina"
