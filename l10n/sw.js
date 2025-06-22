@@ -11,7 +11,9 @@ OC.L10N.register(
     "Confirm" : "Thibitisha",
     "Save" : "Hifadhi",
     "Update to {version}" : "Sasisha kwenda {version}",
+    "Report a bug" : "Report a bug",
     "Update to {update}" : "Sasisha kwenda {update}",
+    "Version" : "Toleo",
     "Actions" : "Utendekaji",
     "Type" : "Aina",
     "Details" : "Maelezo ya kina"
