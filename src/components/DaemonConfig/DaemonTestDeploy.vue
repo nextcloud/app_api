@@ -264,6 +264,7 @@ export default {
 			})
 		},
 		startDeployTest() {
+			this.canDownloadLogs = false
 			this.startingTest = true
 			this._cleanupStatusChecks()
 			this._startDeployTest().then((res) => {
@@ -297,6 +298,7 @@ export default {
 		},
 		removeTestExApp() {
 			this._stopDeployTest().then(() => {
+				this.canDownloadLogs = false
 				this._cleanupStatusChecks()
 			})
 		},
