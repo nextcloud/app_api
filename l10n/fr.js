@@ -126,6 +126,7 @@ OC.L10N.register(
     "Show deploy config" : "Afficher la configuration de déploiement",
     "Hide deploy config" : "Masquer la configuration de déploiement",
     "Enable HaRP" : "Activer HaRP",
+    "FRP server address" : "Adresse du serveur FRP",
     "Disable FRP" : "Désactiver FRP",
     "Disabled" : "Désactivé",
     "Additional option" : "Option supplémentaire",
