@@ -10,6 +10,7 @@ OC.L10N.register(
     "Add" : "Ongeza",
     "Confirm" : "Thibitisha",
     "Save" : "Hifadhi",
+    "Register" : "Sajiri",
     "Update to {version}" : "Sasisha kwenda {version}",
     "Report a bug" : "Report a bug",
     "Update to {update}" : "Sasisha kwenda {update}",
