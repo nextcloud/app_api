@@ -8,6 +8,7 @@ OC.L10N.register(
     "From" : "Tangu/ kutoka",
     "To" : "Mpaka/ hadi",
     "Add" : "Ongeza",
+    "Disabled" : "Zima",
     "Confirm" : "Thibitisha",
     "Save" : "Hifadhi",
     "Register" : "Sajiri",
