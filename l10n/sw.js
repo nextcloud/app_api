@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Futa",
     "Edit" : "Hariri",
     "Name" : "Jina",
+    "Remove" : "Ondoa",
     "From" : "Tangu/ kutoka",
     "To" : "Mpaka/ hadi",
     "Add" : "Ongeza",

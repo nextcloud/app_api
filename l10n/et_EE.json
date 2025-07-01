@@ -38,6 +38,7 @@
     "Supported" : "Toetatud",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Esiletõstetud rakendusi arendatakse kogukonna poolt. Nad pakuvad võimalust kasutada olulist funktsionaalsust ning on sobilikud igapäevaseks kasutuseks.",
     "Featured" : "Esile tõstetud",
+    "Update to {update}" : "Uuenda versioonini {update}",
     "Default Deploy daemon is not accessible" : "Kasutuselevõtmise taustateenus pole leitav",
     "Icon" : "Ikoon",
     "Version" : "Versioon",
