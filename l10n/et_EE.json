@@ -10,6 +10,8 @@
     "Name" : "Nimi",
     "Host" : "Host",
     "Nextcloud URL" : "Nextcloudi võrguaadress",
+    "GPUs support" : "Graafikaprotsessori tugi",
+    "Compute device" : "Arvutusseade",
     "Enabled" : "Sisse lülitatud",
     "Remove" : "Eemalda",
     "From" : "Saatja",
@@ -42,6 +44,7 @@
     "Default Deploy daemon is not accessible" : "Kasutuselevõtmise taustateenus pole leitav",
     "Icon" : "Ikoon",
     "Version" : "Versioon",
+    "Daemon" : "Taustateenus",
     "Level" : "Tase",
     "Actions" : "Tegevused",
     "Results from other categories" : "Tulemused muudest kategooriatest",
@@ -62,7 +65,9 @@
     "Enable" : "Lülita sisse",
     "Disable" : "Lülita välja",
     "Allow untested app" : "Luba testimata rakenduse kasutamine",
+    "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "See rakendus pole märgitud ühilduvaks sinu Nextcloudi serveri versiooniga. Kui jätkad, siis saad ta ikkagi paigaldada, aga palun arvesta, et ta ei pruugi toimida ootuspäraselt.",
     "An error occurred during the request. Unable to proceed." : "Päringu ajal tekkis viga. Jätkamine pole võimalik.",
+    "The app has been enabled but needs to be updated." : "See rakendus on kasutusel, aga vajab uuendamist.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Viga: Kuna ta muudaks selle serveri mittetöökindlaks, siis seda rakendust ei saa sisse lülitada"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
