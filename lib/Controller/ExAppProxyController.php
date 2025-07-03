@@ -101,6 +101,7 @@ class ExAppProxyController extends Controller {
 
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
+				'stream' => true,
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 				RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 				RequestOptions::TIMEOUT => 0,
@@ -128,6 +129,7 @@ class ExAppProxyController extends Controller {
 		}
 
 		$options = [
+			'stream' => true,
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
@@ -170,6 +172,7 @@ class ExAppProxyController extends Controller {
 
 		$stream = fopen('php://input', 'r');
 		$options = [
+			'stream' => true,
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::BODY => $stream,
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
@@ -202,6 +205,7 @@ class ExAppProxyController extends Controller {
 
 		$stream = fopen('php://input', 'r');
 		$options = [
+			'stream' => true,
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::BODY => $stream,
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
