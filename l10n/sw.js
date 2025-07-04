@@ -19,6 +19,7 @@ OC.L10N.register(
     "Version" : "Toleo",
     "Actions" : "Utendekaji",
     "Type" : "Aina",
+    "Documentation" : "Uhifadhi wa nyaraka",
     "Details" : "Maelezo ya kina"
 },
 "nplurals=2; plural=(n != 1);");
