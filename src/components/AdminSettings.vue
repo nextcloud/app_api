@@ -46,6 +46,16 @@
 				:aria-label-combobox="t('app_api', 'ExApp container restart policy')"
 				@input="onInput" />
 		</NcSettingsSection>
+		<NcSettingsSection
+			:name="t('app_api', 'ExApp Docker outdated image cleanup (days)')"
+			:description="t('app_api', 'This will cleanup an old ExApp docker images after the specified amount of days. Value of 0 means job is disabled.')"
+			:aria-label="t('app_api', 'This will cleanup an old ExApp docker images after the specified amount of days. Value of 0 means job is disabled.')">
+			<NcInputField :value.sync="state.cleanup_interval"
+				class="setting"
+				type="number"
+				:placeholder="t('app_api', 'Days')"
+				@update:value="onInput" />
+		</NcSettingsSection>
 	</div>
 </template>
 
@@ -100,6 +110,7 @@ export default {
 				this.saveOptions({
 					init_timeout: this.state.init_timeout,
 					container_restart_policy: this.state.container_restart_policy,
+					cleanup_interval: this.state.cleanup_interval,
 				})
 			}, 2000)()
 		},

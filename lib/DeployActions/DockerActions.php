@@ -1336,4 +1336,18 @@ class DockerActions implements IDeployActions {
 		}
 		return $isLocalPath;
 	}
+
+	/**
+	 * @throws GuzzleException
+	 */
+	public function deleteUnusedImages(string $dockerUrl): array {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('images/prune'));
+		try {
+			$response = $this->guzzleClient->post($url);
+			return json_decode((string) $response->getBody(), true);
+		} catch (GuzzleException $e) {
+			return ['error' => $e->getMessage(), 'exception' => $e];
+		}
+
+	}
 }
