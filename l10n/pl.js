@@ -18,6 +18,7 @@ OC.L10N.register(
     "Default" : "Domyślny",
     "Set as default" : "Ustaw jako domyślny",
     "Edit" : "Edycja",
+    "Deploy Daemon" : "Uruchom demona",
     "Name" : "Nazwa",
     "Protocol" : "Protokół",
     "Host" : "Host",
