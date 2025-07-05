@@ -3,8 +3,10 @@ OC.L10N.register(
     {
     "Cancel" : "Cancel",
     "Delete" : "Futa",
+    "Password confirmation failed" : "Uthibitishaji wa nenosiri umeshindikana",
     "Edit" : "Hariri",
     "Name" : "Jina",
+    "Enabled" : "Washwa",
     "Remove" : "Ondoa",
     "From" : "Tangu/ kutoka",
     "To" : "Mpaka/ hadi",
@@ -16,6 +18,7 @@ OC.L10N.register(
     "Update to {version}" : "Sasisha kwenda {version}",
     "Report a bug" : "Report a bug",
     "Update to {update}" : "Sasisha kwenda {update}",
+    "Icon" : "Aikoni",
     "Version" : "Toleo",
     "Actions" : "Utendekaji",
     "Type" : "Aina",
