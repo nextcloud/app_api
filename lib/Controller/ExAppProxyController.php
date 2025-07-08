@@ -48,7 +48,7 @@ class ExAppProxyController extends Controller {
 		parent::__construct(Application::APP_ID, $request);
 	}
 
-	private function createProxyResponse(string $path, IResponse $response, $cache = true): ProxyResponse {
+	private function createProxyResponse(string $path, IResponse $response, bool $isHTML, $cache = true): ProxyResponse {
 		$headersToIgnore = ['aa-version', 'ex-app-id', 'authorization-app-api', 'ex-app-version', 'aa-request-id'];
 		$responseHeaders = [];
 		foreach ($response->getHeaders() as $key => $value) {
@@ -58,7 +58,6 @@ class ExAppProxyController extends Controller {
 		}
 		$content = $response->getBody();
 
-		$isHTML = pathinfo($path, PATHINFO_EXTENSION) === 'html';
 		if ($isHTML) {
 			$nonce = $this->nonceManager->getNonce();
 			$content = str_replace(
@@ -98,9 +97,11 @@ class ExAppProxyController extends Controller {
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
+		$isHTML = pathinfo($other, PATHINFO_EXTENSION) === 'html';
 
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'GET', queryParams: $_GET, options: [
+				'stream' => !$isHTML, // Can't stream HTML
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 				RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 				RequestOptions::TIMEOUT => 0,
@@ -112,7 +113,7 @@ class ExAppProxyController extends Controller {
 		}
 
 		$this->processBruteforce($bruteforceProtection, $delay, $response->getStatusCode());
-		return $this->createProxyResponse($other, $response);
+		return $this->createProxyResponse($other, $response, $isHTML);
 	}
 
 	#[PublicPage]
@@ -126,8 +127,10 @@ class ExAppProxyController extends Controller {
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
+		$isHTML = pathinfo($other, PATHINFO_EXTENSION) === 'html';
 
 		$options = [
+			'stream' => !$isHTML,
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
@@ -153,7 +156,7 @@ class ExAppProxyController extends Controller {
 		}
 
 		$this->processBruteforce($bruteforceProtection, $delay, $response->getStatusCode());
-		return $this->createProxyResponse($other, $response);
+		return $this->createProxyResponse($other, $response, $isHTML);
 	}
 
 	#[PublicPage]
@@ -167,9 +170,11 @@ class ExAppProxyController extends Controller {
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
+		$isHTML = pathinfo($other, PATHINFO_EXTENSION) === 'html';
 
 		$stream = fopen('php://input', 'r');
 		$options = [
+			'stream' => !$isHTML,
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::BODY => $stream,
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
@@ -185,7 +190,7 @@ class ExAppProxyController extends Controller {
 		}
 
 		$this->processBruteforce($bruteforceProtection, $delay, $response->getStatusCode());
-		return $this->createProxyResponse($other, $response);
+		return $this->createProxyResponse($other, $response, $isHTML);
 	}
 
 	#[PublicPage]
@@ -199,9 +204,11 @@ class ExAppProxyController extends Controller {
 		if ($exApp === null) {
 			return new NotFoundResponse();
 		}
+		$isHTML = pathinfo($other, PATHINFO_EXTENSION) === 'html';
 
 		$stream = fopen('php://input', 'r');
 		$options = [
+			'stream' => !$isHTML,
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::BODY => $stream,
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
@@ -217,7 +224,7 @@ class ExAppProxyController extends Controller {
 		}
 
 		$this->processBruteforce($bruteforceProtection, $delay, $response->getStatusCode());
-		return $this->createProxyResponse($other, $response);
+		return $this->createProxyResponse($other, $response, $isHTML);
 	}
 
 	private function prepareProxy(
