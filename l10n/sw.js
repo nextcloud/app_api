@@ -6,6 +6,7 @@ OC.L10N.register(
     "Password confirmation failed" : "Uthibitishaji wa nenosiri umeshindikana",
     "Edit" : "Hariri",
     "Name" : "Jina",
+    "Host" : "Host",
     "Enabled" : "Washwa",
     "Remove" : "Ondoa",
     "From" : "Tangu/ kutoka",
