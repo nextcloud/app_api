@@ -12,8 +12,8 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Service\AppAPIService;
-
 use OCA\AppAPI\Service\ExAppService;
+
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -22,6 +22,7 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
@@ -33,6 +34,7 @@ class OCSApiController extends OCSController {
 		private readonly LoggerInterface $logger,
 		private readonly AppAPIService   $service,
 		private readonly ExAppService	 $exAppService,
+		private readonly IURLGenerator   $urlGenerator,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -89,7 +91,6 @@ class OCSApiController extends OCSController {
 		return new DataResponse();
 	}
 
-
 	/**
 	 * Retrieves the enabled status of an ExApp (0 for disabled, 1 for enabled).
 	 * Note: This endpoint is accessible even if the ExApp itself is disabled.
@@ -105,5 +106,14 @@ class OCSApiController extends OCSController {
 			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 		return new DataResponse($exApp->getEnabled());
+	}
+
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function getNextcloudAbsoluteUrl(string $url): DataResponse {
+		return new DataResponse([
+			'absolute_url' => $this->urlGenerator->getAbsoluteURL($url),
+		], Http::STATUS_OK);
 	}
 }
