@@ -67,6 +67,7 @@ return [
 		['name' => 'OCSApi#setAppInitProgressDeprecated', 'url' => '/apps/status/{appId}', 'verb' => 'PUT'],
 		['name' => 'OCSApi#setAppInitProgress', 'url' => '/ex-app/status', 'verb' => 'PUT'],
 		['name' => 'OCSApi#getEnabledState', 'url' => '/ex-app/state', 'verb' => 'GET'],
+		['name' => 'OCSApi#getNextcloudAbsoluteUrl', 'url' => '/api/v1/info/nextcloud_url/absolute', 'verb' => 'GET'],
 
 		// ExApps
 		['name' => 'OCSExApp#getNextcloudUrl', 'url' => '/api/v1/info/nextcloud_url', 'verb' => 'GET'],
