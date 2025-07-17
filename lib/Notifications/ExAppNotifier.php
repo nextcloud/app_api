@@ -36,6 +36,9 @@ class ExAppNotifier implements INotifier {
 	}
 
 	public function prepare(INotification $notification, string $languageCode): INotification {
+		if (count($this->service->getExAppsList()) === 0) {
+			throw new UnknownNotificationException();
+		}
 		$exApp = $this->service->getExApp($notification->getApp());
 		if ($exApp === null) {
 			throw new UnknownNotificationException();
