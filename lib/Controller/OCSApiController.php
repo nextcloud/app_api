@@ -21,6 +21,7 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCSController;
+use OCP\IConfig;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 use Psr\Log\InvalidArgumentException;
@@ -33,6 +34,7 @@ class OCSApiController extends OCSController {
 		IRequest                         $request,
 		private readonly LoggerInterface $logger,
 		private readonly AppAPIService   $service,
+		private IConfig $config,
 		private readonly ExAppService	 $exAppService,
 		private readonly IURLGenerator   $urlGenerator,
 	) {
@@ -113,7 +115,7 @@ class OCSApiController extends OCSController {
 	#[NoCSRFRequired]
 	public function getNextcloudAbsoluteUrl(string $url): DataResponse {
 		return new DataResponse([
-			'absolute_url' => $this->urlGenerator->getAbsoluteURL($url),
+			'absolute_url' => rtrim($this->config->getSystemValueString('overwrite.cli.url'), '/') . '/' . ltrim($url, '/'),
 		], Http::STATUS_OK);
 	}
 }
