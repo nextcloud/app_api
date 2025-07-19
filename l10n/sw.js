@@ -24,6 +24,8 @@ OC.L10N.register(
     "Actions" : "Utendekaji",
     "Type" : "Aina",
     "Documentation" : "Uhifadhi wa nyaraka",
-    "Details" : "Maelezo ya kina"
+    "Details" : "Maelezo ya kina",
+    "Enable" : "Wezesha",
+    "Disable" : "Zima"
 },
 "nplurals=2; plural=(n != 1);");
