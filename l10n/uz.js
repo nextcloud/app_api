@@ -1,12 +1,12 @@
 OC.L10N.register(
     "app_api",
     {
-    "Cancel" : "Cancel",
-    "Delete" : "Delete",
+    "Cancel" : "Bekor qilish",
+    "Delete" : "O'chirish",
     "Password confirmation failed" : "Parol tasdiqlanmadi",
     "Edit" : "Tahrirlash",
     "Name" : "Name",
-    "Remove" : "Remove",
+    "Remove" : "O'chirish",
     "From" : "Dan",
     "To" : "Gacha",
     "Add" : "Qo'shish",
