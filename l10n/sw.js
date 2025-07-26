@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Delete" : "Futa",
     "Password confirmation failed" : "Uthibitishaji wa nenosiri umeshindikana",
+    "Default" : "Chaguo msingi",
     "Edit" : "Hariri",
     "Name" : "Jina",
     "Host" : "Host",
