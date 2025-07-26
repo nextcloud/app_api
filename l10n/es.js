@@ -111,7 +111,7 @@ OC.L10N.register(
     "Docker registry mapping removed" : "Eliminación de la asignación del registro de Docker",
     "Error removing Docker registry mapping" : "Error al eliminar la asignación del registro de Docker",
     "Override Docker registries" : "Anular registries Docker",
-    "Configure Docker registry override mappings for selected daemon." : "Configurar anulaciones de mapeos de registries Docker para el daemon seleccionado.",
+    "Configure Docker registry override mappings for selected daemon." : "Configurar anulaciones de asignaciones de registries Docker para el daemon seleccionado.",
     "The matching source registry in ExApp info.xml will be overwritten during deploy (image pull step)." : "El registry origen coincidente en el archivo info.xml de la ExApp será sobreescrito durante el despliegue (paso de obtención de imagen)",
     "This is useful if you want to use a custom Docker registry, for example, to use a private Docker registry, or to use a different Docker registry for testing." : "Esto es útil si desea utilizar un registry Docker personalizado, por ejemplo, para usar un registry Docker privado, o, para usar un registry Docker diferente para pruebas.",
     "Image pull will be skipped" : "Se omitirá la obtención de la imagen",
