@@ -72,6 +72,11 @@ class ExAppProxyController extends Controller {
 			}
 		}
 
+		if (isset($responseHeaders['Transfer-Encoding'])
+			&& str_contains(strtolower($responseHeaders['Transfer-Encoding']), 'chunked')) {
+			unset($responseHeaders['Transfer-Encoding']);
+		}
+
 		$proxyResponse = new ProxyResponse($response->getStatusCode(), $responseHeaders, $content);
 		if ($cache && !$isHTML && empty($response->getHeader('cache-control'))
 			&& $response->getHeader('Content-Type') !== 'application/json'
