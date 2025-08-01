@@ -95,7 +95,7 @@
     "AppAPI will try to install small skeleton ExApp to verify Daemon configured correctly and deployment steps are passing." : "AppAPI спробує встановити невеликий скелет ExApp, щоб переконатися, що демон налаштовано правильно і кроки розгортання пройдено.",
     "The following Deploy test checks must be passed to succeed:" : "Для успішного розгортання необхідно пройти наступні перевірки тесту розгортання:",
     "More info" : "Більше інформації",
-    "Download ExApp logs" : "Завантажити журнали ExApp",
+    "Download ExApp logs" : "Звантажити журнали ExApp",
     "Remove test ExApp" : "Видалити тестовий ExApp",
     "Start Deploy test" : "Почніть тест на розгортання",
     "Stop Deploy test" : "Тест на зупинку розгортання",
