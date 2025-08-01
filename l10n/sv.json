@@ -22,7 +22,7 @@
     "Update to {version}" : "Uppdatera till {version}",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Denna app har ingen lägsta Nextcloud-version tilldelad. Detta kommer att innebära ett problem i framtiden.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Denna app har ingen minimum Nextcloud-version tilldelad. Detta kommer att innebära ett problem i framtiden.",
-    "This app cannot be installed because the following dependencies are not fulfilled:" : "Denna applikation kan inte installeras då följande beroenden inte är uppfyllda: %s",
+    "This app cannot be installed because the following dependencies are not fulfilled:" : "Denna applikation kan inte installeras då följande beroenden inte är uppfyllda:",
     "View in store" : "Visa i butik",
     "Visit website" : "Besök webbplats",
     "Report a bug" : "Rapportera ett problem",
