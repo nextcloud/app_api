@@ -52,6 +52,7 @@ OC.L10N.register(
     "Updates" : "Ажурирања",
     "Featured apps" : "Истакнати апликации",
     "Supported apps" : "Поддржани апликации",
+    "Deploy and Enable" : "Распореди и овозможи",
     "Enable" : "Овозможи",
     "Disable" : "Оневозможи",
     "Allow untested app" : "Дозволи не тестирана апликација",
