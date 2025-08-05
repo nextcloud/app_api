@@ -42,6 +42,7 @@ OC.L10N.register(
     "Updates" : "Atjauninājumi",
     "Featured apps" : "Izceltās lietotnes",
     "Enable" : "Iespējot",
-    "Disable" : "Deaktivēt"
+    "Disable" : "Deaktivēt",
+    "Allow untested app" : "Atļaut nepārbaudītu lietotni"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");
