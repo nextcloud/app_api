@@ -29,6 +29,7 @@
     "External Apps management" : "外部應用程式管理",
     "Admin options saved" : "已儲存管理選項",
     "Failed to save admin options" : "儲存管理選項失敗",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "The AppAPI Project 是一個令人興奮的計劃，旨在通過使用 Docker 容器來徹底改變 Nextcloud 應用程序的開發方式。這樣可以提供更大的編程語言選擇，並允許將計算密集型任務卸載到不同的伺服器上。",
     "Deploy Daemons" : "部署幕後程式",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "部署幕後程式 (DaemonConfig) 是 ExApps 的協作幕後程式。",
     "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "部署幕後程式。部署幕後程式 (DaemonConfig) 是外部應用程式的協作幕後程式。",
