@@ -31,6 +31,7 @@ OC.L10N.register(
     "External Apps management" : "Bainistíocht Aipeanna Seachtracha",
     "Admin options saved" : "Sábháladh roghanna riaracháin",
     "Failed to save admin options" : "Theip ar shábháil na roghanna riaracháin",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "Is tionscnamh spreagúil é Tionscadal AppAPI a bhfuil sé mar aidhm aige réabhlóid a dhéanamh ar an gcaoi a bhforbraítear feidhmchláir do Nextcloud trí úsáid a bhaint as coimeádáin docker. Rud a cheadaíonn rogha níos mó teangacha ríomhchlárúcháin agus a ligeann do thascanna costasacha ó thaobh ríomhaireachta de a dhíluchtú chuig freastalaí difriúil.",
     "Deploy Daemons" : "Imscaradh Deamhain",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Is deamhan le haghaidh ceolfhoirne de chuid ExApps é Imscaradh Deamhan (DaemonConfig).",
     "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Imscaradh Deamhain. Is deamhan le haghaidh ceolfhoirne de chuid ExApps é Imscaradh Deamhan (DaemonConfig).",
