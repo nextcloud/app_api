@@ -29,6 +29,7 @@
     "External Apps management" : "Керування зовнішніми програмами",
     "Admin options saved" : "Параметри адміністратора збережено",
     "Failed to save admin options" : "Не вдалося зберегти параметри адміністрування",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "Проєкт AppAPI — це цікава ініціатива, яка має на меті революціонізувати спосіб розробки додатків для Nextcloud за допомогою контейнерів Docker. Це розширює вибір мов програмування та дозволяє переносити обчислювально ресурсоємні завдання на інший сервер.",
     "Deploy Daemons" : "Розгортання демонів",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Демон розгортання (DaemonConfig) - це демон оркестрування ExApps.",
     "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Розгортання демонів. Deploy Daemon (DaemonConfig) - це демон оркестрування ExApps.",
