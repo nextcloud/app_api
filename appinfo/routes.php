@@ -34,8 +34,8 @@ return [
 		// ExApps actions
 		['name' => 'ExAppsPage#listCategories', 'url' => '/apps/categories', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#listApps', 'url' => '/apps/list', 'verb' => 'GET' , 'root' => ''],
-		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}', 'verb' => 'GET' , 'root' => ''],
-		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}', 'verb' => 'POST' , 'root' => ''],
+		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}/{daemonId}', 'verb' => 'GET' , 'root' => ''],
+		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}/{daemonId}', 'verb' => 'POST' , 'root' => ''],
 		['name' => 'ExAppsPage#getAppStatus', 'url' => '/apps/status/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#getAppLogs', 'url' => '/apps/logs/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#getAppDeployOptions', 'url' => '/apps/deploy-options/{appId}', 'verb' => 'GET' , 'root' => ''],
