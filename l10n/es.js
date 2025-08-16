@@ -31,6 +31,7 @@ OC.L10N.register(
     "External Apps management" : "Gestión de Apps externas",
     "Admin options saved" : "Opciones de administrador guardadas",
     "Failed to save admin options" : "Fallo al guardar opciones de administración",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "El proyecto AppAPI es una iniciativa excitante que busca revolucionar la forma en que las aplicaciones son desarrolladas para Nextcloud a través del uso de contenedores docker. Permitiendo así una variedad más amplia de opciones de lenguajes de programación y permitiendo que las tareas que son computacionalmente costosas puedan ser ejecutadas en un servidor diferente.",
     "Deploy Daemons" : "Daemons de despliegue",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "El Daemon de despliegue (DaemonConfig) es un daemon de orquestación de ExApps.",
     "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Desplegar Daemons,  El Daemon de despliegue (DaemonConfig) es un daemon de orquestación de ExApps.",
