@@ -96,7 +96,7 @@ class ExAppOccService {
 		try {
 			$cacheKey = '/ex_occ_commands';
 			$records = $this->cache?->get($cacheKey);
-			if ($records === null) {
+			if (!is_array($records)) {
 				$records = $this->mapper->findAllEnabled();
 				$this->cache?->set($cacheKey, $records);
 			}
