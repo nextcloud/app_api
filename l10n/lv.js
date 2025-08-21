@@ -17,7 +17,7 @@ OC.L10N.register(
     "Confirm" : "Apstiprināt",
     "Save" : "Saglabāt",
     "Update to {version}" : "Atjaunināts uz {version}",
-    "Visit website" : "Apmeklējiet vietni",
+    "Visit website" : "Apmeklēt tīmekļvietni",
     "Report a bug" : "Ziņot par kļūdu",
     "User documentation" : "Lietotāja dokumentācija",
     "Admin documentation" : "Pārvaldītāja dokumentācija",
