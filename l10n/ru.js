@@ -23,6 +23,7 @@ OC.L10N.register(
     "External Apps management" : "Управление внешними приложениями",
     "Admin options saved" : "Параметры администратора сохранены",
     "Failed to save admin options" : "Не удалось сохранить параметры администратора.",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "Проект AppAPI — это многообещающая инициатива, призванная кардинально изменить подход к разработке приложений для Nextcloud посредством использования Docker-контейнеров. Это расширяет выбор языков программирования и позволяет переносить ресурсоёмкие задачи на другой сервер.",
     "Deploy Daemons" : "Службы публикации",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Служба развертывания (DaemonConfig) - это служба оркестровки ExApps.",
     "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Служба развертывания. Служба развертывания (DaemonConfig) — это служба оркестровки ExApps.",
