@@ -14,6 +14,15 @@ OC.L10N.register(
     "Icon" : "Значок",
     "Version" : "Версія",
     "Actions" : "Дзеянні",
-    "Type" : "Тып"
+    "Type" : "Тып",
+    "Your apps" : "Вашы праграмы",
+    "Active apps" : "Актыўныя праграмы",
+    "Disabled apps" : "Адключаныя праграмы",
+    "Updates" : "Абнаўленні",
+    "Featured apps" : "Папулярныя праграмы",
+    "Disable" : "Адключыць",
+    "Allow untested app" : "Дазволіць неправераную праграму",
+    "An error occurred during the request. Unable to proceed." : "Падчас запыту адбылася памылка. Не ўдалося працягнуць.",
+    "The app has been enabled but needs to be updated." : "Праграма ўключана, але патрабуе абнаўлення."
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");
