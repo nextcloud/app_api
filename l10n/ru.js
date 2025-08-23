@@ -19,6 +19,7 @@ OC.L10N.register(
     "AppAPI" : "AppAPI",
     "AI Integration Team" : "Команда по интеграции ИИ",
     "ExApps Settings" : "Настройки ExApps",
+    "AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps)." : "Демон развертывания AppAPI по умолчанию не установлен. Пожалуйста, зарегистрируйте демон развертывания по умолчанию в настройках для установки внешних приложений (Ex-Apps).пожалуйстаприложения",
     "Nextcloud AppAPI" : "Nextcloud AppAPI",
     "External Apps management" : "Управление внешними приложениями",
     "Admin options saved" : "Параметры администратора сохранены",
