@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f # v2
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f # v2
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
@@ -83,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@4bd44f22a98a19e0950cbad5f31095157cc9621b # v2
+        uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f # v2
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
