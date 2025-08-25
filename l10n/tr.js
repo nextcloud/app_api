@@ -31,6 +31,7 @@ OC.L10N.register(
     "External Apps management" : "Dış uygulamalar yönetimi",
     "Admin options saved" : "Yönetici ayarları kaydedildi",
     "Failed to save admin options" : "Yönetici ayarları kaydedilemedi",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "AppAPI Projesi, docker kapsayıcılarının kullanılması ile Nextcloud için uygulamaların geliştirilme biçiminde devrim yaratmayı amaçlayan heyecan verici bir girişimdir. Daha fazla programlama dili seçeneği sunar ve işlem gücü gereken görevlerin farklı bir sunucuya aktarılmasını sağlar.",
     "Deploy Daemons" : "Dağıtım arka plan işlemleri",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Dağıtım arka plan işlemi (DaemonConfig) bir dış uygulamalar yönetimi arka plan işlemidir.",
     "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Deploy Daemons. Deploy Daemon (DaemonConfig) bir dış uygulamalar yönetim arka plan işlemidir.",
