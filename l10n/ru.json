@@ -21,7 +21,7 @@
     "AI Integration Team" : "Команда по интеграции ИИ",
     "ExApps Settings" : "Настройки ExApps",
     "AppAPI deploy daemon" : "Сервис развертывания AppAPI",
-    "AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps)." : "Демон развертывания AppAPI по умолчанию не установлен. Пожалуйста, зарегистрируйте демон развертывания по умолчанию в настройках для установки внешних приложений (Ex-Apps).пожалуйстаприложения",
+    "AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps)." : "Демон развертывания AppAPI по умолчанию не установлен. Пожалуйста, зарегистрируйте демон развертывания по умолчанию в настройках для установки внешних приложений (Ex-Apps).",
     "AppAPI default deploy daemon \"%s\" is not accessible. Please check the daemon configuration." : "Сервис развертывания AppAPI по-умолчанию \"%s\" недоступен. Проверьте настройки сервиса.",
     "AppAPI default deploy daemon is not using HaRP. Please consider upgrading to it for better performance." : "Сервис развертывания AppAPI по-умолчанию не использует HaRP. Задумайтесь об обновлении до него для улучшения производительности.",
     "Nextcloud AppAPI" : "Nextcloud AppAPI",
