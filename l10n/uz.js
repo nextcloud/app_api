@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Bekor qilish",
     "Delete" : "O'chirish",
     "Password confirmation failed" : "Parol tasdiqlanmadi",
+    "Default" : "Standart",
     "Edit" : "Tahrirlash",
     "Name" : "Name",
     "Remove" : "O'chirish",
