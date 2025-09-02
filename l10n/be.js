@@ -14,6 +14,7 @@ OC.L10N.register(
     "Confirm" : "Пацвердзіць",
     "Save" : "Захаваць",
     "Update to {version}" : "Абнаўленне да {version}",
+    "Visit website" : "Наведаць вэб-сайт",
     "Update to {update}" : "Абнаўленне да {update}",
     "Icon" : "Значок",
     "Version" : "Версія",
