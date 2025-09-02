@@ -21,7 +21,7 @@ OC.L10N.register(
     "Report a bug" : "Ziņot par kļūdu",
     "User documentation" : "Lietotāja dokumentācija",
     "Admin documentation" : "Pārvaldītāja dokumentācija",
-    "Developer documentation" : "Izstrādātāja dokumentācija",
+    "Developer documentation" : "Dokumentācija izstrādātājiem",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Izceltās lietotnes ir kopienas izstrādātas. Tās sniedz centrālu funkcionalitāte un ir gatavas izmantošanai produkcijā.",
     "Featured" : "Izcelta",
     "Update to {update}" : "Atjaunināt uz {update}",
