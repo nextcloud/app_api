@@ -11,6 +11,7 @@ OC.L10N.register(
     "Disabled" : "Ittwarermed",
     "Confirm" : "Serggeg",
     "Save" : "Sekles",
+    "Actions" : "Tigawin",
     "Type" : "Anaw",
     "Details" : "Talqayt",
     "Disable" : "Désactiver"
