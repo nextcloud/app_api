@@ -12,12 +12,14 @@ namespace OCA\AppAPI\Migration;
 use Closure;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
+use OCP\Migration\Attributes\CreateTable;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
 /**
  * Breaking changes migration refactoring UI tables (renames)
  */
+#[CreateTable(table: 'ex_deploy_options', columns: ['id', 'appid', 'type', 'value'], description: 'advanced deploy options')]
 class Version032001Date20250115164140 extends SimpleMigrationStep {
 	/**
 	 * @param IOutput $output
