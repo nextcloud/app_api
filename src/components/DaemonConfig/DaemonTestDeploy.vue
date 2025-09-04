@@ -54,7 +54,7 @@
 					target="_blank"
 					style="margin-right: 10px;">
 					<template #icon>
-						<Download :size="20" />
+						<TrayArrowDown :size="20" />
 					</template>
 					{{ t('app_api', 'Download ExApp logs') }}
 				</NcButton>
@@ -66,7 +66,7 @@
 					style="margin-right: 10px;"
 					@click="removeTestExApp">
 					<template #icon>
-						<TrashCan v-if="!stoppingTest" :size="20" />
+						<TrashCanOutline v-if="!stoppingTest" :size="20" />
 						<NcLoadingIcon v-else :size="20" />
 					</template>
 				</NcButton>
@@ -113,8 +113,8 @@ import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import Check from 'vue-material-design-icons/Check.vue'
 import StopIcon from 'vue-material-design-icons/Stop.vue'
 import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
-import Download from 'vue-material-design-icons/Download.vue'
-import TrashCan from 'vue-material-design-icons/TrashCan.vue'
+import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
+import TrashCanOutline from 'vue-material-design-icons/TrashCanOutline.vue'
 
 export default {
 	name: 'DaemonTestDeploy',
@@ -126,8 +126,8 @@ export default {
 		Check,
 		StopIcon,
 		OpenInNew,
-		Download,
-		TrashCan,
+		TrayArrowDown,
+		TrashCanOutline,
 	},
 	props: {
 		show: {

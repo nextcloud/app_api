@@ -15,9 +15,9 @@
 
 <script>
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import Tooltip from '@nextcloud/vue/dist/Directives/Tooltip.js'
-import Warning from 'vue-material-design-icons/Alert.vue'
-import Information from 'vue-material-design-icons/Information.vue'
+import Tooltip from '@nextcloud/vue/dist/Directives/TooltipOutline.js'
+import Warning from 'vue-material-design-icons/AlertOutline.vue'
+import Information from 'vue-material-design-icons/InformationOutline.vue'
 
 export default {
 	name: 'InfoTooltip',
