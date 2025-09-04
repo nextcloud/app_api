@@ -23,7 +23,7 @@ OC.L10N.register(
     "AI Integration Team" : "Yapay Zeka bütünleştirme ekibi",
     "ExApps Settings" : "ExApp ayarları",
     "AppAPI deploy daemon" : "AppAPI dağıtım işlemi",
-    "AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps)." : "AppAPI varsayılan dağıtım işlemi ayarlanmamış. Dış uygulamaları (ExApp) kurmak için lütfen ayarlardan bir varsayılan dağıtım işlemi kaydedin.",
+    "AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps)." : "AppAPI varsayılan dağıtım işlemi ayarlanmamış. Dış uygulamaları (ExApp) kurmak için lütfen ayarlar bölümünden bir varsayılan dağıtım işlemi kaydedin.",
     "AppAPI default deploy daemon \"%s\" is not accessible. Please check the daemon configuration." : "\"%s\" AppAPI varsayılan dağıtım işlemi erişilebilir değil. Lütfen işlem yapılandırmasını denetleyin.",
     "AppAPI default deploy daemon is not using HaRP. Please consider upgrading to it for better performance." : "AppAPI varsayılan dağıtım işlemi HaRP kullanmıyor. Lütfen daha iyi başarım için yükseltmeyi düşünün.",
     "Nextcloud AppAPI" : "Nextcloud AppAPI",
