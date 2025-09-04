@@ -28,6 +28,7 @@
     "External Apps management" : "Správa externích aplikací",
     "Admin options saved" : "Předvolby pro správu uloženy",
     "Failed to save admin options" : "Předvolby pro správu se nepodařilo uložit",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "Projekt AppAPI je vzrušující iniciativa, která cílí na zmodernizování vývoje aplikací pro Nextcloud s pomocí docker kontejnerů. To umožňuje širší volbu programovacích jazyků a delegování výpočetně náročnějších úloh na jiný server.",
     "Deploy Daemons" : "Nasadit procesy služeb",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Proces služby nasazování (DaemonConfig) slouží pro orchestraci ExApps.",
     "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Procesy nasazování. Proces služby nasazování (DaemonConfig) slouží pro orchestraci ExApps.",
