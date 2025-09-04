@@ -29,6 +29,7 @@
     "External Apps management" : "Управљање спољним апликацијама",
     "Admin options saved" : "Сачуване су админ опције",
     "Failed to save admin options" : "Није успело чување админ опција",
+    "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "AppAPI пројекат је узбудљива иницијатива чији је циљ да се револуционира начин на који се развијају апликације за Nextcloud кроз употребу docker контејнера. Тако се дозвољава слободнији избор програмског језика и омогућава да се сложенији задаци који захтевају већу рачунарску снагу извршавају на неком другом серверу.",
     "Deploy Daemons" : "Даемони за постављање",
     "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Даемон за постављање (DaemonConfig) је даемон за оркестрацију ExApps.",
     "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Даемони за постављање Даемон за постављање (DaemonConfig) је даемон за оркестрацију ExApps.",
