@@ -54,7 +54,7 @@ export default {
 		NcCheckboxRadioSwitch,
 		Cancel,
 		NcLoadingIcon,
-		TrashCanOutline,
+		Delete,
 		NcButton,
 	},
 	props: {
