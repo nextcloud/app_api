@@ -11,6 +11,7 @@ OC.L10N.register(
     "From" : "Ад",
     "To" : "Да",
     "Add" : "Дадаць",
+    "Disabled" : "Адключана",
     "Confirm" : "Пацвердзіць",
     "Save" : "Захаваць",
     "Update to {version}" : "Абнаўленне да {version}",
