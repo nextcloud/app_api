@@ -96,19 +96,11 @@ class ExAppArchiveFetcher {
 
 	public function getExAppFolder(string $appId): ?string {
 		$appsPaths = $this->config->getSystemValue('apps_paths', []);
-		$existingPath = '';
-		foreach ($appsPaths as $appPath) {
-			if ($appPath['writable'] && file_exists($appPath['path'] . '/' . $appId)) {
-				$existingPath = $appPath['path'] . '/' . $appId;
-			}
-		}
-		if (!empty($existingPath)) {
-			return $existingPath;
-		}
 		foreach ($appsPaths as $appPath) {
 			if ($appPath['writable']) {
-				if (mkdir($appPath['path'] . '/' . $appId)) {
-					return $appPath['path'] . '/' . $appId;
+				$fullAppPath = $appPath['path'] . '/' . $appId;
+				if (is_dir($fullAppPath) || mkdir($fullAppPath)) {
+					return $fullAppPath;
 				}
 			}
 		}
@@ -131,7 +123,7 @@ class ExAppArchiveFetcher {
 			return;
 		}
 		foreach ($appsPaths as $appPath) {
-			if ($appPath['writable'] && file_exists($appPath['path'] . '/' . $appId)) {
+			if ($appPath['writable'] && is_dir($appPath['path'] . '/' . $appId)) {
 				$this->rmdirr($appPath['path'] . '/' . $appId);
 			}
 		}
