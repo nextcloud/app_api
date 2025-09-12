@@ -95,32 +95,36 @@ class ExAppArchiveFetcher {
 	}
 
 	public function getExAppFolder(string $appId): ?string {
-		$appsPaths = $this->config->getSystemValue('apps_paths');
-		$existingPath = '';
-		foreach ($appsPaths as $appPath) {
-			if ($appPath['writable'] && file_exists($appPath['path'] . '/' . $appId)) {
-				$existingPath = $appPath['path'] . '/' . $appId;
-			}
-		}
-		if (!empty($existingPath)) {
-			return $existingPath;
-		}
+		$appsPaths = $this->config->getSystemValue('apps_paths', []);
 		foreach ($appsPaths as $appPath) {
 			if ($appPath['writable']) {
-				if (mkdir($appPath['path'] . '/' . $appId)) {
-					return $appPath['path'] . '/' . $appId;
+				$fullAppPath = $appPath['path'] . '/' . $appId;
+				if (is_dir($fullAppPath) || mkdir($fullAppPath)) {
+					return $fullAppPath;
 				}
 			}
+		}
+		// Fallback to default ExApp folder
+		$defaultExAppFolder = \OC::$SERVERROOT . '/apps/' . $appId;
+		if (is_dir($defaultExAppFolder)) {
+			return $defaultExAppFolder;
 		}
 		return null;
 	}
 
 	public function removeExAppFolder(string $appId): void {
-		foreach ($this->config->getSystemValue('apps_paths', []) as $appPath) {
-			if ($appPath['writable']) {
-				if (file_exists($appPath['path'] . '/' . $appId)) {
-					$this->rmdirr($appPath['path'] . '/' . $appId);
-				}
+		$appsPaths = $this->config->getSystemValue('apps_paths', []);
+		if (empty($appsPaths)) {
+			// fallback check of default ExApp folder
+			$defaultExAppFolder = \OC::$SERVERROOT . '/apps/' . $appId;
+			if (is_dir($defaultExAppFolder)) {
+				$this->rmdirr($defaultExAppFolder);
+			}
+			return;
+		}
+		foreach ($appsPaths as $appPath) {
+			if ($appPath['writable'] && is_dir($appPath['path'] . '/' . $appId)) {
+				$this->rmdirr($appPath['path'] . '/' . $appId);
 			}
 		}
 	}
