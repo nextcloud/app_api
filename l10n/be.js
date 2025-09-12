@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Скасаваць",
     "Delete" : "Выдаліць",
+    "Default" : "Прадвызначаныя",
     "Edit" : "Рэдагаваць",
     "Name" : "Назва",
     "Host" : "Хост",
@@ -19,6 +20,7 @@ OC.L10N.register(
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Гэтай праграме не прызначана максімальная версія Nextcloud. У будучыні гэта будзе памылкай.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Гэта праграма не можа быць усталявана, бо не выкананы наступныя залежнасці:",
     "Visit website" : "Наведаць вэб-сайт",
+    "Report a bug" : "Паведаміць пра памылку",
     "Update to {update}" : "Абнаўленне да {update}",
     "Icon" : "Значок",
     "Version" : "Версія",
