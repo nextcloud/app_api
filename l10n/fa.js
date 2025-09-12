@@ -12,6 +12,7 @@ OC.L10N.register(
     "Remove" : "حذف",
     "From" : "از",
     "To" : "به",
+    "Add" : "افزودن",
     "Display name" : "Display name",
     "Disabled" : "غیرفعال شده",
     "Confirm" : "تأیید",

@@ -45,7 +45,7 @@ import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
-import Delete from 'vue-material-design-icons/Delete.vue'
+import Delete from 'vue-material-design-icons/TrashCanOutline.vue'
 
 export default {
 	name: 'ConfirmDaemonDeleteModal',

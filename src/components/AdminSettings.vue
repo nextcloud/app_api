@@ -9,7 +9,7 @@
 				<AppAPIIcon class="app-api-icon" />
 				{{ t('app_api', 'AppAPI') }}
 			</h2>
-			<p>{{ t('app_api', 'The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud.') }}</p>
+			<p>{{ t('app_api', 'The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server.') }}</p>
 		</div>
 		<NcSettingsSection
 			:name="t('app_api', 'Deploy Daemons')"
@@ -132,7 +132,6 @@ export default {
 <style scoped lang="scss">
 #app_api_settings {
 	h2 {
-		display: flex;
 		.app-api-icon {
 			margin-right: 12px;
 		}

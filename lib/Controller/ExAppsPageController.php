@@ -314,7 +314,7 @@ class ExAppsPageController extends Controller {
 	}
 
 	#[PasswordConfirmationRequired]
-	public function enableApp(string $appId, array $deployOptions = []): JSONResponse {
+	public function enableApp(string $appId, string $daemonId, array $deployOptions = []): JSONResponse {
 		$updateRequired = false;
 		$exApp = $this->exAppService->getExApp($appId);
 
@@ -341,6 +341,7 @@ class ExAppsPageController extends Controller {
 					'app_api:app:register',
 					'--silent',
 					$appId,
+					$daemonId,
 				],
 				$envArgs,
 				$mountArgs
