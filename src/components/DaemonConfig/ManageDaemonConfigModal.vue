@@ -209,6 +209,36 @@
 									:aria-label="t('app_api', 'Compute device')"
 									:options="computeDevices" />
 							</div>
+							<div class="external-label" :aria-label="t('app_api', 'Memory limit')">
+								<label for="memory-limit">
+									{{ t('app_api', 'Memory limit (in MiB)') }}
+									<InfoTooltip :text="t('app_api', 'Maximum memory that the ExApp container can use in mebibytes')" />
+								</label>
+								<NcInputField
+									id="memory-limit"
+									ref="memory-limit"
+									class="ex-input-field"
+									:value.sync="memoryLimit"
+									:placeholder="t('app_api', 'Memory limit (in MiB)')"
+									:aria-label="t('app_api', 'Memory limit (in MiB)')"
+									:error="isMemoryLimitValid === false"
+									:helper-text="isMemoryLimitValid === false ? t('app_api', 'Must be a positive integer') : ''" />
+							</div>
+							<div class="external-label" :aria-label="t('app_api', 'CPU limit')">
+								<label for="cpu-limit">
+									{{ t('app_api', 'CPU limit') }}
+									<InfoTooltip :text="t('app_api', 'Maximum CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)')" />
+								</label>
+								<NcInputField
+									id="cpu-limit"
+									ref="cpu-limit"
+									class="ex-input-field"
+									:value.sync="cpuLimit"
+									:placeholder="t('app_api', 'CPU limit as decimal value')"
+									:aria-label="t('app_api', 'CPU limit')"
+									:error="isCpuLimitValid === false"
+									:helper-text="isCpuLimitValid === false ? t('app_api', 'Must be a positive number') : ''" />
+							</div>
 							<template v-if="additionalOptions.length > 0">
 								<div class="row" style="flex-direction: column;">
 									<div
@@ -413,10 +443,29 @@ export default {
 			data.defaultDaemon = this.isDefaultDaemon
 			data.additionalOptions = Object.entries(this.daemon.deploy_config.additional_options ?? {}).map(([key, value]) => ({ key, value }))
 			data.deployConfigSettingsOpened = true
+			if (data.deployConfig.resourceLimits) {
+				if (data.deployConfig.resourceLimits.memory) {
+					// memory in bytes
+					data.deployConfig.resourceLimits.memoryMiB = data.deployConfig.resourceLimits.memory / (1024 * 1024)
+					delete data.deployConfig.resourceLimits.memory
+				} else {
+					data.deployConfig.resourceLimits.memoryMiB = null
+				}
+				if (data.deployConfig.resourceLimits.nanoCPUs) {
+					data.deployConfig.resourceLimits.cpus = data.deployConfig.resourceLimits.nanoCPUs / 1000000000
+					delete data.deployConfig.resourceLimits.nanoCPUs
+				} else {
+					data.deployConfig.resourceLimits.cpus = null
+				}
+			}
 		}
 		if (!data.deployConfig.harp) {
 			data.deployConfig.harp = null
 			data.deployConfigSettingsOpened = false
+		}
+
+		if (!data.deployConfig.resourceLimits) {
+			data.deployConfig.resourceLimits = { memoryMiB: null, cpus: null }
 		}
 
 		return data
@@ -436,6 +485,32 @@ export default {
 		},
 		daemonProtocol() {
 			return this.httpsEnabled ? 'https' : 'http'
+		},
+		memoryLimit: {
+			get() {
+				return this.deployConfig.resourceLimits.memoryMiB || ''
+			},
+			set(value) {
+				this.deployConfig.resourceLimits.memoryMiB = value === '' ? null : value
+			},
+		},
+		cpuLimit: {
+			get() {
+				return this.deployConfig.resourceLimits.cpus || ''
+			},
+			set(value) {
+				this.deployConfig.resourceLimits.cpus = value === '' ? null : value
+			},
+		},
+		isMemoryLimitValid() {
+			if (this.memoryLimit === '' || this.memoryLimit === null) return true
+			const str = String(this.memoryLimit).trim()
+			return /^[1-9]\d*$/.test(str)
+		},
+		isCpuLimitValid() {
+			if (this.cpuLimit === '' || this.cpuLimit === null) return true
+			const str = String(this.cpuLimit).trim()
+			return /^\d*\.?\d+$/.test(str)
 		},
 		isDaemonNameInvalid() {
 			return this.daemons.some(daemon => daemon.name === this.name && daemon.name !== this.daemon?.name)
@@ -463,7 +538,7 @@ export default {
 			return t('app_api', 'The docker network that the deployed ex-apps would use.')
 		},
 		cannotRegister() {
-			return this.isDaemonNameInvalid === true || this.isHaProxyPasswordValid === false || (this.isHarp && !this.deployConfig.net)
+			return this.isDaemonNameInvalid === true || this.isHaProxyPasswordValid === false || (this.isHarp && !this.deployConfig.net) || this.isMemoryLimitValid === false || this.isCpuLimitValid === false
 		},
 		isAdditionalOptionValid() {
 			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
@@ -619,6 +694,17 @@ export default {
 					registries: this.deployConfig.registries || null,
 				},
 			}
+
+			const resourceLimits = {}
+			if (this.deployConfig.resourceLimits.memoryMiB && this.isMemoryLimitValid) {
+				// memory in bytes
+				resourceLimits.memory = Number(this.deployConfig.resourceLimits.memoryMiB) * 1024 * 1024
+			}
+			if (this.deployConfig.resourceLimits.cpus && this.isCpuLimitValid) {
+				resourceLimits.nanoCPUs = Number(this.deployConfig.resourceLimits.cpus) * 1000000000
+			}
+			params.deploy_config.resourceLimits = resourceLimits
+
 			if (this.additionalOptions.length > 0) {
 				params.deploy_config.additional_options = this.additionalOptions.reduce((acc, option) => {
 					acc[option.key] = option.value

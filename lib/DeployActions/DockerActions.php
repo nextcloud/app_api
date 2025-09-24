@@ -160,8 +160,12 @@ class DockerActions implements IDeployActions {
 			'restart_policy' => $this->appConfig->getValueString(Application::APP_ID, 'container_restart_policy', 'unless-stopped', lazy: true),
 			'compute_device' => $computeDevice,
 			'mount_points' => $mountPoints,
-			'start_container' => true,
+			'start_container' => true
 		];
+		
+		if (isset($params['container_params']['resourceLimits']) && !empty($params['container_params']['resourceLimits'])) {
+			$createPayload['resource_limits'] = $params['container_params']['resourceLimits'];
+		}
 
 		$this->logger->debug(sprintf('Payload for /docker/exapp/create for %s: %s', $exAppName, json_encode($createPayload)));
 		try {
@@ -554,6 +558,16 @@ class DockerActions implements IDeployActions {
 					];
 				}, $params['mounts'])
 			);
+		}
+
+		if (isset($params['resourceLimits'])) {
+			if (isset($params['resourceLimits']['memory']) && $params['resourceLimits']['memory'] > 0) {
+				// memory in bytes
+				$containerParams['HostConfig']['Memory'] = $params['resourceLimits']['memory'];
+			}
+			if (isset($params['resourceLimits']['nanoCPUs']) && $params['resourceLimits']['nanoCPUs'] > 0) {
+				$containerParams['HostConfig']['NanoCPUs'] = $params['resourceLimits']['nanoCPUs'];
+			}
 		}
 
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/create?name=%s', urlencode($this->buildExAppContainerName($params['name']))));
@@ -1107,6 +1121,7 @@ class DockerActions implements IDeployActions {
 			'devices' => $devices,
 			'deviceRequests' => $deviceRequests,
 			'mounts' => $appInfo['external-app']['mounts'] ?? [],
+			'resourceLimits' => $deployConfig['resourceLimits'] ?? []
 		];
 
 		return [
