@@ -11,6 +11,8 @@ OC.L10N.register(
     "Disabled" : "Ittwarermed",
     "Confirm" : "Serggeg",
     "Save" : "Sekles",
+    "Update to {version}" : "Leqqem ar {version}",
+    "Update to {update}" : "Leqqem ar {update}",
     "Actions" : "Tigawin",
     "Type" : "Anaw",
     "Details" : "Talqayt",
