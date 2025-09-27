@@ -19,6 +19,10 @@ export const DAEMON_TEMPLATES = [
 				id: 'cpu',
 				label: 'CPU',
 			},
+			resourceLimits: {
+				memory: null,
+				nanoCPUs: null,
+			},
 			harp: {
 				frp_address: 'localhost:8782',
 				docker_socket_port: 24000,
@@ -42,6 +46,10 @@ export const DAEMON_TEMPLATES = [
 			computeDevice: {
 				id: 'cpu',
 				label: 'CPU',
+			},
+			resourceLimits: {
+				memory: null,
+				nanoCPUs: null,
 			},
 			harp: {
 				frp_address: 'appapi-harp:8782',
@@ -67,6 +75,10 @@ export const DAEMON_TEMPLATES = [
 				id: 'cpu',
 				label: 'CPU',
 			},
+			resourceLimits: {
+				memory: null,
+				nanoCPUs: null,
+			},
 			harp: {
 				frp_address: 'nextcloud-aio-harp:8782',
 				docker_socket_port: 24000,
@@ -90,6 +102,10 @@ export const DAEMON_TEMPLATES = [
 			computeDevice: {
 				id: 'cpu',
 				label: 'CPU',
+			},
+			resourceLimits: {
+				memory: null,
+				nanoCPUs: null,
 			},
 			harp: {
 				frp_address: 'localhost:8782',
@@ -115,6 +131,10 @@ export const DAEMON_TEMPLATES = [
 				id: 'cpu',
 				label: 'CPU',
 			},
+			resourceLimits: {
+				memory: null,
+				nanoCPUs: null,
+			},
 			harp: null,
 		},
 		deployConfigSettingsOpened: false,
@@ -134,6 +154,10 @@ export const DAEMON_TEMPLATES = [
 			computeDevice: {
 				id: 'cpu',
 				label: 'CPU',
+			},
+			resourceLimits: {
+				memory: null,
+				nanoCPUs: null,
 			},
 			harp: null,
 		},
@@ -155,6 +179,10 @@ export const DAEMON_TEMPLATES = [
 				id: 'cpu',
 				label: 'CPU',
 			},
+			resourceLimits: {
+				memory: null,
+				nanoCPUs: null,
+			},
 			harp: null,
 		},
 		deployConfigSettingsOpened: false,
@@ -174,6 +202,10 @@ export const DAEMON_TEMPLATES = [
 			computeDevice: {
 				id: 'cpu',
 				label: 'CPU',
+			},
+			resourceLimits: {
+				memory: null,
+				nanoCPUs: null,
 			},
 			harp: null,
 		},
