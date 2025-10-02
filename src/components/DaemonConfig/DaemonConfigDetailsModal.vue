@@ -41,6 +41,9 @@
 				<p v-if="daemon.deploy_config.computeDevice">
 					<b>{{ t('app_api', 'Compute device') }}:</b> {{ daemon.deploy_config?.computeDevice?.label }}
 				</p>
+				<p><b>{{ t('app_api', 'Memory limit') }}:</b> {{ formatMemoryLimit(daemon.deploy_config?.resourceLimits?.memory) }}</p>
+
+				<p><b>{{ t('app_api', 'CPU limit') }}:</b> {{ formatCpuLimit(daemon.deploy_config?.resourceLimits?.nanoCPUs) }}</p>
 
 				<div v-if="daemon.deploy_config.additional_options" class="additional-options">
 					<h3>{{ t('app_api', 'Additional options') }}</h3>
@@ -128,6 +131,27 @@ export default {
 					showError(t('app_api', 'Failed to check connection to Daemon. Check the logs'))
 					console.debug(err)
 				})
+		},
+		formatMemoryLimit(memoryBytes) {
+			if (!memoryBytes) {
+				return t('app_api', 'Unlimited')
+			}
+			const memoryMiB = memoryBytes / (1024 * 1024)
+			if (memoryMiB >= 1024) {
+				const memoryGiB = memoryMiB / 1024
+				return t('app_api', '{size} GiB', { size: memoryGiB.toFixed(1) })
+			}
+			return t('app_api', '{size} MiB', { size: Math.round(memoryMiB) })
+		},
+		formatCpuLimit(nanoCpus) {
+			if (!nanoCpus) {
+				return t('app_api', 'Unlimited')
+			}
+			const cpus = nanoCpus / 1000000000
+			if (cpus === 1) {
+				return t('app_api', '1 CPU')
+			}
+			return t('app_api', '{cpus} CPUs', { cpus: cpus.toFixed(2) })
 		},
 	},
 }
