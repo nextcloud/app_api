@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Hủy",
     "Delete" : "Xóa",
     "Edit" : "Chỉnh sửa",
+    "Unlimited" : "Không giới hạn",
     "Name" : "Tên",
     "Host" : "Máy chủ",
     "Nextcloud URL" : "vWorkspace URL",

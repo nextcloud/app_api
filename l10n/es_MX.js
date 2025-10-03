@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Eliminar",
     "Default" : "Por omisión",
     "Edit" : "Editar",
+    "Unlimited" : "Ilimitado",
     "Deploy Daemon" : "Desplegar demonio",
     "Name" : "Nombre",
     "Host" : "Servidor",

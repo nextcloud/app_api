@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Izbriši",
     "Default" : "Zadani",
     "Edit" : "Uredi",
+    "Unlimited" : "Neograničeno",
     "Name" : "Naziv",
     "Host" : "Glavno računalo",
     "Nextcloud URL" : "Nextcloud URL",

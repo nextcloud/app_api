@@ -58,6 +58,7 @@ OC.L10N.register(
     "Daemon connection successful" : "D'éirigh le nasc deamhan",
     "Failed to connect to Daemon. Check the logs" : "Theip ar nascadh le Deamhan. Seiceáil na logs",
     "Failed to check connection to Daemon. Check the logs" : "Theip ar an nasc le Deamhan a sheiceáil. Seiceáil na logs",
+    "Unlimited" : "Gan teorainn",
     "Deploy daemon config details" : "Imscaradh sonraí cumraíochta deamhan",
     "Deploy Daemon" : "Imscaradh Deamhan",
     "Default daemon. ExApps will be installed on it" : "Deamhan réamhshocraithe. Déanfar ExApps a shuiteáil air",

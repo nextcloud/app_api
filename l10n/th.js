@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "ยกเลิก",
     "Delete" : "ลบ",
     "Edit" : "แก้ไข",
+    "Unlimited" : "ไม่จำกัด",
     "Name" : "ชื่อ",
     "Host" : "โฮสต์",
     "Enabled" : "เปิดใช้งาน",

@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "מחיקה",
     "Default" : "ברירת מחדל",
     "Edit" : "עריכה",
+    "Unlimited" : "ללא הגבלה",
     "Name" : "שם",
     "Host" : "מארח",
     "Nextcloud URL" : "כתובת Nextcloud",

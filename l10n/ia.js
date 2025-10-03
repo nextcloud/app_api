@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Delete" : "Deler",
     "Edit" : "Modificar",
+    "Unlimited" : "Ilimitate",
     "Host" : "Hospite",
     "Enabled" : "Activate",
     "Confirm" : "Confirmar",

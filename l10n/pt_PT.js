@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Eliminar",
     "Default" : "Predefinido",
     "Edit" : "Editar",
+    "Unlimited" : "Ilimitado",
     "Name" : "Nome",
     "Host" : "Anfitrião",
     "Enabled" : "Ativado",
