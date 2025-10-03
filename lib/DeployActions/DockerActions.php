@@ -162,7 +162,7 @@ class DockerActions implements IDeployActions {
 			'mount_points' => $mountPoints,
 			'start_container' => true
 		];
-		
+
 		if (isset($params['container_params']['resourceLimits']) && !empty($params['container_params']['resourceLimits'])) {
 			$createPayload['resource_limits'] = $params['container_params']['resourceLimits'];
 		}
@@ -529,12 +529,31 @@ class DockerActions implements IDeployActions {
 			$containerParams['NetworkingConfig'] = $networkingConfig;
 		}
 
+		$isPodman = $this->isPodman($dockerUrl);
 		if (isset($params['computeDevice'])) {
 			if ($params['computeDevice']['id'] === 'cuda') {
-				if (isset($params['deviceRequests'])) {
-					$containerParams['HostConfig']['DeviceRequests'] = $params['deviceRequests'];
+				if ($isPodman === true) {
+					// Podman 5.4+: use Docker-compat DeviceRequests with CDI driver.
+					$selectors = $params['cdiDevices'] ?? ['nvidia.com/gpu=all'];
+					$containerParams['HostConfig']['DeviceRequests'] = [[
+						'Driver' => 'cdi',
+						'DeviceIDs' => $selectors,
+					]];
+					// Remove NVIDIA_* envs to avoid hook/handoff conflicts under CDI
+					if (!empty($containerParams['Env'])) {
+						$containerParams['Env'] = array_values(array_filter(
+							$containerParams['Env'],
+							fn (string $e) =>
+								!str_starts_with($e, 'NVIDIA_VISIBLE_DEVICES=') &&
+								!str_starts_with($e, 'NVIDIA_DRIVER_CAPABILITIES=')
+						));
+					}
 				} else {
-					$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
+					if (isset($params['deviceRequests'])) {
+						$containerParams['HostConfig']['DeviceRequests'] = $params['deviceRequests'];
+					} else {
+						$containerParams['HostConfig']['DeviceRequests'] = $this->buildDefaultGPUDeviceRequests();
+					}
 				}
 			}
 			if ($params['computeDevice']['id'] === 'rocm') {
@@ -1350,5 +1369,30 @@ class DockerActions implements IDeployActions {
 			}
 		}
 		return $isLocalPath;
+	}
+
+	private function buildCompatUrlRaw(string $dockerUrl, string $route): string {
+		return rtrim($dockerUrl, '/') . '/' . ltrim($route, '/');
+	}
+
+	private function isPodman(string $dockerUrl): bool {
+		try {
+			// _ping is unversioned and returns headers we can key on
+			$resp = $this->guzzleClient->head($this->buildCompatUrlRaw($dockerUrl, '_ping'));
+			if ($resp->hasHeader('Libpod-Api-Version')) {
+				return true;
+			}
+			$server = $resp->getHeaderLine('Server');
+			if ($server && stripos($server, 'Libpod') !== false) {
+				return true;
+			}
+			// fallback: /version body
+			$resp = $this->guzzleClient->get($this->buildCompatUrlRaw($dockerUrl, 'version'));
+			$body = json_decode((string) $resp->getBody(), true);
+			$platformName = $body['Platform']['Name'] ?? '';
+			return stripos($platformName, 'podman') !== false;
+		} catch (\Throwable $e) {
+			return false;
+		}
 	}
 }
