@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Delete",
     "Default" : "Default",
     "Edit" : "Edit",
+    "Unlimited" : "Unlimited",
     "Name" : "Name",
     "Host" : "Host",
     "Nextcloud URL" : "Nextcloud URL",

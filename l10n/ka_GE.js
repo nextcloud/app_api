@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "წაშლა",
     "Default" : "საწყისი პარამეტრები",
     "Edit" : "შეცვლა",
+    "Unlimited" : "ულიმიტო",
     "Name" : "სახელი",
     "Host" : "ჰოსტი",
     "Enabled" : "მოქმედია",

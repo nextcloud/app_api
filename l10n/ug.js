@@ -48,6 +48,7 @@ OC.L10N.register(
     "Daemon connection successful" : "Daemon ئۇلىنىشى مۇۋەپپەقىيەتلىك بولدى",
     "Failed to connect to Daemon. Check the logs" : "Daemon غا ئۇلىنالمىدى. خاتىرىلەرنى تەكشۈرۈڭ",
     "Failed to check connection to Daemon. Check the logs" : "Daemon غا ئۇلىنىشنى تەكشۈرەلمىدى. خاتىرىلەرنى تەكشۈرۈڭ",
+    "Unlimited" : "چەكسىز",
     "Deploy daemon config details" : "Daemon سەپلىمە تەپسىلاتلىرىنى ئورۇنلاشتۇرۇڭ",
     "Deploy Daemon" : "Daemon نى ئورۇنلاشتۇرۇڭ",
     "Default daemon. ExApps will be installed on it" : "كۆڭۈلدىكى daemon. ئۇنىڭغا ExApps ئورنىتىلىدۇ",

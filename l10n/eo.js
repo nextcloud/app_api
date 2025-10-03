@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Delete" : "Forigi",
     "Edit" : "Modifi",
+    "Unlimited" : "Senlima",
     "Name" : "Nomo",
     "Host" : "Gastigo",
     "From" : "De",

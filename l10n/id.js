@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Hapus",
     "Default" : "Default",
     "Edit" : "Sunting",
+    "Unlimited" : "Tak terbatas",
     "Name" : "Nama",
     "Host" : "Host",
     "Enabled" : "Diaktifkan",

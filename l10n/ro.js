@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Șterge",
     "Default" : "Implicită",
     "Edit" : "Editează",
+    "Unlimited" : "Nelimitată",
     "Name" : "Nume",
     "Host" : "Gazdă",
     "Enabled" : "Activat",

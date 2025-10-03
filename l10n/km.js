@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "លើកលែង",
     "Delete" : "លុប",
     "Edit" : "កែប្រែ",
+    "Unlimited" : "មិន​កំណត់",
     "Name" : "ឈ្មោះ",
     "Host" : "ម៉ាស៊ីន​ផ្ទុក",
     "Enabled" : "បាន​បើក",
