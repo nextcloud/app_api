@@ -8,6 +8,7 @@ OC.L10N.register(
     "Password confirmation failed" : "Salasõna kinnitamine ei õnnestunud",
     "Default" : "Vaikimisi",
     "Edit" : "Redigeeri",
+    "Unlimited" : "Piiramatult",
     "Deploy Daemon" : "Kasutuselevõtmise taustateenus",
     "Name" : "Nimi",
     "Host" : "Host",

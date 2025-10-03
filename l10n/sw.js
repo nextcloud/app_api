@@ -58,6 +58,7 @@ OC.L10N.register(
     "Daemon connection successful" : "Muunganisho wa Daemon umefaulu",
     "Failed to connect to Daemon. Check the logs" : "Imeshindwa kuunganisha kwa Daemon. Angalia kumbukumbu",
     "Failed to check connection to Daemon. Check the logs" : "Imeshindwa kuangalia muunganisho kwenye Daemon. Angalia kumbukumbu",
+    "Unlimited" : "Isiyo na kikomo",
     "Deploy daemon config details" : "Tumia maelezo ya usanidi wa daemon",
     "Deploy Daemon" : "Tumia Daemon",
     "Default daemon. ExApps will be installed on it" : "Daemon chaguo-msingi. ExApps itasakinishwa juu yake",

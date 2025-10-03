@@ -6,6 +6,7 @@ OC.L10N.register(
     "Password confirmation failed" : "Parol tasdiqlanmadi",
     "Default" : "Standart",
     "Edit" : "Tahrirlash",
+    "Unlimited" : "Unlimited",
     "Name" : "Name",
     "Remove" : "O'chirish",
     "From" : "Dan",

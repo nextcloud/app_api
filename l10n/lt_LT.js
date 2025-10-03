@@ -6,6 +6,7 @@ OC.L10N.register(
     "Delete" : "Ištrinti",
     "Default" : "Numatytasis",
     "Edit" : "Taisyti",
+    "Unlimited" : "Neribotai",
     "Name" : "Pavadinimas",
     "Protocol" : "Protokolas",
     "Host" : "Serveris",

@@ -58,6 +58,7 @@ OC.L10N.register(
     "Daemon connection successful" : "Daemon forbundet",
     "Failed to connect to Daemon. Check the logs" : "Kunne ikke forbinde til Daemon. Kontroller loggen",
     "Failed to check connection to Daemon. Check the logs" : "Kunne ikke forbinde til daemon. Kontroller loggen",
+    "Unlimited" : "Ubegrænset",
     "Deploy daemon config details" : "Udrulnings systemtjeneste konfigurationsdetaljer",
     "Deploy Daemon" : "Udrulnings systemtjeneste",
     "Default daemon. ExApps will be installed on it" : "Standard daemon. ExApps vil blive installeret på den",

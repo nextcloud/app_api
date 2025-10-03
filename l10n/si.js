@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "අවලංගු",
     "Edit" : "සංස්කරණය",
+    "Unlimited" : "අසීමිත",
     "Name" : "නම",
     "Host" : " ධාරකය",
     "Enabled" : "සබල කර ඇත",

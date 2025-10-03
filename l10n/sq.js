@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Fshi",
     "Default" : "Paraprake",
     "Edit" : "Përpuno",
+    "Unlimited" : "E palimituar",
     "Name" : "Emër",
     "Host" : "Strehë",
     "Enabled" : "E aktivizuar",

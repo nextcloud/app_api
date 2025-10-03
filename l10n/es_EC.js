@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Cancelar",
     "Delete" : "Borrar",
     "Edit" : "Editar",
+    "Unlimited" : "Ilimitado",
     "Name" : "Nombre",
     "Host" : "Servidor",
     "Nextcloud URL" : "URL de Nextcloud",

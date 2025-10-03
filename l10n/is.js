@@ -5,6 +5,7 @@ OC.L10N.register(
     "Delete" : "Eyða",
     "Default" : "Sjálfgefið",
     "Edit" : "Breyta",
+    "Unlimited" : "Ótakmarkað",
     "Deploy Daemon" : "Setja bakgrunnsþjónustu (daemon) í gang",
     "Name" : "Heiti",
     "Host" : "Þjónn",
