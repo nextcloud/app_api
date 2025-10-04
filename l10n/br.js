@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Nullañ",
     "Delete" : "Dilemel",
     "Edit" : "Embann",
+    "Unlimited" : "Didermenet",
     "Name" : "Anv",
     "Host" : "Ostiz",
     "Display name" : "Anv ardivink",

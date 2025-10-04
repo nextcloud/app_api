@@ -54,6 +54,7 @@ OC.L10N.register(
     "Daemon connection successful" : "تمّ الاتصال بنجاح مع برنامج الخادم الخفي",
     "Failed to connect to Daemon. Check the logs" : "تعذّر الاتصال مع البرنامج الخفي",
     "Failed to check connection to Daemon. Check the logs" : "تعذّر اختبار الاتصال مع البرنامج الخفي. راجع سجل الحركات",
+    "Unlimited" : "غير محدود",
     "Deploy daemon config details" : "تفاصيل تهيئة برنامج النشر الخفي ",
     "Deploy Daemon" : "نشر البرنامج الخفي",
     "Default daemon. ExApps will be installed on it" : "البرنامج الخفي التلقائي. سوف يتم تثبيت التطبيقات الخارجية عليه.",
