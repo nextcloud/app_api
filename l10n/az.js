@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Delete" : "Sil",
     "Edit" : "Dəyişiklik et",
+    "Unlimited" : "Limitsiz",
     "Name" : "Ad",
     "Host" : "Şəbəkədə ünvan",
     "Enabled" : "İşə salınıb",

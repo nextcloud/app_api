@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Cancel",
     "Delete" : "Skrap",
+    "Unlimited" : "Onbeperkte",
     "Host" : "Gasheer",
     "From" : "Van",
     "To" : "Aan",
