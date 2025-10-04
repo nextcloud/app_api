@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "বাতিল করুন",
     "Delete" : "মুছে",
     "Edit" : "সম্পাদনা",
+    "Unlimited" : "অসীম",
     "Name" : "নাম",
     "Host" : "হোস্ট",
     "Enabled" : "কার্যকর",

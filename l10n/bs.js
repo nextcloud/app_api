@@ -4,6 +4,7 @@ OC.L10N.register(
     "Cancel" : "Odustani",
     "Delete" : "Obriši",
     "Edit" : "Izmjeni",
+    "Unlimited" : "Neograničeno",
     "Name" : "Ime",
     "Enabled" : "Aktivirano",
     "Disabled" : "Onemogućeno",

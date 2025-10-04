@@ -16,6 +16,7 @@ OC.L10N.register(
     "Set as default" : "Predeterminar",
     "Edit" : "Editar",
     "Daemon connection successful" : "La conexón del degorriu foi correuta",
+    "Unlimited" : "Ensin llende",
     "Name" : "Nome",
     "Protocol" : "Protocolu",
     "Host" : "Agospiador",
