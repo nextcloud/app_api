@@ -73,15 +73,16 @@ class HarpController extends Controller {
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			$this->logger->error('ExApp not found', ['appId' => $appId]);
-			// Protection for guessing installed ExApps list
-			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
-				'appid' => $appId,
-			]);
 			// return the same response as invalid harp key to prevent ex-app guessing
 			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
 		}
 
 		if (!$this->validateHarpSharedKey($exApp)) {
+			// Protection for guessing HaRP shared key
+			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
+				'appid' => $appId,
+			]);
+			$this->logger->error('Harp shared key is not valid', ['appId' => $appId]);
 			return new DataResponse(['message' => 'Harp shared key is not valid'], Http::STATUS_UNAUTHORIZED);
 		}
 
