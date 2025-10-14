@@ -17,6 +17,7 @@
     "Confirm" : "Пацвердзіць",
     "Save" : "Захаваць",
     "Update to {version}" : "Абнавіць да {version}",
+    "Delete data on remove" : "Ачысціць даныя пры выдаленні",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Гэтай праграме не прызначана мінімальная версія Nextcloud. У будучыні гэта будзе памылкай.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Гэтай праграме не прызначана максімальная версія Nextcloud. У будучыні гэта будзе памылкай.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Гэта праграма не можа быць усталявана, бо не выкананы наступныя залежнасці:",
