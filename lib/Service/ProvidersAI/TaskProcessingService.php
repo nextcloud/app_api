@@ -13,6 +13,8 @@ use JsonException;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\TaskProcessing\TaskProcessingProvider;
 use OCA\AppAPI\Db\TaskProcessing\TaskProcessingProviderMapper;
+use OCA\AppAPI\PublicFunctions;
+use OCA\AppAPI\Service\AppAPIService;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -22,6 +24,7 @@ use OCP\ICacheFactory;
 use OCP\IServerContainer;
 use OCP\TaskProcessing\EShapeType;
 use OCP\TaskProcessing\IProvider;
+use OCP\TaskProcessing\ITriggerableProvider;
 use OCP\TaskProcessing\ITaskType;
 use OCP\TaskProcessing\ShapeDescriptor;
 use OCP\TaskProcessing\ShapeEnumValue;
@@ -35,6 +38,7 @@ class TaskProcessingService {
 		ICacheFactory $cacheFactory,
 		private readonly TaskProcessingProviderMapper $mapper,
 		private readonly LoggerInterface $logger,
+		private readonly PublicFunctions $service,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_task_processing_providers');
@@ -241,7 +245,7 @@ class TaskProcessingService {
 			$className = '\\OCA\\AppAPI\\' . $exAppProvider->getAppId() . '\\' . $exAppProvider->getName();
 
 			try {
-				$provider = $this->getAnonymousExAppProvider(json_decode($exAppProvider->getProvider(), true, flags: JSON_THROW_ON_ERROR));
+				$provider = $this->getAnonymousExAppProvider(json_decode($exAppProvider->getProvider(), true, flags: JSON_THROW_ON_ERROR), $exAppProvider->getAppId());
 			} catch (JsonException $e) {
 				$this->logger->debug('Failed to register ExApp TaskProcessing provider', ['exAppId' => $exAppProvider->getAppId(), 'taskType' => $exAppProvider->getName(), 'exception' => $e]);
 				continue;
@@ -261,10 +265,13 @@ class TaskProcessingService {
 	 */
 	public function getAnonymousExAppProvider(
 		array $provider,
+		string $appId,
 	): IProvider {
-		return new class($provider) implements IProvider {
+		return new class($provider, $appId, $this->service) implements IProvider, ITriggerableProvider {
 			public function __construct(
 				private readonly array $provider,
+				private readonly string $appId,
+				private readonly PublicFunctions $service,
 			) {
 			}
 
@@ -278,6 +285,10 @@ class TaskProcessingService {
 
 			public function getTaskTypeId(): string {
 				return $this->provider['task_type'];
+			}
+
+			public function trigger(): void {
+				$this->service->exAppRequest($this->appId, '/trigger', params: ['providerId' => $this->provider['id']]);
 			}
 
 			public function getExpectedRuntime(): int {
