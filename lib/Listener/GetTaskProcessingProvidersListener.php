@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Listener;
 
 use JsonException;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -19,6 +21,8 @@ use Psr\Log\LoggerInterface;
 class GetTaskProcessingProvidersListener implements IEventListener {
 	public function __construct(
 		private readonly TaskProcessingService $taskProcessingService,
+		private readonly ExAppService $exAppService,
+		private readonly AppAPIService $appAPIService,
 		private readonly LoggerInterface $logger,
 	) {
 	}
@@ -32,6 +36,8 @@ class GetTaskProcessingProvidersListener implements IEventListener {
 			return;
 		}
 
+		$this->taskProcessingService->setExAppService($this->exAppService);
+		$this->taskProcessingService->setAppAPIService($this->appAPIService);
 		$exAppsProviders = $this->taskProcessingService->getRegisteredTaskProcessingProviders();
 
 		foreach ($exAppsProviders as $exAppProvider) {
