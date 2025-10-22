@@ -303,7 +303,7 @@ class TaskProcessingService {
 				if ($exApp === null) {
 					return;
 				}
-				$this->appAPIService->requestToExApp($exApp, '/trigger', params: ['providerId' => $this->provider['id']]);
+				$this->appAPIService->requestToExApp($exApp, '/trigger?' . http_build_query(['providerId' => $this->provider['id']]));
 			}
 
 			public function getExpectedRuntime(): int {
