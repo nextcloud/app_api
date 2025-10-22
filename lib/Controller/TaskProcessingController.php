@@ -11,6 +11,8 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Service\AppAPIService;
+use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -26,10 +28,14 @@ class TaskProcessingController extends OCSController {
 	public function __construct(
 		IRequest                                           $request,
 		private readonly TaskProcessingService             $taskProcessingService,
+		private readonly AppAPIService                     $appAPIService,
+		private readonly ExAppService                      $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		$this->request = $request;
+		$this->taskProcessingService->setAppAPIService($this->appAPIService);
+		$this->taskProcessingService->setExAppService($this->exAppService);
 	}
 
 	#[NoCSRFRequired]

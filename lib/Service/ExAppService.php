@@ -36,6 +36,7 @@ use SimpleXMLElement;
 
 class ExAppService {
 	private ?ICache $cache = null;
+	private AppAPIService $appAPIService;
 
 	public function __construct(
 		private readonly LoggerInterface            $logger,
@@ -66,6 +67,7 @@ class ExAppService {
 				$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 			}
 		}
+		$this->taskProcessingService->setExAppService($this);
 	}
 
 	public function getExApp(string $appId): ?ExApp {
@@ -445,5 +447,10 @@ class ExAppService {
 		} catch (Exception $e) {
 			$this->logger->debug(sprintf('Error while unregistering ExApp %s webhooks: %s', $appId, $e->getMessage()));
 		}
+	}
+
+	public function setAppAPIService(AppAPIService $appAPIService): void {
+		$this->appAPIService = $appAPIService;
+		$this->taskProcessingService->setAppAPIService($this->appAPIService);
 	}
 }
