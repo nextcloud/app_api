@@ -52,6 +52,7 @@ class AppAPIService {
 		private readonly HarpService         $harpService,
 	) {
 		$this->client = $clientService->newClient();
+		$this->exAppService->setAppAPIService($this);
 	}
 
 	/**
