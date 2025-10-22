@@ -38,7 +38,7 @@ class GetTaskProcessingProvidersListener implements IEventListener {
 			try {
 				// Decode provider data
 				$providerData = json_decode($exAppProvider->getProvider(), true, 512, JSON_THROW_ON_ERROR);
-				$providerInstance = $this->taskProcessingService->getAnonymousExAppProvider($providerData);
+				$providerInstance = $this->taskProcessingService->getAnonymousExAppProvider($providerData, $exAppProvider->getAppId());
 				$event->addProvider($providerInstance);
 
 				// Decode and add custom task type if it exists
