@@ -173,7 +173,7 @@
     "Memory limit (in MiB)" : "Limite de memória (em MiB)",
     "Maximum memory that the ExApp container can use in mebibytes" : "Memória máxima que o contêiner ExApp pode usar em mebibytes",
     "Must be a positive integer" : "Deve ser um número inteiro positivo",
-    "Maximum CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)" : "Número máximo de núcleos de CPU que o contêiner ExApp pode usar (p. ex., 0,5 para meio núcleo, 2 para dois núcleos)",
+    "Maximum CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)" : "Número máximo de núcleos de CPU que o contêiner ExApp pode usar (p. ex., 0.5 para meio núcleo, 2 para dois núcleos)",
     "CPU limit as decimal value" : "Limite da CPU como valor decimal",
     "Must be a positive number" : "Deve ser um número positivo",
     "Additional option" : "Opção adicional",
