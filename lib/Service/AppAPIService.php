@@ -679,7 +679,7 @@ class AppAPIService {
 		}
 		$this->exAppService->disableExAppInternal($exApp);
 
-		if($result) {
+		if ($result) {
 			$this->harpService->harpExAppUpdate($daemonConfig, $exApp, false);
 		}
 		return $result;
