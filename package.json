@@ -1,75 +1,75 @@
 {
-	"name": "app_api",
-	"description": "Nextcloud AppAPI",
-	"version": "1.0.0",
-	"keywords": [
-		"nextcloud",
-		"app",
-		"ecosystem"
-	],
-	"homepage": "https://github.com/nextcloud/app_api",
-	"bugs": {
-		"url": "https://github.com/nextcloud/app_api/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/nextcloud/app_api"
-	},
-	"license": " AGPL-3.0-or-later",
-	"private": true,
-	"author": "Alexander Piskun <bigcat88@icloud.com>",
-	"contributors": [
-		"Andrey Borysenko <andrey18106x@gmail.com>",
-		"Alexander Piskun <bigcat88@icloud.com>"
-	],
-	"scripts": {
-		"build": "NODE_ENV=production webpack --progress --config webpack.js",
-		"postbuild": "build-js/npm-post-build.sh",
-		"dev": "NODE_ENV=development webpack --progress --config webpack.js",
-		"watch": "NODE_ENV=development webpack --progress --watch --config webpack.js",
-		"lint": "eslint --ext .js,.vue src",
-		"lint:fix": "eslint --ext .js,.vue src --fix",
-		"stylelint": "stylelint src/**/*.vue src/**/*.scss src/**/*.css",
-		"stylelint:fix": "stylelint src/**/*.vue src/**/*.scss src/**/*.css --fix",
-		"serve": "NODE_ENV=development webpack serve --allowed-hosts all --config webpack.js"
-	},
-	"browserslist": [
-		"extends @nextcloud/browserslist-config"
-	],
-	"dependencies": {
-		"@nextcloud/auth": "^2.4.0",
-		"@nextcloud/axios": "^2.5.0",
-		"@nextcloud/dialogs": "^5.3.7",
-		"@nextcloud/event-bus": "^3.3.1",
-		"@nextcloud/files": "^3.9.0",
-		"@nextcloud/initial-state": "^2.2.0",
-		"@nextcloud/l10n": "^3.1.0",
-		"@nextcloud/moment": "^1.3.1",
-		"@nextcloud/password-confirmation": "^5.1.1",
-		"@nextcloud/router": "^3.0.1",
-		"@nextcloud/vue": "^8.17.1",
-		"dompurify": "^3.1.6",
-		"marked": "^14.1.1",
-		"p-limit": "^6.1.0",
-		"vue": "^2.7.14",
-		"vue-click-outside": "^1.1.0",
-		"vue-clipboard2": "^0.3.3",
-		"vue-localstorage": "^0.6.2",
-		"vue-material-design-icons": "^5.3.0",
-		"vuex": "^3.6.2",
-		"vuex-router-sync": "^5.0.0"
-	},
-	"devDependencies": {
-		"@nextcloud/babel-config": "^1.2.0",
-		"@nextcloud/browserslist-config": "^3.0.1",
-		"@nextcloud/eslint-config": "^8.4.1",
-		"@nextcloud/stylelint-config": "^3.0.1",
-		"@nextcloud/webpack-vue-config": "^6.0.1",
-		"eslint-webpack-plugin": "^4.2.0",
-		"stylelint-webpack-plugin": "^5.0.1"
-	},
-	"engines": {
-		"node": "^16.0.0",
-		"npm": "^7.0.0 || ^8.0.0"
-	}
+  "name": "app_api",
+  "description": "Nextcloud AppAPI",
+  "version": "1.0.0",
+  "keywords": [
+    "nextcloud",
+    "app",
+    "ecosystem"
+  ],
+  "homepage": "https://github.com/nextcloud/app_api",
+  "bugs": {
+    "url": "https://github.com/nextcloud/app_api/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nextcloud/app_api"
+  },
+  "license": " AGPL-3.0-or-later",
+  "private": true,
+  "author": "Alexander Piskun <bigcat88@icloud.com>",
+  "contributors": [
+    "Andrey Borysenko <andrey18106x@gmail.com>",
+    "Alexander Piskun <bigcat88@icloud.com>"
+  ],
+  "scripts": {
+    "build": "NODE_ENV=production webpack --progress --config webpack.js",
+    "postbuild": "build-js/npm-post-build.sh",
+    "dev": "NODE_ENV=development webpack --progress --config webpack.js",
+    "watch": "NODE_ENV=development webpack --progress --watch --config webpack.js",
+    "lint": "eslint --ext .js,.vue src",
+    "lint:fix": "eslint --ext .js,.vue src --fix",
+    "stylelint": "stylelint src/**/*.vue src/**/*.scss src/**/*.css",
+    "stylelint:fix": "stylelint src/**/*.vue src/**/*.scss src/**/*.css --fix",
+    "serve": "NODE_ENV=development webpack serve --allowed-hosts all --config webpack.js"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "dependencies": {
+    "@nextcloud/auth": "^2.4.0",
+    "@nextcloud/axios": "^2.5.0",
+    "@nextcloud/dialogs": "^5.3.7",
+    "@nextcloud/event-bus": "^3.3.1",
+    "@nextcloud/files": "^3.9.0",
+    "@nextcloud/initial-state": "^2.2.0",
+    "@nextcloud/l10n": "^3.1.0",
+    "@nextcloud/moment": "^1.3.1",
+    "@nextcloud/password-confirmation": "^5.1.1",
+    "@nextcloud/router": "^3.0.1",
+    "@nextcloud/vue": "^8.17.1",
+    "dompurify": "^3.1.6",
+    "marked": "^14.1.1",
+    "p-limit": "^6.1.0",
+    "vue": "^2.7.14",
+    "vue-click-outside": "^1.1.0",
+    "vue-clipboard2": "^0.3.3",
+    "vue-localstorage": "^0.6.2",
+    "vue-material-design-icons": "^5.3.0",
+    "vuex": "^3.6.2",
+    "vuex-router-sync": "^5.0.0"
+  },
+  "devDependencies": {
+    "@nextcloud/babel-config": "^1.2.0",
+    "@nextcloud/browserslist-config": "^3.0.1",
+    "@nextcloud/eslint-config": "^8.4.1",
+    "@nextcloud/stylelint-config": "^3.0.1",
+    "@nextcloud/webpack-vue-config": "^6.0.1",
+    "eslint-webpack-plugin": "^4.2.0",
+    "stylelint-webpack-plugin": "^5.0.1"
+  },
+  "engines": {
+    "node": "^24.0.0",
+    "npm": "^11.3.0"
+  }
 }
