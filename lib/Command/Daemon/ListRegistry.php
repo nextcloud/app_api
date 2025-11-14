@@ -25,7 +25,7 @@ class ListRegistry extends Command {
 
 	protected function configure(): void {
 		$this->setName('app_api:daemon:registry:list');
-		$this->setDescription('List configured Deploy daemon Docker registry mappings');
+		$this->setDescription('List the configured deploy daemon Docker registry mappings');
 		$this->addArgument('name', InputArgument::REQUIRED, 'Deploy daemon name');
 	}
 

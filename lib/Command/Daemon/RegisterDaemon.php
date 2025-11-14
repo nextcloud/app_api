@@ -36,18 +36,18 @@ class RegisterDaemon extends Command {
 		$this->addArgument('display-name', InputArgument::REQUIRED);
 		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED, 'The deployment method that the daemon accepts. Can be "manual-install" or "docker-install". "docker-install" is for Docker Socket Proxy and HaRP.');
 		$this->addArgument('protocol', InputArgument::REQUIRED, 'The protocol used to connect to the daemon. Can be "http" or "https".');
-		$this->addArgument('host', InputArgument::REQUIRED, 'The hostname (and port) or path at which the docker socket proxy or harp or the manual-install app is/would be available. This need not be a public host, just a host accessible by the Nextcloud server. It can also be a path to the docker socket. (e.g. appapi-harp:8780, /var/run/docker.sock)');
+		$this->addArgument('host', InputArgument::REQUIRED, 'The hostname (and port) or path at which the Docker socket proxy or HaRP or the manual-install app is/would be available. This does not need to be a public host, just a host accessible by the Nextcloud server. It can also be a path to the Docker socket. (e.g. appapi-harp:8780, /var/run/docker.sock)');
 		$this->addArgument('nextcloud_url', InputArgument::REQUIRED);
 
 		// daemon-config settings
-		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'The name of the docker network the ex-apps installed by this daemon should use. Default is "host".');
-		$this->addOption('haproxy_password', null, InputOption::VALUE_REQUIRED, 'AppAPI Docker Socket Proxy password for HAProxy Basic auth. Only for docker socket proxy daemon.');
-		$this->addOption('compute_device', null, InputOption::VALUE_REQUIRED, 'Compute device for GPU support (cpu|cuda|rocm)');
+		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'The name of the Docker network the ex-apps installed by this daemon should use. Default is "host".');
+		$this->addOption('haproxy_password', null, InputOption::VALUE_REQUIRED, 'AppAPI Docker Socket Proxy password for HAProxy Basic auth. Only for Docker Socket Proxy daemons.');
+		$this->addOption('compute_device', null, InputOption::VALUE_REQUIRED, 'Computation device for GPU support (cpu|cuda|rocm)');
 		$this->addOption('set-default', null, InputOption::VALUE_NONE, 'Set DaemonConfig as default');
-		$this->addOption('harp', null, InputOption::VALUE_NONE, 'Set daemon to use HaRP for all docker and exapp communication');
-		$this->addOption('harp_frp_address', null, InputOption::VALUE_REQUIRED, '[host]:[port] of the HaRP FRP server, default host is same as HaRP host and port is 8782');
+		$this->addOption('harp', null, InputOption::VALUE_NONE, 'Set the daemon to use HaRP for all Docker and ExApp communication');
+		$this->addOption('harp_frp_address', null, InputOption::VALUE_REQUIRED, '[host]:[port] of the HaRP FRP server, the default host is same as the HaRP host, port is 8782');
 		$this->addOption('harp_shared_key', null, InputOption::VALUE_REQUIRED, 'HaRP shared key for secure communication between HaRP and AppAPI');
-		$this->addOption('harp_docker_socket_port', null, InputOption::VALUE_REQUIRED, '\'remotePort\' of the FRP client of the remote docker socket proxy. There is one included in the harp container so this can be skipped for default setups.', '24000');
+		$this->addOption('harp_docker_socket_port', null, InputOption::VALUE_REQUIRED, '\'remotePort\' of the FRP client of the remote Docker socket proxy. There is one included in the harp container so this can be skipped for default setups.', '24000');
 		$this->addOption('harp_exapp_direct', null, InputOption::VALUE_NONE, 'Flag for the advanced setups only. Disables the FRP tunnel between ExApps and HaRP.');
 
 		$this->addUsage('harp_proxy_docker "Harp Proxy (Docker)" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --net nextcloud --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
@@ -82,7 +82,7 @@ class RegisterDaemon extends Command {
 		}
 
 		if ($this->daemonConfigService->getDaemonConfigByName($name) !== null) {
-			$output->writeln(sprintf('Skip registration, as daemon config `%s` already registered.', $name));
+			$output->writeln(sprintf('Registration skipped, as the daemon config `%s` already exists.', $name));
 			return 0;
 		}
 
@@ -115,7 +115,7 @@ class RegisterDaemon extends Command {
 		]);
 
 		if ($daemonConfig === null) {
-			$output->writeln('Failed to register daemon.');
+			$output->writeln('Failed to register the daemon config.');
 			return 1;
 		}
 
@@ -123,7 +123,7 @@ class RegisterDaemon extends Command {
 			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
 		}
 
-		$output->writeln('Daemon successfully registered.');
+		$output->writeln('Daemon config successfully registered.');
 		return 0;
 	}
 

@@ -3,15 +3,17 @@
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 <template>
-	<NcModal :show="show" :name="t('app_api', 'Override Docker registries')" @close="closeModal">
+	<NcModal :show="show"
+		:name="t('app_api', 'Override Docker registries')"
+		@close="closeModal">
 		<div class="daemon-config-modal-details" :aria-label="t('app_api', 'Override Docker registries')">
 			<h2>{{ t('app_api', 'Override Docker registries') }}</h2>
 
 			<NcNoteCard type="info" :text="daemonName" />
 
 			<p style="color: var(--color-text-lighter);">
-				{{ t('app_api', 'Configure Docker registry override mappings for selected daemon.') }}
-				{{ t('app_api', 'The matching source registry in ExApp info.xml will be overwritten during deploy (image pull step).') }}
+				{{ t('app_api', 'Configure Docker registry override mappings for the selected daemon.') }}
+				{{ t('app_api', 'The matching source registry in ExApp info.xml will be overwritten during deployment (image pull step).') }}
 				{{ t('app_api', 'This is useful if you want to use a custom Docker registry, for example, to use a private Docker registry, or to use a different Docker registry for testing.') }}
 			</p>
 
@@ -41,7 +43,7 @@
 
 			<NcEmptyContent
 				v-if="!addingRegistry && registries.length === 0"
-				:name="t('app_api', 'No custom Docker registries configured')">
+				:name="t('app_api', 'No custom Docker registries are registered')">
 				<template #icon>
 					<Docker :size="50" />
 				</template>
@@ -207,7 +209,7 @@ export default {
 				return t('app_api', 'Please enter a registry domain')
 			}
 			if (this.dockerRegistry.from === 'local') {
-				return t('app_api', 'From cannot be "local"')
+				return t('app_api', '"From" cannot be "local"')
 			}
 			if (this.registries?.findIndex((registry) => registry.from === this.dockerRegistry.from) !== -1) {
 				return t('app_api', 'This registry mapping already exists')
@@ -222,7 +224,7 @@ export default {
 		},
 		registryMappingValidationError() {
 			if (this.dockerRegistry.from && this.dockerRegistry.to && this.dockerRegistry.from === this.dockerRegistry.to) {
-				return t('app_api', 'From and To cannot be the same')
+				return t('app_api', '"From" and "To" cannot be the same')
 			}
 			return ''
 		},

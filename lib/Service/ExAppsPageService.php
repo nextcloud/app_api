@@ -53,7 +53,7 @@ class ExAppsPageService {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
 					$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 					if (!$daemonConfigAccessible) {
-						$this->logger->warning(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please verify its configuration', $daemonConfig->getName()));
+						$this->logger->warning(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please check its configuration', $daemonConfig->getName()));
 					}
 				}
 			}

@@ -3,14 +3,16 @@
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 <template>
-	<NcModal :show="show" @close="closeModal">
+	<NcModal :show="show"
+		:name="t('app_api', 'Test deploy') + ' - ' + daemon.display_name"
+		@close="closeModal">
 		<div class="test-deploy-dialog">
 			<h2>{{ t('app_api', 'Test deploy') }} - {{ daemon.display_name }}</h2>
 			<p>
-				{{ t('app_api', 'AppAPI will try to install small skeleton ExApp to verify Daemon configured correctly and deployment steps are passing.') }}
+				{{ t('app_api', 'AppAPI will try to install small skeleton ExApp to check that the daemon is configured correctly and the deployment steps are successful.') }}
 			</p>
 			<p>
-				{{ t('app_api', 'The following Deploy test checks must be passed to succeed:') }}
+				{{ t('app_api', 'The following deploy test checks must succeed:') }}
 				({{ Object.values(statusChecks).reduce((acc, status_check) => acc + (status_check.passed ? 1 : 0), 0) }} / {{ Object.keys(statusChecks).length }})
 			</p>
 			<div class="status-checks">
@@ -40,7 +42,7 @@
 							<template #icon>
 								<OpenInNew :size="20" />
 							</template>
-							{{ t('app_api', 'More info') }}
+							{{ t('app_api', 'More information') }}
 						</NcButton>
 					</div>
 				</div>
@@ -60,7 +62,7 @@
 				</NcButton>
 				<NcButton
 					v-if="!testRunning && hasTestDeployResults"
-					v-tooltip="{ content: t('app_api', 'Remove test ExApp'), placement: 'top' }"
+					v-tooltip="{ content: t('app_api', 'Remove the test ExApp'), placement: 'top' }"
 					:disabled="stoppingTest"
 					type="tertiary"
 					style="margin-right: 10px;"
@@ -78,7 +80,7 @@
 					<template #icon>
 						<NcLoadingIcon v-if="startingTest" :size="20" />
 					</template>
-					{{ t('app_api', 'Start Deploy test') }}
+					{{ t('app_api', 'Start the deploy test') }}
 				</NcButton>
 				<NcButton
 					v-if="testRunning"
@@ -90,11 +92,11 @@
 						<StopIcon v-if="!stoppingTest" :size="20" />
 						<NcLoadingIcon v-else :size="20" />
 					</template>
-					{{ t('app_api', 'Stop Deploy test') }}
+					{{ t('app_api', 'Stop the deploy test') }}
 				</NcButton>
 			</div>
 			<p v-if="testRunning" class="warning-text">
-				{{ t('app_api', 'ExApp is unregistered and container is removed on "Stop deploy test"') }}
+				{{ t('app_api', 'The test ExApp is unregistered and its container is removed on "Stop the deploy test"') }}
 			</p>
 		</div>
 	</NcModal>

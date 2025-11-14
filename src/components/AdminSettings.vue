@@ -12,12 +12,12 @@
 			<p>{{ t('app_api', 'The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server.') }}</p>
 		</div>
 		<NcSettingsSection
-			:name="t('app_api', 'Deploy Daemons')"
-			:description="t('app_api', 'Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon.')"
-			:aria-label="t('app_api', 'Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon.')"
+			:name="t('app_api', 'Deploy daemons')"
+			:description="t('app_api', 'A deploy daemon (DaemonConfig) is an ExApps orchestration daemon.')"
+			:aria-label="t('app_api', 'Deploy daemons. A deploy daemon (DaemonConfig) is an ExApps orchestration daemon.')"
 			doc-url="https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon">
 			<NcNoteCard v-if="state.default_daemon_config !== '' && !state?.daemon_config_accessible" type="error">
-				<p>{{ t('app_api', 'Default Deploy Daemon is not accessible. Please verify its configuration') }}</p>
+				<p>{{ t('app_api', 'Default deploy daemon is not accessible. Please check its configuration') }}</p>
 			</NcNoteCard>
 			<DaemonConfigList :daemons.sync="daemons" :default-daemon.sync="default_daemon_config" :save-options="saveOptions" />
 		</NcSettingsSection>
@@ -33,10 +33,10 @@
 		</NcSettingsSection>
 		<NcSettingsSection
 			:name="t('app_api', 'ExApp container restart policy')"
-			:description="t('app_api', 'Specify container restart policy, e.g. \'always\' to ensure ExApp running after daemon server reboot')"
+			:description="t('app_api', 'Choose the container restart policy, e.g. \'always\' to ensure ExApps will be running after a daemon server reboot')"
 			:aria-label="t('app_api', 'ExApp container restart policy')">
 			<NcNoteCard type="info">
-				{{ t('app_api', 'This settings changes are reflected only for newly created containers') }}
+				{{ t('app_api', 'This settings changes are effective only for newly created containers') }}
 			</NcNoteCard>
 			<NcSelect
 				v-model="state.container_restart_policy"

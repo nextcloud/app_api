@@ -46,7 +46,7 @@ class Admin implements ISettings {
 				$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 				$adminInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
 				if (!$daemonConfigAccessible) {
-					$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please verify its configuration', $daemonConfig->getName()));
+					$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please check its configuration', $daemonConfig->getName()));
 				}
 			}
 		}

@@ -4,24 +4,21 @@
 -->
 <template>
 	<div class="confirm-daemon-delete">
-		<NcModal :show="show" @close="closeModal">
+		<NcModal :show="show"
+			:name="t('app_api', 'Deploy daemon deletion confirmation')"
+			@close="closeModal">
 			<div class="confirm-delete-dialog">
-				<h2>{{ t('app_api', 'Are you sure you want delete Deploy Daemon') }}</h2>
+				<h2>{{ t('app_api', 'Are you sure you want delete the "{name}" deploy daemon?', { name: daemon.name }) }}</h2>
 
 				<NcCheckboxRadioSwitch
-					:checked.sync="removeExAppsOnDaemonDelete"
-					:placeholder="t('app_api', 'All ExApps on this daemon will be removed')"
-					:aria-label="t('app_api', 'All ExApps on this daemon will be removed')">
+					:checked.sync="removeExAppsOnDaemonDelete">
 					<template #default>
-						{{ t('app_api', 'All ExApps installed on this daemon will be removed') }}
+						{{ t('app_api', 'Remove all ExApps installed on this daemon') }}
 					</template>
 				</NcCheckboxRadioSwitch>
 
 				<div class="actions">
-					<NcButton type="success" @click="closeModal">
-						<template #icon>
-							<Cancel :size="20" />
-						</template>
+					<NcButton type="tertiary" @click="closeModal">
 						{{ t('app_api', 'Cancel') }}
 					</NcButton>
 					<NcButton type="error"
@@ -44,7 +41,6 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
 import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
 import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
-import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/TrashCanOutline.vue'
 
 export default {
@@ -52,7 +48,6 @@ export default {
 	components: {
 		NcModal,
 		NcCheckboxRadioSwitch,
-		Cancel,
 		NcLoadingIcon,
 		Delete,
 		NcButton,

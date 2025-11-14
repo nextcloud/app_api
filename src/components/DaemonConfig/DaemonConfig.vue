@@ -166,7 +166,7 @@ export default {
 		},
 		setDaemonDefault(daemon) {
 			if (this.daemon.accepts_deploy_id === 'manual-install') {
-				showError(t('app_api', '"manual-install" Deploy Daemon cannot be set as default'))
+				showError(t('app_api', 'A "manual-install" deploy daemon cannot be set as default'))
 				return
 			}
 			this.settingDefault = true
@@ -177,7 +177,7 @@ export default {
 				})
 				.catch(err => {
 					console.debug(err)
-					showError(t('app_api', 'Failed to save admin options. Check the logs'))
+					showError(t('app_api', 'Failed to save admin settings. Check the logs'))
 					this.settingDefault = false
 				})
 		},
