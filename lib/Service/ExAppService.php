@@ -67,8 +67,8 @@ class ExAppService {
 			$distributedCacheClass = ltrim($config->getSystemValueString('memcache.distributed', ''), '\\');
 			$localCacheClass = ltrim($config->getSystemValueString('memcache.local', ''), '\\');
 			if (
-				($distributedCacheClass === '' && ($localCacheClass !== \OC\Memcache\APCu::class)) &&
-				($distributedCacheClass !== \OC\Memcache\APCu::class)
+				($distributedCacheClass === '' && $localCacheClass !== \OC\Memcache\APCu::class) ||
+				($distributedCacheClass !== '' && $distributedCacheClass !== \OC\Memcache\APCu::class)
 			) {
 				$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 			}
