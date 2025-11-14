@@ -4,9 +4,11 @@
 -->
 <template>
 	<div class="register-daemon-config">
-		<NcModal :show="show" name="register-deploy-daemon" @close="closeModal">
+		<NcModal :show="show"
+			:name="isEdit ? t('app_api', 'Edit the deploy daemon') : t('app_api', 'Register a new deploy daemon')"
+			@close="closeModal">
 			<div class="register-daemon-config-body">
-				<h2>{{ isEdit ? t('app_api', 'Edit Deploy Daemon') : t('app_api', 'Register Deploy Daemon') }}</h2>
+				<h2>{{ isEdit ? t('app_api', 'Edit the deploy daemon') : t('app_api', 'Register a new deploy daemon') }}</h2>
 				<div v-if="!isEdit" class="templates">
 					<div class="external-label" :aria-label="t('app_api', 'Daemon configuration template')">
 						<label for="daemon-template">{{ t('app_api', 'Daemon configuration template') }}</label>
@@ -15,22 +17,22 @@
 							v-model="configurationTab"
 							:label-outside="true"
 							:options="configurationTemplateOptions"
-							:placeholder="t('app_api', 'Select daemon configuration template')" />
+							:placeholder="t('app_api', 'Select a daemon configuration template')" />
 					</div>
 				</div>
 				<form class="daemon-register-form" :aria-label="t('app_api', 'Daemon registration form')">
 					<div class="external-label" :aria-label="t('app_api', 'Name')">
 						<label for="daemon-name">
 							{{ t('app_api', 'Name') }}
-							<InfoTooltip :text="t('app_api', 'Unique Deploy Daemon Name')" />
+							<InfoTooltip :text="t('app_api', 'Unique deploy daemon name')" />
 						</label>
 						<NcInputField
 							id="daemon-name"
 							class="ex-input-field"
 							:disabled="isEdit"
 							:value.sync="name"
-							:placeholder="t('app_api', 'Unique Deploy Daemon Name')"
-							:aria-label="t('app_api', 'Unique Deploy Daemon Name')"
+							:placeholder="t('app_api', 'Unique deploy daemon name')"
+							:aria-label="t('app_api', 'Unique deploy Daemon name')"
 							:error="isDaemonNameInvalid === true"
 							:helper-text="isDaemonNameValidHelperText" />
 					</div>
@@ -52,7 +54,7 @@
 							:disabled="isEdit"
 							:options="deployMethods"
 							:label-outside="true"
-							:placeholder="t('app_api', 'Select daemon deploy method')" />
+							:placeholder="t('app_api', 'Select the daemon deploy method')" />
 					</div>
 					<div class="external-label" :aria-label="isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host')">
 						<label for="daemon-host">
@@ -81,7 +83,7 @@
 							:error="isHaProxyPasswordValid === false"
 							:placeholder="haProxyPasswordHelperText"
 							:aria-label="haProxyPasswordHelperText"
-							:helper-text="!isHaProxyPasswordValid ? t('app_api', 'Password must be at least 12 characters long') : ''"
+							:helper-text="!isHaProxyPasswordValid ? t('app_api', 'The password must be at least 12 characters long') : ''"
 							autocomplete="off" />
 					</div>
 					<div class="external-label" :aria-label="t('app_api', 'Nextcloud URL')">
@@ -102,31 +104,28 @@
 							id="default-deploy-config"
 							class="ex-input-field"
 							:checked.sync="defaultDaemon"
-							:placeholder="t('app_api', 'Set daemon as default')"
-							:aria-label="t('app_api', 'Set daemon as default')">
-							{{ t('app_api', 'Set as default daemon') }}
+							:aria-label="t('app_api', 'Set this daemon as the default one')">
+							{{ t('app_api', 'Set as the default daemon') }}
 						</NcCheckboxRadioSwitch>
 						<div v-if="isEdit" />
 						<NcCheckboxRadioSwitch v-if="!isHarp"
 							id="https-enabled"
 							:checked.sync="httpsEnabled"
-							:placeholder="t('app_api', 'Enable https')"
-							:aria-label="t('app_api', 'Enable https')"
+							:aria-label="t('app_api', 'Enable HTTPS')"
 							@change="onProtocolChange">
-							{{ t('app_api', 'Enable https') }}
+							{{ t('app_api', 'Enable HTTPS') }}
 						</NcCheckboxRadioSwitch>
 					</div>
-					<NcButton :aria-label="t('app_api', 'Deploy config')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
-						{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy config') : t('app_api', 'Hide deploy config') }}
+					<NcButton :aria-label="t('app_api', 'Deploy options')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
+						{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy options') : t('app_api', 'Hide deploy options') }}
 						<template #icon>
 							<UnfoldLessHorizontal v-if="deployConfigSettingsOpened" :size="20" />
 							<UnfoldMoreHorizontal v-else :size="20" />
 						</template>
 					</NcButton>
-					<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy config')">
+					<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy options')">
 						<NcCheckboxRadioSwitch
 							:checked="isHarp"
-							:placeholder="t('app_api', 'Enable HaRP')"
 							:aria-label="t('app_api', 'Enable HaRP')"
 							@update:checked="toggleHarp">
 							{{ t('app_api', 'Enable HaRP') }}
@@ -135,7 +134,7 @@
 							<div class="external-label" :aria-label="t('app_api', 'FRP server address')">
 								<label for="frp-address">
 									{{ t('app_api', 'FRP server address') }}
-									<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in \'Docker network\'.')" />
+									<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ExApp in the network defined in the \'Docker network\' section.')" />
 								</label>
 								<NcInputField
 									id="frp-address"
@@ -147,7 +146,7 @@
 							<div class="external-label" :aria-label="t('app_api', 'Docker socket proxy port')">
 								<label for="harp-port">
 									{{ t('app_api', 'Docker socket proxy port') }}
-									<InfoTooltip :text="t('app_api', 'The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
+									<InfoTooltip :text="t('app_api', 'The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
 								</label>
 								<NcInputField
 									id="harp-dsp-port"
@@ -159,13 +158,12 @@
 							<div class="external-label" :aria-label="t('app_api', 'Disable FRP')">
 								<label for="disable-frp">
 									{{ t('app_api', 'Disable FRP') }}
-									<InfoTooltip :text="t('app_api', 'Flag for the advanced setups only. Disables the FRP tunnel between ExApps and HaRP.')" />
+									<InfoTooltip :text="t('app_api', 'Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP.')" />
 								</label>
 								<NcCheckboxRadioSwitch
 									id="disable-frp"
 									:checked.sync="deployConfig.harp.exapp_direct"
 									:disabled="isEdit"
-									:placeholder="t('app_api', 'Disable FRP')"
 									:aria-label="t('app_api', 'Disable FRP')">
 									{{ t('app_api', 'Disabled') }}
 								</NcCheckboxRadioSwitch>
@@ -195,7 +193,7 @@
 									</template>
 								</NcInputField>
 							</div>
-							<div class="external-label" :aria-label="t('app_api', 'Compute device')">
+							<div class="external-label" :aria-label="t('app_api', 'Computation device')">
 								<label for="compute-device">
 									{{ t('app_api', 'Compute device') }}
 									<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
@@ -206,13 +204,14 @@
 									id="compute-device"
 									v-model="deployConfig.computeDevice"
 									class="ex-input-field"
-									:aria-label="t('app_api', 'Compute device')"
+									:aria-label-combobox="t('app_api', 'Computation device')"
+									:label-outside="true"
 									:options="computeDevices" />
 							</div>
 							<div class="external-label" :aria-label="t('app_api', 'Memory limit')">
 								<label for="memory-limit">
 									{{ t('app_api', 'Memory limit (in MiB)') }}
-									<InfoTooltip :text="t('app_api', 'Maximum memory that the ExApp container can use in mebibytes')" />
+									<InfoTooltip :text="t('app_api', 'Maximum amount of memory that the ExApp container can use in mebibytes')" />
 								</label>
 								<NcInputField
 									id="memory-limit"
@@ -227,7 +226,7 @@
 							<div class="external-label" :aria-label="t('app_api', 'CPU limit')">
 								<label for="cpu-limit">
 									{{ t('app_api', 'CPU limit') }}
-									<InfoTooltip :text="t('app_api', 'Maximum CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)')" />
+									<InfoTooltip :text="t('app_api', 'Maximum number of CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)')" />
 								</label>
 								<NcInputField
 									id="cpu-limit"
@@ -246,7 +245,7 @@
 										:id="option.key"
 										:key="index"
 										class="external-label"
-										:aria-label="t('app_api', 'Additional option')">
+										:aria-label="t('app_api', 'Additional options')">
 										<label :for="option.key">{{ option.key }}</label>
 										<div class="additional-option">
 											<NcInputField
@@ -474,14 +473,14 @@ export default {
 		daemonHostHelperText() {
 			if (['http', 'https'].includes(this.daemonProtocol)) {
 				if (this.acceptsDeployId === 'manual-install' && !this.isHarp) {
-					return t('app_api', 'Hostname to access ExApps')
+					return t('app_api', 'Hostname used by Nextcloud to access the ExApps')
 				}
-				return t('app_api', 'The hostname (and port) at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server, e.g. {host}.', {
-					name: this.isHarp ? 'HaRP' : 'Docker Socket Proxy',
+				return t('app_api', 'The hostname (and port) at which the {name} is available. This does not need to be a public host, just a host accessible by the Nextcloud server, e.g. {host}.', {
+					name: this.isHarp ? 'HaRP proxy' : 'Docker Socket Proxy',
 					host: this.isHarp ? 'appapi-harp:8780' : 'nextcloud-appapi-dsp:2375',
 				})
 			}
-			return t('app_api', 'The hostname (and port) or path at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server. It can also be a path to the docker socket. (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
+			return t('app_api', 'The hostname (and port) or path at which the {name} is available. This does not need to be a public host, just a host accessible by the Nextcloud server. It can also be the path to the Docker socket. (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
 		},
 		daemonProtocol() {
 			return this.httpsEnabled ? 'https' : 'http'
@@ -516,7 +515,7 @@ export default {
 			return this.daemons.some(daemon => daemon.name === this.name && daemon.name !== this.daemon?.name)
 		},
 		isDaemonNameValidHelperText() {
-			return this.isDaemonNameInvalid === true ? t('app_api', 'Daemon with this name already exists') : ''
+			return this.isDaemonNameInvalid === true ? t('app_api', 'A daemon with this name already exists') : ''
 		},
 		isHaProxyPasswordValid() {
 			if (this.daemonProtocol === 'https' || this.isHarp) {
@@ -533,9 +532,9 @@ export default {
 		},
 		getNetworkHelperText() {
 			if (this.isEditDifferentNetwork) {
-				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+				return t('app_api', 'Changes are only effective for newly installed ExApps. For existing ExApps, the Docker containers should be recreated to apply the new settings values.')
 			}
-			return t('app_api', 'The docker network that the deployed ex-apps would use.')
+			return t('app_api', 'The Docker network that the deployed ExApps will use.')
 		},
 		cannotRegister() {
 			return this.isDaemonNameInvalid === true || this.isHaProxyPasswordValid === false || (this.isHarp && !this.deployConfig.net) || this.isMemoryLimitValid === false || this.isCpuLimitValid === false
@@ -545,26 +544,26 @@ export default {
 		},
 		getNextcloudUrlHelperText() {
 			if (!/^https?:\/\//.test(this.nextcloud_url)) {
-				return t('app_api', 'URL should start with http:// or https://')
+				return t('app_api', 'The URL should start with http:// or https://')
 			}
 
 			if (this.httpsEnabled && !this.nextcloud_url.startsWith('https://')) {
-				return t('app_api', 'For HTTPS daemon, Nextcloud URL should be HTTPS')
+				return t('app_api', 'For a HTTPS daemon, the Nextcloud URL should be HTTPS')
 			}
 
 			if (this.isEdit && this.nextcloud_url !== this.daemon.deploy_config.nextcloud_url) {
-				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+				return t('app_api', 'Changes are only effective for newly installed ExApps. For existing ExApps, the Docker containers should be recreated to apply the new settings values.')
 			}
 
 			return ''
 		},
 		getComputeDeviceHelperText() {
 			if (this.isEdit && this.deployConfig.computeDevice.id !== this.daemon.deploy_config.computeDevice.id) {
-				return t('app_api', 'Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated.')
+				return t('app_api', 'Changes are only effective for newly installed ExApps. For existing ExApps, the Docker containers should be recreated to apply the new settings values.')
 			}
 
 			if (this.deployConfig.computeDevice.id !== 'cpu') {
-				return t('app_api', 'All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker.')
+				return t('app_api', 'All available GPU devices on the daemon host need to be enabled in ExApp containers by Docker.')
 			}
 
 			return ''

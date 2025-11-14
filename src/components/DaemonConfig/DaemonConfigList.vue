@@ -17,15 +17,15 @@
 			</ul>
 			<NcEmptyContent
 				v-else
-				:name="t('app_api', 'No Deploy daemons configured')"
-				:description="t('app_api', 'Register a custom one or setup from available templates')">
+				:name="t('app_api', 'No Deploy daemons is registered')"
+				:description="t('app_api', 'Register a custom one or configure one from the available templates')">
 				<template #icon>
 					<FormatListBullet :size="20" />
 				</template>
 			</NcEmptyContent>
 		</div>
 		<NcButton type="primary" style="margin: 20px 0;" @click="showRegister">
-			{{ t('app_api', 'Register Daemon') }}
+			{{ t('app_api', 'Register daemon') }}
 			<template #icon>
 				<Plus v-if="!registering" :size="20" />
 				<NcLoadingIcon v-else />

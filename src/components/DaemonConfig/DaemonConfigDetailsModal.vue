@@ -4,25 +4,30 @@
 -->
 <template>
 	<div class="daemon-config-modal">
-		<NcModal :show="show" @close="closeModal">
-			<div class="daemon-config-modal-details" :aria-label="t('app_api', 'Deploy daemon config details')">
-				<h2>{{ t('app_api', 'Deploy Daemon') }} - {{ daemon.display_name }}</h2>
+		<NcModal :show="show"
+			:name="t('app_api', 'Deploy daemon configuration') + ' - ' + daemon.display_name"
+			@close="closeModal">
+			<div class="daemon-config-modal-details" :aria-label="t('app_api', 'Deploy daemon configuration details')">
+				<h2>{{ t('app_api', 'Deploy daemon') }} - {{ daemon.display_name }}</h2>
 
 				<NcNoteCard v-if="isDefault" type="success">
 					{{ t('app_api', 'Default daemon. ExApps will be installed on it') }}
 				</NcNoteCard>
 
 				<NcNoteCard v-if="daemon.accepts_deploy_id === 'manual-install'" type="warning">
-					{{ t('app_api', 'Manual install daemon usually used for development. It cannot be set as default daemon.') }}
+					{{ t('app_api', 'The "Manual install" daemon is usually used for development. It cannot be set as the default daemon.') }}
 				</NcNoteCard>
 
 				<p><b>{{ t('app_api', 'ExApps installed') }}: </b>{{ daemon.exAppsCount }}</p>
 				<p><b>{{ t('app_api', 'Name') }}: </b>{{ daemon.name }}</p>
 				<p><b>{{ t('app_api', 'Protocol') }}: </b>{{ daemon.protocol }}</p>
 				<p><b>{{ t('app_api', 'Host') }}: </b>{{ daemon.host }}</p>
-				<p v-if="daemon.deploy_config.harp"><b>{{ t('app_api', 'ExApp direct communication (FRP disabled)') }}: </b>{{ daemon.deploy_config.harp.exapp_direct ?? false }}</p>
+				<p v-if="daemon.deploy_config.harp">
+					<b>{{ t('app_api', 'ExApp direct communication (FRP disabled)') }}: </b>
+					{{ daemon.deploy_config.harp.exapp_direct ?? false }}
+				</p>
 
-				<h3>{{ t('app_api', 'Deploy config') }}</h3>
+				<h3>{{ t('app_api', 'Deploy options') }}</h3>
 				<p><b>{{ t('app_api', 'Docker network') }}: </b>{{ daemon.deploy_config.net }}</p>
 				<p><b>{{ t('app_api', 'Nextcloud URL') }}: </b>{{ daemon.deploy_config.nextcloud_url }}</p>
 				<p v-if="daemon.deploy_config.haproxy_password" class="external-label">
@@ -36,10 +41,10 @@
 						autocomplete="off" />
 				</p>
 				<p>
-					<b>{{ t('app_api', 'GPUs support') }}:</b> {{ daemon.deploy_config.computeDevice && daemon.deploy_config?.computeDevice?.id !== 'cpu' || false }}
+					<b>{{ t('app_api', 'GPU support') }}:</b> {{ daemon.deploy_config.computeDevice && daemon.deploy_config?.computeDevice?.id !== 'cpu' || false }}
 				</p>
 				<p v-if="daemon.deploy_config.computeDevice">
-					<b>{{ t('app_api', 'Compute device') }}:</b> {{ daemon.deploy_config?.computeDevice?.label }}
+					<b>{{ t('app_api', 'Computation device') }}:</b> {{ daemon.deploy_config?.computeDevice?.label }}
 				</p>
 				<p><b>{{ t('app_api', 'Memory limit') }}:</b> {{ formatMemoryLimit(daemon.deploy_config?.resourceLimits?.memory) }}</p>
 
@@ -54,7 +59,7 @@
 
 				<div class="actions">
 					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install'" @click="verifyConnection">
-						{{ t('app_api', 'Verify connection') }}
+						{{ t('app_api', 'Check connection') }}
 						<template #icon>
 							<NcLoadingIcon v-if="verifying" :size="20" />
 							<Connection v-else :size="20" />
@@ -122,13 +127,13 @@ export default {
 					if (res.data.success) {
 						showSuccess(t('app_api', 'Daemon connection successful'))
 					} else {
-						showError(t('app_api', 'Failed to connect to Daemon. Check the logs'))
+						showError(t('app_api', 'Failed to connect to the daemon. Check the logs'))
 					}
 					this.verifying = false
 				})
 				.catch(err => {
 					this.verifying = false
-					showError(t('app_api', 'Failed to check connection to Daemon. Check the logs'))
+					showError(t('app_api', 'Failed to check connection to the daemon. Check the logs'))
 					console.debug(err)
 				})
 		},
@@ -148,10 +153,7 @@ export default {
 				return t('app_api', 'Unlimited')
 			}
 			const cpus = nanoCpus / 1000000000
-			if (cpus === 1) {
-				return t('app_api', '1 CPU')
-			}
-			return t('app_api', '{cpus} CPUs', { cpus: cpus.toFixed(2) })
+			return n('app_api', '{n} CPU', '{n} CPUs', cpus, { n: cpus.toFixed(2) })
 		},
 	},
 }

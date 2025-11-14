@@ -27,7 +27,7 @@ class AddRegistry extends Command {
 
 	protected function configure(): void {
 		$this->setName('app_api:daemon:registry:add');
-		$this->setDescription('Add Deploy daemon Docker registry mapping');
+		$this->setDescription('Add deploy daemon Docker registry mapping');
 		$this->addArgument('name', InputArgument::REQUIRED, 'Deploy daemon name');
 		$this->addOption('registry-from', null, InputOption::VALUE_REQUIRED, 'Deploy daemon registry from URL');
 		$this->addOption('registry-to', null, InputOption::VALUE_REQUIRED, 'Deploy daemon registry to URL');
