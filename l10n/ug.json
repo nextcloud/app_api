@@ -162,6 +162,7 @@
     "Actions" : "مەشغۇلاتلار",
     "Results from other categories" : "باشقا تۈرلەرنىڭ نەتىجىسى",
     "No apps found" : "ھېچقانداق ئەپ تېپىلمىدى",
+    "_Update_::_Update all_" : ["ھەممىنى يېڭىلا","ھەممىنى يېڭىلا"],
     "Type" : "تىپ",
     "Display Name" : "كۆرسىتىش ئىسمى",
     "Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)" : "Docker daemon نى زىيارەت قىلىدىغان ساھىبجامال ياكى يول (مەسىلەن nextcloud-appapi-dsp: 2375 ، /var/run/docker.sock)",
