@@ -10,91 +10,75 @@
 			<div class="register-daemon-config-body">
 				<h2>{{ isEdit ? t('app_api', 'Edit the deploy daemon') : t('app_api', 'Register a new deploy daemon') }}</h2>
 				<div v-if="!isEdit" class="templates">
-					<div class="external-label" :aria-label="t('app_api', 'Daemon configuration template')">
-						<label for="daemon-template">{{ t('app_api', 'Daemon configuration template') }}</label>
-						<NcSelect
-							id="daemon-template"
-							v-model="configurationTab"
-							:label-outside="true"
-							:options="configurationTemplateOptions"
-							:placeholder="t('app_api', 'Select a daemon configuration template')" />
-					</div>
+					<NcSelect
+						id="daemon-template"
+						v-model="configurationTab"
+						class="ncselect"
+						:input-label="t('app_api', 'Daemon configuration template')"
+						:options="configurationTemplateOptions"
+						:placeholder="t('app_api', 'Select a daemon configuration template')" />
 				</div>
 				<form class="daemon-register-form" :aria-label="t('app_api', 'Daemon registration form')">
-					<div class="external-label" :aria-label="t('app_api', 'Name')">
-						<label for="daemon-name">
-							{{ t('app_api', 'Name') }}
-							<InfoTooltip :text="t('app_api', 'Unique deploy daemon name')" />
-						</label>
+					<div class="row" :aria-label="t('app_api', 'Name')">
 						<NcInputField
 							id="daemon-name"
 							v-model="name"
-							class="ex-input-field"
-							:disabled="isEdit"
+							:label="t('app_api', 'Name')"
+							:readonly="isEdit"
 							:placeholder="t('app_api', 'Unique deploy daemon name')"
 							:aria-label="t('app_api', 'Unique deploy Daemon name')"
 							:error="isDaemonNameInvalid === true"
 							:helper-text="isDaemonNameValidHelperText" />
+						<InfoTooltip :text="t('app_api', 'Unique deploy daemon name')" />
 					</div>
-					<div class="external-label" :aria-label="t('app_api', 'Display name')">
-						<label for="daemon-display-name">{{ t('app_api', 'Display name') }}</label>
+					<div class="row" :aria-label="t('app_api', 'Display name')">
 						<NcInputField
 							id="daemon-display-name"
 							v-model="displayName"
-							class="ex-input-field"
+							:label="t('app_api', 'Display name')"
 							:placeholder="t('app_api', 'Display name')"
 							:aria-label="t('app_api', 'Display name')" />
 					</div>
-					<div class="external-label" :aria-label="t('app_api', 'Deployment method')">
-						<label for="daemon-deploy-id">{{ t('app_api', 'Deployment method') }}</label>
+					<div class="row" :aria-label="t('app_api', 'Deployment method')">
 						<NcSelect
 							id="daemon-deploy-id"
 							v-model="acceptsDeployId"
-							class="ex-input-field"
+							class="ncselect"
+							:input-label="t('app_api', 'Deployment method')"
 							:disabled="isEdit"
 							:options="deployMethods"
-							:label-outside="true"
 							:placeholder="t('app_api', 'Select the daemon deploy method')" />
 					</div>
-					<div class="external-label" :aria-label="isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host')">
-						<label for="daemon-host">
-							{{ isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host') }}
-							<InfoTooltip :text="daemonHostHelperText" />
-						</label>
+					<div class="row" :aria-label="isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host')">
 						<NcInputField
 							id="daemon-host"
 							v-model="host"
-							class="ex-input-field"
+							:label="isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host')"
 							:placeholder="daemonHostHelperText"
-							:aria-label="daemonHostHelperText"
-							style="max-width: 70%;" />
+							:aria-label="daemonHostHelperText" />
+						<InfoTooltip :text="daemonHostHelperText" />
 					</div>
 					<div v-if="['http', 'https'].includes(daemonProtocol) && !isPureManual"
-						class="external-label"
+						class="row"
 						:aria-label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')">
-						<label for="deploy-config-haproxy-password">
-							{{ isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password') }}
-							<InfoTooltip :text="haProxyPasswordHelperText" />
-						</label>
 						<NcPasswordField
 							id="deploy-config-haproxy-password"
 							v-model="deployConfig.haproxy_password"
-							class="ex-input-field"
+							:label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')"
 							:error="isHaProxyPasswordValid === false"
 							:placeholder="haProxyPasswordHelperText"
 							:aria-label="haProxyPasswordHelperText"
 							:helper-text="!isHaProxyPasswordValid ? t('app_api', 'The password must be at least 12 characters long') : ''"
 							autocomplete="off" />
+						<InfoTooltip :text="haProxyPasswordHelperText" />
 					</div>
-					<div class="external-label" :aria-label="t('app_api', 'Nextcloud URL')">
-						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
+					<div class="row" :aria-label="t('app_api', 'Nextcloud URL')">
 						<NcInputField
 							id="nextcloud-url"
 							v-model="nextcloud_url"
-							class="ex-input-field"
+							:label="t('app_api', 'Nextcloud URL')"
 							:helper-text="getNextcloudUrlHelperText"
 							:input-class="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
-							style="max-width: 70%;"
 							:placeholder="t('app_api', 'Nextcloud URL')"
 							:aria-label="t('app_api', 'Nextcloud URL')" />
 					</div>
@@ -102,7 +86,6 @@
 						<NcCheckboxRadioSwitch v-if="!isEdit && acceptsDeployId === 'docker-install'"
 							id="default-deploy-config"
 							v-model="defaultDaemon"
-							class="ex-input-field"
 							:aria-label="t('app_api', 'Set this daemon as the default one')">
 							{{ t('app_api', 'Set as the default daemon') }}
 						</NcCheckboxRadioSwitch>
@@ -130,57 +113,43 @@
 							{{ t('app_api', 'Enable HaRP') }}
 						</NcCheckboxRadioSwitch>
 						<div v-if="isHarp" class="harp-options">
-							<div class="external-label" :aria-label="t('app_api', 'FRP server address')">
-								<label for="frp-address">
-									{{ t('app_api', 'FRP server address') }}
-									<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ExApp in the network defined in the \'Docker network\' section.')" />
-								</label>
+							<div class="row" :aria-label="t('app_api', 'FRP server address')">
 								<NcInputField
 									id="frp-address"
 									v-model="deployConfig.harp.frp_address"
-									class="ex-input-field"
+									:label="t('app_api', 'FRP server address')"
 									:placeholder="t('app_api', 'FRP server address')"
 									:aria-label="t('app_api', 'FRP server address')" />
+								<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ExApp in the network defined in the \'Docker network\' section.')" />
 							</div>
-							<div class="external-label" :aria-label="t('app_api', 'Docker socket proxy port')">
-								<label for="harp-port">
-									{{ t('app_api', 'Docker socket proxy port') }}
-									<InfoTooltip :text="t('app_api', 'The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
-								</label>
+							<div class="row" :aria-label="t('app_api', 'Docker socket proxy port')">
 								<NcInputField
 									id="harp-dsp-port"
 									v-model="deployConfig.harp.docker_socket_port"
-									class="ex-input-field"
+									:label="t('app_api', 'Docker socket proxy port')"
 									:placeholder="t('app_api', 'Docker socket proxy port')"
 									:aria-label="t('app_api', 'Docker socket proxy port')" />
+								<InfoTooltip :text="t('app_api', 'The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
 							</div>
-							<div class="external-label" :aria-label="t('app_api', 'Disable FRP')">
-								<label for="disable-frp">
-									{{ t('app_api', 'Disable FRP') }}
-									<InfoTooltip :text="t('app_api', 'Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP.')" />
-								</label>
+							<div class="row" :aria-label="t('app_api', 'Disable FRP')">
 								<NcCheckboxRadioSwitch
 									id="disable-frp"
 									v-model="deployConfig.harp.exapp_direct"
 									:disabled="isEdit"
 									:aria-label="t('app_api', 'Disable FRP')">
-									{{ t('app_api', 'Disabled') }}
+									{{ t('app_api', 'Disable FRP') }}
 								</NcCheckboxRadioSwitch>
+								<InfoTooltip :text="t('app_api', 'Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP.')" />
 							</div>
 						</div>
 						<template v-if="!isPureManual">
-							<div class="external-label"
+							<div class="row"
 								:aria-label="t('app_api', 'Docker network')">
-								<label for="deploy-config-net">
-									{{ t('app_api', 'Docker network') }}
-									<InfoTooltip :text="getNetworkHelperText"
-										:type="isEditDifferentNetwork ? 'warning' : 'info'" />
-								</label>
 								<NcInputField
 									id="deploy-config-net"
 									ref="deploy-config-net"
 									v-model="deployConfig.net"
-									class="ex-input-field"
+									:label="t('app_api', 'Docker network')"
 									:placeholder="t('app_api', 'Docker network')"
 									:aria-label="t('app_api', 'Docker network')"
 									:show-trailing-button="isEditDifferentNetwork"
@@ -191,51 +160,44 @@
 										<Replay :size="20" />
 									</template>
 								</NcInputField>
+								<InfoTooltip :text="getNetworkHelperText"
+									:type="isEditDifferentNetwork ? 'warning' : 'info'" />
 							</div>
-							<div class="external-label" :aria-label="t('app_api', 'Computation device')">
-								<label for="compute-device">
-									{{ t('app_api', 'Compute device') }}
-									<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
-										:text="getComputeDeviceHelperText"
-										:type="getComputeDeviceHelperText !== '' ? 'warning' : 'info'" />
-								</label>
+							<div class="row" :aria-label="t('app_api', 'Computation device')">
 								<NcSelect
 									id="compute-device"
 									v-model="deployConfig.computeDevice"
-									class="ex-input-field"
+									class="ncselect"
+									:input-label="t('app_api', 'Compute device')"
 									:aria-label-combobox="t('app_api', 'Computation device')"
-									:label-outside="true"
 									:options="computeDevices" />
+								<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
+									:text="getComputeDeviceHelperText"
+									:type="getComputeDeviceHelperText !== '' ? 'warning' : 'info'" />
 							</div>
-							<div class="external-label" :aria-label="t('app_api', 'Memory limit')">
-								<label for="memory-limit">
-									{{ t('app_api', 'Memory limit (in MiB)') }}
-									<InfoTooltip :text="t('app_api', 'Maximum amount of memory that the ExApp container can use in mebibytes')" />
-								</label>
+							<div class="row" :aria-label="t('app_api', 'Memory limit')">
 								<NcInputField
 									id="memory-limit"
 									ref="memory-limit"
 									v-model="memoryLimit"
-									class="ex-input-field"
+									:label="t('app_api', 'Memory limit (in MiB)')"
 									:placeholder="t('app_api', 'Memory limit (in MiB)')"
 									:aria-label="t('app_api', 'Memory limit (in MiB)')"
 									:error="isMemoryLimitValid === false"
 									:helper-text="isMemoryLimitValid === false ? t('app_api', 'Must be a positive integer') : ''" />
+								<InfoTooltip :text="t('app_api', 'Maximum amount of memory that the ExApp container can use in mebibytes')" />
 							</div>
-							<div class="external-label" :aria-label="t('app_api', 'CPU limit')">
-								<label for="cpu-limit">
-									{{ t('app_api', 'CPU limit') }}
-									<InfoTooltip :text="t('app_api', 'Maximum number of CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)')" />
-								</label>
+							<div class="row" :aria-label="t('app_api', 'CPU limit')">
 								<NcInputField
 									id="cpu-limit"
 									ref="cpu-limit"
 									v-model="cpuLimit"
-									class="ex-input-field"
+									:label="t('app_api', 'CPU limit')"
 									:placeholder="t('app_api', 'CPU limit as decimal value')"
 									:aria-label="t('app_api', 'CPU limit')"
 									:error="isCpuLimitValid === false"
 									:helper-text="isCpuLimitValid === false ? t('app_api', 'Must be a positive number') : ''" />
+								<InfoTooltip :text="t('app_api', 'Maximum number of CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)')" />
 							</div>
 							<template v-if="additionalOptions.length > 0">
 								<div class="row" style="flex-direction: column;">
@@ -243,7 +205,7 @@
 										v-for="(option, index) in additionalOptions"
 										:id="option.key"
 										:key="index"
-										class="external-label"
+										class="row"
 										:aria-label="t('app_api', 'Additional options')">
 										<label :for="option.key">{{ option.key }}</label>
 										<div class="additional-option">
@@ -782,22 +744,6 @@ export default {
 		flex: fit-content;
 	}
 
-	.external-label {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		width: 100%;
-		padding: .25rem 0;
-
-		label {
-			flex: fit-content;
-			display: flex;
-			flex-direction: row;
-			align-items: center;
-			gap: .5rem;
-		}
-	}
-
 	.note a {
 		color: #fff;
 		text-decoration: underline;
@@ -806,9 +752,13 @@ export default {
 	.row {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: end;
 		margin-top: 10px;
 		gap: 4px;
+	}
+
+	.ncselect {
+		width: 100%;
 	}
 
 	.hint {
@@ -833,10 +783,6 @@ export default {
 		display: flex;
 		width: 320px;
 		max-width: 320px;
-	}
-
-	.ex-input-field {
-		width: 320px;
 	}
 
 	:deep(.v-select.select) {
