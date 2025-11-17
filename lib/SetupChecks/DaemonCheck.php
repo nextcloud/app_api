@@ -62,7 +62,7 @@ class DaemonCheck implements ISetupCheck {
 		$this->dockerActions->initGuzzleClient($daemonConfig);
 		$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 		if (!$daemonConfigAccessible) {
-			$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please verify its configuration', $daemonConfig->getName()));
+			$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please check its configuration', $daemonConfig->getName()));
 			return SetupResult::error(
 				$this->l10n->t('AppAPI default deploy daemon "%s" is not accessible. Please check the daemon configuration.', ['daemon' => $daemonConfig->getName()]),
 				"https://docs.nextcloud.com/server/$serverVer/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon",
@@ -71,7 +71,7 @@ class DaemonCheck implements ISetupCheck {
 
 		if (!boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
 			return SetupResult::warning(
-				$this->l10n->t('AppAPI default deploy daemon is not using HaRP. Please consider upgrading to it for better performance.'),
+				$this->l10n->t('The AppAPI default deploy daemon is not using HaRP. Please consider switching to HaRP for better performance.'),
 				// todo: update link
 				"https://github.com/nextcloud/HaRP/",
 			);
