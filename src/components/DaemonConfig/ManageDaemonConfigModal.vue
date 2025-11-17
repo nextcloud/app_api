@@ -82,22 +82,18 @@
 							:placeholder="t('app_api', 'Nextcloud URL')"
 							:aria-label="t('app_api', 'Nextcloud URL')" />
 					</div>
-					<div class="row">
-						<NcCheckboxRadioSwitch v-if="!isEdit && acceptsDeployId === 'docker-install'"
-							id="default-deploy-config"
+					<NcFormBox class="formbox">
+						<NcFormBoxSwitch v-if="!isEdit && acceptsDeployId === 'docker-install'"
 							v-model="defaultDaemon"
-							:aria-label="t('app_api', 'Set this daemon as the default one')">
+							:title="t('app_api', 'Set this daemon as the default one')">
 							{{ t('app_api', 'Set as the default daemon') }}
-						</NcCheckboxRadioSwitch>
-						<div v-if="isEdit" />
-						<NcCheckboxRadioSwitch v-if="!isHarp"
-							id="https-enabled"
+						</NcFormBoxSwitch>
+						<NcFormBoxSwitch v-if="!isHarp"
 							v-model="httpsEnabled"
-							:aria-label="t('app_api', 'Enable HTTPS')"
 							@update:model-value="onProtocolChange">
 							{{ t('app_api', 'Enable HTTPS') }}
-						</NcCheckboxRadioSwitch>
-					</div>
+						</NcFormBoxSwitch>
+					</NcFormBox>
 					<NcButton :aria-label="t('app_api', 'Deploy options')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
 						{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy options') : t('app_api', 'Hide deploy options') }}
 						<template #icon>
@@ -106,12 +102,11 @@
 						</template>
 					</NcButton>
 					<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy options')">
-						<NcCheckboxRadioSwitch
+						<NcFormBoxSwitch
 							v-model="isHarp"
-							:aria-label="t('app_api', 'Enable HaRP')"
 							@update:model-value="toggleHarp">
 							{{ t('app_api', 'Enable HaRP') }}
-						</NcCheckboxRadioSwitch>
+						</NcFormBoxSwitch>
 						<div v-if="isHarp" class="harp-options">
 							<div class="row" :aria-label="t('app_api', 'FRP server address')">
 								<NcInputField
@@ -131,14 +126,13 @@
 									:aria-label="t('app_api', 'Docker socket proxy port')" />
 								<InfoTooltip :text="t('app_api', 'The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
 							</div>
-							<div class="row" :aria-label="t('app_api', 'Disable FRP')">
-								<NcCheckboxRadioSwitch
-									id="disable-frp"
+							<div class="row-switch" :aria-label="t('app_api', 'Disable FRP')">
+								<NcFormBoxSwitch
 									v-model="deployConfig.harp.exapp_direct"
-									:disabled="isEdit"
-									:aria-label="t('app_api', 'Disable FRP')">
+									class="switch"
+									:disabled="isEdit">
 									{{ t('app_api', 'Disable FRP') }}
-								</NcCheckboxRadioSwitch>
+								</NcFormBoxSwitch>
 								<InfoTooltip :text="t('app_api', 'Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP.')" />
 							</div>
 						</div>
@@ -309,11 +303,12 @@ import { confirmPassword } from '@nextcloud/password-confirmation'
 import { generateUrl } from '@nextcloud/router'
 
 import NcButton from '@nextcloud/vue/components/NcButton'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
 import NcInputField from '@nextcloud/vue/components/NcInputField'
 import NcModal from '@nextcloud/vue/components/NcModal'
 import NcPasswordField from '@nextcloud/vue/components/NcPasswordField'
 import NcSelect from '@nextcloud/vue/components/NcSelect'
+import NcFormBoxSwitch from '@nextcloud/vue/components/NcFormBoxSwitch'
+import NcFormBox from '@nextcloud/vue/components/NcFormBox'
 
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import Check from 'vue-material-design-icons/Check.vue'
@@ -335,9 +330,10 @@ export default {
 		NcPasswordField,
 		UnfoldLessHorizontal,
 		UnfoldMoreHorizontal,
-		NcCheckboxRadioSwitch,
 		NcSelect,
 		NcButton,
+		NcFormBoxSwitch,
+		NcFormBox,
 		InfoTooltip,
 		Check,
 		Connection,
@@ -755,6 +751,21 @@ export default {
 		align-items: end;
 		margin-top: 10px;
 		gap: 4px;
+	}
+
+	.row-switch {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 10px;
+		gap: 4px;
+		.switch {
+			flex-grow: 1;
+		}
+	}
+
+	.formbox {
+		margin-top: 12px;
 	}
 
 	.ncselect {
