@@ -19,17 +19,20 @@
 			<NcNoteCard v-if="state.default_daemon_config !== '' && !state?.daemon_config_accessible" type="error">
 				<p>{{ t('app_api', 'Default deploy daemon is not accessible. Please check its configuration') }}</p>
 			</NcNoteCard>
-			<DaemonConfigList :daemons.sync="daemons" :default-daemon.sync="default_daemon_config" :save-options="saveOptions" />
+			<DaemonConfigList
+				v-model:daemons="daemons"
+				v-model:default-daemon="default_daemon_config"
+				:save-options="saveOptions" />
 		</NcSettingsSection>
 		<NcSettingsSection
 			:name="t('app_api', 'ExApp init timeout (minutes)')"
 			:description="t('app_api', 'ExApp initialization process timeout after which AppAPI will mark it as failed')"
 			:aria-label="t('app_api', 'ExApp initialization process timeout after which AppAPI will mark it as failed')">
-			<NcInputField :value.sync="state.init_timeout"
+			<NcInputField v-model="state.init_timeout"
 				class="setting"
 				type="number"
 				:placeholder="t('app_api', 'ExApp init timeout')"
-				@update:value="onInput" />
+				@update:model-value="onInput" />
 		</NcSettingsSection>
 		<NcSettingsSection
 			:name="t('app_api', 'ExApp container restart policy')"
@@ -44,7 +47,7 @@
 				:placeholder="t('app_api', 'ExApp container restart policy')"
 				:aria-label="t('app_api', 'ExApp container restart policy')"
 				:aria-label-combobox="t('app_api', 'ExApp container restart policy')"
-				@input="onInput" />
+				@update:model-value="onInput" />
 		</NcSettingsSection>
 	</div>
 </template>
@@ -56,10 +59,10 @@ import { loadState } from '@nextcloud/initial-state'
 import { delay } from '../utils.js'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 
-import NcSettingsSection from '@nextcloud/vue/dist/Components/NcSettingsSection.js'
-import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
+import NcSettingsSection from '@nextcloud/vue/components/NcSettingsSection'
+import NcInputField from '@nextcloud/vue/components/NcInputField'
+import NcSelect from '@nextcloud/vue/components/NcSelect'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
 
 import AppAPIIcon from './icons/AppAPIIcon.vue'
 import DaemonConfigList from './DaemonConfig/DaemonConfigList.vue'

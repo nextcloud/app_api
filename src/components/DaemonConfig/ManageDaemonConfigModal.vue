@@ -28,9 +28,9 @@
 						</label>
 						<NcInputField
 							id="daemon-name"
+							v-model="name"
 							class="ex-input-field"
 							:disabled="isEdit"
-							:value.sync="name"
 							:placeholder="t('app_api', 'Unique deploy daemon name')"
 							:aria-label="t('app_api', 'Unique deploy Daemon name')"
 							:error="isDaemonNameInvalid === true"
@@ -40,8 +40,8 @@
 						<label for="daemon-display-name">{{ t('app_api', 'Display name') }}</label>
 						<NcInputField
 							id="daemon-display-name"
+							v-model="displayName"
 							class="ex-input-field"
-							:value.sync="displayName"
 							:placeholder="t('app_api', 'Display name')"
 							:aria-label="t('app_api', 'Display name')" />
 					</div>
@@ -63,8 +63,8 @@
 						</label>
 						<NcInputField
 							id="daemon-host"
+							v-model="host"
 							class="ex-input-field"
-							:value.sync="host"
 							:placeholder="daemonHostHelperText"
 							:aria-label="daemonHostHelperText"
 							style="max-width: 70%;" />
@@ -78,8 +78,8 @@
 						</label>
 						<NcPasswordField
 							id="deploy-config-haproxy-password"
+							v-model="deployConfig.haproxy_password"
 							class="ex-input-field"
-							:value.sync="deployConfig.haproxy_password"
 							:error="isHaProxyPasswordValid === false"
 							:placeholder="haProxyPasswordHelperText"
 							:aria-label="haProxyPasswordHelperText"
@@ -90,29 +90,28 @@
 						<label for="nextcloud-url">{{ t('app_api', 'Nextcloud URL') }}</label>
 						<NcInputField
 							id="nextcloud-url"
+							v-model="nextcloud_url"
 							class="ex-input-field"
 							:helper-text="getNextcloudUrlHelperText"
 							:input-class="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
-							:value.sync="nextcloud_url"
 							style="max-width: 70%;"
 							:placeholder="t('app_api', 'Nextcloud URL')"
 							:aria-label="t('app_api', 'Nextcloud URL')" />
 					</div>
 					<div class="row">
-						<NcCheckboxRadioSwitch
-							v-if="!isEdit && acceptsDeployId === 'docker-install'"
+						<NcCheckboxRadioSwitch v-if="!isEdit && acceptsDeployId === 'docker-install'"
 							id="default-deploy-config"
+							v-model="defaultDaemon"
 							class="ex-input-field"
-							:checked.sync="defaultDaemon"
 							:aria-label="t('app_api', 'Set this daemon as the default one')">
 							{{ t('app_api', 'Set as the default daemon') }}
 						</NcCheckboxRadioSwitch>
 						<div v-if="isEdit" />
 						<NcCheckboxRadioSwitch v-if="!isHarp"
 							id="https-enabled"
-							:checked.sync="httpsEnabled"
+							v-model="httpsEnabled"
 							:aria-label="t('app_api', 'Enable HTTPS')"
-							@change="onProtocolChange">
+							@update:model-value="onProtocolChange">
 							{{ t('app_api', 'Enable HTTPS') }}
 						</NcCheckboxRadioSwitch>
 					</div>
@@ -125,9 +124,9 @@
 					</NcButton>
 					<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy options')">
 						<NcCheckboxRadioSwitch
-							:checked="isHarp"
+							v-model="isHarp"
 							:aria-label="t('app_api', 'Enable HaRP')"
-							@update:checked="toggleHarp">
+							@update:model-value="toggleHarp">
 							{{ t('app_api', 'Enable HaRP') }}
 						</NcCheckboxRadioSwitch>
 						<div v-if="isHarp" class="harp-options">
@@ -138,8 +137,8 @@
 								</label>
 								<NcInputField
 									id="frp-address"
+									v-model="deployConfig.harp.frp_address"
 									class="ex-input-field"
-									:value.sync="deployConfig.harp.frp_address"
 									:placeholder="t('app_api', 'FRP server address')"
 									:aria-label="t('app_api', 'FRP server address')" />
 							</div>
@@ -150,8 +149,8 @@
 								</label>
 								<NcInputField
 									id="harp-dsp-port"
+									v-model="deployConfig.harp.docker_socket_port"
 									class="ex-input-field"
-									:value.sync="deployConfig.harp.docker_socket_port"
 									:placeholder="t('app_api', 'Docker socket proxy port')"
 									:aria-label="t('app_api', 'Docker socket proxy port')" />
 							</div>
@@ -162,7 +161,7 @@
 								</label>
 								<NcCheckboxRadioSwitch
 									id="disable-frp"
-									:checked.sync="deployConfig.harp.exapp_direct"
+									v-model="deployConfig.harp.exapp_direct"
 									:disabled="isEdit"
 									:aria-label="t('app_api', 'Disable FRP')">
 									{{ t('app_api', 'Disabled') }}
@@ -180,8 +179,8 @@
 								<NcInputField
 									id="deploy-config-net"
 									ref="deploy-config-net"
+									v-model="deployConfig.net"
 									class="ex-input-field"
-									:value.sync="deployConfig.net"
 									:placeholder="t('app_api', 'Docker network')"
 									:aria-label="t('app_api', 'Docker network')"
 									:show-trailing-button="isEditDifferentNetwork"
@@ -216,8 +215,8 @@
 								<NcInputField
 									id="memory-limit"
 									ref="memory-limit"
+									v-model="memoryLimit"
 									class="ex-input-field"
-									:value.sync="memoryLimit"
 									:placeholder="t('app_api', 'Memory limit (in MiB)')"
 									:aria-label="t('app_api', 'Memory limit (in MiB)')"
 									:error="isMemoryLimitValid === false"
@@ -231,8 +230,8 @@
 								<NcInputField
 									id="cpu-limit"
 									ref="cpu-limit"
+									v-model="cpuLimit"
 									class="ex-input-field"
-									:value.sync="cpuLimit"
 									:placeholder="t('app_api', 'CPU limit as decimal value')"
 									:aria-label="t('app_api', 'CPU limit')"
 									:error="isCpuLimitValid === false"
@@ -250,12 +249,12 @@
 										<div class="additional-option">
 											<NcInputField
 												:id="option.key"
+												v-model="option.value"
 												:disabled="isEdit"
-												:value.sync="option.value"
 												:placeholder="option.value"
 												:aria-label="option.value"
 												style="margin: 0 5px 0 0;" />
-											<NcButton v-if="!isEdit" type="tertiary" @click="removeAdditionalOption(option, index)">
+											<NcButton v-if="!isEdit" variant="tertiary" @click="removeAdditionalOption(option, index)">
 												<template #icon>
 													<Close :size="20" />
 												</template>
@@ -267,7 +266,7 @@
 
 							<div v-if="!isEdit" class="additional-options">
 								<div style="display: flex; justify-content: flex-end;">
-									<NcButton type="tertiary" @click="addAdditionalOption">
+									<NcButton variant="tertiary" @click="addAdditionalOption">
 										<template #icon>
 											<Plus :size="20" />
 										</template>
@@ -275,11 +274,11 @@
 									</NcButton>
 								</div>
 								<template v-if="addingAdditionalOption">
-									<div class="row" style="align-items: start;">
+									<div class="row" style="align-items: end;">
 										<NcInputField
 											id="additional-option-key"
 											ref="additionalOptionKey"
-											:value.sync="additionalOption.key"
+											v-model="additionalOption.key"
 											:label="t('app_api', 'Option key (unique)')"
 											:placeholder="t('app_api', 'Option key (unique, e.g. my_key)')"
 											:error="additionalOption.key.trim() === ''"
@@ -287,14 +286,14 @@
 											style="margin: 0 5px 0 0;" />
 										<NcInputField
 											id="additional-option-value"
-											:value.sync="additionalOption.value"
+											v-model="additionalOption.value"
 											:label="t('app_api', 'Option value')"
 											:placeholder="t('app_api', 'Option value')"
 											:error="additionalOption.value.trim() === ''"
 											:helper-text="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
 											style="margin: 0 5px 0 0;" />
 										<NcButton
-											type="tertiary"
+											variant="tertiary"
 											:aria-label="t('app_api', 'Confirm')"
 											:disabled="isAdditionalOptionValid === false"
 											@click="confirmAddingAdditionalOption">
@@ -303,7 +302,7 @@
 											</template>
 										</NcButton>
 										<NcButton
-											type="tertiary"
+											variant="tertiary"
 											:aria-label="t('app_api', 'Cancel')"
 											@click="cancelAddingAdditionalOption">
 											<template #icon>
@@ -318,7 +317,7 @@
 
 					<div class="row">
 						<NcButton
-							type="primary"
+							variant="primary"
 							:disabled="cannotRegister"
 							@click="isEdit ? updateDaemon() : registerDaemon()">
 							{{ isEdit ? t('app_api', 'Save') : t('app_api', 'Register') }}
@@ -327,7 +326,7 @@
 								<Check v-else :size="20" />
 							</template>
 						</NcButton>
-						<NcButton type="secondary" @click="verifyDaemonConnection">
+						<NcButton variant="secondary" @click="verifyDaemonConnection">
 							{{ t('app_api', 'Check connection') }}
 							<template #icon>
 								<NcLoadingIcon v-if="verifyingDaemonConnection" :size="20" />
@@ -347,14 +346,14 @@ import { showError, showSuccess } from '@nextcloud/dialogs'
 import { confirmPassword } from '@nextcloud/password-confirmation'
 import { generateUrl } from '@nextcloud/router'
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
-import NcInputField from '@nextcloud/vue/dist/Components/NcInputField.js'
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
+import NcInputField from '@nextcloud/vue/components/NcInputField'
+import NcModal from '@nextcloud/vue/components/NcModal'
+import NcPasswordField from '@nextcloud/vue/components/NcPasswordField'
+import NcSelect from '@nextcloud/vue/components/NcSelect'
 
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
+import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import Check from 'vue-material-design-icons/Check.vue'
 import Close from 'vue-material-design-icons/Close.vue'
 import Connection from 'vue-material-design-icons/Connection.vue'
@@ -773,6 +772,10 @@ export default {
 .register-daemon-config-body {
 	padding: 20px;
 
+	h2 {
+		margin-top: 0;
+	}
+
 	.daemon-register-form {
 		display: flex;
 		flex-direction: column;
@@ -805,6 +808,7 @@ export default {
 		justify-content: space-between;
 		align-items: center;
 		margin-top: 10px;
+		gap: 4px;
 	}
 
 	.hint {
@@ -835,7 +839,7 @@ export default {
 		width: 320px;
 	}
 
-	:deep .v-select.select {
+	:deep(.v-select.select) {
 		margin: 0 !important;
 	}
 }

@@ -4,8 +4,8 @@
 -->
 <template>
 	<NcButton
-		v-tooltip="{ content: text, triggers: ['hover'], delay: 50, placement: placement, autoHide: true }"
-		type="tertiary"
+		:title="text"
+		variant="tertiary"
 		:aria-label="text">
 		<template #icon>
 			<component :is="iconComponent" :fill-color="iconColor" :size="20" />
@@ -14,8 +14,7 @@
 </template>
 
 <script>
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import Tooltip from '@nextcloud/vue/dist/Directives/Tooltip.js'
+import NcButton from '@nextcloud/vue/components/NcButton'
 import Warning from 'vue-material-design-icons/AlertOutline.vue'
 import Information from 'vue-material-design-icons/InformationOutline.vue'
 
@@ -25,9 +24,6 @@ export default {
 		NcButton,
 		Information,
 		Warning,
-	},
-	directives: {
-		tooltip: Tooltip,
 	},
 	props: {
 		text: {

@@ -51,30 +51,30 @@
 		</NcListItem>
 		<DaemonConfigDetailsModal
 			v-show="showDetailsModal"
-			:show.sync="showDetailsModal"
+			v-model:show="showDetailsModal"
 			:daemon="daemon"
 			:is-default="isDefault" />
 		<ConfirmDaemonDeleteModal
 			v-show="showDeleteDialog"
+			v-model:show="showDeleteDialog"
 			:daemon="daemon"
 			:deleting="deleting"
-			:delete-daemon-config="_deleteDaemonConfig"
-			:show.sync="showDeleteDialog" />
+			:delete-daemon-config="_deleteDaemonConfig" />
 		<template v-if="daemon.accepts_deploy_id !== 'manual-install'">
 			<DaemonTestDeploy
 				v-if="showTestDeployDialog"
-				:show.sync="showTestDeployDialog"
+				v-model:show="showTestDeployDialog"
 				:get-all-daemons="getAllDaemons"
 				:daemon="daemon" />
 		</template>
 		<ManageDaemonConfigModal
-			:show.sync="showEditDialog"
+			v-model:show="showEditDialog"
 			:daemons="daemons"
 			:get-all-daemons="getAllDaemons"
 			:daemon="daemon"
 			:is-default-daemon="isDefault" />
 		<DockerRegistriesModal
-			:show.sync="showOverrideDockerRegistriesModal"
+			v-model:show="showOverrideDockerRegistriesModal"
 			:daemon="daemon"
 			:is-default="isDefault"
 			:get-all-daemons="getAllDaemons"
@@ -87,10 +87,10 @@ import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 import { confirmPassword } from '@nextcloud/password-confirmation'
-import NcListItem from '@nextcloud/vue/dist/Components/NcListItem.js'
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
+import NcListItem from '@nextcloud/vue/components/NcListItem'
+import NcActionButton from '@nextcloud/vue/components/NcActionButton'
 
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
+import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import CheckBold from 'vue-material-design-icons/CheckBold.vue'
 import TestTube from 'vue-material-design-icons/TestTube.vue'
 import PencilOutline from 'vue-material-design-icons/PencilOutline.vue'
