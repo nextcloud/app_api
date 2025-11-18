@@ -12,6 +12,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud-URL",
     "Memory limit" : "Minnesgräns",
     "Enabled" : "Aktiverad",
+    "More information" : "Mer information",
     "Remove" : "Ta bort",
     "From" : "Från",
     "To" : "Till",

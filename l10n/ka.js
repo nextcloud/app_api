@@ -10,6 +10,7 @@ OC.L10N.register(
     "Host" : "Host",
     "Nextcloud URL" : "Nextcloud URL",
     "Enabled" : "Enabled",
+    "More information" : "More information",
     "Remove" : "Remove",
     "From" : "From",
     "To" : "To",

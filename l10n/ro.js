@@ -9,6 +9,7 @@ OC.L10N.register(
     "Name" : "Nume",
     "Host" : "Gazdă",
     "Enabled" : "Activat",
+    "More information" : "Mai multe informații",
     "Remove" : "Elimină",
     "From" : "De la",
     "To" : "Către",

@@ -11,6 +11,7 @@ OC.L10N.register(
     "Nextcloud URL" : "URL Nextcloud",
     "Memory limit" : "Limite di memoria",
     "Enabled" : "Abilitata",
+    "More information" : "Altre informazioni",
     "Remove" : "Rimuovi",
     "From" : "Da",
     "To" : "A",

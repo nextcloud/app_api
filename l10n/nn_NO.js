@@ -7,6 +7,7 @@ OC.L10N.register(
     "Unlimited" : "Ubegrensa",
     "Name" : "Namn",
     "Host" : "Tenar",
+    "More information" : "Meir informasjon",
     "Disabled" : "Deaktivert",
     "Save" : "Lagre",
     "Visit website" : "Besøk nettstaden",

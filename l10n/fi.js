@@ -11,6 +11,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloudin URL-osoite",
     "Memory limit" : "Muistin raja",
     "Enabled" : "Käytössä",
+    "More information" : "Lisää tietoa",
     "Remove" : "Poista",
     "From" : "Lähettäjä",
     "To" : "Vastaanottaja",

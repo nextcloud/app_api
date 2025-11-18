@@ -11,6 +11,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Memory limit" : "Лимит на меморијата",
     "Enabled" : "Овозможено",
+    "More information" : "Повеќе информации",
     "Remove" : "Отстрани ",
     "From" : "Од",
     "To" : "До",
