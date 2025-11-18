@@ -17,7 +17,7 @@
 			</ul>
 			<NcEmptyContent
 				v-else
-				:name="t('app_api', 'No Deploy daemons is registered')"
+				:name="t('app_api', 'No Deploy daemons are registered')"
 				:description="t('app_api', 'Register a custom one or configure one from the available templates')">
 				<template #icon>
 					<FormatListBullet :size="20" />
