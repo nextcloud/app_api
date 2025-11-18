@@ -94,7 +94,10 @@
 							{{ t('app_api', 'Enable HTTPS') }}
 						</NcFormBoxSwitch>
 					</NcFormBox>
-					<NcButton :aria-label="t('app_api', 'Deploy options')" style="margin: 10px 0;" @click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
+					<NcButton
+						:aria-label="t('app_api', 'Deploy options')"
+						style="margin: 10px 0; width: 100%;"
+						@click="deployConfigSettingsOpened = !deployConfigSettingsOpened">
 						{{ !deployConfigSettingsOpened ? t('app_api', 'Show deploy options') : t('app_api', 'Hide deploy options') }}
 						<template #icon>
 							<UnfoldLessHorizontal v-if="deployConfigSettingsOpened" :size="20" />
