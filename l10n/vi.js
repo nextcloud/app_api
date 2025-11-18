@@ -9,6 +9,7 @@ OC.L10N.register(
     "Host" : "Máy chủ",
     "Nextcloud URL" : "vWorkspace URL",
     "Enabled" : "Đá kích hoạt",
+    "More information" : "Thêm thông tin",
     "Remove" : "Xoá",
     "From" : "Từ",
     "To" : "Tới",

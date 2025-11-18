@@ -10,6 +10,7 @@ OC.L10N.register(
     "Host" : "Glavno računalo",
     "Nextcloud URL" : "Nextcloud URL",
     "Enabled" : "Omogućeno",
+    "More information" : "Više informacija",
     "Remove" : "Ukloni",
     "From" : "Od",
     "To" : "Do",

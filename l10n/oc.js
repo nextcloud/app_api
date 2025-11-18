@@ -9,6 +9,7 @@ OC.L10N.register(
     "Host" : "Òste",
     "Nextcloud URL" : "URL Nextcloud",
     "Enabled" : "Activada",
+    "More information" : "Mai d’informacions",
     "Remove" : "Suprimir",
     "From" : "De",
     "Add" : "Apondre",

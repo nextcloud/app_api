@@ -11,6 +11,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Naslov URL Nextcloud",
     "Memory limit" : "Omejitev pomnilnika",
     "Enabled" : "Omogočeno",
+    "More information" : "Več podrobnosti",
     "Remove" : "Odstrani",
     "From" : "Od",
     "To" : "Za",
