@@ -273,27 +273,26 @@
 							</div>
 						</template>
 					</div>
-
-					<div class="row">
-						<NcButton
-							variant="primary"
-							:disabled="cannotRegister"
-							@click="isEdit ? updateDaemon() : registerDaemon()">
-							{{ isEdit ? t('app_api', 'Save') : t('app_api', 'Register') }}
-							<template #icon>
-								<NcLoadingIcon v-if="registeringDaemon" :size="20" />
-								<Check v-else :size="20" />
-							</template>
-						</NcButton>
-						<NcButton variant="secondary" @click="verifyDaemonConnection">
-							{{ t('app_api', 'Check connection') }}
-							<template #icon>
-								<NcLoadingIcon v-if="verifyingDaemonConnection" :size="20" />
-								<Connection v-else :size="20" />
-							</template>
-						</NcButton>
-					</div>
 				</form>
+			</div>
+			<div class="row footer">
+				<NcButton
+					variant="primary"
+					:disabled="cannotRegister"
+					@click="isEdit ? updateDaemon() : registerDaemon()">
+					{{ isEdit ? t('app_api', 'Save') : t('app_api', 'Register') }}
+					<template #icon>
+						<NcLoadingIcon v-if="registeringDaemon" :size="20" />
+						<Check v-else :size="20" />
+					</template>
+				</NcButton>
+				<NcButton variant="secondary" @click="verifyDaemonConnection">
+					{{ t('app_api', 'Check connection') }}
+					<template #icon>
+						<NcLoadingIcon v-if="verifyingDaemonConnection" :size="20" />
+						<Connection v-else :size="20" />
+					</template>
+				</NcButton>
 			</div>
 		</NcModal>
 	</div>
@@ -748,14 +747,6 @@ export default {
 		text-decoration: underline;
 	}
 
-	.row {
-		display: flex;
-		justify-content: space-between;
-		align-items: end;
-		margin-top: 10px;
-		gap: 4px;
-	}
-
 	.row-switch {
 		display: flex;
 		justify-content: space-between;
@@ -802,6 +793,22 @@ export default {
 	:deep(.v-select.select) {
 		margin: 0 !important;
 	}
+}
+
+.row {
+	display: flex;
+	justify-content: space-between;
+	align-items: end;
+	margin-top: 10px;
+	gap: 4px;
+}
+
+.footer {
+	position: sticky;
+	bottom: 0;
+	background-color: var(--color-main-background);
+	padding: 20px;
+	margin: 0;
 }
 </style>
 
