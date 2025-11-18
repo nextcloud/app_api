@@ -12,6 +12,7 @@ OC.L10N.register(
     "Nextcloud URL" : "Nextcloud URL",
     "Memory limit" : "Memória korlát",
     "Enabled" : "Engedélyezve",
+    "More information" : "További információk",
     "Remove" : "Eltávolítás",
     "From" : "Feladó",
     "To" : "Címzett",

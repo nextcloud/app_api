@@ -23,58 +23,35 @@ OC.L10N.register(
     "AppAPI deploy daemon" : "البرنامج الخفي daemon لنشر AppAPI",
     "AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps)." : "البرنامج الخفي التلقائي لنشر AppAPI لم يتم تعيينه. رجاءً؛ قُم بتسجيله في الإعدادات ليمكنك تثبيت التطبيقات الخارجية (Ex-Apps).",
     "AppAPI default deploy daemon \"%s\" is not accessible. Please check the daemon configuration." : "البرنامج الخفي لنشر AppAPI \"%s\" لايمكن الوصول إليه. رجاءً؛ قُم بفحص تهيئة البرنامج الخفي daemon.",
-    "AppAPI default deploy daemon is not using HaRP. Please consider upgrading to it for better performance." : "البرنامج الخفي التلقائي لنشر AppAPI لايستعمل HaRP. رجاءً؛ أدرُس إمكانية ترقيته لتحسين الأداء.",
     "Nextcloud AppAPI" : "واجهة تطبيقات نكست كلاود AppAPI",
     "### Boost your Nextcloud with AppAPI and its specially designed applications.\n\n\nThe AppAPI is a project within the Nextcloud ecosystem designed to streamline and enhance the process of\napplication development, deployment, and management.\n\nIt introduces a new methodology that allows developers to create\napplications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.\n\n_If you wish to develop an application, we will gladly help and assist you._\n\n### Support\n\nWe appreciate any support for this project:\n\n- ⭐ Star our work on GitHub\n- ❗ Create an Issue or feature request\n- 💁 Resolve an Issue and create a Pull Request\n- 🧑‍💻 Develop your own application using AppAPI\n\nWe are genuinely excited about the future of the AppAPI project and its potential to transform\nthe way applications are developed and experienced within Nextcloud.\n\nAs we embark on this journey, we warmly invite you - developers, thinkers, creators, and visionaries -\nto join us in shaping a more versatile, stable, and secure app landscape.\n\n*Your insights, suggestions, and contributions are invaluable to us.*" : "### عزِّز نكست كلاود خاصّتك باستخدام AppAPI وتطبيقاته المصممة خصيصاً. \n\nAppAPI هو مشروع ضمن النظام البيئي لنكست كلاود مصمم لتبسيط وتعزيز عملية تطوير التطبيقات ونشرها وإدارتها. \nوهو يقدم منهجية جديدة تسمح للمطورين بإنشاء التطبيقات باستخدام مجموعة متنوعة من لغات البرمجة، وليس فقط PHP، والتي كانت سابقاً تستخدم لوحدها في تطوير نكست كلاود. \n\n_إذا كنت ترغب في تطوير تطبيق، فسنكون سعداء بمساعدتك وتقديم المساعدة لك._ \n\n### الدعم \n\nنحن نقدر أي دعم لهذا المشروع: \n- ⭐ قم بتمييز عملنا على GitHub \n- ❗ قم بإنشاء مشكلة أو طلب ميزة \n- 💁 حل مشكلة وإنشاء طلب سحب \n- 🧑‍💻 تطوير تطبيقك الخاص باستخدام AppAPI \n\nنحن متحمسون حقًا لمستقبل مشروع AppAPI وإمكاناته لتحويل الطريقة التي يتم بها تطوير التطبيقات وتجربتها داخل نكست كلاود. \n\nبينما ننطلق في هذه الرحلة، ندعو بحرارة المطورين والمفكرين والمبدعين وأصحاب الرؤى للانضمام إلينا في تشكيل مشهد تطبيقات أكثر تنوعاً واستقراراً وأماناً. \n\n*أفكارك واقتراحاتك ومساهماتك لا تقدر بثمن بالنسبة لنا.*",
     "External Apps management" : "إدارة التطبيقات الخارجية",
     "Admin options saved" : "تمّ حفظ خيارات المدير",
     "Failed to save admin options" : "تعذّر حفظ خيارات المدير",
-    "Deploy Daemons" : "نشر البرامج الخفيّة Daemons",
-    "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Deploy Daemon (أو DaemonConfig) هو برنامج خفي لتنسيق التطبيقات الخارجية ExApps.",
-    "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "نشر البرامج الخفيّة Daemons. البرنامج Deploy Daemon (DaemonConfig) هو برنامج خفي لتنسيق التطبيقات الخارجية.",
-    "Default Deploy Daemon is not accessible. Please verify its configuration" : "الوصول إلى البرنامج الخفي التلقائي لنشر التطبيقات Default Deploy Daemon غير ممكن. تأكّد من إعداداته لو سمحت ",
     "ExApp init timeout (minutes)" : "مُهلة بدء التطبيقات الخارجية ExApp (بالدقائق)",
     "ExApp initialization process timeout after which AppAPI will mark it as failed" : "مُهلة بدء التطبيقات الخارجية ExApp حيث بعدها سيتعامل AppAPI معها كعملية فاشلة",
     "ExApp init timeout" : "مهلة بدء التطبيقات الخارجية ExApp",
     "ExApp container restart policy" : "سياسة إعادة تشغيل حاوية container التطبيقات الخارجية ExApp",
-    "Specify container restart policy, e.g. 'always' to ensure ExApp running after daemon server reboot" : "قم بتحديد سياسة إعادة تشغيل الحاوية. مثلاً: \"دائماً always\" تضمن تشغيل التطبيق الخارجي ExApp بعد إعادة تشغيل خادم البرنامج الخفي ",
-    "This settings changes are reflected only for newly created containers" : "التعديلات في هذا الإعداد تنعكس فقط على الحاويات المُنشأة حديثاً",
-    "Are you sure you want delete Deploy Daemon" : "هل أنت متأكد أنك تريد حذف البرنامج المخفي للنشر Deploy Daemon؟",
-    "All ExApps on this daemon will be removed" : "كل التطبيقات الخارجية على هذا البرنامج الخفي سيتم حذفها",
-    "All ExApps installed on this daemon will be removed" : "كل التطبيقات الخارجية المثبتة على هذا البرنامج الخفي سيتم حذفها",
     "Cancel" : "إلغاء",
     "Delete" : "حذف",
-    "\"manual-install\" Deploy Daemon cannot be set as default" : "تطبيق النشر الخارجي \"التثبيت اليدوي\" \"manual-install\" لا يمكن تعيينه كافتراضي",
-    "Failed to save admin options. Check the logs" : "تعذّر حفظ خيارات المدير. راجع سجل الأحداث",
     "Password confirmation failed" : "فشل في تأكيد كلمة المرور",
     "Default" : "التلقائي",
     "Set as default" : "ضبط كقيمة تلقائية",
     "Test deploy" : "نشر تجريبي",
     "Edit" : "تحرير",
     "Daemon connection successful" : "تمّ الاتصال بنجاح مع برنامج الخادم الخفي",
-    "Failed to connect to Daemon. Check the logs" : "تعذّر الاتصال مع البرنامج الخفي",
-    "Failed to check connection to Daemon. Check the logs" : "تعذّر اختبار الاتصال مع البرنامج الخفي. راجع سجل الحركات",
     "Unlimited" : "غير محدود",
-    "Deploy daemon config details" : "تفاصيل تهيئة برنامج النشر الخفي ",
-    "Deploy Daemon" : "نشر البرنامج الخفي",
     "Default daemon. ExApps will be installed on it" : "البرنامج الخفي التلقائي. سوف يتم تثبيت التطبيقات الخارجية عليه.",
-    "Manual install daemon usually used for development. It cannot be set as default daemon." : "البرنامج الخفي للتثبيت اليدوي يُستعمل عادةً في مرحلة التطوير؛ و لا يمكن تعيينه كبرنامج خفي تلقائي.",
     "ExApps installed" : "البرنامج الخارحي ExApps تمّ تثبيته",
     "Name" : "الاسم",
     "Protocol" : "بروتوكول",
     "Host" : "المضيف",
-    "Deploy config" : "تهيئة النشر",
     "Docker network" : "شبكة \"دوكر\" Docker",
     "Nextcloud URL" : "رابط الخادم السحابي نكست كلاود",
     "HaProxy password" : "كلمة مرور HaProxy",
-    "GPUs support" : "دعم وحدات المعالجة الرسومية GPU",
-    "Compute device" : "إحسب الجهاز",
     "Additional options" : "خيارات إضافية",
-    "Verify connection" : "تحقّق من الاتصال",
+    "Check connection" : "تحقَّق من الاتصال",
     "Registered Deploy daemons list" : "قائمة برامج النشر الخفية المسجلة",
-    "No Deploy daemons configured" : "لم تتم تهيئة أي برامج نشر خفية",
-    "Register a custom one or setup from available templates" : "قُم بتسجيل واحدة مخصصة أو قم بتجهيز واحدة باستعمال القوالب المتاحة",
-    "Register Daemon" : "قم بتسجيل برنامج خفي Daemon",
     "Register ExApp in Nextcloud" : "تسجيل ExApp في نكست كلاود",
     "Check if the ExApp is registered in Nextcloud before deployment" : "التحقُّق من أن ExApp مُسجَّل في نكست كلاود قبل النشر",
     "Image pull" : "سحب الصورة",
@@ -90,59 +67,32 @@ OC.L10N.register(
     "Only if ExApp container is preset" : "فقط إذا كانت حاوية التطبيق الخارجي ExApp مُعدَّةٌ مُسبقاً",
     "Deploy test passed successfully!" : "النشر التجريبي تمّ اجتيازه بنجاح",
     "Deploy test failed at step \"{step}\"" : "النشر التجريبي أخفق و توقف في الخطوة \"{step}\"",
-    "AppAPI will try to install small skeleton ExApp to verify Daemon configured correctly and deployment steps are passing." : "سيحاول AppAPI تثبيت ExApp الهيكلي الصغير للتحقق من تكوين Daemon بشكل صحيح ومن تنفيذ خطوات النشر بنجاحٍ.",
-    "The following Deploy test checks must be passed to succeed:" : "يجب اجتياز عمليات التحقق من اختبار النشر التالية لتحقيق النجاح:",
-    "More info" : "معلومات أكثر",
     "Download ExApp logs" : "تنزيل سجلات حركة ExApp",
-    "Remove test ExApp" : "إزالة التطبيق الخارجي ExApp التجريبي",
-    "Start Deploy test" : "البدء في النشر التجريبي",
-    "Stop Deploy test" : "إيقاف النشر التجريبي",
-    "ExApp is unregistered and container is removed on \"Stop deploy test\"" : "التطبيق الخارجي ExApp غير مسجل؛ و تمّت إزالة الحاوية في \"إيقاف تجربة النشر Stop deploy test\"",
     "Remove" : "حذف",
     "From" : "مِن :",
     "To" : "إلى :",
     "Add" : "إضافة ",
-    "Hostname to access ExApps" : "اسم المضيف Hostname للوصول إلى التطبيقات الخارجية ExApps",
-    "The hostname (and port) at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server, e.g. {host}." : "اسم المضيف (والمنفذ) حيث يوجد {name} لايلزم أن يكون مُضيفاً عُموميّاً؛ يلزم فقط أن يكون الوصول إليه مُتاحاً من خادوم نكست كلاود. مثلاً: {host}.",
-    "The hostname (and port) or path at which the {name} is available. This need not be a public host, just a host accessible by the Nextcloud server. It can also be a path to the docker socket. (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)" : "اسم المضيف (والمنفذ) أو المسار حيث يوجد {name} لايلزم أن يكون مُضيفاً عُموميّاً. يلزم فقط أن يكون الوصول إليه متاحاً من خادوم نكست كلاود. ويمكن أيضاً أن يكون مَقبَس \"دوكر\" docker socket. (مثلاً: nextcloud-appapi-dsp:2375, /var/run/docker.sock)",
-    "Daemon with this name already exists" : "برنامج خفي آخر بنفس هذا الاسم موجود سلفاً",
     "The secret key for the HaRP container communication (HP_SHARED_KEY)." : "المفتاح السّري لاتصالات حاوية HaRP؛ أي (HP_SHARES_KEY).",
     "AppAPI Docker Socket Proxy authentication password" : "كلمة مرور التصديق على وكيل مقبس \"دوكر\"  Docker Socket Proxy للواجهات AppAPI",
-    "Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated." : "سيتم تطبيق التغييرات فقط على التطبيقات الخارجية ExApps المثبتة حديثًا. أمّا بالنسبة إلى تلك الموجودة سلفاً، فتتوجب إعادة إنشاء حاويات Docker لها.",
-    "The docker network that the deployed ex-apps would use." : "شبكة \"دوكر\" docker التي ستستعملها التطبيقات الخارجية  ex-apps المثبتة.",
-    "URL should start with http:// or https://" : "عناوين الويب يجب أن تبدأ بـ http:// أو بـ https://",
-    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "بالنسبة للبرنامج الخفي لـ HTTPS، عنوان URL لنكست كلاود يجب أن يكون HTTPS",
-    "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "كل وحدات المعالجة الرسومية GPU على مُضيف البرنامج الخفي سيتم طلب تمكينها في حاويات التطبيقات الخارجية ExApp من قِبَل \"دوكر\" Docker.  ",
     "DaemonConfig successfully registered" : "تمّ بنجاح تسجيل إعداد لبرنامج الخادم خفي DaemonConfig",
     "Failed to register DaemonConfig. Check the logs" : "تعذّر تسجيل إعداد لبرنامج خفي DaemonConfig. راجع سجل الحركات",
     "DaemonConfig successfully updated" : "تمّ تحديث DaemonConfig بنجاح",
     "Failed to update DaemonConfig. Check the logs" : "تعذّر تحديث DaemonConfig. تحقَّق من سجل الحركات.",
-    "Edit Deploy Daemon" : "تحرير برنامج النشر الخفي",
-    "Register Deploy Daemon" : "تسجيل برنامج خفي للنشر",
+    "Failed to connect to Daemon. Check the logs" : "تعذّر الاتصال مع البرنامج الخفي",
+    "Failed to check connection to Daemon. Check the logs" : "تعذّر اختبار الاتصال مع البرنامج الخفي. راجع سجل الحركات",
     "Daemon configuration template" : "قالب تهيئة برنامج خفي",
-    "Select daemon configuration template" : "إختَر قالب تهيئة البرنامج الخفي",
     "Daemon registration form" : "نموذج تهيئة برنامج خفي",
-    "Unique Deploy Daemon Name" : "الاسم الفريد للبرنامج الخفي للنشر",
     "Display name" : "اسم العرض",
     "Deployment method" : "طُرُق النشر",
-    "Select daemon deploy method" : "إختَر طريقة نشر البرنامج الخفي",
     "HaRP host" : "مُضِيف HaRP",
     "Daemon host" : "مُضِيف البرنامج الخفي",
     "HaRP shared key" : "مفتاح HaRP المُشتَرَك",
-    "Password must be at least 12 characters long" : "يجب ألّا يقل طول كلمة المرور عن 12 حرفاً",
-    "Set daemon as default" : "إختَر البرنامج الخفي كقيمة تلقائية",
-    "Set as default daemon" : "تعيين كبرنامج خفي تلقائي",
-    "Enable https" : "تمكين https",
-    "Show deploy config" : "أظهِر تهيئة النشر deploy config",
-    "Hide deploy config" : "إخْفِ تهيئة النشر deploy config",
     "Enable HaRP" : "تمكين HaRP",
     "FRP server address" : "عنوان خادوم FRP",
-    "The address (host:port) of the FRP server that should be reachable by the ex-app in the network defined in 'Docker network'." : "عنوان خادوم FRP (أي المضيف: المنفذ) الذي يجب أن يكون الوصول إليه متاحاً بالنسبة للتطبيق الخارجي في الشبكة المُعرَّفة في 'شبكة دوكر Docker network'.",
     "Docker socket proxy port" : "منفذ وكيل مقبس \"دوكر\" Docker",
-    "The port in HaRP which the docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "المنفذ الذي يتصل من خلاله وكيل مقبس \"دوكر\". هذا يجب أن يكون مكشوفاً؛ لكن بالنسبة للجاهز built-in فلايحتاج لأن يكون مكشوفاً ولا أن يتم تغييره.",
     "Disabled" : "مُعطّل",
     "Docker network for ex-app deployment must be defined" : "يجب تعريف شبكة \"دوكر\" لتثبيت التطبيق الخارجي ex-app",
-    "Additional option" : "خيار إضافي",
+    "Compute device" : "إحسب الجهاز",
     "Add additional option" : "إضِف خياراً إضافيّاً",
     "Option key (unique)" : "مفتاح الخيار (غير متكرر)",
     "Option key (unique, e.g. my_key)" : "مفتاح الخيار (غير متكرر؛ مثل: my_key )",
@@ -152,10 +102,15 @@ OC.L10N.register(
     "Confirm" : "تأكيد",
     "Save" : "حفظ",
     "Register" : "تسجيل",
-    "Check connection" : "تحقَّق من الاتصال",
     "External Apps" : "تطبيقات خارجية",
     "### Boost your Nextcloud with AppAPI and its specially designed applications.\n\n\nThe AppAPI is a project within the Nextcloud ecosystem designed to streamline and enhance the process of\napplication development, deployment, and management.\n\nIt introduces a new methodology that allows developers to create\napplications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.\n\n### Bundled App\n\n**Starting with Nextcloud 30.0.1, this application is included in the default Nextcloud package.**\n\n### Support\n\nWe appreciate any support for this project:\n\n- ⭐ Star our work on GitHub\n- ❗ Create an Issue or feature request\n- 💁 Resolve an Issue and create a Pull Request\n- 🧑‍💻 Develop your own application using AppAPI\n\nWe are genuinely excited about the future of the AppAPI project and its potential to transform\nthe way applications are developed and experienced within Nextcloud.\n\nAs we embark on this journey, we warmly invite you - developers, thinkers, creators, and visionaries -\nto join us in shaping a more versatile, stable, and secure app landscape.\n\n*Your insights, suggestions, and contributions are invaluable to us.*" : "### عزز نكست كلاود عندك باستعمال AppAPI وتطبيقاته المصممة خصيصًا. \n\n\nمشروع AppAPI هو مشروع ضمن النظام البيئي لنكست كلاود مصمم لتبسيط وتعزيز عملية تطوير التطبيقات ونشرها وإدارتها. \nيقدم منهجية جديدة تسمح للمطورين بإنشاء التطبيقات باستخدام مجموعة متنوعة من لغات البرمجة، وليس فقط PHP، والتي كانت تستخدم تقليديًا في تطوير نكست كلاود. \n\n### التطبيق المجمع budled app \n\n**بدءًا من الإصدار  30.0.1 من نكست كلاود، تم تضمين هذا التطبيق في حزمة نكست كلاود الافتراضية.** \n\n### الدعم \n\nنحن نقدر أي دعم لهذا المشروع: \n- ⭐ قم بتمييز عملنا على GitHub \n- ❗ قم بإنشاء مشكلة أو طلب ميزة \n- 💁 حُلَّ مشكلة وأنشئ طلب سحب \n- 🧑‍💻 قم بتطوير تطبيقك الخاص باستخدام AppAPI \n\nنحن متحمسون حقًا لمستقبل مشروع AppAPI وإمكاناته لتحويل الطريقة التي يتم بها تطوير التطبيقات وتجربتها داخل نكست كلاود. \nبينما ننطلق في هذه الرحلة، ندعو بحرارة المطورين والمفكرين والمبدعين وأصحاب الرؤى للانضمام إلينا في تشكيل مشهد تطبيقات أكثر تنوعًا واستقرارًا وأمانًا. \n*أفكارك واقتراحاتك ومساهماتك لا تقدر بثمن بالنسبة لنا.*",
     "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud." : "مشروع AppAPI هو مبادرة مثيرة تهدف لتثوير طريقة تطوير التطبيقات في نكست كلاود.",
+    "Deploy Daemons" : "نشر البرامج الخفيّة Daemons",
+    "Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "Deploy Daemon (أو DaemonConfig) هو برنامج خفي لتنسيق التطبيقات الخارجية ExApps.",
+    "Deploy Daemons. Deploy Daemon (DaemonConfig) is an ExApps orchestration daemon." : "نشر البرامج الخفيّة Daemons. البرنامج Deploy Daemon (DaemonConfig) هو برنامج خفي لتنسيق التطبيقات الخارجية.",
+    "Default Deploy Daemon is not accessible. Please verify its configuration" : "الوصول إلى البرنامج الخفي التلقائي لنشر التطبيقات Default Deploy Daemon غير ممكن. تأكّد من إعداداته لو سمحت ",
+    "Specify container restart policy, e.g. 'always' to ensure ExApp running after daemon server reboot" : "قم بتحديد سياسة إعادة تشغيل الحاوية. مثلاً: \"دائماً always\" تضمن تشغيل التطبيق الخارجي ExApp بعد إعادة تشغيل خادم البرنامج الخفي ",
+    "This settings changes are reflected only for newly created containers" : "التعديلات في هذا الإعداد تنعكس فقط على الحاويات المُنشأة حديثاً",
     "{license}-licensed" : "{license} مُرخّصٌ",
     "Update to {version}" : "التحديث إلى {version}",
     "Delete data on remove" : "إحذف البيانات عند الإزالة",
@@ -185,12 +140,51 @@ OC.L10N.register(
     "No apps found" : "لا توجد أي تطبيقات",
     "_%n ExApp has an update available_::_%n apps have an update available_" : ["%n تطبيق يوجد لها تحديث","%n تطبيق يوجد لها تحديث","%n تطبيق يوجد لها تحديث","%n تطبيقات يوجد لها تحديث","%n تحديث يوجد لها تحديث","%nتطبيق يوجد لها تحديث"],
     "_Update_::_Update all_" : ["تحديث الكل","تحديث","تحديث الكل","تحديث الكل","تحديث الكل","تحديث الكل"],
+    "Deploy Daemon" : "نشر البرنامج الخفي",
     "Type" : "النوع",
     "Display Name" : "إسم العرض",
+    "GPUs support" : "دعم وحدات المعالجة الرسومية GPU",
+    "Are you sure you want delete Deploy Daemon" : "هل أنت متأكد أنك تريد حذف البرنامج المخفي للنشر Deploy Daemon؟",
+    "All ExApps on this daemon will be removed" : "كل التطبيقات الخارجية على هذا البرنامج الخفي سيتم حذفها",
+    "All ExApps installed on this daemon will be removed" : "كل التطبيقات الخارجية المثبتة على هذا البرنامج الخفي سيتم حذفها",
+    "\"manual-install\" Deploy Daemon cannot be set as default" : "تطبيق النشر الخارجي \"التثبيت اليدوي\" \"manual-install\" لا يمكن تعيينه كافتراضي",
+    "Failed to save admin options. Check the logs" : "تعذّر حفظ خيارات المدير. راجع سجل الأحداث",
+    "Deploy daemon config details" : "تفاصيل تهيئة برنامج النشر الخفي ",
+    "Manual install daemon usually used for development. It cannot be set as default daemon." : "البرنامج الخفي للتثبيت اليدوي يُستعمل عادةً في مرحلة التطوير؛ و لا يمكن تعيينه كبرنامج خفي تلقائي.",
+    "Deploy config" : "تهيئة النشر",
+    "Verify connection" : "تحقّق من الاتصال",
+    "No Deploy daemons configured" : "لم تتم تهيئة أي برامج نشر خفية",
+    "Register a custom one or setup from available templates" : "قُم بتسجيل واحدة مخصصة أو قم بتجهيز واحدة باستعمال القوالب المتاحة",
+    "Register Daemon" : "قم بتسجيل برنامج خفي Daemon",
+    "AppAPI will try to install small skeleton ExApp to verify Daemon configured correctly and deployment steps are passing." : "سيحاول AppAPI تثبيت ExApp الهيكلي الصغير للتحقق من تكوين Daemon بشكل صحيح ومن تنفيذ خطوات النشر بنجاحٍ.",
+    "The following Deploy test checks must be passed to succeed:" : "يجب اجتياز عمليات التحقق من اختبار النشر التالية لتحقيق النجاح:",
+    "More info" : "معلومات أكثر",
+    "Remove test ExApp" : "إزالة التطبيق الخارجي ExApp التجريبي",
+    "Start Deploy test" : "البدء في النشر التجريبي",
+    "Stop Deploy test" : "إيقاف النشر التجريبي",
+    "ExApp is unregistered and container is removed on \"Stop deploy test\"" : "التطبيق الخارجي ExApp غير مسجل؛ و تمّت إزالة الحاوية في \"إيقاف تجربة النشر Stop deploy test\"",
+    "Hostname to access ExApps" : "اسم المضيف Hostname للوصول إلى التطبيقات الخارجية ExApps",
     "Hostname or path to access Docker daemon (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)" : "اسم المُضيف للوصول إلى البرنامج الخفي لـ\"دوكر\". مثلاً: (nextcloud-appapi-dsp:2375, /var/run/docker.sock)",
+    "Daemon with this name already exists" : "برنامج خفي آخر بنفس هذا الاسم موجود سلفاً",
+    "Password must be at least 12 characters long" : "يجب ألّا يقل طول كلمة المرور عن 12 حرفاً",
     "With https enabled network is set to host" : "مع تعيين شبكة للمضيف يكون فيها بروتوكول https مٌمكّناً",
+    "Changes would be applied only for newly installed ExApps. For existing ExApps, Docker containers should be recreated." : "سيتم تطبيق التغييرات فقط على التطبيقات الخارجية ExApps المثبتة حديثًا. أمّا بالنسبة إلى تلك الموجودة سلفاً، فتتوجب إعادة إنشاء حاويات Docker لها.",
+    "URL should start with http:// or https://" : "عناوين الويب يجب أن تبدأ بـ http:// أو بـ https://",
+    "For HTTPS daemon, Nextcloud URL should be HTTPS" : "بالنسبة للبرنامج الخفي لـ HTTPS، عنوان URL لنكست كلاود يجب أن يكون HTTPS",
+    "All available GPU devices on daemon host will be requested to be enabled in ExApp containers by Docker." : "كل وحدات المعالجة الرسومية GPU على مُضيف البرنامج الخفي سيتم طلب تمكينها في حاويات التطبيقات الخارجية ExApp من قِبَل \"دوكر\" Docker.  ",
+    "Edit Deploy Daemon" : "تحرير برنامج النشر الخفي",
+    "Register Deploy Daemon" : "تسجيل برنامج خفي للنشر",
+    "Select daemon configuration template" : "إختَر قالب تهيئة البرنامج الخفي",
+    "Unique Deploy Daemon Name" : "الاسم الفريد للبرنامج الخفي للنشر",
+    "Select daemon deploy method" : "إختَر طريقة نشر البرنامج الخفي",
+    "Set daemon as default" : "إختَر البرنامج الخفي كقيمة تلقائية",
+    "Set as default daemon" : "تعيين كبرنامج خفي تلقائي",
+    "Enable https" : "تمكين https",
+    "Show deploy config" : "أظهِر تهيئة النشر deploy config",
+    "Hide deploy config" : "إخْفِ تهيئة النشر deploy config",
     "Network" : "الشبكة",
     "Docker network name" : "إسم شبكة \"دوكر\" Docker",
+    "Additional option" : "خيار إضافي",
     "by {author}\n{license}" : "من قِبَل {author}\n{license}",
     "Your apps" : "تطبيقاتك",
     "Documentation" : "توثيق النظام",

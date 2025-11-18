@@ -9,6 +9,7 @@ OC.L10N.register(
     "Host" : "Retzidore",
     "Nextcloud URL" : "URL de Nextcloud",
     "Enabled" : "Ativadu",
+    "More information" : "Àteras informatziones",
     "Remove" : "Boga",
     "From" : "Dae",
     "To" : "A",

@@ -10,6 +10,7 @@ OC.L10N.register(
     "Host" : "میزبان",
     "Nextcloud URL" : "Nextcloud URL",
     "Enabled" : "فعال شده",
+    "More information" : "اطلاعات بیشتر",
     "Remove" : "حذف",
     "From" : "از",
     "To" : "به",

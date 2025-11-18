@@ -10,6 +10,7 @@ OC.L10N.register(
     "Host" : "מארח",
     "Nextcloud URL" : "כתובת Nextcloud",
     "Enabled" : "מופעל",
+    "More information" : "מידע נוסף",
     "Remove" : "הסרה",
     "From" : "מאת",
     "To" : "אל",
