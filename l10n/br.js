@@ -7,6 +7,7 @@ OC.L10N.register(
     "Unlimited" : "Didermenet",
     "Name" : "Anv",
     "Host" : "Ostiz",
+    "More information" : "Muioc'h a ditouroù",
     "Display name" : "Anv ardivink",
     "Disabled" : "Disaotreañ",
     "Confirm" : "Kadarnañ",

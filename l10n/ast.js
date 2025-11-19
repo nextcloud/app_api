@@ -23,6 +23,7 @@ OC.L10N.register(
     "HaProxy password" : "Contraseña de HaProxy",
     "Check connection" : "Comprobar la conexón",
     "Enabled" : "Activóse",
+    "More information" : "Más información",
     "Remove" : "Quitar",
     "From" : "De",
     "To" : "Pa",
