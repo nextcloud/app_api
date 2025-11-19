@@ -8,6 +8,7 @@ OC.L10N.register(
     "Name" : "Nombre",
     "Host" : "Servidor",
     "Enabled" : "Habilitado",
+    "More information" : "Más información",
     "Remove" : "Eliminar",
     "Add" : "Agregar",
     "Disabled" : "Deshabilitado",

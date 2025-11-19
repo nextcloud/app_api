@@ -9,6 +9,7 @@ OC.L10N.register(
     "Host" : "Servidor",
     "Nextcloud URL" : "URL de Nextcloud",
     "Enabled" : "Habilitado",
+    "More information" : "Más información",
     "From" : "De",
     "To" : "A",
     "Add" : "Guardar",
