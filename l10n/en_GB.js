@@ -83,6 +83,7 @@ OC.L10N.register(
     "Additional options" : "Additional options",
     "Check connection" : "Check connection",
     "Registered Deploy daemons list" : "Registered Deploy daemons list",
+    "No Deploy daemons are registered" : "No Deploy daemons are registered",
     "Register a custom one or configure one from the available templates" : "Register a custom one or configure one from the available templates",
     "Register daemon" : "Register daemon",
     "Register ExApp in Nextcloud" : "Register ExApp in Nextcloud",

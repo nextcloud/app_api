@@ -83,6 +83,7 @@ OC.L10N.register(
     "Additional options" : "額外選項",
     "Check connection" : "檢查連線",
     "Registered Deploy daemons list" : "已註冊的部署幕後程式清單",
+    "No Deploy daemons are registered" : "未註冊部署幕後程式",
     "Register a custom one or configure one from the available templates" : "從可用範本註冊自訂範本或設定",
     "Register daemon" : "註冊幕後程式",
     "Register ExApp in Nextcloud" : "在 Nextcloud 註冊 ExApp",
