@@ -13,10 +13,13 @@ use Closure;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
 use OCP\IDBConnection;
+use OCP\Migration\Attributes\AddColumn;
+use OCP\Migration\Attributes\ColumnType;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 use OCP\Security\ICrypto;
 
+#[AddColumn('preferences_ex', 'sensitive', ColumnType::SMALLINT, 'support sensitive setting')]
 class Version032002Date20250527174907 extends SimpleMigrationStep {
 
 	public function __construct(
