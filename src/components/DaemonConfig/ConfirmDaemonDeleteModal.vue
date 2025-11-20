@@ -11,17 +11,17 @@
 				<h2>{{ t('app_api', 'Are you sure you want delete the "{name}" deploy daemon?', { name: daemon.name }) }}</h2>
 
 				<NcCheckboxRadioSwitch
-					:checked.sync="removeExAppsOnDaemonDelete">
+					v-model="removeExAppsOnDaemonDelete">
 					<template #default>
 						{{ t('app_api', 'Remove all ExApps installed on this daemon') }}
 					</template>
 				</NcCheckboxRadioSwitch>
 
 				<div class="actions">
-					<NcButton type="tertiary" @click="closeModal">
+					<NcButton variant="tertiary" @click="closeModal">
 						{{ t('app_api', 'Cancel') }}
 					</NcButton>
-					<NcButton type="error"
+					<NcButton variant="error"
 						:disabled="!removeExAppsOnDaemonDelete || deleting"
 						@click="deleteDaemonConfig(daemon)">
 						<template #icon>
@@ -37,10 +37,10 @@
 </template>
 
 <script>
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcModal from '@nextcloud/vue/components/NcModal'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
+import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import Delete from 'vue-material-design-icons/TrashCanOutline.vue'
 
 export default {

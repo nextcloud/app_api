@@ -35,7 +35,7 @@
 					<div class="actions">
 						<NcButton
 							v-if="statusCheck.error"
-							type="tertiary"
+							variant="tertiary"
 							:href="statusCheck.help_url"
 							target="_blank"
 							style="margin: 5px 0 15px 0;">
@@ -51,7 +51,7 @@
 				<NcButton
 					v-tooltip="{ content: downloadLogsTooltip, placement: 'top' }"
 					:disabled="!canDownloadLogs"
-					type="tertiary"
+					variant="tertiary"
 					:href="getDownloadLogsUrl()"
 					target="_blank"
 					style="margin-right: 10px;">
@@ -64,7 +64,7 @@
 					v-if="!testRunning && hasTestDeployResults"
 					v-tooltip="{ content: t('app_api', 'Remove the test ExApp'), placement: 'top' }"
 					:disabled="stoppingTest"
-					type="tertiary"
+					variant="tertiary"
 					style="margin-right: 10px;"
 					@click="removeTestExApp">
 					<template #icon>
@@ -75,7 +75,7 @@
 				<NcButton
 					v-if="!testRunning"
 					:disabled="startingTest"
-					type="primary"
+					variant="primary"
 					@click="startDeployTest">
 					<template #icon>
 						<NcLoadingIcon v-if="startingTest" :size="20" />
@@ -84,7 +84,7 @@
 				</NcButton>
 				<NcButton
 					v-if="testRunning"
-					type="warning"
+					variant="warning"
 					style="margin-left: 5px;"
 					:disabled="stoppingTest"
 					@click="stopDeployTest">
@@ -107,11 +107,11 @@ import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { showError, showSuccess } from '@nextcloud/dialogs'
 
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
+import NcModal from '@nextcloud/vue/components/NcModal'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
+import NcButton from '@nextcloud/vue/components/NcButton'
 
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
+import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import Check from 'vue-material-design-icons/Check.vue'
 import StopIcon from 'vue-material-design-icons/Stop.vue'
 import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
@@ -244,7 +244,7 @@ export default {
 	beforeMount() {
 		this.fetchTestDeployStatus()
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		clearInterval(this.polling)
 	},
 	methods: {

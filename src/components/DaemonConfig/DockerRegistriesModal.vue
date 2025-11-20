@@ -28,7 +28,7 @@
 					</template>
 					<template #actions>
 						<NcButton
-							type="icon"
+							variant="icon"
 							:disabled="removingRegistryLoading"
 							@click="removeDockerRegistry(registry)">
 							<template #icon>
@@ -50,7 +50,7 @@
 			</NcEmptyContent>
 
 			<NcButton
-				type="primary"
+				variant="primary"
 				style="margin: 20px 0;"
 				:disabled="addingLoading"
 				@click="startAdding">
@@ -65,7 +65,7 @@
 				<div style="display: flex; gap: 10px;">
 					<NcTextField
 						ref="dockerRegistryInput"
-						:value.sync="dockerRegistry.from"
+						v-model="dockerRegistry.from"
 						:label="t('app_api', 'From')"
 						:placeholder="t('app_api', 'registry URL (e.g. ghcr.io)')"
 						:disabled="addingLoading"
@@ -74,7 +74,7 @@
 						:helper-text="registryMappingFromValidationError"
 						@keyup.enter="addDockerRegistry" />
 					<NcTextField
-						:value.sync="dockerRegistry.to"
+						v-model="dockerRegistry.to"
 						:label="t('app_api', 'To')"
 						:placeholder="t('app_api', 'registry URL (e.g. docker.io)')"
 						:disabled="addingLoading"
@@ -91,7 +91,7 @@
 				<div class="actions">
 					<NcButton
 						:disabled="addingLoading || !newRegistryMappingValid"
-						type="primary"
+						variant="primary"
 						@click="addDockerRegistry">
 						{{ t('app_api', 'Add') }}
 						<template #icon>
@@ -101,7 +101,7 @@
 					</NcButton>
 					<NcButton
 						:disabled="addingLoading"
-						type="secondary"
+						variant="secondary"
 						@click="addingRegistry = false">
 						{{ t('app_api', 'Cancel') }}
 						<template #icon>
@@ -121,14 +121,14 @@ import { generateUrl } from '@nextcloud/router'
 import { confirmPassword } from '@nextcloud/password-confirmation'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js'
-import NcListItem from '@nextcloud/vue/dist/Components/NcListItem.js'
+import NcModal from '@nextcloud/vue/components/NcModal'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
+import NcTextField from '@nextcloud/vue/components/NcTextField'
+import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
+import NcListItem from '@nextcloud/vue/components/NcListItem'
 
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
+import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import Docker from 'vue-material-design-icons/Docker.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import Check from 'vue-material-design-icons/Check.vue'

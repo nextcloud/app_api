@@ -24,14 +24,17 @@
 				</template>
 			</NcEmptyContent>
 		</div>
-		<NcButton type="primary" style="margin: 20px 0;" @click="showRegister">
+		<NcButton variant="primary" style="margin: 20px 0;" @click="showRegister">
 			{{ t('app_api', 'Register daemon') }}
 			<template #icon>
 				<Plus v-if="!registering" :size="20" />
 				<NcLoadingIcon v-else />
 			</template>
 		</NcButton>
-		<ManageDaemonConfigModal :show.sync="showRegisterModal" :daemons="daemons" :get-all-daemons="getAllDaemons" />
+		<ManageDaemonConfigModal
+			v-model:show="showRegisterModal"
+			:daemons="daemons"
+			:get-all-daemons="getAllDaemons" />
 	</div>
 </template>
 
@@ -41,9 +44,9 @@ import { generateUrl } from '@nextcloud/router'
 
 import DaemonConfig from './DaemonConfig.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
+import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 
 import FormatListBullet from 'vue-material-design-icons/FormatListBulleted.vue'
 

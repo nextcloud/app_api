@@ -34,7 +34,7 @@
 					<label for="haproxy_password"><b>{{ t('app_api', 'HaProxy password') }}: </b></label>
 					<NcPasswordField
 						id="haproxy_password"
-						:value="daemon.deploy_config?.haproxy_password"
+						:model-value="daemon.deploy_config?.haproxy_password"
 						:disable="true"
 						style="width: fit-content;"
 						readonly
@@ -76,12 +76,12 @@ import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 
-import NcModal from '@nextcloud/vue/dist/Components/NcModal.js'
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-import NcPasswordField from '@nextcloud/vue/dist/Components/NcPasswordField.js'
+import NcModal from '@nextcloud/vue/components/NcModal'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
+import NcPasswordField from '@nextcloud/vue/components/NcPasswordField'
 
-import NcLoadingIcon from '@nextcloud/vue/dist/Components/NcLoadingIcon.js'
+import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import Connection from 'vue-material-design-icons/Connection.vue'
 
 export default {
@@ -162,6 +162,10 @@ export default {
 <style scoped lang="scss">
 .daemon-config-modal-details {
 	padding: 20px;
+
+	h2 {
+		margin-top: 0;
+	}
 }
 
 .actions {
