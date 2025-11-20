@@ -83,6 +83,7 @@ OC.L10N.register(
     "Additional options" : "Opcións adicionais",
     "Check connection" : "Comprobar a conexión",
     "Registered Deploy daemons list" : "Lista de servizos de despregadura rexistrados",
+    "No Deploy daemons are registered" : "Non hai ningún servizo de despregadura rexistrado",
     "Register a custom one or configure one from the available templates" : "Rexistre un personalizado ou configúreo a partir dos modelos dispoñíbeis",
     "Register daemon" : "Rexistrar o servizo",
     "Register ExApp in Nextcloud" : "Rexistrar a ExApp en Nextcloud",
