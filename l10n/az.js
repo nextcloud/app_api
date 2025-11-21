@@ -8,7 +8,6 @@ OC.L10N.register(
     "Name" : "Ad",
     "Host" : "Şəbəkədə ünvan",
     "Enabled" : "İşə salınıb",
-    "Disabled" : "Dayandırılıb",
     "Confirm" : "Təsdiq edin",
     "Save" : "Saxla",
     "Update to {version}" : "{version} dək yenilə",

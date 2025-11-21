@@ -18,7 +18,6 @@ OC.L10N.register(
     "From" : "Nuo",
     "To" : "Kam",
     "Add" : "Pridėti",
-    "Disabled" : "Išjungta",
     "Confirm" : "Patvirtinti",
     "Save" : "Įrašyti",
     "Register" : "Registruotis",

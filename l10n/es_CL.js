@@ -10,7 +10,6 @@ OC.L10N.register(
     "Enabled" : "Habilitado",
     "Remove" : "Remover",
     "Add" : "Guardar",
-    "Disabled" : "Deshabilitado",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Registrar",

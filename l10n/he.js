@@ -15,7 +15,6 @@ OC.L10N.register(
     "From" : "מאת",
     "To" : "אל",
     "Add" : "הוספה",
-    "Disabled" : "מושבת",
     "Confirm" : "אימות",
     "Save" : "שמירה",
     "Register" : "רישום",

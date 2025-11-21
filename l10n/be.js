@@ -16,7 +16,6 @@ OC.L10N.register(
     "Add" : "Дадаць",
     "Display name" : "Імя для паказу",
     "Enable HTTPS" : "Уключыць HTTPS",
-    "Disabled" : "Адключана",
     "Confirm" : "Пацвердзіць",
     "Save" : "Захаваць",
     "Update to {version}" : "Абнавіць да {version}",

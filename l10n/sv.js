@@ -18,7 +18,6 @@ OC.L10N.register(
     "To" : "Till",
     "Add" : "Lägg till",
     "Display name" : "Visningsnamn",
-    "Disabled" : "Inaktiverad",
     "Confirm" : "Bekräfta",
     "Save" : "Spara",
     "Register" : "Registrera",

@@ -14,7 +14,6 @@ OC.L10N.register(
     "To" : "Para",
     "Add" : "Adicionar",
     "Display name" : "Nome a exibir",
-    "Disabled" : "Desativado",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Registar",

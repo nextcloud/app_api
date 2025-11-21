@@ -14,7 +14,6 @@ OC.L10N.register(
     "From" : "Từ",
     "To" : "Tới",
     "Add" : "Thêm",
-    "Disabled" : "Đã vô hiệu",
     "Confirm" : "Xác nhận",
     "Save" : "Lưu",
     "Register" : "Đăng ký",

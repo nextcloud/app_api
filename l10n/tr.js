@@ -114,7 +114,6 @@ OC.L10N.register(
     "FRP server address" : "FRP sunucusu adresi",
     "Docker socket proxy port" : "Docker soketi vekil sunucu bağlantı noktası",
     "Disable FRP" : "FRP kullanılmasın",
-    "Disabled" : "Kullanılmıyor",
     "Docker network for ex-app deployment must be defined" : "ExApp dağıtımı için Docker ağı tanımlanmalıdır",
     "Compute device" : "Hesaplama aygıtı",
     "Memory limit (in MiB)" : "Bellek sınırı (MiB)",

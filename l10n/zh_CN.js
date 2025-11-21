@@ -38,7 +38,6 @@ OC.L10N.register(
     "Add" : "添加",
     "Display name" : "显示名称",
     "Deployment method" : "部署方式",
-    "Disabled" : "已禁用",
     "Compute device" : "计算设备",
     "Confirm" : "确认",
     "Save" : "保存",

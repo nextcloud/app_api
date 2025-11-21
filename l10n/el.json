@@ -109,7 +109,6 @@
     "FRP server address" : "Διεύθυνση διακομιστή FRP",
     "Docker socket proxy port" : "Θύρα διακομιστή μεσολάβησης Docker socket",
     "Disable FRP" : "Απενεργοποίηση FRP",
-    "Disabled" : "Απενεργοποιημένο",
     "Docker network for ex-app deployment must be defined" : "Το δίκτυο Docker για ανάπτυξη ex-app πρέπει να οριστεί",
     "Compute device" : "Συσκευή υπολογισμού",
     "Add additional option" : "Προσθήκη πρόσθετης επιλογής",

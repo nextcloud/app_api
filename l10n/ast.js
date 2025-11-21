@@ -30,7 +30,6 @@ OC.L10N.register(
     "Add" : "Amestar",
     "Display name" : "Nome visible",
     "Daemon host" : "Agospiador del degorriu",
-    "Disabled" : "Desactivóse",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Rexistrase",

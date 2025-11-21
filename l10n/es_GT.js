@@ -11,7 +11,6 @@ OC.L10N.register(
     "From" : "De",
     "To" : "Para",
     "Add" : "Guardar",
-    "Disabled" : "Deshabilitado",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Registrar",
