@@ -13,7 +13,6 @@ OC.L10N.register(
     "Remove" : "Suprimir",
     "From" : "De",
     "Add" : "Apondre",
-    "Disabled" : "Desactivat",
     "Confirm" : "Confirmar",
     "Save" : "Enregistrar",
     "Register" : "S'inscriure",

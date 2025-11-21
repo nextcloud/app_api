@@ -80,7 +80,6 @@ OC.L10N.register(
     "Display name" : "Visningsnavn",
     "Deployment method" : "Distribueringsmetode",
     "Daemon host" : "Daemon-vert",
-    "Disabled" : "Deaktivert",
     "Compute device" : "Beregningsenhet",
     "Add additional option" : "Legg til ytterligere alternativ",
     "Option key (unique)" : "Alternativnøkkel (unik)",

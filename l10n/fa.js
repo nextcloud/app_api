@@ -16,7 +16,6 @@ OC.L10N.register(
     "To" : "به",
     "Add" : "افزودن",
     "Display name" : "Display name",
-    "Disabled" : "غیرفعال شده",
     "Confirm" : "تأیید",
     "Save" : "ذخیره",
     "Register" : "ثبت‌نام",

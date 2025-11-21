@@ -11,7 +11,6 @@ OC.L10N.register(
     "Enabled" : "E aktivizuar",
     "Remove" : "Hiqe",
     "Add" : "Shto ",
-    "Disabled" : "I/E çaktivizuar",
     "Confirm" : "Konfirmo",
     "Save" : "Ruaje",
     "Register" : "Regjistrohu",

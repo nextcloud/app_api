@@ -91,7 +91,6 @@
     "Enable HaRP" : "Zapnúť HaRP",
     "FRP server address" : "HaRP adresa servera",
     "Docker socket proxy port" : "Docker socket proxy port",
-    "Disabled" : "Vypnuté",
     "Docker network for ex-app deployment must be defined" : "Musí byť definovaná sieť Docker pre nasadenie ex-app",
     "Compute device" : "Výpočetné zariadenie",
     "Add additional option" : "Pridať ďalšiu voľbu",

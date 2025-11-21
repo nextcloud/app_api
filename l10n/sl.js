@@ -17,7 +17,6 @@ OC.L10N.register(
     "To" : "Za",
     "Add" : "Dodaj",
     "Display name" : "Prikazno ime",
-    "Disabled" : "Onemogočeno",
     "Confirm" : "Potrdi",
     "Save" : "Shrani",
     "Register" : "Vpis računa",

@@ -17,7 +17,6 @@ OC.L10N.register(
     "To" : "Vastaanottaja",
     "Add" : "Lisää",
     "Display name" : "Näyttönimi",
-    "Disabled" : "Pois käytöstä",
     "Confirm" : "Vahvista",
     "Save" : "Tallenna",
     "Register" : "Rekisteröidy",

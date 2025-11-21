@@ -15,7 +15,6 @@ OC.L10N.register(
     "To" : "A",
     "Add" : "Agiunghe",
     "Display name" : "Ammustra nùmene",
-    "Disabled" : "Disativadu",
     "Confirm" : "Cunfirma",
     "Save" : "Sarva",
     "Register" : "Registra",

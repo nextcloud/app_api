@@ -15,7 +15,6 @@ OC.L10N.register(
     "To" : "Către",
     "Add" : "Adaugă",
     "Display name" : "Nume afișat",
-    "Disabled" : "Dezactivați",
     "Confirm" : "Confirmă",
     "Save" : "Salvează",
     "Register" : "Înregistrează-te",

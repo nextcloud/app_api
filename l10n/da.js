@@ -110,7 +110,6 @@ OC.L10N.register(
     "FRP server address" : "FRP server adresse",
     "Docker socket proxy port" : "Docker sokkel proxy port",
     "Disable FRP" : "Deaktivér FRP",
-    "Disabled" : "Deaktiveret",
     "Docker network for ex-app deployment must be defined" : "Docker netværk for ex-app udrulning skal være defineret",
     "Compute device" : "Beregningsenhed",
     "Add additional option" : "Tilføj yderligere mulighed",

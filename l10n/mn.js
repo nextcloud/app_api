@@ -8,7 +8,6 @@ OC.L10N.register(
     "Host" : "хост",
     "Enabled" : "Идэвхижүүлэх",
     "Add" : "Нэмэх",
-    "Disabled" : "идэвхигүй",
     "Confirm" : "Батлах",
     "Save" : "Хадгалах",
     "Update to {version}" : "{version} хувилбар руу шинэчлэх",

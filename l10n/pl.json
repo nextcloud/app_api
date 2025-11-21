@@ -112,7 +112,6 @@
     "FRP server address" : "Adres serwera FRP",
     "Docker socket proxy port" : "Port proxy gniazda Dockera",
     "Disable FRP" : "Wyłącz FRP",
-    "Disabled" : "Wyłączone",
     "Docker network for ex-app deployment must be defined" : "Sieć Dockera dla wdrożenia ex-app musi być zdefiniowana",
     "Compute device" : "Urządzenie obliczeniowe",
     "Memory limit (in MiB)" : "Limit pamięci (w MB)",

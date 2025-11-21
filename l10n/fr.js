@@ -87,7 +87,6 @@ OC.L10N.register(
     "Enable HaRP" : "Activer HaRP",
     "FRP server address" : "Adresse du serveur FRP",
     "Disable FRP" : "Désactiver FRP",
-    "Disabled" : "Désactivé",
     "Compute device" : "Equipement de calcul",
     "Add additional option" : "Ajouter une option supplémentaire",
     "Option key (unique)" : "Clé d'option (unique)",

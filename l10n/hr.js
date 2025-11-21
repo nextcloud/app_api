@@ -15,7 +15,6 @@ OC.L10N.register(
     "From" : "Od",
     "To" : "Do",
     "Add" : "Dodaj",
-    "Disabled" : "Onemogućeno",
     "Confirm" : "Potvrdi",
     "Save" : "Spremi",
     "Register" : "Registriraj se",

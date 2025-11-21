@@ -15,7 +15,6 @@ OC.L10N.register(
     "To" : "Til",
     "Add" : "Bæta við",
     "Display name" : "Birtingarnafn",
-    "Disabled" : "Óvirkt",
     "Compute device" : "Reiknitæki",
     "Confirm" : "Staðfesta",
     "Save" : "Vista",

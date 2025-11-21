@@ -109,7 +109,6 @@
     "FRP server address" : "Dirección del servidor FRP",
     "Docker socket proxy port" : "Puerto del proxy para el socket Docker",
     "Disable FRP" : "Deshabilitar FRP",
-    "Disabled" : "Deshabilitado",
     "Docker network for ex-app deployment must be defined" : "La red Docker para despliegues de ex-app debe ser definida",
     "Compute device" : "Dispositivo de cómputo",
     "Add additional option" : "Añadir opción adicional",

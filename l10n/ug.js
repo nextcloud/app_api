@@ -81,7 +81,6 @@ OC.L10N.register(
     "Display name" : "كۆرسىتىش ئىسمى",
     "Deployment method" : "ئورۇنلاشتۇرۇش ئۇسۇلى",
     "Daemon host" : "Daemon host",
-    "Disabled" : "چەكلەنگەن",
     "Compute device" : "ھېسابلاش ئۈسكۈنىسى",
     "Add additional option" : "قوشۇمچە تاللاش قوشۇڭ",
     "Option key (unique)" : "تاللاش كۇنۇپكىسى (ئۆزگىچە)",

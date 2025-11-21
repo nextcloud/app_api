@@ -14,7 +14,6 @@ OC.L10N.register(
     "To" : "Līdz",
     "Add" : "Pievienot",
     "Display name" : "Attēlojamais vārds",
-    "Disabled" : "Atspējots",
     "Confirm" : "Apstiprināt",
     "Save" : "Saglabāt",
     "Update to {version}" : "Atjaunināts uz {version}",

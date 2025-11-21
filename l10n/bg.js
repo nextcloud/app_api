@@ -17,7 +17,6 @@ OC.L10N.register(
     "To" : "До",
     "Add" : "Добавяне",
     "Display name" : "Име за визуализация",
-    "Disabled" : "Изключено",
     "Confirm" : "Потвърдете",
     "Save" : "Запиши",
     "Register" : "Регистрация",

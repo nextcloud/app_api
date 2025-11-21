@@ -43,7 +43,6 @@ OC.L10N.register(
     "Set this daemon as the default one" : "Määra see taustateenus vaikimisi kasutatavaks",
     "Set as the default daemon" : "Määra vaikimisi taustateenuseks",
     "Enable HTTPS" : "Lülita HTTPS sisse",
-    "Disabled" : "Välja lülitatud",
     "Compute device" : "Arvutusseade",
     "Memory limit (in MiB)" : "Mälukasutuse ülempiir (MiB)",
     "Must be a positive integer" : "Peab olema positiivne täisarv",

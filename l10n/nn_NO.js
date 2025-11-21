@@ -8,7 +8,6 @@ OC.L10N.register(
     "Name" : "Namn",
     "Host" : "Tenar",
     "More information" : "Meir informasjon",
-    "Disabled" : "Deaktivert",
     "Save" : "Lagre",
     "Visit website" : "Besøk nettstaden",
     "Report a bug" : "Rapporter feil",

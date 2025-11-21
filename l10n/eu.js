@@ -42,7 +42,6 @@ OC.L10N.register(
     "Display name" : "Erakusteko izena",
     "Deployment method" : "Zabalketa metodoa",
     "Daemon host" : "Daimonaren ostalaria",
-    "Disabled" : "Desgaituta",
     "Compute device" : "Konputazio gailua",
     "Option value" : "Aukeraren balioa",
     "Confirm" : "Berretsi",

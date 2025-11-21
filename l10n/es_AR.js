@@ -11,7 +11,6 @@ OC.L10N.register(
     "More information" : "Más información",
     "Remove" : "Eliminar",
     "Add" : "Agregar",
-    "Disabled" : "Deshabilitado",
     "Confirm" : "Confirmar",
     "Save" : "Guardar",
     "Register" : "Registrar",
