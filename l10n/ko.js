@@ -76,7 +76,6 @@ OC.L10N.register(
     "Display name" : "표시 이름",
     "Deployment method" : "배포 방식",
     "Daemon host" : "데몬 호스트",
-    "Disabled" : "비활성화됨",
     "Compute device" : "컴퓨팅 장치",
     "Add additional option" : "부가 옵션 추가",
     "Option key (unique)" : "옵션 키(고유)",

@@ -16,7 +16,6 @@ OC.L10N.register(
     "To" : "To",
     "Add" : "დამატება",
     "Display name" : "Display name",
-    "Disabled" : "Disabled",
     "Confirm" : "Confirm",
     "Save" : "Save",
     "Register" : "Register",

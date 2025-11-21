@@ -8,7 +8,6 @@ OC.L10N.register(
     "Name" : "Nom",
     "Enabled" : "Yermed",
     "Remove" : "Kkes",
-    "Disabled" : "Ittwarermed",
     "Confirm" : "Serggeg",
     "Save" : "Sekles",
     "Update to {version}" : "Leqqem ar {version}",

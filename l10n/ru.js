@@ -117,7 +117,6 @@ OC.L10N.register(
     "FRP server address" : "Адрес сервера FRP",
     "Docker socket proxy port" : "Порт прокси-сокета Docker",
     "Disable FRP" : "Отключить FRP",
-    "Disabled" : "Отключено",
     "Docker network for ex-app deployment must be defined" : "Сеть Docker для развертывания ex-app должна быть определена",
     "Compute device" : "Вычислительное устройство",
     "Add additional option" : "Добавить дополнительную опцию",

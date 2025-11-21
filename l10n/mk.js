@@ -17,7 +17,6 @@ OC.L10N.register(
     "To" : "До",
     "Add" : "Додади",
     "Display name" : "Име и презиме",
-    "Disabled" : "Оневозможено",
     "Confirm" : "Потврди",
     "Save" : "Сними",
     "Register" : "Регистрирај се",

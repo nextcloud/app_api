@@ -10,7 +10,6 @@ OC.L10N.register(
     "Enabled" : "เปิดใช้งาน",
     "Remove" : "ลบออก",
     "Display name" : "ชื่อที่แสดง",
-    "Disabled" : "ปิดใช้งาน",
     "Confirm" : "ยืนยัน",
     "Save" : "บันทึก",
     "Register" : "ลงทะเบียน",

@@ -18,7 +18,6 @@ OC.L10N.register(
     "To" : "Címzett",
     "Add" : "Hozzáadás",
     "Display name" : "Megjelenítendő név",
-    "Disabled" : "Letiltva",
     "Confirm" : "Megerősítés",
     "Save" : "Mentés",
     "Register" : "Regisztráció",

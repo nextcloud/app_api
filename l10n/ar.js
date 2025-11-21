@@ -92,7 +92,6 @@ OC.L10N.register(
     "Enable HaRP" : "تمكين HaRP",
     "FRP server address" : "عنوان خادوم FRP",
     "Docker socket proxy port" : "منفذ وكيل مقبس \"دوكر\" Docker",
-    "Disabled" : "مُعطّل",
     "Docker network for ex-app deployment must be defined" : "يجب تعريف شبكة \"دوكر\" لتثبيت التطبيق الخارجي ex-app",
     "Compute device" : "إحسب الجهاز",
     "Add additional option" : "إضِف خياراً إضافيّاً",

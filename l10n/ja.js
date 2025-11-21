@@ -97,7 +97,6 @@ OC.L10N.register(
     "Enable HaRP" : "HaRPを有効化",
     "FRP server address" : "FRPサーバーアドレス",
     "Disable FRP" : "FRPを無効化",
-    "Disabled" : "無効",
     "Compute device" : "計算デバイス",
     "Must be a positive integer" : "正の整数である必要があります",
     "Must be a positive number" : "正の数である必要があります",

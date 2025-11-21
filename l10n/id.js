@@ -11,7 +11,6 @@ OC.L10N.register(
     "Enabled" : "Diaktifkan",
     "Remove" : "Hapus",
     "Add" : "Tambah",
-    "Disabled" : "Dinonaktifkan",
     "Confirm" : "Konfirmasi",
     "Save" : "Simpan",
     "Register" : "Daftar",

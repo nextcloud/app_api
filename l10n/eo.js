@@ -10,7 +10,6 @@ OC.L10N.register(
     "From" : "De",
     "To" : "Al",
     "Display name" : "Vidiga nomo",
-    "Disabled" : "Malkapabligita",
     "Confirm" : "Konfirmi",
     "Save" : "Konservi",
     "Register" : "Registriĝi",

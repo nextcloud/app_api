@@ -114,7 +114,6 @@ OC.L10N.register(
     "FRP server address" : "Адреса сервера FRP",
     "Docker socket proxy port" : "Проксі-порт докерного сокета",
     "Disable FRP" : "Вимкнути FRP",
-    "Disabled" : "Вимкнено",
     "Docker network for ex-app deployment must be defined" : "Необхідно визначити докерну мережу для розгортання ex-app",
     "Compute device" : "Обчислити пристрій",
     "Memory limit (in MiB)" : "Ліміт пам'яті (в Мбайт)",
