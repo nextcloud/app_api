@@ -31,7 +31,7 @@ use PharData;
 use Psr\Log\LoggerInterface;
 
 class DockerActions implements IDeployActions {
-	public const DOCKER_API_VERSION = 'v1.41';
+	public const DOCKER_API_VERSION = 'v1.44';
 	public const EX_APP_CONTAINER_PREFIX = 'nc_app_';
 	public const APP_API_HAPROXY_USER = 'app_api_haproxy_user';
 
