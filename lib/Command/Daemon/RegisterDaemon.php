@@ -12,7 +12,7 @@ namespace OCA\AppAPI\Command\Daemon;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\DaemonConfigService;
 
-use OCP\IConfig;
+use OCP\IAppConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,7 +23,7 @@ class RegisterDaemon extends Command {
 
 	public function __construct(
 		private DaemonConfigService $daemonConfigService,
-		private IConfig $config,
+		private IAppConfig $config,
 	) {
 		parent::__construct();
 	}
@@ -120,7 +120,7 @@ class RegisterDaemon extends Command {
 		}
 
 		if ($input->getOption('set-default')) {
-			$this->config->setAppValue(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
+			$this->config->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
 		}
 
 		$output->writeln('Daemon successfully registered.');
