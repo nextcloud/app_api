@@ -54,10 +54,14 @@ OC.L10N.register(
     "Disabled apps" : "Изключени приложения",
     "Updates" : "Актуализации",
     "Featured apps" : "Представени приложения",
+    "Supported apps" : "Поддържани приложения",
+    "Deploy and Enable" : "Разположете и активирайте",
     "Enable" : "Включена",
     "Disable" : "Изключване",
+    "Allow untested app" : "Разрешаване на нетествано приложение",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Приложението не е маркирано като съвместимо с вашата версия на Nextcloud. Можете да инсталирате приложението, но е вероятно да не работи безпроблемно.",
     "An error occurred during the request. Unable to proceed." : "Възникна грешка по време на заявката. Не може да се продължи.",
+    "The app has been enabled but needs to be updated." : "Приложението е активирано, но е необходимо да се актуализира.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Грешка: Това приложение не може да бъде активирано, защото прави сървъра нестабилен"
 },
 "nplurals=2; plural=(n != 1);");
