@@ -32,7 +32,7 @@
     "The AppAPI Project is an exciting initiative that aims to revolutionize the way applications are developed for Nextcloud through the use of docker containers. Allowing for greater programming language choice and allowing computationally expensive tasks to be offloaded to a different server." : "O Projeto AppAPI é uma iniciativa empolgante que visa revolucionar a forma como os aplicativos são desenvolvidos para o Nextcloud por meio do uso de contêineres Docker. Isso permite uma maior escolha de linguagens de programação e permite que tarefas computacionalmente custosas sejam transferidas para um servidor diferente.",
     "Deploy daemons" : "Deploy daemons",
     "A deploy daemon (DaemonConfig) is an ExApps orchestration daemon." : "Um Deploy Daemon (DaemonConfig) é um daemon de orquestração de ExApps.",
-    "Deploy daemons. A deploy daemon (DaemonConfig) is an ExApps orchestration daemon." : "Deploy Daemons. Um Deploy Daemon (DaemonConfig) é um daemon de orquestração de ExApps.",
+    "Deploy daemons. A deploy daemon (DaemonConfig) is an ExApps orchestration daemon." : "Deploy daemons. Um deploy daemon (DaemonConfig) é um daemon de orquestração de ExApps.",
     "Default deploy daemon is not accessible. Please check its configuration" : "O deploy daemon padrão não está acessível. Por favor, verifique a configuração",
     "ExApp init timeout (minutes)" : "Tempo limite de inicialização do ExApp (minutos)",
     "ExApp initialization process timeout after which AppAPI will mark it as failed" : "Tempo limite do processo de inicialização do ExApp após o qual o AppAPI o marcará como com falha",
