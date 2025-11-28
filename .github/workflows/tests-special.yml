@@ -49,14 +49,14 @@ jobs:
         run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
       - name: Checkout server
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           submodules: true
           repository: nextcloud/server
           ref: 'master'
 
       - name: Checkout AppAPI
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           path: apps/${{ env.APP_NAME }}
 
@@ -95,7 +95,7 @@ jobs:
         run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
 
       - name: Checkout NcPyApi
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
