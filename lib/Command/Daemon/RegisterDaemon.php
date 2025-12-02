@@ -120,7 +120,7 @@ class RegisterDaemon extends Command {
 		}
 
 		if ($input->getOption('set-default')) {
-			$this->config->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName());
+			$this->config->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true);
 		}
 
 		$output->writeln('Daemon successfully registered.');
