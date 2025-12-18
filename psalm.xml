@@ -54,4 +54,7 @@
 			</errorLevel>
 		</UndefinedDocblockClass>
 	</issueHandlers>
+	<stubs>
+		<file name="tests/stubs/oca_dav_events_sabrepluginaddevent.php"/>
+	</stubs>
 </psalm>
