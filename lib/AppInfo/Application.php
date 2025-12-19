@@ -24,6 +24,7 @@ use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
+use OCA\DAV\Events\SabrePluginAddEvent;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -32,7 +33,6 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Navigation\Events\LoadAdditionalEntriesEvent;
-use OCP\SabrePluginEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
@@ -77,9 +77,9 @@ class Application extends App implements IBootstrap {
 	public function registerDavAuth(): void {
 		$container = $this->getContainer();
 
-		$dispatcher = $container->query(IEventDispatcher::class);
-		$dispatcher->addListener('OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $event) use ($container) {
-			$event->getServer()->addPlugin($container->query(DavPlugin::class));
+		$dispatcher = $container->get(IEventDispatcher::class);
+		$dispatcher->addListener(SabrePluginAddEvent::class, function (SabrePluginAddEvent $event) use ($container) {
+			$event->getServer()->addPlugin($container->get(DavPlugin::class));
 		});
 	}
 }
