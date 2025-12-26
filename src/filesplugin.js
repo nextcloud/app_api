@@ -30,6 +30,14 @@ function loadExAppInlineSvgIcon(appId, route) {
 	})
 }
 
+function mimeMatches(nodeMime, configuredMime) {
+	// configuredMime may be e.g. "video" or "image/jpeg" or "image/jpeg, image/png"
+	return configuredMime.split(',')
+		.map(m => m.trim())
+		.filter(Boolean)
+		.some(m => nodeMime.includes(m))
+}
+
 function generateAppAPIProxyUrl(appId, route) {
 	return generateUrl(`/apps/app_api/proxy/${appId}/${route}`)
 }
@@ -38,85 +46,80 @@ function generateExAppUIPageUrl(appId, route) {
 	return generateUrl(`/apps/app_api/embedded/${appId}/${route}`)
 }
 
-function registerFileAction28(fileAction, inlineSvgIcon) {
+function registerFileAction33(fileAction, inlineSvgIcon) {
+	const handlerUrl = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
+	const isV2 = ('version' in fileAction && fileAction.version === '2.0')
+
+	const execSingle = async (node) => {
+		if (isV2) {
+			try {
+				const response = await axios.post(handlerUrl, { files: [buildNodeInfo(node)] })
+				if (typeof response.data === 'object' && response.data && 'redirect_handler' in response.data) {
+					const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
+					window.location.assign(`${redirectPage}?fileIds=${node.fileid}`)
+				}
+				return true
+			} catch (error) {
+				console.error('Failed to send FileAction request to ExApp', error)
+				return false
+			}
+		}
+
+		// v1.0 behaviour
+		try {
+			await axios.post(handlerUrl, buildNodeInfo(node))
+			return true
+		} catch (error) {
+			console.error('Failed to send FileAction request to ExApp', error)
+			return false
+		}
+	}
+
+	const execBatch = async (nodes) => {
+		if (isV2) {
+			try {
+				const response = await axios.post(handlerUrl, { files: nodes.map(buildNodeInfo) })
+				if (typeof response.data === 'object' && response.data && 'redirect_handler' in response.data) {
+					const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
+					const fileIds = nodes.map(n => n.fileid).join(',')
+					window.location.assign(`${redirectPage}?fileIds=${fileIds}`)
+				}
+				return nodes.map(() => true)
+			} catch (error) {
+				console.error('Failed to send FileAction request to ExApp', error)
+				return nodes.map(() => false)
+			}
+		}
+
+		// v1.0 behaviour: run one-by-one
+		return Promise.all(nodes.map(execSingle))
+	}
+
 	const action = new FileAction({
 		id: fileAction.name,
 		displayName: () => t(fileAction.appid, fileAction.display_name),
+		// Optional but helps in some tooltips/menus:
+		title: () => t(fileAction.appid, fileAction.display_name),
 		iconSvgInline: () => inlineSvgIcon,
 		order: Number(fileAction.order),
-		enabled(files, view) {
-			if (files.length === 1) {
-				// Check for multiple mimes separated by comma
-				let isMimeMatch = false
-				fileAction.mime.split(',').forEach((mime) => {
-					if (files[0].mime.indexOf(mime.trim()) !== -1) {
-						isMimeMatch = true
-					}
-				})
-				return isMimeMatch
-			} else if (files.length > 1) {
-				// Check all files match fileAction mime
-				return files.every((file) => {
-					// Check for multiple mimes separated by comma
-					let isMimeMatch = false
-					fileAction.mime.split(',').forEach((mime) => {
-						if (file.mime.indexOf(mime.trim()) !== -1) {
-							isMimeMatch = true
-						}
-					})
-					return isMimeMatch
-				})
+
+		enabled: ({ nodes, view, folder, contents }) => {
+			if (!nodes || nodes.length === 0) {
+				return false
 			}
+			return nodes.every((node) => mimeMatches(node.mime, fileAction.mime))
 		},
-		async exec(node, view, dir) {
-			const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-			if ('version' in fileAction && fileAction.version === '2.0') {
-				return axios.post(exAppFileActionHandler, { files: [buildNodeInfo(node)] })
-					.then((response) => {
-						if (typeof response.data === 'object' && 'redirect_handler' in response.data) {
-							const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
-							window.location.assign(`${redirectPage}?fileIds=${node.fileid}`)
-							return true
-						}
-						return true
-					}).catch((error) => {
-						console.error('Failed to send FileAction request to ExApp', error)
-						return false
-					})
-			}
-			return axios.post(exAppFileActionHandler, buildNodeInfo(node))
-				.then(() => {
-					return true
-				})
-				.catch((error) => {
-					console.error('Failed to send FileAction request to ExApp', error)
-					return false
-				})
+
+		exec: async ({ nodes }) => {
+			const node = nodes[0]
+			return execSingle(node)
 		},
-		async execBatch(nodes, view, dir) {
-			if ('version' in fileAction && fileAction.version === '2.0') {
-				const exAppFileActionHandler = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
-				const nodesDataList = nodes.map(buildNodeInfo)
-				return axios.post(exAppFileActionHandler, { files: nodesDataList })
-					.then((response) => {
-						if (typeof response.data === 'object' && 'redirect_handler' in response.data) {
-							const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
-							const fileIds = nodes.map((node) => node.fileid).join(',')
-							window.location.assign(`${redirectPage}?fileIds=${fileIds}`)
-						}
-						return nodes.map(_ => true)
-					})
-					.catch((error) => {
-						console.error('Failed to send FileAction request to ExApp', error)
-						return nodes.map(_ => false)
-					})
-			}
-			// for version 1.0 behavior is not changed
-			return Promise.all(nodes.map((node) => {
-				return this.exec(node, view, dir)
-			}))
+
+		execBatch: async ({ nodes }) => {
+			return execBatch(nodes)
 		},
 	})
+
 	registerFileAction(action)
 }
 
@@ -131,7 +134,7 @@ function buildNodeInfo(node) {
 		permissions: node.permissions,
 		fileType: node.type,
 		size: Number(node.size),
-		mtime: new Date(node.mtime).getTime() / 1000, // convert ms to s
+		mtime: new Date(node.mtime).getTime() / 1000,
 		shareTypes: node.attributes.shareTypes || null,
 		shareAttributes: node.attributes.shareAttributes || null,
 		sharePermissions: node.attributes.sharePermissions || null,
@@ -146,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	state.fileActions.forEach(fileAction => {
 		if (fileAction.icon === '') {
 			const inlineSvgIcon = loadStaticAppAPIInlineSvgIcon()
-			registerFileAction28(fileAction, inlineSvgIcon)
+			registerFileAction33(fileAction, inlineSvgIcon)
 		} else {
 			loadExAppInlineSvgIcon(fileAction.appid, fileAction.icon).then((svg) => {
 				if (svg !== null) {
@@ -156,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					icon.documentElement.setAttribute('style', 'filter: var(--background-invert-if-dark);')
 					// Convert back to inline string
 					const inlineSvgIcon = icon.documentElement.outerHTML
-					registerFileAction28(fileAction, inlineSvgIcon)
+					registerFileAction33(fileAction, inlineSvgIcon)
 				}
 			})
 		}
