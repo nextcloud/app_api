@@ -4,7 +4,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-License-Identifier: BSD-3-Clause
 SPDX-License-Identifier: AGPL-3.0-or-later
 SPDX-License-Identifier: (MPL-2.0 OR Apache-2.0)
-SPDX-License-Identifier: ( AGPL-3.0-or-later)
 SPDX-FileCopyrightText: rhysd <lin90162@yahoo.co.jp>
 SPDX-FileCopyrightText: p-queue developers
 SPDX-FileCopyrightText: inline-style-parser developers
@@ -42,7 +41,6 @@ SPDX-FileCopyrightText: Arnout Kazemier
 SPDX-FileCopyrightText: Antoni Andre <antoniandre.web@gmail.com>
 SPDX-FileCopyrightText: Anthony Fu <https://github.com/antfu>
 SPDX-FileCopyrightText: Andrea Giammarchi
-SPDX-FileCopyrightText: Alexander Piskun <bigcat88@icloud.com>
 SPDX-FileCopyrightText: @nextcloud/dialogs developers
 
 
@@ -87,7 +85,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 3.4.1
 	- license: GPL-3.0-or-later
 - @nextcloud/logger
-	- version: 3.0.2
+	- version: 3.0.3
 	- license: GPL-3.0-or-later
 - @nextcloud/paths
 	- version: 2.3.0
@@ -377,6 +375,6 @@ This file is generated from multiple sources. Included packages:
 - webpack
 	- version: 5.102.1
 	- license: MIT
-- app_api
+- nextcloud
 	- version: 1.0.0
-	- license: ( AGPL-3.0-or-later)
+	- license: AGPL-3.0-or-later
