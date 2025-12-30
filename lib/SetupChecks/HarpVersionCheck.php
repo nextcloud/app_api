@@ -91,7 +91,7 @@ class HarpVersionCheck implements ISetupCheck {
 	}
 
 	private function getHarpVersion(DaemonConfig $daemonConfig): ?string {
-		$cacheKey = $daemonConfig->getName() . "_" . crc32(json_encode($daemonConfig));
+		$cacheKey = $daemonConfig->getName() . "_" . (string)crc32(json_encode($daemonConfig));
 		$version = $this->cache->get($cacheKey);
 		if ($version === null) {
 			$version = $this->harpService->getHarpVersion($daemonConfig);

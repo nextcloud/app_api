@@ -177,9 +177,6 @@ class HarpService {
 				return (string) $data['version'];
 			}
 			return null;
-		} catch (ClientException $e) {
-			$this->logger->error("HarpService: getHarpVersion failed: " . $e->getMessage());
-			return null;
 		} catch (\Exception $e) {
 			$this->logger->error("HarpService: getHarpVersion failed: " . $e->getMessage());
 			return null;
