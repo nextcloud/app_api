@@ -157,4 +157,32 @@ class HarpService {
 			$this->logger->error("HarpService: harpExAppUpdate ($addedStr) failed: " . $e->getMessage());
 		}
 	}
+
+	public function getHarpVersion(DaemonConfig $daemonConfig): ?string {
+		if (!self::isHarp($daemonConfig->getDeployConfig())) {
+			return null;
+		}
+		$this->initGuzzleClient($daemonConfig);
+		$url = $this->buildHarpUrl($daemonConfig, '/info');
+		$this->logger->info("HarpService: getHarpVersion: " . $url);
+
+		try {
+			$response = $this->guzzleClient->get($url);
+			$data = json_decode($response->getBody()->getContents(), true);
+			if (isset($data['version'])) {
+				if (gettype($data['version']) === 'double') {
+					// Locale-independent float to string conversion
+					return rtrim(number_format($data['version'], 10, '.', ''), '0');
+				}
+				return (string) $data['version'];
+			}
+			return null;
+		} catch (ClientException $e) {
+			$this->logger->error("HarpService: getHarpVersion failed: " . $e->getMessage());
+			return null;
+		} catch (\Exception $e) {
+			$this->logger->error("HarpService: getHarpVersion failed: " . $e->getMessage());
+			return null;
+		}
+	}
 }
