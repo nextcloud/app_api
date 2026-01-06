@@ -171,8 +171,7 @@ class HarpService {
 			$data = json_decode($response->getBody()->getContents(), true);
 			if (isset($data['version'])) {
 				if (gettype($data['version']) === 'double') {
-					// Locale-independent float to string conversion
-					return rtrim(number_format($data['version'], 10, '.', ''), '0');
+					return $this->versionFloatToString($data['version']);
 				}
 				return (string) $data['version'];
 			}
@@ -181,5 +180,11 @@ class HarpService {
 			$this->logger->error("HarpService: getHarpVersion failed: " . $e->getMessage());
 			return null;
 		}
+	}
+
+	private function versionFloatToString(float $version): string{
+		// If the Harp version was reported as a float, e.g. `4.2`, convert it to the string "4.2.0".
+		// We use number_format to avoid potential issues from locale-dependent float to string conversions.
+		return rtrim(number_format($version, 10, '.', ''), '0') . '.0';
 	}
 }
