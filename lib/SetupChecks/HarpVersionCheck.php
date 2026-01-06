@@ -68,7 +68,7 @@ class HarpVersionCheck implements ISetupCheck {
 					continue;
 				}
 				if (!$this->fulfillsMinimumVersionRequirement($versionString)) {
-					$issues[] = $this->l10n->t('HaRP version for daemon "%s" is "%s", which is too old. The minimum required version is "%s". Please update the daemon to the latest version. ', [$daemonConfig->getName(), $versionString, Application::MINIMUM_HARP_VERSION]);
+					$issues[] = $this->l10n->t('HaRP version for daemon "%s" is "%s", which is too old. The minimum required version is "%s". Please update the daemon to the latest version.', [$daemonConfig->getName(), $versionString, Application::MINIMUM_HARP_VERSION]);
 				}
 			} catch (\Exception $e) {
 				$this->logger->error('Failed to check HaRP version for daemon ' . $daemonConfig->getName() . ': ' . $e->getMessage(), ['exception' => $e]);
