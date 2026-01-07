@@ -106,7 +106,7 @@ class HarpService {
 				return $exApp->getAppid();
 			}
 		}
-		return "127.0.0.1";
+		return '127.0.0.1';
 	}
 
 	public function getHarpExApp(ExApp $exApp): array {
@@ -164,7 +164,7 @@ class HarpService {
 		}
 		$this->initGuzzleClient($daemonConfig);
 		$url = $this->buildHarpUrl($daemonConfig, '/info');
-		$this->logger->info("HarpService: getHarpVersion: " . $url);
+		$this->logger->info('HarpService: getHarpVersion: ' . $url);
 
 		try {
 			$response = $this->guzzleClient->get($url);
@@ -177,12 +177,12 @@ class HarpService {
 			}
 			return null;
 		} catch (\Exception $e) {
-			$this->logger->error("HarpService: getHarpVersion failed: " . $e->getMessage());
+			$this->logger->error('HarpService: getHarpVersion failed: ' . $e->getMessage());
 			return null;
 		}
 	}
 
-	private function versionFloatToString(float $version): string{
+	private function versionFloatToString(float $version): string {
 		// If the Harp version was reported as a float, e.g. `4.2`, convert it to the string "4.2.0".
 		// We use number_format to avoid potential issues from locale-dependent float to string conversions.
 		return rtrim(number_format($version, 10, '.', ''), '0') . '.0';

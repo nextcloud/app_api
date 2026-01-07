@@ -78,8 +78,8 @@ class HarpVersionCheck implements ISetupCheck {
 
 		if (!empty($issues)) {
 			return SetupResult::warning(
-				implode("\n", $issues),
-				"https://github.com/nextcloud/HaRP/",
+				implode('\n', $issues),
+				'https://github.com/nextcloud/HaRP/',
 			);
 		}
 
@@ -87,11 +87,11 @@ class HarpVersionCheck implements ISetupCheck {
 	}
 
 	private function fulfillsMinimumVersionRequirement(string $version): bool {
-		return version_compare($version, Application::MINIMUM_HARP_VERSION, ">=");
+		return version_compare($version, Application::MINIMUM_HARP_VERSION, '>=');
 	}
 
 	private function getHarpVersion(DaemonConfig $daemonConfig): ?string {
-		$cacheKey = $daemonConfig->getName() . "_" . (string)crc32(json_encode($daemonConfig));
+		$cacheKey = $daemonConfig->getName() . '_' . (string)crc32(json_encode($daemonConfig));
 		$version = $this->cache->get($cacheKey);
 		if ($version === null) {
 			$version = $this->harpService->getHarpVersion($daemonConfig);
