@@ -30,6 +30,14 @@ class DaemonConfigService {
 	) {
 	}
 
+	/**
+	 * Validate that a string does not contain control characters.
+	 * Control characters (0x00-0x1F and 0x7F) can cause issues with URL routing and display.
+	 */
+	private function containsControlCharacters(string $value): bool {
+		return preg_match('/[\x00-\x1F\x7F]/', $value) === 1;
+	}
+
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
 		$bad_patterns = ['http', 'https', 'tcp', 'udp', 'ssh'];
 		$docker_host = (string)$params['host'];
@@ -117,6 +125,12 @@ class DaemonConfigService {
 	}
 
 	public function updateDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
+		$name = $daemonConfig->getName() ?? '';
+		if ($name === '' || $this->containsControlCharacters($name)) {
+			$this->logger->error('Failed to update daemon configuration: `name` contains invalid characters or is empty.');
+			return null;
+		}
+
 		try {
 			return $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
