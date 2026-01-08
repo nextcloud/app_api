@@ -78,7 +78,7 @@ class HarpVersionCheck implements ISetupCheck {
 
 		if (!empty($issues)) {
 			return SetupResult::warning(
-				implode('\n', $issues),
+				implode("<br />", $issues),
 				'https://github.com/nextcloud/HaRP/',
 			);
 		}
