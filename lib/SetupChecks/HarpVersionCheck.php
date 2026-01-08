@@ -45,7 +45,7 @@ class HarpVersionCheck implements ISetupCheck {
 	/**
 	 * @return DaemonConfig[]
 	 */
-	public function getHaRPDaemonConfigs(): array {
+	private function getHaRPDaemonConfigs(): array {
 		$allDaemons = $this->daemonConfigService->getRegisteredDaemonConfigs();
 		return array_filter($allDaemons, function (DaemonConfig $daemon) {
 			return HarpService::isHarp($daemon->getDeployConfig());
