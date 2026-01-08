@@ -20,7 +20,7 @@ use OCP\SetupCheck\SetupResult;
 use Psr\Log\LoggerInterface;
 
 class HarpVersionCheck implements ISetupCheck {
-	private \OCP\ICache $cache;
+	private ?\OCP\ICache $cache = null;
 
 	public function __construct(
 		private readonly IL10N               $l10n,
@@ -92,11 +92,11 @@ class HarpVersionCheck implements ISetupCheck {
 
 	private function getHarpVersion(DaemonConfig $daemonConfig): ?string {
 		$cacheKey = $daemonConfig->getName() . '_' . (string)crc32(json_encode($daemonConfig));
-		$version = $this->cache->get($cacheKey);
+		$version = $this->cache?->get($cacheKey);
 		if ($version === null) {
 			$version = $this->harpService->getHarpVersion($daemonConfig);
 			$oneWeek = 60 * 60 * 24 * 7;
-			$this->cache->set($cacheKey, $version, $oneWeek);
+			$this->cache?->set($cacheKey, $version, $oneWeek);
 		}
 		return $version;
 	}
