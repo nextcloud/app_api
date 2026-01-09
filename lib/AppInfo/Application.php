@@ -24,6 +24,7 @@ use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
+use OCA\AppAPI\SetupChecks\HarpVersionCheck;
 use OCA\DAV\Events\SabrePluginAddEvent;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
@@ -42,6 +43,7 @@ class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_api';
 	public const TEST_DEPLOY_APPID = 'test-deploy';
 	public const TEST_DEPLOY_INFO_XML = 'https://raw.githubusercontent.com/nextcloud/test-deploy/main/appinfo/info.xml';
+	public const MINIMUM_HARP_VERSION = '0.3.0';
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);
@@ -69,6 +71,7 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(DeclarativeSettingsSetValueEvent::class, SetValueListener::class);
 
 		$context->registerSetupCheck(DaemonCheck::class);
+		$context->registerSetupCheck(HarpVersionCheck::class);
 	}
 
 	public function boot(IBootContext $context): void {
