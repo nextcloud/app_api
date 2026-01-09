@@ -39,6 +39,12 @@ class DaemonConfigService {
 	}
 
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
+		$name = $params['name'] ?? '';
+		if ($name === '' || $this->containsControlCharacters($name)) {
+			$this->logger->error('Failed to register daemon configuration: `name` contains invalid characters or is empty.');
+			return null;
+		}
+
 		$bad_patterns = ['http', 'https', 'tcp', 'udp', 'ssh'];
 		$docker_host = (string)$params['host'];
 		foreach ($bad_patterns as $bad_pattern) {
