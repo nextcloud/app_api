@@ -20,7 +20,7 @@
 		"roave/security-advisories": "dev-latest",
 		"psalm/phar": "6.7.x",
 		"nextcloud/coding-standard": "^1.1",
-		"friendsofphp/php-cs-fixer": "3.92.3"
+		"friendsofphp/php-cs-fixer": "3.92.5"
 	},
 	"scripts": {
 		"lint": "find . -name \\*.php -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
