@@ -27,8 +27,7 @@
 						<span style="color: var(--color-warning);">{{ t('app_api', 'Image pull will be skipped') }}</span>
 					</template>
 					<template #actions>
-						<NcButton
-							variant="icon"
+						<NcActionButton
 							:disabled="removingRegistryLoading"
 							@click="removeDockerRegistry(registry)">
 							<template #icon>
@@ -36,7 +35,7 @@
 								<Close v-else :size="20" />
 							</template>
 							{{ t('app_api', 'Remove') }}
-						</NcButton>
+						</NcActionButton>
 					</template>
 				</NcListItem>
 			</div>
@@ -127,6 +126,7 @@ import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
 import NcTextField from '@nextcloud/vue/components/NcTextField'
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 import NcListItem from '@nextcloud/vue/components/NcListItem'
+import NcActionButton from '@nextcloud/vue/components/NcActionButton'
 
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import Docker from 'vue-material-design-icons/Docker.vue'
@@ -144,6 +144,7 @@ export default {
 		NcTextField,
 		NcEmptyContent,
 		NcListItem,
+		NcActionButton,
 		Docker,
 		Plus,
 		Check,
