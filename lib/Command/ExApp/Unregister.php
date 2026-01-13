@@ -102,6 +102,7 @@ class Unregister extends Command {
 				if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $rmData)) {
 					if (!$silent) {
 						$output->writeln(sprintf('Failed to remove ExApp %s', $appId));
+						$output->writeln('Hint: If the container was already removed manually, you can use the --force option to continue unregistering.');
 					}
 					if (!$force) {
 						return 1;
@@ -112,12 +113,14 @@ class Unregister extends Command {
 					}
 				}
 			} else {
+				$containerName = $this->dockerActions->buildExAppContainerName($appId);
 				$removeResult = $this->dockerActions->removeContainer(
-					$this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId)
+					$this->dockerActions->buildDockerUrl($daemonConfig), $containerName
 				);
 				if ($removeResult) {
 					if (!$silent) {
 						$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
+						$output->writeln(sprintf('Hint: If the container "%s" was already removed manually, you can use the --force option to continue unregistering.', $containerName));
 					}
 					if (!$force) {
 						return 1;
