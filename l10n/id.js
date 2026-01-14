@@ -30,6 +30,7 @@ OC.L10N.register(
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Aplikasi unggulan dikembangkan oleh dan dalam komunitas. Mereka menawarkan fungsionalitas sentral dan mereka siap dipakai untuk produksi.",
     "Featured" : "Unggulan",
     "Update to {update}" : "Perbarui ke {update}",
+    "Icon" : "Ikon",
     "Version" : "Versi",
     "Actions" : "Tindakan",
     "Results from other categories" : "Hasil dari kategori lainnya",
