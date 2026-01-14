@@ -102,7 +102,7 @@ class Unregister extends Command {
 				if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $rmData)) {
 					if (!$silent) {
 						$output->writeln(sprintf('Failed to remove ExApp %s', $appId));
-						$output->writeln('Hint: If the container was already removed manually, you can use the --force option to fullly remove it from AppAPI.');
+						$output->writeln('Hint: If the container was already removed manually, you can use the --force option to fully remove it from AppAPI.');
 					}
 					if (!$force) {
 						return 1;
