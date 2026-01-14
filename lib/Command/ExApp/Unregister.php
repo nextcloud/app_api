@@ -120,7 +120,7 @@ class Unregister extends Command {
 				if ($removeResult) {
 					if (!$silent) {
 						$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
-						$output->writeln(sprintf('Hint: If the container "%s" was already removed manually, you can use the --force option to continue unregistering.', $containerName));
+						$output->writeln(sprintf('Hint: If the container "%s" was already removed manually, you can use the --force option to fully remove it from AppAPI.', $containerName));
 					}
 					if (!$force) {
 						return 1;
