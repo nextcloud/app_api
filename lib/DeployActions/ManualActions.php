@@ -66,6 +66,7 @@ class ManualActions implements IDeployActions {
 				$host = $deployConfig['additional_options']['OVERRIDE_APP_HOST'];
 			}
 		}
+		$host = explode(':', $host)[0];
 		return sprintf('%s://%s:%s', $protocol, $host, $port);
 	}
 }
