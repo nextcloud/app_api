@@ -53,7 +53,7 @@ class DaemonCheck implements ISetupCheck {
 
 		$daemonConfig = $this->getDefaultDaemonConfig();
 		if ($daemonConfig === null) {
-			return SetupResult::error(
+			return SetupResult::info(
 				$this->l10n->t('AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps).'),
 				"https://docs.nextcloud.com/server/$serverVer/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon",
 			);
