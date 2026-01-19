@@ -81,6 +81,10 @@ class RegisterDaemon extends Command {
 			return 1;
 		}
 
+		if ($acceptsDeployId === 'manual-install' && !$isHarp && str_contains($host, ':')) {
+			$output->writeln('<comment>Warning: The host contains a port, which will be ignored for manual-install daemons. The ExApp\'s port from --json-info will be used instead.</comment>');
+		}
+
 		if ($this->daemonConfigService->getDaemonConfigByName($name) !== null) {
 			$output->writeln(sprintf('Registration skipped, as the daemon config `%s` already exists.', $name));
 			return 0;
