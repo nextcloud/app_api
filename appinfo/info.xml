@@ -9,34 +9,33 @@
 	<summary>Nextcloud AppAPI</summary>
 	<description>
 	<![CDATA[
-### Boost your Nextcloud with AppAPI and its specially designed applications.
+### What is AppAPI?
 
+AppAPI is the Nextcloud component that enables **External Apps (ExApps)**.
+ExApps are apps whose backend runs **outside** the Nextcloud PHP process (usually as a Docker container), while still integrating with your Nextcloud users, permissions and web UI.
 
-The AppAPI is a project within the Nextcloud ecosystem designed to streamline and enhance the process of
-application development, deployment, and management.
+### Do I need it?
 
-It introduces a new methodology that allows developers to create
-applications using a variety of programming languages, not limited to PHP, which was traditionally used in Nextcloud development.
+No. If you do not plan to install External Apps, you can disable AppAPI.
 
-_If you wish to develop an application, we will gladly help and assist you._
+If AppAPI is enabled without a configured Deploy Daemon, Nextcloud will show the info message:
 
-### Support
+> "AppAPI default deploy daemon is not set …"
 
-We appreciate any support for this project:
+That warning means: "External Apps are not configured yet".
 
-- ⭐ Star our work on GitHub
-- ❗ Create an Issue or feature request
-- 💁 Resolve an Issue and create a Pull Request
-- 🧑‍💻 Develop your own application using AppAPI
+You can either disable AppAPI, or configure a Deploy Daemon (see below).
 
-We are genuinely excited about the future of the AppAPI project and its potential to transform
-the way applications are developed and experienced within Nextcloud.
+### How do External Apps get deployed?
 
-As we embark on this journey, we warmly invite you - developers, thinkers, creators, and visionaries -
-to join us in shaping a more versatile, stable, and secure app landscape.
+A **Deploy Daemon** is the service Nextcloud talks to in order to install, start, stop and reach ExApps.
 
-*Your insights, suggestions, and contributions are invaluable to us.*
+Two options are available:
 
+- **HaRP** (recommended for Nextcloud 32+) — a high-performance reverse proxy with FRP tunneling
+- **Docker Socket Proxy** (legacy) — scheduled for removal in Nextcloud 35
+
+See the [admin documentation](https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/DeployConfigurations.html) for setup instructions.
 	]]></description>
 	<version>33.0.0-dev.0</version>
 	<licence>agpl</licence>
@@ -44,7 +43,8 @@ to join us in shaping a more versatile, stable, and secure app landscape.
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
 	<namespace>AppAPI</namespace>
 	<documentation>
-		<developer>https://docs.nextcloud.com/server/latest/developer_manual/exapp_development</developer>
+		<admin>https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/AppAPIAndExternalApps.html</admin>
+		<developer>https://docs.nextcloud.com/server/latest/developer_manual/exapp_development/index.html</developer>
 	</documentation>
 	<category>integration</category>
 	<category>tools</category>
