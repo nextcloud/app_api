@@ -29,7 +29,7 @@ OC.L10N.register(
     "AppAPI HaRP version check" : "Verificação da versão do AppAPI HaRP",
     "Could not retrieve HaRP version from daemon \"%s\"" : "Não foi possível recuperar a versão do HaRP do daemon \"%s\"",
     "HaRP version for daemon \"%s\" is \"%s\", which is too old. The minimum required version is \"%s\". Please update the daemon to the latest version." : "A versão do HaRP para o daemon \"%s\" é \"%s\", que é muito antiga. A versão mínima necessária é \"%s\". Atualize o daemon para a versão mais recente.",
-    "Failed to check HaRP version for daemon \"%s\": %s" : "Falha ao verificar a versão do HaRP para o daemon %s: %s",
+    "Failed to check HaRP version for daemon \"%s\": %s" : "Falha ao verificar a versão do HaRP para o daemon \"%s\": %s",
     "Nextcloud AppAPI" : "Nextcloud AppAPI",
     "External Apps management" : "Gerenciamento de Aplicativos Externos",
     "Admin options saved" : "Opções de administrador salvas",
