@@ -12,6 +12,8 @@ OC.L10N.register(
     "Registered Deploy daemons list" : "Daftar Deploy daemon yang terdaftar",
     "Enabled" : "Diaktifkan",
     "Remove" : "Hapus",
+    "From" : "Dari",
+    "To" : "Hingga",
     "Add" : "Tambah",
     "Display name" : "Nama tampilan",
     "Compute device" : "Perangkat komputasi",
