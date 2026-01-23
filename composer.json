@@ -16,7 +16,7 @@
 		}
 	],
 	"require-dev": {
-		"nextcloud/ocp": "dev-master",
+		"nextcloud/ocp": "dev-stable33",
 		"roave/security-advisories": "dev-latest",
 		"psalm/phar": "6.7.x",
 		"nextcloud/coding-standard": "^1.1",
