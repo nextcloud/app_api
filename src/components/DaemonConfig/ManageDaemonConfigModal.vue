@@ -133,10 +133,10 @@
 								<NcFormBoxSwitch
 									v-model="deployConfig.harp.exapp_direct"
 									class="switch"
-									:disabled="isEdit">
+									:disabled="isEdit || isHarpAio">
 									{{ t('app_api', 'Disable FRP') }}
 								</NcFormBoxSwitch>
-								<InfoTooltip :text="t('app_api', 'Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP.')" />
+								<InfoTooltip :text="isHarpAio ? t('app_api', 'FRP is always disabled for the All-in-One setup.') : t('app_api', 'Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP.')" />
 							</div>
 						</div>
 						<template v-if="!isPureManual">
@@ -532,6 +532,9 @@ export default {
 		},
 		isHarp() {
 			return this.deployConfig.harp !== null
+		},
+		isHarpAio() {
+			return this.configurationTab?.id === 'harp_aio'
 		},
 		isPureManual() {
 			return this.acceptsDeployId === 'manual-install' && !this.isHarp
