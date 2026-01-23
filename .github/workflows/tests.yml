@@ -4,9 +4,9 @@ name: Tests
 
 on:
   pull_request:
-    branches: [main]
+    branches: [stable33]
   push:
-    branches: [main]
+    branches: [stable33]
   workflow_dispatch:
 
 permissions:
@@ -55,13 +55,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout Notifications
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: nextcloud/notifications
-          ref: master
+          ref: stable33
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -174,13 +174,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout Notifications
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: nextcloud/notifications
-          ref: master
+          ref: stable33
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -288,13 +288,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout Notifications
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: nextcloud/notifications
-          ref: master
+          ref: stable33
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -410,13 +410,13 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout Notifications
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           repository: nextcloud/notifications
-          ref: master
+          ref: stable33
           path: apps/notifications
 
       - name: Checkout AppAPI

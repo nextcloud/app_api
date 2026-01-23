@@ -4,9 +4,9 @@ name: Tests - Deploy
 
 on:
   pull_request:
-    branches: [main]
+    branches: [stable33]
   push:
-    branches: [main]
+    branches: [stable33]
   workflow_dispatch:
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -148,7 +148,7 @@ jobs:
       - name: Create container
         run: |
           docker network create master_bridge
-          docker run --net master_bridge --name nextcloud --rm -d -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud -e SERVER_BRANCH=stable33 --rm -d -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
           sudo chmod 766 /var/run/docker.sock
           sleep 120s
 
@@ -238,7 +238,7 @@ jobs:
             -e NC_HAPROXY_PASSWORD="some_secure_password" \
             --net master_bridge --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud -e SERVER_BRANCH=stable33 --rm -d ${{ env.docker-image }}
           sleep 60s
 
       - name: Install AppAPI
@@ -337,7 +337,7 @@ jobs:
             -e EX_APPS_NET="ipv4@localhost" \
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud -e SERVER_BRANCH=stable33 --rm -d ${{ env.docker-image }}
           sleep 60s
 
       - name: Debug information
@@ -466,7 +466,7 @@ jobs:
             -e EX_APPS_NET="ipv4@localhost" \
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
+          docker run --net=bridge --name=nextcloud -p 8080:80 -e SERVER_BRANCH=stable33 --rm -d ${{ env.docker-image }}
           sleep 60s
 
       - name: Debug information
@@ -598,7 +598,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -738,7 +738,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -888,7 +888,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -1008,13 +1008,13 @@ jobs:
             --net master_bridge --name appapi-harp -h appapi-harp \
             --restart unless-stopped \
             -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
-          docker run --net master_bridge --name nextcloud-docker --rm -d ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud-docker -e SERVER_BRANCH=stable33 --rm -d ${{ env.docker-image }}
 
           sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
           sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
           cat tests/simple-nginx-NOT-FOR-PRODUCTION.conf
 
-          docker run --net master_bridge --name nextcloud --rm \
+          docker run --net master_bridge --name nextcloud -e SERVER_BRANCH=stable33 --rm \
             -v $(pwd)/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
             -d nginx
 
@@ -1100,13 +1100,13 @@ jobs:
             --net master_bridge --name appapi-harp -h appapi-harp \
             --restart unless-stopped \
             -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
-          docker run --net master_bridge --name nextcloud-docker --rm -d ${{ env.docker-image }}
+          docker run --net master_bridge --name nextcloud-docker -e SERVER_BRANCH=stable33 --rm -d ${{ env.docker-image }}
 
           sed -i 's/127\.0\.0\.1:8080/nextcloud-docker/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
           sed -i 's/127\.0\.0\.1:8780/appapi-harp:8780/' tests/simple-nginx-NOT-FOR-PRODUCTION.conf
           cat tests/simple-nginx-NOT-FOR-PRODUCTION.conf
 
-          docker run --net master_bridge --name nextcloud --rm \
+          docker run --net master_bridge --name nextcloud -e SERVER_BRANCH=stable33 --rm \
             -v $(pwd)/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
             -d nginx
 
@@ -1189,7 +1189,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -1241,7 +1241,7 @@ jobs:
             --net host --name appapi-harp \
             --restart unless-stopped \
             -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
-          docker run --net host --name nextcloud --rm \
+          docker run --net host --name nextcloud -e SERVER_BRANCH=stable33 --rm \
             -v $(pwd)/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
             -d nginx
 
@@ -1308,7 +1308,7 @@ jobs:
         with:
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable33
 
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -1362,7 +1362,7 @@ jobs:
             --net host --name appapi-harp \
             --restart unless-stopped \
             -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
-          docker run --net host --name nextcloud --rm \
+          docker run --net host --name nextcloud -e SERVER_BRANCH=stable33 --rm \
             -v $(pwd)/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
             -d nginx
           docker run --net host --name nc_app_app-skeleton-python \
