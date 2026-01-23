@@ -25,7 +25,7 @@ OC.L10N.register(
     "Register" : "Registra",
     "{license}-licensed" : "sotto licenza {license}",
     "Update to {version}" : "Aggiorna a {version}",
-    "Delete data on remove" : "Cancella dati alla rimozione",
+    "Delete data on remove" : "Elimina dati alla rimozione",
     "This app has no minimum Nextcloud version assigned. This will be an error in the future." : "Questa applicazione non contiene l'informazione della versione minima di Nextcloud richiesta. In futuro ciò sarà considerato un errore.",
     "This app has no maximum Nextcloud version assigned. This will be an error in the future." : "Questa applicazione non contiene l'informazione della versione massima di Nextcloud richiesta. In futuro ciò sarà considerato un errore.",
     "This app cannot be installed because the following dependencies are not fulfilled:" : "Questa applicazione non può essere installata perché le seguenti dipendenze non sono soddisfatte:",
