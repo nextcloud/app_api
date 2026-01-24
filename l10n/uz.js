@@ -26,6 +26,7 @@ OC.L10N.register(
     "Actions" : "Actions",
     "Type" : "Turi",
     "URL should start with http:// or https://" : "URL http:// yoki https:// bilan boshlanishi kerak",
+    "Network" : "Tarmoq",
     "Documentation" : "Hujjatlar",
     "Details" : "Details",
     "Enable" : "Enable",
