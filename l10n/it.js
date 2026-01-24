@@ -11,7 +11,6 @@ OC.L10N.register(
     "Deploy options" : "Opzioni di distribuzione",
     "Nextcloud URL" : "URL Nextcloud",
     "Memory limit" : "Limite di memoria",
-    "Registered Deploy daemons list" : "Elenco dei Deploy Daemons registrati",
     "Enabled" : "Abilitata",
     "More information" : "Altre informazioni",
     "Remove" : "Rimuovi",
@@ -52,7 +51,6 @@ OC.L10N.register(
     "Type" : "Tipo",
     "Display Name" : "Nome visualizzato",
     "GPUs support" : "Supporto GPUs",
-    "No Deploy daemons configured" : "Nessun Deploy Deamons configurato",
     "Register a custom one or setup from available templates" : "Registra uno personalizzato o configuralo dai modelli disponibili",
     "Network" : "Rete",
     "by {author}\n{license}" : "di {author}\n{license}",
@@ -71,7 +69,7 @@ OC.L10N.register(
     "Allow untested app" : "Consenti applicazione non verificata",
     "This app is not marked as compatible with your Nextcloud version. If you continue you will still be able to install the app. Note that the app might not work as expected." : "Questa applicazione non è marcata come compatibile con la tua versione di Nextcloud. Se continui sarai ancora in grado di installare l'applicazione. Nota che l'applicazione potrebbe non funzionare come previsto.",
     "An error occurred during the request. Unable to proceed." : "Si è verificato un errore durante la richiesta. Impossibile continuare.",
-    "The app has been enabled but needs to be updated." : "L'app è stata abilitata ma deve essere aggiornata.",
+    "The app has been enabled but needs to be updated." : "L'applicazione è stata abilitata, ma deve essere aggiornata.",
     "Error: This app cannot be enabled because it makes the server unstable" : "Errore: questa applicazione non può essere abilitata perché rende il server instabile"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
