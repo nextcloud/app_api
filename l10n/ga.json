@@ -174,6 +174,7 @@
     "Docker socket proxy port" : "Port seachfhreastalaí soicéad docker",
     "The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "An port i HaRP lena nascann seachfhreastalaí soicéad Docker. Ba chóir é seo a nochtadh ach i gcás an cheann ionsuite, ní gá é a nochtadh ná a athrú.",
     "Disable FRP" : "Díchumasaigh FRP",
+    "FRP is always disabled for the All-in-One setup." : "Bíonn FRP díchumasaithe i gcónaí don socrú Uile-i-n-Aon.",
     "Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP." : "Bratach le haghaidh socruithe ardleibhéil amháin. Díchumasaíonn sé an tollán FRP idir ExApps agus HaRP.",
     "Docker network for ex-app deployment must be defined" : "Ní mór líonra dugaí le haghaidh imscaradh ex-app a shainiú",
     "Compute device" : "Gléas ríomh",
