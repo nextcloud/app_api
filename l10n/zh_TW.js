@@ -176,6 +176,7 @@ OC.L10N.register(
     "Docker socket proxy port" : "Docker socket 代理伺服器連接埠",
     "The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "Docker socket 代理伺服器連線到的 HaRP 連接埠。這應該是公開的，但對於內建的版本，則不需要公開或變更。",
     "Disable FRP" : "停用 FRP",
+    "FRP is always disabled for the All-in-One setup." : "在 All-in-One 組態中，FRP 一律處於停用狀態。",
     "Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP." : "僅適用於進階設定的旗標。停用 ExApps 與 HaRP 間的 FRP 通道。",
     "Docker network for ex-app deployment must be defined" : "必須定義用於外部應用程式部署的 docker 網路",
     "Compute device" : "計算裝置",
