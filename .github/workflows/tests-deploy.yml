@@ -23,7 +23,7 @@ jobs:
 
     services:
       postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:5432/tcp
         env:
@@ -39,6 +39,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: master
@@ -46,6 +47,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php
@@ -570,7 +572,7 @@ jobs:
 
     services:
       postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:5432/tcp
         env:
@@ -579,7 +581,7 @@ jobs:
           POSTGRES_DB: nextcloud
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
       redis:
-        image: redis
+        image: redis # zizmor: ignore[unpinned-images]
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -596,6 +598,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: master
@@ -603,6 +606,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php 8.3
@@ -710,7 +714,7 @@ jobs:
 
     services:
       postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:5432/tcp
         env:
@@ -719,7 +723,7 @@ jobs:
           POSTGRES_DB: nextcloud
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
       redis:
-        image: redis
+        image: redis # zizmor: ignore[unpinned-images]
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -736,6 +740,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: master
@@ -743,6 +748,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php 8.3
@@ -870,7 +876,7 @@ jobs:
 
     services:
       postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:5432/tcp
         env:
@@ -886,6 +892,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: master
@@ -893,6 +900,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php 8.3
@@ -996,6 +1004,8 @@ jobs:
 
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
 
       - name: Create containers
         run: |
@@ -1087,6 +1097,8 @@ jobs:
 
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
 
       - name: Create containers
         run: |
@@ -1171,7 +1183,7 @@ jobs:
 
     services:
       postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:5432/tcp
         env:
@@ -1187,6 +1199,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: master
@@ -1194,6 +1207,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php 8.3
@@ -1290,7 +1304,7 @@ jobs:
 
     services:
       postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:5432/tcp
         env:
@@ -1306,6 +1320,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: master
@@ -1313,6 +1328,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php 8.3
