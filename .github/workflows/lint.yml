@@ -21,7 +21,9 @@ jobs:
     name: info.xml lint
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
 
       - name: Download xml appinfo schema
         run: wget https://raw.githubusercontent.com/nextcloud/appstore/master/nextcloudappstore/api/v1/release/info.xsd
@@ -40,7 +42,9 @@ jobs:
         php-versions: ["8.1"]
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@ec406be512d7077f68eed36e63f4d91bc006edc4 # v2
@@ -59,7 +63,9 @@ jobs:
         php-versions: ["8.1"]
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@ec406be512d7077f68eed36e63f4d91bc006edc4 # v2
@@ -81,7 +87,10 @@ jobs:
     name: php-psalm-analysis
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@ec406be512d7077f68eed36e63f4d91bc006edc4 # v2
         with:
@@ -99,7 +108,10 @@ jobs:
     name: eslint
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+
       - name: Install dependencies
         run: npm ci
 
@@ -112,7 +124,10 @@ jobs:
     name: stylelint
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+
       - name: Install dependencies
         run: npm ci
 
