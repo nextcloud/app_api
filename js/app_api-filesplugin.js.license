@@ -3,7 +3,7 @@ SPDX-License-Identifier: ISC
 SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-License-Identifier: BlueOak-1.0.0
 SPDX-License-Identifier: BSD-3-Clause
-SPDX-License-Identifier: AGPL-3.0-or-later
+SPDX-License-Identifier: ( AGPL-3.0-or-later)
 SPDX-FileCopyrightText: string_decoder developers
 SPDX-FileCopyrightText: readable-stream developers
 SPDX-FileCopyrightText: inherits developers
@@ -20,6 +20,7 @@ SPDX-FileCopyrightText: Irakli Gozalishvili <rfobic@gmail.com> (http://jeditoolk
 SPDX-FileCopyrightText: GitHub Inc.
 SPDX-FileCopyrightText: Feross Aboukhadijeh
 SPDX-FileCopyrightText: Borewit
+SPDX-FileCopyrightText: Alexander Piskun <bigcat88@icloud.com>
 
 
 This file is generated from multiple sources. Included packages:
@@ -80,6 +81,6 @@ This file is generated from multiple sources. Included packages:
 - webpack
 	- version: 5.102.1
 	- license: MIT
-- nextcloud
-	- version: 1.0.0
-	- license: AGPL-3.0-or-later
+- app_api
+	- version: 34.0.0-dev.1
+	- license: ( AGPL-3.0-or-later)
