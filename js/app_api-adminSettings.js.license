@@ -4,6 +4,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-License-Identifier: BSD-3-Clause
 SPDX-License-Identifier: AGPL-3.0-or-later
 SPDX-License-Identifier: (MPL-2.0 OR Apache-2.0)
+SPDX-License-Identifier: ( AGPL-3.0-or-later)
 SPDX-FileCopyrightText: escape-html developers
 SPDX-FileCopyrightText: debounce developers
 SPDX-FileCopyrightText: atomiks
@@ -23,6 +24,7 @@ SPDX-FileCopyrightText: Dr.-Ing. Mario Heiderich, Cure53 <mario@cure53.de> (http
 SPDX-FileCopyrightText: David Clark
 SPDX-FileCopyrightText: Christoph Wurst
 SPDX-FileCopyrightText: Anthony Fu <https://github.com/antfu>
+SPDX-FileCopyrightText: Alexander Piskun <bigcat88@icloud.com>
 SPDX-FileCopyrightText: @nextcloud/dialogs developers
 
 
@@ -144,6 +146,6 @@ This file is generated from multiple sources. Included packages:
 - webpack
 	- version: 5.102.1
 	- license: MIT
-- nextcloud
-	- version: 1.0.0
-	- license: AGPL-3.0-or-later
+- app_api
+	- version: 34.0.0-dev.0
+	- license: ( AGPL-3.0-or-later)
