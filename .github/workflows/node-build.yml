@@ -18,6 +18,9 @@ on:
       - stylelint.config.js
       - webpack.js
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: node-build
@@ -30,6 +33,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #
         with:
+          persist-credentials: false
           path: ${{ env.APP_NAME }}
 
       - name: Read package.json node and npm engines version
@@ -43,6 +47,7 @@ jobs:
       - name: Set up node ${{ steps.versions.outputs.nodeVersion }}
         uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3
         with:
+          persist-credentials: false
           node-version: ${{ steps.versions.outputs.nodeVersion }}
 
       - name: Set up npm ${{ steps.versions.outputs.npmVersion }}
