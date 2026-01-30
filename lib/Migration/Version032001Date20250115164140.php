@@ -12,12 +12,21 @@ namespace OCA\AppAPI\Migration;
 use Closure;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
+use OCP\Migration\Attributes\AddColumn;
+use OCP\Migration\Attributes\AddIndex;
+use OCP\Migration\Attributes\ColumnType;
+use OCP\Migration\Attributes\IndexType;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
 /**
  * Breaking changes migration refactoring UI tables (renames)
  */
+#[AddColumn('ex_deploy_options', 'id', ColumnType::BIGINT, 'advanced deploy options')]
+#[AddColumn('ex_deploy_options', 'appid', ColumnType::STRING, 'advanced deploy options')]
+#[AddColumn('ex_deploy_options', 'type', ColumnType::STRING, 'advanced deploy options')]
+#[AddColumn('ex_deploy_options', 'value', ColumnType::JSON, 'advanced deploy options')]
+#[AddIndex('ex_deploy_options', IndexType::UNIQUE, 'advanced deploy options')]
 class Version032001Date20250115164140 extends SimpleMigrationStep {
 	/**
 	 * @param IOutput $output
