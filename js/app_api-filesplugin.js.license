@@ -2,13 +2,14 @@ SPDX-License-Identifier: MIT
 SPDX-License-Identifier: ISC
 SPDX-License-Identifier: GPL-3.0-or-later
 SPDX-License-Identifier: BSD-3-Clause
+SPDX-License-Identifier: AGPL-3.0-or-later
 SPDX-License-Identifier: (MPL-2.0 OR Apache-2.0)
-SPDX-License-Identifier: ( AGPL-3.0-or-later)
 SPDX-FileCopyrightText: escape-html developers
 SPDX-FileCopyrightText: Tobias Koppers @sokra
 SPDX-FileCopyrightText: T. Jameson Little <t.jameson.little@gmail.com>
 SPDX-FileCopyrightText: Roman Shtylman <shtylman@gmail.com>
 SPDX-FileCopyrightText: Roeland Jago Douma
+SPDX-FileCopyrightText: Nextcloud GmbH and Nextcloud contributors
 SPDX-FileCopyrightText: Matt Zabriskie
 SPDX-FileCopyrightText: James Halliday
 SPDX-FileCopyrightText: GitHub Inc.
@@ -16,7 +17,6 @@ SPDX-FileCopyrightText: Feross Aboukhadijeh
 SPDX-FileCopyrightText: Dr.-Ing. Mario Heiderich, Cure53 <mario@cure53.de> (https://cure53.de/)
 SPDX-FileCopyrightText: Christoph Wurst
 SPDX-FileCopyrightText: Alkemics
-SPDX-FileCopyrightText: Alexander Piskun <bigcat88@icloud.com>
 
 
 This file is generated from multiple sources. Included packages:
@@ -36,7 +36,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 3.1.0
 	- license: GPL-3.0-or-later
 - axios
-	- version: 1.7.4
+	- version: 1.13.4
 	- license: MIT
 - base64-js
 	- version: 1.5.1
@@ -65,6 +65,6 @@ This file is generated from multiple sources. Included packages:
 - webpack
 	- version: 5.94.0
 	- license: MIT
-- app_api
+- nextcloud
 	- version: 1.0.0
-	- license: ( AGPL-3.0-or-later)
+	- license: AGPL-3.0-or-later

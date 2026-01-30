@@ -5,7 +5,6 @@ SPDX-License-Identifier: BSD-3-Clause
 SPDX-License-Identifier: BSD-2-Clause
 SPDX-License-Identifier: AGPL-3.0-or-later
 SPDX-License-Identifier: (MPL-2.0 OR Apache-2.0)
-SPDX-License-Identifier: ( AGPL-3.0-or-later)
 SPDX-FileCopyrightText: xiaokai <kexiaokai@gmail.com>
 SPDX-FileCopyrightText: rhysd <lin90162@yahoo.co.jp>
 SPDX-FileCopyrightText: inline-style-parser developers
@@ -48,7 +47,6 @@ SPDX-FileCopyrightText: Antoni Andre <antoniandre.web@gmail.com>
 SPDX-FileCopyrightText: Anthony Fu <https://github.com/antfu>
 SPDX-FileCopyrightText: Andris Reinman
 SPDX-FileCopyrightText: Andrea Giammarchi
-SPDX-FileCopyrightText: Alexander Piskun <bigcat88@icloud.com>
 SPDX-FileCopyrightText: @nextcloud/dialogs developers
 
 
@@ -120,7 +118,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 11.0.3
 	- license: MIT
 - axios
-	- version: 1.7.4
+	- version: 1.13.4
 	- license: MIT
 - bail
 	- version: 2.0.2
@@ -434,6 +432,6 @@ This file is generated from multiple sources. Included packages:
 - zwitch
 	- version: 2.0.4
 	- license: MIT
-- app_api
+- nextcloud
 	- version: 1.0.0
-	- license: ( AGPL-3.0-or-later)
+	- license: AGPL-3.0-or-later
