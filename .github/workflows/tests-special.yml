@@ -31,7 +31,7 @@ jobs:
 
     services:
       postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:5432/tcp
         env:
@@ -51,6 +51,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: stable31
@@ -58,6 +59,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php
@@ -97,6 +99,7 @@ jobs:
       - name: Checkout NcPyApi
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
 
