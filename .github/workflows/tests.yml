@@ -33,7 +33,7 @@ jobs:
 
     services:
       postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:5432/tcp
         env:
@@ -53,6 +53,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: stable33
@@ -60,6 +61,7 @@ jobs:
       - name: Checkout Notifications
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           repository: nextcloud/notifications
           ref: stable33
           path: apps/notifications
@@ -67,11 +69,13 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Checkout Notes
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           repository: nextcloud/notes
           ref: "main"
           path: apps/notes
@@ -118,6 +122,7 @@ jobs:
       - name: Checkout NcPyApi
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
 
@@ -154,7 +159,7 @@ jobs:
 
     services:
       mysql:
-        image: ghcr.io/nextcloud/continuous-integration-mysql-8.3:latest
+        image: ghcr.io/nextcloud/continuous-integration-mysql-8.3:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:3306/tcp
         env:
@@ -172,6 +177,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: stable33
@@ -179,6 +185,7 @@ jobs:
       - name: Checkout Notifications
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           repository: nextcloud/notifications
           ref: stable33
           path: apps/notifications
@@ -186,6 +193,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php
@@ -232,6 +240,7 @@ jobs:
       - name: Checkout NcPyApi
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
 
@@ -268,7 +277,7 @@ jobs:
 
     services:
       mysql:
-        image: ghcr.io/nextcloud/continuous-integration-mysql-8.3:latest
+        image: ghcr.io/nextcloud/continuous-integration-mysql-8.3:latest # zizmor: ignore[unpinned-images]
         ports:
           - 4444:3306/tcp
         env:
@@ -286,6 +295,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: stable33
@@ -293,6 +303,7 @@ jobs:
       - name: Checkout Notifications
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           repository: nextcloud/notifications
           ref: stable33
           path: apps/notifications
@@ -300,6 +311,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php
@@ -349,6 +361,7 @@ jobs:
       - name: Checkout NcPyApi
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
 
@@ -408,6 +421,7 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           submodules: true
           repository: nextcloud/server
           ref: stable33
@@ -415,6 +429,7 @@ jobs:
       - name: Checkout Notifications
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           repository: nextcloud/notifications
           ref: stable33
           path: apps/notifications
@@ -422,6 +437,7 @@ jobs:
       - name: Checkout AppAPI
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: apps/${{ env.APP_NAME }}
 
       - name: Set up php
@@ -461,6 +477,7 @@ jobs:
       - name: Checkout NcPyApi
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          persist-credentials: false
           path: nc_py_api
           repository: cloud-py-api/nc_py_api
 
