@@ -82,5 +82,5 @@ This file is generated from multiple sources. Included packages:
 	- version: 5.102.1
 	- license: MIT
 - app_api
-	- version: 34.0.0-dev.0
+	- version: 34.0.0-dev.1
 	- license: ( AGPL-3.0-or-later)
