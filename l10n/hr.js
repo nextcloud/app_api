@@ -15,6 +15,7 @@ OC.L10N.register(
     "From" : "Od",
     "To" : "Do",
     "Add" : "Dodaj",
+    "Display name" : "Ime za prikaz",
     "Confirm" : "Potvrdi",
     "Save" : "Spremi",
     "Register" : "Registriraj se",
