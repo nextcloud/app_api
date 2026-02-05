@@ -174,7 +174,7 @@
     "Docker socket proxy port" : "Porto do proxy do conectador Docker",
     "The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "O porto en HaRP ao que se conecta o proxy do conectador Docker. Este debe estar exposto, mais no caso do porto incorporado, non é necesario expoñelo nin cambialo.",
     "Disable FRP" : "Desactivar FRP",
-    "FRP is always disabled for the All-in-One setup." : "FRP está sempre desactivado para a configuración «Todo en un».",
+    "FRP is always disabled for the All-in-One setup." : "FRP está sempre desactivado para a configuración «Todo-en-Un».",
     "Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP." : "Indicador só para as configuracións avanzadas. Desactiva o túnel FRP entre ExApps e HaRP.",
     "Docker network for ex-app deployment must be defined" : "Debe definirse a rede Docker para a despregadura da ExApp",
     "Compute device" : "Dispositivo de computación",
