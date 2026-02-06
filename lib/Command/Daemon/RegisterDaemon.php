@@ -50,6 +50,15 @@ class RegisterDaemon extends Command {
 		$this->addOption('harp_docker_socket_port', null, InputOption::VALUE_REQUIRED, '\'remotePort\' of the FRP client of the remote Docker socket proxy. There is one included in the harp container so this can be skipped for default setups.', '24000');
 		$this->addOption('harp_exapp_direct', null, InputOption::VALUE_NONE, 'Flag for the advanced setups only. Disables the FRP tunnel between ExApps and HaRP.');
 
+		// Kubernetes options
+		$this->addOption('k8s', null, InputOption::VALUE_NONE, 'Flag to indicate Kubernetes daemon (uses kubernetes-install deploy ID). Requires --harp flag.');
+		$this->addOption('k8s_expose_type', null, InputOption::VALUE_REQUIRED, 'Kubernetes Service type: nodeport|clusterip|loadbalancer|manual (default: clusterip)', 'clusterip');
+		$this->addOption('k8s_node_port', null, InputOption::VALUE_REQUIRED, 'Optional NodePort (30000-32767) for nodeport expose type');
+		$this->addOption('k8s_upstream_host', null, InputOption::VALUE_REQUIRED, 'Override upstream host for HaRP to reach ExApps. Required for manual expose type.');
+		$this->addOption('k8s_external_traffic_policy', null, InputOption::VALUE_REQUIRED, 'Cluster|Local for NodePort/LoadBalancer Service types');
+		$this->addOption('k8s_load_balancer_ip', null, InputOption::VALUE_REQUIRED, 'Optional LoadBalancer IP for loadbalancer expose type');
+		$this->addOption('k8s_node_address_type', null, InputOption::VALUE_REQUIRED, 'InternalIP|ExternalIP for auto node selection (default: InternalIP)', 'InternalIP');
+
 		$this->addUsage('harp_proxy_docker "Harp Proxy (Docker)" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --net nextcloud --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
 		$this->addUsage('harp_proxy_host "Harp Proxy (Host)" "docker-install" "http" "localhost:8780" "http://nextcloud.local" --harp --harp_frp_address "localhost:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
 		$this->addUsage('manual_install_harp "Harp Manual Install" "manual-install" "http" "appapi-harp:8780" "http://nextcloud.local" --net nextcloud --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password"');
@@ -57,6 +66,11 @@ class RegisterDaemon extends Command {
 		$this->addUsage('manual_install "Manual Install" "manual-install" "http" null "http://nextcloud.local"');
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
+
+		// Kubernetes usage examples
+		$this->addUsage('k8s_daemon "Kubernetes HaRP" "kubernetes-install" "http" "harp.nextcloud.svc:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --harp_frp_address "harp.nextcloud.svc:8782" --k8s');
+		$this->addUsage('k8s_daemon_nodeport "K8s NodePort" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --harp_frp_address "harp.example.com:8782" --k8s --k8s_expose_type=nodeport --k8s_upstream_host="k8s-node.example.com"');
+		$this->addUsage('k8s_daemon_lb "K8s LoadBalancer" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --harp_frp_address "harp.example.com:8782" --k8s --k8s_expose_type=loadbalancer');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -67,6 +81,7 @@ class RegisterDaemon extends Command {
 		$host = $input->getArgument('host');
 		$nextcloudUrl = $input->getArgument('nextcloud_url');
 		$isHarp = $input->getOption('harp');
+		$isK8s = $input->getOption('k8s');
 
 		if (($protocol !== 'http') && ($protocol !== 'https')) {
 			$output->writeln('Value error: The protocol must be `http` or `https`.');
@@ -79,6 +94,67 @@ class RegisterDaemon extends Command {
 		if ($isHarp && !$input->getOption('harp_frp_address')) {
 			$output->writeln('Value error: HaRP enabled daemon requires `harp_frp_address` option.');
 			return 1;
+		}
+
+		// Kubernetes validation
+		if ($isK8s) {
+			if (!$isHarp) {
+				$output->writeln('Value error: Kubernetes daemon (--k8s) requires --harp flag. K8s always uses HaRP.');
+				return 1;
+			}
+			// Override accepts-deploy-id for K8s
+			if ($acceptsDeployId !== 'kubernetes-install') {
+				$output->writeln('<comment>Note: --k8s flag detected. Overriding accepts-deploy-id to "kubernetes-install".</comment>');
+				$acceptsDeployId = 'kubernetes-install';
+			}
+
+			$k8sExposeType = $input->getOption('k8s_expose_type');
+			$validExposeTypes = ['nodeport', 'clusterip', 'loadbalancer', 'manual'];
+			if (!in_array($k8sExposeType, $validExposeTypes)) {
+				$output->writeln(sprintf('Value error: Invalid k8s_expose_type "%s". Must be one of: %s', $k8sExposeType, implode(', ', $validExposeTypes)));
+				return 1;
+			}
+
+			$k8sNodePort = $input->getOption('k8s_node_port');
+			if ($k8sNodePort !== null) {
+				$k8sNodePort = (int)$k8sNodePort;
+				if ($k8sExposeType !== 'nodeport') {
+					$output->writeln('Value error: --k8s_node_port is only valid with --k8s_expose_type=nodeport');
+					return 1;
+				}
+				if ($k8sNodePort < 30000 || $k8sNodePort > 32767) {
+					$output->writeln('Value error: --k8s_node_port must be between 30000 and 32767');
+					return 1;
+				}
+			}
+
+			$k8sLoadBalancerIp = $input->getOption('k8s_load_balancer_ip');
+			if ($k8sLoadBalancerIp !== null && $k8sExposeType !== 'loadbalancer') {
+				$output->writeln('Value error: --k8s_load_balancer_ip is only valid with --k8s_expose_type=loadbalancer');
+				return 1;
+			}
+
+			$k8sUpstreamHost = $input->getOption('k8s_upstream_host');
+			if ($k8sExposeType === 'manual' && $k8sUpstreamHost === null) {
+				$output->writeln('Value error: --k8s_upstream_host is required for --k8s_expose_type=manual');
+				return 1;
+			}
+
+			$k8sExternalTrafficPolicy = $input->getOption('k8s_external_traffic_policy');
+			if ($k8sExternalTrafficPolicy !== null) {
+				$validPolicies = ['Cluster', 'Local'];
+				if (!in_array($k8sExternalTrafficPolicy, $validPolicies)) {
+					$output->writeln(sprintf('Value error: Invalid k8s_external_traffic_policy "%s". Must be one of: %s', $k8sExternalTrafficPolicy, implode(', ', $validPolicies)));
+					return 1;
+				}
+			}
+
+			$k8sNodeAddressType = $input->getOption('k8s_node_address_type');
+			$validNodeAddressTypes = ['InternalIP', 'ExternalIP'];
+			if (!in_array($k8sNodeAddressType, $validNodeAddressTypes)) {
+				$output->writeln(sprintf('Value error: Invalid k8s_node_address_type "%s". Must be one of: %s', $k8sNodeAddressType, implode(', ', $validNodeAddressTypes)));
+				return 1;
+			}
 		}
 
 		if ($acceptsDeployId === 'manual-install' && !$isHarp && str_contains($host, ':')) {
@@ -94,18 +170,32 @@ class RegisterDaemon extends Command {
 			? $input->getOption('harp_shared_key')
 			: $input->getOption('haproxy_password') ?? '';
 
+		// For K8s, 'net' is not used (K8s has its own networking), default to 'bridge' to avoid validation issues
+		$defaultNet = $isK8s ? 'bridge' : 'host';
 		$deployConfig = [
-			'net' => $input->getOption('net') ?? 'host',
+			'net' => $input->getOption('net') ?? $defaultNet,
 			'nextcloud_url' => $nextcloudUrl,
 			'haproxy_password' => $secret,
 			'computeDevice' => $this->buildComputeDevice($input->getOption('compute_device') ?? 'cpu'),
 			'harp' => null,
+			'kubernetes' => null,
 		];
 		if ($isHarp) {
 			$deployConfig['harp'] = [
 				'frp_address' => $input->getOption('harp_frp_address') ?? '',
 				'docker_socket_port' => $input->getOption('harp_docker_socket_port'),
-				'exapp_direct' => (bool)$input->getOption('harp_exapp_direct'),
+				'exapp_direct' => $isK8s ? true : (bool)$input->getOption('harp_exapp_direct'), // K8s always uses direct (Service-based) routing
+			];
+		}
+		if ($isK8s) {
+			$k8sNodePort = $input->getOption('k8s_node_port');
+			$deployConfig['kubernetes'] = [
+				'expose_type' => $input->getOption('k8s_expose_type') ?? 'clusterip',
+				'node_port' => $k8sNodePort !== null ? (int)$k8sNodePort : null,
+				'upstream_host' => $input->getOption('k8s_upstream_host'),
+				'external_traffic_policy' => $input->getOption('k8s_external_traffic_policy'),
+				'load_balancer_ip' => $input->getOption('k8s_load_balancer_ip'),
+				'node_address_type' => $input->getOption('k8s_node_address_type') ?? 'InternalIP',
 			];
 		}
 
