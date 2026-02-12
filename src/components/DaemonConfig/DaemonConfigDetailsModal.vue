@@ -30,16 +30,7 @@
 				<h3>{{ t('app_api', 'Deploy options') }}</h3>
 				<p><b>{{ t('app_api', 'Docker network') }}: </b>{{ daemon.deploy_config.net }}</p>
 				<p><b>{{ t('app_api', 'Nextcloud URL') }}: </b>{{ daemon.deploy_config.nextcloud_url }}</p>
-				<p v-if="daemon.deploy_config.haproxy_password" class="external-label">
-					<label for="haproxy_password"><b>{{ t('app_api', 'HaProxy password') }}: </b></label>
-					<NcPasswordField
-						id="haproxy_password"
-						:model-value="daemon.deploy_config?.haproxy_password"
-						:disable="true"
-						style="width: fit-content;"
-						readonly
-						autocomplete="off" />
-				</p>
+				<p><b>{{ t('app_api', 'HaProxy password') }}: </b>{{ daemon.deploy_config?.haproxy_password ? '**************' : t('app_api', '(not set)') }}</p>
 				<p>
 					<b>{{ t('app_api', 'GPU support') }}:</b> {{ daemon.deploy_config.computeDevice && daemon.deploy_config?.computeDevice?.id !== 'cpu' || false }}
 				</p>
@@ -79,7 +70,6 @@ import { showSuccess, showError } from '@nextcloud/dialogs'
 import NcModal from '@nextcloud/vue/components/NcModal'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
-import NcPasswordField from '@nextcloud/vue/components/NcPasswordField'
 
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import Connection from 'vue-material-design-icons/Connection.vue'
@@ -91,7 +81,6 @@ export default {
 		NcButton,
 		NcNoteCard,
 		NcLoadingIcon,
-		NcPasswordField,
 		Connection,
 	},
 	props: {
@@ -172,15 +161,5 @@ export default {
 	display: flex;
 	justify-content: space-between;
 	margin: 20px 0;
-}
-
-.external-label {
-	display: flex;
-	align-items: center;
-	width: 100%;
-
-	label {
-		margin-right: 5px;
-	}
 }
 </style>
