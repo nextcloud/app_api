@@ -101,6 +101,10 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}
         run: composer i
 
+      - name: Set up notifications production dependencies
+        working-directory: apps/notifications
+        run: composer i --no-dev
+
       - name: Set up Nextcloud
         env:
           DB_PORT: 4444
@@ -222,6 +226,10 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}
         run: composer i
 
+      - name: Set up notifications production dependencies
+        working-directory: apps/notifications
+        run: composer i --no-dev
+
       - name: Set up Nextcloud
         env:
           DB_PORT: 4444
@@ -342,6 +350,10 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}
         run: composer i
 
+      - name: Set up notifications production dependencies
+        working-directory: apps/notifications
+        run: composer i --no-dev
+
       - name: Set up Nextcloud
         env:
           DB_PORT: 4444
@@ -457,6 +469,10 @@ jobs:
         if: steps.check_composer.outputs.files_exists == 'true'
         working-directory: apps/${{ env.APP_NAME }}
         run: composer i
+
+      - name: Set up notifications production dependencies
+        working-directory: apps/notifications
+        run: composer i --no-dev
 
       - name: Set up Nextcloud
         env:
