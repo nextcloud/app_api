@@ -652,6 +652,7 @@ export default {
 					haproxy_password: this.deployConfig.haproxy_password ?? '',
 					computeDevice: this.deployConfig.computeDevice,
 					harp: this.deployConfig.harp ?? null,
+					kubernetes: this.deployConfig.kubernetes ?? null,
 					registries: this.deployConfig.registries || null,
 				},
 			}
