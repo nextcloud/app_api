@@ -6,7 +6,7 @@
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { loadState } from '@nextcloud/initial-state'
-import { registerFileAction, FileAction } from '@nextcloud/files'
+import { registerFileAction } from '@nextcloud/files'
 import { getCurrentUser } from '@nextcloud/auth'
 import { translate as t } from '@nextcloud/l10n'
 
@@ -135,7 +135,7 @@ function registerFileAction33(fileAction, iconProvider) {
 		return Promise.all(nodes.map(execSingle))
 	}
 
-	const action = new FileAction({
+	const action = {
 		id: fileAction.name,
 		displayName: () => t(fileAction.appid, fileAction.display_name),
 		title: () => t(fileAction.appid, fileAction.display_name),
@@ -149,7 +149,7 @@ function registerFileAction33(fileAction, iconProvider) {
 
 		exec: async ({ nodes }) => execSingle(nodes[0]),
 		execBatch: async ({ nodes }) => execBatch(nodes),
-	})
+	}
 
 	registerFileAction(action)
 }
