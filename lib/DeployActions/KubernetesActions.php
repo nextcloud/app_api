@@ -381,7 +381,8 @@ class KubernetesActions implements IDeployActions {
 						'name' => $exAppName,
 						'instance_id' => $instanceId,
 					],
-					'timeout' => 150,
+					// HaRP's image_pull wait (3600s) + startup_timeout (90s)
+					'timeout' => 3700,
 				]
 			);
 
