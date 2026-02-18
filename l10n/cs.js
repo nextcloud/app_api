@@ -79,6 +79,7 @@ OC.L10N.register(
     "Docker network" : "Síť pro Docker:",
     "Nextcloud URL" : "URL adresa Nextcloud",
     "HaProxy password" : "Heslo k HAProxy",
+    "(not set)" : "(nenastaveno)",
     "GPU support" : "Podpora GPU",
     "Computation device" : "Výpočetní zařízení",
     "Memory limit" : "Limit paměti",
