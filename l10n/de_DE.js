@@ -80,6 +80,7 @@ OC.L10N.register(
     "Docker network" : "Docker-Netzwerk",
     "Nextcloud URL" : "Nextcloud-URL",
     "HaProxy password" : "HaProxy-Passwort",
+    "(not set)" : "(Nicht eingestellt)",
     "GPU support" : "GPU-Unterstützung",
     "Computation device" : "Rechengerät",
     "Memory limit" : "Speicherlimit",
