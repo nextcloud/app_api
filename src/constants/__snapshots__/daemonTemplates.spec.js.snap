@@ -1,0 +1,214 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DAEMON_TEMPLATES > matches snapshot 1`] = `
+[
+  {
+    "acceptsDeployId": "docker-install",
+    "defaultDaemon": true,
+    "deployConfig": {
+      "computeDevice": {
+        "id": "cpu",
+        "label": "CPU",
+      },
+      "gpu": false,
+      "haproxy_password": "some_very_secure_password",
+      "harp": {
+        "docker_socket_port": 24000,
+        "exapp_direct": false,
+        "frp_address": "localhost:8782",
+      },
+      "net": "host",
+      "resourceLimits": {
+        "memory": null,
+        "nanoCPUs": null,
+      },
+    },
+    "deployConfigSettingsOpened": true,
+    "displayName": "HaRP Proxy (Host)",
+    "host": "localhost:8780",
+    "httpsEnabled": false,
+    "name": "harp_proxy_host",
+    "nextcloud_url": null,
+  },
+  {
+    "acceptsDeployId": "docker-install",
+    "defaultDaemon": true,
+    "deployConfig": {
+      "computeDevice": {
+        "id": "cpu",
+        "label": "CPU",
+      },
+      "gpu": false,
+      "haproxy_password": "some_very_secure_password",
+      "harp": {
+        "docker_socket_port": 24000,
+        "exapp_direct": false,
+        "frp_address": "appapi-harp:8782",
+      },
+      "net": "",
+      "resourceLimits": {
+        "memory": null,
+        "nanoCPUs": null,
+      },
+    },
+    "deployConfigSettingsOpened": true,
+    "displayName": "HaRP Proxy (Docker)",
+    "host": "appapi-harp:8780",
+    "httpsEnabled": false,
+    "name": "harp_proxy_docker",
+    "nextcloud_url": null,
+  },
+  {
+    "acceptsDeployId": "docker-install",
+    "defaultDaemon": true,
+    "deployConfig": {
+      "computeDevice": {
+        "id": "cpu",
+        "label": "CPU",
+      },
+      "gpu": false,
+      "haproxy_password": "some_very_secure_password",
+      "harp": {
+        "docker_socket_port": 24000,
+        "exapp_direct": true,
+        "frp_address": "nextcloud-aio-harp:8782",
+      },
+      "net": "nextcloud-aio",
+      "resourceLimits": {
+        "memory": null,
+        "nanoCPUs": null,
+      },
+    },
+    "deployConfigSettingsOpened": false,
+    "displayName": "HaRP All-in-One",
+    "host": "nextcloud-aio-harp:8780",
+    "httpsEnabled": false,
+    "name": "harp_aio",
+    "nextcloud_url": null,
+  },
+  {
+    "acceptsDeployId": "manual-install",
+    "defaultDaemon": false,
+    "deployConfig": {
+      "computeDevice": {
+        "id": "cpu",
+        "label": "CPU",
+      },
+      "gpu": false,
+      "haproxy_password": "some_very_secure_password",
+      "harp": {
+        "docker_socket_port": 24000,
+        "exapp_direct": false,
+        "frp_address": "localhost:8782",
+      },
+      "net": "host",
+      "resourceLimits": {
+        "memory": null,
+        "nanoCPUs": null,
+      },
+    },
+    "deployConfigSettingsOpened": true,
+    "displayName": "HaRP Manual Install",
+    "host": "appapi-harp:8780",
+    "httpsEnabled": false,
+    "name": "manual_install_harp",
+    "nextcloud_url": null,
+  },
+  {
+    "acceptsDeployId": "docker-install",
+    "defaultDaemon": true,
+    "deployConfig": {
+      "computeDevice": {
+        "id": "cpu",
+        "label": "CPU",
+      },
+      "gpu": false,
+      "haproxy_password": "enter_haproxy_password",
+      "harp": null,
+      "net": "host",
+      "resourceLimits": {
+        "memory": null,
+        "nanoCPUs": null,
+      },
+    },
+    "deployConfigSettingsOpened": false,
+    "displayName": "Docker Socket Proxy",
+    "host": "nextcloud-appapi-dsp:2375",
+    "httpsEnabled": false,
+    "name": "docker_socket_proxy",
+    "nextcloud_url": null,
+  },
+  {
+    "acceptsDeployId": "docker-install",
+    "defaultDaemon": true,
+    "deployConfig": {
+      "computeDevice": {
+        "id": "cpu",
+        "label": "CPU",
+      },
+      "gpu": false,
+      "haproxy_password": "some_secure_password",
+      "harp": null,
+      "net": "host",
+      "resourceLimits": {
+        "memory": null,
+        "nanoCPUs": null,
+      },
+    },
+    "deployConfigSettingsOpened": false,
+    "displayName": "Custom Default",
+    "host": "nextcloud-appapi-dsp:2375",
+    "httpsEnabled": false,
+    "name": "custom",
+    "nextcloud_url": null,
+  },
+  {
+    "acceptsDeployId": "docker-install",
+    "defaultDaemon": true,
+    "deployConfig": {
+      "computeDevice": {
+        "id": "cpu",
+        "label": "CPU",
+      },
+      "gpu": false,
+      "haproxy_password": "",
+      "harp": null,
+      "net": "nextcloud-aio",
+      "resourceLimits": {
+        "memory": null,
+        "nanoCPUs": null,
+      },
+    },
+    "deployConfigSettingsOpened": false,
+    "displayName": "All-in-One",
+    "host": "nextcloud-aio-docker-socket-proxy:2375",
+    "httpsEnabled": false,
+    "name": "docker_aio",
+    "nextcloud_url": null,
+  },
+  {
+    "acceptsDeployId": "manual-install",
+    "defaultDaemon": false,
+    "deployConfig": {
+      "computeDevice": {
+        "id": "cpu",
+        "label": "CPU",
+      },
+      "gpu": false,
+      "haproxy_password": "",
+      "harp": null,
+      "net": "host",
+      "resourceLimits": {
+        "memory": null,
+        "nanoCPUs": null,
+      },
+    },
+    "deployConfigSettingsOpened": false,
+    "displayName": "Manual Install",
+    "host": "host.docker.internal",
+    "httpsEnabled": false,
+    "name": "manual_install",
+    "nextcloud_url": null,
+  },
+]
+`;
