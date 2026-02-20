@@ -18,12 +18,12 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\TaskProcessing\Events\GetTaskProcessingProvidersEvent;
 use Psr\Log\LoggerInterface;
 
-class GetTaskProcessingProvidersListener implements IEventListener {
+readonly class GetTaskProcessingProvidersListener implements IEventListener {
 	public function __construct(
-		private readonly TaskProcessingService $taskProcessingService,
-		private readonly ExAppService $exAppService,
-		private readonly AppAPIService $appAPIService,
-		private readonly LoggerInterface $logger,
+		private TaskProcessingService $taskProcessingService,
+		private ExAppService $exAppService,
+		private AppAPIService $appAPIService,
+		private LoggerInterface $logger,
 	) {
 	}
 

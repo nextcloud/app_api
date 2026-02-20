@@ -14,11 +14,11 @@ use OCA\AppAPI\Db\ExApp;
 use OCP\App\IAppManager;
 use OCP\IRequest;
 
-class AppAPICommonService {
+readonly class AppAPICommonService {
 
 	public function __construct(
-		private readonly IAppManager $appManager,
-		private readonly HarpService $harpService,
+		private IAppManager $appManager,
+		private HarpService $harpService,
 	) {
 	}
 

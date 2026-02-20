@@ -17,16 +17,16 @@ use OCP\IAppConfig;
 use OCP\IURLGenerator;
 use Psr\Log\LoggerInterface;
 
-class ExAppsPageService {
+readonly class ExAppsPageService {
 
 	public function __construct(
-		private readonly ExAppFetcher $exAppFetcher,
-		private readonly DaemonConfigService $daemonConfigService,
-		private readonly DockerActions $dockerActions,
-		private readonly IAppConfig $appConfig,
-		private readonly IAppManager $appManager,
-		private readonly LoggerInterface $logger,
-		private readonly IURLGenerator $urlGenerator,
+		private ExAppFetcher $exAppFetcher,
+		private DaemonConfigService $daemonConfigService,
+		private DockerActions $dockerActions,
+		private IAppConfig $appConfig,
+		private IAppManager $appManager,
+		private LoggerInterface $logger,
+		private IURLGenerator $urlGenerator,
 	) {
 	}
 

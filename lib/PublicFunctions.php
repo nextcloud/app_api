@@ -15,11 +15,11 @@ use OCP\Http\Client\IPromise;
 use OCP\Http\Client\IResponse;
 use OCP\IRequest;
 
-class PublicFunctions {
+readonly class PublicFunctions {
 
 	public function __construct(
-		private readonly ExAppService $exAppService,
-		private readonly AppAPIService $service,
+		private ExAppService $exAppService,
+		private AppAPIService $service,
 	) {
 	}
 

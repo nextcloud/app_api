@@ -25,10 +25,10 @@ use OCP\Server;
 /**
  * @template-extends IEventListener<LoadMenuEntriesListener>
  */
-class LoadMenuEntriesListener implements IEventListener {
+readonly class LoadMenuEntriesListener implements IEventListener {
 
 	public function __construct(
-		private readonly TopMenuService $topMenuService,
+		private TopMenuService $topMenuService,
 	) {
 	}
 
