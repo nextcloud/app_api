@@ -21,8 +21,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class GetConfig extends Command {
 
 	public function __construct(
-		private readonly ExAppService       $service,
-		private readonly ExAppConfigService $exAppConfigService) {
+		private readonly ExAppService $service,
+		private readonly ExAppConfigService $exAppConfigService,
+	) {
 		parent::__construct();
 	}
 

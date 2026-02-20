@@ -17,8 +17,8 @@ use OCP\Notification\INotification;
 class ExNotificationsManager {
 
 	public function __construct(
-		private readonly IManager      $notificationManager,
-		private readonly IGroupManager $groupManager
+		private readonly IManager $notificationManager,
+		private readonly IGroupManager $groupManager,
 	) {
 	}
 
@@ -38,7 +38,7 @@ class ExNotificationsManager {
 	}
 
 	public function sendAdminsNotification(string $appId, array $params = []): array {
-		$admins = $this->groupManager->get("admin")->getUsers();
+		$admins = $this->groupManager->get('admin')->getUsers();
 		$notifications = [];
 		foreach ($admins as $adminUser) {
 			$notification = $this->notificationManager->createNotification();

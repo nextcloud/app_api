@@ -25,9 +25,9 @@ use SimpleXMLElement;
 class ExAppArchiveFetcher {
 
 	public function __construct(
-		private readonly ITempManager   $tempManager,
+		private readonly ITempManager $tempManager,
 		private readonly IClientService $clientService,
-		private readonly IConfig        $config,
+		private readonly IConfig $config,
 	) {
 	}
 
@@ -70,7 +70,7 @@ class ExAppArchiveFetcher {
 
 		// 3. Parse info.xml and return its object
 		$infoXml = simplexml_load_string(file_get_contents($extractDir . '/' . $folders[0] . '/appinfo/info.xml'));
-		if ((string) $infoXml->id !== $exAppAppstoreData['id']) {
+		if ((string)$infoXml->id !== $exAppAppstoreData['id']) {
 			return null;
 		}
 		$extractedDir = $extractDir . '/' . $folders[0];
@@ -245,7 +245,7 @@ class ExAppArchiveFetcher {
 			}
 			$files = scandir($src);
 			foreach ($files as $file) {
-				if ($file != "." && $file != "..") {
+				if ($file != '.' && $file != '..') {
 					self::copyr("$src/$file", "$dest/$file");
 				}
 			}

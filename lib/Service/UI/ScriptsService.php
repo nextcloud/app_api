@@ -24,7 +24,7 @@ class ScriptsService {
 	public const MAX_JS_FILES = 10; //should be equal to number of files in "proxy_js" folder.
 
 	public function __construct(
-		private readonly ScriptMapper    $mapper,
+		private readonly ScriptMapper $mapper,
 		private readonly LoggerInterface $logger,
 	) {
 	}

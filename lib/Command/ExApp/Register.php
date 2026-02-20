@@ -29,15 +29,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Register extends Command {
 
 	public function __construct(
-		private readonly AppAPIService  	  $service,
-		private readonly DaemonConfigService  $daemonConfigService,
-		private readonly DockerActions        $dockerActions,
-		private readonly ManualActions        $manualActions,
-		private readonly IAppConfig           $appConfig,
-		private readonly ExAppService         $exAppService,
-		private readonly ISecureRandom        $random,
-		private readonly LoggerInterface      $logger,
-		private readonly ExAppArchiveFetcher  $exAppArchiveFetcher,
+		private readonly AppAPIService $service,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly DockerActions $dockerActions,
+		private readonly ManualActions $manualActions,
+		private readonly IAppConfig $appConfig,
+		private readonly ExAppService $exAppService,
+		private readonly ISecureRandom $random,
+		private readonly LoggerInterface $logger,
+		private readonly ExAppArchiveFetcher $exAppArchiveFetcher,
 	) {
 		parent::__construct();
 	}
@@ -207,7 +207,7 @@ class Register extends Command {
 				$daemonConfig->getProtocol(),
 				$daemonConfig->getHost(),
 				$daemonConfig->getDeployConfig(),
-				(int) $appInfo['port'],
+				(int)$appInfo['port'],
 				$auth,
 			);
 		}

@@ -54,7 +54,7 @@ abstract class AppAPIFetcher {
 	 */
 	protected function fetch(string $ETag, string $content): array {
 		$appstoreenabled = $this->config->getSystemValueBool('appstoreenabled', true);
-		if ((int) $this->config->getAppValue(Application::APP_ID, 'appstore-appapi-fetcher-lastFailure', '0') > time() - self::RETRY_AFTER_FAILURE_SECONDS) {
+		if ((int)$this->config->getAppValue(Application::APP_ID, 'appstore-appapi-fetcher-lastFailure', '0') > time() - self::RETRY_AFTER_FAILURE_SECONDS) {
 			return [];
 		}
 

@@ -21,7 +21,7 @@ class ManualActions implements IDeployActions {
 	public const DEPLOY_ID = 'manual-install';
 
 	public function __construct(
-		private readonly ExAppService		 $exAppService,
+		private readonly ExAppService $exAppService,
 	) {
 	}
 
@@ -47,7 +47,7 @@ class ManualActions implements IDeployActions {
 	}
 
 	public function resolveExAppUrl(
-		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth,
 	): string {
 		if (boolval($deployConfig['harp'] ?? false)) {
 			$url = rtrim($deployConfig['nextcloud_url'], '/');
@@ -58,8 +58,8 @@ class ManualActions implements IDeployActions {
 		}
 
 		$auth = [];
-		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
-			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
+		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST'])
+			&& $deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
 		) {
 			$wideNetworkAddresses = ['0.0.0.0', '127.0.0.1', '::', '::1'];
 			if (!in_array($deployConfig['additional_options']['OVERRIDE_APP_HOST'], $wideNetworkAddresses)) {

@@ -24,10 +24,10 @@ use Psr\Log\LoggerInterface;
  */
 class DaemonConfigService {
 	public function __construct(
-		private readonly LoggerInterface    $logger,
+		private readonly LoggerInterface $logger,
 		private readonly DaemonConfigMapper $mapper,
-		private readonly ExAppService       $exAppService,
-		private readonly ICrypto			$crypto,
+		private readonly ExAppService $exAppService,
+		private readonly ICrypto $crypto,
 	) {
 	}
 

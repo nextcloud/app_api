@@ -23,12 +23,12 @@ class TopMenuService {
 	private ?ICache $cache = null;
 
 	public function __construct(
-		private readonly TopMenuMapper       $mapper,
-		private readonly LoggerInterface     $logger,
+		private readonly TopMenuMapper $mapper,
+		private readonly LoggerInterface $logger,
 		private readonly InitialStateService $initialStateService,
-		private readonly ScriptsService      $scriptsService,
-		private readonly StylesService       $stylesService,
-		ICacheFactory                        $cacheFactory,
+		private readonly ScriptsService $scriptsService,
+		private readonly StylesService $stylesService,
+		ICacheFactory $cacheFactory,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_top_menus');

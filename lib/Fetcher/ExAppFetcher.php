@@ -78,8 +78,8 @@ class ExAppFetcher extends AppAPIFetcher {
 						$minServerVersion = $serverVersion->getMinimumVersion();
 						$maxServerVersion = $serverVersion->getMaximumVersion();
 						$minFulfilled = $this->compareVersion->isCompatible($ncVersion, $minServerVersion, '>=');
-						$maxFulfilled = $maxServerVersion !== '' &&
-							$this->compareVersion->isCompatible($ncVersion, $maxServerVersion, '<=');
+						$maxFulfilled = $maxServerVersion !== ''
+							&& $this->compareVersion->isCompatible($ncVersion, $maxServerVersion, '<=');
 						$isPhpCompatible = true;
 						if (($release['rawPhpVersionSpec'] ?? '*') !== '*') {
 							$phpVersion = $versionParser->getVersion($release['rawPhpVersionSpec']);

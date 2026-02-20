@@ -32,14 +32,14 @@ use OCP\Security\ICrypto;
 class DaemonConfigController extends ApiController {
 
 	public function __construct(
-		IRequest                             $request,
-		private readonly IAppConfig          $appConfig,
+		IRequest $request,
+		private readonly IAppConfig $appConfig,
 		private readonly DaemonConfigService $daemonConfigService,
-		private readonly DockerActions       $dockerActions,
-		private readonly AppAPIService       $service,
-		private readonly ExAppService        $exAppService,
-		private readonly IL10N               $l10n,
-		private readonly ICrypto			 $crypto,
+		private readonly DockerActions $dockerActions,
+		private readonly AppAPIService $service,
+		private readonly ExAppService $exAppService,
+		private readonly IL10N $l10n,
+		private readonly ICrypto $crypto,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -72,7 +72,7 @@ class DaemonConfigController extends ApiController {
 
 		// Restore the original password if "dummySecret123" is provided
 		if ($haproxyPassword === 'dummySecret123') {
-			$daemonConfigParams['deploy_config']['haproxy_password'] = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
+			$daemonConfigParams['deploy_config']['haproxy_password'] = $daemonConfig->getDeployConfig()['haproxy_password'] ?? '';
 		} elseif (!empty($haproxyPassword)) {
 			// New password provided, encrypt it
 			$daemonConfigParams['deploy_config']['haproxy_password'] = $this->crypto->encrypt($haproxyPassword);
@@ -141,7 +141,7 @@ class DaemonConfigController extends ApiController {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonParams['name']);
 			if ($daemonConfig !== null) {
 				// such Daemon config already present in the DB
-				$haproxyPasswordDB = $daemonConfig->getDeployConfig()['haproxy_password'] ?? "";
+				$haproxyPasswordDB = $daemonConfig->getDeployConfig()['haproxy_password'] ?? '';
 				if ($haproxyPasswordDB) {
 					// get password from the DB instead of the “masked” one
 					$daemonParams['deploy_config']['haproxy_password'] = $haproxyPasswordDB;

@@ -21,7 +21,7 @@ use OCP\IRequest;
 class ExAppUiMiddleware extends Middleware {
 
 	public function __construct(
-		protected IRequest                  $request,
+		protected IRequest $request,
 		private readonly INavigationManager $navigationManager,
 	) {
 	}

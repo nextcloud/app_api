@@ -23,10 +23,10 @@ class HarpService {
 	private Client $guzzleClient;
 
 	public function __construct(
-		private readonly LoggerInterface     $logger,
-		private readonly IConfig             $config,
+		private readonly LoggerInterface $logger,
+		private readonly IConfig $config,
 		private readonly ICertificateManager $certificateManager,
-		private readonly ICrypto             $crypto,
+		private readonly ICrypto $crypto,
 	) {
 	}
 
@@ -94,8 +94,8 @@ class HarpService {
 	public static function getExAppHost(ExApp $exApp): string {
 		$deployConfig = $exApp->getDeployConfig();
 		if (HarpService::isHarpDirectConnect($deployConfig)) {
-			if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
-				$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
+			if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST'])
+				&& $deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
 			) {
 				$wideNetworkAddresses = ['0.0.0.0', '127.0.0.1', '::', '::1'];
 				if (!in_array($deployConfig['additional_options']['OVERRIDE_APP_HOST'], $wideNetworkAddresses)) {
@@ -173,7 +173,7 @@ class HarpService {
 				if (gettype($data['version']) === 'double') {
 					return $this->versionFloatToString($data['version']);
 				}
-				return (string) $data['version'];
+				return (string)$data['version'];
 			}
 			return null;
 		} catch (\Exception $e) {

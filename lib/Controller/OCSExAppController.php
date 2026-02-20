@@ -25,9 +25,9 @@ class OCSExAppController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                       $request,
+		IRequest $request,
 		private readonly AppAPIService $service,
-		private readonly ExAppService  $exAppService,
+		private readonly ExAppService $exAppService,
 		private readonly IURLGenerator $urlGenerator,
 	) {
 		parent::__construct(Application::APP_ID, $request);

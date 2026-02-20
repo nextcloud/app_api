@@ -29,12 +29,12 @@ class OCSUiController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                                 $request,
+		IRequest $request,
 		private readonly FilesActionsMenuService $filesActionsMenuService,
-		private readonly TopMenuService          $menuEntryService,
-		private readonly InitialStateService     $initialStateService,
-		private readonly ScriptsService          $scriptsService,
-		private readonly StylesService           $stylesService,
+		private readonly TopMenuService $menuEntryService,
+		private readonly InitialStateService $initialStateService,
+		private readonly ScriptsService $scriptsService,
+		private readonly StylesService $stylesService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -50,12 +50,12 @@ class OCSUiController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerFileActionMenu(string $name, string $displayName, string $actionHandler,
-		string $icon = "", string $mime = "file", int $permissions = 31,
+		string $icon = '', string $mime = 'file', int $permissions = 31,
 		int $order = 0): DataResponse {
 		$result = $this->filesActionsMenuService->registerFileActionMenu(
 			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, '1.0');
 		if (!$result) {
-			throw new OCSBadRequestException("File Action Menu entry could not be registered");
+			throw new OCSBadRequestException('File Action Menu entry could not be registered');
 		}
 		return new DataResponse();
 	}
@@ -67,12 +67,12 @@ class OCSUiController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function registerFileActionMenuV2(string $name, string $displayName, string $actionHandler,
-		string $icon = "", string $mime = "file", int $permissions = 31,
+		string $icon = '', string $mime = 'file', int $permissions = 31,
 		int $order = 0): DataResponse {
 		$result = $this->filesActionsMenuService->registerFileActionMenu(
 			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, '2.0');
 		if (!$result) {
-			throw new OCSBadRequestException("File Action Menu entry could not be registered");
+			throw new OCSBadRequestException('File Action Menu entry could not be registered');
 		}
 		return new DataResponse();
 	}
@@ -119,7 +119,7 @@ class OCSUiController extends OCSController {
 		$result = $this->menuEntryService->registerExAppMenuEntry(
 			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $icon, $adminRequired);
 		if (!$result) {
-			throw new OCSBadRequestException("Top Menu entry could not be registered");
+			throw new OCSBadRequestException('Top Menu entry could not be registered');
 		}
 		return new DataResponse();
 	}
@@ -164,7 +164,7 @@ class OCSUiController extends OCSController {
 		$result = $this->initialStateService->setExAppInitialState(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $key, $value);
 		if (!$result) {
-			throw new OCSBadRequestException("InitialState could not be set");
+			throw new OCSBadRequestException('InitialState could not be set');
 		}
 		return new DataResponse();
 	}
@@ -209,7 +209,7 @@ class OCSUiController extends OCSController {
 		$result = $this->scriptsService->setExAppScript(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path, $afterAppId);
 		if (!$result) {
-			throw new OCSBadRequestException("Script could not be set");
+			throw new OCSBadRequestException('Script could not be set');
 		}
 		return new DataResponse();
 	}
@@ -254,7 +254,7 @@ class OCSUiController extends OCSController {
 		$result = $this->stylesService->setExAppStyle(
 			$this->request->getHeader('EX-APP-ID'), $type, $name, $path);
 		if (!$result) {
-			throw new OCSBadRequestException("Style could not be set");
+			throw new OCSBadRequestException('Style could not be set');
 		}
 		return new DataResponse();
 	}

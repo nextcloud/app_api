@@ -20,10 +20,10 @@ use OCP\Notification\UnknownNotificationException;
 class ExAppNotifier implements INotifier {
 
 	public function __construct(
-		private readonly IFactory      $factory,
+		private readonly IFactory $factory,
 		private readonly IURLGenerator $url,
-		private readonly ExAppService  $service,
-		private readonly IFactory 	   $l10nFactory
+		private readonly ExAppService $service,
+		private readonly IFactory $l10nFactory,
 	) {
 	}
 

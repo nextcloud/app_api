@@ -26,10 +26,10 @@ class TaskProcessingController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                                           $request,
-		private readonly TaskProcessingService             $taskProcessingService,
-		private readonly AppAPIService                     $appAPIService,
-		private readonly ExAppService                      $exAppService,
+		IRequest $request,
+		private readonly TaskProcessingService $taskProcessingService,
+		private readonly AppAPIService $appAPIService,
+		private readonly ExAppService $exAppService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 

@@ -28,8 +28,8 @@ class PreferencesController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                                $request,
-		private readonly IUserSession           $userSession,
+		IRequest $request,
+		private readonly IUserSession $userSession,
 		private readonly ExAppPreferenceService $exAppPreferenceService,
 	) {
 		parent::__construct(Application::APP_ID, $request);

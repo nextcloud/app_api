@@ -20,7 +20,7 @@ class InitialStateService {
 
 	public function __construct(
 		private readonly InitialStateMapper $mapper,
-		private readonly LoggerInterface    $logger,
+		private readonly LoggerInterface $logger,
 	) {
 	}
 

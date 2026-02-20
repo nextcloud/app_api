@@ -27,9 +27,9 @@ use ReflectionMethod;
 class AppAPIAuthMiddleware extends Middleware {
 
 	public function __construct(
-		private AppAPIService   $service,
-		protected IRequest      $request,
-		private IL10N           $l,
+		private AppAPIService $service,
+		protected IRequest $request,
+		private IL10N $l,
 		private LoggerInterface $logger,
 	) {
 	}

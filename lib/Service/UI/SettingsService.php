@@ -23,9 +23,9 @@ class SettingsService {
 	private ?ICache $cache = null;
 
 	public function __construct(
-		ICacheFactory                       $cacheFactory,
+		ICacheFactory $cacheFactory,
 		private readonly SettingsFormMapper $mapper,
-		private readonly LoggerInterface    $logger,
+		private readonly LoggerInterface $logger,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_settings_forms');

@@ -16,7 +16,7 @@ use OCP\Migration\IRepairStep;
 
 class DataInitializationStep implements IRepairStep {
 	public function __construct(
-		private readonly AIODockerActions     $AIODockerActions,
+		private readonly AIODockerActions $AIODockerActions,
 	) {
 	}
 

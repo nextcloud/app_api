@@ -19,10 +19,10 @@ use OCP\Security\ISecureRandom;
 class TalkBotsService {
 
 	public function __construct(
-		private readonly ExAppConfigService  $exAppConfigService,
-		private readonly IEventDispatcher    $dispatcher,
-		private readonly ISecureRandom       $random,
-		private readonly IURLGenerator       $urlGenerator,
+		private readonly ExAppConfigService $exAppConfigService,
+		private readonly IEventDispatcher $dispatcher,
+		private readonly ISecureRandom $random,
+		private readonly IURLGenerator $urlGenerator,
 	) {
 	}
 
