@@ -20,7 +20,7 @@ export function isSvgContentType(ct) {
 	return (ct || '').toLowerCase().startsWith('image/svg+xml')
 }
 
-function loadExAppInlineSvgIcon(appId, route) {
+export function loadExAppInlineSvgIcon(appId, route) {
 	const url = generateAppAPIProxyUrl(appId, route)
 	return axios.get(url, {
 		responseType: 'text',
@@ -86,7 +86,7 @@ export function generateExAppUIPageUrl(appId, route) {
 	return generateUrl(`/apps/app_api/embedded/${appId}/${route}`)
 }
 
-function registerFileAction33(fileAction, iconProvider) {
+export function registerFileAction33(fileAction, iconProvider) {
 	const handlerUrl = generateAppAPIProxyUrl(fileAction.appid, fileAction.action_handler)
 	const isV2 = ('version' in fileAction && fileAction.version === '2.0')
 
