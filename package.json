@@ -31,7 +31,10 @@
 		"lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint --ext .js,.vue src --fix",
 		"stylelint": "stylelint src/**/*.vue src/**/*.scss src/**/*.css",
 		"stylelint:fix": "stylelint src/**/*.vue src/**/*.scss src/**/*.css --fix",
-		"serve": "NODE_ENV=development webpack serve --allowed-hosts all --config webpack.js"
+		"serve": "NODE_ENV=development webpack serve --allowed-hosts all --config webpack.js",
+		"test": "vitest run",
+		"test:watch": "vitest watch",
+		"test:coverage": "vitest run --coverage"
 	},
 	"browserslist": [
 		"extends @nextcloud/browserslist-config"
@@ -63,8 +66,13 @@
 		"@nextcloud/eslint-config": "^8.4.1",
 		"@nextcloud/stylelint-config": "^3.0.1",
 		"@nextcloud/webpack-vue-config": "^7.0.1",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@vitejs/plugin-vue": "^6.0.4",
+		"@vitest/coverage-istanbul": "^4.0.18",
 		"eslint-webpack-plugin": "^5.0.2",
-		"stylelint-webpack-plugin": "^5.0.1"
+		"jsdom": "^28.1.0",
+		"stylelint-webpack-plugin": "^5.0.1",
+		"vitest": "^4.0.18"
 	},
 	"engines": {
 		"node": "^22.0.0",
