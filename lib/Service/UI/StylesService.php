@@ -18,11 +18,11 @@ use OCP\DB\Exception;
 use OCP\Util;
 use Psr\Log\LoggerInterface;
 
-class StylesService {
+readonly class StylesService {
 
 	public function __construct(
-		private readonly StyleMapper $mapper,
-		private readonly LoggerInterface $logger,
+		private StyleMapper $mapper,
+		private LoggerInterface $logger,
 	) {
 	}
 

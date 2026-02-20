@@ -20,14 +20,14 @@ use OCP\SetupCheck\ISetupCheck;
 use OCP\SetupCheck\SetupResult;
 use Psr\Log\LoggerInterface;
 
-class DaemonCheck implements ISetupCheck {
+readonly class DaemonCheck implements ISetupCheck {
 	public function __construct(
-		private readonly IL10N $l10n,
-		private readonly IConfig $config,
-		private readonly IAppConfig $appConfig,
-		private readonly DockerActions $dockerActions,
-		private readonly LoggerInterface $logger,
-		private readonly DaemonConfigService $daemonConfigService,
+		private IL10N $l10n,
+		private IConfig $config,
+		private IAppConfig $appConfig,
+		private DockerActions $dockerActions,
+		private LoggerInterface $logger,
+		private DaemonConfigService $daemonConfigService,
 	) {
 	}
 

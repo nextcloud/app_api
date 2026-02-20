@@ -22,13 +22,13 @@ use Psr\Log\LoggerInterface;
 /**
  * @template-implements IEventListener<Event>
  */
-class GetValueListener implements IEventListener {
+readonly class GetValueListener implements IEventListener {
 	public function __construct(
-		private readonly SettingsService $service,
-		private readonly ExAppPreferenceService $preferenceService,
-		private readonly ExAppConfigService $configService,
-		private readonly ICrypto $crypto,
-		private readonly LoggerInterface $logger,
+		private SettingsService $service,
+		private ExAppPreferenceService $preferenceService,
+		private ExAppConfigService $configService,
+		private ICrypto $crypto,
+		private LoggerInterface $logger,
 	) {
 	}
 

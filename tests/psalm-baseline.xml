@@ -119,7 +119,7 @@
 			}]]></code>
     </InvalidArgument>
     <InvalidDocblock>
-      <code><![CDATA[class LoadMenuEntriesListener implements IEventListener {]]></code>
+      <code><![CDATA[readonly class LoadMenuEntriesListener implements IEventListener {]]></code>
     </InvalidDocblock>
     <InvalidTemplateParam>
       <code><![CDATA[IEventListener]]></code>

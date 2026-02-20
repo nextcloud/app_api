@@ -14,11 +14,11 @@ use OCP\App\IAppManager;
 use OCP\Capabilities\ICapability;
 use OCP\IConfig;
 
-class Capabilities implements ICapability {
+readonly class Capabilities implements ICapability {
 
 	public function __construct(
-		private readonly IConfig $config,
-		private readonly IAppManager $appManager,
+		private IConfig $config,
+		private IAppManager $appManager,
 	) {
 	}
 

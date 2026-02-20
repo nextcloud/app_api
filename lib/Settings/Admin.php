@@ -19,14 +19,14 @@ use OCP\IAppConfig;
 use OCP\Settings\ISettings;
 use Psr\Log\LoggerInterface;
 
-class Admin implements ISettings {
+readonly class Admin implements ISettings {
 
 	public function __construct(
-		private readonly IInitialState $initialStateService,
-		private readonly DaemonConfigService $daemonConfigService,
-		private readonly IAppConfig $appConfig,
-		private readonly DockerActions $dockerActions,
-		private readonly LoggerInterface $logger,
+		private IInitialState $initialStateService,
+		private DaemonConfigService $daemonConfigService,
+		private IAppConfig $appConfig,
+		private DockerActions $dockerActions,
+		private LoggerInterface $logger,
 	) {
 	}
 

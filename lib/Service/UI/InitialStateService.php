@@ -16,11 +16,11 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use Psr\Log\LoggerInterface;
 
-class InitialStateService {
+readonly class InitialStateService {
 
 	public function __construct(
-		private readonly InitialStateMapper $mapper,
-		private readonly LoggerInterface $logger,
+		private InitialStateMapper $mapper,
+		private LoggerInterface $logger,
 	) {
 	}
 

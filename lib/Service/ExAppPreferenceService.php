@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * App per-user preferences (preferences_ex)
  */
-class ExAppPreferenceService {
+readonly class ExAppPreferenceService {
 
 	public function __construct(
 		private ExAppPreferenceMapper $mapper,

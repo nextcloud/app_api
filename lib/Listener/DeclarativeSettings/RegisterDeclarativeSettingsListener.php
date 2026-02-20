@@ -17,9 +17,9 @@ use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 /**
  * @template-implements IEventListener<Event>
  */
-class RegisterDeclarativeSettingsListener implements IEventListener {
+readonly class RegisterDeclarativeSettingsListener implements IEventListener {
 	public function __construct(
-		private readonly SettingsService $service,
+		private SettingsService $service,
 	) {
 	}
 

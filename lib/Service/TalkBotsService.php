@@ -16,13 +16,13 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IURLGenerator;
 use OCP\Security\ISecureRandom;
 
-class TalkBotsService {
+readonly class TalkBotsService {
 
 	public function __construct(
-		private readonly ExAppConfigService $exAppConfigService,
-		private readonly IEventDispatcher $dispatcher,
-		private readonly ISecureRandom $random,
-		private readonly IURLGenerator $urlGenerator,
+		private ExAppConfigService $exAppConfigService,
+		private IEventDispatcher $dispatcher,
+		private ISecureRandom $random,
+		private IURLGenerator $urlGenerator,
 	) {
 	}
 

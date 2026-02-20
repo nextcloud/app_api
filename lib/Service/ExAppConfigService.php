@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
 /**
  * App configuration (appconfig_ex)
  */
-class ExAppConfigService {
+readonly class ExAppConfigService {
 
 	public function __construct(
 		private ExAppConfigMapper $mapper,
