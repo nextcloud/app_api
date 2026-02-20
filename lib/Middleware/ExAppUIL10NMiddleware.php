@@ -29,12 +29,12 @@ class ExAppUIL10NMiddleware extends Middleware {
 	];
 
 	public function __construct(
-		protected IRequest                  $request,
-		private readonly IFactory           $l10nFactory,
+		protected IRequest $request,
+		private readonly IFactory $l10nFactory,
 		private readonly ContentSecurityPolicyNonceManager $nonceManager,
-		private readonly IAppManager        $appManager,
-		private readonly ExAppService       $exAppService,
-		private readonly LoggerInterface	$logger,
+		private readonly IAppManager $appManager,
+		private readonly ExAppService $exAppService,
+		private readonly LoggerInterface $logger,
 	) {
 	}
 
@@ -63,7 +63,7 @@ class ExAppUIL10NMiddleware extends Middleware {
 					try {
 						$l10nScriptSrc = $this->appManager->getAppWebPath($appId) . '/l10n/' . $lang . '.js';
 						$nonce = $this->nonceManager->getNonce();
-						$output = substr_replace($output, '<script nonce="'.$nonce.'" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
+						$output = substr_replace($output, '<script nonce="' . $nonce . '" defer src="' . $l10nScriptSrc . '"></script>', $headPos, 0);
 					} catch (AppPathNotFoundException) {
 						$this->logger->debug(sprintf('Can not find translations for %s ExApp.', $appId));
 					}

@@ -32,15 +32,15 @@ class TopMenuController extends Controller {
 	public array $jsProxyMap = [];
 
 	public function __construct(
-		IRequest                             $request,
-		private readonly IInitialState       $initialState,
-		private readonly TopMenuService      $menuEntryService,
+		IRequest $request,
+		private readonly IInitialState $initialState,
+		private readonly TopMenuService $menuEntryService,
 		private readonly InitialStateService $initialStateService,
-		private readonly ScriptsService      $scriptsService,
-		private readonly StylesService       $stylesService,
-		private readonly ExAppService        $service,
-		private readonly ?string             $userId,
-		private readonly IGroupManager       $groupManager,
+		private readonly ScriptsService $scriptsService,
+		private readonly StylesService $stylesService,
+		private readonly ExAppService $service,
+		private readonly ?string $userId,
+		private readonly IGroupManager $groupManager,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}

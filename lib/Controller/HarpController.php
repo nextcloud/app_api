@@ -29,15 +29,15 @@ class HarpController extends Controller {
 	protected $request;
 
 	public function __construct(
-		IRequest                             $request,
-		private readonly ExAppService        $exAppService,
-		private readonly LoggerInterface     $logger,
-		private readonly IThrottler          $throttler,
-		private readonly IUserManager        $userManager,
-		private readonly IGroupManager       $groupManager,
-		private readonly ICrypto             $crypto,
-		private readonly ?string             $userId,
-		private readonly HarpService		 $harpService,
+		IRequest $request,
+		private readonly ExAppService $exAppService,
+		private readonly LoggerInterface $logger,
+		private readonly IThrottler $throttler,
+		private readonly IUserManager $userManager,
+		private readonly IGroupManager $groupManager,
+		private readonly ICrypto $crypto,
+		private readonly ?string $userId,
+		private readonly HarpService $harpService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 

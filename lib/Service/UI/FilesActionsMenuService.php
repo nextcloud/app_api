@@ -23,9 +23,9 @@ class FilesActionsMenuService {
 	private ?ICache $cache = null;
 
 	public function __construct(
-		ICacheFactory                           $cacheFactory,
+		ICacheFactory $cacheFactory,
 		private readonly FilesActionsMenuMapper $mapper,
-		private readonly LoggerInterface        $logger,
+		private readonly LoggerInterface $logger,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_ui_files_actions');

@@ -36,8 +36,10 @@
 				<referencedClass name="GuzzleHttp\Client" />
 				<referencedClass name="GuzzleHttp\Exception\GuzzleException" />
 				<referencedClass name="OC\Security\CSP\ContentSecurityPolicyNonceManager" />
+				<referencedClass name="Symfony\Component\Console\Command\Command" />
 			</errorLevel>
 		</UndefinedClass>
+		<MissingDependency errorLevel="suppress" />
 		<UndefinedDocblockClass>
 			<errorLevel type="suppress">
 				<referencedClass name="Doctrine\DBAL\Schema\Schema" />

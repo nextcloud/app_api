@@ -22,7 +22,7 @@ class ListDaemons extends Command {
 
 	public function __construct(
 		private readonly DaemonConfigService $daemonConfigService,
-		private readonly IAppConfig          $appConfig
+		private readonly IAppConfig $appConfig,
 	) {
 		parent::__construct();
 	}

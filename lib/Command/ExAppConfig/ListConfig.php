@@ -23,8 +23,8 @@ class ListConfig extends Command {
 	private const SENSITIVE_VALUE = '***REMOVED SENSITIVE VALUE***';
 
 	public function __construct(
-		private readonly ExAppService       $service,
-		private readonly ExAppConfigService $appConfigService
+		private readonly ExAppService $service,
+		private readonly ExAppConfigService $appConfigService,
 	) {
 		parent::__construct();
 	}

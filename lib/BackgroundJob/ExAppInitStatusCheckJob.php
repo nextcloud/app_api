@@ -21,10 +21,10 @@ class ExAppInitStatusCheckJob extends TimedJob {
 	private const everyMinuteInterval = 60;
 
 	public function __construct(
-		ITimeFactory                   $time,
-		private readonly ExAppMapper   $mapper,
+		ITimeFactory $time,
+		private readonly ExAppMapper $mapper,
 		private readonly AppAPIService $service,
-		private readonly IAppConfig    $appConfig,
+		private readonly IAppConfig $appConfig,
 	) {
 		parent::__construct($time);
 
@@ -46,7 +46,7 @@ class ExAppInitStatusCheckJob extends TimedJob {
 					if ($exApp->getAppid() === Application::TEST_DEPLOY_APPID) {
 						$initTimeoutSeconds = 30;  // Check for smaller timeout(half of minute) for test deploy app
 					} else {
-						$initTimeoutSeconds = (int) ($initTimeoutMinutesSetting * 60);
+						$initTimeoutSeconds = (int)($initTimeoutMinutesSetting * 60);
 					}
 					if ((time() >= ($status['init_start_time'] + $initTimeoutSeconds)) && (empty($status['error']))) {
 						$this->service->setAppInitProgress(

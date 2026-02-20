@@ -39,30 +39,30 @@ class ExAppService {
 	private AppAPIService $appAPIService;
 
 	public function __construct(
-		private readonly LoggerInterface            $logger,
-		ICacheFactory                               $cacheFactory,
-		private readonly IUserManager               $userManager,
-		private readonly ExAppFetcher               $exAppFetcher,
-		private readonly ExAppArchiveFetcher        $exAppArchiveFetcher,
-		private readonly ExAppMapper                $exAppMapper,
-		private readonly TopMenuService             $topMenuService,
-		private readonly InitialStateService        $initialStateService,
-		private readonly ScriptsService             $scriptsService,
-		private readonly StylesService              $stylesService,
-		private readonly FilesActionsMenuService    $filesActionsMenuService,
-		private readonly TaskProcessingService      $taskProcessingService,
-		private readonly TalkBotsService            $talkBotsService,
-		private readonly SettingsService            $settingsService,
-		private readonly ExAppOccService            $occService,
-		private readonly ExAppDeployOptionsService  $deployOptionsService,
-		private readonly IConfig                    $config,
+		private readonly LoggerInterface $logger,
+		ICacheFactory $cacheFactory,
+		private readonly IUserManager $userManager,
+		private readonly ExAppFetcher $exAppFetcher,
+		private readonly ExAppArchiveFetcher $exAppArchiveFetcher,
+		private readonly ExAppMapper $exAppMapper,
+		private readonly TopMenuService $topMenuService,
+		private readonly InitialStateService $initialStateService,
+		private readonly ScriptsService $scriptsService,
+		private readonly StylesService $stylesService,
+		private readonly FilesActionsMenuService $filesActionsMenuService,
+		private readonly TaskProcessingService $taskProcessingService,
+		private readonly TalkBotsService $talkBotsService,
+		private readonly SettingsService $settingsService,
+		private readonly ExAppOccService $occService,
+		private readonly ExAppDeployOptionsService $deployOptionsService,
+		private readonly IConfig $config,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$distributedCacheClass = ltrim($config->getSystemValueString('memcache.distributed', ''), '\\');
 			$localCacheClass = ltrim($config->getSystemValueString('memcache.local', ''), '\\');
 			if (
-				($distributedCacheClass === '' && $localCacheClass !== \OC\Memcache\APCu::class) ||
-				($distributedCacheClass !== '' && $distributedCacheClass !== \OC\Memcache\APCu::class)
+				($distributedCacheClass === '' && $localCacheClass !== \OC\Memcache\APCu::class)
+				|| ($distributedCacheClass !== '' && $distributedCacheClass !== \OC\Memcache\APCu::class)
 			) {
 				$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/service');
 			}
@@ -99,7 +99,7 @@ class ExAppService {
 				$exApp->setRoutes($this->registerExAppRoutes($exApp, $appInfo['external-app']['routes'])->getRoutes() ?? []);
 			}
 			return $exApp;
-		} catch (Exception | MultipleObjectsReturnedException | DoesNotExistException $e) {
+		} catch (Exception|MultipleObjectsReturnedException|DoesNotExistException $e) {
 			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appInfo['id'], $e->getMessage()));
 			return null;
 		}
@@ -383,7 +383,7 @@ class ExAppService {
 			}
 			usleep(100000); // 0.1s
 		} while ($status['init'] !== 100);
-		return "";
+		return '';
 	}
 
 	public function setStatusError(ExApp $exApp, string $error): void {
@@ -443,7 +443,7 @@ class ExAppService {
 		try {
 			$webhookListenerMapper = \OCP\Server::get(\OCA\WebhookListeners\Db\WebhookListenerMapper::class);
 			$webhookListenerMapper->deleteByAppId($appId);
-		} catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+		} catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
 		} catch (Exception $e) {
 			$this->logger->debug(sprintf('Error while unregistering ExApp %s webhooks: %s', $appId, $e->getMessage()));
 		}

@@ -24,9 +24,11 @@ use Sabre\HTTP\ResponseInterface;
  */
 class DavPlugin extends ServerPlugin {
 
-	public function __construct(private IRequest $request,
+	public function __construct(
+		private IRequest $request,
 		private ISession $session,
-		private AppAPIService $service) {
+		private AppAPIService $service,
+	) {
 	}
 
 	public function initialize(Server $server) {

@@ -22,11 +22,11 @@ use Psr\Log\LoggerInterface;
 
 class DaemonCheck implements ISetupCheck {
 	public function __construct(
-		private readonly IL10N               $l10n,
-		private readonly IConfig             $config,
-		private readonly IAppConfig          $appConfig,
-		private readonly DockerActions       $dockerActions,
-		private readonly LoggerInterface     $logger,
+		private readonly IL10N $l10n,
+		private readonly IConfig $config,
+		private readonly IAppConfig $appConfig,
+		private readonly DockerActions $dockerActions,
+		private readonly LoggerInterface $logger,
 		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}
@@ -73,7 +73,7 @@ class DaemonCheck implements ISetupCheck {
 			return SetupResult::warning(
 				$this->l10n->t('The AppAPI default deploy daemon is not using HaRP. Please consider switching to HaRP for better performance.'),
 				// todo: update link
-				"https://github.com/nextcloud/HaRP/",
+				'https://github.com/nextcloud/HaRP/',
 			);
 		}
 

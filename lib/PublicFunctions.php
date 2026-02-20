@@ -18,7 +18,7 @@ use OCP\IRequest;
 class PublicFunctions {
 
 	public function __construct(
-		private readonly ExAppService  $exAppService,
+		private readonly ExAppService $exAppService,
 		private readonly AppAPIService $service,
 	) {
 	}

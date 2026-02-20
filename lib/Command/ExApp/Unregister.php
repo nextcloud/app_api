@@ -23,10 +23,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Unregister extends Command {
 
 	public function __construct(
-		private readonly AppAPIService 		 $service,
+		private readonly AppAPIService $service,
 		private readonly DaemonConfigService $daemonConfigService,
-		private readonly DockerActions       $dockerActions,
-		private readonly ExAppService        $exAppService,
+		private readonly DockerActions $dockerActions,
+		private readonly ExAppService $exAppService,
 	) {
 		parent::__construct();
 	}

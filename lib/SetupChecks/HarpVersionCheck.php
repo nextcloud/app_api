@@ -23,11 +23,11 @@ class HarpVersionCheck implements ISetupCheck {
 	private ?\OCP\ICache $cache = null;
 
 	public function __construct(
-		private readonly IL10N               $l10n,
-		private readonly LoggerInterface     $logger,
+		private readonly IL10N $l10n,
+		private readonly LoggerInterface $logger,
 		private readonly DaemonConfigService $daemonConfigService,
-		private readonly HarpService         $harpService,
-		ICacheFactory                        $cacheFactory,
+		private readonly HarpService $harpService,
+		ICacheFactory $cacheFactory,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/harp_version_check');
@@ -78,7 +78,7 @@ class HarpVersionCheck implements ISetupCheck {
 
 		if (!empty($issues)) {
 			return SetupResult::warning(
-				implode("<br />", $issues),
+				implode('<br />', $issues),
 				'https://github.com/nextcloud/HaRP/',
 			);
 		}

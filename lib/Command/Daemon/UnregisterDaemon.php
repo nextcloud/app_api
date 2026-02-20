@@ -21,7 +21,7 @@ class UnregisterDaemon extends Command {
 
 	public function __construct(
 		private readonly DaemonConfigService $daemonConfigService,
-		private readonly ExAppService		 $exAppService,
+		private readonly ExAppService $exAppService,
 	) {
 		parent::__construct();
 	}

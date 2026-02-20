@@ -67,9 +67,9 @@ class LoadMenuEntriesListener implements IEventListener {
 					'href' => $urlGenerator->linkToRoute(
 						'app_api.TopMenu.viewExAppPage', ['appId' => $appId, 'name' => $entryName]
 					),
-					'icon' => $icon === '' ?
-						$urlGenerator->imagePath('app_api', 'app.svg') :
-						$urlGenerator->linkToRoute(
+					'icon' => $icon === ''
+						? $urlGenerator->imagePath('app_api', 'app.svg')
+						: $urlGenerator->linkToRoute(
 							'app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => $icon]
 						),
 					'name' => Server::get(IFactory::class)->get($appId)->t($menuEntry->getDisplayName()),

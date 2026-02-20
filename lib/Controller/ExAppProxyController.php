@@ -35,15 +35,15 @@ use Psr\Log\LoggerInterface;
 class ExAppProxyController extends Controller {
 
 	public function __construct(
-		IRequest                                           $request,
-		private readonly AppAPIService                     $service,
-		private readonly ExAppService					   $exAppService,
-		private readonly IMimeTypeDetector                 $mimeTypeHelper,
+		IRequest $request,
+		private readonly AppAPIService $service,
+		private readonly ExAppService $exAppService,
+		private readonly IMimeTypeDetector $mimeTypeHelper,
 		private readonly ContentSecurityPolicyNonceManager $nonceManager,
-		private readonly ?string                           $userId,
-		private readonly IGroupManager                     $groupManager,
-		private readonly LoggerInterface                   $logger,
-		private readonly IThrottler              		   $throttler,
+		private readonly ?string $userId,
+		private readonly IGroupManager $groupManager,
+		private readonly LoggerInterface $logger,
+		private readonly IThrottler $throttler,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -233,7 +233,7 @@ class ExAppProxyController extends Controller {
 	}
 
 	private function prepareProxy(
-		string $appId, string $other, array &$route, array &$bruteforceProtection, int &$delay
+		string $appId, string $other, array &$route, array &$bruteforceProtection, int &$delay,
 	): ?ExApp {
 		$delay = 0;
 		$exApp = $this->exAppService->getExApp($appId);
@@ -312,9 +312,9 @@ class ExAppProxyController extends Controller {
 
 	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): array {
 		foreach ($exApp->getRoutes() as $route) {
-			if (preg_match('/' . $route['url'] . '/i', $exAppRoute) === 1 &&
-				str_contains(strtolower($route['verb']), strtolower($this->request->getMethod())) &&
-				$this->passesExAppProxyRouteAccessLevelCheck($route['access_level'])
+			if (preg_match('/' . $route['url'] . '/i', $exAppRoute) === 1
+				&& str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()))
+				&& $this->passesExAppProxyRouteAccessLevelCheck($route['access_level'])
 			) {
 				return $route;
 			}

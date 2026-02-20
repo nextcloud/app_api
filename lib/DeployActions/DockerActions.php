@@ -43,16 +43,16 @@ class DockerActions implements IDeployActions {
 	private string $socketAddress;
 
 	public function __construct(
-		private readonly LoggerInterface           $logger,
-		private readonly IAppConfig                $appConfig,
-		private readonly IConfig				   $config,
-		private readonly ICertificateManager       $certificateManager,
-		private readonly IAppManager               $appManager,
-		private readonly IURLGenerator             $urlGenerator,
-		private readonly AppAPICommonService       $service,
-		private readonly ExAppService              $exAppService,
-		private readonly ITempManager              $tempManager,
-		private readonly ICrypto                   $crypto,
+		private readonly LoggerInterface $logger,
+		private readonly IAppConfig $appConfig,
+		private readonly IConfig $config,
+		private readonly ICertificateManager $certificateManager,
+		private readonly IAppManager $appManager,
+		private readonly IURLGenerator $urlGenerator,
+		private readonly AppAPICommonService $service,
+		private readonly ExAppService $exAppService,
+		private readonly ITempManager $tempManager,
+		private readonly ICrypto $crypto,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 	) {
 	}
@@ -175,12 +175,12 @@ class DockerActions implements IDeployActions {
 			);
 
 			if ($response->getStatusCode() !== 201) {
-				$errorBody = (string) $response->getBody();
+				$errorBody = (string)$response->getBody();
 				$this->logger->error(sprintf('Failed to create ExApp container %s. Status: %d, Body: %s', $exAppName, $response->getStatusCode(), $errorBody));
 				return sprintf('Failed to create ExApp container (status %d). Check HaRP logs. Details: %s', $response->getStatusCode(), $errorBody);
 			}
 
-			$responseData = json_decode((string) $response->getBody(), true);
+			$responseData = json_decode((string)$response->getBody(), true);
 			if ($responseData === null || !isset($responseData['name']) || !isset($responseData['id'])) {
 				$this->logger->error(sprintf('Invalid JSON response from HaRP /docker/exapp/create for %s: %s', $exAppName, $response->getBody()));
 				return 'Invalid response from HaRP agent after container creation.';
@@ -221,7 +221,7 @@ class DockerActions implements IDeployActions {
 			$osInfo = $this->getContainerOsInfo($dockerUrl, $containerName);
 			if (!$this->isSupportedOs($osInfo)) {
 				$this->logger->warning(sprintf(
-					"Unsupported OS detected for container: %s. OS info: %s",
+					'Unsupported OS detected for container: %s. OS info: %s',
 					$containerName,
 					$osInfo
 				));
@@ -237,7 +237,7 @@ class DockerActions implements IDeployActions {
 			$this->executeCommandInContainer($dockerUrl, $containerName, $updateCommand);
 		} catch (Exception $e) {
 			$this->logger->warning(sprintf(
-				"Failed to update certificates in container: %s. Error: %s",
+				'Failed to update certificates in container: %s. Error: %s',
 				$containerName,
 				$e->getMessage()
 			));
@@ -282,7 +282,7 @@ class DockerActions implements IDeployActions {
 			if ($statusCode === 204) {
 				$this->logger->info(sprintf('Successfully installed certificates for ExApp "%s" (instance "%s").', $exAppName, $instanceId));
 			} else {
-				$errorBody = (string) $response->getBody();
+				$errorBody = (string)$response->getBody();
 				$this->logger->error(sprintf('Failed to install certificates for ExApp "%s" (instance "%s"). Status: %d, Body: %s', $exAppName, $instanceId, $statusCode, $errorBody));
 			}
 
@@ -332,7 +332,7 @@ class DockerActions implements IDeployActions {
 				'headers' => ['Content-Type' => 'application/x-tar']
 			]);
 		} catch (Exception $e) {
-			throw new Exception(sprintf("Failed to copy %s to container %s: %s", $sourcePath, $containerId, $e->getMessage()));
+			throw new Exception(sprintf('Failed to copy %s to container %s: %s', $sourcePath, $containerId, $e->getMessage()));
 		} finally {
 			if (file_exists($archivePath)) {
 				unlink($archivePath);
@@ -359,7 +359,7 @@ class DockerActions implements IDeployActions {
 	private function createTarArchive(string $filePath, string $pathInContainer): string {
 		$tempFile = $this->tempManager->getTemporaryFile('.tar');
 		if ($tempFile === false) {
-			throw new Exception("Failed to create tar archive (getTemporaryFile fails).");
+			throw new Exception('Failed to create tar archive (getTemporaryFile fails).');
 		}
 
 		try {
@@ -375,7 +375,7 @@ class DockerActions implements IDeployActions {
 			if (file_exists($tempFile)) {
 				unlink($tempFile);
 			}
-			throw new Exception(sprintf("Failed to create tar archive: %s", $e->getMessage()));
+			throw new Exception(sprintf('Failed to create tar archive: %s', $e->getMessage()));
 		}
 		return $tempFile; // Return the path to the TAR archive
 	}
@@ -399,7 +399,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	private function isSupportedOs(string $osInfo): bool {
-		return (bool) preg_match('/(alpine|debian|ubuntu|centos|almalinux)/i', $osInfo);
+		return (bool)preg_match('/(alpine|debian|ubuntu|centos|almalinux)/i', $osInfo);
 	}
 
 	private function executeCommandInContainer(string $dockerUrl, string $containerId, $command): string {
@@ -410,12 +410,12 @@ class DockerActions implements IDeployActions {
 			'AttachStderr' => true,
 		];
 		$response = $this->guzzleClient->post($url, ['json' => $payload]);
-		$execId = json_decode((string) $response->getBody(), true)['Id'];
+		$execId = json_decode((string)$response->getBody(), true)['Id'];
 
 		// Start the exec process
 		$startUrl = $this->buildApiUrl($dockerUrl, sprintf('exec/%s/start', $execId));
 		$startResponse = $this->guzzleClient->post($startUrl, ['json' => ['Detach' => false, 'Tty' => false]]);
-		return (string) $startResponse->getBody();
+		return (string)$startResponse->getBody();
 	}
 
 	public function buildApiUrl(string $dockerUrl, string $route): string {
@@ -432,8 +432,8 @@ class DockerActions implements IDeployActions {
 				}
 			}
 		}
-		return $imageParams['image_src'] . '/' .
-			$imageParams['image_name'] . ':' . $imageParams['image_tag'];
+		return $imageParams['image_src'] . '/'
+			. $imageParams['image_name'] . ':' . $imageParams['image_tag'];
 	}
 
 	private function buildExtendedImageName(array $imageParams, DaemonConfig $daemonConfig): ?string {
@@ -449,8 +449,8 @@ class DockerActions implements IDeployActions {
 				}
 			}
 		}
-		return $imageParams['image_src'] . '/' .
-			$imageParams['image_name'] . ':' . $imageParams['image_tag'] . '-' . $daemonConfig->getDeployConfig()['computeDevice']['id'];
+		return $imageParams['image_src'] . '/'
+			. $imageParams['image_name'] . ':' . $imageParams['image_tag'] . '-' . $daemonConfig->getDeployConfig()['computeDevice']['id'];
 	}
 
 	private function shouldPullImage(array $imageParams, DaemonConfig $daemonConfig): bool {
@@ -501,8 +501,8 @@ class DockerActions implements IDeployActions {
 		if (($params['net'] !== 'host') && ($daemonConfig->getProtocol() === 'https')) {
 			$exAppMainPort = $params['port'];
 			$containerParams['ExposedPorts'] = [
-				sprintf('%d/tcp', $exAppMainPort) => (object) [],
-				sprintf('%d/udp', $exAppMainPort) => (object) [],
+				sprintf('%d/tcp', $exAppMainPort) => (object)[],
+				sprintf('%d/udp', $exAppMainPort) => (object)[],
 			];
 			$containerParams['HostConfig']['PortBindings'] = [
 				sprintf('%d/tcp', $exAppMainPort) => [
@@ -543,9 +543,9 @@ class DockerActions implements IDeployActions {
 					if (!empty($containerParams['Env'])) {
 						$containerParams['Env'] = array_values(array_filter(
 							$containerParams['Env'],
-							fn (string $e) =>
-								!str_starts_with($e, 'NVIDIA_VISIBLE_DEVICES=') &&
-								!str_starts_with($e, 'NVIDIA_DRIVER_CAPABILITIES=')
+							fn (string $e)
+								=> !str_starts_with($e, 'NVIDIA_VISIBLE_DEVICES=')
+								&& !str_starts_with($e, 'NVIDIA_DRIVER_CAPABILITIES=')
 						));
 					}
 				} else {
@@ -593,7 +593,7 @@ class DockerActions implements IDeployActions {
 		try {
 			$options['json'] = $containerParams;
 			$response = $this->guzzleClient->post($url, $options);
-			return json_decode((string) $response->getBody(), true);
+			return json_decode((string)$response->getBody(), true);
 		} catch (GuzzleException $e) {
 			$this->logger->error('Failed to create container', ['exception' => $e]);
 			error_log($e->getMessage());
@@ -644,7 +644,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function pullImage(
-		string $dockerUrl, array $params, ExApp $exApp, int $startPercent, int $maxPercent, DaemonConfig $daemonConfig, string &$imageId
+		string $dockerUrl, array $params, ExApp $exApp, int $startPercent, int $maxPercent, DaemonConfig $daemonConfig, string &$imageId,
 	): string {
 		$shouldPull = $this->shouldPullImage($params, $daemonConfig);
 		$urlToLog = $this->useSocket ? $this->socketAddress : $dockerUrl;
@@ -699,7 +699,7 @@ class DockerActions implements IDeployActions {
 	 * @throws GuzzleException
 	 */
 	public function pullImageInternal(
-		string $dockerUrl, ExApp $exApp, int $startPercent, int $maxPercent, string $imageId
+		string $dockerUrl, ExApp $exApp, int $startPercent, int $maxPercent, string $imageId,
 	): string {
 		# docs: https://github.com/docker/compose/blob/main/pkg/compose/pull.go
 		$layerInProgress = ['preparing', 'waiting', 'pulling fs layer', 'download', 'extracting', 'verifying checksum'];
@@ -747,14 +747,14 @@ class DockerActions implements IDeployActions {
 						}
 					} else {
 						$this->logger->warning(
-							sprintf("Progress tracking of image pulling(%s) disabled, error: %d, data: %s", $exApp->getAppid(), json_last_error(), $line)
+							sprintf('Progress tracking of image pulling(%s) disabled, error: %d, data: %s', $exApp->getAppid(), json_last_error(), $line)
 						);
 						$disableProgressTracking = true;
 					}
 				}
 			} catch (Exception $e) {
 				$this->logger->warning(
-					sprintf("Progress tracking of image pulling(%s) disabled, exception: %s", $exApp->getAppid(), $e->getMessage()), ['exception' => $e]
+					sprintf('Progress tracking of image pulling(%s) disabled, exception: %s', $exApp->getAppid(), $e->getMessage()), ['exception' => $e]
 				);
 				$disableProgressTracking = true;
 			}
@@ -775,7 +775,7 @@ class DockerActions implements IDeployActions {
 		$url = $this->buildApiUrl($dockerUrl, sprintf('containers/%s/json', $containerId));
 		try {
 			$response = $this->guzzleClient->get($url);
-			return json_decode((string) $response->getBody(), true);
+			return json_decode((string)$response->getBody(), true);
 		} catch (GuzzleException $e) {
 			return ['error' => $e->getMessage(), 'exception' => $e];
 		}
@@ -789,7 +789,7 @@ class DockerActions implements IDeployActions {
 			$dockerUrl, sprintf('containers/%s/logs?stdout=true&stderr=true&tail=%s', $containerId, $tail)
 		);
 		$response = $this->guzzleClient->get($url);
-		return array_reduce($this->processDockerLogs((string) $response->getBody()), function ($carry, $logEntry) {
+		return array_reduce($this->processDockerLogs((string)$response->getBody()), function ($carry, $logEntry) {
 			return $carry . $logEntry['content'];
 		}, '');
 	}
@@ -832,7 +832,7 @@ class DockerActions implements IDeployActions {
 				'name' => $volume,
 			];
 			$response = $this->guzzleClient->post($url, $options);
-			$result = json_decode((string) $response->getBody(), true);
+			$result = json_decode((string)$response->getBody(), true);
 			if ($response->getStatusCode() === 201) {
 				return $result;
 			}
@@ -959,7 +959,7 @@ class DockerActions implements IDeployActions {
 					return $errorMsg;
 				}
 			}
-			$errorBody = (string) $response->getBody();
+			$errorBody = (string)$response->getBody();
 			$this->logger->error(sprintf('Failed to stop ExApp container "%s" (instance "%s"). Status: %d, Body: %s', $exAppName, $instanceId, $statusCode, $errorBody));
 			return sprintf('Failed to stop ExApp container "%s" (Status: %d). Details: %s', $exAppName, $statusCode, $errorBody);
 		} catch (GuzzleException $e) {
@@ -987,7 +987,7 @@ class DockerActions implements IDeployActions {
 
 			$statusCode = $response->getStatusCode();
 			if ($statusCode === 200) {
-				$responseData = json_decode((string) $response->getBody(), true);
+				$responseData = json_decode((string)$response->getBody(), true);
 				if ($responseData === null) {
 					$this->logger->error(sprintf('Invalid JSON response from HaRP /docker/exapp/wait_for_start for ExApp "%s" (instance "%s").', $exAppName, $instanceId));
 					return false;
@@ -1005,7 +1005,7 @@ class DockerActions implements IDeployActions {
 					return false;
 				}
 			} else {
-				$errorBody = (string) $response->getBody();
+				$errorBody = (string)$response->getBody();
 				$this->logger->error(sprintf('Failed to wait for ExApp container "%s" (instance "%s") start. Status: %d, Body: %s', $exAppName, $instanceId, $statusCode, $errorBody));
 				return false;
 			}
@@ -1033,12 +1033,12 @@ class DockerActions implements IDeployActions {
 
 			$existsStatusCode = $existsResponse->getStatusCode();
 			if ($existsStatusCode !== 200) {
-				$errorBody = (string) $existsResponse->getBody();
+				$errorBody = (string)$existsResponse->getBody();
 				$this->logger->error(sprintf('Failed to check existence for ExApp "%s" (instance "%s"). Status: %d, Body: %s', $exAppName, $instanceId, $existsStatusCode, $errorBody));
 				return sprintf('Failed to check existence for ExApp "%s" (Status: %d). Details: %s', $exAppName, $existsStatusCode, $errorBody);
 			}
 
-			$existsData = json_decode((string) $existsResponse->getBody(), true);
+			$existsData = json_decode((string)$existsResponse->getBody(), true);
 			if ($existsData === null) {
 				$this->logger->error(sprintf('Invalid JSON response from HaRP /docker/exapp/exists for ExApp "%s" (instance "%s").', $exAppName, $instanceId));
 				return sprintf('Invalid JSON response from HaRP /docker/exapp/exists for ExApp "%s".', $exAppName);
@@ -1062,7 +1062,7 @@ class DockerActions implements IDeployActions {
 					$this->logger->info(sprintf('ExApp container "%s" (instance "%s") successfully removed.', $exAppName, $instanceId));
 					return '';
 				}
-				$errorBody = (string) $removeResponse->getBody();
+				$errorBody = (string)$removeResponse->getBody();
 				$this->logger->error(sprintf('Failed to remove ExApp container "%s" (instance "%s"). Status: %d, Body: %s', $exAppName, $instanceId, $removeStatusCode, $errorBody));
 				return sprintf('Failed to remove ExApp container "%s" (Status: %d). Details: %s', $exAppName, $removeStatusCode, $errorBody);
 			} elseif (isset($existsData['exists']) && $existsData['exists'] === false) {
@@ -1075,7 +1075,7 @@ class DockerActions implements IDeployActions {
 					return $errorMsg;
 				}
 			} else {
-				$errorBody = (string) $existsResponse->getBody();
+				$errorBody = (string)$existsResponse->getBody();
 				$this->logger->error(sprintf('Unexpected "exists" data from /docker/exapp/exists for ExApp "%s" (instance "%s"). Body: %s', $exAppName, $instanceId, $errorBody));
 				return sprintf('Unexpected "exists" data from HaRP for ExApp "%s".', $exAppName);
 			}
@@ -1090,7 +1090,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function buildDeployParams(DaemonConfig $daemonConfig, array $appInfo): array {
-		$appId = (string) $appInfo['id'];
+		$appId = (string)$appInfo['id'];
 		$externalApp = $appInfo['external-app'];
 		$deployConfig = $daemonConfig->getDeployConfig();
 
@@ -1106,9 +1106,9 @@ class DockerActions implements IDeployActions {
 		$storage = $this->buildDefaultExAppVolume($appId)[0]['Target'];
 
 		$imageParams = [
-			'image_src' => (string) ($externalApp['docker-install']['registry'] ?? 'docker.io'),
-			'image_name' => (string) ($externalApp['docker-install']['image'] ?? $appId),
-			'image_tag' => (string) ($externalApp['docker-install']['image-tag'] ?? 'latest'),
+			'image_src' => (string)($externalApp['docker-install']['registry'] ?? 'docker.io'),
+			'image_name' => (string)($externalApp['docker-install']['image'] ?? $appId),
+			'image_tag' => (string)($externalApp['docker-install']['image-tag'] ?? 'latest'),
 		];
 
 		$harpEnvVars = [];
@@ -1120,8 +1120,8 @@ class DockerActions implements IDeployActions {
 
 		$envs = $this->buildDeployEnvs([
 			'appid' => $appId,
-			'name' => (string) $appInfo['name'],
-			'version' => (string) $appInfo['version'],
+			'name' => (string)$appInfo['name'],
+			'version' => (string)$appInfo['version'],
 			'host' => $this->service->buildExAppHost($deployConfig),
 			'port' => $appInfo['port'],
 			'storage' => $storage,
@@ -1190,7 +1190,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function resolveExAppUrl(
-		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth,
 	): string {
 		if (boolval($deployConfig['harp'] ?? false)) {
 			$url = rtrim($deployConfig['nextcloud_url'], '/');
@@ -1201,8 +1201,8 @@ class DockerActions implements IDeployActions {
 		}
 
 		$auth = [];
-		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST']) &&
-			$deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
+		if (isset($deployConfig['additional_options']['OVERRIDE_APP_HOST'])
+			&& $deployConfig['additional_options']['OVERRIDE_APP_HOST'] !== ''
 		) {
 			$wideNetworkAddresses = ['0.0.0.0', '127.0.0.1', '::', '::1'];
 			if (!in_array($deployConfig['additional_options']['OVERRIDE_APP_HOST'], $wideNetworkAddresses)) {
@@ -1319,7 +1319,7 @@ class DockerActions implements IDeployActions {
 
 	private function buildDevicesParams(array $devices): array {
 		return array_map(function (string $device) {
-			return ["PathOnHost" => $device, "PathInContainer" => $device, "CgroupPermissions" => "rwm"];
+			return ['PathOnHost' => $device, 'PathInContainer' => $device, 'CgroupPermissions' => 'rwm'];
 		}, $devices);
 	}
 
@@ -1388,7 +1388,7 @@ class DockerActions implements IDeployActions {
 			}
 			// fallback: /version body
 			$resp = $this->guzzleClient->get($this->buildCompatUrlRaw($dockerUrl, 'version'));
-			$body = json_decode((string) $resp->getBody(), true);
+			$body = json_decode((string)$resp->getBody(), true);
 			$platformName = $body['Platform']['Name'] ?? '';
 			return stripos($platformName, 'podman') !== false;
 		} catch (\Throwable $e) {

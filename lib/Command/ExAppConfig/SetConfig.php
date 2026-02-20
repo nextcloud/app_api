@@ -21,8 +21,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class SetConfig extends Command {
 
 	public function __construct(
-		private readonly ExAppService		$service,
-		private readonly ExAppConfigService $exAppConfigService
+		private readonly ExAppService $service,
+		private readonly ExAppConfigService $exAppConfigService,
 	) {
 		parent::__construct();
 	}
@@ -50,7 +50,7 @@ class SetConfig extends Command {
 		$configKey = $input->getArgument('configkey');
 		$value = $input->getOption('value');
 		$isSensitive = $input->getOption('sensitive');
-		$sensitive = (int) filter_var($isSensitive, FILTER_VALIDATE_BOOLEAN);
+		$sensitive = (int)filter_var($isSensitive, FILTER_VALIDATE_BOOLEAN);
 		$updateOnly = $input->getOption('update-only');
 
 		$exAppConfig = $this->exAppConfigService->getAppConfig($appId, $configKey);

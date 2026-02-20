@@ -20,8 +20,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class DeleteConfig extends Command {
 
 	public function __construct(
-		private readonly ExAppService       $service,
-		private readonly ExAppConfigService $exAppConfigService) {
+		private readonly ExAppService $service,
+		private readonly ExAppConfigService $exAppConfigService,
+	) {
 		parent::__construct();
 	}
 

@@ -30,9 +30,9 @@ class ExAppOccService {
 	private ?ICache $cache = null;
 
 	public function __construct(
-		private readonly LoggerInterface       $logger,
+		private readonly LoggerInterface $logger,
 		private readonly ExAppOccCommandMapper $mapper,
-		ICacheFactory                          $cacheFactory,
+		ICacheFactory $cacheFactory,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_occ_commands');
@@ -47,7 +47,7 @@ class ExAppOccService {
 		array $arguments,
 		array $options,
 		array $usages,
-		string $executeHandler
+		string $executeHandler,
 	): ?ExAppOccCommand {
 		$occCommandEntry = $this->getOccCommand($appId, $name);
 		try {
@@ -120,7 +120,7 @@ class ExAppOccService {
 
 			public function __construct(
 				private ExAppOccCommand $occCommand,
-				private ContainerInterface $container
+				private ContainerInterface $container,
 			) {
 				parent::__construct();
 

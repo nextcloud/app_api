@@ -17,8 +17,8 @@ use OCP\IRequest;
 class AppAPICommonService {
 
 	public function __construct(
-		private readonly IAppManager         $appManager,
-		private readonly HarpService         $harpService,
+		private readonly IAppManager $appManager,
+		private readonly HarpService $harpService,
 	) {
 	}
 

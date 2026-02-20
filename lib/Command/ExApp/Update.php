@@ -28,14 +28,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Update extends Command {
 
 	public function __construct(
-		private readonly AppAPIService  	       $service,
-		private readonly ExAppService              $exAppService,
-		private readonly DaemonConfigService       $daemonConfigService,
-		private readonly DockerActions             $dockerActions,
-		private readonly ManualActions             $manualActions,
-		private readonly LoggerInterface           $logger,
-		private readonly ExAppArchiveFetcher       $exAppArchiveFetcher,
-		private readonly ExAppFetcher		       $exAppFetcher,
+		private readonly AppAPIService $service,
+		private readonly ExAppService $exAppService,
+		private readonly DaemonConfigService $daemonConfigService,
+		private readonly DockerActions $dockerActions,
+		private readonly ManualActions $manualActions,
+		private readonly LoggerInterface $logger,
+		private readonly ExAppArchiveFetcher $exAppArchiveFetcher,
+		private readonly ExAppFetcher $exAppFetcher,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 	) {
 		parent::__construct();
@@ -60,10 +60,10 @@ class Update extends Command {
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$appId = $input->getArgument('appid');
 		if (empty($appId) && !$input->getOption('all')) {
-			$output->writeln("<error>Please specify an app to update or \"--all\" to update all updatable apps</error>");
+			$output->writeln('<error>Please specify an app to update or "--all" to update all updatable apps</error>');
 			return 1;
 		} elseif (!empty($appId) && $input->getOption('all')) {
-			$output->writeln("<error>The \"--all\" flag is mutually exclusive with specifying app</error>");
+			$output->writeln('<error>The "--all" flag is mutually exclusive with specifying app</error>');
 			return 1;
 		} elseif ($input->getOption('all')) {
 			$apps = $this->exAppFetcher->get();
@@ -243,7 +243,7 @@ class Update extends Command {
 				$daemonConfig->getProtocol(),
 				$daemonConfig->getHost(),
 				$daemonConfig->getDeployConfig(),
-				(int) $appInfo['port'],
+				(int)$appInfo['port'],
 				$auth,
 			);
 		}

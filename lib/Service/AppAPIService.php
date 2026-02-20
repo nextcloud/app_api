@@ -35,21 +35,21 @@ class AppAPIService {
 	private IClient $client;
 
 	public function __construct(
-		private readonly LoggerInterface     $logger,
-		private readonly ILogFactory         $logFactory,
-		private readonly IThrottler          $throttler,
-		private readonly IConfig             $config,
-		IClientService                       $clientService,
-		private readonly IUserSession        $userSession,
-		private readonly ISession            $session,
-		private readonly IUserManager        $userManager,
-		private readonly IFactory            $l10nFactory,
-		private readonly ExAppService        $exAppService,
-		private readonly DockerActions       $dockerActions,
-		private readonly ManualActions       $manualActions,
+		private readonly LoggerInterface $logger,
+		private readonly ILogFactory $logFactory,
+		private readonly IThrottler $throttler,
+		private readonly IConfig $config,
+		IClientService $clientService,
+		private readonly IUserSession $userSession,
+		private readonly ISession $session,
+		private readonly IUserManager $userManager,
+		private readonly IFactory $l10nFactory,
+		private readonly ExAppService $exAppService,
+		private readonly DockerActions $dockerActions,
+		private readonly ManualActions $manualActions,
 		private readonly AppAPICommonService $commonService,
 		private readonly DaemonConfigService $daemonConfigService,
-		private readonly HarpService         $harpService,
+		private readonly HarpService $harpService,
 	) {
 		$this->client = $clientService->newClient();
 		$this->exAppService->setAppAPIService($this);
@@ -161,9 +161,9 @@ class AppAPIService {
 		$auth = [];
 		$url = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
 		if (str_starts_with($route, '/')) {
-			$url = $url.$route;
+			$url = $url . $route;
 		} else {
-			$url = $url.'/'.$route;
+			$url = $url . '/' . $route;
 		}
 
 		if (isset($options['headers']) && is_array($options['headers'])) {
@@ -211,9 +211,9 @@ class AppAPIService {
 		$auth = [];
 		$url = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
 		if (str_starts_with($route, '/')) {
-			$url = $url.$route;
+			$url = $url . $route;
 		} else {
-			$url = $url.'/'.$route;
+			$url = $url . '/' . $route;
 		}
 
 		if (isset($options['headers']) && is_array($options['headers'])) {
@@ -443,7 +443,7 @@ class AppAPIService {
 			2 => ['pipe', 'w'],
 		];
 		$occDirectory = null;
-		if (!file_exists("console.php")) {
+		if (!file_exists('console.php')) {
 			$occDirectory = dirname(__FILE__, 5);
 		}
 		$this->logger->info(sprintf('Calling occ(directory=%s): %s', $occDirectory ?? 'null', $args));

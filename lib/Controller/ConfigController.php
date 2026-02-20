@@ -20,8 +20,8 @@ use OCP\IRequest;
 class ConfigController extends Controller {
 
 	public function __construct(
-		string                      $appName,
-		IRequest                    $request,
+		string $appName,
+		IRequest $request,
 		private readonly IAppConfig $appConfig,
 	) {
 		parent::__construct($appName, $request);

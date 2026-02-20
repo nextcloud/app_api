@@ -93,7 +93,7 @@ class TaskProcessingService {
 		}
 	}
 
-	private function everyElementHasKeys(array|null $array, array $keys): bool {
+	private function everyElementHasKeys(?array $array, array $keys): bool {
 		if (!is_array($array)) {
 			return false;
 		}
@@ -117,7 +117,7 @@ class TaskProcessingService {
 		return true;
 	}
 
-	private function everyArrayElementHasKeys(array|null $array, array $keys): bool {
+	private function everyArrayElementHasKeys(?array $array, array $keys): bool {
 		if (!is_array($array)) {
 			return false;
 		}
@@ -282,7 +282,7 @@ class TaskProcessingService {
 				private readonly array $provider,
 				private readonly string $appId,
 				private readonly ExAppService $exAppService,
-				private readonly AppAPiService $appAPIService
+				private readonly AppAPiService $appAPIService,
 			) {
 			}
 

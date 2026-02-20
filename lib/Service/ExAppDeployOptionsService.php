@@ -22,9 +22,9 @@ class ExAppDeployOptionsService {
 	private ?ICache $cache = null;
 
 	public function __construct(
-		private readonly LoggerInterface          $logger,
+		private readonly LoggerInterface $logger,
 		private readonly ExAppDeployOptionsMapper $mapper,
-		ICacheFactory                             $cacheFactory,
+		ICacheFactory $cacheFactory,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_deploy_options');
@@ -44,7 +44,7 @@ class ExAppDeployOptionsService {
 	public function addExAppDeployOption(
 		string $appId,
 		string $type,
-		mixed  $value,
+		mixed $value,
 	): ?ExAppDeployOption {
 		$deployOptionEntry = $this->getDeployOption($appId, $type);
 		try {

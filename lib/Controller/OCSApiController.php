@@ -31,12 +31,12 @@ class OCSApiController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                         $request,
+		IRequest $request,
 		private readonly LoggerInterface $logger,
-		private readonly AppAPIService   $service,
+		private readonly AppAPIService $service,
 		private IConfig $config,
-		private readonly ExAppService	 $exAppService,
-		private readonly IURLGenerator   $urlGenerator,
+		private readonly ExAppService $exAppService,
+		private readonly IURLGenerator $urlGenerator,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 

@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
 class StylesService {
 
 	public function __construct(
-		private readonly StyleMapper     $mapper,
+		private readonly StyleMapper $mapper,
 		private readonly LoggerInterface $logger,
 	) {
 	}
@@ -84,7 +84,7 @@ class StylesService {
 	public function applyExAppStyles(string $appId, string $type, string $name): void {
 		$styles = $this->mapper->findByAppIdTypeName($appId, $type, $name);
 		foreach ($styles as $value) {
-			$path = 'proxy/'. $appId . '/' . $value['path'];
+			$path = 'proxy/' . $appId . '/' . $value['path'];
 			Util::addStyle(Application::APP_ID, $path);
 		}
 	}

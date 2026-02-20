@@ -31,12 +31,12 @@ class TalkBotController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                         $request,
-		private readonly ExAppService    $service,
-		private readonly AppAPIService	 $appAPIService,
+		IRequest $request,
+		private readonly ExAppService $service,
+		private readonly AppAPIService $appAPIService,
 		private readonly TalkBotsService $talkBotsService,
 		private readonly LoggerInterface $logger,
-		private readonly IThrottler      $throttler,
+		private readonly IThrottler $throttler,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -105,7 +105,7 @@ class TalkBotController extends OCSController {
 						$this->request->getRemoteAddress(),
 						['proxyTalkMessage' => $appId, 'route' => $route, 'reason' => 'invalid hash']
 					);
-					$this->logger->error(sprintf("Invalid ExApp TalkBot hash provided: %s:%s.", $appId, $route));
+					$this->logger->error(sprintf('Invalid ExApp TalkBot hash provided: %s:%s.', $appId, $route));
 					return new DataResponse([], Http::STATUS_NOT_FOUND);
 				}
 				$this->throttler->resetDelay(
@@ -130,7 +130,7 @@ class TalkBotController extends OCSController {
 			$this->request->getRemoteAddress(),
 			['proxyTalkMessage' => $appId, 'route' => $route]
 		);
-		$this->logger->error(sprintf("Invalid request to ExApp TalkBot: %s:%s.", $appId, $route));
+		$this->logger->error(sprintf('Invalid request to ExApp TalkBot: %s:%s.', $appId, $route));
 		return new DataResponse([], Http::STATUS_NOT_FOUND);
 	}
 }

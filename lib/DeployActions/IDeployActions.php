@@ -68,6 +68,6 @@ interface IDeployActions {
 	 * @return string
 	 */
 	public function resolveExAppUrl(
-		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth
+		string $appId, string $protocol, string $host, array $deployConfig, int $port, array &$auth,
 	): string;
 }

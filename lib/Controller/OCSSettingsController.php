@@ -23,7 +23,7 @@ class OCSSettingsController extends OCSController {
 	protected $request;
 
 	public function __construct(
-		IRequest                         $request,
+		IRequest $request,
 		private readonly SettingsService $settingsService,
 	) {
 		parent::__construct(Application::APP_ID, $request);

@@ -24,8 +24,8 @@ class AIODockerActions {
 	public const AIO_HARP_HOST = 'nextcloud-aio-harp:8780';
 
 	public function __construct(
-		private readonly IAppConfig    		 $appConfig,
-		private readonly DaemonConfigService $daemonConfigService
+		private readonly IAppConfig $appConfig,
+		private readonly DaemonConfigService $daemonConfigService,
 	) {
 	}
 
