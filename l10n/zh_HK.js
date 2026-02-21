@@ -80,6 +80,7 @@ OC.L10N.register(
     "Docker network" : "Docker 網絡",
     "Nextcloud URL" : "Nextcloud URL",
     "HaProxy password" : "HaProxy 密碼",
+    "(not set)" : "（未設定）",
     "GPU support" : "GPU 支援",
     "Computation device" : "計算裝置",
     "Memory limit" : "記憶體限制",
