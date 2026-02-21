@@ -22,6 +22,9 @@ webpackConfig.output.clean = {
 	keep: 'proxy_js',
 }
 
+// Ensure deterministic builds for source maps
+webpackConfig.optimization.moduleIds = 'deterministic'
+
 const appId = 'app_api'
 webpackConfig.entry = {
 	adminSettings: { import: path.join(__dirname, 'src', 'adminSettings.js'), filename: appId + '-adminSettings.js' },
