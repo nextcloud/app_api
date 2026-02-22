@@ -167,7 +167,9 @@ class DockerActions implements IDeployActions {
 			$createPayload['resource_limits'] = $params['container_params']['resourceLimits'];
 		}
 
-		$this->logger->debug(sprintf('Payload for /docker/exapp/create for %s: %s', $exAppName, json_encode($createPayload)));
+		$logPayload = $createPayload;
+		$logPayload['environment_variables'] = '[REDACTED]';
+		$this->logger->debug(sprintf('Payload for /docker/exapp/create for %s: %s', $exAppName, json_encode($logPayload)));
 		try {
 			$response = $this->guzzleClient->post(
 				sprintf('%s/%s', $dockerUrl, 'docker/exapp/create'),

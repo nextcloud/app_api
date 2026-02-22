@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Service;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\DaemonConfigMapper;
 
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -67,11 +68,14 @@ readonly class DaemonConfigService {
 			$this->logger->error('Failed to register daemon configuration: `protocol` must be `http` or `https`.');
 			return null;
 		}
-		if ($params['accepts_deploy_id'] !== ManualActions::DEPLOY_ID && isset($params['deploy_config']['harp']['exapp_direct']) && $params['deploy_config']['harp']['exapp_direct'] === true) {
-			if ($params['deploy_config']['net'] === 'host') {
-				$this->logger->error('Failed to register daemon configuration: setting `net=host` in HaRP is not supported when communication with ExApps is done directly without FRP.');
-				return null;
-			}
+		// For Docker with HaRP direct mode, 'net=host' is not supported (K8s is excluded as it has its own networking)
+		$isDockerDirect = $params['accepts_deploy_id'] !== ManualActions::DEPLOY_ID
+			&& $params['accepts_deploy_id'] !== KubernetesActions::DEPLOY_ID
+			&& isset($params['deploy_config']['harp']['exapp_direct'])
+			&& $params['deploy_config']['harp']['exapp_direct'] === true;
+		if ($isDockerDirect && $params['deploy_config']['net'] === 'host') {
+			$this->logger->error('Failed to register daemon configuration: setting `net=host` in HaRP is not supported when communication with ExApps is done directly without FRP.');
+			return null;
 		}
 		$params['deploy_config']['nextcloud_url'] = rtrim($params['deploy_config']['nextcloud_url'], '/');
 		try {

@@ -10,9 +10,11 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -26,7 +28,9 @@ class Unregister extends Command {
 		private readonly AppAPIService $service,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions $dockerActions,
+		private readonly KubernetesActions $kubernetesActions,
 		private readonly ExAppService $exAppService,
+		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 	) {
 		parent::__construct();
 	}
@@ -95,51 +99,81 @@ class Unregister extends Command {
 				return 1;
 			}
 		}
-		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-			$this->dockerActions->initGuzzleClient($daemonConfig);
+		if ($daemonConfig !== null) {
+			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+				$this->dockerActions->initGuzzleClient($daemonConfig);
 
-			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-				if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $rmData)) {
-					if (!$silent) {
-						$output->writeln(sprintf('Failed to remove ExApp %s', $appId));
-						$output->writeln('Hint: If the container was already removed manually, you can use the --force option to fully remove it from AppAPI.');
-					}
-					if (!$force) {
-						return 1;
+				if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
+					if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $rmData)) {
+						if (!$silent) {
+							$output->writeln(sprintf('Failed to remove ExApp %s', $appId));
+							$output->writeln('Hint: If the container was already removed manually, you can use the --force option to fully remove it from AppAPI.');
+						}
+						if (!$force) {
+							return 1;
+						}
+					} else {
+						if (!$silent) {
+							$output->writeln(sprintf('ExApp %s successfully removed', $appId));
+						}
 					}
 				} else {
-					if (!$silent) {
-						$output->writeln(sprintf('ExApp %s successfully removed', $appId));
+					$containerName = $this->dockerActions->buildExAppContainerName($appId);
+					$removeResult = $this->dockerActions->removeContainer(
+						$this->dockerActions->buildDockerUrl($daemonConfig), $containerName
+					);
+					if ($removeResult) {
+						if (!$silent) {
+							$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
+							$output->writeln(sprintf('Hint: If the container "%s" was already removed manually, you can use the --force option to fully remove it from AppAPI.', $containerName));
+						}
+						if (!$force) {
+							return 1;
+						}
+					} elseif (!$silent) {
+						$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
+					}
+					if ($rmData) {
+						$volumeName = $this->dockerActions->buildExAppVolumeName($appId);
+						$removeVolumeResult = $this->dockerActions->removeVolume(
+							$this->dockerActions->buildDockerUrl($daemonConfig), $volumeName
+						);
+						if (!$silent) {
+							if (isset($removeVolumeResult['error'])) {
+								$output->writeln(sprintf('Failed to remove ExApp %s volume: %s', $appId, $volumeName));
+							} else {
+								$output->writeln(sprintf('ExApp %s data volume successfully removed', $appId));
+							}
+						}
 					}
 				}
-			} else {
-				$containerName = $this->dockerActions->buildExAppContainerName($appId);
-				$removeResult = $this->dockerActions->removeContainer(
-					$this->dockerActions->buildDockerUrl($daemonConfig), $containerName
-				);
+			} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
+				$this->kubernetesActions->initGuzzleClient($daemonConfig);
+				$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
+
+				// Check for stored multi-role configuration
+				$rolesOption = $this->exAppDeployOptionsService->getDeployOption($exApp->getAppid(), 'k8s_service_roles');
+				$roles = $rolesOption !== null ? $rolesOption->getValue() : [];
+
+				if (!empty($roles) && is_array($roles)) {
+					$removeResult = $this->kubernetesActions->removeAllRoles(
+						$harpK8sUrl, $exApp->getAppid(), $roles, removeData: $rmData
+					);
+				} else {
+					$removeResult = $this->kubernetesActions->removeExApp(
+						$harpK8sUrl, $exApp->getAppid(), removeData: $rmData
+					);
+				}
 				if ($removeResult) {
 					if (!$silent) {
-						$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
-						$output->writeln(sprintf('Hint: If the container "%s" was already removed manually, you can use the --force option to fully remove it from AppAPI.', $containerName));
+						$output->writeln(sprintf('Failed to remove K8s ExApp %s: %s', $appId, $removeResult));
+						$output->writeln('Hint: If the K8s deployment was already removed manually, use --force to remove from AppAPI.');
 					}
 					if (!$force) {
 						return 1;
 					}
 				} elseif (!$silent) {
-					$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
-				}
-				if ($rmData) {
-					$volumeName = $this->dockerActions->buildExAppVolumeName($appId);
-					$removeVolumeResult = $this->dockerActions->removeVolume(
-						$this->dockerActions->buildDockerUrl($daemonConfig), $volumeName
-					);
-					if (!$silent) {
-						if (isset($removeVolumeResult['error'])) {
-							$output->writeln(sprintf('Failed to remove ExApp %s volume: %s', $appId, $volumeName));
-						} else {
-							$output->writeln(sprintf('ExApp %s data volume successfully removed', $appId));
-						}
-					}
+					$output->writeln(sprintf('ExApp %s K8s resources successfully removed', $appId));
 				}
 			}
 		}
