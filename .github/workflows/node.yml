@@ -86,6 +86,11 @@ jobs:
           npm ci
           npm run build --if-present
 
+      - name: Reset source maps
+        # Source map `mappings` are non-deterministic across different build environments
+        # Reset tracked .map files so only JS and license changes are checked.
+        run: git checkout -- '*.js.map' 2>/dev/null || true
+
       - name: Check build changes
         run: |
           bash -c "[[ ! \"`git status --porcelain `\" ]] || (echo 'Please recompile and commit the assets, see the section \"Show changes on failure\" for details' && exit 1)"
