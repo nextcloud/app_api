@@ -80,6 +80,7 @@ OC.L10N.register(
     "Docker network" : "Líonra docker",
     "Nextcloud URL" : "URL Nextcloud",
     "HaProxy password" : "Pasfhocal HaProxy",
+    "(not set)" : "(ní socraithe)",
     "GPU support" : "Tacaíocht GPU",
     "Computation device" : "Gléas ríomhaireachta",
     "Memory limit" : "Teorainn chuimhne",
