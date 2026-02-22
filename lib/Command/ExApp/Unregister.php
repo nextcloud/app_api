@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
@@ -26,6 +27,7 @@ class Unregister extends Command {
 		private readonly AppAPIService $service,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions $dockerActions,
+		private readonly KubernetesActions $kubernetesActions,
 		private readonly ExAppService $exAppService,
 	) {
 		parent::__construct();
@@ -141,6 +143,24 @@ class Unregister extends Command {
 						}
 					}
 				}
+			}
+		} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
+			$this->kubernetesActions->initGuzzleClient($daemonConfig);
+			$removeResult = $this->kubernetesActions->removeExApp(
+				$this->kubernetesActions->buildHarpK8sUrl($daemonConfig),
+				$exApp->getAppid(),
+				removeData: $rmData
+			);
+			if ($removeResult) {
+				if (!$silent) {
+					$output->writeln(sprintf('Failed to remove K8s ExApp %s: %s', $appId, $removeResult));
+					$output->writeln('Hint: If the K8s deployment was already removed manually, use --force to remove from AppAPI.');
+				}
+				if (!$force) {
+					return 1;
+				}
+			} elseif (!$silent) {
+				$output->writeln(sprintf('ExApp %s K8s resources successfully removed', $appId));
 			}
 		}
 
