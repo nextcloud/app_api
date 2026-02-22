@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
@@ -32,6 +33,7 @@ class Update extends Command {
 		private readonly ExAppService $exAppService,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions $dockerActions,
+		private readonly KubernetesActions $kubernetesActions,
 		private readonly ManualActions $manualActions,
 		private readonly LoggerInterface $logger,
 		private readonly ExAppArchiveFetcher $exAppArchiveFetcher,
@@ -138,6 +140,7 @@ class Update extends Command {
 		$actionsDeployIds = [
 			$this->dockerActions->getAcceptsDeployId(),
 			$this->manualActions->getAcceptsDeployId(),
+			$this->kubernetesActions->getAcceptsDeployId(),
 		];
 		if (!in_array($daemonConfig->getAcceptsDeployId(), $actionsDeployIds)) {
 			$this->logger->error(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
@@ -234,6 +237,43 @@ class Update extends Command {
 				$daemonConfig->getHost(),
 				$daemonConfig->getDeployConfig(),
 				(int)explode('=', $deployParams['container_params']['env'][6])[1],
+				$auth,
+			);
+		} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
+			$deployParams = $this->kubernetesActions->buildDeployParams($daemonConfig, $appInfo);
+			$this->kubernetesActions->initGuzzleClient($daemonConfig);
+			$deployResult = $this->kubernetesActions->deployExApp($exApp, $daemonConfig, $deployParams);
+			if ($deployResult) {
+				$this->logger->error(sprintf('ExApp %s K8s deployment update failed. Error: %s', $appId, $deployResult));
+				if ($outputConsole) {
+					$output->writeln(sprintf('ExApp %s K8s deployment update failed. Error: %s', $appId, $deployResult));
+				}
+				$this->exAppService->setStatusError($exApp, 'K8s deployment update failed');
+				return 1;
+			}
+
+			$k8sConfig = $daemonConfig->getDeployConfig()['kubernetes'] ?? [];
+			$exposeResult = $this->kubernetesActions->exposeExApp(
+				$this->kubernetesActions->buildHarpK8sUrl($daemonConfig),
+				$appId,
+				(int)$appInfo['port'],
+				$k8sConfig
+			);
+			if (isset($exposeResult['error'])) {
+				$this->logger->error(sprintf('ExApp %s K8s expose failed. Error: %s', $appId, $exposeResult['error']));
+				if ($outputConsole) {
+					$output->writeln(sprintf('ExApp %s K8s expose failed. Error: %s', $appId, $exposeResult['error']));
+				}
+				$this->exAppService->setStatusError($exApp, $exposeResult['error']);
+				return 1;
+			}
+
+			$exAppUrl = $this->kubernetesActions->resolveExAppUrl(
+				$appId,
+				$daemonConfig->getProtocol(),
+				$daemonConfig->getHost(),
+				$daemonConfig->getDeployConfig(),
+				(int)$appInfo['port'],
 				$auth,
 			);
 		} else {
