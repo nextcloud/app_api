@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  - SPDX-FileCopyrightText: 2025 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 bootstrap="bootstrap.php"
+		 timeoutForSmallTests="900"
+		 timeoutForMediumTests="900"
+		 timeoutForLargeTests="900"
+		 failOnDeprecation="true"
+		 failOnIncomplete="true"
+		 failOnRisky="true"
+		 failOnWarning="true"
+		 failOnEmptyTestSuite="true"
+		 failOnNotice="true"
+		 xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+		 cacheDirectory=".phpunit.result.cache"
+>
+	<testsuite name="AppAPI Unit Tests">
+		<directory suffix="Test.php">.</directory>
+	</testsuite>
+	<source>
+		<include>
+			<directory suffix=".php">../../lib</directory>
+		</include>
+	</source>
+</phpunit>

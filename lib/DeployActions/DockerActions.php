@@ -418,8 +418,16 @@ class DockerActions implements IDeployActions {
 		return (string)$startResponse->getBody();
 	}
 
+	public function getDockerApiVersion(): string {
+		$version = $this->appConfig->getValueString(Application::APP_ID, 'docker_api_version', lazy: true);
+		if ($version !== '') {
+			return $version;
+		}
+		return self::DOCKER_API_VERSION;
+	}
+
 	public function buildApiUrl(string $dockerUrl, string $route): string {
-		return sprintf('%s/%s/%s', $dockerUrl, self::DOCKER_API_VERSION, $route);
+		return sprintf('%s/%s/%s', $dockerUrl, $this->getDockerApiVersion(), $route);
 	}
 
 	public function buildBaseImageName(array $imageParams, DaemonConfig $daemonConfig): string {
