@@ -119,6 +119,7 @@ class AIODockerActions {
 			'haproxy_password' => $harpSharedKey, // will be encrypted by DaemonConfigService
 			'harp' => [
 				'exapp_direct' => true,
+				'docker_socket_port' => 24000,
 			],
 			'computeDevice' => [
 				'id' => 'cpu',
