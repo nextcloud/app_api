@@ -35,6 +35,7 @@
 				<referencedClass name="OCA\DAV\Events\SabrePluginAuthInitEvent" />
 				<referencedClass name="GuzzleHttp\Client" />
 				<referencedClass name="GuzzleHttp\Exception\GuzzleException" />
+				<referencedClass name="OC\Core\Command\Base" />
 				<referencedClass name="OC\Security\CSP\ContentSecurityPolicyNonceManager" />
 				<referencedClass name="Symfony\Component\Console\Command\Command" />
 			</errorLevel>
