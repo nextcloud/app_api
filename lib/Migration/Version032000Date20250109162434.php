@@ -11,9 +11,14 @@ namespace OCA\AppAPI\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
+use OCP\Migration\Attributes\ColumnType;
+use OCP\Migration\Attributes\ModifyColumn;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
+#[ModifyColumn(table: 'ex_task_processing', name: 'name', type:ColumnType::STRING, description: 'enlarge field length to 255')]
+#[ModifyColumn(table: 'ex_task_processing', name: 'display_name', type:ColumnType::STRING, description: 'enlarge field length to 255')]
+#[ModifyColumn(table: 'ex_task_processing', name: 'task_type', type:ColumnType::STRING, description: 'enlarge field length to 255')]
 class Version032000Date20250109162434 extends SimpleMigrationStep {
 	/**
 	 * @param IOutput $output
