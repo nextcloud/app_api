@@ -253,12 +253,17 @@ class Update extends Command {
 			}
 
 			$k8sConfig = $daemonConfig->getDeployConfig()['kubernetes'] ?? [];
-			$exposeResult = $this->kubernetesActions->exposeExApp(
-				$this->kubernetesActions->buildHarpK8sUrl($daemonConfig),
-				$appId,
-				(int)$appInfo['port'],
-				$k8sConfig
-			);
+			$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
+			$roles = $deployParams['k8s_service_roles'] ?? [];
+			if (!empty($roles)) {
+				$exposeResult = $this->kubernetesActions->exposeExAppRoles(
+					$harpK8sUrl, $appId, (int)$appInfo['port'], $k8sConfig, $roles
+				);
+			} else {
+				$exposeResult = $this->kubernetesActions->exposeExApp(
+					$harpK8sUrl, $appId, (int)$appInfo['port'], $k8sConfig
+				);
+			}
 			if (isset($exposeResult['error'])) {
 				$this->logger->error(sprintf('ExApp %s K8s expose failed. Error: %s', $appId, $exposeResult['error']));
 				if ($outputConsole) {

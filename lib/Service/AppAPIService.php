@@ -13,6 +13,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCP\AppFramework\Http;
 use OCP\DB\Exception;
@@ -46,9 +47,11 @@ class AppAPIService {
 		private readonly IFactory $l10nFactory,
 		private readonly ExAppService $exAppService,
 		private readonly DockerActions $dockerActions,
+		private readonly KubernetesActions $kubernetesActions,
 		private readonly ManualActions $manualActions,
 		private readonly AppAPICommonService $commonService,
 		private readonly DaemonConfigService $daemonConfigService,
+		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 		private readonly HarpService $harpService,
 	) {
 		$this->client = $clientService->newClient();
@@ -620,6 +623,35 @@ class AppAPIService {
 				$this->logger->error(sprintf('ExApp %s container healthcheck failed.', $exApp->getAppid()));
 				return false;
 			}
+		} elseif ($exApp->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
+			$this->kubernetesActions->initGuzzleClient($daemonConfig);
+			$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
+			$rolesOption = $this->exAppDeployOptionsService->getDeployOption($exApp->getAppid(), 'k8s_service_roles');
+			$roles = ($rolesOption !== null) ? $rolesOption->getValue() : [];
+
+			if (!empty($roles)) {
+				$error = $this->kubernetesActions->startAllRoles($harpK8sUrl, $exApp->getAppid(), $roles);
+				if ($error) {
+					$this->logger->error(sprintf('ExApp %s K8s start all roles failed: %s', $exApp->getAppid(), $error));
+					return false;
+				}
+				foreach ($roles as $role) {
+					if (!$this->kubernetesActions->waitExAppStart($harpK8sUrl, $exApp->getAppid(), $role['name'])) {
+						$this->logger->error(sprintf('ExApp %s K8s role "%s" startup failed.', $exApp->getAppid(), $role['name']));
+						return false;
+					}
+				}
+			} else {
+				$error = $this->kubernetesActions->startExApp($harpK8sUrl, $exApp->getAppid(), ignoreIfAlready: true);
+				if ($error) {
+					$this->logger->error(sprintf('ExApp %s K8s start failed: %s', $exApp->getAppid(), $error));
+					return false;
+				}
+				if (!$this->kubernetesActions->waitExAppStart($harpK8sUrl, $exApp->getAppid())) {
+					$this->logger->error(sprintf('ExApp %s K8s pod startup failed.', $exApp->getAppid()));
+					return false;
+				}
+			}
 		}
 
 		$auth = [];
@@ -675,6 +707,23 @@ class AppAPIService {
 				$this->dockerActions->stopExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
 			} else {
 				$this->dockerActions->stopContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+			}
+		} elseif ($exApp->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
+			$this->kubernetesActions->initGuzzleClient($daemonConfig);
+			$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
+			$rolesOption = $this->exAppDeployOptionsService->getDeployOption($exApp->getAppid(), 'k8s_service_roles');
+			$roles = ($rolesOption !== null) ? $rolesOption->getValue() : [];
+
+			if (!empty($roles)) {
+				$error = $this->kubernetesActions->stopAllRoles($harpK8sUrl, $exApp->getAppid(), $roles);
+				if ($error) {
+					$this->logger->error(sprintf('ExApp %s K8s stop all roles failed: %s', $exApp->getAppid(), $error));
+				}
+			} else {
+				$error = $this->kubernetesActions->stopExApp($harpK8sUrl, $exApp->getAppid(), ignoreIfAlready: true);
+				if ($error) {
+					$this->logger->error(sprintf('ExApp %s K8s stop failed: %s', $exApp->getAppid(), $error));
+				}
 			}
 		}
 		$this->exAppService->disableExAppInternal($exApp);

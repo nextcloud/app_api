@@ -170,7 +170,6 @@ class RegisterDaemon extends Command {
 			? $input->getOption('harp_shared_key')
 			: $input->getOption('haproxy_password') ?? '';
 
-		// For K8s, 'net' is not used (K8s has its own networking), default to 'bridge' to avoid validation issues
 		$defaultNet = $isK8s ? 'bridge' : 'host';
 		$deployConfig = [
 			'net' => $input->getOption('net') ?? $defaultNet,
@@ -184,7 +183,7 @@ class RegisterDaemon extends Command {
 			$deployConfig['harp'] = [
 				'frp_address' => $input->getOption('harp_frp_address') ?? '',
 				'docker_socket_port' => $input->getOption('harp_docker_socket_port'),
-				'exapp_direct' => $isK8s ? true : (bool)$input->getOption('harp_exapp_direct'), // K8s always uses direct (Service-based) routing
+				'exapp_direct' => $isK8s ? true : (bool)$input->getOption('harp_exapp_direct'),
 			];
 		}
 		if ($isK8s) {

@@ -258,7 +258,7 @@ class ExAppService {
 			# fill 'id' if it is missing(this field was called `appid` in previous versions in json)
 			$appInfo['id'] = $appInfo['id'] ?? $appId;
 			# during manual install JSON can have all values at root level
-			foreach (['docker-install', 'translations_folder', 'routes'] as $key) {
+			foreach (['docker-install', 'translations_folder', 'routes', 'k8s-service-roles'] as $key) {
 				if (isset($appInfo[$key])) {
 					$appInfo['external-app'][$key] = $appInfo[$key];
 					unset($appInfo[$key]);
@@ -324,6 +324,20 @@ class ExAppService {
 					return $envVar['value'] !== '';
 				});
 				$appInfo['external-app']['environment-variables'] = $envVars;
+			}
+			if (isset($appInfo['external-app']['k8s-service-roles']['role'])) {
+				$roles = $appInfo['external-app']['k8s-service-roles']['role'];
+				if (!isset($roles[0])) {
+					$roles = [$roles];
+				}
+				$appInfo['external-app']['k8s-service-roles'] = array_map(function ($role) {
+					return [
+						'name' => (string)($role['name'] ?? ''),
+						'display-name' => (string)($role['display-name'] ?? $role['name'] ?? ''),
+						'env' => (string)($role['env'] ?? ''),
+						'expose' => filter_var($role['expose'] ?? 'false', FILTER_VALIDATE_BOOLEAN),
+					];
+				}, $roles);
 			}
 			if (isset($deployOptions['mounts'])) {
 				$appInfo['external-app']['mounts'] = $deployOptions['mounts'];
