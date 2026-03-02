@@ -309,7 +309,7 @@ class AppAPIService {
 					$this->logger->error(sprintf('Error getting path info. Error: %s', $e->getMessage()), ['exception' => $e]);
 					return false;
 				}
-				if (($this->sanitizeOcsRoute($path) !== '/apps/app_api/ex-app/state') && !$exApp->getEnabled()) {
+				if (!$exApp->getEnabled() && !$this->isExemptFromEnabledCheck($path, $exApp)) {
 					$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
 					return false;
 				}
@@ -368,6 +368,26 @@ class AppAPIService {
 		return $route;
 	}
 
+	/**
+	 * Check if the given path is exempt from the ExApp enabled check.
+	 * /ex-app/state is always exempt (query enabled state).
+	 * Init status endpoints are only exempt while the ExApp is actively being
+	 * installed or updated (status type set server-side by Register/Update commands),
+	 * preventing a disabled ExApp from re-enabling itself via set_init_status(100).
+	 */
+	private function isExemptFromEnabledCheck(string $path, ExApp $exApp): bool {
+		$sanitizedPath = $this->sanitizeOcsRoute($path);
+		if ($sanitizedPath === '/apps/app_api/ex-app/state') {
+			return true;
+		}
+		$status = $exApp->getStatus();
+		$isInitializing = in_array($status['type'] ?? '', ['install', 'update'], true);
+		if ($isInitializing && $sanitizedPath === '/apps/app_api/ex-app/status') {
+			return true;
+		}
+		return false;
+	}
+
 	private function getCustomLogger(string $name): LoggerInterface {
 		$path = $this->config->getSystemValue('datadirectory', \OC::$SERVERROOT . '/data') . '/' . $name;
 		return $this->logFactory->getCustomPsrLogger($path);
@@ -411,7 +431,11 @@ class AppAPIService {
 		}
 
 		$this->setAppInitProgress($exApp, 0);
-		$this->exAppService->enableExAppInternal($exApp);
+		if (!$this->exAppService->enableExAppInternal($exApp)) {
+			$this->logger->error(sprintf('Failed to enable ExApp %s before init dispatch', $exApp->getAppid()));
+			$this->setAppInitProgress($exApp, 0, 'Failed to enable ExApp before init');
+			return;
+		}
 		try {
 			$this->client->post($initUrl, $options);
 		} catch (\Exception $e) {
