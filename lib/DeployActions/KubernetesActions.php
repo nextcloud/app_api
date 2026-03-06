@@ -214,9 +214,11 @@ class KubernetesActions implements IDeployActions {
 	}
 
 	/**
-	 * Expose the appropriate role for a multi-role ExApp.
-	 * Only roles with expose=true get a K8s Service.
-	 * Returns the expose result for the first exposed role.
+	 * Expose the single entry-point role for a multi-role ExApp.
+	 *
+	 * Only one role per ExApp can be exposed because HaRP caches the upstream
+	 * by app_id alone (no role-aware routing). The first role with expose=true
+	 * is treated as the ExApp's entry point; remaining roles are internal-only.
 	 */
 	public function exposeExAppRoles(string $harpUrl, string $exAppName, int $port, array $k8sConfig, array $roles): array {
 		foreach ($roles as $role) {
@@ -224,11 +226,7 @@ class KubernetesActions implements IDeployActions {
 				continue;
 			}
 			$roleSuffix = $role['name'];
-			$result = $this->exposeExApp($harpUrl, $exAppName, $port, $k8sConfig, $roleSuffix);
-			if (isset($result['error'])) {
-				return $result;
-			}
-			return $result;
+			return $this->exposeExApp($harpUrl, $exAppName, $port, $k8sConfig, $roleSuffix);
 		}
 		return ['error' => 'No exposed roles found in k8s-service-roles configuration.'];
 	}

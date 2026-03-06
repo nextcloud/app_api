@@ -558,6 +558,12 @@ class AppAPIService {
 		return false;
 	}
 
+	/**
+	 * No explicit K8s branch needed: K8s daemons always have harp=true,
+	 * so ManualActions::resolveExAppUrl() returns {nextcloud_url}/exapps/{appId}
+	 * which is the same URL that KubernetesActions::resolveExAppUrl() would
+	 * return. HaRP's SPOE agent handles the actual K8s upstream resolution.
+	 */
 	public function getExAppUrl(ExApp $exApp, int $port, array &$auth): string {
 		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			return $this->dockerActions->resolveExAppUrl(
