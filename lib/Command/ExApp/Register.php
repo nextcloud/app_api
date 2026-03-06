@@ -169,6 +169,8 @@ class Register extends Command {
 		}
 
 		$auth = [];
+		$harpK8sUrl = null;
+		$k8sRoles = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
 			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
@@ -206,6 +208,8 @@ class Register extends Command {
 		} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
 			$deployParams = $this->kubernetesActions->buildDeployParams($daemonConfig, $appInfo);
 			$this->kubernetesActions->initGuzzleClient($daemonConfig);
+			$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
+			$k8sRoles = $deployParams['k8s_service_roles'] ?? [];
 			$deployResult = $this->kubernetesActions->deployExApp($exApp, $daemonConfig, $deployParams);
 			if ($deployResult) {
 				$this->logger->error(sprintf('ExApp %s K8s deployment failed. Error: %s', $appId, $deployResult));
@@ -213,17 +217,16 @@ class Register extends Command {
 					$output->writeln(sprintf('ExApp %s K8s deployment failed. Error: %s', $appId, $deployResult));
 				}
 				$this->exAppService->setStatusError($exApp, $deployResult);
+				$this->_removeK8sResources($harpK8sUrl, $appId, $k8sRoles);
 				$this->_unregisterExApp($appId, $isTestDeployMode);
 				return 1;
 			}
 
 			// For K8s, expose the ExApp (create Service) and get upstream endpoint
 			$k8sConfig = $daemonConfig->getDeployConfig()['kubernetes'] ?? [];
-			$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
-			$roles = $deployParams['k8s_service_roles'] ?? [];
-			if (!empty($roles)) {
+			if (!empty($k8sRoles)) {
 				$exposeResult = $this->kubernetesActions->exposeExAppRoles(
-					$harpK8sUrl, $appId, (int)$appInfo['port'], $k8sConfig, $roles
+					$harpK8sUrl, $appId, (int)$appInfo['port'], $k8sConfig, $k8sRoles
 				);
 			} else {
 				$exposeResult = $this->kubernetesActions->exposeExApp(
@@ -236,6 +239,7 @@ class Register extends Command {
 					$output->writeln(sprintf('ExApp %s K8s expose failed. Error: %s', $appId, $exposeResult['error']));
 				}
 				$this->exAppService->setStatusError($exApp, $exposeResult['error']);
+				$this->_removeK8sResources($harpK8sUrl, $appId, $k8sRoles);
 				$this->_unregisterExApp($appId, $isTestDeployMode);
 				return 1;
 			}
@@ -266,6 +270,10 @@ class Register extends Command {
 				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
 			}
 			$this->exAppService->setStatusError($exApp, 'Heartbeat check failed');
+			if ($harpK8sUrl !== null) {
+				$this->_removeK8sResources($harpK8sUrl, $appId, $k8sRoles);
+				$this->_unregisterExApp($appId, $isTestDeployMode);
+			}
 			return 1;
 		}
 		$this->logger->info(sprintf('ExApp %s deployed successfully.', $appId));
@@ -286,6 +294,17 @@ class Register extends Command {
 			$output->writeln(sprintf('ExApp %s successfully registered.', $appId));
 		}
 		return 0;
+	}
+
+	private function _removeK8sResources(string $harpK8sUrl, string $appId, array $roles): void {
+		if (!empty($roles)) {
+			$error = $this->kubernetesActions->removeAllRoles($harpK8sUrl, $appId, $roles);
+		} else {
+			$error = $this->kubernetesActions->removeExApp($harpK8sUrl, $appId);
+		}
+		if ($error) {
+			$this->logger->warning(sprintf('Failed to clean up K8s resources for %s: %s', $appId, $error));
+		}
 	}
 
 	private function _unregisterExApp(string $appId, bool $testDeployMode = false): void {
