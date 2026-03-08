@@ -33,6 +33,7 @@
     "Active apps" : "Aplicacions activas",
     "Disabled apps" : "Aplicacions desactivadas",
     "Updates" : "Mesas a jorn",
+    "Enable" : "Activar",
     "Disable" : "Desactivar"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }
