@@ -35,6 +35,7 @@ OC.L10N.register(
     "Active apps" : "Aplicacions activas",
     "Disabled apps" : "Aplicacions desactivadas",
     "Updates" : "Mesas a jorn",
+    "Enable" : "Activar",
     "Disable" : "Desactivar"
 },
 "nplurals=2; plural=(n > 1);");
