@@ -77,6 +77,11 @@ class KubernetesActions implements IDeployActions {
 		$harpUrl = $this->buildHarpK8sUrl($daemonConfig);
 		$this->initGuzzleClient($daemonConfig);
 
+		$pingError = $this->ping($daemonConfig);
+		if ($pingError !== '') {
+			return $pingError;
+		}
+
 		$roles = $params['k8s_service_roles'] ?? [];
 
 		if (empty($roles)) {
@@ -701,6 +706,42 @@ class KubernetesActions implements IDeployActions {
 			$url = substr($url, 0, -10);
 		}
 		return sprintf('%s/exapps/%s', $url, $appId);
+	}
+
+	/**
+	 * Pre-flight check: verify HaRP has a working Kubernetes backend.
+	 *
+	 * Calls GET /info and inspects the kubernetes status fields.
+	 * Returns empty string on success, actionable error message on failure.
+	 */
+	public function ping(DaemonConfig $daemonConfig): string {
+		$url = rtrim($daemonConfig->getProtocol() . '://' . $daemonConfig->getHost(), '/')
+			. '/exapps/app_api/info';
+		try {
+			$response = $this->guzzleClient->get($url, ['timeout' => 5]);
+			$data = json_decode((string)$response->getBody(), true);
+
+			$k8s = $data['kubernetes'] ?? null;
+			if ($k8s === null) {
+				return 'HaRP version is too old and does not report Kubernetes support. Please update HaRP.';
+			}
+			if (!($k8s['enabled'] ?? false)) {
+				return 'Kubernetes backend is disabled in HaRP. Set HP_K8S_ENABLED=true in HaRP configuration.';
+			}
+			if (!($k8s['reachable'] ?? false)) {
+				return sprintf(
+					'HaRP cannot reach the Kubernetes API server (%s). Check HP_K8S_API_SERVER, token, and network connectivity.',
+					$k8s['api_server'] ?? 'unknown'
+				);
+			}
+			return '';
+		} catch (GuzzleException $e) {
+			$this->logger->error(sprintf('K8s pre-flight check failed: %s', $e->getMessage()), ['exception' => $e]);
+			return sprintf('Cannot reach HaRP: %s', $e->getMessage());
+		} catch (Exception $e) {
+			$this->logger->error(sprintf('K8s pre-flight check failed: %s', $e->getMessage()), ['exception' => $e]);
+			return sprintf('K8s pre-flight check failed: %s', $e->getMessage());
+		}
 	}
 
 	public function buildHarpK8sUrl(DaemonConfig $daemonConfig): string {
