@@ -253,7 +253,7 @@ class Update extends Command {
 					$output->writeln(sprintf('ExApp %s K8s deployment update failed. Error: %s', $appId, $deployResult));
 				}
 				$this->exAppService->setStatusError($exApp, 'K8s deployment update failed');
-				$this->_removeK8sResources($harpK8sUrl, $appId, $k8sRoles);
+				$this->kubernetesActions->cleanupResources($harpK8sUrl, $appId, $k8sRoles);
 				return 1;
 			}
 
@@ -273,7 +273,7 @@ class Update extends Command {
 					$output->writeln(sprintf('ExApp %s K8s expose failed. Error: %s', $appId, $exposeResult['error']));
 				}
 				$this->exAppService->setStatusError($exApp, $exposeResult['error']);
-				$this->_removeK8sResources($harpK8sUrl, $appId, $k8sRoles);
+				$this->kubernetesActions->cleanupResources($harpK8sUrl, $appId, $k8sRoles);
 				return 1;
 			}
 
@@ -304,7 +304,7 @@ class Update extends Command {
 			}
 			$this->exAppService->setStatusError($exApp, 'Heartbeat check failed');
 			if ($harpK8sUrl !== null) {
-				$this->_removeK8sResources($harpK8sUrl, $appId, $k8sRoles);
+				$this->kubernetesActions->cleanupResources($harpK8sUrl, $appId, $k8sRoles);
 			}
 			return 1;
 		}
@@ -342,14 +342,4 @@ class Update extends Command {
 		return 0;
 	}
 
-	private function _removeK8sResources(string $harpK8sUrl, string $appId, array $roles): void {
-		if (!empty($roles)) {
-			$error = $this->kubernetesActions->removeAllRoles($harpK8sUrl, $appId, $roles);
-		} else {
-			$error = $this->kubernetesActions->removeExApp($harpK8sUrl, $appId);
-		}
-		if ($error) {
-			$this->logger->warning(sprintf('Failed to clean up K8s resources for %s: %s', $appId, $error));
-		}
-	}
 }

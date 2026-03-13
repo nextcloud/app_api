@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-FileCopyrightText: 2026 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
@@ -229,6 +229,22 @@ class KubernetesActions implements IDeployActions {
 			if ($error) {
 				$this->logger->warning(sprintf('Rollback: failed to remove role "%s" for "%s": %s', $roleSuffix, $exAppName, $error));
 			}
+		}
+	}
+
+	/**
+	 * Clean up K8s resources for an ExApp (Deployments, Services, etc.).
+	 *
+	 * Dispatches to removeAllRoles() or removeExApp() depending on whether roles are defined.
+	 */
+	public function cleanupResources(string $harpUrl, string $appId, array $roles): void {
+		if (!empty($roles)) {
+			$error = $this->removeAllRoles($harpUrl, $appId, $roles);
+		} else {
+			$error = $this->removeExApp($harpUrl, $appId);
+		}
+		if ($error) {
+			$this->logger->warning(sprintf('Failed to clean up K8s resources for %s: %s', $appId, $error));
 		}
 	}
 
