@@ -166,6 +166,7 @@ class KubernetesActions implements IDeployActions {
 
 		$this->exAppService->setAppDeployProgress($exApp, 20);
 
+		$deployedRoles = [];
 		$roleIndex = 0;
 		foreach ($roles as $role) {
 			$roleSuffix = $role['name'];
@@ -180,11 +181,14 @@ class KubernetesActions implements IDeployActions {
 
 			$error = $this->createExApp($harpUrl, $exAppName, $instanceId, $roleParams, $roleSuffix);
 			if ($error) {
+				$this->rollbackDeployedRoles($harpUrl, $exAppName, $deployedRoles);
 				return $error;
 			}
+			$deployedRoles[] = $roleSuffix;
 
 			$error = $this->startExApp($harpUrl, $exAppName, roleSuffix: $roleSuffix);
 			if ($error) {
+				$this->rollbackDeployedRoles($harpUrl, $exAppName, $deployedRoles);
 				return $error;
 			}
 
@@ -205,12 +209,22 @@ class KubernetesActions implements IDeployActions {
 		foreach ($roles as $role) {
 			$roleSuffix = $role['name'];
 			if (!$this->waitExAppStart($harpUrl, $exAppName, $roleSuffix)) {
+				$this->rollbackDeployedRoles($harpUrl, $exAppName, array_column($roles, 'name'));
 				return sprintf('Kubernetes Pod startup failed for role "%s"', $roleSuffix);
 			}
 		}
 
 		$this->exAppService->setAppDeployProgress($exApp, 100);
 		return '';
+	}
+
+	private function rollbackDeployedRoles(string $harpUrl, string $exAppName, array $roleSuffixes): void {
+		foreach ($roleSuffixes as $roleSuffix) {
+			$error = $this->removeExApp($harpUrl, $exAppName, removeData: false, roleSuffix: $roleSuffix);
+			if ($error) {
+				$this->logger->warning(sprintf('Rollback: failed to remove role "%s" for "%s": %s', $roleSuffix, $exAppName, $error));
+			}
+		}
 	}
 
 	/**
