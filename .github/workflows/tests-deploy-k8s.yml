@@ -84,7 +84,6 @@ jobs:
             --admin-user admin --admin-pass admin
           ./occ config:system:set loglevel --value=0 --type=integer
           ./occ config:system:set debug --value=true --type=boolean
-          ./occ config:system:set overwrite.cli.url --value http://127.0.0.1 --type=string
           ./occ app:enable --force ${{ env.APP_NAME }}
 
       - name: Install k3s
@@ -97,6 +96,14 @@ jobs:
         run: |
           kubectl wait --for=condition=Ready node --all --timeout=120s
           kubectl create namespace nextcloud-exapps
+          NODE_IP=$(kubectl get node -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+          echo "NODE_IP=${NODE_IP}" >> $GITHUB_ENV
+          echo "k3s node IP: $NODE_IP"
+
+      - name: Configure Nextcloud for k3s networking
+        run: |
+          ./occ config:system:set overwrite.cli.url --value "http://${{ env.NODE_IP }}" --type=string
+          ./occ config:system:set trusted_domains 1 --value "${{ env.NODE_IP }}"
 
       - name: Create K8s service account for HaRP
         run: |
@@ -119,7 +126,7 @@ jobs:
         run: |
           docker run --net host --name appapi-harp \
             -e HP_SHARED_KEY="${{ env.HP_SHARED_KEY }}" \
-            -e NC_INSTANCE_URL="http://127.0.0.1" \
+            -e NC_INSTANCE_URL="http://${{ env.NODE_IP }}" \
             -e HP_LOG_LEVEL="debug" \
             -e HP_K8S_ENABLED="true" \
             -e HP_K8S_API_SERVER="https://127.0.0.1:6443" \
@@ -136,12 +143,12 @@ jobs:
             -d nginx
 
       - name: Start Nextcloud
-        run: PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 0.0.0.0:8080 &
 
       - name: Wait for HaRP K8s readiness
         run: |
           for i in $(seq 1 30); do
-            if curl -sf http://127.0.0.1:8780/exapps/app_api/info \
+            if curl -sf http://${{ env.NODE_IP }}:8780/exapps/app_api/info \
                 -H "harp-shared-key: ${{ env.HP_SHARED_KEY }}" 2>/dev/null | grep -q '"kubernetes"'; then
               echo "HaRP is ready with K8s backend"
               exit 0
@@ -156,8 +163,8 @@ jobs:
       - name: Register K8s daemon
         run: |
           ./occ app_api:daemon:register \
-            k8s_test "K8s Test" "kubernetes-install" "http" "127.0.0.1:8780" "http://127.0.0.1" \
-            --harp --harp_shared_key "${{ env.HP_SHARED_KEY }}" --harp_frp_address "127.0.0.1:8782" \
+            k8s_test "K8s Test" "kubernetes-install" "http" "${{ env.NODE_IP }}:8780" "http://${{ env.NODE_IP }}" \
+            --harp --harp_shared_key "${{ env.HP_SHARED_KEY }}" --harp_frp_address "${{ env.NODE_IP }}:8782" \
             --k8s --k8s_expose_type=nodeport --set-default
           ./occ app_api:daemon:list
 
