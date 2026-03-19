@@ -114,8 +114,7 @@ def ensure_manual_service(app_name="app-skeleton-python", port=23000):
         ["kubectl", "-n", K8S_NAMESPACE, "apply", "-f", "-"],
         input=manifest.encode(), stdout=PIPE, stderr=PIPE,
     )
-    if r.returncode != 0:
-        print(f"\n    WARNING: Failed to create manual Service: {r.stderr.decode()}", end=" ")
+    assert r.returncode == 0, f"Failed to create operator Service {svc_name}: {r.stderr.decode()}"
 
 
 # =============================================================================
