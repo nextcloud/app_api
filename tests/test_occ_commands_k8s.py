@@ -9,6 +9,7 @@ Requires: Nextcloud with AppAPI enabled, k3s, HaRP with K8s backend, nginx proxy
 See .github/workflows/tests-deploy-k8s.yml for CI setup.
 """
 import json
+import os
 from subprocess import DEVNULL, PIPE, TimeoutExpired, run
 
 SKELETON_XML_URL = (
@@ -16,6 +17,12 @@ SKELETON_XML_URL = (
 )
 K8S_DAEMON_NAME = "k8s_test"
 K8S_NAMESPACE = "nextcloud-exapps"
+
+# Expose-type awareness: set K8S_EXPOSE_TYPE=manual in CI to run manual tests.
+EXPOSE_TYPE = os.environ.get("K8S_EXPOSE_TYPE", "nodeport")
+IS_MANUAL = EXPOSE_TYPE == "manual"
+# Fixed ClusterIP used for operator-created Services in manual tests.
+MANUAL_CLUSTER_IP = os.environ.get("MANUAL_CLUSTER_IP", "10.43.200.200")
 
 # Separate daemon name for validation tests to avoid interfering with the deploy daemon
 K8S_VALIDATION_DAEMON = "k8s_validation"
@@ -80,6 +87,35 @@ def unregister_k8s_daemon(name=None):
 def cleanup_k8s_daemon():
     """Ensure no leftover validation daemon from previous test."""
     unregister_k8s_daemon(K8S_VALIDATION_DAEMON)
+
+
+def ensure_manual_service(app_name="app-skeleton-python", port=23000):
+    """Pre-create a ClusterIP Service for manual expose type testing.
+
+    For manual expose, HaRP does not create a K8s Service — the operator
+    manages networking.  This simulates the operator creating a Service
+    before deploying the ExApp.  Uses a fixed ClusterIP so it survives
+    delete/re-create cycles with the same daemon upstream_host.
+    """
+    if not IS_MANUAL:
+        return
+    svc_name = f"nc-app-{app_name}"
+    manifest = json.dumps({
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {"name": svc_name, "namespace": K8S_NAMESPACE},
+        "spec": {
+            "clusterIP": MANUAL_CLUSTER_IP,
+            "selector": {"app": svc_name},
+            "ports": [{"name": "http", "port": port, "targetPort": port}],
+        },
+    })
+    r = run(
+        ["kubectl", "-n", K8S_NAMESPACE, "apply", "-f", "-"],
+        input=manifest.encode(), stdout=PIPE, stderr=PIPE,
+    )
+    if r.returncode != 0:
+        print(f"\n    WARNING: Failed to create manual Service: {r.stderr.decode()}", end=" ")
 
 
 # =============================================================================
@@ -267,6 +303,8 @@ def run_validation_tests():
 def test_k8s_single_deploy():
     """Deploy a single-role ExApp via K8s."""
     print("  test_k8s_single_deploy...", end=" ", flush=True)
+    ensure_manual_service()
+
     # Register app
     r = occ(
         f"app_api:app:register app-skeleton-python {K8S_DAEMON_NAME}"
@@ -280,8 +318,9 @@ def test_k8s_single_deploy():
     deploy_output = kubectl_output("get deploy -o name")
     assert "app-skeleton-python" in deploy_output, f"No deployment found: {deploy_output}"
 
-    svc_output = kubectl_output("get svc -o name")
-    assert "app-skeleton-python" in svc_output, f"No service found: {svc_output}"
+    if not IS_MANUAL:
+        svc_output = kubectl_output("get svc -o name")
+        assert "app-skeleton-python" in svc_output, f"No service found: {svc_output}"
 
     pvc_output = kubectl_output("get pvc -o name")
     assert "app-skeleton-python" in pvc_output, f"No PVC found: {pvc_output}"
@@ -330,8 +369,9 @@ def test_k8s_single_unregister_keep_data():
     deploy_output = kubectl_output("get deploy -o name", check=False)
     assert "app-skeleton-python" not in deploy_output, f"Deployment still exists: {deploy_output}"
 
-    svc_output = kubectl_output("get svc -o name", check=False)
-    assert "app-skeleton-python" not in svc_output, f"Service still exists: {svc_output}"
+    if not IS_MANUAL:
+        svc_output = kubectl_output("get svc -o name", check=False)
+        assert "app-skeleton-python" not in svc_output, f"Service still exists: {svc_output}"
 
     # PVC should still exist (default keeps data)
     pvc_output = kubectl_output("get pvc -o name", check=False)
@@ -345,6 +385,7 @@ def test_k8s_single_unregister_keep_data():
 def test_k8s_single_deploy_rm_data():
     """Deploy then unregister with --rm-data removes PVC too."""
     print("  test_k8s_single_deploy_rm_data...", end=" ", flush=True)
+    ensure_manual_service()
 
     # Deploy again
     r = occ(
@@ -434,10 +475,11 @@ def test_k8s_multi_deploy():
     deploy_names = [line for line in deploy_output.strip().split("\n") if "app-skeleton-python" in line]
     assert len(deploy_names) >= 2, f"Expected 2 deployments, got {len(deploy_names)}: {deploy_output}"
 
-    # Verify 1 Service (only the api role with expose=true)
-    svc_output = kubectl_output("get svc -o name")
-    svc_names = [line for line in svc_output.strip().split("\n") if "app-skeleton-python" in line]
-    assert len(svc_names) == 1, f"Expected 1 service (exposed role only), got {len(svc_names)}: {svc_output}"
+    # Verify Service (only the api role with expose=true)
+    if not IS_MANUAL:
+        svc_output = kubectl_output("get svc -o name")
+        svc_names = [line for line in svc_output.strip().split("\n") if "app-skeleton-python" in line]
+        assert len(svc_names) == 1, f"Expected 1 service (exposed role only), got {len(svc_names)}: {svc_output}"
 
     # Verify in AppAPI
     list_output = occ_output("app_api:app:list")
@@ -486,13 +528,17 @@ def test_k8s_multi_unregister():
     assert "app-skeleton-python" not in deploy_output, f"Deployments still exist: {deploy_output}"
 
     # Service gone
-    svc_output = kubectl_output("get svc -o name", check=False)
-    assert "app-skeleton-python" not in svc_output, f"Service still exists: {svc_output}"
+    if not IS_MANUAL:
+        svc_output = kubectl_output("get svc -o name", check=False)
+        assert "app-skeleton-python" not in svc_output, f"Service still exists: {svc_output}"
     print("OK")
 
 
 def run_multi_role_tests():
     """Group C: multi-role lifecycle."""
+    if IS_MANUAL:
+        print("\n=== Group C: Skipped (multi-role + manual not supported yet) ===\n")
+        return
     print("\n=== Group C: K8s Multi-Role Deploy Lifecycle ===")
     test_k8s_multi_deploy()
     # Skip enable/disable for multi-role: app-skeleton-python exits after init
@@ -552,6 +598,7 @@ def test_k8s_deploy_bad_image():
 def test_k8s_unregister_force():
     """--force unregister works even when K8s resources are already gone."""
     print("  test_k8s_unregister_force...", end=" ", flush=True)
+    ensure_manual_service()
 
     # Deploy
     r = occ(
@@ -606,8 +653,9 @@ def run_failure_tests():
 # =============================================================================
 
 if __name__ == "__main__":
+    print(f"K8s expose type: {EXPOSE_TYPE}")
     run_validation_tests()
     run_single_role_tests()
     run_multi_role_tests()
     run_failure_tests()
-    print("All K8s tests passed!")
+    print(f"All K8s tests passed! (expose_type={EXPOSE_TYPE})")

@@ -1,6 +1,16 @@
 # SPDX-FileCopyrightText: 2026 Nextcloud GmbH and Nextcloud contributors
 # SPDX-License-Identifier: MIT
-name: Tests - K8s Deploy (NodePort)
+#
+# K8s Manual expose type tests.
+#
+# Manual expose means the operator manages K8s networking (Services, Ingress,
+# etc.) themselves.  HaRP creates the Deployment but does NOT create a Service.
+# This workflow tests the deploy lifecycle with operator-managed Services.
+#
+# NOTE: Requires HaRP with manual-expose annotation persistence support.
+# Once merged into HaRP main and released, switch to the prebuilt image.
+#
+name: Tests - K8s Deploy (Manual)
 
 on:
   pull_request:
@@ -13,16 +23,17 @@ permissions:
   contents: read
 
 concurrency:
-  group: tests-deploy-k8s-${{ github.head_ref || github.run_id }}
+  group: tests-deploy-k8s-manual-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 env:
   HP_SHARED_KEY: 'test_shared_key_12345'
+  MANUAL_CLUSTER_IP: '10.43.200.200'
 
 jobs:
-  k8s-deploy-nodeport:
+  k8s-deploy-manual:
     runs-on: ubuntu-22.04
-    name: K8s Deploy Lifecycle (NodePort)
+    name: K8s Deploy Lifecycle (Manual)
 
     services:
       postgres:
@@ -117,10 +128,18 @@ jobs:
       - name: Pre-pull ExApp image into k3s
         run: sudo k3s ctr images pull ghcr.io/nextcloud/app-skeleton-python:latest
 
-      - name: Pull HaRP image
-        run: |
-          docker pull ghcr.io/nextcloud/nextcloud-appapi-harp:latest
-          docker tag ghcr.io/nextcloud/nextcloud-appapi-harp:latest harp:test
+      # Build HaRP from fix branch (manual expose annotation support).
+      # TODO: switch to prebuilt image once HaRP fix/k8s-manual-expose-persistence is released.
+      - name: Checkout HaRP
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          repository: nextcloud/HaRP
+          ref: fix/k8s-manual-expose-persistence
+          path: harp-src
+
+      - name: Build HaRP image
+        run: docker build -t harp:test harp-src/
 
       - name: Start HaRP with K8s backend
         run: |
@@ -160,15 +179,18 @@ jobs:
           docker logs appapi-harp
           exit 1
 
-      - name: Register K8s daemon
+      - name: Register K8s daemon (manual expose)
         run: |
           ./occ app_api:daemon:register \
             k8s_test "K8s Test" "kubernetes-install" "http" "${{ env.NODE_IP }}:8780" "http://${{ env.NODE_IP }}" \
             --harp --harp_shared_key "${{ env.HP_SHARED_KEY }}" --harp_frp_address "${{ env.NODE_IP }}:8782" \
-            --k8s --k8s_expose_type=nodeport --set-default
+            --k8s --k8s_expose_type=manual --k8s_upstream_host=${{ env.MANUAL_CLUSTER_IP }} --set-default
           ./occ app_api:daemon:list
 
-      - name: Run K8s integration tests
+      - name: Run K8s integration tests (manual)
+        env:
+          K8S_EXPOSE_TYPE: manual
+          MANUAL_CLUSTER_IP: ${{ env.MANUAL_CLUSTER_IP }}
         run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_k8s.py
 
       - name: Collect HaRP logs
@@ -194,7 +216,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
-          name: k8s_deploy_nodeport_harp.log
+          name: k8s_deploy_manual_harp.log
           path: harp.log
           if-no-files-found: warn
 
@@ -202,7 +224,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
-          name: k8s_deploy_nodeport_resources.txt
+          name: k8s_deploy_manual_resources.txt
           path: |
             k8s-resources.txt
             k8s-pods-describe.txt
@@ -212,7 +234,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
-          name: k8s_deploy_nodeport_nextcloud.log
+          name: k8s_deploy_manual_nextcloud.log
           path: data/nextcloud.log
           if-no-files-found: warn
 
@@ -220,7 +242,7 @@ jobs:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [k8s-deploy-nodeport]
-    name: K8s-NodePort-Tests-OK
+    needs: [k8s-deploy-manual]
+    name: K8s-Manual-Tests-OK
     steps:
-      - run: echo "K8s NodePort tests passed successfully"
+      - run: echo "K8s Manual expose tests passed successfully"
