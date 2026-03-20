@@ -10,6 +10,7 @@ See .github/workflows/tests-deploy-k8s.yml for CI setup.
 """
 import json
 import os
+import time
 from subprocess import DEVNULL, PIPE, TimeoutExpired, run
 
 SKELETON_XML_URL = (
@@ -329,7 +330,7 @@ def test_k8s_single_deploy():
         svc_output = kubectl_output("get svc -o name")
         assert "app-skeleton-python" in svc_output, f"No service found: {svc_output}"
 
-        # Verify Service type matches the expose type
+        # Verify Service type and managed-by label
         expected_type = EXPECTED_SVC_TYPE.get(EXPOSE_TYPE)
         if expected_type:
             svc_json = kubectl_output("get svc -l app.kubernetes.io/component=exapp -o json")
@@ -340,6 +341,12 @@ def test_k8s_single_deploy():
                     actual_type = item["spec"].get("type", "ClusterIP")
                     assert actual_type == expected_type, (
                         f"Service type mismatch: expected {expected_type}, got {actual_type}"
+                    )
+                    managed_by = item["metadata"].get("labels", {}).get(
+                        "app.kubernetes.io/managed-by"
+                    )
+                    assert managed_by == "harp", (
+                        f"Service missing managed-by=harp label, got: {managed_by}"
                     )
                     found = True
                     break
@@ -368,9 +375,14 @@ def test_k8s_single_enable_disable():
     # Verify replicas=0
     deploy_json = kubectl_output("get deploy -l app.kubernetes.io/component=exapp -o json", check=False)
     data = json.loads(deploy_json)
-    if data.get("items"):
-        replicas = data["items"][0]["spec"].get("replicas", -1)
-        assert replicas == 0, f"Expected 0 replicas after disable, got {replicas}"
+    items = data.get("items", [])
+    assert items, "No deployments found after disable — label selector returned empty list"
+    replicas = items[0]["spec"].get("replicas", -1)
+    assert replicas == 0, f"Expected 0 replicas after disable, got {replicas}"
+
+    # Verify AppAPI shows disabled
+    list_output = occ_output("app_api:app:list")
+    assert "disabled" in list_output, f"Expected 'disabled' in app list after disable: {list_output}"
 
     # Re-enable
     r = occ("app_api:app:enable app-skeleton-python", check=False, timeout=300)
@@ -379,9 +391,14 @@ def test_k8s_single_enable_disable():
     # Verify replicas=1
     deploy_json = kubectl_output("get deploy -l app.kubernetes.io/component=exapp -o json", check=False)
     data = json.loads(deploy_json)
-    if data.get("items"):
-        replicas = data["items"][0]["spec"].get("replicas", -1)
-        assert replicas == 1, f"Expected 1 replica after enable, got {replicas}"
+    items = data.get("items", [])
+    assert items, "No deployments found after enable — label selector returned empty list"
+    replicas = items[0]["spec"].get("replicas", -1)
+    assert replicas == 1, f"Expected 1 replica after enable, got {replicas}"
+
+    # Verify AppAPI shows enabled
+    list_output = occ_output("app_api:app:list")
+    assert "enabled" in list_output, f"Expected 'enabled' in app list after enable: {list_output}"
     print("OK")
 
 
@@ -429,15 +446,13 @@ def test_k8s_single_deploy_rm_data():
     # PVC removal is requested via remove_data=true in the payload to HaRP.
     # K8s pvc-protection finalizer may delay actual deletion until pod terminates.
     # Wait briefly then check.
-    import time
     time.sleep(5)
     pvc_output = kubectl_output("get pvc -o name", check=False)
     # Note: PVC may still exist with a deletion timestamp (terminating).
     # Check that it's either gone or marked for deletion.
     if "app-skeleton-python" in pvc_output:
         pvc_json = kubectl_output("get pvc -o json", check=False)
-        import json as _json
-        data = _json.loads(pvc_json)
+        data = json.loads(pvc_json)
         for item in data.get("items", []):
             if "app-skeleton-python" in item["metadata"]["name"]:
                 deletion_ts = item["metadata"].get("deletionTimestamp")
@@ -543,7 +558,9 @@ def test_k8s_multi_enable_disable():
     # Verify all deployments scaled to 0
     deploy_json = kubectl_output("get deploy -l app.kubernetes.io/component=exapp -o json", check=False)
     data = json.loads(deploy_json)
-    for item in data.get("items", []):
+    items = data.get("items", [])
+    assert len(items) >= 2, f"Expected 2+ deployments after disable, got {len(items)}"
+    for item in items:
         replicas = item["spec"].get("replicas", -1)
         name = item["metadata"]["name"]
         assert replicas == 0, f"Expected 0 replicas for {name} after disable, got {replicas}"
@@ -555,7 +572,9 @@ def test_k8s_multi_enable_disable():
     # Verify all deployments scaled to 1
     deploy_json = kubectl_output("get deploy -l app.kubernetes.io/component=exapp -o json", check=False)
     data = json.loads(deploy_json)
-    for item in data.get("items", []):
+    items = data.get("items", [])
+    assert len(items) >= 2, f"Expected 2+ deployments after enable, got {len(items)}"
+    for item in items:
         replicas = item["spec"].get("replicas", -1)
         name = item["metadata"]["name"]
         assert replicas == 1, f"Expected 1 replica for {name} after enable, got {replicas}"
@@ -586,10 +605,7 @@ def run_multi_role_tests():
         return
     print("\n=== Group C: K8s Multi-Role Deploy Lifecycle ===")
     test_k8s_multi_deploy()
-    # Skip enable/disable for multi-role: app-skeleton-python exits after init
-    # (pod enters 'Succeeded' phase), which waitExAppStart treats as failure.
-    # The enable/disable K8s code path (startAllRoles/stopAllRoles) is already
-    # tested in Group B with single-role — same code, just iterates roles.
+    test_k8s_multi_enable_disable()
     test_k8s_multi_unregister()
     print("=== Group C: All multi-role tests passed ===\n")
 
@@ -636,6 +652,12 @@ def test_k8s_deploy_bad_image():
     if not IS_MANUAL:
         svc_output = kubectl_output("get svc -o name", check=False)
         assert "bad-image-test" not in svc_output, f"Leftover service found: {svc_output}"
+
+    # Verify cleanup: no leftover PVCs for bad-image-test
+    pvc_output = kubectl_output("get pvc -o name", check=False)
+    if "bad-image-test" in pvc_output:
+        print("WARN: leftover PVC found, cleaning up ", end="")
+        kubectl("delete pvc --all", check=False)
 
     # Verify not in AppAPI list
     list_output = occ_output("app_api:app:list", check=False)
