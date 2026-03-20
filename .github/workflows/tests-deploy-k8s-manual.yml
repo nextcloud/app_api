@@ -191,6 +191,7 @@ jobs:
         env:
           K8S_EXPOSE_TYPE: manual
           MANUAL_CLUSTER_IP: ${{ env.MANUAL_CLUSTER_IP }}
+          HARP_HAS_MANAGED_BY_LABEL: "true"
         run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_k8s.py
 
       - name: Collect HaRP logs

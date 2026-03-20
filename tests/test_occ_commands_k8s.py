@@ -33,6 +33,10 @@ EXPECTED_SVC_TYPE = {
     "loadbalancer": "LoadBalancer",
 }
 
+# Whether the HaRP version under test supports managed-by labels on Services.
+# ClusterIP and Manual workflows build from the fix branch; NodePort uses prebuilt.
+HARP_HAS_MANAGED_BY_LABEL = os.environ.get("HARP_HAS_MANAGED_BY_LABEL", "false") == "true"
+
 # Separate daemon name for validation tests to avoid interfering with the deploy daemon
 K8S_VALIDATION_DAEMON = "k8s_validation"
 
@@ -342,12 +346,13 @@ def test_k8s_single_deploy():
                     assert actual_type == expected_type, (
                         f"Service type mismatch: expected {expected_type}, got {actual_type}"
                     )
-                    managed_by = item["metadata"].get("labels", {}).get(
-                        "app.kubernetes.io/managed-by"
-                    )
-                    assert managed_by == "harp", (
-                        f"Service missing managed-by=harp label, got: {managed_by}"
-                    )
+                    if HARP_HAS_MANAGED_BY_LABEL:
+                        managed_by = item["metadata"].get("labels", {}).get(
+                            "app.kubernetes.io/managed-by"
+                        )
+                        assert managed_by == "harp", (
+                            f"Service missing managed-by=harp label, got: {managed_by}"
+                        )
                     found = True
                     break
             assert found, (
