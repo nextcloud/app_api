@@ -117,10 +117,18 @@ jobs:
       - name: Pre-pull ExApp image into k3s
         run: sudo k3s ctr images pull ghcr.io/nextcloud/app-skeleton-python:latest
 
-      - name: Pull HaRP image
-        run: |
-          docker pull ghcr.io/nextcloud/nextcloud-appapi-harp:latest
-          docker tag ghcr.io/nextcloud/nextcloud-appapi-harp:latest harp:test
+      # Build HaRP from fix branch (K8s fixes: ClusterIP resolution, managed-by labels, Succeeded phase).
+      # TODO: switch to prebuilt image once HaRP fix/k8s-manual-expose-persistence is released.
+      - name: Checkout HaRP
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          repository: nextcloud/HaRP
+          ref: fix/k8s-manual-expose-persistence
+          path: harp-src
+
+      - name: Build HaRP image
+        run: docker build -t harp:test harp-src/
 
       - name: Start HaRP with K8s backend
         run: |
@@ -171,6 +179,7 @@ jobs:
       - name: Run K8s integration tests
         env:
           K8S_EXPOSE_TYPE: nodeport
+          HARP_HAS_MANAGED_BY_LABEL: "true"
         run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_k8s.py
 
       - name: Collect HaRP logs
