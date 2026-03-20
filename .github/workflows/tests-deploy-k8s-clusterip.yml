@@ -8,9 +8,6 @@
 # works when HaRP runs outside the cluster (e.g. Docker on the host) because
 # kube-proxy makes ClusterIPs routable via iptables/ipvs.
 #
-# NOTE: Requires HaRP with ClusterIP address resolution fix.
-# Once merged into HaRP main and released, switch to the prebuilt image.
-#
 name: Tests - K8s Deploy (ClusterIP)
 
 on:
@@ -128,18 +125,8 @@ jobs:
       - name: Pre-pull ExApp image into k3s
         run: sudo k3s ctr images pull ghcr.io/nextcloud/app-skeleton-python:latest
 
-      # Build HaRP from fix branch (ClusterIP address resolution fix).
-      # TODO: switch to prebuilt image once HaRP fix/k8s-manual-expose-persistence is released.
-      - name: Checkout HaRP
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-          repository: nextcloud/HaRP
-          ref: fix/k8s-manual-expose-persistence
-          path: harp-src
-
-      - name: Build HaRP image
-        run: docker build -t harp:test harp-src/
+      - name: Pull HaRP image
+        run: docker pull ghcr.io/nextcloud/nextcloud-appapi-harp:latest
 
       - name: Start HaRP with K8s backend
         run: |
@@ -153,7 +140,7 @@ jobs:
             -e HP_K8S_NAMESPACE="nextcloud-exapps" \
             -e HP_K8S_VERIFY_SSL="false" \
             --restart unless-stopped \
-            -d harp:test
+            -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
 
       - name: Start nginx proxy
         run: |
@@ -190,7 +177,6 @@ jobs:
       - name: Run K8s integration tests (ClusterIP)
         env:
           K8S_EXPOSE_TYPE: clusterip
-          HARP_HAS_MANAGED_BY_LABEL: "true"
         run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_k8s.py
 
       - name: Collect HaRP logs
