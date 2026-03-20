@@ -18,11 +18,19 @@ SKELETON_XML_URL = (
 K8S_DAEMON_NAME = "k8s_test"
 K8S_NAMESPACE = "nextcloud-exapps"
 
-# Expose-type awareness: set K8S_EXPOSE_TYPE=manual in CI to run manual tests.
+# Expose-type awareness: set K8S_EXPOSE_TYPE in CI to select the expose type under test.
 EXPOSE_TYPE = os.environ.get("K8S_EXPOSE_TYPE", "nodeport")
 IS_MANUAL = EXPOSE_TYPE == "manual"
+IS_CLUSTERIP = EXPOSE_TYPE == "clusterip"
 # Fixed ClusterIP used for operator-created Services in manual tests.
 MANUAL_CLUSTER_IP = os.environ.get("MANUAL_CLUSTER_IP", "10.43.200.200")
+
+# Expected K8s Service type per expose type (manual creates no HaRP-managed Service).
+EXPECTED_SVC_TYPE = {
+    "nodeport": "NodePort",
+    "clusterip": "ClusterIP",
+    "loadbalancer": "LoadBalancer",
+}
 
 # Separate daemon name for validation tests to avoid interfering with the deploy daemon
 K8S_VALIDATION_DAEMON = "k8s_validation"
@@ -321,6 +329,25 @@ def test_k8s_single_deploy():
         svc_output = kubectl_output("get svc -o name")
         assert "app-skeleton-python" in svc_output, f"No service found: {svc_output}"
 
+        # Verify Service type matches the expose type
+        expected_type = EXPECTED_SVC_TYPE.get(EXPOSE_TYPE)
+        if expected_type:
+            svc_json = kubectl_output("get svc -l app.kubernetes.io/component=exapp -o json")
+            svc_data = json.loads(svc_json)
+            found = False
+            for item in svc_data.get("items", []):
+                if "app-skeleton-python" in item["metadata"]["name"]:
+                    actual_type = item["spec"].get("type", "ClusterIP")
+                    assert actual_type == expected_type, (
+                        f"Service type mismatch: expected {expected_type}, got {actual_type}"
+                    )
+                    found = True
+                    break
+            assert found, (
+                f"Service with 'app-skeleton-python' not found via label selector "
+                f"app.kubernetes.io/component=exapp; services: {svc_data.get('items', [])}"
+            )
+
     pvc_output = kubectl_output("get pvc -o name")
     assert "app-skeleton-python" in pvc_output, f"No PVC found: {pvc_output}"
 
@@ -480,6 +507,25 @@ def test_k8s_multi_deploy():
         svc_names = [line for line in svc_output.strip().split("\n") if "app-skeleton-python" in line]
         assert len(svc_names) == 1, f"Expected 1 service (exposed role only), got {len(svc_names)}: {svc_output}"
 
+        # Verify Service type matches the expose type
+        expected_type = EXPECTED_SVC_TYPE.get(EXPOSE_TYPE)
+        if expected_type:
+            svc_json = kubectl_output("get svc -l app.kubernetes.io/component=exapp -o json")
+            svc_data = json.loads(svc_json)
+            found = False
+            for item in svc_data.get("items", []):
+                if "app-skeleton-python" in item["metadata"]["name"]:
+                    actual_type = item["spec"].get("type", "ClusterIP")
+                    assert actual_type == expected_type, (
+                        f"Multi-role Service type mismatch: expected {expected_type}, got {actual_type}"
+                    )
+                    found = True
+                    break
+            assert found, (
+                f"Multi-role Service with 'app-skeleton-python' not found via label selector; "
+                f"services: {svc_data.get('items', [])}"
+            )
+
     # Verify in AppAPI
     list_output = occ_output("app_api:app:list")
     assert "app-skeleton-python" in list_output, f"App not in list: {list_output}"
@@ -585,6 +631,11 @@ def test_k8s_deploy_bad_image():
     # Verify cleanup: no leftover K8s deployments for bad-image-test
     deploy_output = kubectl_output("get deploy -o name", check=False)
     assert "bad-image-test" not in deploy_output, f"Leftover deployment found: {deploy_output}"
+
+    # Verify cleanup: no leftover K8s Services for bad-image-test
+    if not IS_MANUAL:
+        svc_output = kubectl_output("get svc -o name", check=False)
+        assert "bad-image-test" not in svc_output, f"Leftover service found: {svc_output}"
 
     # Verify not in AppAPI list
     list_output = occ_output("app_api:app:list", check=False)
