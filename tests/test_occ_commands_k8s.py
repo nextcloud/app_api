@@ -402,6 +402,83 @@ def test_k8s_single_enable_disable():
     print("OK")
 
 
+def test_k8s_single_update():
+    """Update a single-role K8s ExApp to a new version."""
+    print("  test_k8s_single_update...", end=" ", flush=True)
+
+    # Get current version from app list
+    list_output = occ_output("app_api:app:list")
+    assert "app-skeleton-python" in list_output, f"App not in list before update: {list_output}"
+
+    # Build update JSON with a higher version (same image, bumped version)
+    update_json = json.dumps({
+        "id": "app-skeleton-python",
+        "name": "App Skeleton Python",
+        "version": "99.0.0",
+        "docker-install": {
+            "registry": "ghcr.io",
+            "image": "nextcloud/app-skeleton-python",
+            "image-tag": "latest",
+        },
+    })
+
+    r = run(
+        [
+            "php", "occ", "--no-warnings", "app_api:app:update",
+            "app-skeleton-python",
+            "--json-info", update_json,
+            "--wait-finish",
+        ],
+        stdout=PIPE, stderr=PIPE, timeout=600,
+    )
+    assert r.returncode == 0, f"Update failed (exit {r.returncode}): {r.stdout.decode()}"
+
+    # Verify version changed
+    list_output = occ_output("app_api:app:list")
+    assert "99.0.0" in list_output, f"Expected version 99.0.0 in app list: {list_output}"
+
+    # Verify K8s resources still exist
+    deploy_output = kubectl_output("get deploy -o name")
+    assert "app-skeleton-python" in deploy_output, f"No deployment after update: {deploy_output}"
+
+    if not IS_MANUAL:
+        svc_output = kubectl_output("get svc -o name")
+        assert "app-skeleton-python" in svc_output, f"No service after update: {svc_output}"
+
+    # Verify app is enabled after update
+    assert "enabled" in list_output, f"App not enabled after update: {list_output}"
+    print("OK")
+
+
+def test_k8s_single_update_same_version():
+    """Update with the same version should be a no-op."""
+    print("  test_k8s_single_update_same_version...", end=" ", flush=True)
+
+    same_json = json.dumps({
+        "id": "app-skeleton-python",
+        "name": "App Skeleton Python",
+        "version": "99.0.0",
+        "docker-install": {
+            "registry": "ghcr.io",
+            "image": "nextcloud/app-skeleton-python",
+            "image-tag": "latest",
+        },
+    })
+
+    r = run(
+        [
+            "php", "occ", "--no-warnings", "app_api:app:update",
+            "app-skeleton-python",
+            "--json-info", same_json,
+        ],
+        stdout=PIPE, stderr=PIPE, timeout=60,
+    )
+    assert r.returncode == 0, f"Same-version update failed: {r.stdout.decode()}"
+    output = r.stdout.decode()
+    assert "already updated" in output, f"Expected 'already updated' message, got: {output}"
+    print("OK")
+
+
 def test_k8s_single_unregister_keep_data():
     """Unregister K8s ExApp — default keeps PVC."""
     print("  test_k8s_single_unregister_keep_data...", end=" ", flush=True)
@@ -474,6 +551,8 @@ def run_single_role_tests():
     print("\n=== Group B: K8s Single-Role Deploy Lifecycle ===")
     test_k8s_single_deploy()
     test_k8s_single_enable_disable()
+    test_k8s_single_update()
+    test_k8s_single_update_same_version()
     test_k8s_single_unregister_keep_data()
     test_k8s_single_deploy_rm_data()
     print("=== Group B: All single-role tests passed ===\n")
@@ -587,6 +666,50 @@ def test_k8s_multi_enable_disable():
     print("OK")
 
 
+def test_k8s_multi_update():
+    """Update a multi-role K8s ExApp to a new version."""
+    print("  test_k8s_multi_update...", end=" ", flush=True)
+
+    update_json = json.dumps({
+        "id": "app-skeleton-python",
+        "name": "App Skeleton Python",
+        "version": "2.0.0",
+        "docker-install": {
+            "registry": "ghcr.io",
+            "image": "nextcloud/app-skeleton-python",
+            "image-tag": "latest",
+        },
+        "k8s-service-roles": [
+            {"name": "api", "env": "SERVICE_ROLE=api", "expose": True},
+            {"name": "worker", "env": "SERVICE_ROLE=worker", "expose": False},
+        ],
+    })
+
+    r = run(
+        [
+            "php", "occ", "--no-warnings", "app_api:app:update",
+            "app-skeleton-python",
+            "--json-info", update_json,
+            "--wait-finish",
+        ],
+        stdout=PIPE, stderr=PIPE, timeout=600,
+    )
+    assert r.returncode == 0, f"Multi-role update failed (exit {r.returncode}): {r.stdout.decode()}"
+
+    # Verify version changed
+    list_output = occ_output("app_api:app:list")
+    assert "2.0.0" in list_output, f"Expected version 2.0.0 in app list: {list_output}"
+
+    # Verify both deployments still exist
+    deploy_output = kubectl_output("get deploy -o name")
+    deploy_names = [line for line in deploy_output.strip().split("\n") if "app-skeleton-python" in line]
+    assert len(deploy_names) >= 2, f"Expected 2 deployments after update, got {len(deploy_names)}: {deploy_output}"
+
+    # Verify app is enabled after update
+    assert "enabled" in list_output, f"App not enabled after update: {list_output}"
+    print("OK")
+
+
 def test_k8s_multi_unregister():
     """Unregister multi-role ExApp — both deployments and service removed."""
     print("  test_k8s_multi_unregister...", end=" ", flush=True)
@@ -612,6 +735,7 @@ def run_multi_role_tests():
     print("\n=== Group C: K8s Multi-Role Deploy Lifecycle ===")
     test_k8s_multi_deploy()
     test_k8s_multi_enable_disable()
+    test_k8s_multi_update()
     test_k8s_multi_unregister()
     print("=== Group C: All multi-role tests passed ===\n")
 
