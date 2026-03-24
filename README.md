@@ -29,12 +29,12 @@ This warning means:
 You have two valid options:
 
 1. **You do not want External Apps**
-	- Disable AppAPI in **Apps → Tools → AppAPI**, or with:
+	- Disable AppAPI in **Apps --> Tools --> AppAPI**, or with:
 		- `occ app:disable app_api`
 	- The warning will disappear.
 
 2. **You want to install External Apps**
-	- Open **Settings → Administration → AppAPI**
+	- Open **Settings --> Administration --> AppAPI**
 	- Register a Deploy Daemon and set it as the default
 	- Use **Check connection** and **Test deploy** to verify the setup
 

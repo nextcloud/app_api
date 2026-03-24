@@ -632,9 +632,10 @@ def test_k8s_multi_deploy():
     print("OK")
 
 
-def _wait_multi_role_replicas(expected, label="app.kubernetes.io/component=exapp", timeout_sec=30):
+def _wait_multi_role_replicas(expected, label="app.kubernetes.io/component=exapp", timeout_sec=90):
     """Poll until all multi-role deployments reach the expected replica count."""
-    for _ in range(timeout_sec // 2):
+    last_state = ""
+    for attempt in range(timeout_sec // 3):
         deploy_json = kubectl_output(f"get deploy -l {label} -o json", check=False)
         data = json.loads(deploy_json)
         items = data.get("items", [])
@@ -642,17 +643,16 @@ def _wait_multi_role_replicas(expected, label="app.kubernetes.io/component=exapp
             item["spec"].get("replicas", -1) == expected for item in items
         ):
             return items
-        time.sleep(2)
+        last_state = ", ".join(
+            f"{item['metadata']['name']}={item['spec'].get('replicas', '?')}"
+            for item in items
+        )
+        time.sleep(3)
     # Final check with assertion
-    deploy_json = kubectl_output(f"get deploy -l {label} -o json", check=False)
-    data = json.loads(deploy_json)
-    items = data.get("items", [])
-    assert len(items) >= 2, f"Expected 2+ deployments, got {len(items)}"
-    for item in items:
-        replicas = item["spec"].get("replicas", -1)
-        name = item["metadata"]["name"]
-        assert replicas == expected, f"Expected {expected} replicas for {name}, got {replicas}"
-    return items
+    assert False, (
+        f"Timed out waiting for replicas={expected} after {timeout_sec}s. "
+        f"Last state: {last_state}"
+    )
 
 
 def test_k8s_multi_enable_disable():
@@ -663,7 +663,7 @@ def test_k8s_multi_enable_disable():
     r = occ("app_api:app:disable app-skeleton-python", check=False, timeout=120)
     assert r.returncode == 0, f"Disable failed: {r.stdout.decode()}"
 
-    # Verify all deployments scaled to 0 (poll to avoid race)
+    # Verify all deployments scaled to 0 (poll to avoid race with HaRP-to-K8s propagation)
     _wait_multi_role_replicas(0)
 
     # Verify AppAPI shows disabled
