@@ -632,6 +632,29 @@ def test_k8s_multi_deploy():
     print("OK")
 
 
+def _wait_multi_role_replicas(expected, label="app.kubernetes.io/component=exapp", timeout_sec=30):
+    """Poll until all multi-role deployments reach the expected replica count."""
+    for _ in range(timeout_sec // 2):
+        deploy_json = kubectl_output(f"get deploy -l {label} -o json", check=False)
+        data = json.loads(deploy_json)
+        items = data.get("items", [])
+        if len(items) >= 2 and all(
+            item["spec"].get("replicas", -1) == expected for item in items
+        ):
+            return items
+        time.sleep(2)
+    # Final check with assertion
+    deploy_json = kubectl_output(f"get deploy -l {label} -o json", check=False)
+    data = json.loads(deploy_json)
+    items = data.get("items", [])
+    assert len(items) >= 2, f"Expected 2+ deployments, got {len(items)}"
+    for item in items:
+        replicas = item["spec"].get("replicas", -1)
+        name = item["metadata"]["name"]
+        assert replicas == expected, f"Expected {expected} replicas for {name}, got {replicas}"
+    return items
+
+
 def test_k8s_multi_enable_disable():
     """Disable and re-enable a multi-role ExApp."""
     print("  test_k8s_multi_enable_disable...", end=" ", flush=True)
@@ -640,29 +663,19 @@ def test_k8s_multi_enable_disable():
     r = occ("app_api:app:disable app-skeleton-python", check=False, timeout=120)
     assert r.returncode == 0, f"Disable failed: {r.stdout.decode()}"
 
-    # Verify all deployments scaled to 0
-    deploy_json = kubectl_output("get deploy -l app.kubernetes.io/component=exapp -o json", check=False)
-    data = json.loads(deploy_json)
-    items = data.get("items", [])
-    assert len(items) >= 2, f"Expected 2+ deployments after disable, got {len(items)}"
-    for item in items:
-        replicas = item["spec"].get("replicas", -1)
-        name = item["metadata"]["name"]
-        assert replicas == 0, f"Expected 0 replicas for {name} after disable, got {replicas}"
+    # Verify all deployments scaled to 0 (poll to avoid race)
+    _wait_multi_role_replicas(0)
+
+    # Verify AppAPI shows disabled
+    list_output = occ_output("app_api:app:list")
+    assert "disabled" in list_output, f"Expected 'disabled' in app list after disable: {list_output}"
 
     # Re-enable
     r = occ("app_api:app:enable app-skeleton-python", check=False, timeout=300)
     assert r.returncode == 0, f"Enable failed: {r.stdout.decode()}"
 
-    # Verify all deployments scaled to 1
-    deploy_json = kubectl_output("get deploy -l app.kubernetes.io/component=exapp -o json", check=False)
-    data = json.loads(deploy_json)
-    items = data.get("items", [])
-    assert len(items) >= 2, f"Expected 2+ deployments after enable, got {len(items)}"
-    for item in items:
-        replicas = item["spec"].get("replicas", -1)
-        name = item["metadata"]["name"]
-        assert replicas == 1, f"Expected 1 replica for {name} after enable, got {replicas}"
+    # Verify all deployments scaled to 1 (poll to avoid race)
+    _wait_multi_role_replicas(1)
     print("OK")
 
 
