@@ -18,6 +18,7 @@ OC.L10N.register(
     "From" : "Nuo",
     "To" : "Kam",
     "Add" : "Pridėti",
+    "Display name" : "Rodomas vardas",
     "Confirm" : "Patvirtinti",
     "Save" : "Įrašyti",
     "Register" : "Registruotis",
