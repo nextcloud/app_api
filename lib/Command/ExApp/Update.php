@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
@@ -32,6 +33,7 @@ class Update extends Command {
 		private readonly ExAppService $exAppService,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions $dockerActions,
+		private readonly KubernetesActions $kubernetesActions,
 		private readonly ManualActions $manualActions,
 		private readonly LoggerInterface $logger,
 		private readonly ExAppArchiveFetcher $exAppArchiveFetcher,
@@ -138,6 +140,7 @@ class Update extends Command {
 		$actionsDeployIds = [
 			$this->dockerActions->getAcceptsDeployId(),
 			$this->manualActions->getAcceptsDeployId(),
+			$this->kubernetesActions->getAcceptsDeployId(),
 		];
 		if (!in_array($daemonConfig->getAcceptsDeployId(), $actionsDeployIds)) {
 			$this->logger->error(sprintf('Daemon config %s actions for %s not found.', $daemonConfig->getName(), $daemonConfig->getAcceptsDeployId()));
@@ -203,6 +206,8 @@ class Update extends Command {
 		$appInfo['port'] = $exApp->getPort();
 		$appInfo['secret'] = $exApp->getSecret();
 		$auth = [];
+		$harpK8sUrl = null;
+		$k8sRoles = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
 			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
@@ -236,6 +241,50 @@ class Update extends Command {
 				(int)explode('=', $deployParams['container_params']['env'][6])[1],
 				$auth,
 			);
+		} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
+			$deployParams = $this->kubernetesActions->buildDeployParams($daemonConfig, $appInfo);
+			$this->kubernetesActions->initGuzzleClient($daemonConfig);
+			$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
+			$k8sRoles = $deployParams['k8s_service_roles'] ?? [];
+			$deployResult = $this->kubernetesActions->deployExApp($exApp, $daemonConfig, $deployParams);
+			if ($deployResult) {
+				$this->logger->error(sprintf('ExApp %s K8s deployment update failed. Error: %s', $appId, $deployResult));
+				if ($outputConsole) {
+					$output->writeln(sprintf('ExApp %s K8s deployment update failed. Error: %s', $appId, $deployResult));
+				}
+				$this->exAppService->setStatusError($exApp, 'K8s deployment update failed');
+				$this->kubernetesActions->cleanupResources($harpK8sUrl, $appId, $k8sRoles);
+				return 1;
+			}
+
+			$k8sConfig = $daemonConfig->getDeployConfig()['kubernetes'] ?? [];
+			if (!empty($k8sRoles)) {
+				$exposeResult = $this->kubernetesActions->exposeExAppRoles(
+					$harpK8sUrl, $appId, (int)$appInfo['port'], $k8sConfig, $k8sRoles
+				);
+			} else {
+				$exposeResult = $this->kubernetesActions->exposeExApp(
+					$harpK8sUrl, $appId, (int)$appInfo['port'], $k8sConfig
+				);
+			}
+			if (isset($exposeResult['error'])) {
+				$this->logger->error(sprintf('ExApp %s K8s expose failed. Error: %s', $appId, $exposeResult['error']));
+				if ($outputConsole) {
+					$output->writeln(sprintf('ExApp %s K8s expose failed. Error: %s', $appId, $exposeResult['error']));
+				}
+				$this->exAppService->setStatusError($exApp, $exposeResult['error']);
+				$this->kubernetesActions->cleanupResources($harpK8sUrl, $appId, $k8sRoles);
+				return 1;
+			}
+
+			$exAppUrl = $this->kubernetesActions->resolveExAppUrl(
+				$appId,
+				$daemonConfig->getProtocol(),
+				$daemonConfig->getHost(),
+				$daemonConfig->getDeployConfig(),
+				(int)$appInfo['port'],
+				$auth,
+			);
 		} else {
 			$this->manualActions->deployExApp($exApp, $daemonConfig);
 			$exAppUrl = $this->manualActions->resolveExAppUrl(
@@ -254,6 +303,9 @@ class Update extends Command {
 				$output->writeln(sprintf('ExApp %s heartbeat check failed. Make sure that Nextcloud instance and ExApp can reach it other.', $appId));
 			}
 			$this->exAppService->setStatusError($exApp, 'Heartbeat check failed');
+			if ($harpK8sUrl !== null) {
+				$this->kubernetesActions->cleanupResources($harpK8sUrl, $appId, $k8sRoles);
+			}
 			return 1;
 		}
 
@@ -289,4 +341,5 @@ class Update extends Command {
 
 		return 0;
 	}
+
 }

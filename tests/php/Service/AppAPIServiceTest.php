@@ -11,10 +11,12 @@ namespace OCA\AppAPI\Tests\php\Service;
 
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCA\AppAPI\Service\AppAPICommonService;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
 use OCP\Http\Client\IClient;
@@ -37,6 +39,7 @@ class AppAPIServiceTest extends TestCase {
 	private LoggerInterface&MockObject $logger;
 	private ExAppService&MockObject $exAppService;
 	private DockerActions&MockObject $dockerActions;
+	private KubernetesActions&MockObject $kubernetesActions;
 	private ManualActions&MockObject $manualActions;
 	private IClient&MockObject $client;
 	private AppAPICommonService&MockObject $commonService;
@@ -62,9 +65,11 @@ class AppAPIServiceTest extends TestCase {
 		$l10nFactory = $this->createMock(IFactory::class);
 		$this->exAppService = $this->createMock(ExAppService::class);
 		$this->dockerActions = $this->createMock(DockerActions::class);
+		$this->kubernetesActions = $this->createMock(KubernetesActions::class);
 		$this->manualActions = $this->createMock(ManualActions::class);
 		$this->commonService = $this->createMock(AppAPICommonService::class);
 		$daemonConfigService = $this->createMock(DaemonConfigService::class);
+		$exAppDeployOptionsService = $this->createMock(ExAppDeployOptionsService::class);
 		$harpService = $this->createMock(HarpService::class);
 
 		$this->service = new AppAPIService(
@@ -79,9 +84,11 @@ class AppAPIServiceTest extends TestCase {
 			$l10nFactory,
 			$this->exAppService,
 			$this->dockerActions,
+			$this->kubernetesActions,
 			$this->manualActions,
 			$this->commonService,
 			$daemonConfigService,
+			$exAppDeployOptionsService,
 			$harpService,
 		);
 	}
@@ -136,6 +143,7 @@ class AppAPIServiceTest extends TestCase {
 	private function setupExAppUrlMocks(): void {
 		// Make getExAppUrl take the manual actions path and return a test URL
 		$this->dockerActions->method('getAcceptsDeployId')->willReturn('docker-install');
+		$this->kubernetesActions->method('getAcceptsDeployId')->willReturn('kubernetes-install');
 		$this->manualActions->method('getAcceptsDeployId')->willReturn('manual-install');
 		$this->manualActions->method('resolveExAppUrl')->willReturn('http://localhost:23000');
 	}

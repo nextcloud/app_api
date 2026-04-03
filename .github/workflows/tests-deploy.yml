@@ -152,7 +152,18 @@ jobs:
           docker network create master_bridge
           docker run --net master_bridge --name nextcloud --rm -d -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
           sudo chmod 766 /var/run/docker.sock
-          sleep 120s
+
+      - name: Wait for Nextcloud bootstrap
+        run: |
+          for i in $(seq 1 60); do
+            if docker exec nextcloud test -f /var/www/html/version.php 2>/dev/null; then
+              echo "Nextcloud source ready after ${i}0s"
+              break
+            fi
+            echo "Waiting for Nextcloud bootstrap... ($i/60)"
+            sleep 10
+          done
+          docker exec nextcloud test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
 
       - name: Install AppAPI
         run: |
@@ -241,7 +252,18 @@ jobs:
             --net master_bridge --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-          sleep 60s
+
+      - name: Wait for Nextcloud bootstrap
+        run: |
+          for i in $(seq 1 60); do
+            if docker exec nextcloud test -f /var/www/html/version.php 2>/dev/null; then
+              echo "Nextcloud source ready after ${i}0s"
+              break
+            fi
+            echo "Waiting for Nextcloud bootstrap... ($i/60)"
+            sleep 10
+          done
+          docker exec nextcloud test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
 
       - name: Install AppAPI
         run: |
@@ -340,7 +362,18 @@ jobs:
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
           docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-          sleep 60s
+
+      - name: Wait for Nextcloud bootstrap
+        run: |
+          for i in $(seq 1 60); do
+            if docker exec nextcloud test -f /var/www/html/version.php 2>/dev/null; then
+              echo "Nextcloud source ready after ${i}0s"
+              break
+            fi
+            echo "Waiting for Nextcloud bootstrap... ($i/60)"
+            sleep 10
+          done
+          docker exec nextcloud test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
 
       - name: Debug information
         run: |
@@ -469,7 +502,18 @@ jobs:
             --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
             --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
           docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
-          sleep 60s
+
+      - name: Wait for Nextcloud bootstrap
+        run: |
+          for i in $(seq 1 60); do
+            if docker exec nextcloud test -f /var/www/html/version.php 2>/dev/null; then
+              echo "Nextcloud source ready after ${i}0s"
+              break
+            fi
+            echo "Waiting for Nextcloud bootstrap... ($i/60)"
+            sleep 10
+          done
+          docker exec nextcloud test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
 
       - name: Debug information
         run: |
@@ -1028,9 +1072,20 @@ jobs:
             -v $(pwd)/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
             -d nginx
 
+      - name: Wait for Nextcloud bootstrap
+        run: |
+          for i in $(seq 1 60); do
+            if docker exec nextcloud-docker test -f /var/www/html/version.php 2>/dev/null; then
+              echo "Nextcloud source ready after ${i}0s"
+              break
+            fi
+            echo "Waiting for Nextcloud bootstrap... ($i/60)"
+            sleep 10
+          done
+          docker exec nextcloud-docker test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
+
       - name: Install AppAPI
         run: |
-          sleep 60s
           docker exec -w /var/www/html/apps nextcloud-docker git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git checkout FETCH_HEAD
@@ -1122,9 +1177,20 @@ jobs:
             -v $(pwd)/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
             -d nginx
 
+      - name: Wait for Nextcloud bootstrap
+        run: |
+          for i in $(seq 1 60); do
+            if docker exec nextcloud-docker test -f /var/www/html/version.php 2>/dev/null; then
+              echo "Nextcloud source ready after ${i}0s"
+              break
+            fi
+            echo "Waiting for Nextcloud bootstrap... ($i/60)"
+            sleep 10
+          done
+          docker exec nextcloud-docker test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
+
       - name: Install AppAPI
         run: |
-          sleep 60s
           docker exec -w /var/www/html/apps nextcloud-docker git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git fetch origin $GITHUB_REF
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git checkout FETCH_HEAD

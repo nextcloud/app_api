@@ -12,6 +12,7 @@ namespace OCA\AppAPI\SetupChecks;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\IAppConfig;
 use OCP\IConfig;
@@ -26,6 +27,7 @@ readonly class DaemonCheck implements ISetupCheck {
 		private IConfig $config,
 		private IAppConfig $appConfig,
 		private DockerActions $dockerActions,
+		private KubernetesActions $kubernetesActions,
 		private LoggerInterface $logger,
 		private DaemonConfigService $daemonConfigService,
 	) {
@@ -59,13 +61,25 @@ readonly class DaemonCheck implements ISetupCheck {
 			);
 		}
 
+		$docsUrl = "https://docs.nextcloud.com/server/$serverVer/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon";
+
+		if ($daemonConfig->getAcceptsDeployId() === KubernetesActions::DEPLOY_ID) {
+			$this->kubernetesActions->initGuzzleClient($daemonConfig);
+			$pingError = $this->kubernetesActions->ping($daemonConfig);
+			if ($pingError !== '') {
+				$this->logger->error(sprintf('K8s deploy daemon "%s" pre-flight check failed: %s', $daemonConfig->getName(), $pingError));
+				return SetupResult::error($pingError, $docsUrl);
+			}
+			return SetupResult::success();
+		}
+
 		$this->dockerActions->initGuzzleClient($daemonConfig);
 		$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 		if (!$daemonConfigAccessible) {
 			$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please check its configuration', $daemonConfig->getName()));
 			return SetupResult::error(
 				$this->l10n->t('AppAPI default deploy daemon "%s" is not accessible. Please check the daemon configuration.', ['daemon' => $daemonConfig->getName()]),
-				"https://docs.nextcloud.com/server/$serverVer/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon",
+				$docsUrl,
 			);
 		}
 

@@ -1,0 +1,235 @@
+# SPDX-FileCopyrightText: 2026 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+#
+# K8s Manual expose type tests.
+#
+# Manual expose means the operator manages K8s networking (Services, Ingress,
+# etc.) themselves.  HaRP creates the Deployment but does NOT create a Service.
+# This workflow tests the deploy lifecycle with operator-managed Services.
+#
+name: Tests - K8s Deploy (Manual)
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-deploy-k8s-manual-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  HP_SHARED_KEY: 'test_shared_key_12345'
+  MANUAL_CLUSTER_IP: '10.43.200.200'
+
+jobs:
+  k8s-deploy-manual:
+    runs-on: ubuntu-22.04
+    name: K8s Deploy Lifecycle (Manual)
+
+    services:
+      postgres:
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
+        ports:
+          - 4444:5432/tcp
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: nextcloud
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
+
+    steps:
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          submodules: true
+          repository: nextcloud/server
+          ref: master
+
+      - name: Checkout AppAPI
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
+        with:
+          php-version: '8.3'
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
+          coverage: none
+          ini-file: development
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
+            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
+          ./occ config:system:set loglevel --value=0 --type=integer
+          ./occ config:system:set debug --value=true --type=boolean
+          ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Install k3s
+        run: |
+          curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik --disable servicelb" sh -
+          sudo chmod 644 /etc/rancher/k3s/k3s.yaml
+          echo "KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> $GITHUB_ENV
+
+      - name: Wait for k3s and create namespace
+        run: |
+          kubectl wait --for=condition=Ready node --all --timeout=120s
+          kubectl create namespace nextcloud-exapps
+          NODE_IP=$(kubectl get node -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+          echo "NODE_IP=${NODE_IP}" >> $GITHUB_ENV
+          echo "k3s node IP: $NODE_IP"
+
+      - name: Configure Nextcloud for k3s networking
+        run: |
+          ./occ config:system:set overwrite.cli.url --value "http://${{ env.NODE_IP }}" --type=string
+          ./occ config:system:set trusted_domains 1 --value "${{ env.NODE_IP }}"
+
+      - name: Create K8s service account for HaRP
+        run: |
+          kubectl -n nextcloud-exapps create serviceaccount harp-sa
+          kubectl create clusterrolebinding harp-admin \
+            --clusterrole=cluster-admin \
+            --serviceaccount=nextcloud-exapps:harp-sa
+          K3S_TOKEN=$(kubectl -n nextcloud-exapps create token harp-sa --duration=2h)
+          echo "K3S_TOKEN=${K3S_TOKEN}" >> $GITHUB_ENV
+
+      - name: Pre-pull ExApp image into k3s
+        run: sudo k3s ctr images pull ghcr.io/nextcloud/app-skeleton-python:latest
+
+      - name: Pull HaRP image
+        run: docker pull ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+
+      - name: Start HaRP with K8s backend
+        run: |
+          docker run --net host --name appapi-harp \
+            -e HP_SHARED_KEY="${{ env.HP_SHARED_KEY }}" \
+            -e NC_INSTANCE_URL="http://${{ env.NODE_IP }}" \
+            -e HP_LOG_LEVEL="debug" \
+            -e HP_K8S_ENABLED="true" \
+            -e HP_K8S_API_SERVER="https://127.0.0.1:6443" \
+            -e HP_K8S_BEARER_TOKEN="${{ env.K3S_TOKEN }}" \
+            -e HP_K8S_NAMESPACE="nextcloud-exapps" \
+            -e HP_K8S_VERIFY_SSL="false" \
+            --restart unless-stopped \
+            -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+
+      - name: Start nginx proxy
+        run: |
+          docker run --net host --name nextcloud --rm \
+            -v $(pwd)/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro \
+            -d nginx
+
+      - name: Start Nextcloud
+        run: PHP_CLI_SERVER_WORKERS=2 php -S 0.0.0.0:8080 &
+
+      - name: Wait for HaRP K8s readiness
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://${{ env.NODE_IP }}:8780/exapps/app_api/info \
+                -H "harp-shared-key: ${{ env.HP_SHARED_KEY }}" 2>/dev/null | grep -q '"kubernetes"'; then
+              echo "HaRP is ready with K8s backend"
+              exit 0
+            fi
+            echo "Waiting for HaRP... ($i/30)"
+            sleep 2
+          done
+          echo "HaRP K8s readiness check failed"
+          docker logs appapi-harp
+          exit 1
+
+      - name: Register K8s daemon (manual expose)
+        run: |
+          ./occ app_api:daemon:register \
+            k8s_test "K8s Test" "kubernetes-install" "http" "${{ env.NODE_IP }}:8780" "http://${{ env.NODE_IP }}" \
+            --harp --harp_shared_key "${{ env.HP_SHARED_KEY }}" --harp_frp_address "${{ env.NODE_IP }}:8782" \
+            --k8s --k8s_expose_type=manual --k8s_upstream_host=${{ env.MANUAL_CLUSTER_IP }} --set-default
+          ./occ app_api:daemon:list
+
+      - name: Run K8s integration tests (manual)
+        env:
+          K8S_EXPOSE_TYPE: manual
+          MANUAL_CLUSTER_IP: ${{ env.MANUAL_CLUSTER_IP }}
+        run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_k8s.py
+
+      - name: Collect HaRP logs
+        if: always()
+        run: docker logs appapi-harp > harp.log 2>&1
+
+      - name: Collect K8s resources
+        if: always()
+        run: |
+          kubectl -n nextcloud-exapps get all -o wide > k8s-resources.txt 2>&1 || true
+          kubectl -n nextcloud-exapps describe pods > k8s-pods-describe.txt 2>&1 || true
+          kubectl -n nextcloud-exapps get pvc -o wide >> k8s-resources.txt 2>&1 || true
+
+      - name: Show all logs
+        if: always()
+        run: |
+          echo "=== HaRP logs ===" && cat harp.log || true
+          echo "=== K8s resources ===" && cat k8s-resources.txt || true
+          echo "=== K8s pods ===" && cat k8s-pods-describe.txt || true
+          echo "=== Nextcloud log (last 100 lines) ===" && tail -100 data/nextcloud.log || true
+
+      - name: Upload HaRP logs
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        with:
+          name: k8s_deploy_manual_harp.log
+          path: harp.log
+          if-no-files-found: warn
+
+      - name: Upload K8s resources
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        with:
+          name: k8s_deploy_manual_resources.txt
+          path: |
+            k8s-resources.txt
+            k8s-pods-describe.txt
+          if-no-files-found: warn
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        with:
+          name: k8s_deploy_manual_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
+  tests-success:
+    permissions:
+      contents: none
+    runs-on: ubuntu-22.04
+    needs: [k8s-deploy-manual]
+    name: K8s-Manual-Tests-OK
+    steps:
+      - run: echo "K8s Manual expose tests passed successfully"
