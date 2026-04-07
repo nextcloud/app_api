@@ -18,14 +18,36 @@
 					{{ t('app_api', 'The "Manual install" daemon is usually used for development. It cannot be set as the default daemon.') }}
 				</NcNoteCard>
 
+				<NcNoteCard v-if="daemon.accepts_deploy_id === 'kubernetes-install'" type="info">
+					{{ t('app_api', 'This is a Kubernetes daemon managed via CLI.') }}
+				</NcNoteCard>
+
 				<p><b>{{ t('app_api', 'ExApps installed') }}: </b>{{ daemon.exAppsCount }}</p>
 				<p><b>{{ t('app_api', 'Name') }}: </b>{{ daemon.name }}</p>
 				<p><b>{{ t('app_api', 'Protocol') }}: </b>{{ daemon.protocol }}</p>
 				<p><b>{{ t('app_api', 'Host') }}: </b>{{ daemon.host }}</p>
-				<p v-if="daemon.deploy_config.harp">
+				<p v-if="daemon.deploy_config.harp && daemon.accepts_deploy_id !== 'kubernetes-install'">
 					<b>{{ t('app_api', 'ExApp direct communication (FRP disabled)') }}: </b>
 					{{ daemon.deploy_config.harp.exapp_direct ?? false }}
 				</p>
+
+				<template v-if="daemon.deploy_config.kubernetes">
+					<h3>{{ t('app_api', 'Kubernetes settings') }}</h3>
+					<p><b>{{ t('app_api', 'Expose type') }}: </b>{{ daemon.deploy_config.kubernetes.expose_type }}</p>
+					<p v-if="daemon.deploy_config.kubernetes.node_port">
+						<b>{{ t('app_api', 'Node port') }}: </b>{{ daemon.deploy_config.kubernetes.node_port }}
+					</p>
+					<p v-if="daemon.deploy_config.kubernetes.upstream_host">
+						<b>{{ t('app_api', 'Upstream host') }}: </b>{{ daemon.deploy_config.kubernetes.upstream_host }}
+					</p>
+					<p v-if="daemon.deploy_config.kubernetes.external_traffic_policy">
+						<b>{{ t('app_api', 'External traffic policy') }}: </b>{{ daemon.deploy_config.kubernetes.external_traffic_policy }}
+					</p>
+					<p v-if="daemon.deploy_config.kubernetes.load_balancer_ip">
+						<b>{{ t('app_api', 'Load balancer IP') }}: </b>{{ daemon.deploy_config.kubernetes.load_balancer_ip }}
+					</p>
+					<p><b>{{ t('app_api', 'Node address type') }}: </b>{{ daemon.deploy_config.kubernetes.node_address_type }}</p>
+				</template>
 
 				<h3>{{ t('app_api', 'Deploy options') }}</h3>
 				<p><b>{{ t('app_api', 'Docker network') }}: </b>{{ daemon.deploy_config.net }}</p>
