@@ -43,7 +43,7 @@ K8S_DAEMON_BASE = [
     "127.0.0.1:8780", "http://127.0.0.1",
 ]
 K8S_HARP_OPTS = [
-    "--harp", "--harp_shared_key", "test_key", "--harp_frp_address", "127.0.0.1:8782",
+    "--harp", "--harp_shared_key", "test_key",
 ]
 
 

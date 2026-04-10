@@ -55,6 +55,7 @@
 							v-model="host"
 							:label="isHarp ? t('app_api', 'HaRP host') : t('app_api', 'Daemon host')"
 							:placeholder="daemonHostHelperText"
+							:readonly="isEdit && isK8s"
 							:aria-label="daemonHostHelperText" />
 						<InfoTooltip :text="daemonHostHelperText" />
 					</div>
@@ -66,6 +67,7 @@
 							v-model="deployConfig.haproxy_password"
 							:label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')"
 							:error="isHaProxyPasswordValid === false"
+							:disabled="isEdit && isK8s"
 							:placeholder="haProxyPasswordHelperText"
 							:aria-label="haProxyPasswordHelperText"
 							:helper-text="!isHaProxyPasswordValid ? t('app_api', 'The password must be at least 12 characters long') : ''"
@@ -77,6 +79,7 @@
 							id="nextcloud-url"
 							v-model="nextcloud_url"
 							:label="t('app_api', 'Nextcloud URL')"
+							:readonly="isEdit && isK8s"
 							:helper-text="getNextcloudUrlHelperText"
 							:input-class="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
 							:placeholder="t('app_api', 'Nextcloud URL')"
@@ -106,12 +109,13 @@
 					</NcButton>
 					<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy options')">
 						<NcFormBoxSwitch
+							v-if="!isK8s || !isEdit"
 							v-model="isHarp"
 							@update:model-value="toggleHarp">
 							{{ t('app_api', 'Enable HaRP') }}
 						</NcFormBoxSwitch>
 						<div v-if="isHarp" class="harp-options">
-							<div class="row" :aria-label="t('app_api', 'FRP server address')">
+							<div v-if="!isK8s" class="row" :aria-label="t('app_api', 'FRP server address')">
 								<NcInputField
 									id="frp-address"
 									v-model="deployConfig.harp.frp_address"
@@ -120,7 +124,7 @@
 									:aria-label="t('app_api', 'FRP server address')" />
 								<InfoTooltip :text="t('app_api', 'The address (host:port) of the FRP server that should be reachable by the ExApp in the network defined in the \'Docker network\' section.')" />
 							</div>
-							<div class="row" :aria-label="t('app_api', 'Docker socket proxy port')">
+							<div v-if="!isK8s" class="row" :aria-label="t('app_api', 'Docker socket proxy port')">
 								<NcInputField
 									id="harp-dsp-port"
 									v-model="deployConfig.harp.docker_socket_port"
@@ -129,7 +133,7 @@
 									:aria-label="t('app_api', 'Docker socket proxy port')" />
 								<InfoTooltip :text="t('app_api', 'The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed.')" />
 							</div>
-							<div class="row-switch" :aria-label="t('app_api', 'Disable FRP')">
+							<div v-if="!isK8s" class="row-switch" :aria-label="t('app_api', 'Disable FRP')">
 								<NcFormBoxSwitch
 									v-model="deployConfig.harp.exapp_direct"
 									class="switch"
@@ -148,6 +152,7 @@
 									v-model="deployConfig.net"
 									:label="t('app_api', 'Docker network')"
 									:placeholder="t('app_api', 'Docker network')"
+									:readonly="isEdit && isK8s"
 									:aria-label="t('app_api', 'Docker network')"
 									:show-trailing-button="isEditDifferentNetwork"
 									:error="isHarp && !deployConfig.net"
@@ -165,6 +170,7 @@
 									id="compute-device"
 									v-model="deployConfig.computeDevice"
 									class="ncselect"
+									:disabled="isEdit && isK8s"
 									:input-label="t('app_api', 'Compute device')"
 									:aria-label-combobox="t('app_api', 'Computation device')"
 									:options="computeDevices" />
@@ -179,6 +185,7 @@
 									v-model="memoryLimit"
 									:label="t('app_api', 'Memory limit (in MiB)')"
 									:placeholder="t('app_api', 'Memory limit (in MiB)')"
+									:readonly="isEdit && isK8s"
 									:aria-label="t('app_api', 'Memory limit (in MiB)')"
 									:error="isMemoryLimitValid === false"
 									:helper-text="isMemoryLimitValid === false ? t('app_api', 'Must be a positive integer') : ''" />
@@ -191,10 +198,28 @@
 									v-model="cpuLimit"
 									:label="t('app_api', 'CPU limit')"
 									:placeholder="t('app_api', 'CPU limit as decimal value')"
+									:readonly="isEdit && isK8s"
 									:aria-label="t('app_api', 'CPU limit')"
 									:error="isCpuLimitValid === false"
 									:helper-text="isCpuLimitValid === false ? t('app_api', 'Must be a positive number') : ''" />
 								<InfoTooltip :text="t('app_api', 'Maximum number of CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)')" />
+							</div>
+							<div v-if="isK8s && isEdit && deployConfig.kubernetes" class="k8s-info">
+								<h4>{{ t('app_api', 'Kubernetes settings') }}</h4>
+								<p><b>{{ t('app_api', 'Expose type') }}: </b>{{ deployConfig.kubernetes.expose_type }}</p>
+								<p v-if="deployConfig.kubernetes.node_port">
+									<b>{{ t('app_api', 'Node port') }}: </b>{{ deployConfig.kubernetes.node_port }}
+								</p>
+								<p v-if="deployConfig.kubernetes.upstream_host">
+									<b>{{ t('app_api', 'Upstream host') }}: </b>{{ deployConfig.kubernetes.upstream_host }}
+								</p>
+								<p v-if="deployConfig.kubernetes.external_traffic_policy">
+									<b>{{ t('app_api', 'External traffic policy') }}: </b>{{ deployConfig.kubernetes.external_traffic_policy }}
+								</p>
+								<p v-if="deployConfig.kubernetes.load_balancer_ip">
+									<b>{{ t('app_api', 'Load balancer IP') }}: </b>{{ deployConfig.kubernetes.load_balancer_ip }}
+								</p>
+								<p><b>{{ t('app_api', 'Node address type') }}: </b>{{ deployConfig.kubernetes.node_address_type }}</p>
 							</div>
 							<template v-if="additionalOptions.length > 0">
 								<div class="row" style="flex-direction: column;">
@@ -539,6 +564,9 @@ export default {
 		isPureManual() {
 			return this.acceptsDeployId === 'manual-install' && !this.isHarp
 		},
+		isK8s() {
+			return this.acceptsDeployId === 'kubernetes-install'
+		},
 	},
 	watch: {
 		configurationTab(newConfigurationTab) {
@@ -782,6 +810,10 @@ export default {
 		border-bottom: 2px solid var(--color-border-dark);
 		padding-bottom: 15px;
 		margin-bottom: 10px;
+	}
+
+	.k8s-info {
+		margin-top: 16px;
 	}
 
 	.additional-options {

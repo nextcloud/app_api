@@ -76,7 +76,7 @@ class ListDaemons extends Base {
 					$daemon->getHost(),
 					$deployConfig['nextcloud_url'],
 					isset($deployConfig['harp']) ? 'yes' : 'no',
-					$deployConfig['harp']['frp_address'] ?? '(none)',
+					($deployConfig['harp']['frp_address'] ?? null) ?: '(none)',
 					$deployConfig['harp']['docker_socket_port'] ?? '(none)',
 				];
 			}

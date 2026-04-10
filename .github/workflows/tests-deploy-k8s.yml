@@ -162,7 +162,7 @@ jobs:
         run: |
           ./occ app_api:daemon:register \
             k8s_test "K8s Test" "kubernetes-install" "http" "${{ env.NODE_IP }}:8780" "http://${{ env.NODE_IP }}" \
-            --harp --harp_shared_key "${{ env.HP_SHARED_KEY }}" --harp_frp_address "${{ env.NODE_IP }}:8782" \
+            --harp --harp_shared_key "${{ env.HP_SHARED_KEY }}" \
             --k8s --k8s_expose_type=nodeport --set-default
           ./occ app_api:daemon:list
 

@@ -45,7 +45,7 @@ class RegisterDaemon extends Command {
 		$this->addOption('compute_device', null, InputOption::VALUE_REQUIRED, 'Computation device for GPU support (cpu|cuda|rocm)');
 		$this->addOption('set-default', null, InputOption::VALUE_NONE, 'Set DaemonConfig as default');
 		$this->addOption('harp', null, InputOption::VALUE_NONE, 'Set the daemon to use HaRP for all Docker and ExApp communication');
-		$this->addOption('harp_frp_address', null, InputOption::VALUE_REQUIRED, '[host]:[port] of the HaRP FRP server, the default host is same as the HaRP host, port is 8782');
+		$this->addOption('harp_frp_address', null, InputOption::VALUE_REQUIRED, '[host]:[port] of the HaRP FRP server (not required for K8s daemons). Default: same as HaRP host, port 8782');
 		$this->addOption('harp_shared_key', null, InputOption::VALUE_REQUIRED, 'HaRP shared key for secure communication between HaRP and AppAPI');
 		$this->addOption('harp_docker_socket_port', null, InputOption::VALUE_REQUIRED, '\'remotePort\' of the FRP client of the remote Docker socket proxy. There is one included in the harp container so this can be skipped for default setups.', '24000');
 		$this->addOption('harp_exapp_direct', null, InputOption::VALUE_NONE, 'Flag for the advanced setups only. Disables the FRP tunnel between ExApps and HaRP.');
@@ -68,9 +68,9 @@ class RegisterDaemon extends Command {
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
 
 		// Kubernetes usage examples
-		$this->addUsage('k8s_daemon "Kubernetes HaRP" "kubernetes-install" "http" "harp.nextcloud.svc:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --harp_frp_address "harp.nextcloud.svc:8782" --k8s');
-		$this->addUsage('k8s_daemon_nodeport "K8s NodePort" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --harp_frp_address "harp.example.com:8782" --k8s --k8s_expose_type=nodeport --k8s_upstream_host="k8s-node.example.com"');
-		$this->addUsage('k8s_daemon_lb "K8s LoadBalancer" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --harp_frp_address "harp.example.com:8782" --k8s --k8s_expose_type=loadbalancer');
+		$this->addUsage('k8s_daemon "Kubernetes HaRP" "kubernetes-install" "http" "harp.nextcloud.svc:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --k8s');
+		$this->addUsage('k8s_daemon_nodeport "K8s NodePort" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --k8s --k8s_expose_type=nodeport --k8s_upstream_host="k8s-node.example.com"');
+		$this->addUsage('k8s_daemon_lb "K8s LoadBalancer" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --k8s --k8s_expose_type=loadbalancer');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -91,7 +91,7 @@ class RegisterDaemon extends Command {
 			$output->writeln('Value error: HaRP enabled daemon requires `harp_shared_key` option.');
 			return 1;
 		}
-		if ($isHarp && !$input->getOption('harp_frp_address')) {
+		if ($isHarp && !$isK8s && !$input->getOption('harp_frp_address')) {
 			$output->writeln('Value error: HaRP enabled daemon requires `harp_frp_address` option.');
 			return 1;
 		}
