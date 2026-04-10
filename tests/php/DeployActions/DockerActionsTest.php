@@ -22,8 +22,8 @@ use OCP\ITempManager;
 use OCP\IURLGenerator;
 use OCP\Security\ICrypto;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Test\TestCase;
 
 class DockerActionsTest extends TestCase {
 	private DockerActions $dockerActions;
