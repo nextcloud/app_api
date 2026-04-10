@@ -117,7 +117,7 @@ class ExAppsPageController extends Controller {
 				}
 			}
 
-			$currentLanguage = substr(\OC::$server->getL10NFactory()->findLanguage(), 0, 2);
+			$currentLanguage = substr($this->l10nFactory->findLanguage(), 0, 2);
 
 			if ($exApp !== null) {
 				$currentVersion = $exApp->getVersion();
