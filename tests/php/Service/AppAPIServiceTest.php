@@ -28,8 +28,8 @@ use OCP\IUserSession;
 use OCP\L10N\IFactory;
 use OCP\Security\Bruteforce\IThrottler;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Test\TestCase;
 
 class AppAPIServiceTest extends TestCase {
 
