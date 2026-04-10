@@ -4,8 +4,9 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2b2210fb407c8bbed4fee93452b1b1ba",
-    "packages": [
+    "content-hash": "5d657b5e105bbb22f11522f7ffd1c5b6",
+    "packages": [],
+    "packages-dev": [
         {
             "name": "bamarni/composer-bin-plugin",
             "version": "1.9.1",
@@ -62,9 +63,7 @@
                 "source": "https://github.com/bamarni/composer-bin-plugin/tree/1.9.1"
             },
             "time": "2026-02-04T10:18:12+00:00"
-        }
-    ],
-    "packages-dev": [
+        },
         {
             "name": "kubawerlos/php-cs-fixer-custom-fixers",
             "version": "v3.36.0",
@@ -265,20 +264,20 @@
         },
         {
             "name": "psalm/phar",
-            "version": "6.7.1",
+            "version": "6.16.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/psalm/phar.git",
-                "reference": "a7112d33cfd48d857c2eb730ea642046d21bbdf5"
+                "reference": "11c6b55449667837fc07bb2a456c45a137c05ecd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/psalm/phar/zipball/a7112d33cfd48d857c2eb730ea642046d21bbdf5",
-                "reference": "a7112d33cfd48d857c2eb730ea642046d21bbdf5",
+                "url": "https://api.github.com/repos/psalm/phar/zipball/11c6b55449667837fc07bb2a456c45a137c05ecd",
+                "reference": "11c6b55449667837fc07bb2a456c45a137c05ecd",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1 || ^8.0"
+                "php": "^8.2"
             },
             "conflict": {
                 "vimeo/psalm": "*"
@@ -294,9 +293,9 @@
             "description": "Composer-based Psalm Phar",
             "support": {
                 "issues": "https://github.com/psalm/phar/issues",
-                "source": "https://github.com/psalm/phar/tree/6.7.1"
+                "source": "https://github.com/psalm/phar/tree/6.16.1"
             },
-            "time": "2025-02-17T10:54:35+00:00"
+            "time": "2026-03-19T11:11:23+00:00"
         },
         {
             "name": "psr/clock",
@@ -1542,5 +1541,5 @@
     "platform-overrides": {
         "php": "8.2"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
