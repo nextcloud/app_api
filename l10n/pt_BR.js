@@ -81,7 +81,7 @@ OC.L10N.register(
     "Expose type" : "Tipo de exposição",
     "Node port" : "Porta do nó",
     "Upstream host" : "Host upstream",
-    "External traffic policy" : "Política de tráfego externa",
+    "External traffic policy" : "Política de tráfego externo",
     "Load balancer IP" : "IP do balanceador de carga",
     "Node address type" : "Tipo do endereço de nó",
     "Deploy options" : "Opções de implantação",
