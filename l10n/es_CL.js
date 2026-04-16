@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Cancel" : "Cancel",
     "Delete" : "Borrar",
+    "Default" : "Por defecto",
     "Edit" : "Editar",
     "Unlimited" : "Ilimitado",
     "Name" : "Nombre",
