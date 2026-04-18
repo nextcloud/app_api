@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Command\ExApp;
 
+use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\DeployActions\ManualActions;
@@ -19,6 +21,7 @@ use OCA\AppAPI\Service\DaemonConfigService;
 
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
+use OCP\IAppConfig;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -39,6 +42,7 @@ class Update extends Command {
 		private readonly ExAppArchiveFetcher $exAppArchiveFetcher,
 		private readonly ExAppFetcher $exAppFetcher,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
+		private readonly IAppConfig $appConfig,
 	) {
 		parent::__construct();
 	}
@@ -208,7 +212,13 @@ class Update extends Command {
 		$auth = [];
 		$harpK8sUrl = null;
 		$k8sRoles = [];
+		$oldImageName = '';
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			// Capture old image name before deploying the new version
+			$oldAppInfo = array_merge($appInfo, ['version' => $exApp->getVersion()]);
+			$oldDeployParams = $this->dockerActions->buildDeployParams($daemonConfig, $oldAppInfo);
+			$oldImageName = $this->dockerActions->buildBaseImageName($oldDeployParams['image_params'], $daemonConfig);
+
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
 			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
 				$deployResult = $this->dockerActions->deployExAppHarp($exApp, $daemonConfig, $deployParams);
@@ -314,6 +324,8 @@ class Update extends Command {
 			$output->writeln(sprintf('ExApp %s update successfully deployed.', $appId));
 		}
 
+		$this->removeOldImageIfEnabled($oldImageName, $daemonConfig, $appId);
+
 		$this->service->dispatchExAppInitInternal($exApp);
 		if ($input->getOption('wait-finish')) {
 			$error = $this->exAppService->waitInitStepFinish($appId);
@@ -342,4 +354,28 @@ class Update extends Command {
 		return 0;
 	}
 
+	private function removeOldImageIfEnabled(string $oldImageName, DaemonConfig $daemonConfig, string $appId): void {
+		if (empty($oldImageName)) {
+			return;
+		}
+		// Image cleanup only applies to Docker daemons
+		if ($daemonConfig->getAcceptsDeployId() !== $this->dockerActions->getAcceptsDeployId()) {
+			return;
+		}
+
+		$isEnabled = $this->appConfig->getValueBool(
+			Application::APP_ID, Application::CONF_IMAGE_CLEANUP_ON_UPDATE, false, lazy: true
+		);
+		if (!$isEnabled) {
+			return;
+		}
+
+		$dockerUrl = $this->dockerActions->buildDockerUrl($daemonConfig);
+		$result = $this->dockerActions->removeImage($dockerUrl, $oldImageName);
+		if ($result) {
+			$this->logger->warning(sprintf('Old image cleanup for %s: %s', $appId, $result));
+		} else {
+			$this->logger->info(sprintf('Old image %s removed after updating %s', $oldImageName, $appId));
+		}
+	}
 }

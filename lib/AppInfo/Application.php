@@ -44,6 +44,8 @@ class Application extends App implements IBootstrap {
 	public const TEST_DEPLOY_APPID = 'test-deploy';
 	public const TEST_DEPLOY_INFO_XML = 'https://raw.githubusercontent.com/nextcloud/test-deploy/main/appinfo/info.xml';
 	public const MINIMUM_HARP_VERSION = '0.3.0';
+	public const CONF_IMAGE_CLEANUP_INTERVAL_DAYS = 'image_cleanup_interval_days';
+	public const CONF_IMAGE_CLEANUP_ON_UPDATE = 'image_cleanup_on_update';
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);

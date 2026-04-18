@@ -49,6 +49,28 @@
 				:aria-label-combobox="t('app_api', 'ExApp container restart policy')"
 				@update:model-value="onInput" />
 		</NcSettingsSection>
+		<NcSettingsSection
+			:name="t('app_api', 'Docker image cleanup')"
+			:description="t('app_api', 'Automatically remove unused Docker images to free up disk space on the daemon host')"
+			:aria-label="t('app_api', 'Docker image cleanup settings')">
+			<div class="setting">
+				<NcInputField v-model="state.image_cleanup_interval_days"
+					class="setting"
+					type="number"
+					min="0"
+					max="365"
+					:label="t('app_api', 'Cleanup interval (days)')"
+					:placeholder="t('app_api', 'Cleanup interval in days (0 to disable)')"
+					@update:model-value="onInput" />
+			</div>
+			<div class="setting" style="margin-top: 12px;">
+				<NcCheckboxRadioSwitch
+					:checked="state.image_cleanup_on_update === '1'"
+					@update:checked="onCheckboxChanged($event, 'image_cleanup_on_update')">
+					{{ t('app_api', 'Remove old images after ExApp update') }}
+				</NcCheckboxRadioSwitch>
+			</div>
+		</NcSettingsSection>
 	</div>
 </template>
 
@@ -63,6 +85,7 @@ import NcSettingsSection from '@nextcloud/vue/components/NcSettingsSection'
 import NcInputField from '@nextcloud/vue/components/NcInputField'
 import NcSelect from '@nextcloud/vue/components/NcSelect'
 import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
 
 import AppAPIIcon from './icons/AppAPIIcon.vue'
 import DaemonConfigList from './DaemonConfig/DaemonConfigList.vue'
@@ -76,6 +99,7 @@ export default {
 		NcNoteCard,
 		NcInputField,
 		NcSelect,
+		NcCheckboxRadioSwitch,
 	},
 	data() {
 		return {
@@ -103,6 +127,7 @@ export default {
 				this.saveOptions({
 					init_timeout: this.state.init_timeout,
 					container_restart_policy: this.state.container_restart_policy,
+					image_cleanup_interval_days: this.state.image_cleanup_interval_days,
 				})
 			}, 2000)()
 		},

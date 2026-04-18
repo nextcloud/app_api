@@ -14,13 +14,14 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
-
 use OCA\AppAPI\Db\ExApp;
+
 use OCA\AppAPI\Service\AppAPICommonService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
 use OCP\App\IAppManager;
+use OCP\AppFramework\Http;
 
 use OCP\IAppConfig;
 use OCP\ICertificateManager;
@@ -28,6 +29,7 @@ use OCP\IConfig;
 use OCP\ITempManager;
 use OCP\IURLGenerator;
 use OCP\Security\ICrypto;
+use OCP\Util;
 use Phar;
 use PharData;
 use Psr\Log\LoggerInterface;
@@ -485,6 +487,56 @@ class DockerActions implements IDeployActions {
 				$this->logger->error('Failed to check image existence', ['exception' => $e]);
 			}
 			return false;
+		}
+	}
+
+	public function removeImage(string $dockerUrl, string $imageId): string {
+		$url = $this->buildApiUrl($dockerUrl, sprintf('images/%s', $imageId));
+		try {
+			$response = $this->guzzleClient->delete($url);
+			if ($response->getStatusCode() === Http::STATUS_OK) {
+				$this->logger->info(sprintf('Successfully removed Docker image: %s', $imageId));
+				return '';
+			}
+			return sprintf('Unexpected status %d removing image %s', $response->getStatusCode(), $imageId);
+		} catch (GuzzleException $e) {
+			if ($e->getCode() === Http::STATUS_NOT_FOUND) {
+				$this->logger->debug(sprintf('Image %s not found (already removed)', $imageId));
+				return '';
+			}
+			if ($e->getCode() === Http::STATUS_CONFLICT) {
+				$this->logger->warning(sprintf('Image %s is in use, skipping removal', $imageId));
+				return '';
+			}
+			$this->logger->error(sprintf('Failed to remove image %s: %s', $imageId, $e->getMessage()));
+			return sprintf('Failed to remove image %s: %s', $imageId, $e->getMessage());
+		}
+	}
+
+	/**
+	 * @throws \JsonException
+	 */
+	public function pruneImages(string $dockerUrl, array $filters = []): array {
+		$url = $this->buildApiUrl($dockerUrl, 'images/prune');
+		$queryParams = [];
+		if (!empty($filters)) {
+			$queryParams['filters'] = json_encode($filters, JSON_THROW_ON_ERROR);
+		}
+		try {
+			$response = $this->guzzleClient->post($url, ['query' => $queryParams]);
+			$result = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+			$spaceReclaimed = $result['SpaceReclaimed'] ?? 0;
+			$imagesDeleted = $result['ImagesDeleted'] ?? [];
+			$count = is_array($imagesDeleted) ? count($imagesDeleted) : 0;
+			$this->logger->info(sprintf(
+				'Docker image prune completed: %d images removed, %s reclaimed',
+				$count,
+				Util::humanFileSize($spaceReclaimed)
+			));
+			return $result ?? [];
+		} catch (GuzzleException $e) {
+			$this->logger->error(sprintf('Failed to prune Docker images: %s', $e->getMessage()));
+			return ['error' => $e->getMessage()];
 		}
 	}
 
