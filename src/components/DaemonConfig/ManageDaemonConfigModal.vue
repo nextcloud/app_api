@@ -9,6 +9,9 @@
 			@close="closeModal">
 			<div class="register-daemon-config-body">
 				<h2>{{ isEdit ? t('app_api', 'Edit the deploy daemon') : t('app_api', 'Register a new deploy daemon') }}</h2>
+				<NcNoteCard v-if="isDeprecatedDirectDocker" type="warning">
+					{{ t('app_api', 'Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.') }}
+				</NcNoteCard>
 				<div v-if="!isEdit" class="templates">
 					<NcSelect
 						id="daemon-template"
@@ -332,6 +335,7 @@ import { generateUrl } from '@nextcloud/router'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcInputField from '@nextcloud/vue/components/NcInputField'
 import NcModal from '@nextcloud/vue/components/NcModal'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
 import NcPasswordField from '@nextcloud/vue/components/NcPasswordField'
 import NcSelect from '@nextcloud/vue/components/NcSelect'
 import NcFormBoxSwitch from '@nextcloud/vue/components/NcFormBoxSwitch'
@@ -354,6 +358,7 @@ export default {
 		NcLoadingIcon,
 		NcModal,
 		NcInputField,
+		NcNoteCard,
 		NcPasswordField,
 		UnfoldLessHorizontal,
 		UnfoldMoreHorizontal,
@@ -403,7 +408,10 @@ export default {
 			registeringDaemon: false,
 			configurationTab: { id: DAEMON_TEMPLATES[0].name, label: DAEMON_TEMPLATES[0].displayName },
 			configurationTemplateOptions: [
-				...DAEMON_TEMPLATES.map(template => { return { id: template.name, label: template.displayName } }),
+				...DAEMON_TEMPLATES.map(template => ({
+					id: template.name,
+					label: template.deprecated ? `${template.displayName} (deprecated)` : template.displayName,
+				})),
 			],
 			verifyingDaemonConnection: false,
 			computeDevices: DAEMON_COMPUTE_DEVICES,
@@ -566,6 +574,9 @@ export default {
 		},
 		isK8s() {
 			return this.acceptsDeployId === 'kubernetes-install'
+		},
+		isDeprecatedDirectDocker() {
+			return this.acceptsDeployId === 'docker-install' && !this.isHarp
 		},
 	},
 	watch: {

@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Service;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\DaemonConfigMapper;
 
+use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -76,6 +77,12 @@ readonly class DaemonConfigService {
 		if ($isDockerDirect && $params['deploy_config']['net'] === 'host') {
 			$this->logger->error('Failed to register daemon configuration: setting `net=host` in HaRP is not supported when communication with ExApps is done directly without FRP.');
 			return null;
+		}
+		if ($params['accepts_deploy_id'] === DockerActions::DEPLOY_ID && empty($params['deploy_config']['harp'])) {
+			$this->logger->warning(sprintf(
+				'Daemon "%s" uses direct Docker access (Docker Socket Proxy). This deployment method is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.',
+				$params['name'],
+			));
 		}
 		$params['deploy_config']['nextcloud_url'] = rtrim($params['deploy_config']['nextcloud_url'], '/');
 		try {

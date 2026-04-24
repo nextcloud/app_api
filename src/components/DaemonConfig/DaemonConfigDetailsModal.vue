@@ -18,6 +18,10 @@
 					{{ t('app_api', 'The "Manual install" daemon is usually used for development. It cannot be set as the default daemon.') }}
 				</NcNoteCard>
 
+				<NcNoteCard v-if="isDeprecatedDirectDocker" type="warning">
+					{{ t('app_api', 'Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.') }}
+				</NcNoteCard>
+
 				<NcNoteCard v-if="daemon.accepts_deploy_id === 'kubernetes-install'" type="info">
 					{{ t('app_api', 'This is a Kubernetes daemon managed via CLI.') }}
 				</NcNoteCard>
@@ -126,6 +130,11 @@ export default {
 		return {
 			verifying: false,
 		}
+	},
+	computed: {
+		isDeprecatedDirectDocker() {
+			return this.daemon.accepts_deploy_id === 'docker-install' && !this.daemon.deploy_config?.harp
+		},
 	},
 	methods: {
 		closeModal() {

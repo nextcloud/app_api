@@ -9,6 +9,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [34.0.0]
+
+### Deprecated
+
+- Direct Docker access via Docker Socket Proxy is deprecated and scheduled for removal in Nextcloud 35. Migrate `docker-install` daemons to HaRP.
+- AIO Docker Socket Proxy auto-registration (`AIODockerActions::registerAIODaemonConfig`) is deprecated in favor of the HaRP-based AIO daemon.
+
+
 ## [3.2.0 - 2024-09-10]
 
 ### Added

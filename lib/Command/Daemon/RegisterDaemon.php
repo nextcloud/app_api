@@ -34,7 +34,7 @@ class RegisterDaemon extends Command {
 
 		$this->addArgument('name', InputArgument::REQUIRED, 'Unique deploy daemon name');
 		$this->addArgument('display-name', InputArgument::REQUIRED);
-		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED, 'The deployment method that the daemon accepts. Can be "manual-install" or "docker-install". "docker-install" is for Docker Socket Proxy and HaRP.');
+		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED, 'The deployment method that the daemon accepts. Can be "manual-install", "docker-install", or "kubernetes-install". "docker-install" is for HaRP (recommended) and the legacy Docker Socket Proxy (deprecated, scheduled for removal in Nextcloud 35).');
 		$this->addArgument('protocol', InputArgument::REQUIRED, 'The protocol used to connect to the daemon. Can be "http" or "https".');
 		$this->addArgument('host', InputArgument::REQUIRED, 'The hostname (and port) or path at which the Docker socket proxy or HaRP or the manual-install app is/would be available. This does not need to be a public host, just a host accessible by the Nextcloud server. It can also be a path to the Docker socket. (e.g. appapi-harp:8780, /var/run/docker.sock)');
 		$this->addArgument('nextcloud_url', InputArgument::REQUIRED);
@@ -159,6 +159,10 @@ class RegisterDaemon extends Command {
 
 		if ($acceptsDeployId === 'manual-install' && !$isHarp && str_contains($host, ':')) {
 			$output->writeln('<comment>Warning: The host contains a port, which will be ignored for manual-install daemons. The ExApp\'s port from --json-info will be used instead.</comment>');
+		}
+
+		if ($acceptsDeployId === 'docker-install' && !$isHarp) {
+			$output->writeln('<comment>Warning: Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please register a HaRP-based daemon instead (pass --harp).</comment>');
 		}
 
 		if ($this->daemonConfigService->getDaemonConfigByName($name) !== null) {
