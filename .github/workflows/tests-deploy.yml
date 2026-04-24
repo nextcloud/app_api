@@ -858,15 +858,18 @@ jobs:
 
       - name: Check docker inspect TEST_ENV_1
         run: |
-          docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q 'TEST_ENV_1=0' || error
+          docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q '"TEST_ENV_1=0"' || error
 
       - name: Check docker inspect TEST_ENV_2
         run: |
-          docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q 'TEST_ENV_2=2' || error
+          docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q '"TEST_ENV_2=2"' || error
 
       - name: Check docker inspect TEST_ENV_3
         run: |
-            docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q 'TEST_ENV_3=' && error || true
+          if docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q '"TEST_ENV_3='; then
+            echo "TEST_ENV_3 should not be present in container env"
+            exit 1
+          fi
 
       - name: Check docker inspect TEST_MOUNT
         run: |
@@ -1563,6 +1566,162 @@ jobs:
         if: always()
         run: tail -v -n +1 *container.json *.log data/nextcloud.log
 
+  nc-update-preserves-deploy-options:
+    runs-on: ubuntu-22.04
+    name: Update preserves deploy options (Docker)
+    # Regression test for https://github.com/nextcloud/app_api/issues/808
+    # When two or more ExApps have rows in `ex_deploy_options`, the update flow
+    # used to drop the target app's env vars because it read the unfiltered
+    # options table. This job seeds a stray second row, bumps the skeleton's
+    # version via a local info.xml, runs `app_api:app:update`, and asserts the
+    # user-provided env vars are still set on the new container.
+
+    services:
+      postgres:
+        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
+        ports:
+          - 4444:5432/tcp
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: nextcloud
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
+
+    steps:
+      - name: Set app env
+        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Checkout server
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          submodules: true
+          repository: nextcloud/server
+          ref: master
+
+      - name: Checkout AppAPI
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          path: apps/${{ env.APP_NAME }}
+
+      - name: Set up php
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2
+        with:
+          php-version: '8.3'
+          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
+          coverage: none
+          ini-file: development
+          ini-values:
+            apc.enabled=on, apc.enable_cli=on, disable_functions=
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check composer file existence
+        id: check_composer
+        uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # v2
+        with:
+          files: apps/${{ env.APP_NAME }}/composer.json
+
+      - name: Set up dependencies
+        if: steps.check_composer.outputs.files_exists == 'true'
+        working-directory: apps/${{ env.APP_NAME }}
+        run: composer i
+
+      - name: Set up Nextcloud
+        env:
+          DB_PORT: 4444
+        run: |
+          mkdir data
+          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
+            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
+            --admin-user admin --admin-pass admin
+          ./occ config:system:set loglevel --value=0 --type=integer
+          ./occ config:system:set debug --value=true --type=boolean
+          ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Register daemon & Skeleton v1 with user env vars
+        run: |
+          PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:app:register app-skeleton-python docker_local_sock \
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
+            --env='TEST_ENV_2=user_provided_value'
+
+      - name: Verify env vars on the freshly registered container
+        run: |
+          docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q '"TEST_ENV_1=0"' \
+            || { echo "TEST_ENV_1 default missing after register"; exit 1; }
+          docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q '"TEST_ENV_2=user_provided_value"' \
+            || { echo "TEST_ENV_2 user value missing after register"; exit 1; }
+
+      - name: Seed stray ex_deploy_options row for a second app
+        # Without a second appid in the table, the Update.php bug from #808 is
+        # latent: formatDeployOptions() with no $appId filter still produces
+        # the single app's rows by luck. The `zz_` prefix ensures this stray row
+        # iterates AFTER `app-skeleton-python`, so the last-wins flattening
+        # actually clobbers the skeleton's env_vars entry.
+        run: |
+          php apps/${{ env.APP_NAME }}/tests/integration_helper.php \
+            set-env zz_fake_second_app UNRELATED_VAR x
+
+      - name: Build v2 info.xml with bumped version
+        # Update.php:153 short-circuits when versions match; bumping to 999.0.0
+        # forces the real update path to run without touching the image.
+        run: |
+          curl -sS https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
+            | sed 's#<version>[^<]*</version>#<version>999.0.0</version>#' > /tmp/info-v2.xml
+          grep -q '<version>999.0.0</version>' /tmp/info-v2.xml || { echo "version bump failed"; exit 1; }
+
+      - name: Update ExApp
+        run: |
+          ./occ app_api:app:update app-skeleton-python --info-xml /tmp/info-v2.xml --wait-finish
+
+      - name: After update, TEST_ENV_1 default still present
+        run: |
+          docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q '"TEST_ENV_1=0"' \
+            || { echo "#808 regression: TEST_ENV_1 lost on update"; exit 1; }
+
+      - name: After update, TEST_ENV_2 user value still present
+        run: |
+          docker inspect --format '{{ json .Config.Env }}' nc_app_app-skeleton-python | grep -q '"TEST_ENV_2=user_provided_value"' \
+            || { echo "#808 regression: user-provided TEST_ENV_2 lost on update"; exit 1; }
+
+      - name: Save container info & logs
+        if: always()
+        run: |
+          docker inspect nc_app_app-skeleton-python | json_pp > container.json
+          docker logs nc_app_app-skeleton-python > container.log 2>&1
+
+      - name: Unregister Skeleton & Daemon
+        run: |
+          ./occ app_api:app:unregister app-skeleton-python
+          ./occ app_api:daemon:unregister docker_local_sock
+
+      - name: Upload Container info
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: nc_update_preserves_deploy_options_container.json
+          path: container.json
+          if-no-files-found: warn
+
+      - name: Upload Container logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: nc_update_preserves_deploy_options_container.log
+          path: container.log
+          if-no-files-found: warn
+
+      - name: Upload NC logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: nc_update_preserves_deploy_options_nextcloud.log
+          path: data/nextcloud.log
+          if-no-files-found: warn
+
   tests-deploy-success:
     permissions:
       contents: none
@@ -1570,7 +1729,7 @@ jobs:
     needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-dsp-http,
             nc-docker-dsp-https, nc-host-app-docker-redis, nc-host-network-host,
             nc-docker-harp-bridge, nc-docker-harp-bridge-no-tls, nc-host-harp-host,
-            nc-host-manual-harp-host]
+            nc-host-manual-harp-host, nc-update-preserves-deploy-options]
     name: Tests-Deploy-OK
     steps:
       - run: echo "Tests-Deploy passed successfully"

@@ -95,7 +95,7 @@ class Update extends Command {
 	private function updateExApp(InputInterface $input, OutputInterface $output, string $appId): int {
 		$outputConsole = !$input->getOption('silent');
 		$deployOptions = $this->exAppDeployOptionsService->formatDeployOptions(
-			$this->exAppDeployOptionsService->getDeployOptions()
+			$this->exAppDeployOptionsService->getDeployOptions($appId)
 		);
 		$appInfo = $this->exAppService->getAppInfo(
 			$appId, $input->getOption('info-xml'), $input->getOption('json-info'),
