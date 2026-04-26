@@ -69,6 +69,7 @@
     "Deploy daemon" : "Deploy daemon",
     "Default daemon. ExApps will be installed on it" : "Default daemon. ExApps will be installed on it",
     "The \"Manual install\" daemon is usually used for development. It cannot be set as the default daemon." : "The \"Manual install\" daemon is usually used for development. It cannot be set as the default daemon.",
+    "Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon." : "Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.",
     "This is a Kubernetes daemon managed via CLI." : "This is a Kubernetes daemon managed via CLI.",
     "ExApps installed" : "ExApps installed",
     "Name" : "Surname",
