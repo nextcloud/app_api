@@ -16,5 +16,6 @@ if (!defined('PHPUNIT_RUN')) {
 
 require_once __DIR__ . '/../../../../lib/base.php';
 require_once __DIR__ . '/../../../../tests/autoload.php';
+require_once __DIR__ . '/Controller/RegistersFakeExAppTrait.php';
 
 Server::get(IAppManager::class)->loadApp('app_api');
