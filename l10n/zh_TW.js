@@ -71,6 +71,7 @@ OC.L10N.register(
     "Deploy daemon" : "部署幕後程式",
     "Default daemon. ExApps will be installed on it" : "預設幕後程式。ExApp 將會安裝在其之上",
     "The \"Manual install\" daemon is usually used for development. It cannot be set as the default daemon." : "「手動安裝」幕後程式通常用於開發。其不能被設定為預設幕後程式。",
+    "Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon." : "直接存取 Docker (Docker Socket Proxy) 已棄用，並將於 Nextcloud 35 移除。請遷移至以 HaRP 為基礎的幕後程式。",
     "This is a Kubernetes daemon managed via CLI." : "這是透過命令列介面管理的 Kubernetes 幕後程式。",
     "ExApps installed" : "已安裝 ExApp",
     "Name" : "名稱",
