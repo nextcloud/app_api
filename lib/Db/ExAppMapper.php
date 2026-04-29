@@ -43,6 +43,7 @@ class ExAppMapper extends QBMapper {
 			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
 			->leftJoin('a', 'ex_apps_routes', 'r', $qb->expr()->eq('a.appid', 'r.appid'))
 			->orderBy('a.appid', 'ASC')
+			->addOrderBy('r.id', 'ASC')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 		return $this->buildExAppWithRoutes($qb->executeQuery()->fetchAll());
@@ -75,6 +76,7 @@ class ExAppMapper extends QBMapper {
 			->leftJoin('a', 'ex_apps_daemons', 'd', $qb->expr()->eq('a.daemon_config_name', 'd.name'))
 			->leftJoin('a', 'ex_apps_routes', 'r', $qb->expr()->eq('a.appid', 'r.appid'))
 			->orderBy('a.appid', 'ASC')
+			->addOrderBy('r.id', 'ASC')
 			->where(
 				$qb->expr()->eq('a.appid', $qb->createNamedParameter($appId))
 			);
