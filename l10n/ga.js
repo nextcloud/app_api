@@ -71,6 +71,7 @@ OC.L10N.register(
     "Deploy daemon" : "Imscaradh deamhan",
     "Default daemon. ExApps will be installed on it" : "Deamhan réamhshocraithe. Déanfar ExApps a shuiteáil air",
     "The \"Manual install\" daemon is usually used for development. It cannot be set as the default daemon." : "De ghnáth, úsáidtear an daemon \"Suiteáil láimhe\" le haghaidh forbartha. Ní féidir é a shocrú mar an daemon réamhshocraithe.",
+    "Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon." : "Tá rochtain dhíreach Docker (Docker Socket Proxy) imithe i léig agus bainfear í i Nextcloud 35. Aistrigh chuig daemon bunaithe ar HaRP le do thoil.",
     "This is a Kubernetes daemon managed via CLI." : "Is daemon Kubernetes é seo atá á bhainistiú trí CLI.",
     "ExApps installed" : "ExApps suiteáilte",
     "Name" : "Ainm",
