@@ -312,11 +312,12 @@ class ExAppProxyController extends Controller {
 
 	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): array {
 		foreach ($exApp->getRoutes() as $route) {
-			if (preg_match('/' . $route['url'] . '/i', $exAppRoute) === 1
+			$pattern = '~^(?:' . str_replace('~', '\\~', $route['url']) . ')~i';
+			if (preg_match($pattern, $exAppRoute) === 1
 				&& str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()))
-				&& $this->passesExAppProxyRouteAccessLevelCheck($route['access_level'])
 			) {
-				return $route;
+				// First match by path+verb wins. Apply its access level without falling through to broader routes.
+				return $this->passesExAppProxyRouteAccessLevelCheck($route['access_level']) ? $route : [];
 			}
 		}
 		return [];
