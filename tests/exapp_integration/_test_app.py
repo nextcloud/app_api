@@ -3,8 +3,14 @@
 """Minimal test ExApp for AppAPI integration tests.
 
 Replaces the nc_py_api-based `tests/_install.py`. Implements only the
-callbacks AppAPI invokes (`/init`, `/enabled`, `/heartbeat`) plus a few
-introspection endpoints used by the integration tests.
+callbacks AppAPI invokes (`/enabled`, `/heartbeat`) plus a few introspection
+endpoints used by the integration tests.
+
+We deliberately do not register a `/init` route: AppAPI's
+`dispatchExAppInitInternal` treats a 404/501 from the ExApp as "no init step
+needed" and marks init progress = 100. This lets `app_api:app:register
+--wait-finish` complete promptly without the test app having to call back to
+`/ex-app/status` itself.
 """
 
 import os
@@ -38,12 +44,6 @@ def verify_auth(request: FastAPIRequest) -> str:
     if secret != APP_SECRET:
         raise HTTPException(status_code=401, detail="Invalid app secret")
     return username
-
-
-@APP.post("/init")
-async def init_callback(request: FastAPIRequest):
-    verify_auth(request)
-    return JSONResponse(content={}, status_code=200)
 
 
 @APP.put("/enabled")

@@ -7,7 +7,15 @@ We send a request to a Nextcloud OCS endpoint that returns the current user
 ID (`/cloud/user`), once with no AA-USER-ID and once with one explicitly set.
 """
 
+import os
+import subprocess
+
 from ._client import AppAPIClient
+
+OCC = os.environ.get(
+    "OCC_CMD",
+    "docker exec appapi-nextcloud-1 sudo -u www-data php occ",
+).split()
 
 
 def _whoami(client: AppAPIClient) -> str:
@@ -40,17 +48,23 @@ def test_aa_user_id_changes_effective_user(client: AppAPIClient) -> None:
 
 def _ensure_test_user_exists() -> str:
     """Make sure a non-admin user exists for the impersonation check."""
-    import subprocess
     user = "phpunit_user_impersonation"
-    OCC = ["docker", "exec", "appapi-nextcloud-1",
-           "sudo", "-u", "www-data", "php", "occ"]
-    r = subprocess.run(OCC + ["user:info", user], capture_output=True, text=True)
-    if r.returncode != 0:
-        env = "OC_PASS=phpunit_password_for_test"
+    password = "phpunit_password_for_test"
+    if subprocess.run(OCC + ["user:info", user], capture_output=True).returncode == 0:
+        return user
+    # `user:add --password-from-env` reads OC_PASS from the env. For a
+    # `docker exec ... sudo` OCC we have to inject via `-e` and preserve via
+    # `sudo -E`; for a plain `php occ` OCC, subprocess env= is enough.
+    if OCC[:2] == ["docker", "exec"]:
+        cmd = ["docker", "exec", "-e", f"OC_PASS={password}"] + OCC[2:]
+        if "-u" in cmd and "-E" not in cmd:
+            cmd.insert(cmd.index("-u") + 2, "-E")
+        subprocess.run(cmd + ["user:add", "--password-from-env", user],
+                       check=True, capture_output=True)
+    else:
         subprocess.run(
-            ["docker", "exec", "-e", env, "appapi-nextcloud-1",
-             "sudo", "-u", "www-data", "-E", "php", "occ",
-             "user:add", "--password-from-env", user],
+            OCC + ["user:add", "--password-from-env", user],
+            env={**os.environ, "OC_PASS": password},
             check=True, capture_output=True,
         )
     return user
