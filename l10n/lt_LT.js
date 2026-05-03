@@ -6,6 +6,7 @@ OC.L10N.register(
     "Delete" : "Ištrinti",
     "Password confirmation failed" : "Nepavyko patvirtinti slaptažodžio",
     "Default" : "Numatytasis",
+    "Set as default" : "Nustatyti kaip numatytąjį",
     "Edit" : "Taisyti",
     "Unlimited" : "Neribotai",
     "Name" : "Pavadinimas",
