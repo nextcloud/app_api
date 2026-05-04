@@ -1,17 +1,21 @@
 # SPDX-FileCopyrightText: 2026 Nextcloud GmbH and Nextcloud contributors
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Lifecycle callbacks: /init and /enabled fire on the registered ExApp.
+"""Lifecycle: /enabled fires on the registered ExApp.
 
 Replaces the implicit lifecycle coverage from nc_py_api/tests/_install.py and
-its `set_handlers` indirection. We use AppAPI's /ex-app/{appId}/enabled OCS
-endpoint to flip enabled state and verify the test ExApp returned 200 to the
-callback (otherwise the OCC enable command itself would fail).
+its `set_handlers` indirection. We toggle enabled state via OCC and verify the
+test ExApp returned 200 to the /enabled callback (otherwise the OCC command
+itself would fail). The init callback is not exercised here because the test
+ExApp deliberately does not implement /init (see _test_app.py).
 """
 
+import os
 import subprocess
 
-OCC = ["docker", "exec", "appapi-nextcloud-1",
-       "sudo", "-u", "www-data", "php", "occ"]
+OCC = os.environ.get(
+    "OCC_CMD",
+    "docker exec appapi-nextcloud-1 sudo -u www-data php occ",
+).split()
 
 
 def _is_enabled(app_id: str) -> bool:

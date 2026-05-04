@@ -15,7 +15,8 @@
 #
 # The ExApp itself (uvicorn _test_app:APP) must be running and reachable from
 # the Nextcloud container at $APP_HOST:$APP_PORT BEFORE this script runs,
-# because `app_api:app:enable` calls /init synchronously.
+# because `app_api:app:register --wait-finish` calls /heartbeat and /init
+# synchronously and would fail/hang otherwise.
 set -euo pipefail
 
 NEXTCLOUD_CONTAINER=${NEXTCLOUD_CONTAINER:-appapi-nextcloud-1}
@@ -46,10 +47,10 @@ docker exec "$NEXTCLOUD_CONTAINER" curl -fs "http://$APP_HOST:$APP_PORT/heartbea
 "${OCC[@]}" app_api:app:unregister "$APP_ID" --silent 2>/dev/null || true
 
 JSON=$(cat <<EOF
-{"id":"$APP_ID","name":"AppAPI Integration Test ExApp","version":"$APP_VERSION","secret":"$APP_SECRET","port":$APP_PORT,"host":"$APP_HOST","protocol":"http","system_app":0}
+{"id":"$APP_ID","name":"AppAPI Integration Test ExApp","version":"$APP_VERSION","secret":"$APP_SECRET","port":$APP_PORT,"host":"$APP_HOST","protocol":"http"}
 EOF
 )
-"${OCC[@]}" app_api:app:register "$APP_ID" "$DAEMON_NAME" --json-info="$JSON" --silent
+"${OCC[@]}" app_api:app:register "$APP_ID" "$DAEMON_NAME" --json-info="$JSON" --silent --wait-finish
 "${OCC[@]}" app_api:app:enable "$APP_ID" || true
 
 # Confirm
