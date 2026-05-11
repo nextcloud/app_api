@@ -301,17 +301,15 @@ class AppAPIService {
 		$authValid = $authorizationSecret === $exApp->getSecret();
 
 		if ($authValid) {
-			if (!$isDav) {
-				try {
-					$path = $request->getPathInfo();
-				} catch (\Exception $e) {
-					$this->logger->error(sprintf('Error getting path info. Error: %s', $e->getMessage()), ['exception' => $e]);
-					return false;
-				}
-				if (($this->sanitizeOcsRoute($path) !== '/apps/app_api/ex-app/state') && !$exApp->getEnabled()) {
-					$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
-					return false;
-				}
+			try {
+				$path = $request->getPathInfo();
+			} catch (\Exception $e) {
+				$this->logger->error(sprintf('Error getting path info. Error: %s', $e->getMessage()), ['exception' => $e]);
+				return false;
+			}
+			if (($this->sanitizeOcsRoute($path) !== '/apps/app_api/ex-app/state') && !$exApp->getEnabled()) {
+				$this->logger->error(sprintf('ExApp with appId %s is disabled (%s)', $request->getHeader('EX-APP-ID'), $request->getRequestUri()));
+				return false;
 			}
 			if (!$this->handleExAppVersionChange($request, $exApp)) {
 				return false;
