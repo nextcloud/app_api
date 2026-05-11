@@ -17,7 +17,9 @@ use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
+use OCA\AppAPI\Service\ExAppImageCleanupService;
 use OCA\AppAPI\Service\ExAppService;
+use OCA\AppAPI\Service\ImageCleanupChoice;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -38,6 +40,7 @@ class Update extends Command {
 		private readonly ExAppArchiveFetcher $exAppArchiveFetcher,
 		private readonly ExAppFetcher $exAppFetcher,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
+		private readonly ExAppImageCleanupService $imageCleanupService,
 	) {
 		parent::__construct();
 	}
@@ -56,6 +59,8 @@ class Update extends Command {
 		$this->addOption('all', null, InputOption::VALUE_NONE, 'Updates all enabled and updatable apps');
 		$this->addOption('showonly', null, InputOption::VALUE_NONE, 'Additional flag for "--all" to only show all updatable apps');
 		$this->addOption('include-disabled', null, InputOption::VALUE_NONE, 'Additional flag for "--all" to also update disabled apps');
+		$this->addOption('purge-old-image-now', null, InputOption::VALUE_NONE, 'Delete the old ExApp Docker image immediately after update, without the configured grace period.');
+		$this->addOption('keep-old-image', null, InputOption::VALUE_NONE, 'Do not schedule any cleanup of the old ExApp image; admin will remove it manually.');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -65,6 +70,9 @@ class Update extends Command {
 			return 1;
 		} elseif (!empty($appId) && $input->getOption('all')) {
 			$output->writeln('<error>The "--all" flag is mutually exclusive with specifying app</error>');
+			return 1;
+		} elseif ((bool)$input->getOption('purge-old-image-now') && (bool)$input->getOption('keep-old-image')) {
+			$output->writeln('<error>--purge-old-image-now and --keep-old-image are mutually exclusive.</error>');
 			return 1;
 		} elseif ($input->getOption('all')) {
 			$apps = $this->exAppFetcher->get();
@@ -208,6 +216,14 @@ class Update extends Command {
 		$harpK8sUrl = null;
 		$k8sRoles = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$cleanupChoice = ImageCleanupChoice::fromFlags(
+				(bool)$input->getOption('purge-old-image-now'),
+				(bool)$input->getOption('keep-old-image'),
+			);
+			// Capture the OLD image ref before the deploy replaces the container.
+			// We schedule cleanup for it after the new image is verified running.
+			$oldImageRef = $this->imageCleanupService->captureImageRef($daemonConfig, $appId, $cleanupChoice);
+
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
 			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
 				$deployResult = $this->dockerActions->deployExAppHarp($exApp, $daemonConfig, $deployParams);
@@ -231,6 +247,14 @@ class Update extends Command {
 				$this->exAppService->setStatusError($exApp, 'Container healthcheck failed');
 				return 1;
 			}
+
+			// Deploy + healthcheck both succeeded; safe to schedule cleanup of the old ref.
+			$this->imageCleanupService->scheduleCleanup(
+				$oldImageRef,
+				$exApp,
+				$daemonConfig,
+				$cleanupChoice,
+			);
 
 			$exAppUrl = $this->dockerActions->resolveExAppUrl(
 				$appId,

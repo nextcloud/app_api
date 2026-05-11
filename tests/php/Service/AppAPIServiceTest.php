@@ -17,6 +17,7 @@ use OCA\AppAPI\Service\AppAPICommonService;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
+use OCA\AppAPI\Service\ExAppImageCleanupService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
 use OCP\Http\Client\IClient;
@@ -71,6 +72,7 @@ class AppAPIServiceTest extends TestCase {
 		$daemonConfigService = $this->createMock(DaemonConfigService::class);
 		$exAppDeployOptionsService = $this->createMock(ExAppDeployOptionsService::class);
 		$harpService = $this->createMock(HarpService::class);
+		$imageCleanupService = $this->createMock(ExAppImageCleanupService::class);
 
 		$this->service = new AppAPIService(
 			$this->logger,
@@ -90,6 +92,7 @@ class AppAPIServiceTest extends TestCase {
 			$daemonConfigService,
 			$exAppDeployOptionsService,
 			$harpService,
+			$imageCleanupService,
 		);
 	}
 

@@ -53,6 +53,7 @@ class AppAPIService {
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 		private readonly HarpService $harpService,
+		private readonly ExAppImageCleanupService $imageCleanupService,
 	) {
 		$this->client = $clientService->newClient();
 		$this->exAppService->setAppAPIService($this);
@@ -802,11 +803,28 @@ class AppAPIService {
 				$this->disableExApp($exApp);
 				if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
+					// The daemon config is deleted right after this, so a grace-period
+					// job could never reach its Docker socket again; when automatic
+					// cleanup is enabled, purge the image immediately instead
+					// (best-effort, Docker 409 protects shared images). This is an
+					// automatic path, so the master toggle is honored here even
+					// though PURGE_NOW mechanics are used.
+					$imageRef = $this->imageCleanupService->isMasterEnabled()
+						? $this->imageCleanupService->captureImageRef($daemonConfig, $exApp->getAppid(), ImageCleanupChoice::PURGE_NOW)
+						: null;
 					if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
 						$this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
 					} else {
 						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
 						$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));
+					}
+					if ($imageRef !== null) {
+						$this->imageCleanupService->scheduleCleanup(
+							$imageRef,
+							$exApp,
+							$daemonConfig,
+							ImageCleanupChoice::PURGE_NOW,
+						);
 					}
 				}
 				$this->exAppService->unregisterExApp($exApp->getAppid());

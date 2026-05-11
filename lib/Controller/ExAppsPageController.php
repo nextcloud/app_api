@@ -23,7 +23,9 @@ use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
+use OCA\AppAPI\Service\ExAppImageCleanupService;
 use OCA\AppAPI\Service\ExAppService;
+use OCA\AppAPI\Service\ImageCleanupChoice;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -61,6 +63,7 @@ class ExAppsPageController extends Controller {
 		private readonly IAppManager $appManager,
 		private readonly ExAppService $exAppService,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
+		private readonly ExAppImageCleanupService $imageCleanupService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -475,13 +478,14 @@ class ExAppsPageController extends Controller {
 	 * @param string $appId ID of the ExApp
 	 * @param bool $removeContainer Whether to remove the ExApp container
 	 * @param bool $removeData Whether to remove the ExApp data volume
+	 * @param 'grace'|'now'|'keep' $imageCleanup When to remove the ExApp Docker image: after the configured grace period, immediately or never
 	 *
 	 * @return JSONResponse<Http::STATUS_OK, list<empty>, array{}>
 	 *
 	 * 200: ExApp uninstalled
 	 */
 	#[PasswordConfirmationRequired]
-	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
+	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false, string $imageCleanup = 'grace'): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp) {
 			if ($exApp->getEnabled()) {
@@ -491,6 +495,9 @@ class ExAppsPageController extends Controller {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
 			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 				$this->dockerActions->initGuzzleClient($daemonConfig);
+				$choice = ImageCleanupChoice::tryFrom($imageCleanup) ?? ImageCleanupChoice::GRACE;
+				// Capture before removal so we still have the ref to clean up afterwards.
+				$capturedImageRef = $this->imageCleanupService->captureImageRef($daemonConfig, $appId, $choice);
 				if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
 					$this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $removeData);
 				} else {
@@ -501,6 +508,7 @@ class ExAppsPageController extends Controller {
 						}
 					}
 				}
+				$this->imageCleanupService->scheduleCleanup($capturedImageRef, $exApp, $daemonConfig, $choice);
 			}
 			$this->exAppService->unregisterExApp($appId);
 		}
