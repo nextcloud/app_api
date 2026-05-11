@@ -49,6 +49,26 @@
 				:aria-label-combobox="t('app_api', 'ExApp container restart policy')"
 				@update:model-value="onInput" />
 		</NcSettingsSection>
+		<NcSettingsSection
+			:name="t('app_api', 'ExApp Docker image cleanup')"
+			:description="t('app_api', 'Remove old ExApp images from Docker daemons after uninstall or update. Kubernetes deployments use the kubelet built-in image garbage collection and are not affected by these settings.')"
+			:aria-label="t('app_api', 'ExApp Docker image cleanup')">
+			<NcCheckboxRadioSwitch v-model="state.image_cleanup_enabled"
+				type="switch"
+				@update:model-value="onCleanupEnabledToggled">
+				{{ t('app_api', 'Automatically remove unused ExApp images') }}
+			</NcCheckboxRadioSwitch>
+			<p class="cleanup-grace-desc">
+				{{ t('app_api', 'Grace period in hours before deleting an orphaned ExApp image. 0 = delete immediately, maximum 720 (30 days).') }}
+			</p>
+			<NcInputField v-model="state.image_cleanup_grace_hours"
+				class="setting"
+				type="number"
+				:min="0"
+				:max="720"
+				:placeholder="t('app_api', 'Grace period in hours')"
+				@update:model-value="onGraceHoursInput" />
+		</NcSettingsSection>
 	</div>
 </template>
 
@@ -63,6 +83,7 @@ import NcSettingsSection from '@nextcloud/vue/components/NcSettingsSection'
 import NcInputField from '@nextcloud/vue/components/NcInputField'
 import NcSelect from '@nextcloud/vue/components/NcSelect'
 import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
 
 import AppAPIIcon from './icons/AppAPIIcon.vue'
 import DaemonConfigList from './DaemonConfig/DaemonConfigList.vue'
@@ -76,6 +97,7 @@ export default {
 		NcNoteCard,
 		NcInputField,
 		NcSelect,
+		NcCheckboxRadioSwitch,
 	},
 	data() {
 		return {
@@ -125,6 +147,18 @@ export default {
 			this.state[key] = newValue
 			this.saveOptions({ [key]: this.state[key] ? '1' : '0' })
 		},
+		onCleanupEnabledToggled() {
+			// v-model has already updated state.image_cleanup_enabled to the new bool;
+			// persist it as a real boolean so the backend stores via setValueBool.
+			this.saveOptions({ image_cleanup_enabled: !!this.state.image_cleanup_enabled })
+		},
+		onGraceHoursInput(value) {
+			delay(() => {
+				const clamped = Math.min(720, Math.max(0, parseInt(value, 10) || 0))
+				this.state.image_cleanup_grace_hours = clamped
+				this.saveOptions({ image_cleanup_grace_hours: clamped })
+			}, 2000)()
+		},
 		linkToExAppsManagement() {
 			return generateUrl('/apps/app_api/apps')
 		},
@@ -143,6 +177,15 @@ export default {
 	.setting {
 		width: fit-content;
 		max-width: 400px;
+	}
+
+	// Mirrors NcSettingsSection's __desc style so the grace-period hint reads
+	// like a section description even though it lives inside the section above.
+	.cleanup-grace-desc {
+		color: var(--color-text-maxcontrast);
+		max-width: 900px;
+		margin-top: 12px;
+		margin-bottom: 8px;
 	}
 }
 </style>

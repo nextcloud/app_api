@@ -15,7 +15,9 @@ use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
+use OCA\AppAPI\Service\ExAppImageCleanupService;
 use OCA\AppAPI\Service\ExAppService;
+use OCA\AppAPI\Service\ImageCleanupChoice;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,6 +33,7 @@ class Unregister extends Command {
 		private readonly KubernetesActions $kubernetesActions,
 		private readonly ExAppService $exAppService,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
+		private readonly ExAppImageCleanupService $imageCleanupService,
 	) {
 		parent::__construct();
 	}
@@ -53,11 +56,15 @@ class Unregister extends Command {
 			'Continue removal even if errors.');
 		$this->addOption('keep-data', null, InputOption::VALUE_NONE, 'Keep ExApp data (volume) [deprecated, data is kept by default].');
 		$this->addOption('rm-data', null, InputOption::VALUE_NONE, 'Remove ExApp data (persistent storage volume).');
+		$this->addOption('purge-now', null, InputOption::VALUE_NONE, 'Delete the ExApp Docker image immediately, without the configured grace period.');
+		$this->addOption('keep-image', null, InputOption::VALUE_NONE, 'Do not schedule any image cleanup; admin will remove the image manually.');
 
 		$this->addUsage('test_app');
 		$this->addUsage('test_app --silent');
 		$this->addUsage('test_app --rm-data');
 		$this->addUsage('test_app --silent --force --rm-data');
+		$this->addUsage('test_app --purge-now');
+		$this->addUsage('test_app --keep-image');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -65,6 +72,17 @@ class Unregister extends Command {
 		$silent = $input->getOption('silent');
 		$force = $input->getOption('force');
 		$rmData = $input->getOption('rm-data');
+		$purgeNow = (bool)$input->getOption('purge-now');
+		$keepImage = (bool)$input->getOption('keep-image');
+		if ($purgeNow && $keepImage) {
+			$output->writeln('<error>--purge-now and --keep-image are mutually exclusive.</error>');
+			return 1;
+		}
+		$cleanupChoice = match (true) {
+			$purgeNow => ImageCleanupChoice::PURGE_NOW,
+			$keepImage => ImageCleanupChoice::KEEP,
+			default => ImageCleanupChoice::GRACE,
+		};
 
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
@@ -103,6 +121,11 @@ class Unregister extends Command {
 			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 				$this->dockerActions->initGuzzleClient($daemonConfig);
 
+				// Capture the image ref BEFORE the container is removed; we still need
+				// to know it after the removal so the cleanup job has something to delete.
+				$capturedImageRef = $this->imageCleanupService->captureImageRef($daemonConfig, $appId);
+
+				$containerRemoved = false;
 				if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
 					if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $rmData)) {
 						if (!$silent) {
@@ -113,6 +136,7 @@ class Unregister extends Command {
 							return 1;
 						}
 					} else {
+						$containerRemoved = true;
 						if (!$silent) {
 							$output->writeln(sprintf('ExApp %s successfully removed', $appId));
 						}
@@ -130,8 +154,11 @@ class Unregister extends Command {
 						if (!$force) {
 							return 1;
 						}
-					} elseif (!$silent) {
-						$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
+					} else {
+						$containerRemoved = true;
+						if (!$silent) {
+							$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
+						}
 					}
 					if ($rmData) {
 						$volumeName = $this->dockerActions->buildExAppVolumeName($appId);
@@ -146,6 +173,17 @@ class Unregister extends Command {
 							}
 						}
 					}
+				}
+
+				// Schedule image cleanup once the container is gone. Skipped silently if
+				// the master toggle is off or the ref couldn't be captured.
+				if ($containerRemoved) {
+					$this->imageCleanupService->scheduleCleanup(
+						$capturedImageRef,
+						$exApp,
+						$daemonConfig,
+						$cleanupChoice,
+					);
 				}
 			} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
 				$this->kubernetesActions->initGuzzleClient($daemonConfig);

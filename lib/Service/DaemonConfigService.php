@@ -30,6 +30,7 @@ readonly class DaemonConfigService {
 		private DaemonConfigMapper $mapper,
 		private ExAppService $exAppService,
 		private ICrypto $crypto,
+		private ExAppImageCleanupService $imageCleanupService,
 	) {
 	}
 
@@ -105,6 +106,9 @@ readonly class DaemonConfigService {
 
 	public function unregisterDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
 		try {
+			// Drop any pending image-cleanup jobs for this daemon before the daemon row is gone.
+			// Otherwise, they would fire later and silently fail.
+			$this->imageCleanupService->cancelPendingForDaemon($daemonConfig->getName());
 			return $this->mapper->delete($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to unregister daemon config. Error: ' . $e->getMessage(), ['exception' => $e]);
