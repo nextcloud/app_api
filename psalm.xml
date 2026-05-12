@@ -59,5 +59,6 @@
 	</issueHandlers>
 	<stubs>
 		<file name="tests/stubs/oca_dav_events_sabrepluginaddevent.php"/>
+		<file name="tests/stubs/oca_talk_events.php"/>
 	</stubs>
 </psalm>

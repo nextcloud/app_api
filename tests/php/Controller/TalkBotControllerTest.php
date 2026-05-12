@@ -10,10 +10,14 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Tests\php\Controller;
 
 use OCA\AppAPI\Controller\TalkBotController;
+use OCA\AppAPI\Db\TalkBot;
+use OCA\AppAPI\Db\TalkBotMapper;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\TalkBotsService;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\IRequest;
 use OCP\Security\Bruteforce\IThrottler;
@@ -130,12 +134,52 @@ class TalkBotControllerTest extends TestCase {
 	}
 
 	public function testRegisterTwiceReusesSecret(): void {
-		// TalkBotsService caches the secret keyed by the (appid, route) hash and reuses it on re-register
-		// (see getExAppTalkBotConfig: "Do not regenerate already registered bot secret"). Both register calls
-		// must succeed and return the SAME id/secret pair.
+		// TalkBotsService keeps one row per (appid, route) and reuses its stored secret on re-register
+		// so existing Talk-side bots stay valid. Both register calls must return the SAME id/secret.
 		$first = $this->controller->registerExAppTalkBot('PHPUnit Bot', self::ROUTE, 'desc')->getData();
 		$second = $this->controller->registerExAppTalkBot('PHPUnit Bot', self::ROUTE, 'desc')->getData();
 		self::assertSame($first['id'], $second['id']);
 		self::assertSame($first['secret'], $second['secret']);
+	}
+
+	public function testRegisterReturnsBadRequestWhenStoredSecretIsCorrupted(): void {
+		// Insert a TalkBot row directly with bogus secret data that ICrypto::decrypt cannot parse.
+		// The service must refuse to auto-recover (re-minting against the same URL would leave Talk
+		// wedged with a "different secret" rejection) and the controller surfaces a 400 to the caller.
+		$mapper = Server::get(TalkBotMapper::class);
+		$bot = new TalkBot();
+		$bot->setAppid(self::TEST_APP_ID);
+		$bot->setRoute(ltrim(self::ROUTE, '/'));
+		$bot->setSecret('NOT_A_VALID_CRYPTO_PAYLOAD');
+		$bot->setCreatedTime(time());
+		$mapper->insert($bot);
+
+		try {
+			$this->expectException(OCSBadRequestException::class);
+			$this->controller->registerExAppTalkBot('PHPUnit Bot', self::ROUTE, 'desc');
+		} finally {
+			// Clean up the manually-inserted corrupted row so tearDown's safeUnregister works.
+			try {
+				$mapper->delete($mapper->findByAppidAndRoute(self::TEST_APP_ID, ltrim(self::ROUTE, '/')));
+			} catch (DoesNotExistException) {
+			}
+		}
+	}
+
+	public function testFanOutUnregisterClearsAllAppBots(): void {
+		// unregisterExAppTalkBots is invoked by ExAppService::unregisterExApp. It must enumerate via
+		// TalkBotMapper::findAllByAppid and dispatch a BotUninstallEvent per bot.
+		$exApp = $this->exAppService->getExApp(self::TEST_APP_ID);
+		self::assertNotNull($exApp);
+
+		$this->talkBotsService->registerExAppBot($exApp, 'PHPUnit Bot 1', 'fanout_route_one', 'desc');
+		$this->talkBotsService->registerExAppBot($exApp, 'PHPUnit Bot 2', 'fanout_route_two', 'desc');
+		self::assertNotNull($this->talkBotsService->getTalkBotSecret(self::TEST_APP_ID, 'fanout_route_one'));
+		self::assertNotNull($this->talkBotsService->getTalkBotSecret(self::TEST_APP_ID, 'fanout_route_two'));
+
+		$this->talkBotsService->unregisterExAppTalkBots($exApp);
+
+		self::assertNull($this->talkBotsService->getTalkBotSecret(self::TEST_APP_ID, 'fanout_route_one'));
+		self::assertNull($this->talkBotsService->getTalkBotSecret(self::TEST_APP_ID, 'fanout_route_two'));
 	}
 }
