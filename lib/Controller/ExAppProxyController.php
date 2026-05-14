@@ -236,6 +236,12 @@ class ExAppProxyController extends Controller {
 		string $appId, string $other, array &$route, array &$bruteforceProtection, int &$delay
 	): ?ExApp {
 		$delay = 0;
+		if (preg_match('#(?:^|/|%2[fF])(?:\.|%2[eE]){2}(?:/|%2[fF]|$)#', $other) === 1) {
+			$this->logger->debug(
+				sprintf('Returning status 404 for "%s": path contains a parent-directory segment.', $other)
+			);
+			return null;
+		}
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			$this->logger->debug(
