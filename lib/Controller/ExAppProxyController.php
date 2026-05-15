@@ -317,9 +317,20 @@ class ExAppProxyController extends Controller {
 	}
 
 	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): array {
+		// Route URL is a regex matched against the request path including its leading slash, mirroring HaRP's target_path semantics.
+		$canonicalSubject = '/' . $exAppRoute;
 		foreach ($exApp->getRoutes() as $route) {
 			$pattern = '~^(?:' . str_replace('~', '\\~', $route['url']) . ')~i';
-			if (preg_match($pattern, $exAppRoute) === 1 &&
+			$matched = preg_match($pattern, $canonicalSubject) === 1;
+			if (!$matched && preg_match($pattern, $exAppRoute) === 1) {
+				// TODO(deprecation): remove this bare-path fallback once known ExApps have migrated their info.xml route URLs to the canonical `^/path$` form. Tracked by the AppAPI / context_chat_backend coordination effort.
+				$this->logger->debug(sprintf(
+					'ExApp "%s" matched route "%s" via legacy bare-path fallback. Update the info.xml route URL to start with "/" or "^/" so it matches against "%s".',
+					$exApp->getAppid(), $route['url'], $canonicalSubject
+				));
+				$matched = true;
+			}
+			if ($matched &&
 				str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()))
 			) {
 				// First match by path+verb wins. Apply its access level without falling through to broader routes.
