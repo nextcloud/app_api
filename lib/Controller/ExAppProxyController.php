@@ -317,6 +317,8 @@ class ExAppProxyController extends Controller {
 	}
 
 	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): array {
+		// Route URL is a regex matched against the request path including its leading slash, mirroring HaRP's target_path semantics.
+		$exAppRoute = '/' . $exAppRoute;
 		foreach ($exApp->getRoutes() as $route) {
 			$pattern = '~^(?:' . str_replace('~', '\\~', $route['url']) . ')~i';
 			if (preg_match($pattern, $exAppRoute) === 1
