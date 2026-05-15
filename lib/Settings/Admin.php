@@ -36,6 +36,16 @@ readonly class Admin implements ISettings {
 			'default_daemon_config' => $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true),
 			'init_timeout' => $this->appConfig->getValueString(Application::APP_ID, 'init_timeout', '40'),
 			'container_restart_policy' => $this->appConfig->getValueString(Application::APP_ID, 'container_restart_policy', 'unless-stopped'),
+			Application::CONF_IMAGE_CLEANUP_ENABLED => $this->appConfig->getValueBool(
+				Application::APP_ID,
+				Application::CONF_IMAGE_CLEANUP_ENABLED,
+				(bool)Application::CONF_IMAGE_CLEANUP_DEFAULTS[Application::CONF_IMAGE_CLEANUP_ENABLED],
+			),
+			Application::CONF_IMAGE_CLEANUP_GRACE_HOURS => $this->appConfig->getValueInt(
+				Application::APP_ID,
+				Application::CONF_IMAGE_CLEANUP_GRACE_HOURS,
+				Application::CONF_IMAGE_CLEANUP_DEFAULTS[Application::CONF_IMAGE_CLEANUP_GRACE_HOURS],
+			),
 		];
 
 		$defaultDaemonConfigName = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true);

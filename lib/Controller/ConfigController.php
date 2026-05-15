@@ -30,7 +30,15 @@ class ConfigController extends Controller {
 	#[NoCSRFRequired]
 	public function setAdminConfig(array $values): DataResponse {
 		foreach ($values as $key => $value) {
-			$this->appConfig->setValueString(Application::APP_ID, $key, $value, lazy: true);
+			// Preserve native types so bool/int settings (e.g. image cleanup) round-trip
+			// correctly through getValueBool/getValueInt on the read side.
+			if (is_bool($value)) {
+				$this->appConfig->setValueBool(Application::APP_ID, $key, $value, lazy: true);
+			} elseif (is_int($value)) {
+				$this->appConfig->setValueInt(Application::APP_ID, $key, $value, lazy: true);
+			} else {
+				$this->appConfig->setValueString(Application::APP_ID, $key, (string)$value, lazy: true);
+			}
 		}
 		return new DataResponse(1);
 	}

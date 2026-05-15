@@ -16,6 +16,7 @@ use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
+use OCA\AppAPI\Service\ExAppImageCleanupService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Http\JSONResponse;
@@ -52,6 +53,7 @@ class ExAppsPageControllerTest extends TestCase {
 		$appManager = $this->createMock(IAppManager::class);
 		$this->exAppService = $this->createMock(ExAppService::class);
 		$exAppDeployOptionsService = $this->createMock(ExAppDeployOptionsService::class);
+		$imageCleanupService = $this->createMock(ExAppImageCleanupService::class);
 
 		$this->controller = new ExAppsPageController(
 			$request,
@@ -67,6 +69,7 @@ class ExAppsPageControllerTest extends TestCase {
 			$appManager,
 			$this->exAppService,
 			$exAppDeployOptionsService,
+			$imageCleanupService,
 		);
 	}
 
