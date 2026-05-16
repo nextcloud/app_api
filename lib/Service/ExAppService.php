@@ -418,9 +418,8 @@ class ExAppService {
 	public function registerExAppRoutes(ExApp $exApp, array $routes): ?ExApp {
 		try {
 			$this->exAppMapper->registerExAppRoutes($exApp, $routes);
-			$exApp->setRoutes($routes);
-			return $exApp;
-		} catch (Exception $e) {
+			return $this->exAppMapper->findByAppId($exApp->getAppid());
+		} catch (Exception|MultipleObjectsReturnedException|DoesNotExistException $e) {
 			$this->logger->error(sprintf('Error while registering ExApp %s routes: %s. Routes: %s', $exApp->getAppid(), $e->getMessage(), json_encode($routes)));
 			return null;
 		}
