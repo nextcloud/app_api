@@ -26,6 +26,18 @@ class ExAppMapper extends QBMapper {
 	}
 
 	/**
+	 * Decode a JSON-list column (`bruteforce_protection`, `headers_to_exclude`) into an array,
+	 * tolerating NULL / non-string / malformed values from legacy rows.
+	 */
+	public static function parseJsonList(mixed $raw): array {
+		if (!is_string($raw)) {
+			return [];
+		}
+		$decoded = json_decode($raw, true);
+		return is_array($decoded) ? $decoded : [];
+	}
+
+	/**
 	 * @throws Exception
 	 *
 	 * @return ExApp[]
