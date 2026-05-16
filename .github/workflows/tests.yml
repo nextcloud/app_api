@@ -4,9 +4,9 @@ name: Tests
 
 on:
   pull_request:
-    branches: [main]
+    branches: [stable34]
   push:
-    branches: [main]
+    branches: [stable34]
   workflow_dispatch:
 
 permissions:
@@ -56,14 +56,14 @@ jobs:
           persist-credentials: false
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable34
 
       - name: Checkout Notifications
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
           repository: nextcloud/notifications
-          ref: master
+          ref: stable34
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -184,14 +184,14 @@ jobs:
           persist-credentials: false
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable34
 
       - name: Checkout Notifications
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
           repository: nextcloud/notifications
-          ref: master
+          ref: stable34
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -306,14 +306,14 @@ jobs:
           persist-credentials: false
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable34
 
       - name: Checkout Notifications
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
           repository: nextcloud/notifications
-          ref: master
+          ref: stable34
           path: apps/notifications
 
       - name: Checkout AppAPI
@@ -434,14 +434,14 @@ jobs:
           persist-credentials: false
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable34
 
       - name: Checkout Notifications
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
           repository: nextcloud/notifications
-          ref: master
+          ref: stable34
           path: apps/notifications
 
       - name: Checkout AppAPI
