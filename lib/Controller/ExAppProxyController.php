@@ -15,6 +15,7 @@ use GuzzleHttp\RequestOptions;
 use OC\Security\CSP\ContentSecurityPolicyNonceManager;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppMapper;
 use OCA\AppAPI\Db\ExAppRouteAccessLevel;
 use OCA\AppAPI\ProxyResponse;
 use OCA\AppAPI\Service\AppAPIService;
@@ -261,9 +262,7 @@ class ExAppProxyController extends Controller {
 			);
 			return null;
 		}
-		$bruteforceProtection = isset($route['bruteforce_protection'])
-			? json_decode($route['bruteforce_protection'], true)
-			: [];
+		$bruteforceProtection = ExAppMapper::parseJsonList($route['bruteforce_protection'] ?? null);
 		if (!empty($bruteforceProtection)) {
 			$delay = $this->throttler->sleepDelayOrThrowOnMax($this->request->getRemoteAddress(), Application::APP_ID);
 		}
@@ -350,8 +349,10 @@ class ExAppProxyController extends Controller {
 	}
 
 	private function buildHeadersWithExclude(array $route, array $headers): array {
-		$headersToExclude = json_decode($route['headers_to_exclude'], true);
-		$headersToExclude = array_map('strtolower', $headersToExclude);
+		$headersToExclude = array_map(
+			'strtolower',
+			array_filter(ExAppMapper::parseJsonList($route['headers_to_exclude'] ?? null), 'is_string')
+		);
 
 		if (!in_array('x-origin-ip', $headersToExclude)) {
 			$headersToExclude[] = 'x-origin-ip';
