@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Service;
 
+use InvalidArgumentException;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
@@ -287,15 +288,6 @@ class ExAppService {
 				} else {
 					$appInfo['external-app']['routes'] = [$appInfo['external-app']['routes']['route']];
 				}
-				// update routes, map string access_level to int
-				$appInfo['external-app']['routes'] = array_map(function ($route) use ($appId) {
-					$route['access_level'] = $this->mapExAppRouteAccessLevelNameToNumber($route['access_level']);
-					if ($route['access_level'] !== -1) {
-						return $route;
-					} else {
-						$this->logger->error(sprintf('Invalid access level `%s` for route `%s` in ExApp `%s`', $route['access_level'], $route['url'], $appId));
-					}
-				}, $appInfo['external-app']['routes']);
 			}
 			// Advanced deploy options
 			if (isset($appInfo['external-app']['environment-variables']['variable'])) {
@@ -350,21 +342,22 @@ class ExAppService {
 				}
 			}
 		}
+		if (isset($appInfo['external-app']['routes'])) {
+			if (!is_array($appInfo['external-app']['routes'])) {
+				return ['error' => sprintf("ExApp '%s' has invalid route definition. 'routes' must be a list of route objects, got %s", $appId, get_debug_type($appInfo['external-app']['routes']))];
+			}
+			try {
+				$appInfo['external-app']['routes'] = ExAppRouteHelper::normalizeAndValidate($appInfo['external-app']['routes']);
+			} catch (InvalidArgumentException $e) {
+				return ['error' => sprintf("ExApp '%s' has invalid route definition. %s", $appId, $e->getMessage())];
+			}
+		}
 		return $appInfo;
-	}
-
-	public function mapExAppRouteAccessLevelNameToNumber(string $accessLevel): int {
-		return match($accessLevel) {
-			'PUBLIC' => 0,
-			'USER' => 1,
-			'ADMIN' => 2,
-			default => -1,
-		};
 	}
 
 	public function setAppDeployProgress(ExApp $exApp, int $progress, string $error = ''): void {
 		if ($progress < 0 || $progress > 100) {
-			throw new \InvalidArgumentException('Invalid ExApp deploy status progress value');
+			throw new InvalidArgumentException('Invalid ExApp deploy status progress value');
 		}
 		$status = $exApp->getStatus();
 		if ($progress !== 0 && isset($status['deploy']) && $status['deploy'] === 100) {
