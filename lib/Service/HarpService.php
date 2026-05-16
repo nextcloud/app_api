@@ -13,6 +13,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppMapper;
 use OCA\AppAPI\DeployActions\ManualActions;
 use OCP\ICertificateManager;
 use OCP\IConfig;
@@ -116,14 +117,10 @@ class HarpService {
 			'host' => $this->getExAppHost($exApp),
 			'port' => $exApp->getPort(),
 			'routes' => array_map(function ($route) {
-				$bruteforceList = json_decode($route['bruteforce_protection'], true);
-				if (!$bruteforceList) {
-					$bruteforceList = [];
-				}
 				return [
 					'url' => $route['url'],
 					'access_level' => $route['access_level'],
-					'bruteforce_protection' => $bruteforceList,
+					'bruteforce_protection' => ExAppMapper::parseJsonList($route['bruteforce_protection'] ?? null),
 				];
 			}, $exApp->getRoutes()),
 		];
