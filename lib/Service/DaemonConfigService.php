@@ -41,7 +41,13 @@ readonly class DaemonConfigService {
 		return preg_match('/[\x00-\x1F\x7F]/', $value) === 1;
 	}
 
-	public function registerDaemonConfig(array $params): ?DaemonConfig {
+	/**
+	 * @param bool $allowDeprecatedDsp Internal / testing use only: bypass the rejection
+	 *                                 of non-HaRP `docker-install` (Docker Socket Proxy) daemons.
+	 *                                 Scheduled for removal in Nextcloud 36 together with the
+	 *                                 underlying DSP code paths.
+	 */
+	public function registerDaemonConfig(array $params, bool $allowDeprecatedDsp = false): ?DaemonConfig {
 		$name = $params['name'] ?? '';
 		if ($name === '' || $this->containsControlCharacters($name)) {
 			$this->logger->error('Failed to register daemon configuration: `name` contains invalid characters or is empty.');
@@ -78,11 +84,12 @@ readonly class DaemonConfigService {
 			$this->logger->error('Failed to register daemon configuration: setting `net=host` in HaRP is not supported when communication with ExApps is done directly without FRP.');
 			return null;
 		}
-		if ($params['accepts_deploy_id'] === DockerActions::DEPLOY_ID && empty($params['deploy_config']['harp'])) {
-			$this->logger->warning(sprintf(
-				'Daemon "%s" uses direct Docker access (Docker Socket Proxy). This deployment method is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.',
+		if ($params['accepts_deploy_id'] === DockerActions::DEPLOY_ID && empty($params['deploy_config']['harp']) && !$allowDeprecatedDsp) {
+			$this->logger->error(sprintf(
+				'Failed to register daemon "%s": direct Docker access (Docker Socket Proxy) is no longer supported for new daemon registrations. Please register a HaRP-based daemon instead.',
 				$params['name'],
 			));
+			return null;
 		}
 		$params['deploy_config']['nextcloud_url'] = rtrim($params['deploy_config']['nextcloud_url'], '/');
 		try {

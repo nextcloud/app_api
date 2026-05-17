@@ -32,20 +32,13 @@ class DataInitializationStep implements IRepairStep {
 			$harpEnabled = $this->AIODockerActions->isHarpEnabled();
 			$dspEnabled = $this->AIODockerActions->isDockerSocketProxyEnabled();
 
-			// Register Docker Socket Proxy daemon if enabled
-			if ($dspEnabled) {
-				$output->info('Docker Socket Proxy is enabled in AIO. Registering DSP daemon');
-				if ($this->AIODockerActions->registerAIODaemonConfig() !== null) {
-					$output->info('AIO Docker Socket Proxy DaemonConfig successfully registered');
-				}
-			}
-
-			// Register HaRP daemon if enabled (HaRP becomes default when both are enabled)
 			if ($harpEnabled) {
 				$output->info('HaRP is enabled in AIO. Registering HaRP daemon');
 				if ($this->AIODockerActions->registerAIOHarpDaemonConfig() !== null) {
 					$output->info('AIO HaRP DaemonConfig successfully registered');
 				}
+			} elseif ($dspEnabled) {
+				$output->warning('Docker Socket Proxy is enabled in AIO, but registration of new DSP daemons is no longer supported. Please enable HARP_ENABLED=yes in your AIO configuration so AppAPI can register a HaRP daemon.');
 			}
 		}
 	}

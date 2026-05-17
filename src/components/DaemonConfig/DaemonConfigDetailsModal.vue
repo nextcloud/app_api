@@ -19,7 +19,7 @@
 				</NcNoteCard>
 
 				<NcNoteCard v-if="isDeprecatedDirectDocker" type="warning">
-					{{ t('app_api', 'Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.') }}
+					{{ t('app_api', 'Direct Docker access (Docker Socket Proxy) is no longer supported for new daemon registrations. This existing daemon remains functional, but migration to HaRP is recommended.') }}
 				</NcNoteCard>
 
 				<NcNoteCard v-if="daemon.accepts_deploy_id === 'kubernetes-install'" type="info">

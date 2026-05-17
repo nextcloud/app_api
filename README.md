@@ -64,8 +64,10 @@ Repository: https://github.com/nextcloud/HaRP
 It is a security-hardened proxy in front of the Docker Engine socket/API and is protected by basic
 authentication and brute-force protection.
 
-> **Note:** DSP is being deprecated in favor of HaRP and is scheduled for removal in Nextcloud 35.
-> New installations should use HaRP.
+> **Note:** Starting with Nextcloud 35, registration of new DSP daemons is no longer accepted by
+> OCC, the admin API, or the AIO bootstrap. Existing DSP daemons remain visible in the admin UI
+> and continue to function unchanged. New installations must use HaRP. Removal of the underlying
+> DSP code paths is planned for a later release.
 
 Repository: https://github.com/nextcloud/docker-socket-proxy
 

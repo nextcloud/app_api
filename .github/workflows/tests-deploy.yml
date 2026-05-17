@@ -88,7 +88,7 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php --allow-deprecated-dsp
           ./occ app_api:app:register app-skeleton-python docker_local_sock \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
           ./occ app_api:app:enable app-skeleton-python
@@ -173,7 +173,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_local_sock Docker docker-install http /var/run/docker.sock http://nextcloud/index.php \
-            --net=master_bridge
+            --net=master_bridge --allow-deprecated-dsp
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
 
       - name: Registering and enabling Skeleton ExApp
@@ -273,7 +273,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ app:enable app_api
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install http nextcloud-appapi-dsp:2375 http://nextcloud/index.php \
-            --net=master_bridge --haproxy_password=some_secure_password
+            --net=master_bridge --haproxy_password=some_secure_password --allow-deprecated-dsp
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud ping -c 1 nextcloud-appapi-dsp
 
@@ -396,7 +396,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:2375 http://nextcloud/index.php \
-            --net=master_bridge --haproxy_password=some_secure_password
+            --net=master_bridge --haproxy_password=some_secure_password --allow-deprecated-dsp
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud ping -c 1 host.docker.internal
 
@@ -534,7 +534,7 @@ jobs:
           docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
             docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost:8080/index.php \
-            --net=host --haproxy_password=some_secure_password
+            --net=host --haproxy_password=some_secure_password --allow-deprecated-dsp
           docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
           docker exec nextcloud ping -c 1 host.docker.internal
 
@@ -698,7 +698,7 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php --allow-deprecated-dsp
           ./occ app_api:daemon:list
           ./occ app_api:app:register app-skeleton-python docker_local_sock \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
@@ -840,7 +840,7 @@ jobs:
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php --allow-deprecated-dsp
           ./occ app_api:daemon:list
           mkdir -p ./test_mount
           TEST_MOUNT_ABS_PATH=$(pwd)/test_mount
@@ -989,7 +989,7 @@ jobs:
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register \
             docker_socket_local Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php \
-            --net=host --set-default
+            --net=host --set-default --allow-deprecated-dsp
           ./occ app_api:daemon:list
           ./occ app_api:app:register app-skeleton-python \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
@@ -1643,7 +1643,7 @@ jobs:
       - name: Register daemon & Skeleton v1 with user env vars
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php --allow-deprecated-dsp
           ./occ app_api:app:register app-skeleton-python docker_local_sock \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
             --env='TEST_ENV_2=user_provided_value'

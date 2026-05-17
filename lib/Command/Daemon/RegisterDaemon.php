@@ -34,14 +34,14 @@ class RegisterDaemon extends Command {
 
 		$this->addArgument('name', InputArgument::REQUIRED, 'Unique deploy daemon name');
 		$this->addArgument('display-name', InputArgument::REQUIRED);
-		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED, 'The deployment method that the daemon accepts. Can be "manual-install", "docker-install", or "kubernetes-install". "docker-install" is for HaRP (recommended) and the legacy Docker Socket Proxy (deprecated, scheduled for removal in Nextcloud 35).');
+		$this->addArgument('accepts-deploy-id', InputArgument::REQUIRED, 'The deployment method that the daemon accepts. Can be "manual-install", "docker-install", or "kubernetes-install". "docker-install" requires HaRP (--harp). Direct Docker access via Docker Socket Proxy is no longer accepted for new daemon registrations.');
 		$this->addArgument('protocol', InputArgument::REQUIRED, 'The protocol used to connect to the daemon. Can be "http" or "https".');
-		$this->addArgument('host', InputArgument::REQUIRED, 'The hostname (and port) or path at which the Docker socket proxy or HaRP or the manual-install app is/would be available. This does not need to be a public host, just a host accessible by the Nextcloud server. It can also be a path to the Docker socket. (e.g. appapi-harp:8780, /var/run/docker.sock)');
+		$this->addArgument('host', InputArgument::REQUIRED, 'The hostname (and port) at which HaRP or the manual-install app is/would be available. This does not need to be a public host, just a host accessible by the Nextcloud server. (e.g. appapi-harp:8780)');
 		$this->addArgument('nextcloud_url', InputArgument::REQUIRED);
 
 		// daemon-config settings
 		$this->addOption('net', null, InputOption::VALUE_REQUIRED, 'The name of the Docker network the ex-apps installed by this daemon should use. Default is "host".');
-		$this->addOption('haproxy_password', null, InputOption::VALUE_REQUIRED, 'AppAPI Docker Socket Proxy password for HAProxy Basic auth. Only for Docker Socket Proxy daemons.');
+		$this->addOption('haproxy_password', null, InputOption::VALUE_REQUIRED, 'DEPRECATED — only valid together with --allow-deprecated-dsp. Password for HAProxy Basic auth on a Docker Socket Proxy daemon. Scheduled for removal in Nextcloud 36.');
 		$this->addOption('compute_device', null, InputOption::VALUE_REQUIRED, 'Computation device for GPU support (cpu|cuda|rocm)');
 		$this->addOption('set-default', null, InputOption::VALUE_NONE, 'Set DaemonConfig as default');
 		$this->addOption('harp', null, InputOption::VALUE_NONE, 'Set the daemon to use HaRP for all Docker and ExApp communication');
@@ -49,6 +49,10 @@ class RegisterDaemon extends Command {
 		$this->addOption('harp_shared_key', null, InputOption::VALUE_REQUIRED, 'HaRP shared key for secure communication between HaRP and AppAPI');
 		$this->addOption('harp_docker_socket_port', null, InputOption::VALUE_REQUIRED, '\'remotePort\' of the FRP client of the remote Docker socket proxy. There is one included in the harp container so this can be skipped for default setups.', '24000');
 		$this->addOption('harp_exapp_direct', null, InputOption::VALUE_NONE, 'Flag for the advanced setups only. Disables the FRP tunnel between ExApps and HaRP.');
+
+		// Internal / testing only — bypass the rejection of non-HaRP docker-install daemons.
+		// Scheduled for removal in Nextcloud 36 together with the DSP code paths.
+		$this->addOption('allow-deprecated-dsp', null, InputOption::VALUE_NONE, 'Internal / testing use only: bypass the rejection of new Docker Socket Proxy (non-HaRP docker-install) daemons. Scheduled for removal in Nextcloud 36.');
 
 		// Kubernetes options
 		$this->addOption('k8s', null, InputOption::VALUE_NONE, 'Flag to indicate Kubernetes daemon (uses kubernetes-install deploy ID). Requires --harp flag.');
@@ -62,10 +66,7 @@ class RegisterDaemon extends Command {
 		$this->addUsage('harp_proxy_docker "Harp Proxy (Docker)" "docker-install" "http" "appapi-harp:8780" "http://nextcloud.local" --net nextcloud --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
 		$this->addUsage('harp_proxy_host "Harp Proxy (Host)" "docker-install" "http" "localhost:8780" "http://nextcloud.local" --harp --harp_frp_address "localhost:8782" --harp_shared_key "some_very_secure_password" --set-default --compute_device=cuda');
 		$this->addUsage('manual_install_harp "Harp Manual Install" "manual-install" "http" "appapi-harp:8780" "http://nextcloud.local" --net nextcloud --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password"');
-		$this->addUsage('docker_install "Docker Socket Proxy" "docker-install" "http" "nextcloud-appapi-dsp:2375" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
 		$this->addUsage('manual_install "Manual Install" "manual-install" "http" null "http://nextcloud.local"');
-		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud');
-		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
 
 		// Kubernetes usage examples
 		$this->addUsage('k8s_daemon "Kubernetes HaRP" "kubernetes-install" "http" "harp.nextcloud.svc:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --k8s');
@@ -161,8 +162,13 @@ class RegisterDaemon extends Command {
 			$output->writeln('<comment>Warning: The host contains a port, which will be ignored for manual-install daemons. The ExApp\'s port from --json-info will be used instead.</comment>');
 		}
 
-		if ($acceptsDeployId === 'docker-install' && !$isHarp) {
-			$output->writeln('<comment>Warning: Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please register a HaRP-based daemon instead (pass --harp).</comment>');
+		$allowDeprecatedDsp = (bool)$input->getOption('allow-deprecated-dsp');
+		if ($acceptsDeployId === 'docker-install' && !$isHarp && !$allowDeprecatedDsp) {
+			$output->writeln('Value error: direct Docker access (Docker Socket Proxy) is no longer supported for new daemon registrations. Please register a HaRP-based daemon (pass --harp and --harp_shared_key).');
+			return 1;
+		}
+		if ($allowDeprecatedDsp && ($acceptsDeployId !== 'docker-install' || $isHarp)) {
+			$output->writeln('<comment>Note: --allow-deprecated-dsp has no effect outside non-HaRP docker-install registrations.</comment>');
 		}
 
 		if ($this->daemonConfigService->getDaemonConfigByName($name) !== null) {
@@ -172,7 +178,7 @@ class RegisterDaemon extends Command {
 
 		$secret = $isHarp
 			? $input->getOption('harp_shared_key')
-			: $input->getOption('haproxy_password') ?? '';
+			: ($input->getOption('haproxy_password') ?? '');
 
 		$defaultNet = $isK8s ? 'bridge' : 'host';
 		$deployConfig = [
@@ -209,7 +215,7 @@ class RegisterDaemon extends Command {
 			'protocol' => $protocol,
 			'host' => $host,
 			'deploy_config' => $deployConfig,
-		]);
+		], $allowDeprecatedDsp);
 
 		if ($daemonConfig === null) {
 			$output->writeln('Failed to register the daemon config.');

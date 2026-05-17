@@ -9,6 +9,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [35.0.0]
+
+### Changed
+
+- Registration of new `docker-install` daemons now requires HaRP. Direct Docker access via Docker Socket Proxy is no longer accepted by OCC `app_api:daemon:register`, the admin API, or the AIO bootstrap. Existing DSP daemons remain visible and continue to function; removal of the underlying DSP code paths is planned for Nextcloud 36.
+- OCC `app_api:daemon:register` `--haproxy_password` option is now marked deprecated and is only honoured when combined with the internal `--allow-deprecated-dsp` flag used by the backward-compatibility test suite. Both will be removed in Nextcloud 36.
+
+
 ## [34.0.0]
 
 ### Deprecated

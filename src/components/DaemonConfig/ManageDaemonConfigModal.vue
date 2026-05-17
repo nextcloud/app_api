@@ -10,7 +10,9 @@
 			<div class="register-daemon-config-body">
 				<h2>{{ isEdit ? t('app_api', 'Edit the deploy daemon') : t('app_api', 'Register a new deploy daemon') }}</h2>
 				<NcNoteCard v-if="isDeprecatedDirectDocker" type="warning">
-					{{ t('app_api', 'Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.') }}
+					{{ isEdit
+						? t('app_api', 'Direct Docker access (Docker Socket Proxy) is no longer supported for new daemon registrations. This existing daemon remains functional, but migration to HaRP is recommended.')
+						: t('app_api', 'Direct Docker access (Docker Socket Proxy) is no longer accepted for new daemon registrations. Enable HaRP to register this daemon.') }}
 				</NcNoteCard>
 				<div v-if="!isEdit" class="templates">
 					<NcSelect
@@ -410,7 +412,7 @@ export default {
 			configurationTemplateOptions: [
 				...DAEMON_TEMPLATES.map(template => ({
 					id: template.name,
-					label: template.deprecated ? `${template.displayName} (deprecated)` : template.displayName,
+					label: template.displayName,
 				})),
 			],
 			verifyingDaemonConnection: false,
@@ -529,7 +531,7 @@ export default {
 			return t('app_api', 'The Docker network that the deployed ExApps will use.')
 		},
 		cannotRegister() {
-			return this.isDaemonNameInvalid === true || this.isHaProxyPasswordValid === false || (this.isHarp && !this.deployConfig.net) || this.isMemoryLimitValid === false || this.isCpuLimitValid === false
+			return this.isDaemonNameInvalid === true || this.isHaProxyPasswordValid === false || (this.isHarp && !this.deployConfig.net) || this.isMemoryLimitValid === false || this.isCpuLimitValid === false || (!this.isEdit && this.isDeprecatedDirectDocker)
 		},
 		isAdditionalOptionValid() {
 			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''

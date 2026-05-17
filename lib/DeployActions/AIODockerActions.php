@@ -18,9 +18,9 @@ use OCP\IAppConfig;
  * Class with utils methods for AIO setup
  */
 class AIODockerActions {
-	/** @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 35. Use AIO_HARP_DAEMON_CONFIG_NAME instead. */
+	/** @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 36. Use AIO_HARP_DAEMON_CONFIG_NAME instead. */
 	public const AIO_DAEMON_CONFIG_NAME = 'docker_aio';
-	/** @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 35. Use AIO_HARP_HOST instead. */
+	/** @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 36. Use AIO_HARP_HOST instead. */
 	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
 	public const AIO_HARP_DAEMON_CONFIG_NAME = 'harp_aio';
 	public const AIO_HARP_HOST = 'nextcloud-aio-harp:8780';
@@ -41,7 +41,7 @@ class AIODockerActions {
 	/**
 	 * Registers DaemonConfig with default params to use AIO Docker Socket Proxy.
 	 *
-	 * @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 35.
+	 * @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 36.
 	 *             Use {@see registerAIOHarpDaemonConfig()} instead.
 	 */
 	public function registerAIODaemonConfig(): ?DaemonConfig {
@@ -90,7 +90,7 @@ class AIODockerActions {
 	/**
 	 * Check if Docker Socket Proxy is enabled in AIO.
 	 *
-	 * @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 35.
+	 * @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 36.
 	 *             The Docker Socket Proxy deployment mode is being replaced by HaRP.
 	 */
 	public function isDockerSocketProxyEnabled(): bool {

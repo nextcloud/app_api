@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest'
 import { DAEMON_TEMPLATES, DAEMON_COMPUTE_DEVICES } from './daemonTemplates.js'
 
 describe('DAEMON_TEMPLATES', () => {
-	it('has 8 templates', () => {
-		expect(DAEMON_TEMPLATES).toHaveLength(8)
+	it('has 5 templates', () => {
+		expect(DAEMON_TEMPLATES).toHaveLength(5)
 	})
 
 	it('each template has required fields', () => {
