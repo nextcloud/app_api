@@ -16,6 +16,7 @@ use OCA\AppAPI\Service\UI\ScriptsService;
 use OCA\AppAPI\Service\UI\StylesService;
 use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\IRequest;
 use OCP\Server;
@@ -193,6 +194,38 @@ class OCSUiControllerTest extends TestCase {
 		self::assertSame('image', $data['mime']);
 		self::assertSame('31', (string)$data['permissions']);
 		self::assertSame('2.0', $data['version']);
+		self::assertNull($data['default_action']);
+	}
+
+	public function testFileActionsV2DefaultActionRoundTrip(): void {
+		$this->controller->registerFileActionMenuV2(
+			name: 'ui_action_v2', displayName: 'V2 Action', actionHandler: '/handler2',
+			icon: '', mime: 'image', permissions: 31, order: 0, defaultAction: 'default',
+		);
+		$data = self::asArray($this->controller->getFileActionMenu('ui_action_v2')->getData());
+		self::assertSame('default', $data['default_action']);
+
+		$this->controller->registerFileActionMenuV2(
+			name: 'ui_action_v2', displayName: 'V2 Action', actionHandler: '/handler2',
+			icon: '', mime: 'image', permissions: 31, order: 0, defaultAction: 'hidden',
+		);
+		$data = self::asArray($this->controller->getFileActionMenu('ui_action_v2')->getData());
+		self::assertSame('hidden', $data['default_action']);
+
+		$this->controller->registerFileActionMenuV2(
+			name: 'ui_action_v2', displayName: 'V2 Action', actionHandler: '/handler2',
+			icon: '', mime: 'image', permissions: 31, order: 0, defaultAction: '',
+		);
+		$data = self::asArray($this->controller->getFileActionMenu('ui_action_v2')->getData());
+		self::assertNull($data['default_action']);
+	}
+
+	public function testFileActionsV2RejectsUnknownDefaultAction(): void {
+		$this->expectException(OCSBadRequestException::class);
+		$this->controller->registerFileActionMenuV2(
+			name: 'ui_action_v2', displayName: 'V2 Action', actionHandler: '/handler2',
+			icon: '', mime: 'image', permissions: 31, order: 0, defaultAction: 'bogus',
+		);
 	}
 
 	public function testInitialStateRoundTrip(): void {

@@ -61,6 +61,7 @@ class OCSUiController extends OCSController {
 	}
 
 	/**
+	 * @param string $defaultAction One of '', 'default', or 'hidden'
 	 * @throws OCSBadRequestException
 	 */
 	#[AppAPIAuth]
@@ -68,9 +69,12 @@ class OCSUiController extends OCSController {
 	#[NoCSRFRequired]
 	public function registerFileActionMenuV2(string $name, string $displayName, string $actionHandler,
 		string $icon = '', string $mime = 'file', int $permissions = 31,
-		int $order = 0): DataResponse {
+		int $order = 0, string $defaultAction = ''): DataResponse {
+		if (!in_array($defaultAction, ['', 'default', 'hidden'], true)) {
+			throw new OCSBadRequestException("Invalid defaultAction '$defaultAction' — must be '', 'default', or 'hidden'");
+		}
 		$result = $this->filesActionsMenuService->registerFileActionMenu(
-			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, '2.0');
+			$this->request->getHeader('EX-APP-ID'), $name, $displayName, $actionHandler, $icon, $mime, $permissions, $order, '2.0', $defaultAction ?: null);
 		if (!$result) {
 			throw new OCSBadRequestException('File Action Menu entry could not be registered');
 		}

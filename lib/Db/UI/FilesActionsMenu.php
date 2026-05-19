@@ -26,6 +26,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getIcon()
  * @method string getActionHandler()
  * @method string getVersion()
+ * @method string|null getDefaultAction()
  * @method void setAppid(string $appid)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
@@ -35,6 +36,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setIcon(string $icon)
  * @method void setActionHandler(string $actionHandler)
  * @method void setVersion(string $version)
+ * @method void setDefaultAction(string|null $defaultAction)
  */
 class FilesActionsMenu extends Entity implements JsonSerializable {
 	protected $appid;
@@ -46,6 +48,7 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 	protected $icon;
 	protected $actionHandler;
 	protected $version;
+	protected $defaultAction;
 
 	/**
 	 * @param array $params
@@ -60,6 +63,7 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		$this->addType('icon', 'string');
 		$this->addType('actionHandler', 'string');
 		$this->addType('version', 'string');
+		$this->addType('defaultAction', 'string');
 
 		if (isset($params['id'])) {
 			$this->setId($params['id']);
@@ -91,6 +95,9 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		if (isset($params['version'])) {
 			$this->setVersion($params['version']);
 		}
+		if (array_key_exists('default_action', $params)) {
+			$this->setDefaultAction($params['default_action']);
+		}
 	}
 
 	public function jsonSerialize(): array {
@@ -105,6 +112,7 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 			'icon' => $this->getIcon(),
 			'action_handler' => $this->getActionHandler(),
 			'version' => $this->getVersion(),
+			'default_action' => $this->getDefaultAction(),
 		];
 	}
 }

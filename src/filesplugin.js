@@ -151,6 +151,8 @@ export function registerFileAction33(fileAction, iconProvider) {
 		execBatch: async ({ nodes }) => execBatch(nodes),
 	}
 
+	action.default = fileAction.default_action
+
 	registerFileAction(action)
 }
 
