@@ -205,30 +205,24 @@ class ExAppMapper extends QBMapper {
 	}
 
 	/**
+	 * Insert routes for an ExApp. Caller is responsible for validating shape — see
+	 * {@see \OCA\AppAPI\Service\ExAppRouteHelper::normalizeAndValidate()}, which is invoked
+	 * by ExAppService::getAppInfo() before reaching this method.
+	 *
 	 * @throws Exception
 	 */
 	public function registerExAppRoutes(ExApp $exApp, array $routes): int {
 		$qb = $this->db->getQueryBuilder();
 		$count = 0;
 		foreach ($routes as $route) {
-			if (isset($route['bruteforce_protection']) && is_string($route['bruteforce_protection'])) {
-				$route['bruteforce_protection'] = json_decode($route['bruteforce_protection'], false);
-			}
-			if (!isset($route['headers_to_exclude'])) {
-				$route['headers_to_exclude'] = [];
-			}
 			$qb->insert('ex_apps_routes')
 				->values([
 					'appid' => $qb->createNamedParameter($exApp->getAppid()),
 					'url' => $qb->createNamedParameter($route['url']),
 					'verb' => $qb->createNamedParameter($route['verb']),
-					'access_level' => $qb->createNamedParameter($route['access_level']),
-					'headers_to_exclude' => $qb->createNamedParameter(is_array($route['headers_to_exclude']) ? json_encode($route['headers_to_exclude']) : '[]'),
-					'bruteforce_protection' => $qb->createNamedParameter(
-						isset($route['bruteforce_protection']) && is_array($route['bruteforce_protection'])
-							? json_encode($route['bruteforce_protection'])
-							: '[]'
-					),
+					'access_level' => $qb->createNamedParameter($route['access_level'], IQueryBuilder::PARAM_INT),
+					'headers_to_exclude' => $qb->createNamedParameter(json_encode($route['headers_to_exclude'])),
+					'bruteforce_protection' => $qb->createNamedParameter(json_encode($route['bruteforce_protection'])),
 				]);
 			$count += $qb->executeStatement();
 		}
