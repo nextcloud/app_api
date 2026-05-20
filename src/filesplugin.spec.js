@@ -416,6 +416,44 @@ describe('registerFileAction33', () => {
 			expect(action.enabled({ nodes: [mockNode] })).toBe(false)
 		})
 
+		it('does not set default when default_action is missing', () => {
+			const action = getRegisteredAction({
+				appid: 'testapp',
+				action_handler: 'handler',
+				name: 'test',
+				display_name: 'Test',
+				mime: 'image/jpeg',
+				order: 0,
+			})
+			expect(action.default).toBeUndefined()
+		})
+
+		it('passes through default_action="default"', () => {
+			const action = getRegisteredAction({
+				appid: 'testapp',
+				action_handler: 'handler',
+				name: 'test',
+				display_name: 'Test',
+				mime: 'image/jpeg',
+				order: 0,
+				default_action: 'default',
+			})
+			expect(action.default).toBe('default')
+		})
+
+		it('passes through default_action="hidden"', () => {
+			const action = getRegisteredAction({
+				appid: 'testapp',
+				action_handler: 'handler',
+				name: 'test',
+				display_name: 'Test',
+				mime: 'image/jpeg',
+				order: 0,
+				default_action: 'hidden',
+			})
+			expect(action.default).toBe('hidden')
+		})
+
 		it('enabled returns false for empty nodes', () => {
 			const action = getRegisteredAction({
 				appid: 'testapp',

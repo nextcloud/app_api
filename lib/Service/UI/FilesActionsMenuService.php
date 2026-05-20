@@ -44,39 +44,38 @@ class FilesActionsMenuService {
 	 * @param int $permissions
 	 * @param int $order
 	 * @param string $version
+	 * @param string|null $defaultAction
 	 * @return FilesActionsMenu|null
 	 */
 	public function registerFileActionMenu(string $appId, string $name, string $displayName, string $actionHandler,
-		string $icon, string $mime, int $permissions, int $order, string $version): ?FilesActionsMenu {
+		string $icon, string $mime, int $permissions, int $order, string $version,
+		?string $defaultAction = null): ?FilesActionsMenu {
 		try {
-			$fileActionMenu = $this->mapper->findByAppidName($appId, $name);
+			$existing = $this->mapper->findByAppidName($appId, $name);
 		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$fileActionMenu = null;
+			$existing = null;
 		}
 		try {
-			$newFileActionMenu = new FilesActionsMenu([
-				'appid' => $appId,
-				'name' => $name,
-				'display_name' => $displayName,
-				'action_handler' => ltrim($actionHandler, '/'),
-				'icon' => ltrim($icon, '/'),
-				'mime' => $mime,
-				'permissions' => $permissions,
-				'order' => $order,
-				'version' => $version,
-			]);
-			if ($fileActionMenu !== null) {
-				$newFileActionMenu->setId($fileActionMenu->getId());
-			}
-			$fileActionMenu = $this->mapper->insertOrUpdate($newFileActionMenu);
+			$entity = $existing ?? new FilesActionsMenu();
+			$entity->setAppid($appId);
+			$entity->setName($name);
+			$entity->setDisplayName($displayName);
+			$entity->setActionHandler(ltrim($actionHandler, '/'));
+			$entity->setIcon(ltrim($icon, '/'));
+			$entity->setMime($mime);
+			$entity->setPermissions((string)$permissions);
+			$entity->setOrder($order);
+			$entity->setVersion($version);
+			$entity->setDefaultAction($defaultAction);
+			$result = $existing === null ? $this->mapper->insert($entity) : $this->mapper->update($entity);
 			$this->resetCacheEnabled();
+			return $result;
 		} catch (Exception $e) {
 			$this->logger->error(
 				sprintf('Failed to register ExApp %s FileActionMenu %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]
 			);
 			return null;
 		}
-		return $fileActionMenu;
 	}
 
 	public function unregisterFileActionMenu(string $appId, string $name): ?FilesActionsMenu {
