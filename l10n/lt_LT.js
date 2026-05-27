@@ -36,7 +36,7 @@ OC.L10N.register(
     "View in store" : "Rodyti parduotuvėje",
     "Visit website" : "Aplankyti svetainę",
     "Report a bug" : "Pranešti apie klaidą",
-    "User documentation" : "Naudotojo dokumentacija",
+    "User documentation" : "Vartotojo dokumentacija",
     "Admin documentation" : "Administratoriaus dokumentacija",
     "Developer documentation" : "Plėtotojo dokumentacija",
     "This app is supported via your current Nextcloud subscription." : "Ši programėlė yra palaikoma per jūsų esamą Nextcloud prenumeratą.",
