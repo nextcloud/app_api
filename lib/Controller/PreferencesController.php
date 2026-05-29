@@ -81,7 +81,7 @@ class PreferencesController extends OCSController {
 			throw new OCSBadRequestException('Failed to delete user config values');
 		}
 		if ($result === 0) {
-			throw new OCSNotFoundException('No preferences_ex values deleted');
+			throw new OCSNotFoundException('No user config values deleted');
 		}
 		return new DataResponse($result, Http::STATUS_OK);
 	}

@@ -10,69 +10,74 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Db;
 
 use JsonSerializable;
-use OCP\AppFramework\Db\Entity;
 
 /**
- * Class ExAppPreference
+ * App per-user preference value object.
  *
- * @package OCA\AppAPI\Db
+ * Historically a database entity backed by the `preferences_ex` table. ExApp preferences now
+ * live in the server's standard `oc_preferences` (via {@see \OCA\AppAPI\Service\ExAppPreferenceService});
+ * this class remains as a plain serializable DTO for OCS responses and internal callers.
  *
- * @method string getUserid()
- * @method string getAppid()
- * @method string getConfigkey()
- * @method string getConfigvalue()
- * @method int getSensitive()
- * @method void setUserid(string $userid)
- * @method void setAppid(string $appid)
- * @method void setConfigkey(string $configkey)
- * @method void setConfigvalue(string $configvalue)
- * @method void setSensitive(int $sensitive)
+ * The `id` field has no surrogate key anymore (the server table uses a composite primary key);
+ * it is kept in the serialized shape as `0` for backwards compatibility and is unused.
  */
-class ExAppPreference extends Entity implements JsonSerializable {
-	protected $userid;
-	protected $appid;
-	protected $configkey;
-	protected $configvalue;
-	protected $sensitive;
+class ExAppPreference implements JsonSerializable {
+	private int $id;
+	private string $userid;
+	private string $appid;
+	private string $configkey;
+	private string $configvalue;
+	private int $sensitive;
 
-	/**
-	 * @param array $params
-	 */
 	public function __construct(array $params = []) {
-		$this->addType('userid', 'string');
-		$this->addType('appid', 'string');
-		$this->addType('configkey', 'string');
-		$this->addType('configvalue', 'string');
-		$this->addType('sensitive', 'integer');
+		$this->id = isset($params['id']) ? (int)$params['id'] : 0;
+		$this->userid = (string)($params['userid'] ?? '');
+		$this->appid = (string)($params['appid'] ?? '');
+		$this->configkey = (string)($params['configkey'] ?? '');
+		$this->configvalue = (string)($params['configvalue'] ?? '');
+		$this->sensitive = (int)($params['sensitive'] ?? 0);
+	}
 
-		if (isset($params['id'])) {
-			$this->setId($params['id']);
-		}
-		if (isset($params['userid'])) {
-			$this->setUserid($params['userid']);
-		}
-		if (isset($params['appid'])) {
-			$this->setAppid($params['appid']);
-		}
-		if (isset($params['configkey'])) {
-			$this->setConfigkey($params['configkey']);
-		}
-		if (isset($params['configvalue'])) {
-			$this->setConfigvalue($params['configvalue']);
-		}
-		if (isset($params['sensitive'])) {
-			$this->setSensitive($params['sensitive']);
-		}
+	public function getId(): int {
+		return $this->id;
+	}
+
+	public function getUserid(): string {
+		return $this->userid;
+	}
+
+	public function getAppid(): string {
+		return $this->appid;
+	}
+
+	public function getConfigkey(): string {
+		return $this->configkey;
+	}
+
+	public function getConfigvalue(): string {
+		return $this->configvalue;
+	}
+
+	public function setConfigvalue(string $configValue): void {
+		$this->configvalue = $configValue;
+	}
+
+	public function getSensitive(): int {
+		return $this->sensitive;
+	}
+
+	public function setSensitive(int $sensitive): void {
+		$this->sensitive = $sensitive;
 	}
 
 	public function jsonSerialize(): array {
 		return [
-			'id' => $this->getId(),
-			'user_id' => $this->getUserid(),
-			'appid' => $this->getAppid(),
-			'configkey' => $this->getConfigkey(),
-			'configvalue' => $this->getConfigvalue(),
-			'sensitive' => $this->getSensitive(),
+			'id' => $this->id,
+			'user_id' => $this->userid,
+			'appid' => $this->appid,
+			'configkey' => $this->configkey,
+			'configvalue' => $this->configvalue,
+			'sensitive' => $this->sensitive,
 		];
 	}
 }

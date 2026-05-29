@@ -14,6 +14,7 @@ use OCA\AppAPI\Service\ExAppConfigService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
+use OCP\IAppConfig;
 use OCP\IRequest;
 use OCP\Server;
 use PHPUnit\Framework\Attributes\Group;
@@ -103,5 +104,41 @@ class AppConfigControllerTest extends TestCase {
 	public function testDeleteMissingThrowsNotFound(): void {
 		$this->expectException(OCSNotFoundException::class);
 		$this->controller->deleteAppConfigValues(['no_such_key_phpunit_xyz']);
+	}
+
+	public function testSensitiveDowngradeClearsFlag(): void {
+		// IAppConfig keeps sensitivity sticky; the service must force the downgrade so an
+		// explicit sensitive=0 on a previously-sensitive key actually unsets it (and the value
+		// stays readable as plaintext). This mirrors nc_py_api's appcfg_prefs_ex sensitive test.
+		$this->controller->setAppConfigValue(self::KEY_SECRET, '123', sensitive: 1);
+		$response = $this->controller->setAppConfigValue(self::KEY_SECRET, '123', sensitive: 0);
+		self::assertSame(0, $response->getData()->getSensitive());
+
+		$rows = $this->controller->getAppConfigValues([self::KEY_SECRET])->getData();
+		self::assertSame('123', array_column($rows, 'configvalue', 'configkey')[self::KEY_SECRET]);
+	}
+
+	public function testEmptySensitiveValueRoundTrips(): void {
+		// Empty + sensitive: server encrypts an empty string; read must return '' (not the envelope).
+		$this->controller->setAppConfigValue(self::KEY_SECRET, '', sensitive: 1);
+		$rows = $this->controller->getAppConfigValues([self::KEY_SECRET])->getData();
+		self::assertSame('', array_column($rows, 'configvalue', 'configkey')[self::KEY_SECRET]);
+	}
+
+	public function testNonLazyKeyIsReadableAndDeletable(): void {
+		// A key created non-lazy (e.g. via `occ config:app:set` or a colliding PHP app) must still be
+		// readable and deletable through the service — existence checks use lazy-agnostic hasKey(null).
+		$appConfig = Server::get(IAppConfig::class);
+		$appConfig->setValueString(self::TEST_APP_ID, self::KEY_PLAIN, 'nonlazyval', lazy: false);
+		try {
+			$rows = $this->controller->getAppConfigValues([self::KEY_PLAIN])->getData();
+			self::assertSame('nonlazyval', array_column($rows, 'configvalue', 'configkey')[self::KEY_PLAIN] ?? null);
+			$del = $this->controller->deleteAppConfigValues([self::KEY_PLAIN]);
+			self::assertSame(Http::STATUS_OK, $del->getStatus(), 'non-lazy key must be deletable');
+		} finally {
+			if ($appConfig->hasKey(self::TEST_APP_ID, self::KEY_PLAIN, null)) {
+				$appConfig->deleteKey(self::TEST_APP_ID, self::KEY_PLAIN);
+			}
+		}
 	}
 }

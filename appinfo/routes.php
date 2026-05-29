@@ -87,12 +87,16 @@ return [
 		// ExApps actions
 		['name' => 'OCSExApp#setExAppEnabled', 'url' => '/api/v1/ex-app/{appId}/enabled', 'verb' => 'PUT'],
 
-		// appconfig_ex (app configuration)
+		// ExApp app configuration (backed by the server's IAppConfig / oc_appconfig).
+		// Intentionally kept as AppAPI endpoints: the server's own provisioning_api app-config
+		// routes require admin / delegated-admin authorization, which an ExApp request lacks.
 		['name' => 'AppConfig#setAppConfigValue', 'url' => '/api/v1/ex-app/config', 'verb' => 'POST'],
 		['name' => 'AppConfig#getAppConfigValues', 'url' => '/api/v1/ex-app/config/get-values', 'verb' => 'POST'],
 		['name' => 'AppConfig#deleteAppConfigValues', 'url' => '/api/v1/ex-app/config', 'verb' => 'DELETE'],
 
-		// preferences_ex (user-specific configuration)
+		// ExApp per-user preferences (backed by the server's IUserConfig / oc_preferences).
+		// Intentionally kept: the server's provisioning_api user-config routes are write-only
+		// (no read endpoint) and have no sensitive/encrypted-value support.
 		['name' => 'Preferences#setUserConfigValue', 'url' => '/api/v1/ex-app/preference', 'verb' => 'POST'],
 		['name' => 'Preferences#getUserConfigValues', 'url' => '/api/v1/ex-app/preference/get-values', 'verb' => 'POST'],
 		['name' => 'Preferences#deleteUserConfigValues', 'url' => '/api/v1/ex-app/preference', 'verb' => 'DELETE'],
