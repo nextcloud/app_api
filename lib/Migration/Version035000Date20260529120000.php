@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Migration;
 use Closure;
 use OCP\Config\IUserConfig;
 use OCP\DB\ISchemaWrapper;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IAppConfig;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
@@ -38,6 +39,7 @@ use Throwable;
  *    rows are copied as-is and keep round-tripping through the listener. Do not sniff ciphertext.
  *  - Idempotent: a key already present in the target is skipped (standard storage wins), so a
  *    re-run after a transient failure resumes cleanly. All ExApp values are stored lazy.
+ *  - Rows are read in keyset-paginated batches so a large `preferences_ex` cannot OOM `occ upgrade`.
  */
 class Version035000Date20260529120000 extends SimpleMigrationStep {
 
@@ -47,6 +49,9 @@ class Version035000Date20260529120000 extends SimpleMigrationStep {
 	 * any data is still un-migrated.
 	 */
 	public const FAILED_FLAG = 'migration_035000_backfill_failed';
+
+	/** Read the legacy tables in keyset-paginated batches of this many rows to bound memory usage. */
+	private const BATCH_SIZE = 1000;
 
 	public function __construct(
 		private IDBConnection $connection,
@@ -68,7 +73,7 @@ class Version035000Date20260529120000 extends SimpleMigrationStep {
 			$failed += $this->migratePreferences($output);
 		}
 
-		// Persist the outcome so the table-drop migration (PR #2) can gate on it. Stored lazy under
+		// Persist the outcome so the table-drop migration can gate on it. Stored lazy under
 		// AppAPI's own app id; a value > 0 means some rows are still only in the legacy tables.
 		$this->appConfig->setValueString('app_api', self::FAILED_FLAG, (string)$failed, lazy: true);
 		if ($failed > 0) {
@@ -81,27 +86,31 @@ class Version035000Date20260529120000 extends SimpleMigrationStep {
 	private function migrateAppConfig(IOutput $output): int {
 		$migrated = $skipped = $failed = 0;
 
-		foreach ($this->fetchRows('appconfig_ex', ['id', 'appid', 'configkey', 'configvalue', 'sensitive']) as $row) {
-			$appId = (string)$row['appid'];
-			$configKey = (string)$row['configkey'];
-			$sensitive = (int)($row['sensitive'] ?? 0) === 1;
+		$lastId = 0;
+		while (($rows = $this->fetchBatch('appconfig_ex', ['appid', 'configkey', 'configvalue', 'sensitive'], $lastId)) !== []) {
+			foreach ($rows as $row) {
+				$lastId = (int)$row['id'];
+				$appId = (string)$row['appid'];
+				$configKey = (string)$row['configkey'];
+				$sensitive = (int)($row['sensitive'] ?? 0) === 1;
 
-			try {
-				if ($this->appConfig->hasKey($appId, $configKey, null)) {
-					$skipped++;
-					continue;
-				}
-				$value = $this->decryptLegacyValue((string)($row['configvalue'] ?? ''), $sensitive);
-				if ($value === null) {
-					$output->warning(sprintf('Config migration: failed to decrypt sensitive value for app %s key %s (row id=%d) — skipping', $appId, $configKey, (int)$row['id']));
+				try {
+					if ($this->appConfig->hasKey($appId, $configKey, null)) {
+						$skipped++;
+						continue;
+					}
+					$value = $this->decryptLegacyValue((string)($row['configvalue'] ?? ''), $sensitive);
+					if ($value === null) {
+						$output->warning(sprintf('Config migration: failed to decrypt sensitive value for app %s key %s (row id=%d) — skipping', $appId, $configKey, $lastId));
+						$failed++;
+						continue;
+					}
+					$this->appConfig->setValueString($appId, $configKey, $value, lazy: true, sensitive: $sensitive);
+					$migrated++;
+				} catch (Throwable $e) {
+					$output->warning(sprintf('Config migration: failed to migrate app %s key %s (row id=%d): %s — skipping', $appId, $configKey, $lastId, $e->getMessage()));
 					$failed++;
-					continue;
 				}
-				$this->appConfig->setValueString($appId, $configKey, $value, lazy: true, sensitive: $sensitive);
-				$migrated++;
-			} catch (Throwable $e) {
-				$output->warning(sprintf('Config migration: failed to migrate app %s key %s (row id=%d): %s — skipping', $appId, $configKey, (int)$row['id'], $e->getMessage()));
-				$failed++;
 			}
 		}
 
@@ -112,32 +121,36 @@ class Version035000Date20260529120000 extends SimpleMigrationStep {
 	private function migratePreferences(IOutput $output): int {
 		$migrated = $skipped = $failed = 0;
 
-		foreach ($this->fetchRows('preferences_ex', ['id', 'userid', 'appid', 'configkey', 'configvalue', 'sensitive']) as $row) {
-			$userId = (string)$row['userid'];
-			$appId = (string)$row['appid'];
-			$configKey = (string)$row['configkey'];
-			$sensitive = (int)($row['sensitive'] ?? 0) === 1;
+		$lastId = 0;
+		while (($rows = $this->fetchBatch('preferences_ex', ['userid', 'appid', 'configkey', 'configvalue', 'sensitive'], $lastId)) !== []) {
+			foreach ($rows as $row) {
+				$lastId = (int)$row['id'];
+				$userId = (string)$row['userid'];
+				$appId = (string)$row['appid'];
+				$configKey = (string)$row['configkey'];
+				$sensitive = (int)($row['sensitive'] ?? 0) === 1;
 
-			try {
-				if ($this->userConfig->hasKey($userId, $appId, $configKey, null)) {
-					$skipped++;
-					continue;
-				}
-				$value = $this->decryptLegacyValue((string)($row['configvalue'] ?? ''), $sensitive);
-				if ($value === null) {
-					$output->warning(sprintf('Preferences migration: failed to decrypt sensitive value for user %s app %s key %s (row id=%d) — skipping', $userId, $appId, $configKey, (int)$row['id']));
+				try {
+					if ($this->userConfig->hasKey($userId, $appId, $configKey, null)) {
+						$skipped++;
+						continue;
+					}
+					$value = $this->decryptLegacyValue((string)($row['configvalue'] ?? ''), $sensitive);
+					if ($value === null) {
+						$output->warning(sprintf('Preferences migration: failed to decrypt sensitive value for user %s app %s key %s (row id=%d) — skipping', $userId, $appId, $configKey, $lastId));
+						$failed++;
+						continue;
+					}
+					$this->userConfig->setValueString(
+						$userId, $appId, $configKey, $value,
+						lazy: true,
+						flags: $sensitive ? IUserConfig::FLAG_SENSITIVE : 0,
+					);
+					$migrated++;
+				} catch (Throwable $e) {
+					$output->warning(sprintf('Preferences migration: failed to migrate user %s app %s key %s (row id=%d): %s — skipping', $userId, $appId, $configKey, $lastId, $e->getMessage()));
 					$failed++;
-					continue;
 				}
-				$this->userConfig->setValueString(
-					$userId, $appId, $configKey, $value,
-					lazy: true,
-					flags: $sensitive ? IUserConfig::FLAG_SENSITIVE : 0,
-				);
-				$migrated++;
-			} catch (Throwable $e) {
-				$output->warning(sprintf('Preferences migration: failed to migrate user %s app %s key %s (row id=%d): %s — skipping', $userId, $appId, $configKey, (int)$row['id'], $e->getMessage()));
-				$failed++;
 			}
 		}
 
@@ -162,15 +175,21 @@ class Version035000Date20260529120000 extends SimpleMigrationStep {
 	}
 
 	/**
-	 * Materialize the full rowset up front: iterating a forward-only cursor while writing config
-	 * (which touches the DB on the same connection) is undefined across drivers.
+	 * Fetch up to {@see BATCH_SIZE} rows whose id is greater than `$afterId`, ordered by id, then
+	 * close the cursor before the caller issues any writes. Keyset pagination keeps memory bounded on
+	 * large tables and avoids holding a forward-only cursor open while writing config on the same
+	 * connection. The backfill never modifies the legacy tables, so paging over them is stable.
 	 *
 	 * @param string[] $columns
 	 * @return list<array<string,mixed>>
 	 */
-	private function fetchRows(string $table, array $columns): array {
+	private function fetchBatch(string $table, array $columns, int $afterId): array {
 		$qb = $this->connection->getQueryBuilder();
-		$qb->select(...$columns)->from($table);
+		$qb->select('id', ...$columns)
+			->from($table)
+			->where($qb->expr()->gt('id', $qb->createNamedParameter($afterId, IQueryBuilder::PARAM_INT)))
+			->orderBy('id', 'ASC')
+			->setMaxResults(self::BATCH_SIZE);
 		$cursor = $qb->executeQuery();
 		$rows = $cursor->fetchAll();
 		$cursor->closeCursor();

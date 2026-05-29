@@ -58,11 +58,24 @@ class Version035000Date20260529130000 extends SimpleMigrationStep {
 	}
 
 	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper {
-		// The outcome flag only existed to gate this drop; remove it once the tables are gone.
-		if ($this->dropped && $this->appConfig->hasKey('app_api', Version035000Date20260529120000::FAILED_FLAG, null)) {
+		// The outcome flag only existed to gate this drop. Once no legacy table remains it is dead
+		// bookkeeping, so clear it whether this run dropped them or they were already gone. While a
+		// table still exists (e.g. the drop was skipped due to backfill failures) the flag is kept so
+		// a later re-run still sees the failure count.
+		if ($this->appConfig->hasKey('app_api', Version035000Date20260529120000::FAILED_FLAG, null)
+			&& !$this->anyLegacyTableExists()) {
 			$this->appConfig->deleteKey('app_api', Version035000Date20260529120000::FAILED_FLAG);
 		}
 		return null;
+	}
+
+	private function anyLegacyTableExists(): bool {
+		foreach (self::LEGACY_TABLES as $table) {
+			if ($this->connection->tableExists($table)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
