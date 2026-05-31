@@ -10,6 +10,7 @@ OC.L10N.register(
     "Delete" : "Kustuta",
     "Password confirmation failed" : "Salasõna kinnitamine ei õnnestunud",
     "Default" : "Vaikimisi",
+    "Set as default" : "Määra vaikimisi väärtuseks",
     "Docker registries" : "Dockeri registrikirjed",
     "Edit" : "Redigeeri",
     "Unlimited" : "Piiramatult",
