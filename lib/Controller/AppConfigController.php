@@ -76,7 +76,7 @@ class AppConfigController extends OCSController {
 			throw new OCSBadRequestException('Error deleting app config values');
 		}
 		if ($result === 0) {
-			throw new OCSNotFoundException('No appconfig_ex values deleted');
+			throw new OCSNotFoundException('No app config values deleted');
 		}
 		return new DataResponse($result, Http::STATUS_OK);
 	}
