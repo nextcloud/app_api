@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Migration;
 
 use OCA\AppAPI\DeployActions\AIODockerActions;
-
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 

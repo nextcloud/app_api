@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Settings;
 
 use OCA\AppAPI\AppInfo\Application;
-
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\AppFramework\Http\TemplateResponse;

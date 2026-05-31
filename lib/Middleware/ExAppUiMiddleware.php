@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Middleware;
 
 use OCA\AppAPI\AppInfo\Application;
-
 use OCA\AppAPI\Controller\TopMenuController;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;

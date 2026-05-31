@@ -14,14 +14,12 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
-
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
 use OCP\App\IAppManager;
-
 use OCP\IAppConfig;
 use OCP\ICertificateManager;
 use OCP\IConfig;

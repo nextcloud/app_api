@@ -125,7 +125,6 @@ abstract class AppAPIFetcher {
 			$file = $rootFolder->getFile($this->fileName);
 			$jsonBlob = json_decode($file->getContent(), true);
 
-
 			if (is_array($jsonBlob)) {
 				// No caching when the version has been updated
 				if (isset($jsonBlob['ncversion']) && $jsonBlob['ncversion'] === $this->getVersion()) {

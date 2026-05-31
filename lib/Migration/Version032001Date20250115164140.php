@@ -55,7 +55,6 @@ class Version032001Date20250115164140 extends SimpleMigrationStep {
 			$table->addUniqueIndex(['appid', 'type'], 'deploy_options__idx');
 		}
 
-
 		return $schema;
 	}
 }

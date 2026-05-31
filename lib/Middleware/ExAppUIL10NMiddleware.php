@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Middleware;
 
 use OC\Security\CSP\ContentSecurityPolicyNonceManager;
-
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\AppPathNotFoundException;
 use OCP\App\IAppManager;

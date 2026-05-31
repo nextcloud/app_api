@@ -17,7 +17,6 @@ use OCP\IGroupManager;
 use OCP\INavigationManager;
 use OCP\IURLGenerator;
 use OCP\IUserSession;
-
 use OCP\L10N\IFactory;
 use OCP\Navigation\Events\LoadAdditionalEntriesEvent;
 use OCP\Server;
