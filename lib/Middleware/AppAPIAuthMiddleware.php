@@ -13,7 +13,6 @@ use Exception;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Exceptions\AppAPIAuthNotValidException;
 use OCA\AppAPI\Service\AppAPIService;
-
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;

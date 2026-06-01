@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\Db\ExAppPreference;
-
 use OCP\Config\IUserConfig;
 use OCP\IDBConnection;
 use Psr\Log\LoggerInterface;

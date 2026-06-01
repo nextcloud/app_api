@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\Db\ExAppMapper;
-
 use OCP\DB\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

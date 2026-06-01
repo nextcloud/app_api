@@ -11,7 +11,6 @@ namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\DaemonConfigMapper;
-
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\DeployActions\ManualActions;

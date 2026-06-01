@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\Daemon;
 
 use OCA\AppAPI\Service\DaemonConfigService;
-
 use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

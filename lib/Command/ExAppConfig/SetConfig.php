@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Command\ExAppConfig;
 
 use OCA\AppAPI\Service\ExAppConfigService;
-
 use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

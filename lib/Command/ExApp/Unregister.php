@@ -11,7 +11,6 @@ namespace OCA\AppAPI\Command\ExApp;
 
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\KubernetesActions;
-
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;

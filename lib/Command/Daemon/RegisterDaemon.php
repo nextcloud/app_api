@@ -11,7 +11,6 @@ namespace OCA\AppAPI\Command\Daemon;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Service\DaemonConfigService;
-
 use OCP\IAppConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

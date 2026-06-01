@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Listener;
 
 use OCA\AppAPI\AppAPIAuthBackend;
-
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
