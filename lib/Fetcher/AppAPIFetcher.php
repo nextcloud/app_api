@@ -15,6 +15,7 @@ use OC\Files\AppData\Factory;
 use OCA\AppAPI\AppInfo\Application;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\Files\GenericFileException;
 use OCP\Files\IAppData;
 use OCP\Files\NotFoundException;
 use OCP\Files\NotPermittedException;
@@ -147,6 +148,16 @@ abstract class AppAPIFetcher {
 			}
 		} catch (NotFoundException $e) {
 			// File does not already exists
+			$file = $rootFolder->newFile($this->fileName);
+		} catch (GenericFileException $e) {
+			// File exists but is unreadable (I/O or OS-level permission failure); drop it and refresh
+			try {
+				$file->delete();
+			} catch (Exception) {
+				$this->logger->error('Could not read appstore cache file', ['app' => 'appstoreExAppFetcher', 'exception' => $e]);
+				return [];
+			}
+			$this->logger->warning('Could not read appstore cache file, it will be refreshed', ['app' => 'appstoreExAppFetcher', 'exception' => $e]);
 			$file = $rootFolder->newFile($this->fileName);
 		}
 
