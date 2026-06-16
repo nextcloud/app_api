@@ -21,6 +21,7 @@ use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
 use OCA\AppAPI\Middleware\ExAppUiMiddleware;
+use OCA\AppAPI\Middleware\MaintenanceModeMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
@@ -60,6 +61,7 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadFilesPluginListener::class);
 		$context->registerCapability(Capabilities::class);
 		$context->registerCapability(PublicCapabilities::class);
+		$context->registerMiddleware(MaintenanceModeMiddleware::class);
 		$context->registerMiddleware(AppAPIAuthMiddleware::class);
 		$context->registerMiddleware(ExAppUiMiddleware::class);
 		$context->registerMiddleware(ExAppUIL10NMiddleware::class, true);
