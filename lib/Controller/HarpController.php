@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\Attribute\MaintenanceModeAvailable;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
@@ -69,6 +70,7 @@ class HarpController extends Controller {
 
 	#[PublicPage]
 	#[NoCSRFRequired]
+	#[MaintenanceModeAvailable]
 	public function getExAppMetadata(string $appId): DataResponse {
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {

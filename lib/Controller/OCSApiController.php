@@ -11,6 +11,7 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\Attribute\MaintenanceModeAvailable;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Http;
@@ -49,6 +50,7 @@ class OCSApiController extends OCSController {
 	#[PublicPage]
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	#[MaintenanceModeAvailable]
 	public function log(int $level, string $message): DataResponse {
 		try {
 			$this->logger->log($level, $message, [
@@ -71,6 +73,7 @@ class OCSApiController extends OCSController {
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
+	#[MaintenanceModeAvailable]
 	public function setAppInitProgressDeprecated(string $appId, int $progress, string $error = ''): DataResponse {
 		$exApp = $this->exAppService->getExApp($appId);
 		if (!$exApp) {
@@ -83,6 +86,7 @@ class OCSApiController extends OCSController {
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
+	#[MaintenanceModeAvailable]
 	public function setAppInitProgress(int $progress, string $error = ''): DataResponse {
 		$exApp = $this->exAppService->getExApp($this->request->getHeader('EX-APP-ID'));
 		if (!$exApp) {
@@ -101,6 +105,7 @@ class OCSApiController extends OCSController {
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
+	#[MaintenanceModeAvailable]
 	public function getEnabledState(): DataResponse {
 		$exApp = $this->exAppService->getExApp($this->request->getHeader('EX-APP-ID'));
 		if (!$exApp) {
@@ -112,6 +117,7 @@ class OCSApiController extends OCSController {
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
+	#[MaintenanceModeAvailable]
 	public function getNextcloudAbsoluteUrl(string $url): DataResponse {
 		return new DataResponse([
 			'absolute_url' => rtrim($this->config->getSystemValueString('overwrite.cli.url'), '/') . '/' . ltrim($url, '/'),
