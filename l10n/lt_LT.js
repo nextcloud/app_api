@@ -187,7 +187,7 @@ OC.L10N.register(
     "The port in HaRP which the Docker socket proxy connects to. This should be exposed but for the in-built one, it is not required to be exposed or changed." : "HaRP prievadas, prie kurio jungiasi „Docker“ lizdo tarpinis serveris. Jis turėtų būti rodomas, bet integruoto prievado atveju jo rodyti ar keisti nebūtina.",
     "Disable FRP" : "Išjungti FRP",
     "FRP is always disabled for the All-in-One setup." : "„Viskas viename“ sąrankoje FRP visada išjungtas.",
-    "Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP." : "Pažymėti tik išplėstiniams nustatymams. Išjungia FRP tunelį tarp ExApps ir HaRP.",
+    "Flag for advanced setups only. Disables the FRP tunnel between ExApps and HaRP." : "Pažymėti tik išplėstinėms sąrankoms. Išjungia FRP tunelį tarp ExApps ir HaRP.",
     "Docker network for ex-app deployment must be defined" : "Reikia apibrėžti „Docker“ tinklą, skirtą programėlės diegimui",
     "Compute device" : "Skaičiavimo įrenginys",
     "Memory limit (in MiB)" : "Atminties limitas (MiB)",
