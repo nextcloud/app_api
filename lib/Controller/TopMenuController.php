@@ -18,6 +18,7 @@ use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -26,6 +27,7 @@ use OCP\DB\Exception;
 use OCP\IGroupManager;
 use OCP\IRequest;
 
+#[OpenAPI(OpenAPI::SCOPE_IGNORE)]
 class TopMenuController extends Controller {
 
 	public bool $postprocess = false;

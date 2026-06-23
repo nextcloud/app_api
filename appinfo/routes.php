@@ -34,7 +34,7 @@ return [
 		// ExApps actions
 		['name' => 'ExAppsPage#listCategories', 'url' => '/apps/categories', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#listApps', 'url' => '/apps/list', 'verb' => 'GET' , 'root' => ''],
-		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}/{daemonId}', 'verb' => 'GET' , 'root' => ''],
+		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}/{daemonId}', 'verb' => 'GET' , 'root' => '', 'postfix' => 'get'],
 		['name' => 'ExAppsPage#enableApp', 'url' => '/apps/enable/{appId}/{daemonId}', 'verb' => 'POST' , 'root' => ''],
 		['name' => 'ExAppsPage#getAppStatus', 'url' => '/apps/status/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#getAppLogs', 'url' => '/apps/logs/{appId}', 'verb' => 'GET' , 'root' => ''],
@@ -42,8 +42,6 @@ return [
 		['name' => 'ExAppsPage#disableApp', 'url' => '/apps/disable/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#updateApp', 'url' => '/apps/update/{appId}', 'verb' => 'GET' , 'root' => ''],
 		['name' => 'ExAppsPage#uninstallApp', 'url' => '/apps/uninstall/{appId}', 'verb' => 'GET' , 'root' => ''],
-		['name' => 'ExAppsPage#viewApps', 'url' => '/apps/{category}', 'verb' => 'GET', 'defaults' => ['category' => ''] , 'root' => ''],
-		['name' => 'ExAppsPage#viewApps', 'url' => '/apps/{category}/{id}', 'verb' => 'GET', 'defaults' => ['category' => '', 'id' => ''] , 'root' => ''],
 		['name' => 'ExAppsPage#force', 'url' => '/apps/force', 'verb' => 'POST' , 'root' => ''],
 
 		// DaemonConfig actions
@@ -103,11 +101,6 @@ return [
 
 		// Notifications
 		['name' => 'Notifications#sendNotification', 'url' => '/api/v1/notification', 'verb' => 'POST'],
-
-		// Events
-		['name' => 'EventsListener#registerListener', 'url' => '/api/v1/events_listener', 'verb' => 'POST'],
-		['name' => 'EventsListener#unregisterListener', 'url' => '/api/v1/events_listener', 'verb' => 'DELETE'],
-		['name' => 'EventsListener#getListener', 'url' => '/api/v1/events_listener', 'verb' => 'GET'],
 
 		// Commands
 		['name' => 'OccCommand#registerCommand', 'url' => '/api/v1/occ_command', 'verb' => 'POST'],

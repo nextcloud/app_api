@@ -17,6 +17,8 @@ use OCP\AppFramework\Db\Entity;
  *
  * @package OCA\AppAPI\Db
  *
+ * @psalm-import-type AppAPIExAppStatus from \OCA\AppAPI\ResponseDefinitions
+ *
  * @method string getAppid()
  * @method string getVersion()
  * @method string getName()
@@ -25,7 +27,7 @@ use OCP\AppFramework\Db\Entity;
  * @method string getHost()
  * @method int getPort()
  * @method string getSecret()
- * @method array getStatus()
+ * @method AppAPIExAppStatus getStatus()
  * @method int getEnabled()
  * @method int getCreatedTime()
  * @method array getDeployConfig()

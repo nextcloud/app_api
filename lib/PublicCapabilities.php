@@ -20,6 +20,9 @@ class PublicCapabilities implements IPublicCapability {
 	) {
 	}
 
+	/**
+	 * @return array{app_api: array{version: string}}
+	 */
 	public function getCapabilities(): array {
 		$capabilities = [
 			'version' => $this->appManager->getAppVersion(Application::APP_ID),

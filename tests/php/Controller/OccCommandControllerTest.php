@@ -43,7 +43,7 @@ class OccCommandControllerTest extends TestCase {
 		$this->insertFakeExApp(self::TEST_APP_ID, self::TEST_PORT);
 		$this->request = $this->createMock(IRequest::class);
 		$this->request->method('getHeader')->willReturnCallback(
-			fn (string $name): string => $name === 'EX-APP-ID' ? self::TEST_APP_ID : ''
+			fn (string $name): string => strtoupper($name) === 'EX-APP-ID' ? self::TEST_APP_ID : ''
 		);
 		$this->service = Server::get(ExAppOccService::class);
 		$this->controller = new OccCommandController($this->request, $this->service);
@@ -67,9 +67,9 @@ class OccCommandControllerTest extends TestCase {
 		$response = $this->controller->getCommand(self::CMD_NAME);
 		self::assertSame(Http::STATUS_OK, $response->getStatus());
 		$data = $response->getData();
-		self::assertSame(self::CMD_NAME, $data->getName());
+		self::assertSame(self::CMD_NAME, $data['name']);
 		// Service strips the leading slash from execute_handler.
-		self::assertSame('handler', $data->getExecuteHandler());
+		self::assertSame('handler', $data['execute_handler']);
 
 		self::assertSame(Http::STATUS_OK, $this->controller->unregisterCommand(self::CMD_NAME)->getStatus());
 		self::assertSame(Http::STATUS_NOT_FOUND, $this->controller->getCommand(self::CMD_NAME)->getStatus());
@@ -92,9 +92,9 @@ class OccCommandControllerTest extends TestCase {
 			usages: [],
 		);
 		$data = $this->controller->getCommand(self::CMD_NAME)->getData();
-		self::assertSame('desc', $data->getDescription());
-		self::assertSame('some_url2', $data->getExecuteHandler());
-		self::assertSame($arguments, $data->getArguments());
+		self::assertSame('desc', $data['description']);
+		self::assertSame('some_url2', $data['execute_handler']);
+		self::assertSame($arguments, $data['arguments']);
 	}
 
 	public function testRegisterReplacesExistingCommand(): void {
@@ -102,8 +102,8 @@ class OccCommandControllerTest extends TestCase {
 		$this->controller->registerCommand(self::CMD_NAME, 'first desc', 'handler_v1');
 		$this->controller->registerCommand(self::CMD_NAME, 'updated desc', 'handler_v2');
 		$data = $this->controller->getCommand(self::CMD_NAME)->getData();
-		self::assertSame('updated desc', $data->getDescription());
-		self::assertSame('handler_v2', $data->getExecuteHandler());
+		self::assertSame('updated desc', $data['description']);
+		self::assertSame('handler_v2', $data['execute_handler']);
 	}
 
 	public function testGetMissingReturns404(): void {

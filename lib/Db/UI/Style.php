@@ -25,6 +25,8 @@ use OCP\AppFramework\Db\Entity;
  * @method void setType(string $type)
  * @method void setName(string $name)
  * @method void setPath(string $path)
+ *
+ * @psalm-import-type AppAPIStyle from \OCA\AppAPI\ResponseDefinitions
  */
 class Style extends Entity implements JsonSerializable {
 	protected $appid;
@@ -58,6 +60,9 @@ class Style extends Entity implements JsonSerializable {
 		}
 	}
 
+	/**
+	 * @return AppAPIStyle
+	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),

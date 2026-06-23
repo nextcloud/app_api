@@ -17,6 +17,12 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "2023 Nextcloud GmbH and Nextcloud contributors"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 
+[[annotations]]
+path = ["openapi.json", "openapi-**.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 Nextcloud GmbH and Nextcloud contributors"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
 # Workaround annotating the folders
 [[annotations]]
 path = ["docs/**", "js/**", ""]

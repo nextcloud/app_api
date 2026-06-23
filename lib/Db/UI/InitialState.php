@@ -27,6 +27,8 @@ use OCP\AppFramework\Db\Entity;
  * @method void setName(string $name)
  * @method void setKey(string $key)
  * @method void setValue(array $value)
+ *
+ * @psalm-import-type AppAPIInitialState from \OCA\AppAPI\ResponseDefinitions
  */
 class InitialState extends Entity implements JsonSerializable {
 	protected $appid;
@@ -65,6 +67,9 @@ class InitialState extends Entity implements JsonSerializable {
 		}
 	}
 
+	/**
+	 * @return AppAPIInitialState
+	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),

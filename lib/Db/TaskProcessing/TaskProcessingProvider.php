@@ -29,6 +29,8 @@ use OCP\AppFramework\Db\Entity;
  * @method string getProvider()
  * @method void setCustomTaskType(string|null $customTaskType)
  * @method string|null getCustomTaskType()
+ *
+ * @psalm-import-type AppAPITaskProcessingProvider from \OCA\AppAPI\ResponseDefinitions
  */
 class TaskProcessingProvider extends Entity implements JsonSerializable {
 	protected ?string $appId = null;
@@ -69,6 +71,9 @@ class TaskProcessingProvider extends Entity implements JsonSerializable {
 		}
 	}
 
+	/**
+	 * @return AppAPITaskProcessingProvider
+	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->id,

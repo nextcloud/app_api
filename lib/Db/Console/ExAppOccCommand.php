@@ -33,6 +33,8 @@ use OCP\AppFramework\Db\Entity;
  * @method void setOptions(array $options)
  * @method void setUsages(array $usages)
  * @method void setExecuteHandler(string $executeHandler)
+ *
+ * @psalm-import-type AppAPIOccCommand from \OCA\AppAPI\ResponseDefinitions
  */
 class ExAppOccCommand extends Entity implements JsonSerializable {
 	protected $appid;
@@ -88,6 +90,9 @@ class ExAppOccCommand extends Entity implements JsonSerializable {
 		}
 	}
 
+	/**
+	 * @return AppAPIOccCommand
+	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),

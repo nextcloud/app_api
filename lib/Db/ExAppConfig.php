@@ -20,6 +20,8 @@ use JsonSerializable;
  *
  * The `id` field has no surrogate key anymore (the server table uses a composite primary key);
  * it is kept in the serialized shape as `0` for backwards compatibility and is unused.
+ *
+ * @psalm-import-type AppAPIExAppConfig from \OCA\AppAPI\ResponseDefinitions
  */
 class ExAppConfig implements JsonSerializable {
 	private int $id;
@@ -64,6 +66,9 @@ class ExAppConfig implements JsonSerializable {
 		$this->sensitive = $sensitive;
 	}
 
+	/**
+	 * @return AppAPIExAppConfig
+	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->id,

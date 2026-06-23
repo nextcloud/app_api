@@ -37,6 +37,8 @@ use OCP\AppFramework\Db\Entity;
  * @method void setActionHandler(string $actionHandler)
  * @method void setVersion(string $version)
  * @method void setDefaultAction(string|null $defaultAction)
+ *
+ * @psalm-import-type AppAPIFileAction from \OCA\AppAPI\ResponseDefinitions
  */
 class FilesActionsMenu extends Entity implements JsonSerializable {
 	protected $appid;
@@ -100,6 +102,9 @@ class FilesActionsMenu extends Entity implements JsonSerializable {
 		}
 	}
 
+	/**
+	 * @return AppAPIFileAction
+	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),

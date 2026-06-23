@@ -12,11 +12,13 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\Response;
@@ -27,7 +29,11 @@ use OCP\Security\ICrypto;
 
 /**
  * DaemonConfig actions (for UI)
+ *
+ * @psalm-import-type AppAPIDaemonConfig from ResponseDefinitions
+ * @psalm-import-type AppAPIDaemonConfigWithAppsCount from ResponseDefinitions
  */
+#[OpenAPI(OpenAPI::SCOPE_ADMINISTRATION)]
 class DaemonConfigController extends ApiController {
 
 	public function __construct(
@@ -43,6 +49,13 @@ class DaemonConfigController extends ApiController {
 		parent::__construct(Application::APP_ID, $request);
 	}
 
+	/**
+	 * Get all registered deploy daemons together with the number of ExApps each one runs
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{daemons: list<AppAPIDaemonConfigWithAppsCount>, default_daemon_config: string}, array{}>
+	 *
+	 * 200: Daemons returned
+	 */
 	public function getAllDaemonConfigs(): Response {
 		return new JSONResponse([
 			'daemons' => $this->daemonConfigService->getDaemonConfigsWithAppsCount(),
@@ -50,6 +63,16 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
+	/**
+	 * Register a new deploy daemon
+	 *
+	 * @param array<string, mixed> $daemonConfigParams Daemon configuration parameters
+	 * @param bool $defaultDaemon Whether to set the new daemon as the default one
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{success: bool, daemonConfig: ?AppAPIDaemonConfig}, array{}>
+	 *
+	 * 200: Daemon registered
+	 */
 	#[PasswordConfirmationRequired]
 	public function registerDaemonConfig(array $daemonConfigParams, bool $defaultDaemon = false): Response {
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
@@ -58,10 +81,20 @@ class DaemonConfigController extends ApiController {
 		}
 		return new JSONResponse([
 			'success' => $daemonConfig !== null,
-			'daemonConfig' => $daemonConfig,
+			'daemonConfig' => $daemonConfig?->jsonSerialize(),
 		]);
 	}
 
+	/**
+	 * Update a registered deploy daemon
+	 *
+	 * @param string $name Name of the daemon to update
+	 * @param array<string, mixed> $daemonConfigParams New daemon configuration parameters
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{success: bool, daemonConfig: ?AppAPIDaemonConfig}, array{}>
+	 *
+	 * 200: Daemon updated
+	 */
 	#[PasswordConfirmationRequired]
 	public function updateDaemonConfig(string $name, array $daemonConfigParams): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
@@ -99,10 +132,19 @@ class DaemonConfigController extends ApiController {
 
 		return new JSONResponse([
 			'success' => true,
-			'daemonConfig' => $updatedDaemonConfig,
+			'daemonConfig' => $updatedDaemonConfig->jsonSerialize(),
 		]);
 	}
 
+	/**
+	 * Unregister a deploy daemon and remove the ExApps that run on it
+	 *
+	 * @param string $name Name of the daemon to remove
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{success: bool, daemonConfig: ?AppAPIDaemonConfig}, array{}>
+	 *
+	 * 200: Daemon unregistered
+	 */
 	#[PasswordConfirmationRequired]
 	public function unregisterDaemonConfig(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
@@ -114,10 +156,19 @@ class DaemonConfigController extends ApiController {
 		$daemonConfig = $this->daemonConfigService->unregisterDaemonConfig($daemonConfig);
 		return new JSONResponse([
 			'success' => $daemonConfig !== null,
-			'daemonConfig' => $daemonConfig,
+			'daemonConfig' => $daemonConfig?->jsonSerialize(),
 		]);
 	}
 
+	/**
+	 * Verify the connection to a registered deploy daemon
+	 *
+	 * @param string $name Name of the daemon to check
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{success: bool}, array{}>
+	 *
+	 * 200: Connection check result returned
+	 */
 	public function verifyDaemonConnection(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		$this->dockerActions->initGuzzleClient($daemonConfig);
@@ -127,6 +178,15 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
+	/**
+	 * Check the connection to a deploy daemon from the given parameters
+	 *
+	 * @param array<string, mixed> $daemonParams Daemon parameters to check
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{success: bool}, array{}>
+	 *
+	 * 200: Connection check result returned
+	 */
 	public function checkDaemonConnection(array $daemonParams): Response {
 		// Safely check if "haproxy_password" exists before accessing it
 		// note: UI passes here 'deploy_config' instead of 'deployConfig'
@@ -166,6 +226,17 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
+	/**
+	 * Start a test deployment on a deploy daemon
+	 *
+	 * @param string $name Name of the daemon to deploy on
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{status: array<string, mixed>}, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, array{error: string}, array{}>|JSONResponse<Http::STATUS_INTERNAL_SERVER_ERROR, array{error: string}, array{}>
+	 *
+	 * 200: Test deploy started
+	 * 404: Daemon config not found
+	 * 500: Test deploy could not be started
+	 */
 	public function startTestDeploy(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		if (!$daemonConfig) {
@@ -201,6 +272,15 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
+	/**
+	 * Stop the running test deployment
+	 *
+	 * @param string $name Name of the daemon the test runs on
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{success: bool}, array{}>
+	 *
+	 * 200: Test deploy stopped
+	 */
 	public function stopTestDeploy(string $name): Response {
 		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
 		if ($exApp !== null) {
@@ -223,6 +303,16 @@ class DaemonConfigController extends ApiController {
 		]);
 	}
 
+	/**
+	 * Get the status of the running test deployment
+	 *
+	 * @param string $name Name of the daemon the test runs on
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array<string, mixed>, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, array{error: string}, array{}>
+	 *
+	 * 200: Test deploy status returned
+	 * 404: Test ExApp not found
+	 */
 	public function getTestDeployStatus(string $name): Response {
 		$exApp = $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID);
 		if (is_null($exApp) || $exApp->getDaemonConfigName() !== $name) {
@@ -231,6 +321,18 @@ class DaemonConfigController extends ApiController {
 		return new JSONResponse($exApp->getStatus());
 	}
 
+	/**
+	 * Add a Docker registry mapping to a deploy daemon
+	 *
+	 * @param string $name Name of the daemon
+	 * @param array<string, mixed> $registryMap Docker registry mapping to add
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, AppAPIDaemonConfig, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, array{error: string}, array{}>|JSONResponse<Http::STATUS_INTERNAL_SERVER_ERROR, array{error: string}, array{}>
+	 *
+	 * 200: Registry added
+	 * 404: Daemon config not found
+	 * 500: Registry could not be added
+	 */
 	#[PasswordConfirmationRequired]
 	public function addDaemonDockerRegistry(string $name, array $registryMap): JSONResponse {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
@@ -241,9 +343,21 @@ class DaemonConfigController extends ApiController {
 		if ($daemonConfig === null) {
 			return new JSONResponse(['error' => $this->l10n->t('Error adding Docker registry')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
-		return new JSONResponse($daemonConfig, Http::STATUS_OK);
+		return new JSONResponse($daemonConfig->jsonSerialize(), Http::STATUS_OK);
 	}
 
+	/**
+	 * Remove a Docker registry mapping from a deploy daemon
+	 *
+	 * @param string $name Name of the daemon
+	 * @param array<string, mixed> $registryMap Docker registry mapping to remove
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, AppAPIDaemonConfig, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, array{error: string}, array{}>|JSONResponse<Http::STATUS_INTERNAL_SERVER_ERROR, array{error: string}, array{}>
+	 *
+	 * 200: Registry removed
+	 * 404: Daemon config not found
+	 * 500: Registry could not be removed
+	 */
 	#[PasswordConfirmationRequired]
 	public function removeDaemonDockerRegistry(string $name, array $registryMap): JSONResponse {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
@@ -254,6 +368,6 @@ class DaemonConfigController extends ApiController {
 		if ($daemonConfig === null) {
 			return new JSONResponse(['error' => $this->l10n->t('Error removing Docker registry')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
-		return new JSONResponse($daemonConfig, Http::STATUS_OK);
+		return new JSONResponse($daemonConfig->jsonSerialize(), Http::STATUS_OK);
 	}
 }

@@ -23,6 +23,7 @@ use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
@@ -33,6 +34,7 @@ use OCP\IRequest;
 use OCP\Security\Bruteforce\IThrottler;
 use Psr\Log\LoggerInterface;
 
+#[OpenAPI(OpenAPI::SCOPE_IGNORE)]
 class ExAppProxyController extends Controller {
 
 	public function __construct(
@@ -141,7 +143,7 @@ class ExAppProxyController extends Controller {
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
 		];
-		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
+		if (str_starts_with($this->request->getHeader('content-type'), 'multipart/form-data') || count($_FILES) > 0) {
 			unset($options['headers']['Content-Type']);
 			unset($options['headers']['Content-Length']);
 			$options[RequestOptions::MULTIPART] = $this->buildMultipartFormData($_POST, $_FILES);
