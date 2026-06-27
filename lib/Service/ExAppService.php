@@ -56,6 +56,7 @@ class ExAppService {
 		private readonly SettingsService $settingsService,
 		private readonly ExAppOccService $occService,
 		private readonly ExAppDeployOptionsService $deployOptionsService,
+		private readonly ExAppSetupCheckService $setupCheckService,
 		private readonly IConfig $config,
 	) {
 		if ($cacheFactory->isAvailable()) {
@@ -119,6 +120,7 @@ class ExAppService {
 		$this->stylesService->deleteExAppStyles($appId);
 		$this->taskProcessingService->unregisterExAppTaskProcessingProviders($appId);
 		$this->settingsService->unregisterExAppForms($appId);
+		$this->setupCheckService->optOut($appId);
 		$this->exAppArchiveFetcher->removeExAppFolder($appId);
 		$this->occService->unregisterExAppOccCommands($appId);
 		$this->deployOptionsService->removeExAppDeployOptions($appId);
