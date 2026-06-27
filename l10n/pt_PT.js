@@ -49,7 +49,9 @@ OC.L10N.register(
     "Disabled apps" : "Apps desativadas",
     "Updates" : "Atualizações",
     "Featured apps" : "Aplicações principais",
+    "Supported apps" : "Aplicativos compatíveis",
     "Enable" : "Ativar",
-    "Disable" : "Desativar"
+    "Disable" : "Desativar",
+    "The app has been enabled but needs to be updated." : "O aplicativo foi ativado, mas precisa ser atualizado."
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
