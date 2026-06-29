@@ -22,6 +22,9 @@ readonly class Capabilities implements ICapability {
 	) {
 	}
 
+	/**
+	 * @return array{app_api: array{loglevel: int, version: string}}
+	 */
 	public function getCapabilities(): array {
 		$capabilities = [
 			'loglevel' => intval($this->config->getSystemValue('loglevel', 2)),

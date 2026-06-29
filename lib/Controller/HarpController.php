@@ -17,6 +17,7 @@ use OCA\AppAPI\Service\HarpService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IGroupManager;
@@ -26,6 +27,7 @@ use OCP\Security\Bruteforce\IThrottler;
 use OCP\Security\ICrypto;
 use Psr\Log\LoggerInterface;
 
+#[OpenAPI(OpenAPI::SCOPE_IGNORE)]
 class HarpController extends Controller {
 	protected $request;
 
@@ -57,7 +59,7 @@ class HarpController extends Controller {
 			return false;
 		}
 
-		$headerHarpKey = $this->request->getHeader('HARP-SHARED-KEY');
+		$headerHarpKey = $this->request->getHeader('harp-shared-key');
 		if ($headerHarpKey === '' || $headerHarpKey !== $harpKey) {
 			$this->logger->error('Harp shared key is not valid');
 			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [

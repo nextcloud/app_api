@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Http;
@@ -20,6 +21,10 @@ use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 
+/**
+ * @psalm-import-type AppAPIExApp from ResponseDefinitions
+ * @psalm-import-type AppAPIExAppRequestResult from ResponseDefinitions
+ */
 class OCSExAppController extends OCSController {
 	protected $request;
 
@@ -34,6 +39,16 @@ class OCSExAppController extends OCSController {
 		$this->request = $request;
 	}
 
+	/**
+	 * Get a list of registered ExApps
+	 *
+	 * @param 'all'|'enabled' $list Which ExApps to return
+	 *
+	 * @return DataResponse<Http::STATUS_OK, list<AppAPIExApp>, array{}>|DataResponse<Http::STATUS_BAD_REQUEST, list<empty>, array{}>
+	 *
+	 * 200: ExApps list returned
+	 * 400: Invalid list type
+	 */
 	#[NoCSRFRequired]
 	public function getExAppsList(string $list = 'enabled'): DataResponse {
 		if (!in_array($list, ['all', 'enabled'])) {
@@ -42,6 +57,16 @@ class OCSExAppController extends OCSController {
 		return new DataResponse($this->exAppService->getExAppsList($list), Http::STATUS_OK);
 	}
 
+	/**
+	 * Get information about a registered ExApp
+	 *
+	 * @param string $appId ID of the ExApp
+	 *
+	 * @return DataResponse<Http::STATUS_OK, AppAPIExApp, array{}>|DataResponse<Http::STATUS_NOT_FOUND, list<empty>, array{}>
+	 *
+	 * 200: ExApp info returned
+	 * 404: ExApp not found
+	 */
 	#[NoCSRFRequired]
 	public function getExApp(string $appId): DataResponse {
 		$exApp = $this->exAppService->getExApp($appId);
@@ -51,6 +76,13 @@ class OCSExAppController extends OCSController {
 		return new DataResponse($this->exAppService->formatExAppInfo($exApp), Http::STATUS_OK);
 	}
 
+	/**
+	 * Get the base URL of this Nextcloud instance
+	 *
+	 * @return DataResponse<Http::STATUS_OK, array{base_url: string}, array{}>
+	 *
+	 * 200: Base URL returned
+	 */
 	#[NoCSRFRequired]
 	public function getNextcloudUrl(): DataResponse {
 		return new DataResponse([
@@ -59,7 +91,16 @@ class OCSExAppController extends OCSController {
 	}
 
 	/**
-	 * @throws OCSBadRequestException
+	 * Enable or disable a registered ExApp
+	 *
+	 * @param string $appId ID of the ExApp
+	 * @param int $enabled New state: 1 to enable, 0 to disable
+	 *
+	 * @return DataResponse<Http::STATUS_OK, list<empty>, array{}>|DataResponse<Http::STATUS_NOT_FOUND, list<empty>, array{}>
+	 * @throws OCSBadRequestException ExApp is already in the requested state or the state change failed
+	 *
+	 * 200: ExApp state changed
+	 * 404: ExApp not found
 	 */
 	#[NoCSRFRequired]
 	public function setExAppEnabled(string $appId, int $enabled): DataResponse {
@@ -87,6 +128,22 @@ class OCSExAppController extends OCSController {
 		return new DataResponse();
 	}
 
+	/**
+	 * Proxy a request from one ExApp to another registered ExApp
+	 *
+	 * @param string $appId ID of the target ExApp
+	 * @param string $route Route inside the target ExApp to call
+	 * @param ?string $userId User to perform the request on behalf of, or null
+	 * @param string $method HTTP method to use
+	 * @param array<string, mixed> $params Request parameters
+	 * @param array<string, mixed> $options Additional request options
+	 *
+	 * @return DataResponse<Http::STATUS_OK, AppAPIExAppRequestResult|array{error: string}, array{}>|DataResponse<Http::STATUS_BAD_REQUEST, array{error: string}, array{}>
+	 * @psalm-suppress InvalidReturnType, InvalidReturnStatement The proxied ExApp response body is dynamically typed
+	 *
+	 * 200: ExApp response returned
+	 * 400: Request to the ExApp failed
+	 */
 	#[NoCSRFRequired]
 	public function requestToExApp(
 		string $appId,
@@ -112,7 +169,20 @@ class OCSExAppController extends OCSController {
 	}
 
 	/**
-	 * TODO: remove later
+	 * Proxy a request from one ExApp to another registered ExApp (deprecated alias)
+	 *
+	 * @param string $appId ID of the target ExApp
+	 * @param string $route Route inside the target ExApp to call
+	 * @param ?string $userId User to perform the request on behalf of, or null
+	 * @param string $method HTTP method to use
+	 * @param array<string, mixed> $params Request parameters
+	 * @param array<string, mixed> $options Additional request options
+	 *
+	 * @return DataResponse<Http::STATUS_OK, AppAPIExAppRequestResult|array{error: string}, array{}>|DataResponse<Http::STATUS_BAD_REQUEST, array{error: string}, array{}>
+	 * @psalm-suppress InvalidReturnType, InvalidReturnStatement The proxied ExApp response body is dynamically typed
+	 *
+	 * 200: ExApp response returned
+	 * 400: Request to the ExApp failed
 	 *
 	 * @deprecated since AppAPI 3.0.0
 	 */

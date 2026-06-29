@@ -35,7 +35,7 @@ class OCSSettingsControllerTest extends TestCase {
 		parent::setUp();
 		$this->request = $this->createMock(IRequest::class);
 		$this->request->method('getHeader')->willReturnCallback(
-			fn (string $name): string => $name === 'EX-APP-ID' ? self::TEST_APP_ID : ''
+			fn (string $name): string => strtoupper($name) === 'EX-APP-ID' ? self::TEST_APP_ID : ''
 		);
 		$this->service = Server::get(SettingsService::class);
 		$this->controller = new OCSSettingsController($this->request, $this->service);

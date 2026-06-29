@@ -11,6 +11,7 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\TalkBotsService;
@@ -27,6 +28,9 @@ use OCP\IRequest;
 use OCP\Security\Bruteforce\IThrottler;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @psalm-import-type AppAPITalkBot from ResponseDefinitions
+ */
 class TalkBotController extends OCSController {
 	protected $request;
 
@@ -44,18 +48,22 @@ class TalkBotController extends OCSController {
 	}
 
 	/**
-	 * @param string $name bot display name
-	 * @param string $route ExApp route to post messages
-	 * @param string $description
+	 * Register a Talk bot for the calling ExApp
 	 *
-	 * @throws OCSBadRequestException
-	 * @return Response
+	 * @param string $name Bot display name
+	 * @param string $route ExApp route that receives bot messages
+	 * @param string $description Description of the bot
+	 *
+	 * @return DataResponse<Http::STATUS_OK, AppAPITalkBot, array{}>
+	 * @throws OCSBadRequestException Talk bot could not be registered
+	 *
+	 * 200: Talk bot registered
 	 */
 	#[AppAPIAuth]
 	#[NoCSRFRequired]
 	#[PublicPage]
 	public function registerExAppTalkBot(string $name, string $route, string $description): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
+		$appId = $this->request->getHeader('ex-app-id');
 		$exApp = $this->service->getExApp($appId);
 		$botRegistered = $this->talkBotsService->registerExAppBot(
 			$exApp,
@@ -70,13 +78,20 @@ class TalkBotController extends OCSController {
 	}
 
 	/**
-	 * @throws OCSNotFoundException
+	 * Unregister a Talk bot of the calling ExApp
+	 *
+	 * @param string $route ExApp route of the bot to remove
+	 *
+	 * @return DataResponse<Http::STATUS_OK, bool, array{}>
+	 * @throws OCSNotFoundException Talk bot could not be unregistered
+	 *
+	 * 200: Talk bot unregistered
 	 */
 	#[AppAPIAuth]
 	#[NoCSRFRequired]
 	#[PublicPage]
 	public function unregisterExAppTalkBot(string $route): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
+		$appId = $this->request->getHeader('ex-app-id');
 		$exApp = $this->service->getExApp($appId);
 		$botUnregistered = $this->talkBotsService->unregisterExAppBot($exApp, ltrim($route, '/'));
 		if ($botUnregistered === null) {
@@ -85,6 +100,18 @@ class TalkBotController extends OCSController {
 		return new DataResponse($botUnregistered);
 	}
 
+	/**
+	 * Proxy a Talk chat message to the bot of a registered ExApp
+	 *
+	 * @param string $appId ID of the ExApp owning the bot
+	 * @param string $route ExApp route that receives the message
+	 *
+	 * @return DataResponse<Http::STATUS_OK, list<empty>, array{}>|DataResponse<Http::STATUS_NOT_FOUND, list<empty>, array{}>|DataResponse<Http::STATUS_INTERNAL_SERVER_ERROR, list<empty>, array{}>
+	 *
+	 * 200: Message proxied to the ExApp bot
+	 * 404: Invalid signature or unknown bot
+	 * 500: The ExApp bot could not be reached
+	 */
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	#[PublicPage]
@@ -97,9 +124,9 @@ class TalkBotController extends OCSController {
 			if ($bot_secret !== null) {
 				$digest = hash_hmac(
 					'sha256',
-					$this->request->getHeader('X-Nextcloud-Talk-Random') . file_get_contents('php://input'),
+					$this->request->getHeader('x-nextcloud-talk-random') . file_get_contents('php://input'),
 					$bot_secret);
-				if (!hash_equals($digest, strtolower($this->request->getHeader('X-Nextcloud-Talk-Signature')))) {
+				if (!hash_equals($digest, strtolower($this->request->getHeader('x-nextcloud-talk-signature')))) {
 					$this->throttler->registerAttempt(
 						Application::APP_ID,
 						$this->request->getRemoteAddress(),

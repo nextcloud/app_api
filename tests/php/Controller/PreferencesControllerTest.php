@@ -42,7 +42,7 @@ class PreferencesControllerTest extends TestCase {
 		parent::setUp();
 		$this->request = $this->createMock(IRequest::class);
 		$this->request->method('getHeader')->willReturnCallback(
-			fn (string $name): string => $name === 'EX-APP-ID' ? self::TEST_APP_ID : ''
+			fn (string $name): string => strtoupper($name) === 'EX-APP-ID' ? self::TEST_APP_ID : ''
 		);
 		$user = $this->createMock(IUser::class);
 		$user->method('getUID')->willReturn(self::TEST_USER_ID);
@@ -66,25 +66,25 @@ class PreferencesControllerTest extends TestCase {
 	public function testSensitiveFlagPersistsOnSet(): void {
 		$response = $this->controller->setUserConfigValue(self::KEY_SECRET, '123', sensitive: 1);
 		self::assertSame(Http::STATUS_OK, $response->getStatus());
-		self::assertSame('123', $response->getData()->getConfigvalue());
-		self::assertSame(1, $response->getData()->getSensitive());
+		self::assertSame('123', $response->getData()['configvalue']);
+		self::assertSame(1, $response->getData()['sensitive']);
 	}
 
 	public function testNonSensitiveDefaultsToZero(): void {
 		$response = $this->controller->setUserConfigValue(self::KEY_PLAIN, 'plain', sensitive: null);
-		self::assertSame(0, $response->getData()->getSensitive());
+		self::assertSame(0, $response->getData()['sensitive']);
 	}
 
 	public function testSensitiveFlagPreservedOnUpdateWithoutFlag(): void {
 		$this->controller->setUserConfigValue(self::KEY_SECRET, 'orig', sensitive: 1);
 		$response = $this->controller->setUserConfigValue(self::KEY_SECRET, 'updated', sensitive: null);
-		self::assertSame(1, $response->getData()->getSensitive());
+		self::assertSame(1, $response->getData()['sensitive']);
 	}
 
 	public function testSensitiveDowngradeClearsFlag(): void {
 		$this->controller->setUserConfigValue(self::KEY_SECRET, '123', sensitive: 1);
 		$response = $this->controller->setUserConfigValue(self::KEY_SECRET, '123', sensitive: 0);
-		self::assertSame(0, $response->getData()->getSensitive());
+		self::assertSame(0, $response->getData()['sensitive']);
 		$rows = $this->controller->getUserConfigValues([self::KEY_SECRET])->getData();
 		self::assertSame('123', array_column($rows, 'configvalue', 'configkey')[self::KEY_SECRET]);
 	}

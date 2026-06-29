@@ -67,7 +67,7 @@ class TalkBotControllerTest extends TestCase {
 
 		$this->request = $this->createMock(IRequest::class);
 		$this->request->method('getHeader')->willReturnCallback(
-			fn (string $name): string => $name === 'EX-APP-ID' ? self::TEST_APP_ID : ''
+			fn (string $name): string => strtoupper($name) === 'EX-APP-ID' ? self::TEST_APP_ID : ''
 		);
 
 		$this->controller = new TalkBotController(

@@ -19,6 +19,7 @@ use OC_App;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
+use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
@@ -27,6 +28,7 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\Attribute\PasswordConfirmationRequired;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -38,7 +40,11 @@ use Psr\Log\LoggerInterface;
 
 /**
  * ExApps actions controller similar to default one with project-specific changes and additions
+ *
+ * @psalm-import-type AppAPICategory from ResponseDefinitions
+ * @psalm-import-type AppAPIDeployOptions from ResponseDefinitions
  */
+#[OpenAPI(OpenAPI::SCOPE_ADMINISTRATION)]
 class ExAppsPageController extends Controller {
 
 	public function __construct(
@@ -178,6 +184,13 @@ class ExAppsPageController extends Controller {
 		return $formattedApps;
 	}
 
+	/**
+	 * Get the list of ExApps available in the App Store together with locally installed ones
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{apps: list<array<string, mixed>>, status: string}, array{}>
+	 *
+	 * 200: ExApps list returned
+	 */
 	#[NoCSRFRequired]
 	public function listApps(): JSONResponse {
 		$apps = $this->getAppsForCategory('');
@@ -313,6 +326,18 @@ class ExAppsPageController extends Controller {
 		return array_merge($apps, $formattedLocalApps);
 	}
 
+	/**
+	 * Deploy and enable, or just enable, an ExApp
+	 *
+	 * @param string $appId ID of the ExApp
+	 * @param string $daemonId Name of the deploy daemon to use
+	 * @param array<string, mixed> $deployOptions Deploy options (environment variables, mounts)
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array{data?: array{update_required?: bool}}, array{}>|JSONResponse<Http::STATUS_INTERNAL_SERVER_ERROR, array{data: array{message: string}}, array{}>
+	 *
+	 * 200: ExApp enabled
+	 * 500: ExApp could not be enabled
+	 */
 	#[PasswordConfirmationRequired]
 	public function enableApp(string $appId, string $daemonId, array $deployOptions = []): JSONResponse {
 		$updateRequired = false;
@@ -375,6 +400,16 @@ class ExAppsPageController extends Controller {
 		return new JSONResponse(['data' => ['update_required' => $updateRequired]]);
 	}
 
+	/**
+	 * Disable an ExApp
+	 *
+	 * @param string $appId ID of the ExApp
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, list<empty>, array{}>|JSONResponse<Http::STATUS_INTERNAL_SERVER_ERROR, array{data: array{message: string}}, array{}>
+	 *
+	 * 200: ExApp disabled
+	 * 500: ExApp could not be disabled
+	 */
 	#[PasswordConfirmationRequired]
 	public function disableApp(string $appId): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
@@ -389,8 +424,14 @@ class ExAppsPageController extends Controller {
 	}
 
 	/**
-	 * Default forced ExApp update process.
-	 * Update approval via password confirmation.
+	 * Update an ExApp
+	 *
+	 * @param string $appId ID of the ExApp
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, list<empty>, array{}>|JSONResponse<Http::STATUS_INTERNAL_SERVER_ERROR, array{data: array{message: string}}, array{}>
+	 *
+	 * 200: ExApp updated
+	 * 500: ExApp could not be updated
 	 */
 	#[PasswordConfirmationRequired]
 	#[NoCSRFRequired]
@@ -429,7 +470,15 @@ class ExAppsPageController extends Controller {
 	}
 
 	/**
-	 * Unregister ExApp, remove container by default
+	 * Unregister an ExApp and optionally remove its container and data
+	 *
+	 * @param string $appId ID of the ExApp
+	 * @param bool $removeContainer Whether to remove the ExApp container
+	 * @param bool $removeData Whether to remove the ExApp data volume
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, list<empty>, array{}>
+	 *
+	 * 200: ExApp uninstalled
 	 */
 	#[PasswordConfirmationRequired]
 	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
@@ -459,7 +508,13 @@ class ExAppsPageController extends Controller {
 	}
 
 	/**
-	 * Using default force mechanism for ExApps
+	 * Mark an ExApp as compatible with the current Nextcloud version
+	 *
+	 * @param string $appId ID of the ExApp
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, list<empty>, array{}>
+	 *
+	 * 200: Compatibility requirement overwritten
 	 */
 	#[PasswordConfirmationRequired]
 	public function force(string $appId): JSONResponse {
@@ -469,14 +524,25 @@ class ExAppsPageController extends Controller {
 	}
 
 	/**
-	 * Get all available categories
+	 * Get all available App Store categories
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, list<AppAPICategory>, array{}>
+	 *
+	 * 200: Categories returned
 	 */
 	public function listCategories(): JSONResponse {
 		return new JSONResponse($this->getAllCategories());
 	}
 
 	/**
-	 * Get ExApp status, that includes initialization information
+	 * Get the status of an ExApp, including its initialization information
+	 *
+	 * @param string $appId ID of the ExApp
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, array<string, mixed>, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, array{error: string}, array{}>
+	 *
+	 * 200: ExApp status returned
+	 * 404: ExApp not found
 	 */
 	#[NoCSRFRequired]
 	public function getAppStatus(string $appId): JSONResponse {
@@ -487,6 +553,16 @@ class ExAppsPageController extends Controller {
 		return new JSONResponse($exApp->getStatus());
 	}
 
+	/**
+	 * Download the container logs of an ExApp
+	 *
+	 * @param string $appId ID of the ExApp
+	 * @param string $tail Number of lines to return from the end of the logs, or 'all'
+	 *
+	 * @return DataDownloadResponse<Http::STATUS_OK, 'text/plain', array{}>
+	 *
+	 * 200: ExApp logs returned
+	 */
 	#[NoCSRFRequired]
 	public function getAppLogs(string $appId, string $tail = 'all'): DataDownloadResponse {
 		$exApp = $this->exAppService->getExApp($appId);
@@ -519,6 +595,16 @@ class ExAppsPageController extends Controller {
 		}
 	}
 
+	/**
+	 * Get the deploy options of an ExApp
+	 *
+	 * @param string $appId ID of the ExApp
+	 *
+	 * @return JSONResponse<Http::STATUS_OK, AppAPIDeployOptions, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, array{error: string}, array{}>
+	 *
+	 * 200: Deploy options returned
+	 * 404: ExApp not found
+	 */
 	public function getAppDeployOptions(string $appId) {
 		$exApp = $this->exAppService->getExApp($appId);
 		if (is_null($exApp)) {

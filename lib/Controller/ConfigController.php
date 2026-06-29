@@ -11,11 +11,14 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
+#[OpenAPI(OpenAPI::SCOPE_ADMINISTRATION)]
 class ConfigController extends Controller {
 
 	public function __construct(
@@ -26,6 +29,15 @@ class ConfigController extends Controller {
 		parent::__construct($appName, $request);
 	}
 
+	/**
+	 * Update the AppAPI admin configuration
+	 *
+	 * @param array<string, string> $values Configuration key-value pairs to store
+	 *
+	 * @return DataResponse<Http::STATUS_OK, int, array{}>
+	 *
+	 * 200: Configuration updated
+	 */
 	#[NoCSRFRequired]
 	public function setAdminConfig(array $values): DataResponse {
 		foreach ($values as $key => $value) {

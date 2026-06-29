@@ -17,12 +17,14 @@ use OCP\AppFramework\Db\Entity;
  *
  * @package OCA\AppAPI\Db
  *
+ * @psalm-import-type AppAPIDaemonConfig from \OCA\AppAPI\ResponseDefinitions
+ *
  * @method string getAcceptsDeployId()
  * @method string getName()
  * @method string getDisplayName()
  * @method string getProtocol()
  * @method string getHost()
- * @method array getDeployConfig()
+ * @method array<string, mixed> getDeployConfig()
  * @method void setAcceptsDeployId(string $acceptsDeployId)
  * @method void setName(string $name)
  * @method void setDisplayName(string $displayName)
@@ -72,6 +74,9 @@ class DaemonConfig extends Entity implements JsonSerializable {
 		}
 	}
 
+	/**
+	 * @return AppAPIDaemonConfig
+	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),

@@ -27,6 +27,8 @@ use OCP\AppFramework\Db\Entity;
  * @method void setDisplayName(string $displayName)
  * @method void setIcon(string $icon)
  * @method void setAdminRequired(int $adminRequired)
+ *
+ * @psalm-import-type AppAPITopMenu from \OCA\AppAPI\ResponseDefinitions
  */
 class TopMenu extends Entity implements JsonSerializable {
 	protected $appid;
@@ -65,6 +67,9 @@ class TopMenu extends Entity implements JsonSerializable {
 		}
 	}
 
+	/**
+	 * @return AppAPITopMenu
+	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),

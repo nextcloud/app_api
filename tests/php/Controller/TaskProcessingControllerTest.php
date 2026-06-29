@@ -38,7 +38,7 @@ class TaskProcessingControllerTest extends TestCase {
 		parent::setUp();
 		$this->request = $this->createMock(IRequest::class);
 		$this->request->method('getHeader')->willReturnCallback(
-			fn (string $name): string => $name === 'EX-APP-ID' ? self::TEST_APP_ID : ''
+			fn (string $name): string => strtoupper($name) === 'EX-APP-ID' ? self::TEST_APP_ID : ''
 		);
 		$this->service = Server::get(TaskProcessingService::class);
 		$this->controller = new TaskProcessingController(
@@ -79,9 +79,9 @@ class TaskProcessingControllerTest extends TestCase {
 		$response = $this->controller->getProvider(self::PROVIDER_ID);
 		self::assertSame(Http::STATUS_OK, $response->getStatus());
 		$data = $response->getData();
-		self::assertSame(self::PROVIDER_ID, $data->getName());
-		self::assertSame('Test Display Name', $data->getDisplayName());
-		self::assertSame('core:text2image', $data->getTaskType());
+		self::assertSame(self::PROVIDER_ID, $data['name']);
+		self::assertSame('Test Display Name', $data['display_name']);
+		self::assertSame('core:text2image', $data['task_type']);
 
 		$response = $this->controller->unregisterProvider(self::PROVIDER_ID);
 		self::assertSame(Http::STATUS_OK, $response->getStatus());

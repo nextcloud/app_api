@@ -40,7 +40,7 @@ class AppConfigControllerTest extends TestCase {
 		parent::setUp();
 		$this->request = $this->createMock(IRequest::class);
 		$this->request->method('getHeader')->willReturnCallback(
-			fn (string $name): string => $name === 'EX-APP-ID' ? self::TEST_APP_ID : ''
+			fn (string $name): string => strtoupper($name) === 'EX-APP-ID' ? self::TEST_APP_ID : ''
 		);
 		$this->service = Server::get(ExAppConfigService::class);
 		$this->controller = new AppConfigController($this->request, $this->service);
@@ -59,16 +59,16 @@ class AppConfigControllerTest extends TestCase {
 	public function testSensitiveFlagPersistsOnSet(): void {
 		$response = $this->controller->setAppConfigValue(self::KEY_SECRET, '123', sensitive: 1);
 		self::assertSame(Http::STATUS_OK, $response->getStatus());
-		$entity = $response->getData();
-		self::assertSame('123', $entity->getConfigvalue());
-		self::assertSame(1, $entity->getSensitive());
+		$data = $response->getData();
+		self::assertSame('123', $data['configvalue']);
+		self::assertSame(1, $data['sensitive']);
 	}
 
 	public function testNonSensitiveDefaultsToZero(): void {
 		$response = $this->controller->setAppConfigValue(self::KEY_PLAIN, 'plain', sensitive: null);
 		self::assertSame(Http::STATUS_OK, $response->getStatus());
 		// The persisted entity has sensitive=0 when null is passed (no flag set).
-		self::assertSame(0, $response->getData()->getSensitive());
+		self::assertSame(0, $response->getData()['sensitive']);
 	}
 
 	public function testSensitiveFlagPreservedOnUpdateWithoutFlag(): void {
@@ -78,7 +78,7 @@ class AppConfigControllerTest extends TestCase {
 		// ExAppConfigService only calls setSensitive() when $sensitive !== null.
 		$response = $this->controller->setAppConfigValue(self::KEY_SECRET, 'updated', sensitive: null);
 		self::assertSame(Http::STATUS_OK, $response->getStatus());
-		self::assertSame(1, $response->getData()->getSensitive());
+		self::assertSame(1, $response->getData()['sensitive']);
 	}
 
 	public function testGetReturnsAllKeys(): void {
@@ -112,7 +112,7 @@ class AppConfigControllerTest extends TestCase {
 		// stays readable as plaintext). This mirrors nc_py_api's appcfg_prefs_ex sensitive test.
 		$this->controller->setAppConfigValue(self::KEY_SECRET, '123', sensitive: 1);
 		$response = $this->controller->setAppConfigValue(self::KEY_SECRET, '123', sensitive: 0);
-		self::assertSame(0, $response->getData()->getSensitive());
+		self::assertSame(0, $response->getData()['sensitive']);
 
 		$rows = $this->controller->getAppConfigValues([self::KEY_SECRET])->getData();
 		self::assertSame('123', array_column($rows, 'configvalue', 'configkey')[self::KEY_SECRET]);

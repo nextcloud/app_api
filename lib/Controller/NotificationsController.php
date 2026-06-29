@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Notifications\ExNotificationsManager;
+use OCA\AppAPI\ResponseDefinitions;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
@@ -21,6 +22,9 @@ use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 use OCP\Notification\INotification;
 
+/**
+ * @psalm-import-type AppAPINotification from ResponseDefinitions
+ */
 class NotificationsController extends OCSController {
 	protected $request;
 
@@ -33,12 +37,21 @@ class NotificationsController extends OCSController {
 		$this->request = $request;
 	}
 
+	/**
+	 * Send a notification to a user on behalf of the calling ExApp
+	 *
+	 * @param array<string, mixed> $params Notification parameters
+	 *
+	 * @return DataResponse<Http::STATUS_OK, AppAPINotification, array{}>
+	 *
+	 * 200: Notification sent
+	 */
 	#[AppAPIAuth]
 	#[PublicPage]
 	#[NoCSRFRequired]
 	public function sendNotification(array $params): Response {
-		$appId = $this->request->getHeader('EX-APP-ID');
-		$userId = explode(':', base64_decode($this->request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
+		$appId = $this->request->getHeader('ex-app-id');
+		$userId = explode(':', base64_decode($this->request->getHeader('authorization-app-api')), 2)[0];
 		$notification = $this->exNotificationsManager->sendNotification($appId, $userId, $params);
 		return new DataResponse($this->notificationToArray($notification), Http::STATUS_OK);
 	}
