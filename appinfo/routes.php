@@ -145,5 +145,9 @@ return [
 		['name' => 'taskProcessing#registerProvider', 'url' => '/api/v1/ai_provider/task_processing', 'verb' => 'POST'],
 		['name' => 'taskProcessing#unregisterProvider', 'url' => '/api/v1/ai_provider/task_processing', 'verb' => 'DELETE'],
 		['name' => 'taskProcessing#getProvider', 'url' => '/api/v1/ai_provider/task_processing', 'verb' => 'GET'],
+
+		// Setup checks (admin "Security & setup warnings" panel)
+		['name' => 'SetupCheck#registerChecks', 'url' => '/api/v1/setup_check', 'verb' => 'POST'],
+		['name' => 'SetupCheck#unregisterChecks', 'url' => '/api/v1/setup_check', 'verb' => 'DELETE'],
 	],
 ];
