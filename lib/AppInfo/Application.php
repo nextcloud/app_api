@@ -25,6 +25,8 @@ use OCA\AppAPI\Middleware\MaintenanceModeMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
+use OCA\AppAPI\SetupChecks\ExAppsErrorSetupCheck;
+use OCA\AppAPI\SetupChecks\ExAppsWarningSetupCheck;
 use OCA\AppAPI\SetupChecks\HarpVersionCheck;
 use OCA\DAV\Events\SabrePluginAddEvent;
 use OCA\DAV\Events\SabrePluginAuthInitEvent;
@@ -74,6 +76,8 @@ class Application extends App implements IBootstrap {
 
 		$context->registerSetupCheck(DaemonCheck::class);
 		$context->registerSetupCheck(HarpVersionCheck::class);
+		$context->registerSetupCheck(ExAppsErrorSetupCheck::class);
+		$context->registerSetupCheck(ExAppsWarningSetupCheck::class);
 	}
 
 	public function boot(IBootContext $context): void {
