@@ -35,7 +35,7 @@ relevant one when working on that topology.
 6. [ExApp lifecycle (occ)](#6-exapp-lifecycle-occ)
 7. [Operating AppAPI](#7-operating-appapi)
 8. [App store / fetcher](#8-app-store--fetcher)
-9. [Runtime request flow](#9-runtime-request-flow)
+9. [Runtime and the ExApp contract](#9-runtime-and-the-exapp-contract)
 10. [Troubleshooting (symptom-first)](#10-troubleshooting-symptom-first)
 11. [Version notes (NC33 / 34 / 35)](#11-version-notes-nc33--34--35)
 12. [Developing app_api (start here)](#12-developing-app_api-start-here)
@@ -68,6 +68,10 @@ permissions and the web UI.
   the Docker Engine, routes requests straight to ExApps (bypassing PHP, enabling WebSockets), and uses FRP
   tunnels so ExApps need not expose host ports.
 - **nc_py_api**: the Python framework used to write ExApps that call back into Nextcloud through AppAPI.
+
+ExApps are **trusted, first-class apps**, comparable to PHP apps running inside Nextcloud: they authenticate
+with a per-install app secret and integrate with user sessions. Install only ExApps you trust, exactly as you
+would with regular Nextcloud apps.
 
 AppAPI is only useful if you want to install or develop External Apps. If you do not, you can disable it
 (`occ app:disable app_api`) and the "default deploy daemon" warning disappears.
@@ -187,7 +191,8 @@ occ app_api:daemon:register \
 occ app_api:daemon:list
 ```
 
-In the UI, open **Settings --> Administration --> AppAPI** and use **Check connection** and **Test deploy**.
+In the UI, open **Settings --> Administration --> AppAPI** and use **Check connection** and **Test deploy**
+(the latter installs and removes a real test ExApp, exercising image pull + run, not just connectivity).
 The admin setup checks `DaemonCheck` (daemon reachable, default set) and `HarpVersionCheck` (HaRP new enough)
 should be green. Note: green checks confirm the internal Nextcloud-to-HaRP path only; the **browser** path
 still needs the `/exapps/` proxy rule from Step 4.
@@ -297,7 +302,7 @@ Source: `lib/Command/ExApp/`. `appid` is the ExApp's id.
 | `app_api:app:enable <appid>` | Enable a registered ExApp. No options. |
 | `app_api:app:disable <appid>` | Disable a registered ExApp. No options. |
 | `app_api:app:update [appid]` | Update one ExApp, or `--all` (with `--showonly` to preview, `--include-disabled` to widen). Reuses the ExApp's stored daemon and deploy options. |
-| `app_api:app:unregister <appid>` | Remove an ExApp. `--rm-data` also deletes its persistent volume (data is **kept** by default). `--force` continues past errors; `--silent`. |
+| `app_api:app:unregister <appid>` | Remove an ExApp. `--rm-data` also deletes its persistent volume (data is **kept** by default). `--force` continues past errors; `--silent`. The Docker image is never removed automatically; prune it manually if disk space matters. |
 | `app_api:app:list` | List ExApps: `<appid> (<name>): <version> [enabled\|disabled]`. No options. |
 
 Notes:
@@ -308,16 +313,23 @@ Notes:
   set it fails. Set one with `--set-default` at daemon registration.
 - `--keep-data` (on unregister) and `--force-scopes` (on register/update) are **deprecated no-ops**; do not
   rely on them. Data is kept by default; use `--rm-data` to delete it.
+- Unregister cleans up everything the ExApp registered (UI entries, AI providers, Talk bots, webhooks, occ
+  commands) but deliberately **keeps its app config and per-user preferences**, so a reinstall picks up the
+  previous settings. There is no purge flag for those.
 
 ## 7. Operating AppAPI
 
 - **ExApp configuration**: `app_api:app:config:get|set|delete|list` inspect or modify an ExApp's stored
   key/value configuration.
 - **Private/mirror Docker registries**: `app_api:daemon:registry:add|remove|list` map registries for a
-  daemon so ExApp images can be pulled from somewhere other than the default.
+  daemon so ExApp images can be pulled from somewhere other than the default
+  (`registry:add <daemon> --registry-from <url> --registry-to <url>`).
 - **Daemons**: `app_api:daemon:list` / `app_api:daemon:unregister` manage daemon configs; re-run
   `app_api:daemon:register ... --set-default` to change the default. Note that `daemon:register` is a no-op if
   a daemon with that `name` already exists (see [Troubleshooting](#10-troubleshooting-symptom-first)).
+  Unregistering a daemon is **blocked while ExApps still use it**, and there is no command to move an installed
+  ExApp between daemons: unregister the ExApp and reinstall it on the new daemon (its config survives, see the
+  lifecycle notes). That is also the DSP-to-HaRP migration path.
 - **Logs**: ExApp containers are prefixed `nc_app_` (`docker logs nc_app_<appid>`); the daemon logs live in
   the HaRP container; Nextcloud-side errors are in the Nextcloud log.
 - **Health checks**: the shipped admin setup checks are `DaemonCheck` (daemon reachable, default set) and
@@ -326,6 +338,16 @@ Notes:
   ExApp-reported errors and "not responding" warnings into the admin overview; these are not yet in a stable
   release. Background jobs such as `ExAppInitStatusCheckJob` and
   `ExAppSetupChecksRefreshJob` refresh ExApp init/health state.
+- **Certificates**: Nextcloud's certificate store (`occ security:certificates`) is pushed into every ExApp
+  container at **deploy time** (all daemon types), so ExApps trust the same CAs as Nextcloud, including
+  self-signed setups. After importing a new CA, update or reinstall ExApps to propagate it. Daemon connections
+  over `https` always verify TLS with that same store and there is no bypass flag; import a self-signed daemon
+  certificate into the store first.
+- **Maintenance mode** (NC35+): `occ app_api:*` commands keep working and the HaRP control routes (ExApp
+  metadata, init progress/state, logging) stay available, while ExApp end-user traffic and the ExApp
+  config/preference APIs are rejected until maintenance ends (blocked AppAPI routes return 503 with
+  `Retry-After: 120`). On NC33/34, app_api is not loaded during maintenance at all, so ExApps and
+  `occ app_api:*` are unavailable for the duration.
 
 ## 8. App store / fetcher
 
@@ -336,7 +358,7 @@ There are **no** occ commands for the App Store; it is code-only under `lib/Fetc
   disabled if `appstoreenabled` is false.
 - ExApp catalog file: `appapi_apps.json` (`ExAppFetcher`); updates are computed by `getExAppsWithUpdates()`.
 
-## 9. Runtime request flow
+## 9. Runtime and the ExApp contract
 
 ```
 Browser --> Nextcloud reverse proxy (/exapps/*) --> HaRP (:8780) --> FRP tunnel --> ExApp container
@@ -352,6 +374,35 @@ Browser --> Nextcloud reverse proxy (/exapps/*) --> HaRP (:8780) --> FRP tunnel 
 - Some simpler UI integrations instead proxy through Nextcloud's own PHP route
   (`/index.php/apps/app_api/proxy/...`, `ExAppProxyController`), so a trivial ExApp may work even without the
   Step 4 `/exapps/` rule; WebSocket/streaming apps do not.
+
+### The ExApp contract
+
+AppAPI injects the same environment into every ExApp container (Docker and Kubernetes,
+`DockerActions`/`KubernetesActions`):
+
+| Env var | Meaning |
+|---|---|
+| `APP_ID`, `APP_VERSION`, `APP_DISPLAY_NAME` | Identity, from the ExApp's `info.xml` |
+| `APP_SECRET` | Per-install shared secret for ExApp-to-Nextcloud authentication |
+| `APP_HOST`, `APP_PORT` | Where the ExApp backend must listen |
+| `APP_PERSISTENT_STORAGE` | Path of the persistent data volume |
+| `NEXTCLOUD_URL` | The daemon's `nextcloud_url` positional |
+| `COMPUTE_DEVICE` | `cpu`/`cuda`/`rocm` (plus `NVIDIA_*` vars for cuda) |
+| `HP_FRP_ADDRESS`, `HP_FRP_PORT`, `HP_SHARED_KEY` | FRP tunnel wiring (HaRP daemons) |
+| `AA_VERSION` | AppAPI version |
+
+Lifecycle and authentication:
+
+- After deploy, AppAPI waits for the ExApp's `/heartbeat` to respond, calls `/init`, and the ExApp reports
+  init progress (0-100) back through the OCS status endpoint; at 100 it gets enabled. "Stuck initializing"
+  means this loop stalled (see [Troubleshooting](#10-troubleshooting-symptom-first)).
+- ExApp calls to Nextcloud carry the `EX-APP-ID`, `EX-APP-VERSION` and `AUTHORIZATION-APP-API` (base64
+  `userid:APP_SECRET`) headers, validated by `AppAPIAuthMiddleware`. This is a **different credential** than
+  the daemon's `harp-shared-key`: a 401 on an ExApp API call points at the app secret/headers, not the daemon
+  key.
+- Through these APIs an ExApp can register UI elements (top-menu entries, Files actions, scripts/styles),
+  Task Processing (AI) providers, Talk bots, declarative settings, webhook listeners, and its own `occ`
+  commands. All of these are cleaned up when the ExApp is unregistered.
 
 ## 10. Troubleshooting (symptom-first)
 
@@ -393,6 +444,7 @@ gating in the deploy/registration code, so these differences are which code ship
 | AIO auto-daemon | `docker_aio` + `harp_aio` (neither deprecated) | `docker_aio` deprecated, `harp_aio` | `harp_aio` (`docker_aio` deprecated) |
 | Connection/HaRP setup checks | `DaemonCheck`, `HarpVersionCheck` | same | same |
 | ExApp-surfaced setup checks | no | no | in flight, not yet released |
+| AppAPI available during maintenance mode | no | no | yes (occ + HaRP control routes) |
 
 - The `--harp_*` flags are stable across NC33-35. The `--k8s_*` flags and `KubernetesActions` arrived in NC34.
 - `harp_aio` auto-registration exists from NC33; the NC34 change was deprecating `docker_aio` (removal
@@ -401,6 +453,9 @@ gating in the deploy/registration code, so these differences are which code ship
   of this writing; treat DSP as deprecated everywhere and prefer HaRP.
 - ExApp-surfaced setup checks (`ExAppsErrorSetupCheck`, `ExAppsWarningSetupCheck`) are in flight for NC35 and
   not yet in a stable release; only `DaemonCheck` and `HarpVersionCheck` ship today.
+- On NC35, maintenance mode keeps `occ app_api:*` and the HaRP control routes available while ExApp user
+  traffic is rejected (see [Operating AppAPI](#7-operating-appapi)); NC33/34 do not load app_api during
+  maintenance at all.
 
 ## 12. Developing app_api (start here)
 
