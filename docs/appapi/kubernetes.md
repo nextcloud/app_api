@@ -45,7 +45,8 @@ Because HaRP is off-cluster, how HaRP reaches each ExApp depends on the Service 
 (see [Expose types](#expose-types)); that is the main decision on Kubernetes.
 
 > The exact Deployment/Service/PVC object names, and the `HP_K8S_*` default values, are internal to HaRP and
-> are not defined in the `app_api` repo. The stable, verifiable anchors are the namespace and the label
+> are not defined in the `app_api` repo (in practice the objects are named `nc-app-<appid>` with a
+> `nc-app-<appid>-data` PVC). The stable, verifiable anchors are the namespace and the label
 > `app.kubernetes.io/component=exapp` on ExApp Deployments and Services. Facts here are drawn from `KubernetesActions.php`,
 > the repo's `tests-deploy-k8s*.yml` workflows, and HaRP's `development/redeploy_host_k8s.sh`; HaRP's README
 > has no Kubernetes section to cite.

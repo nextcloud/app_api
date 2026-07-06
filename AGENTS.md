@@ -344,10 +344,10 @@ Notes:
   self-signed setups. After importing a new CA, update or reinstall ExApps to propagate it. Daemon connections
   over `https` always verify TLS with that same store and there is no bypass flag; import a self-signed daemon
   certificate into the store first.
-- **Maintenance mode** (NC35+): `occ app_api:*` commands keep working and the HaRP control routes (ExApp
-  metadata, init progress/state, logging) stay available, while ExApp end-user traffic and the ExApp
-  config/preference APIs are rejected until maintenance ends (blocked AppAPI routes return 503 with
-  `Retry-After: 120`). On NC33/34, app_api is not loaded during maintenance at all, so ExApps and
+- **Maintenance mode** (NC35+): `occ app_api:*` commands keep working (occ prints "only AppAPI commands are
+  loaded") and the HaRP control routes (ExApp metadata, init progress/state, logging) stay available, while
+  ExApp end-user traffic and the ExApp config/preference APIs are rejected until maintenance ends (blocked
+  AppAPI routes return 503 with `X-Nextcloud-Maintenance-Mode: 1` and `Retry-After: 120`). On NC33/34, app_api is not loaded during maintenance at all, so ExApps and
   `occ app_api:*` are unavailable for the duration.
 
 ## 8. App store / fetcher
@@ -389,7 +389,7 @@ AppAPI injects the same environment into every ExApp container (Docker and Kuber
 | `APP_PERSISTENT_STORAGE` | Path of the persistent data volume |
 | `NEXTCLOUD_URL` | The daemon's `nextcloud_url` positional |
 | `COMPUTE_DEVICE` | `cpu`/`cuda`/`rocm` (plus `NVIDIA_*` vars for cuda) |
-| `HP_FRP_ADDRESS`, `HP_FRP_PORT`, `HP_SHARED_KEY` | FRP tunnel wiring (HaRP daemons) |
+| `HP_FRP_ADDRESS`, `HP_FRP_PORT`, `HP_SHARED_KEY` | FRP tunnel wiring (HaRP Docker daemons only; K8s forces direct mode and omits them) |
 | `AA_VERSION` | AppAPI version |
 
 Lifecycle and authentication:
