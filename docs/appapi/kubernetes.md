@@ -46,7 +46,7 @@ Because HaRP is off-cluster, how HaRP reaches each ExApp depends on the Service 
 
 > The exact Deployment/Service/PVC object names, and the `HP_K8S_*` default values, are internal to HaRP and
 > are not defined in the `app_api` repo. The stable, verifiable anchors are the namespace and the label
-> `app.kubernetes.io/component=exapp` on ExApp Deployments. Facts here are drawn from `KubernetesActions.php`,
+> `app.kubernetes.io/component=exapp` on ExApp Deployments and Services. Facts here are drawn from `KubernetesActions.php`,
 > the repo's `tests-deploy-k8s*.yml` workflows, and HaRP's `development/redeploy_host_k8s.sh`; HaRP's README
 > has no Kubernetes section to cite.
 
@@ -134,6 +134,7 @@ enforces both `enabled` and `reachable`. If the curl or the daemon check fails, 
 
 ## Step 4: Register the Kubernetes daemon
 
+Kubernetes daemons are managed via `occ` only; the admin UI shows them read-only ("managed via CLI").
 The positional order is `name display-name accepts-deploy-id protocol host nextcloud_url`. For Kubernetes use
 `kubernetes-install`, protocol `http`, and HaRP's `:8780` HTTP frontend as `host`. `--k8s` requires `--harp`
 and forces the deploy id to `kubernetes-install`; `--harp_frp_address` is not needed for Kubernetes.
@@ -155,9 +156,7 @@ occ app_api:daemon:register \
 ## Expose types
 
 `--k8s_expose_type` decides what Service HaRP creates and how HaRP (off-cluster) reaches the ExApp. This is the
-core Kubernetes decision. AppAPI validates the flags; HaRP maps them to Service types. `clusterip` is the
-register default, but it only works when HaRP can route cluster IPs (HaRP on a k3s/kubeadm node); for kind,
-remote, or managed clusters choose `nodeport` or `manual`.
+core Kubernetes decision. AppAPI validates the flags; HaRP maps them to Service types.
 
 | Expose type | HaRP creates | HaRP reaches the ExApp via | Required/related flags | Choose when |
 |---|---|---|---|---|

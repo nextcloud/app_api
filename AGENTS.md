@@ -193,7 +193,7 @@ should be green. Note: green checks confirm the internal Nextcloud-to-HaRP path 
 still needs the `/exapps/` proxy rule from Step 4.
 
 **Step 7. Install an ExApp.** Browse installable ExApps in the UI store (**Settings --> Administration -->
-AppAPI**) or at https://apps.nextcloud.com/ (the Ex-Apps category) to find its id; there is no `occ` command
+AppAPI**) or at https://apps.nextcloud.com/ to find its id; there is no `occ` command
 that lists store apps. Then install it (this pulls the app from the App Store and uses the default daemon):
 
 ```bash
@@ -219,7 +219,7 @@ A HaRP daemon is **not** identified by its deploy type. Both HaRP and the legacy
 | Deploy type | Class | When to use | Status |
 |---|---|---|---|
 | `docker-install` + `--harp` | `DockerActions` | Default. Docker host (local or remote) via HaRP | Recommended (NC32+) |
-| `docker-install` (no `--harp`) | `DockerActions` | Legacy Docker Socket Proxy (DSP) | Deprecated, removal targeted for NC35 |
+| `docker-install` (no `--harp`) | `DockerActions` | Legacy Docker Socket Proxy (DSP) | Deprecated (see [Version notes](#11-version-notes-nc33--34--35)) |
 | `kubernetes-install` | `KubernetesActions` | Kubernetes cluster, always via HaRP | Supported (NC34+) |
 | `manual-install` | `ManualActions` | Local development; ExApp runs outside any orchestration | Dev only |
 
@@ -230,12 +230,12 @@ GPU: add `--compute_device cuda` (NVIDIA) or `--compute_device rocm` (AMD) to an
 
 | Case | How to register | Notes |
 |---|---|---|
-| HaRP on the same Docker host as Nextcloud | `docker-install --harp`, `host` = `<harp>:8780`, `--harp_frp_address <harp>:8782` | Most common single-host setup (the Quickstart) |
+| HaRP on the same Docker host as Nextcloud | `docker-install --harp`, `host` = `<harp-host>:8780`, `--harp_frp_address <harp-host>:8782` | Most common single-host setup (the Quickstart) |
 | HaRP on a **remote** Docker host | same, `host` points at the remote HaRP; set `--harp_docker_socket_port` for the remote socket proxy | Separate ExApp server; FRP tunnels back |
 | Kubernetes (NC34+) | `--k8s --harp` (forces `kubernetes-install`) + `--k8s_expose_type` | FRP address not required for K8s; all K8s ops go through HaRP. Runbook: `docs/appapi/kubernetes.md` |
 | Nextcloud AIO | auto-registered `harp_aio` daemon (`nextcloud-aio-harp:8780`) when HaRP is enabled (NC33+) | Managed by AIO; legacy `docker_aio` deprecated on NC34+ |
 | Local development | `manual-install` | ExApp process runs on your machine; pair with nc_py_api dev mode |
-| Legacy Docker Socket Proxy | `docker-install` (no `--harp`) + `--haproxy_password` | Deprecated; migrate to HaRP before NC35 |
+| Legacy Docker Socket Proxy | `docker-install` (no `--harp`) + `--haproxy_password` | Deprecated; migrate to HaRP |
 
 ## 5. `occ app_api:daemon:register` reference
 
@@ -248,7 +248,7 @@ Source: `lib/Command/Daemon/RegisterDaemon.php`. Positional arguments (all requi
 | 3 | `accepts-deploy-id` | `manual-install`, `docker-install`, or `kubernetes-install` |
 | 4 | `protocol` | `http` or `https` (how Nextcloud connects to the daemon) |
 | 5 | `host` | Where the daemon is reachable, e.g. `<harp>:8780` or a Docker socket path |
-| 6 | `nextcloud_url` | URL of this Nextcloud, as reachable from the ExApp/daemon side |
+| 6 | `nextcloud_url` | URL of this Nextcloud as reachable **from the ExApps**; it becomes each ExApp's `NEXTCLOUD_URL`. On a co-located single host it equals HaRP's `NC_INSTANCE_URL`; in split topologies (K8s, remote host) it may differ from what HaRP uses |
 
 Options:
 
@@ -280,18 +280,11 @@ Rules the command enforces:
 - `--harp_exapp_direct` drops the reverse FRP tunnel, so the ExApp must be directly network-reachable by HaRP;
   `net=host` is disallowed in this mode. Only use it inside a trusted network segment.
 
-Kubernetes example (NC34+). Protocol is `http` against HaRP's `:8780`; K8s daemons need no `--harp_frp_address`:
+Kubernetes daemons (NC34+) use `kubernetes-install` with `http` against HaRP's `:8780` and need no
+`--harp_frp_address`; they are occ-only (the admin UI shows them read-only). Full setup and the register
+command (HaRP `HP_K8S_*` config, RBAC, expose types): [`docs/appapi/kubernetes.md`](docs/appapi/kubernetes.md).
 
-```bash
-occ app_api:daemon:register \
-    k8s1 "Kubernetes" kubernetes-install http <harp-host>:8780 <nextcloud-url> \
-    --harp --harp_shared_key "$HP_SHARED_KEY" \
-    --k8s --k8s_expose_type clusterip \
-    --set-default
-```
-
-Verify with `occ app_api:daemon:list` and the admin UI **Check connection** / **Test deploy**. Full setup
-(HaRP `HP_K8S_*` config, RBAC, expose types): see [`docs/appapi/kubernetes.md`](docs/appapi/kubernetes.md).
+Verify with `occ app_api:daemon:list` and the admin UI **Check connection** / **Test deploy**.
 
 ## 6. ExApp lifecycle (occ)
 
@@ -396,7 +389,7 @@ gating in the deploy/registration code, so these differences are which code ship
 | HaRP daemon | yes | yes | yes |
 | Legacy DSP (`docker-install`, no `--harp`) | yes, no deprecation warning | yes, deprecation warning | present, removal targeted |
 | Kubernetes (`kubernetes-install`, `--k8s*`) | no | yes | yes |
-| `daemon:register` options | 9 (`--harp_*`, no `--k8s*`) | 16 (adds `--k8s*`) | 16 |
+| `daemon:register` options | 9 (Docker/HaRP options, no `--k8s*`) | 16 (adds `--k8s*`) | 16 |
 | AIO auto-daemon | `docker_aio` + `harp_aio` (neither deprecated) | `docker_aio` deprecated, `harp_aio` | `harp_aio` (`docker_aio` deprecated) |
 | Connection/HaRP setup checks | `DaemonCheck`, `HarpVersionCheck` | same | same |
 | ExApp-surfaced setup checks | no | no | in flight, not yet released |
@@ -458,7 +451,7 @@ npm test                 # vitest (JS unit tests)
 - `openapi.yml`: runs `composer openapi` and **fails if the committed `openapi*.json` (and, if applicable,
   `src/types/openapi/*.ts`) are stale**. Regenerate and commit them whenever you touch controllers/routes.
 - `node.yml`: `npm run build` and **fails if compiled `js/` assets are not committed**.
-- `reuse.yml`: every file needs an SPDX license header (REUSE compliance).
+- `reuse.yml`: every file needs SPDX licensing info, via a file header or a `REUSE.toml` annotation.
 - `tests-deploy*.yml`: end-to-end daemon lifecycle across Docker / HaRP / DSP and the four K8s expose types;
   `tests.yml` runs nc_py_api integration (PgSQL/MySQL/APcu). CI targets the server `master` line.
 
