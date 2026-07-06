@@ -21,10 +21,10 @@ change. Keep it portable (see [Keep this file portable](#15-keep-this-file-porta
 
 For building the ExApp side (Python), see the sibling project **nc_py_api** (`cloud-py-api/nc_py_api`).
 
-**Detailed runbooks** for specific topologies live under `docs/appapi/` and are linked from the sections below:
-[Kubernetes](docs/appapi/kubernetes.md), [ExApps on a separate host](docs/appapi/remote-daemon.md), and
-[Nextcloud AIO](docs/appapi/aio.md). They hold depth that would bloat this hub; open the relevant one when
-working on that topology.
+**Detailed runbooks** live under `docs/appapi/` and are linked from the sections below:
+[Kubernetes](docs/appapi/kubernetes.md), [ExApps on a separate host](docs/appapi/remote-daemon.md),
+[Nextcloud AIO](docs/appapi/aio.md), and the [ExApp manifest reference](docs/appapi/exapp-contract.md). They
+hold depth that would bloat this hub; open the relevant one when working on that topic.
 
 ## Table of contents
 
@@ -299,7 +299,7 @@ Source: `lib/Command/ExApp/`. `appid` is the ExApp's id.
 
 | Command | Args and key options |
 |---|---|
-| `app_api:app:register <appid> [daemon]` | Install an ExApp. Omit `[daemon]` to use the default. Definition source: App Store (default), or `--info-xml <url-or-abs-path>`, or `--json-info <json>`. `--env NAME=VALUE` (repeatable) sets container env; `--mount SRC:DST[:ro\|rw]` (repeatable) adds mounts the app declares. `--wait-finish` blocks until deployed; `--silent`; `--test-deploy-mode` re-registers if already present. |
+| `app_api:app:register <appid> [daemon]` | Install an ExApp. Omit `[daemon]` to use the default. Definition source: App Store (default), or `--info-xml <url-or-abs-path>`, or `--json-info <json>`. `--env NAME=VALUE` (repeatable) sets container env, but only for variables the app **declares** in its manifest (undeclared names are silently ignored); `--mount SRC:DST[:ro\|rw]` (repeatable) adds bind mounts (Docker daemons; recorded but not mounted on K8s). `--wait-finish` blocks until deployed; `--silent`; `--test-deploy-mode` re-registers if already present. See `docs/appapi/exapp-contract.md`. |
 | `app_api:app:enable <appid>` | Enable a registered ExApp. No options. |
 | `app_api:app:disable <appid>` | Disable a registered ExApp. No options. |
 | `app_api:app:update [appid]` | Update one ExApp, or `--all` (with `--showonly` to preview, `--include-disabled` to widen). Reuses the ExApp's stored daemon and deploy options. |
@@ -404,6 +404,10 @@ Lifecycle and authentication:
 - Through these APIs an ExApp can register UI elements (top-menu entries, Files actions, scripts/styles),
   Task Processing (AI) providers, Talk bots, declarative settings, webhook listeners, and its own `occ`
   commands. All of these are cleaned up when the ExApp is unregistered.
+
+What the ExApp itself declares (routes and their access levels, image coordinates, the env-var allow-list,
+Kubernetes service roles) lives in its `info.xml` `<external-app>` manifest:
+see [`docs/appapi/exapp-contract.md`](docs/appapi/exapp-contract.md).
 
 ## 10. Troubleshooting (symptom-first)
 
@@ -542,7 +546,7 @@ npm test                 # vitest (JS unit tests)
 | Frontend | `src/` (Vue), entries `src/adminSettings.js` + `src/filesplugin.js`, built into `js/` via `webpack.js` |
 | App metadata / command + job registration | `appinfo/info.xml` |
 | Generated API specs | `openapi.json`, `openapi-administration.json`, `openapi-full.json` |
-| Detailed setup runbooks | `docs/appapi/` (`kubernetes.md`, `remote-daemon.md`, `aio.md`) |
+| Detailed runbooks | `docs/appapi/` (`kubernetes.md`, `remote-daemon.md`, `aio.md`, `exapp-contract.md`) |
 
 ## 14. Related links
 
