@@ -21,9 +21,10 @@ change. Keep it portable (see [Keep this file portable](#15-keep-this-file-porta
 
 For building the ExApp side (Python), see the sibling project **nc_py_api** (`cloud-py-api/nc_py_api`).
 
-**Detailed runbooks** for specific topologies live under `docs/appapi/` and are linked from the sections below
-(currently [Kubernetes](docs/appapi/kubernetes.md)). They hold depth that would bloat this hub; open the
-relevant one when working on that topology.
+**Detailed runbooks** for specific topologies live under `docs/appapi/` and are linked from the sections below:
+[Kubernetes](docs/appapi/kubernetes.md), [ExApps on a separate host](docs/appapi/remote-daemon.md), and
+[Nextcloud AIO](docs/appapi/aio.md). They hold depth that would bloat this hub; open the relevant one when
+working on that topology.
 
 ## Table of contents
 
@@ -85,7 +86,7 @@ placeholders in angle brackets; never paste a real secret into a shared file.
 able to reach your Nextcloud URL.
 
 - **On Nextcloud AIO**: HaRP is auto-registered as the `harp_aio` daemon (NC33+); skip Steps 2-6 and go to
-  Step 7.
+  Step 7. See [`docs/appapi/aio.md`](docs/appapi/aio.md).
 - **If Nextcloud itself is not in Docker** (snap/bare-metal): in Step 3 omit `--network` and publish HaRP's
   ports; in Step 5 drop `--net`, set `host` to `localhost:8780` and `--harp_frp_address localhost:8782`. Run
   `occ` natively (see the note above).
@@ -236,9 +237,9 @@ GPU: add `--compute_device cuda` (NVIDIA) or `--compute_device rocm` (AMD) to an
 | Case | How to register | Notes |
 |---|---|---|
 | HaRP on the same Docker host as Nextcloud | `docker-install --harp`, `host` = `<harp-host>:8780`, `--harp_frp_address <harp-host>:8782` | Most common single-host setup (the Quickstart) |
-| HaRP on a **remote** Docker host | same, `host` points at the remote HaRP; set `--harp_docker_socket_port` for the remote socket proxy | Separate ExApp server; FRP tunnels back |
+| ExApps on a **separate host** | HaRP near NC + FRP-tunneled remote engine (`--harp_docker_socket_port`), or HaRP on the ExApp host | Runbook: `docs/appapi/remote-daemon.md` |
 | Kubernetes (NC34+) | `--k8s --harp` (forces `kubernetes-install`) + `--k8s_expose_type` | FRP address not required for K8s; all K8s ops go through HaRP. Runbook: `docs/appapi/kubernetes.md` |
-| Nextcloud AIO | auto-registered `harp_aio` daemon (`nextcloud-aio-harp:8780`) when HaRP is enabled (NC33+) | Managed by AIO; legacy `docker_aio` deprecated on NC34+ |
+| Nextcloud AIO | auto-registered `harp_aio` daemon (`nextcloud-aio-harp:8780`) when HaRP is enabled (NC33+) | Managed by AIO. Runbook: `docs/appapi/aio.md` |
 | Local development | `manual-install` | ExApp process runs on your machine; pair with nc_py_api dev mode |
 | Legacy Docker Socket Proxy | `docker-install` (no `--harp`) + `--haproxy_password` | Deprecated; migrate to HaRP |
 
@@ -266,7 +267,7 @@ Options:
 | `--harp` | Use HaRP for all Docker + ExApp communication |
 | `--harp_frp_address` | `host:port` of the HaRP FRP server (the FRP port is typically `8782`); required for HaRP unless `--k8s` |
 | `--harp_shared_key` | HaRP shared key; must equal HaRP's `HP_SHARED_KEY` |
-| `--harp_docker_socket_port` | FRP remote port of the remote Docker socket proxy (default `24000`) |
+| `--harp_docker_socket_port` | FRP remote port selecting the Docker Engine (default `24000` = HaRP's local engine; remote engines use `24001-24099`, see `docs/appapi/remote-daemon.md`) |
 | `--harp_exapp_direct` | Advanced: disable the FRP tunnel between ExApps and HaRP (see note below) |
 | `--k8s` (NC34+) | Mark as Kubernetes daemon (requires `--harp`; forces `kubernetes-install`) |
 | `--k8s_expose_type` (NC34+) | `nodeport`, `clusterip` (default), `loadbalancer`, or `manual` |
@@ -541,7 +542,7 @@ npm test                 # vitest (JS unit tests)
 | Frontend | `src/` (Vue), entries `src/adminSettings.js` + `src/filesplugin.js`, built into `js/` via `webpack.js` |
 | App metadata / command + job registration | `appinfo/info.xml` |
 | Generated API specs | `openapi.json`, `openapi-administration.json`, `openapi-full.json` |
-| Detailed setup runbooks | `docs/appapi/` (e.g. `kubernetes.md`) |
+| Detailed setup runbooks | `docs/appapi/` (`kubernetes.md`, `remote-daemon.md`, `aio.md`) |
 
 ## 14. Related links
 
