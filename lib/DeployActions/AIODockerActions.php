@@ -32,7 +32,7 @@ class AIODockerActions {
 	}
 
 	/**
-	 * Detecting AIO instance by config setting or AIO_TOKEN env as fallback
+	 * Detecting AIO instance by the THIS_IS_AIO environment variable
 	 */
 	public function isAIO(): bool {
 		return filter_var(getenv('THIS_IS_AIO'), FILTER_VALIDATE_BOOL);
