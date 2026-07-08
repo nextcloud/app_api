@@ -486,6 +486,96 @@ class DockerActions implements IDeployActions {
 		}
 	}
 
+	/**
+	 * Remove a Docker image by reference via HaRP.
+	 *
+	 * Image cleanup is HaRP-only; direct Docker daemons (deprecated in NC35) are skipped.
+	 * Returns ['deleted' => bool, 'bytes_freed' => int, 'reason' => ?string]:
+	 *   - {deleted: true,  bytes_freed: <int>}                       image was removed
+	 *   - {deleted: true,  bytes_freed: 0, reason: 'not_found'}      image already gone
+	 *   - {deleted: false, bytes_freed: 0, reason: 'in_use'}         Docker refused (409)
+	 *   - {deleted: false, bytes_freed: 0, reason: 'unsupported'}    direct Docker daemon
+	 *   - {deleted: false, bytes_freed: 0, reason: 'error'}          transport / unexpected
+	 */
+	public function removeImage(DaemonConfig $daemonConfig, string $imageRef): array {
+		if (!HarpService::isHarp($daemonConfig->getDeployConfig())) {
+			$this->logger->debug(sprintf('removeImage skipped for non-HaRP daemon "%s"', $daemonConfig->getName()));
+			return ['deleted' => false, 'bytes_freed' => 0, 'reason' => 'unsupported'];
+		}
+		$dockerUrl = $this->buildDockerUrl($daemonConfig);
+		$this->initGuzzleClient($daemonConfig);
+
+		try {
+			$response = $this->guzzleClient->post(
+				sprintf('%s/%s', $dockerUrl, 'docker/exapp/image_remove'),
+				[
+					'json' => ['image_ref' => $imageRef],
+					// HaRP caps its own Docker Engine calls at 30s each (inspect + delete);
+					// bound the request so an unreachable daemon cannot hang a worker.
+					'timeout' => 90,
+					'connect_timeout' => 5,
+				],
+			);
+			$body = json_decode((string)$response->getBody(), true);
+			if (!is_array($body) || !array_key_exists('deleted', $body)) {
+				$this->logger->error(sprintf('Invalid JSON response from HaRP /docker/exapp/image_remove for "%s"', $imageRef));
+				return ['deleted' => false, 'bytes_freed' => 0, 'reason' => 'error'];
+			}
+			return [
+				'deleted' => (bool)$body['deleted'],
+				'bytes_freed' => (int)($body['bytes_freed'] ?? 0),
+				'reason' => isset($body['reason']) ? (string)$body['reason'] : null,
+			];
+		} catch (GuzzleException $e) {
+			$this->logger->error(
+				sprintf('GuzzleException during HaRP /docker/exapp/image_remove for "%s": %s', $imageRef, $e->getMessage()),
+				['exception' => $e],
+			);
+			return ['deleted' => false, 'bytes_freed' => 0, 'reason' => 'error'];
+		}
+	}
+
+	/**
+	 * Look up the image reference an ExApp's container is currently running with, via HaRP.
+	 *
+	 * Used by image cleanup to know which ref to remove after the container is gone,
+	 * without having to track refs in AppAPI state. Returns null if the daemon is not
+	 * HaRP-backed, the container doesn't exist, or the lookup fails. The caller treats
+	 * null as "don't schedule cleanup."
+	 */
+	public function getRunningImageRef(DaemonConfig $daemonConfig, string $appid): ?string {
+		if (!HarpService::isHarp($daemonConfig->getDeployConfig())) {
+			return null;
+		}
+		$dockerUrl = $this->buildDockerUrl($daemonConfig);
+		$this->initGuzzleClient($daemonConfig);
+
+		try {
+			$response = $this->guzzleClient->post(
+				sprintf('%s/%s', $dockerUrl, 'docker/exapp/exists'),
+				[
+					'json' => ['name' => $appid, 'instance_id' => ''],
+					// Container inspect is fast; bound it so uninstall/update flows
+					// never hang on an unreachable daemon.
+					'timeout' => 15,
+					'connect_timeout' => 5,
+				],
+			);
+			if ($response->getStatusCode() !== 200) {
+				return null;
+			}
+			$data = json_decode((string)$response->getBody(), true);
+			if (!is_array($data) || ($data['exists'] ?? false) !== true) {
+				return null;
+			}
+			$ref = (string)($data['image_ref'] ?? '');
+			return $ref !== '' ? $ref : null;
+		} catch (GuzzleException $e) {
+			$this->logger->info(sprintf('Failed to look up image ref via HaRP for "%s": %s', $appid, $e->getMessage()));
+			return null;
+		}
+	}
+
 	public function createContainer(string $dockerUrl, string $imageId, DaemonConfig $daemonConfig, array $params = []): array {
 		$createVolumeResult = $this->createVolume($dockerUrl, $this->buildExAppVolumeName($params['name']));
 		if (isset($createVolumeResult['error'])) {

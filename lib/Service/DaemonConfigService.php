@@ -29,6 +29,7 @@ readonly class DaemonConfigService {
 		private DaemonConfigMapper $mapper,
 		private ExAppService $exAppService,
 		private ICrypto $crypto,
+		private ExAppImageCleanupService $imageCleanupService,
 	) {
 	}
 
@@ -104,11 +105,27 @@ readonly class DaemonConfigService {
 
 	public function unregisterDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
 		try {
-			return $this->mapper->delete($daemonConfig);
+			// Last chance to reclaim images of already-pending cleanup jobs: their
+			// grace period cannot be honored on a daemon that is going away.
+			// Failures only log; cleanup must never block the unregister itself.
+			$this->imageCleanupService->flushPendingForDaemon($daemonConfig);
+		} catch (Exception $e) {
+			$this->logger->warning('Failed to flush pending image cleanup jobs for daemon. Error: ' . $e->getMessage(), ['exception' => $e]);
+		}
+		try {
+			$deleted = $this->mapper->delete($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to unregister daemon config. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		try {
+			// The daemon is gone, so any leftover pending jobs (flush failures,
+			// races) can never succeed; drop them.
+			$this->imageCleanupService->cancelPendingForDaemon($daemonConfig->getName());
+		} catch (Exception $e) {
+			$this->logger->warning('Failed to cancel pending image cleanup jobs for daemon. Error: ' . $e->getMessage(), ['exception' => $e]);
+		}
+		return $deleted;
 	}
 
 	/**

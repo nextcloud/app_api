@@ -350,7 +350,18 @@
                                         "type": "object",
                                         "description": "Configuration key-value pairs to store",
                                         "additionalProperties": {
-                                            "type": "string"
+                                            "oneOf": [
+                                                {
+                                                    "type": "boolean"
+                                                },
+                                                {
+                                                    "type": "integer",
+                                                    "format": "int64"
+                                                },
+                                                {
+                                                    "type": "string"
+                                                }
+                                            ]
                                         }
                                     }
                                 }
@@ -1408,6 +1419,20 @@
                         "schema": {
                             "type": "boolean",
                             "default": false
+                        }
+                    },
+                    {
+                        "name": "imageCleanup",
+                        "in": "query",
+                        "description": "When to remove the ExApp Docker image: after the configured grace period, immediately or never",
+                        "schema": {
+                            "type": "string",
+                            "default": "grace",
+                            "enum": [
+                                "grace",
+                                "now",
+                                "keep"
+                            ]
                         }
                     },
                     {

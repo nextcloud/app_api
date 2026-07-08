@@ -1237,9 +1237,17 @@ jobs:
           docker inspect nc_app_app-skeleton-python | json_pp > app_harp_bridge_no_tls_container.json
           docker logs nc_app_app-skeleton-python > app_harp_bridge_no_tls_container.log 2>&1
 
-      - name: Unregister Skeleton & Daemon
+      - name: Unregister Skeleton
         run: |
           docker exec nextcloud-docker sudo -u www-data php occ app_api:app:unregister app-skeleton-python
+
+      - name: Test image cleanup
+        env:
+          OCC_PREFIX: docker exec nextcloud-docker sudo -u www-data php occ
+        run: python3 tests/test_image_cleanup.py
+
+      - name: Unregister Daemon
+        run: |
           docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:unregister harp_proxy
 
       - name: Show all logs

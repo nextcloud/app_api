@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Settings;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppImageCleanupService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\IAppConfig;
@@ -25,6 +26,7 @@ readonly class Admin implements ISettings {
 		private DaemonConfigService $daemonConfigService,
 		private IAppConfig $appConfig,
 		private DockerActions $dockerActions,
+		private ExAppImageCleanupService $imageCleanupService,
 		private LoggerInterface $logger,
 	) {
 	}
@@ -35,6 +37,10 @@ readonly class Admin implements ISettings {
 			'default_daemon_config' => $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true),
 			'init_timeout' => $this->appConfig->getValueString(Application::APP_ID, 'init_timeout', '40'),
 			'container_restart_policy' => $this->appConfig->getValueString(Application::APP_ID, 'container_restart_policy', 'unless-stopped'),
+			// Read through the service so the settings form always shows the
+			// effective values the cleanup code will actually use.
+			Application::CONF_IMAGE_CLEANUP_ENABLED => $this->imageCleanupService->isMasterEnabled(),
+			Application::CONF_IMAGE_CLEANUP_GRACE_HOURS => $this->imageCleanupService->resolvedGraceHours(),
 		];
 
 		$defaultDaemonConfigName = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true);
