@@ -44,7 +44,7 @@ class WebpackSPDXPlugin {
 	 * @param {string} dir Directory to start checking
 	 */
 	async #findPackage(dir) {
-		if (!dir || dir === '/' || dir === '.') {
+		if (!dir || dir === '/' || dir === '.' || path.dirname(dir) === dir) {
 			return null
 		}
 
