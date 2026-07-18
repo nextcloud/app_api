@@ -55,6 +55,7 @@ OC.L10N.register(
     "Compute device" : "Arvutusseade",
     "Memory limit (in MiB)" : "Mälukasutuse ülempiir (MiB)",
     "Must be a positive integer" : "Peab olema positiivne täisarv",
+    "Option value" : "Valiku väärtus",
     "Confirm" : "Kinnita",
     "Save" : "Salvesta",
     "Register" : "Registreeru",
