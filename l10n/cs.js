@@ -76,6 +76,7 @@ OC.L10N.register(
     "Host" : "Hostitel",
     "ExApp direct communication (FRP disabled)" : "Přímá komunikace ExAPP (FRP vypnuto)",
     "Kubernetes settings" : "Nastavení kubernetes",
+    "Expose type" : "Exponovat typ",
     "Node port" : "Port uzlu",
     "Load balancer IP" : "IP adresa rozdělovače vytížení",
     "Node address type" : "Typ adresy uzlu",
