@@ -55,10 +55,13 @@ class ExAppNotifier implements INotifier {
 		}
 		$notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath(Application::APP_ID, 'app-dark.svg')));
 
-		if (isset($parameters['rich_subject']) && isset($parameters['rich_subject_params'])) {
+		// Empty strings are rejected on both sides: `t('')` throws since the L10N strict types
+		// refactoring, and `setRichSubject('')`/`setRichMessage('')` throw an InvalidValueException.
+		// A notification without a message is valid, so skip what the ExApp did not provide.
+		if (isset($parameters['rich_subject'], $parameters['rich_subject_params']) && $parameters['rich_subject'] !== '') {
 			$notification->setRichSubject($l->t($parameters['rich_subject']), $parameters['rich_subject_params']);
 		}
-		if (isset($parameters['rich_message']) && isset($parameters['rich_message_params'])) {
+		if (isset($parameters['rich_message'], $parameters['rich_message_params']) && $parameters['rich_message'] !== '') {
 			$notification->setRichMessage($l->t($parameters['rich_message']), $parameters['rich_message_params']);
 		}
 
