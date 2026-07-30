@@ -54,6 +54,11 @@ readonly class LoadMenuEntriesListener implements IEventListener {
 			if ($menuEntry->getAdminRequired() === 1 && !$isUserAdmin) {
 				continue; // Skip this entry if the user is not an admin and the entry requires admin privileges
 			}
+			if ($menuEntry->getDisplayName() === '') {
+				// An entry without a label is not renderable, and translating an empty string
+				// throws since the L10N strict types refactoring.
+				continue;
+			}
 			$navigationManager->add(static function () use ($menuEntry) {
 				$appId = $menuEntry->getAppid();
 				$entryName = $menuEntry->getName();
