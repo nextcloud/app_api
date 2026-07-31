@@ -156,14 +156,14 @@ jobs:
       - name: Wait for Nextcloud bootstrap
         run: |
           for i in $(seq 1 60); do
-            if docker exec nextcloud test -f /var/www/html/version.php 2>/dev/null; then
-              echo "Nextcloud source ready after ${i}0s"
+            if docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
+              echo "Nextcloud installed after ${i}0s"
               break
             fi
             echo "Waiting for Nextcloud bootstrap... ($i/60)"
             sleep 10
           done
-          docker exec nextcloud test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
+          docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
 
       - name: Install AppAPI
         run: |
@@ -256,14 +256,14 @@ jobs:
       - name: Wait for Nextcloud bootstrap
         run: |
           for i in $(seq 1 60); do
-            if docker exec nextcloud test -f /var/www/html/version.php 2>/dev/null; then
-              echo "Nextcloud source ready after ${i}0s"
+            if docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
+              echo "Nextcloud installed after ${i}0s"
               break
             fi
             echo "Waiting for Nextcloud bootstrap... ($i/60)"
             sleep 10
           done
-          docker exec nextcloud test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
+          docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
 
       - name: Install AppAPI
         run: |
@@ -366,14 +366,14 @@ jobs:
       - name: Wait for Nextcloud bootstrap
         run: |
           for i in $(seq 1 60); do
-            if docker exec nextcloud test -f /var/www/html/version.php 2>/dev/null; then
-              echo "Nextcloud source ready after ${i}0s"
+            if docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
+              echo "Nextcloud installed after ${i}0s"
               break
             fi
             echo "Waiting for Nextcloud bootstrap... ($i/60)"
             sleep 10
           done
-          docker exec nextcloud test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
+          docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
 
       - name: Debug information
         run: |
@@ -506,14 +506,14 @@ jobs:
       - name: Wait for Nextcloud bootstrap
         run: |
           for i in $(seq 1 60); do
-            if docker exec nextcloud test -f /var/www/html/version.php 2>/dev/null; then
-              echo "Nextcloud source ready after ${i}0s"
+            if docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
+              echo "Nextcloud installed after ${i}0s"
               break
             fi
             echo "Waiting for Nextcloud bootstrap... ($i/60)"
             sleep 10
           done
-          docker exec nextcloud test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
+          docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
 
       - name: Debug information
         run: |
@@ -1078,14 +1078,14 @@ jobs:
       - name: Wait for Nextcloud bootstrap
         run: |
           for i in $(seq 1 60); do
-            if docker exec nextcloud-docker test -f /var/www/html/version.php 2>/dev/null; then
-              echo "Nextcloud source ready after ${i}0s"
+            if docker exec nextcloud-docker sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
+              echo "Nextcloud installed after ${i}0s"
               break
             fi
             echo "Waiting for Nextcloud bootstrap... ($i/60)"
             sleep 10
           done
-          docker exec nextcloud-docker test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
+          docker exec nextcloud-docker sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
 
       - name: Install AppAPI
         run: |
@@ -1183,14 +1183,14 @@ jobs:
       - name: Wait for Nextcloud bootstrap
         run: |
           for i in $(seq 1 60); do
-            if docker exec nextcloud-docker test -f /var/www/html/version.php 2>/dev/null; then
-              echo "Nextcloud source ready after ${i}0s"
+            if docker exec nextcloud-docker sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
+              echo "Nextcloud installed after ${i}0s"
               break
             fi
             echo "Waiting for Nextcloud bootstrap... ($i/60)"
             sleep 10
           done
-          docker exec nextcloud-docker test -f /var/www/html/version.php || (echo "Bootstrap timed out" && exit 1)
+          docker exec nextcloud-docker sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
 
       - name: Install AppAPI
         run: |
