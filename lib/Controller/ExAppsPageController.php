@@ -15,7 +15,6 @@ use OC\App\AppStore\Fetcher\CategoryFetcher;
 use OC\App\AppStore\Version\VersionParser;
 use OC\App\DependencyAnalyzer;
 use OC\App\Platform;
-use OC_App;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
@@ -518,8 +517,20 @@ class ExAppsPageController extends Controller {
 	 */
 	#[PasswordConfirmationRequired]
 	public function force(string $appId): JSONResponse {
-		$appId = OC_App::cleanAppId($appId);
-		$this->appManager->overwriteNextcloudRequirement($appId);
+		$appId = $this->appManager->cleanAppId($appId);
+
+		// Same effect as the non-public OC\App\AppManager::overwriteNextcloudRequirement(),
+		// except that a corrupt (non-array) value is repaired instead of raising a TypeError.
+		// The same system value is read back in getAppsForCategory().
+		$ignoreMaxApps = $this->config->getSystemValue('app_install_overwrite', []);
+		if (!is_array($ignoreMaxApps)) {
+			$this->logger->warning('The value given for app_install_overwrite is not an array. Ignoring...');
+			$ignoreMaxApps = [];
+		}
+		if (!in_array($appId, $ignoreMaxApps, true)) {
+			$ignoreMaxApps[] = $appId;
+			$this->config->setSystemValue('app_install_overwrite', $ignoreMaxApps);
+		}
 		return new JSONResponse();
 	}
 
