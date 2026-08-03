@@ -35,6 +35,7 @@ class ExAppsPageControllerTest extends TestCase {
 	private ExAppService&MockObject $exAppService;
 	private DaemonConfigService&MockObject $daemonConfigService;
 	private IConfig&MockObject $config;
+	private IAppManager&MockObject $appManager;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -49,7 +50,7 @@ class ExAppsPageControllerTest extends TestCase {
 		$this->exAppFetcher = $this->createMock(ExAppFetcher::class);
 		$l10n = $this->createMock(IL10N::class);
 		$logger = $this->createMock(LoggerInterface::class);
-		$appManager = $this->createMock(IAppManager::class);
+		$this->appManager = $this->createMock(IAppManager::class);
 		$this->exAppService = $this->createMock(ExAppService::class);
 		$exAppDeployOptionsService = $this->createMock(ExAppDeployOptionsService::class);
 
@@ -64,7 +65,7 @@ class ExAppsPageControllerTest extends TestCase {
 			$this->exAppFetcher,
 			$l10n,
 			$logger,
-			$appManager,
+			$this->appManager,
 			$this->exAppService,
 			$exAppDeployOptionsService,
 		);
@@ -168,5 +169,63 @@ class ExAppsPageControllerTest extends TestCase {
 		self::assertCount(1, $data['apps']);
 		self::assertSame('Fake App (de)', $data['apps'][0]['name']);
 		self::assertSame('Eine Test-App', $data['apps'][0]['description']);
+	}
+
+	/**
+	 * force() marks an ExApp as compatible by adding its id to the
+	 * `app_install_overwrite` system value. This mirrors the non-public
+	 * OC\App\AppManager::overwriteNextcloudRequirement(); the same key is read
+	 * back in getAppsForCategory(), so both sides must stay in sync.
+	 *
+	 * The id must be the one returned by cleanAppId(), not the raw input.
+	 */
+	public function testForceAppendsCleanedAppIdToOverwriteList(): void {
+		$this->appManager->expects(self::once())
+			->method('cleanAppId')
+			->with('My_ExApp!')
+			->willReturn('my_exapp');
+
+		$this->config->method('getSystemValue')
+			->with('app_install_overwrite', self::anything())
+			->willReturn(['other_app']);
+
+		$this->config->expects(self::once())
+			->method('setSystemValue')
+			->with('app_install_overwrite', ['other_app', 'my_exapp']);
+
+		self::assertInstanceOf(JSONResponse::class, $this->controller->force('My_ExApp!'));
+	}
+
+	/**
+	 * The duplicate check must compare the cleaned id against the stored list,
+	 * so this passes a raw id that differs from the cleaned one.
+	 */
+	public function testForceDoesNotRewriteWhenAlreadyMarked(): void {
+		$this->appManager->expects(self::once())
+			->method('cleanAppId')
+			->with('My_ExApp!')
+			->willReturn('my_exapp');
+
+		$this->config->method('getSystemValue')
+			->with('app_install_overwrite', self::anything())
+			->willReturn(['my_exapp']);
+
+		$this->config->expects(self::never())->method('setSystemValue');
+
+		self::assertInstanceOf(JSONResponse::class, $this->controller->force('My_ExApp!'));
+	}
+
+	public function testForceRecoversFromNonArrayOverwriteValue(): void {
+		$this->appManager->method('cleanAppId')->willReturn('my_exapp');
+
+		$this->config->method('getSystemValue')
+			->with('app_install_overwrite', self::anything())
+			->willReturn('not-an-array');
+
+		$this->config->expects(self::once())
+			->method('setSystemValue')
+			->with('app_install_overwrite', ['my_exapp']);
+
+		self::assertInstanceOf(JSONResponse::class, $this->controller->force('my_exapp'));
 	}
 }
