@@ -37,3 +37,4 @@
 /stylelint.config.js
 /webpack.*
 tests
+/examples
