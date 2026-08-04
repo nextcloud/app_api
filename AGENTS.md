@@ -24,7 +24,10 @@ Python developers can use the sibling project **nc_py_api** (`cloud-py-api/nc_py
 ExApp contract for you.
 
 **Detailed runbooks** live under `docs/appapi/` and are linked from the sections below. They hold depth that
-would bloat this hub; open the relevant one when working on that topic.
+would bloat this hub; open the relevant one when working on that topic. The runbooks ship with the installed
+app (release archives include `docs/`), so on a production instance they sit right next to this file; if a
+linked file is missing from your copy, read it from https://github.com/nextcloud/app_api at the tag matching
+the installed AppAPI version.
 
 - Operations: [Kubernetes](docs/appapi/kubernetes.md), [ExApps on a separate host](docs/appapi/remote-daemon.md),
   [Nextcloud AIO](docs/appapi/aio.md)
@@ -421,7 +424,8 @@ What the ExApp itself declares (routes and their access levels, image coordinate
 Kubernetes service roles) lives in its `info.xml` `<external-app>` manifest:
 see [`docs/appapi/exapp-contract.md`](docs/appapi/exapp-contract.md). How to implement the ExApp side of this
 contract in any language, with a reference app: [`docs/appapi/exapp-development.md`](docs/appapi/exapp-development.md)
-and [`examples/minimal_exapp/`](examples/minimal_exapp/).
+and [`examples/minimal_exapp/`](https://github.com/nextcloud/app_api/tree/main/examples/minimal_exapp)
+(repository only; not part of the release archive).
 
 ## 10. Troubleshooting (symptom-first)
 

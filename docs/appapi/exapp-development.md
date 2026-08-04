@@ -15,8 +15,9 @@ agent can follow it end to end.
 Prerequisite: a working environment from [dev-environment.md](dev-environment.md) (Nextcloud + AppAPI + a HaRP
 daemon `local-harp` + a manual-install daemon `manual_dev`).
 
-Reference implementation: [examples/minimal_exapp](../../examples/minimal_exapp/) in this repository is the whole
-contract in one framework-free Python file. Read it first; to develop in Go, Rust, Node or anything else, port
+Reference implementation:
+[examples/minimal_exapp](https://github.com/nextcloud/app_api/tree/main/examples/minimal_exapp) in the app_api
+repository (any git checkout; not in release archives) is the whole contract in one framework-free Python file. Read it first; to develop in Go, Rust, Node or anything else, port
 that file. For Python, use [nc_py_api](https://github.com/cloud-py-api/nc_py_api), which implements all of this
 for you.
 

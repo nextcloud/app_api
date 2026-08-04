@@ -254,7 +254,8 @@ Expected: both daemons listed, `local-harp` marked default.
 ## Stage 7: smoke test with the reference ExApp
 
 Goal: prove the whole chain (AppAPI, HaRP, Docker, frpc, /exapps/ routing) with a real deploy before writing any
-code. Uses [examples/minimal_exapp](../../examples/minimal_exapp/) from this repository.
+code. Uses [examples/minimal_exapp](https://github.com/nextcloud/app_api/tree/main/examples/minimal_exapp) from
+the app_api repository (present in any git checkout, including the one bootstrap made; not in release archives).
 
 From the nextcloud-docker-dev checkout root (the app_api clone from Stage 1 contains the example):
 

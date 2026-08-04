@@ -22,7 +22,6 @@
 /composer.*
 /node_modules
 /screenshots
-/docs
 /src
 /vendor/bin
 /jest.config.js
