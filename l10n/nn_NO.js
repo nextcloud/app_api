@@ -8,6 +8,8 @@ OC.L10N.register(
     "Name" : "Namn",
     "Host" : "Tenar",
     "More information" : "Meir informasjon",
+    "Remove" : "Fjern",
+    "Add" : "Legg til",
     "Save" : "Lagre",
     "Update to {version}" : "Oppdater til {version}",
     "Visit website" : "Besøk nettstaden",
