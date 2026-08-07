@@ -19,12 +19,22 @@ Applies to **Nextcloud 33, 34 and 35**. This repo's `main` is the NC35 dev line;
 This is a **living document**: when you change AppAPI's behavior, update the relevant section in the same
 change. Keep it portable (see [Keep this file portable](#15-keep-this-file-portable-and-current)).
 
-For building the ExApp side (Python), see the sibling project **nc_py_api** (`cloud-py-api/nc_py_api`).
+For building the ExApp side, start at [exapp-development.md](docs/appapi/exapp-development.md) (any language);
+Python developers can use the sibling project **nc_py_api** (`cloud-py-api/nc_py_api`), which implements the
+ExApp contract for you.
 
-**Detailed runbooks** live under `docs/appapi/` and are linked from the sections below:
-[Kubernetes](docs/appapi/kubernetes.md), [ExApps on a separate host](docs/appapi/remote-daemon.md),
-[Nextcloud AIO](docs/appapi/aio.md), and the [ExApp manifest reference](docs/appapi/exapp-contract.md). They
-hold depth that would bloat this hub; open the relevant one when working on that topic.
+**Detailed runbooks** live under `docs/appapi/` and are linked from the sections below. They hold depth that
+would bloat this hub; open the relevant one when working on that topic. The runbooks ship with the installed
+app (release archives include `docs/`), so on a production instance they sit right next to this file; if a
+linked file is missing from your copy, read it from https://github.com/nextcloud/app_api at the tag matching
+the installed AppAPI version.
+
+- Operations: [Kubernetes](docs/appapi/kubernetes.md), [ExApps on a separate host](docs/appapi/remote-daemon.md),
+  [Nextcloud AIO](docs/appapi/aio.md)
+- Development: [set up a dev environment](docs/appapi/dev-environment.md),
+  [develop ExApps in any language](docs/appapi/exapp-development.md),
+  [fix or extend an installed ExApp](docs/appapi/exapp-ai-maintenance.md)
+- Reference: [ExApp manifest](docs/appapi/exapp-contract.md)
 
 ## Table of contents
 
@@ -81,6 +91,9 @@ AppAPI is only useful if you want to install or develop External Apps. If you do
 
 The golden path on a Docker-based Nextcloud, using HaRP. This is the setup most colleagues want. Replace the
 placeholders in angle brackets; never paste a real secret into a shared file.
+
+Setting up a local **development** environment instead? Start at
+[`docs/appapi/dev-environment.md`](docs/appapi/dev-environment.md).
 
 **Prerequisites**: Nextcloud 33+ with admin access; a Docker Engine reachable from where you run HaRP; HaRP
 able to reach your Nextcloud URL.
@@ -227,7 +240,7 @@ A HaRP daemon is **not** identified by its deploy type. Both HaRP and the legacy
 | `docker-install` + `--harp` | `DockerActions` | Default. Docker host (local or remote) via HaRP | Recommended (NC32+) |
 | `docker-install` (no `--harp`) | `DockerActions` | Legacy Docker Socket Proxy (DSP) | Deprecated (see [Version notes](#11-version-notes-nc33--34--35)) |
 | `kubernetes-install` | `KubernetesActions` | Kubernetes cluster, always via HaRP | Supported (NC34+) |
-| `manual-install` | `ManualActions` | Local development; ExApp runs outside any orchestration | Dev only |
+| `manual-install` | `ManualActions` | Local development; ExApp runs outside any orchestration (`docs/appapi/dev-environment.md`) | Dev only |
 
 GPU: add `--compute_device cuda` (NVIDIA) or `--compute_device rocm` (AMD) to any daemon for AI ExApps
 (`cpu` is the default).
@@ -240,7 +253,7 @@ GPU: add `--compute_device cuda` (NVIDIA) or `--compute_device rocm` (AMD) to an
 | ExApps on a **separate host** | HaRP near NC + FRP-tunneled remote engine (`--harp_docker_socket_port`), or HaRP on the ExApp host | Runbook: `docs/appapi/remote-daemon.md` |
 | Kubernetes (NC34+) | `--k8s --harp` (forces `kubernetes-install`) + `--k8s_expose_type` | FRP address not required for K8s; all K8s ops go through HaRP. Runbook: `docs/appapi/kubernetes.md` |
 | Nextcloud AIO | auto-registered `harp_aio` daemon (`nextcloud-aio-harp:8780`) when HaRP is enabled (NC33+) | Managed by AIO. Runbook: `docs/appapi/aio.md` |
-| Local development | `manual-install` | ExApp process runs on your machine; pair with nc_py_api dev mode |
+| Local development | `manual-install` | ExApp process runs on your machine. Runbook: `docs/appapi/dev-environment.md` |
 | Legacy Docker Socket Proxy | `docker-install` (no `--harp`) + `--haproxy_password` | Deprecated; migrate to HaRP |
 
 ## 5. `occ app_api:daemon:register` reference
@@ -317,6 +330,8 @@ Notes:
 - Unregister cleans up everything the ExApp registered (UI entries, AI providers, Talk bots, webhooks, occ
   commands) but deliberately **keeps its app config and per-user preferences**, so a reinstall picks up the
   previous settings. There is no purge flag for those.
+- Rebuilding and redeploying a **changed** ExApp, including locally built images that exist in no registry
+  (daemon registry mapping to `local`): [`docs/appapi/exapp-ai-maintenance.md`](docs/appapi/exapp-ai-maintenance.md).
 
 ## 7. Operating AppAPI
 
@@ -407,7 +422,10 @@ Lifecycle and authentication:
 
 What the ExApp itself declares (routes and their access levels, image coordinates, the env-var allow-list,
 Kubernetes service roles) lives in its `info.xml` `<external-app>` manifest:
-see [`docs/appapi/exapp-contract.md`](docs/appapi/exapp-contract.md).
+see [`docs/appapi/exapp-contract.md`](docs/appapi/exapp-contract.md). How to implement the ExApp side of this
+contract in any language, with a reference app: [`docs/appapi/exapp-development.md`](docs/appapi/exapp-development.md)
+and [`examples/minimal_exapp/`](https://github.com/nextcloud/app_api/tree/main/examples/minimal_exapp)
+(repository only; not part of the release archive).
 
 ## 10. Troubleshooting (symptom-first)
 
@@ -434,6 +452,9 @@ see [`docs/appapi/exapp-contract.md`](docs/appapi/exapp-contract.md).
   HaRP image (`:release`).
 - **GPU ExApp not using the GPU**: register the daemon with `--compute_device cuda|rocm`.
 - **DSP deprecation warnings**: expected on NC34+; migrate the daemon to HaRP (`--harp`).
+- **Changed an ExApp's code but the running container is unchanged**: rebuilds never apply automatically, and
+  same-version updates are a no-op; the redeploy loops are in
+  [`docs/appapi/exapp-ai-maintenance.md`](docs/appapi/exapp-ai-maintenance.md).
 
 ## 11. Version notes (NC33 / 34 / 35)
 
@@ -478,6 +499,9 @@ To test this checkout manually (distinct from the Quickstart, which installs the
   `apps-extra/app_api`).
 - `occ app:enable app_api`.
 - `npm run watch` rebuilds the frontend on change; reload Nextcloud to pick it up.
+
+For a full local environment (nextcloud-docker-dev with HaRP and both development daemons), use
+[`docs/appapi/dev-environment.md`](docs/appapi/dev-environment.md).
 
 ### Build, test, lint
 
@@ -546,11 +570,12 @@ npm test                 # vitest (JS unit tests)
 | Frontend | `src/` (Vue), entries `src/adminSettings.js` + `src/filesplugin.js`, built into `js/` via `webpack.js` |
 | App metadata / command + job registration | `appinfo/info.xml` |
 | Generated API specs | `openapi.json`, `openapi-administration.json`, `openapi-full.json` |
-| Detailed runbooks | `docs/appapi/` (`kubernetes.md`, `remote-daemon.md`, `aio.md`, `exapp-contract.md`) |
+| Detailed runbooks | `docs/appapi/` (`kubernetes.md`, `remote-daemon.md`, `aio.md`, `exapp-contract.md`, `dev-environment.md`, `exapp-development.md`, `exapp-ai-maintenance.md`) |
 
 ## 14. Related links
 
 - **nc_py_api** (build ExApps in Python): https://github.com/cloud-py-api/nc_py_api
+- **nextcloud-docker-dev** (development environment): https://github.com/nextcloud/nextcloud-docker-dev
 - **HaRP**: https://github.com/nextcloud/HaRP
 - **Docker Socket Proxy** (legacy): https://github.com/nextcloud/docker-socket-proxy
 - **Admin docs**: https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/

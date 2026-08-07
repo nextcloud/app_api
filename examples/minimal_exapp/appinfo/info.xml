@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+  - SPDX-FileCopyrightText: 2026 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<info>
+	<id>minimal_exapp</id>
+	<name>Minimal ExApp</name>
+	<summary>Minimal framework-free ExApp showing the raw AppAPI contract</summary>
+	<description>Reference ExApp implemented with the Python standard library only. Port it to any language; the AppAPI contract is exactly what this app implements.</description>
+	<version>1.0.0</version>
+	<licence>agpl</licence>
+	<author homepage="https://github.com/nextcloud/app_api">AppAPI developers</author>
+	<namespace>MinimalExApp</namespace>
+	<category>tools</category>
+	<website>https://github.com/nextcloud/app_api</website>
+	<bugs>https://github.com/nextcloud/app_api/issues</bugs>
+	<dependencies>
+		<nextcloud min-version="33" max-version="36"/>
+	</dependencies>
+	<external-app>
+		<docker-install>
+			<registry>example.local</registry>
+			<image>minimal_exapp</image>
+			<image-tag>1.0.0</image-tag>
+		</docker-install>
+		<routes>
+			<route>
+				<url>^/echo$</url>
+				<verb>GET</verb>
+				<access_level>PUBLIC</access_level>
+			</route>
+			<route>
+				<url>^/nc-version$</url>
+				<verb>GET</verb>
+				<access_level>PUBLIC</access_level>
+			</route>
+		</routes>
+	</external-app>
+</info>
