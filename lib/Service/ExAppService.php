@@ -293,31 +293,17 @@ class ExAppService {
 			}
 			// Advanced deploy options
 			if (isset($appInfo['external-app']['environment-variables']['variable'])) {
-				$envVars = [];
-				if (!isset($appInfo['external-app']['environment-variables']['variable'][0])) {
-					$appInfo['external-app']['environment-variables']['variable'] = [$appInfo['external-app']['environment-variables']['variable']];
+				$variables = $appInfo['external-app']['environment-variables']['variable'];
+				if (!is_array($variables)) {
+					return ['error' => sprintf("ExApp '%s' has invalid environment variable definition. 'variable' must be an object or a list of objects, got %s", $appId, get_debug_type($variables))];
 				}
-				foreach ($appInfo['external-app']['environment-variables']['variable'] as $envVar) {
-					$envVars[$envVar['name']] = [
-						'name' => $envVar['name'],
-						'displayName' => $envVar['display-name'] ?? '',
-						'description' => $envVar['description'] ?? '',
-						'default' => $envVar['default'] ?? '',
-						'value' => $envVar['default'] ?? '',
-					];
+				try {
+					$appInfo['external-app']['environment-variables'] = ExAppEnvVarsHelper::normalizeAndValidate(
+						$variables, $deployOptions['environment_variables'] ?? []
+					);
+				} catch (InvalidArgumentException $e) {
+					return ['error' => sprintf("ExApp '%s' has invalid environment variable definition. %s", $appId, $e->getMessage())];
 				}
-				if (isset($deployOptions['environment_variables']) && count(array_keys($deployOptions['environment_variables'])) > 0) {
-					// override with given deploy options values
-					foreach ($deployOptions['environment_variables'] as $key => $value) {
-						if (array_key_exists($key, $envVars)) {
-							$envVars[$key]['value'] = $value['value'] ?? $value ?? '';
-						}
-					}
-				}
-				$envVars = array_filter($envVars, function ($envVar) {
-					return $envVar['value'] !== '';
-				});
-				$appInfo['external-app']['environment-variables'] = $envVars;
 			}
 			if (isset($appInfo['external-app']['k8s-service-roles']['role'])) {
 				$roles = $appInfo['external-app']['k8s-service-roles']['role'];
