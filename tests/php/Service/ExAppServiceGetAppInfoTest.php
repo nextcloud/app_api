@@ -31,9 +31,10 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * getAppInfo-level coverage for the environment-variable normalization wiring: the info.xml
- * path must feed declared variables through ExAppEnvVarsHelper, so an empty <default></default>
- * (parsed to [] by the simplexml/json roundtrip) never reaches the deploy actions.
+ * getAppInfo-level coverage for the environment-variable normalization wiring: both the
+ * info.xml and the --json-info path must feed declared variables through ExAppEnvVarsHelper,
+ * so an empty <default></default> (parsed to [] by the simplexml/json roundtrip) or an
+ * unnormalized JSON definition never reaches the deploy actions.
  */
 class ExAppServiceGetAppInfoTest extends TestCase {
 	private ExAppService $service;
@@ -75,7 +76,7 @@ class ExAppServiceGetAppInfoTest extends TestCase {
 	}
 
 	private function writeInfoXml(string $environmentVariables): string {
-		$this->infoXmlPath = tempnam(sys_get_temp_dir(), 'appapi-test-info-') . '.xml';
+		$this->infoXmlPath = tempnam(sys_get_temp_dir(), 'appapi-test-info-');
 		file_put_contents($this->infoXmlPath, <<<XML
 <?xml version="1.0"?>
 <info>
@@ -150,6 +151,72 @@ XML);
 XML);
 
 		$appInfo = $this->service->getAppInfo('test_app', $infoXml, null);
+
+		self::assertArrayHasKey('error', $appInfo);
+		self::assertStringContainsString('invalid environment variable definition', $appInfo['error']);
+	}
+
+	public function testJsonInfoEnvironmentVariablesAreNormalized(): void {
+		$jsonInfo = json_encode([
+			'id' => 'test_app',
+			'external-app' => [
+				'environment-variables' => [
+					'variable' => [
+						['name' => 'EMPTY', 'display-name' => 'Empty', 'default' => ''],
+						['name' => 'KEPT', 'display-name' => 'Kept', 'default' => 'v'],
+						['name' => 'TYPED', 'default' => 5],
+					],
+				],
+			],
+		]);
+
+		$appInfo = $this->service->getAppInfo('test_app', null, $jsonInfo, [
+			'environment_variables' => ['KEPT' => 'overridden'],
+		]);
+
+		self::assertArrayNotHasKey('error', $appInfo);
+		self::assertSame(
+			[
+				'KEPT' => ['name' => 'KEPT', 'displayName' => 'Kept', 'description' => '', 'default' => 'v', 'value' => 'overridden'],
+				'TYPED' => ['name' => 'TYPED', 'displayName' => '', 'description' => '', 'default' => '5', 'value' => '5'],
+			],
+			$appInfo['external-app']['environment-variables']
+		);
+	}
+
+	public function testJsonInfoRootLevelEnvironmentVariablesAreNormalized(): void {
+		$jsonInfo = json_encode([
+			'id' => 'test_app',
+			'environment-variables' => [
+				'variable' => [
+					['name' => 'EMPTY', 'default' => ''],
+					['name' => 'KEPT', 'default' => 'v'],
+				],
+			],
+		]);
+
+		$appInfo = $this->service->getAppInfo('test_app', null, $jsonInfo);
+
+		self::assertArrayNotHasKey('error', $appInfo);
+		self::assertSame(
+			['KEPT' => ['name' => 'KEPT', 'displayName' => '', 'description' => '', 'default' => 'v', 'value' => 'v']],
+			$appInfo['external-app']['environment-variables']
+		);
+	}
+
+	public function testJsonInfoVariableWithEmptyNameReturnsError(): void {
+		$jsonInfo = json_encode([
+			'id' => 'test_app',
+			'external-app' => [
+				'environment-variables' => [
+					'variable' => [
+						['name' => '', 'default' => 'v'],
+					],
+				],
+			],
+		]);
+
+		$appInfo = $this->service->getAppInfo('test_app', null, $jsonInfo);
 
 		self::assertArrayHasKey('error', $appInfo);
 		self::assertStringContainsString('invalid environment variable definition', $appInfo['error']);
