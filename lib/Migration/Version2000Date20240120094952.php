@@ -37,7 +37,7 @@ class Version2000Date20240120094952 extends SimpleMigrationStep {
 		$table->addUniqueIndex(['daemon_config_name', 'port'], 'ex_apps_c_port__idx');
 
 		$table = $schema->getTable('ex_apps_daemons');
-		$table->changeColumn('deploy_config', [
+		$table->modifyColumn('deploy_config', [
 			'notnull' => true,
 		]);
 
