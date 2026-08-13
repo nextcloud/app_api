@@ -26,14 +26,14 @@ class ExAppUiMiddleware extends Middleware {
 	) {
 	}
 
-	public function beforeOutput(Controller $controller, string $methodName, string $output) {
+	public function beforeOutput(Controller $controller, string $methodName, string $output): string {
 		if (($controller instanceof TopMenuController) && ($controller->postprocess)) {
-			$output = preg_replace(
+			$output = (string)preg_replace(
 				'/(href=")(\/.*?)(\/app_api\/css\/)(proxy\/.*css.*")/',
 				'$1/index.php/apps/app_api/$4',
 				$output);
 			foreach ($controller->jsProxyMap as $key => $value) {
-				$output = preg_replace(
+				$output = (string)preg_replace(
 					'/(src=")(\/.*?)(\/app_api\/js\/)(proxy_js\/' . (string)$key . '.js)(.*")/',
 					'$1/index.php/apps/app_api/proxy/' . $value . '.js$5',
 					$output,
@@ -43,7 +43,7 @@ class ExAppUiMiddleware extends Middleware {
 		return $output;
 	}
 
-	public function afterController(Controller $controller, string $methodName, Response $response) {
+	public function afterController(Controller $controller, string $methodName, Response $response): Response {
 		if (($controller instanceof TopMenuController) && ($controller->postprocess)) {
 			$exAppId = $this->request->getParam('appId');
 			$menuEntryName = $this->request->getParam('name');

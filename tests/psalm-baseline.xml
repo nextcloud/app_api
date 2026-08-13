@@ -142,14 +142,6 @@
       <code><![CDATA[IEventListener]]></code>
     </MissingTemplateParam>
   </file>
-  <file src="lib/Middleware/ExAppUiMiddleware.php">
-    <InvalidNullableReturnType>
-      <code><![CDATA[beforeOutput]]></code>
-    </InvalidNullableReturnType>
-    <NullableReturnStatement>
-      <code><![CDATA[$output]]></code>
-    </NullableReturnStatement>
-  </file>
   <file src="lib/Service/ExAppOccService.php">
     <InvalidReturnStatement>
       <code><![CDATA[new class($occCommand, $container) extends Command {
