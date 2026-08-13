@@ -128,7 +128,7 @@ class ExAppOccService {
 				$this->service = $this->container->get(PublicFunctions::class);
 			}
 
-			protected function configure() {
+			protected function configure(): void {
 				$this->setName($this->occCommand->getName());
 				$this->setDescription($this->occCommand->getDescription());
 				$this->setHidden(filter_var($this->occCommand->getHidden(), FILTER_VALIDATE_BOOLEAN));
