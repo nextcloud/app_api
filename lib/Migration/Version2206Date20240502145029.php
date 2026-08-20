@@ -30,11 +30,13 @@ class Version2206Date20240502145029 extends SimpleMigrationStep {
 		if ($schema->hasTable('ex_ui_files_actions')) {
 			$table = $schema->getTable('ex_ui_files_actions');
 
-			$table->addColumn('version', Types::STRING, [
-				'notnull' => true,
-				'length' => 64,
-				'default' => '1.0',
-			]);
+			if (!$table->hasColumn('version')) {
+				$table->addColumn('version', Types::STRING, [
+					'notnull' => true,
+					'length' => 64,
+					'default' => '1.0',
+				]);
+			}
 		}
 
 		return $schema;
