@@ -26,11 +26,14 @@ class Version2800Date20240711080316 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		$table = $schema->getTable('ex_task_processing');
-		if (!$table->hasColumn('custom_task_type')) {
-			$table->addColumn('custom_task_type', Types::TEXT, [
-				'notnull' => false,
-			]);
+		if ($schema->hasTable('ex_task_processing')) {
+			$table = $schema->getTable('ex_task_processing');
+
+			if (!$table->hasColumn('custom_task_type')) {
+				$table->addColumn('custom_task_type', Types::TEXT, [
+					'notnull' => false,
+				]);
+			}
 		}
 
 		return $schema;

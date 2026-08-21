@@ -26,11 +26,14 @@ class Version3000Date20240807085759 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		$table = $schema->getTable('ex_task_processing');
-		if (!$table->hasColumn('provider')) {
-			$table->addColumn('provider', Types::TEXT, [
-				'notnull' => true,
-			]);
+		if ($schema->hasTable('ex_task_processing')) {
+			$table = $schema->getTable('ex_task_processing');
+
+			if (!$table->hasColumn('provider')) {
+				$table->addColumn('provider', Types::TEXT, [
+					'notnull' => true,
+				]);
+			}
 		}
 
 		return $schema;
