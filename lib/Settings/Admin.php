@@ -11,6 +11,7 @@ namespace OCA\AppAPI\Settings;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
@@ -25,6 +26,7 @@ readonly class Admin implements ISettings {
 		private DaemonConfigService $daemonConfigService,
 		private IAppConfig $appConfig,
 		private DockerActions $dockerActions,
+		private KubernetesActions $kubernetesActions,
 		private LoggerInterface $logger,
 	) {
 	}
@@ -41,11 +43,21 @@ readonly class Admin implements ISettings {
 		if ($defaultDaemonConfigName !== '') {
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($defaultDaemonConfigName);
 			if ($daemonConfig !== null) {
-				$this->dockerActions->initGuzzleClient($daemonConfig);
-				$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
-				$adminInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
-				if (!$daemonConfigAccessible) {
-					$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please check its configuration', $daemonConfig->getName()));
+				if ($daemonConfig->getAcceptsDeployId() === KubernetesActions::DEPLOY_ID) {
+					$this->kubernetesActions->initGuzzleClient($daemonConfig);
+					$pingError = $this->kubernetesActions->ping($daemonConfig);
+					$daemonConfigAccessible = $pingError === '';
+					$adminInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
+					if (!$daemonConfigAccessible) {
+						$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud: %s', $daemonConfig->getName(), $pingError));
+					}
+				} else {
+					$this->dockerActions->initGuzzleClient($daemonConfig);
+					$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
+					$adminInitialData['daemon_config_accessible'] = $daemonConfigAccessible;
+					if (!$daemonConfigAccessible) {
+						$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please check its configuration', $daemonConfig->getName()));
+					}
 				}
 			}
 		}
