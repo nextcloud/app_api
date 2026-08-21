@@ -37,7 +37,7 @@ class ExAppUIL10NMiddleware extends Middleware {
 	) {
 	}
 
-	public function beforeOutput(Controller $controller, string $methodName, string $output) {
+	public function beforeOutput(Controller $controller, string $methodName, string $output): string {
 		$url = $this->request->getRequestUri();
 		$loadL10N = false;
 		foreach (self::routesToLoadL10N as $route) {
