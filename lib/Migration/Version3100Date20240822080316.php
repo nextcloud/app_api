@@ -26,12 +26,15 @@ class Version3100Date20240822080316 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		$table = $schema->getTable('ex_apps_routes');
-		if (!$table->hasColumn('bruteforce_protection')) {
-			$table->addColumn('bruteforce_protection', Types::STRING, [
-				'notnull' => false,
-				'length' => 512,
-			]);
+		if ($schema->hasTable('ex_apps_routes')) {
+			$table = $schema->getTable('ex_apps_routes');
+
+			if (!$table->hasColumn('bruteforce_protection')) {
+				$table->addColumn('bruteforce_protection', Types::STRING, [
+					'notnull' => false,
+					'length' => 512,
+				]);
+			}
 		}
 
 		return $schema;
