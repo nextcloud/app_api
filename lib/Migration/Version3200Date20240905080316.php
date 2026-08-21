@@ -25,12 +25,15 @@ class Version3200Date20240905080316 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		$table = $schema->getTable('ex_apps');
-		if ($table->hasColumn('last_check_time')) {
-			$table->dropColumn('last_check_time');
-		}
-		if ($table->hasColumn('api_scopes')) {
-			$table->dropColumn('api_scopes');
+		if ($schema->hasTable('ex_apps')) {
+			$table = $schema->getTable('ex_apps');
+
+			if ($table->hasColumn('last_check_time')) {
+				$table->dropColumn('last_check_time');
+			}
+			if ($table->hasColumn('api_scopes')) {
+				$table->dropColumn('api_scopes');
+			}
 		}
 
 		return $schema;
