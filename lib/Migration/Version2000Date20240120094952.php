@@ -26,20 +26,30 @@ class Version2000Date20240120094952 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		$table = $schema->getTable('ex_apps');
-		if ($table->hasColumn('protocol')) {
-			$table->dropColumn('protocol');
+		if ($schema->hasTable('ex_apps')) {
+			$table = $schema->getTable('ex_apps');
+			if ($table->hasColumn('protocol')) {
+				$table->dropColumn('protocol');
+			}
+			if ($table->hasColumn('host')) {
+				$table->dropColumn('host');
+			}
+			// would result in re-creation of the same index if this migration is re-run
+			// but should be safe to run.
+			if ($table->hasIndex('ex_apps_c_port__idx')) {
+				$table->dropIndex('ex_apps_c_port__idx');
+			}
+			$table->addUniqueIndex(['daemon_config_name', 'port'], 'ex_apps_c_port__idx');
 		}
-		if ($table->hasColumn('host')) {
-			$table->dropColumn('host');
-		}
-		$table->dropIndex('ex_apps_c_port__idx');
-		$table->addUniqueIndex(['daemon_config_name', 'port'], 'ex_apps_c_port__idx');
 
-		$table = $schema->getTable('ex_apps_daemons');
-		$table->changeColumn('deploy_config', [
-			'notnull' => true,
-		]);
+		if ($schema->hasTable('ex_apps_daemons')) {
+			$table = $schema->getTable('ex_apps_daemons');
+			if ($table->hasColumn('deploy_config')) {
+				$table->changeColumn('deploy_config', [
+					'notnull' => true,
+				]);
+			}
+		}
 
 		return $schema;
 	}
