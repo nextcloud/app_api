@@ -18,6 +18,7 @@ use OCP\Migration\Attributes\ColumnType;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 use OCP\Security\ICrypto;
+use Throwable;
 
 #[AddColumn('preferences_ex', 'sensitive', ColumnType::SMALLINT, 'support sensitive setting')]
 class Version032002Date20250527174907 extends SimpleMigrationStep {
@@ -71,6 +72,11 @@ class Version032002Date20250527174907 extends SimpleMigrationStep {
 		while ($row = $req->fetch()) {
 			$configValue = $row['configvalue'];
 			if (!empty($configValue)) {
+				// Readers decrypt exactly once, so re-encrypting an already-encrypted value would
+				// nest a second envelope and make the stored secret unrecoverable on the next read.
+				if ($this->isEncrypted((string)$configValue)) {
+					continue;
+				}
 				try {
 					$encryptedValue = $this->crypto->encrypt($configValue);
 					$qbUpdate = $this->connection->getQueryBuilder();
@@ -88,5 +94,18 @@ class Version032002Date20250527174907 extends SimpleMigrationStep {
 
 		$req->closeCursor();
 		return null;
+	}
+
+	/**
+	 * ICrypto::decrypt() HMAC-verifies the envelope, so a value that decrypts cleanly is already
+	 * encrypted and must not be encrypted again.
+	 */
+	private function isEncrypted(string $value): bool {
+		try {
+			$this->crypto->decrypt($value);
+			return true;
+		} catch (Throwable) {
+			return false;
+		}
 	}
 }

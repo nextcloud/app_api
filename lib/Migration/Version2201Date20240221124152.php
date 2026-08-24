@@ -27,14 +27,18 @@ class Version2201Date20240221124152 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		$table = $schema->getTable('ex_apps');
+		if ($schema->hasTable('ex_apps')) {
+			$table = $schema->getTable('ex_apps');
 
-		$table->addColumn('is_system', Types::SMALLINT, [
-			'notnull' => true,
-			'default' => 0,
-			'length' => 1,
-			'unsigned' => true,
-		]);
+			if (!$table->hasColumn('is_system')) {
+				$table->addColumn('is_system', Types::SMALLINT, [
+					'notnull' => true,
+					'default' => 0,
+					'length' => 1,
+					'unsigned' => true,
+				]);
+			}
+		}
 
 		return $schema;
 	}
