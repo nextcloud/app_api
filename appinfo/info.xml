@@ -37,8 +37,8 @@ Two options are available:
 
 See the [admin documentation](https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/DeployConfigurations.html) for setup instructions.
 	]]></description>
-	<version>35.0.0-dev.1</version>
-	<licence>agpl</licence>
+	<version>35.0.0</version>
+	<licence>AGPL-3.0-or-later</licence>
 	<author mail="andrey18106x@gmail.com" homepage="https://github.com/andrey18106">Andrey Borysenko</author>
 	<author mail="bigcat88@icloud.com" homepage="https://github.com/bigcat88">Alexander Piskun</author>
 	<namespace>AppAPI</namespace>
@@ -57,7 +57,6 @@ See the [admin documentation](https://docs.nextcloud.com/server/latest/admin_man
 	<screenshot>https://raw.githubusercontent.com/nextcloud/app_api/main/screenshots/app_api_3.png</screenshot>
 	<screenshot>https://raw.githubusercontent.com/nextcloud/app_api/main/screenshots/app_api_4.png</screenshot>
 	<dependencies>
-		<php min-version="8.2"/>
 		<nextcloud min-version="35" max-version="35"/>
 	</dependencies>
 	<background-jobs>
