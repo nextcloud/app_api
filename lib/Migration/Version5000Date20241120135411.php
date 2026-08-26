@@ -14,6 +14,7 @@ use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 use OCP\Security\ICrypto;
+use Throwable;
 
 class Version5000Date20241120135411 extends SimpleMigrationStep {
 
@@ -41,6 +42,12 @@ class Version5000Date20241120135411 extends SimpleMigrationStep {
 			$deployConfig = $row['deploy_config'];
 			$deployConfig = json_decode($deployConfig, true);
 			if (!empty($deployConfig['haproxy_password'])) {
+				// Every consumer decrypts exactly once, so a value that is already ciphertext must be
+				// left alone: wrapping a second envelope around it silently turns the daemon key into
+				// garbage. This step is replayed whenever the migration was applied but not recorded.
+				if ($this->isEncrypted((string)$deployConfig['haproxy_password'])) {
+					continue;
+				}
 				$deployConfig['haproxy_password'] = $this->crypto->encrypt($deployConfig['haproxy_password']);
 				$encodedDeployConfig = json_encode($deployConfig);
 				$qbUpdate = $this->connection->getQueryBuilder();
@@ -54,5 +61,18 @@ class Version5000Date20241120135411 extends SimpleMigrationStep {
 		}
 		$req->closeCursor();
 		return null;
+	}
+
+	/**
+	 * ICrypto::decrypt() HMAC-verifies the envelope, so a value that decrypts cleanly is already
+	 * encrypted and must not be encrypted again.
+	 */
+	private function isEncrypted(string $value): bool {
+		try {
+			$this->crypto->decrypt($value);
+			return true;
+		} catch (Throwable) {
+			return false;
+		}
 	}
 }
