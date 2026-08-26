@@ -45,7 +45,7 @@ class Version2000Date20240120094952 extends SimpleMigrationStep {
 		if ($schema->hasTable('ex_apps_daemons')) {
 			$table = $schema->getTable('ex_apps_daemons');
 			if ($table->hasColumn('deploy_config')) {
-				$table->changeColumn('deploy_config', [
+				$table->modifyColumn('deploy_config', [
 					'notnull' => true,
 				]);
 			}
