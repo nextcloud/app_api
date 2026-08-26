@@ -22,6 +22,7 @@ OC.L10N.register(
     "User documentation" : "Lietotāja dokumentācija",
     "Admin documentation" : "Pārvaldītāja dokumentācija",
     "Developer documentation" : "Dokumentācija izstrādātājiem",
+    "Supported" : "Atbalstīts",
     "Featured apps are developed by and within the community. They offer central functionality and are ready for production use." : "Izceltās lietotnes ir kopienas izstrādātas. Tās sniedz centrālu funkcionalitāti un ir gatavas izmantošanai produkcijā.",
     "Featured" : "Izcelta",
     "Update to {update}" : "Atjaunināt uz {update}",
@@ -42,6 +43,7 @@ OC.L10N.register(
     "Disabled apps" : "Atspējotās lietotnes",
     "Updates" : "Atjauninājumi",
     "Featured apps" : "Izceltās lietotnes",
+    "Supported apps" : "Atbalstītās lietotnes",
     "Enable" : "Iespējot",
     "Disable" : "Deaktivēt",
     "Allow untested app" : "Atļaut nepārbaudītu lietotni"
