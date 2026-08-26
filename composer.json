@@ -17,7 +17,7 @@
 	],
 	"require-dev": {
 		"bamarni/composer-bin-plugin": "^1.9",
-		"friendsofphp/php-cs-fixer": "3.94.1",
+		"friendsofphp/php-cs-fixer": "3.95.18",
 		"nextcloud/coding-standard": "^1.1",
 		"nextcloud/ocp": "dev-master",
 		"psalm/phar": "6.16.1",
