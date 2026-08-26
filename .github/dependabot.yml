@@ -42,6 +42,21 @@ updates:
       timezone: Europe/Paris
     cooldown:
       default-days: 10
+    target-branch: stable35
+    open-pull-requests-limit: 5
+    ignore:
+      # do not do breaking changes on stable branches
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "03:00"
+      timezone: Europe/Paris
+    cooldown:
+      default-days: 10
     target-branch: stable34
     open-pull-requests-limit: 5
     ignore:

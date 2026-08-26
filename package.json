@@ -1,7 +1,7 @@
 {
 	"name": "app_api",
 	"description": "Nextcloud AppAPI",
-	"version": "35.0.0-dev.0",
+	"version": "36.0.0-dev.0",
 	"keywords": [
 		"nextcloud",
 		"app",

@@ -61,9 +61,7 @@ class GetConfig extends Command {
 			return 1;
 		}
 
-		$value = $exAppConfig->getConfigvalue() ?? $defaultValue;
-
-		$output->writeln((string)$value);
+		$output->writeln($exAppConfig->getConfigvalue());
 		return 0;
 	}
 }
