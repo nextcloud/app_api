@@ -17,13 +17,13 @@ concurrency:
 
 jobs:
   phpunit:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     name: PHPUnit • PHP ${{ matrix.php-version }} • ${{ matrix.server-version }}
     strategy:
       fail-fast: false
       matrix:
         php-version: ['8.3', '8.4']
-        server-version: ['master']
+        server-version: ['stable35']
 
     steps:
       - name: Set app env
@@ -70,7 +70,7 @@ jobs:
   phpunit-summary:
     permissions:
       contents: none
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest-low
     needs: [phpunit]
     name: PHPUnit-OK
     steps:
