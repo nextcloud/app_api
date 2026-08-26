@@ -117,7 +117,7 @@ npm test                 # vitest (JS unit tests)
   Nextcloud requires this to merge.
 - **Commit messages**: concise, one line. Reference issues in the PR description, not the commit subject.
 - **Target branch** `main`; release fixes are backported to the relevant `stableXX`.
-- **PHP floor 8.2**, so do not use 8.3+ only syntax in `lib/`. Frontend engines: Node `^22`, npm `^10`.
+- **PHP floor 8.3**, so do not use 8.4+ only syntax in `lib/`. Frontend engines: Node `^22`, npm `^10`.
 - Before pushing: `composer cs:fix && composer psalm && composer test:unit`; if you touched the frontend,
   `npm run lint && npm run build`; if you touched controllers/routes, `composer openapi`. Commit the
   regenerated `openapi*.json`, any `src/types/openapi/*.ts`, and `js/` assets.
