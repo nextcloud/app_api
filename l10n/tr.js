@@ -196,7 +196,7 @@ OC.L10N.register(
     "Compute device" : "Hesaplama aygıtı",
     "Memory limit (in MiB)" : "Bellek sınırı (MiB)",
     "Must be a positive integer" : "Bir pozitif tam sayı olmalıdır",
-    "Maximum amount of memory that the ExApp container can use in mebibytes" : "ExApp kapsayıcısının mebibayt cinsinden kullanabileceği en fazla bellek miktarı",
+    "Maximum amount of memory that the ExApp container can use in mebibytes" : "ExApp kapsayıcısının mebibayt olarak kullanabileceği en fazla bellek miktarı",
     "CPU limit as decimal value" : "Ondalık değer olarak işlemci sayısı sınırı",
     "Must be a positive number" : "Bir pozitif sayı olmalıdır",
     "Maximum number of CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)" : "ExApp kapsayıcısının kullanabileceği en fazla işlemci çekirdeği sayısı (yarım çekirdek için 0.5, iki çekirdek için 2)",
