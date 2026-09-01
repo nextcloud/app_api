@@ -71,7 +71,7 @@
 		"@vitest/coverage-istanbul": "^4.0.18",
 		"eslint-webpack-plugin": "^5.0.2",
 		"jsdom": "^28.1.0",
-		"stylelint-webpack-plugin": "^5.0.1",
+		"stylelint-webpack-plugin": "^5.1.0",
 		"terser-webpack-plugin": "^5.3.11",
 		"vitest": "^4.0.18"
 	},
