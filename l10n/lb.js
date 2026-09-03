@@ -20,6 +20,7 @@ OC.L10N.register(
     "Documentation" : "Dokumentatioun",
     "Details" : "Detailer",
     "Updates" : "Updates",
+    "Enable" : "Aktivéieren",
     "Disable" : "Ofschalten"
 },
 "nplurals=2; plural=(n != 1);");
