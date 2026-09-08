@@ -9,6 +9,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- `POST /ocs/v2.php/apps/app_api/api/v1/notification` now answers `404` when the `notifications` app is not enabled, instead of `200` for a notification that nobody delivers.
+
 ## [34.0.0]
 
 ### Deprecated
