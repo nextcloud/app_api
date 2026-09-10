@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Services\IInitialState;
@@ -23,6 +24,7 @@ readonly class ExAppsPageService {
 		private ExAppFetcher $exAppFetcher,
 		private DaemonConfigService $daemonConfigService,
 		private DockerActions $dockerActions,
+		private KubernetesActions $kubernetesActions,
 		private IAppConfig $appConfig,
 		private IAppManager $appManager,
 		private LoggerInterface $logger,
@@ -50,10 +52,19 @@ readonly class ExAppsPageService {
 				if ($daemonConfig !== null) {
 					$defaultDaemonConfig = $daemonConfig->jsonSerialize();
 					unset($defaultDaemonConfig['deploy_config']['haproxy_password']);
-					$this->dockerActions->initGuzzleClient($daemonConfig);
-					$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
-					if (!$daemonConfigAccessible) {
-						$this->logger->warning(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please check its configuration', $daemonConfig->getName()));
+					if ($daemonConfig->getAcceptsDeployId() === KubernetesActions::DEPLOY_ID) {
+						$this->kubernetesActions->initGuzzleClient($daemonConfig);
+						$pingError = $this->kubernetesActions->ping($daemonConfig);
+						$daemonConfigAccessible = $pingError === '';
+						if (!$daemonConfigAccessible) {
+							$this->logger->warning(sprintf('Deploy daemon "%s" is not accessible by Nextcloud: %s', $daemonConfig->getName(), $pingError));
+						}
+					} else {
+						$this->dockerActions->initGuzzleClient($daemonConfig);
+						$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
+						if (!$daemonConfigAccessible) {
+							$this->logger->warning(sprintf('Deploy daemon "%s" is not accessible by Nextcloud. Please check its configuration', $daemonConfig->getName()));
+						}
 					}
 				}
 			}
