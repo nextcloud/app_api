@@ -73,7 +73,7 @@
 		"jsdom": "^28.1.0",
 		"stylelint-webpack-plugin": "^5.0.1",
 		"terser-webpack-plugin": "^5.3.11",
-		"vitest": "^4.0.18"
+		"vitest": "^4.1.11"
 	},
 	"engines": {
 		"node": "^22.0.0",
