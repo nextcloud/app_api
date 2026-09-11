@@ -5,7 +5,7 @@ name: PHPUnit
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [stable35]
   workflow_dispatch:
 
 permissions:
