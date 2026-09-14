@@ -77,7 +77,7 @@ jobs:
         with:
           persist-credentials: false
           repository: nextcloud/notes
-          ref: "main"
+          ref: "v5.0"
           path: apps/notes
 
       - name: Set up php
