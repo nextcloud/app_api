@@ -7,10 +7,10 @@
 		<NcListItem
 			:name="itemTitle"
 			:details="isDefault ? t('app_api', 'Default') : ''"
-			:force-display-actions="true"
-			:counter-number="daemon.exAppsCount"
+			:forceDisplayActions="true"
+			:counterNumber="daemon.exAppsCount"
 			:class="{'daemon-default': isDefault }"
-			counter-type="highlighted"
+			counterType="highlighted"
 			@click="showDaemonConfigDetailsModal(daemon)">
 			<template #subname>
 				{{ daemon.accepts_deploy_id }}
@@ -23,25 +23,25 @@
 					</template>
 					{{ !isDefault ? t('app_api', 'Set as default') : t('app_api', 'Default') }}
 				</NcActionButton>
-				<NcActionButton v-if="daemon.accepts_deploy_id !== 'manual-install'" :close-after-click="true" @click="showTestDeployModal()">
+				<NcActionButton v-if="daemon.accepts_deploy_id !== 'manual-install'" :closeAfterClick="true" @click="showTestDeployModal()">
 					{{ t('app_api', 'Test deploy') }}
 					<template #icon>
 						<TestTube :size="20" />
 					</template>
 				</NcActionButton>
-				<NcActionButton v-if="daemon.accepts_deploy_id === 'docker-install'" :close-after-click="true" @click="_showOverrideDockerRegistriesModal()">
+				<NcActionButton v-if="daemon.accepts_deploy_id === 'docker-install'" :closeAfterClick="true" @click="_showOverrideDockerRegistriesModal()">
 					{{ t('app_api', 'Docker registries') }}
 					<template #icon>
 						<Docker :size="20" />
 					</template>
 				</NcActionButton>
-				<NcActionButton :close-after-click="true" @click="showEditModal()">
+				<NcActionButton :closeAfterClick="true" @click="showEditModal()">
 					{{ t('app_api', 'Edit') }}
 					<template #icon>
 						<PencilOutline :size="20" />
 					</template>
 				</NcActionButton>
-				<NcActionButton icon="icon-delete" :close-after-click="true" @click="deleteDaemonConfig()">
+				<NcActionButton icon="icon-delete" :closeAfterClick="true" @click="deleteDaemonConfig()">
 					{{ t('app_api', 'Delete') }}
 					<template #icon>
 						<NcLoadingIcon v-if="deleting" :size="20" />
@@ -53,31 +53,31 @@
 			v-show="showDetailsModal"
 			v-model:show="showDetailsModal"
 			:daemon="daemon"
-			:is-default="isDefault" />
+			:isDefault="isDefault" />
 		<ConfirmDaemonDeleteModal
 			v-show="showDeleteDialog"
 			v-model:show="showDeleteDialog"
 			:daemon="daemon"
 			:deleting="deleting"
-			:delete-daemon-config="_deleteDaemonConfig" />
+			:deleteDaemonConfig="_deleteDaemonConfig" />
 		<template v-if="daemon.accepts_deploy_id !== 'manual-install'">
 			<DaemonTestDeploy
 				v-if="showTestDeployDialog"
 				v-model:show="showTestDeployDialog"
-				:get-all-daemons="getAllDaemons"
+				:getAllDaemons="getAllDaemons"
 				:daemon="daemon" />
 		</template>
 		<ManageDaemonConfigModal
 			v-model:show="showEditDialog"
 			:daemons="daemons"
-			:get-all-daemons="getAllDaemons"
+			:getAllDaemons="getAllDaemons"
 			:daemon="daemon"
-			:is-default-daemon="isDefault" />
+			:isDefaultDaemon="isDefault" />
 		<DockerRegistriesModal
 			v-model:show="showOverrideDockerRegistriesModal"
 			:daemon="daemon"
-			:is-default="isDefault"
-			:get-all-daemons="getAllDaemons"
+			:isDefault="isDefault"
+			:getAllDaemons="getAllDaemons"
 			@close="showOverrideDockerRegistriesModal = false" />
 	</div>
 </template>
@@ -118,31 +118,37 @@ export default {
 		PencilOutline,
 		Docker,
 	},
+
 	props: {
 		daemon: {
 			type: Object,
 			required: true,
 			default: () => {},
 		},
+
 		isDefault: {
 			type: Boolean,
 			required: true,
-			default: () => false,
+			default: false,
 		},
+
 		saveOptions: {
 			type: Function,
 			required: true,
 		},
+
 		daemons: {
 			type: Array,
 			required: true,
 			default: () => [],
 		},
+
 		getAllDaemons: {
 			type: Function,
 			required: true,
 		},
 	},
+
 	data() {
 		return {
 			showDetailsModal: false,
@@ -155,15 +161,18 @@ export default {
 			showOverrideDockerRegistriesModal: false,
 		}
 	},
+
 	computed: {
 		itemTitle() {
 			return this.daemon.name + ' - ' + this.daemon.display_name
 		},
 	},
+
 	methods: {
 		showDaemonConfigDetailsModal() {
 			this.showDetailsModal = true
 		},
+
 		setDaemonDefault(daemon) {
 			if (this.daemon.accepts_deploy_id === 'manual-install') {
 				showError(t('app_api', 'A "manual-install" deploy daemon cannot be set as default'))
@@ -175,27 +184,29 @@ export default {
 					this.getAllDaemons()
 					this.settingDefault = false
 				})
-				.catch(err => {
+				.catch((err) => {
 					console.debug(err)
 					showError(t('app_api', 'Failed to save admin settings. Check the logs'))
 					this.settingDefault = false
 				})
 		},
+
 		deleteDaemonConfig() {
 			this.showDeleteDialog = true
 		},
+
 		_deleteDaemonConfig(daemon) {
 			this.deleting = true
 			return confirmPassword().then(() => {
 				return axios.delete(generateUrl(`/apps/app_api/daemons/${daemon.name}?removeExApps=${this.removeExAppsOnDaemonDelete}`))
-					.then(res => {
+					.then((res) => {
 						if (res.data.success) {
 							this.getAllDaemons()
 						}
 						this.deleting = false
 						this.showDetailsModal = false
 					})
-					.catch(err => {
+					.catch((err) => {
 						console.debug(err)
 						this.deleting = false
 						this.showDetailsModal = false
@@ -206,12 +217,15 @@ export default {
 				showError(t('app_api', 'Password confirmation failed'))
 			})
 		},
+
 		showTestDeployModal() {
 			this.showTestDeployDialog = true
 		},
+
 		showEditModal() {
 			this.showEditDialog = true
 		},
+
 		_showOverrideDockerRegistriesModal() {
 			this.showOverrideDockerRegistriesModal = true
 		},

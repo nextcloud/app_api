@@ -22,7 +22,7 @@
 					v-for="(registry, index) in registries"
 					:key="index"
 					:name="`${registry.from} -> ${registry.to}`"
-					:force-display-actions="true">
+					:forceDisplayActions="true">
 					<template v-if="registry.to === 'local'" #details>
 						<span style="color: var(--color-warning);">{{ t('app_api', 'Image pull will be skipped') }}</span>
 					</template>
@@ -70,7 +70,7 @@
 						:disabled="addingLoading"
 						:loading="addingLoading"
 						:error="!registryMappingFromValid"
-						:helper-text="registryMappingFromValidationError"
+						:helperText="registryMappingFromValidationError"
 						@keyup.enter="addDockerRegistry" />
 					<NcTextField
 						v-model="dockerRegistry.to"
@@ -79,7 +79,7 @@
 						:disabled="addingLoading"
 						:loading="addingLoading"
 						:error="!registryMappingToValid"
-						:helper-text="registryMappingToValidationError"
+						:helperText="registryMappingToValidationError"
 						@keyup.enter="addDockerRegistry" />
 				</div>
 				<p v-if="!newRegistryMappingValid" style="margin: 5px 0;">
@@ -118,7 +118,7 @@
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { confirmPassword } from '@nextcloud/password-confirmation'
-import { showSuccess, showError } from '@nextcloud/dialogs'
+import { showError, showSuccess } from '@nextcloud/dialogs'
 
 import NcModal from '@nextcloud/vue/components/NcModal'
 import NcButton from '@nextcloud/vue/components/NcButton'
@@ -150,27 +150,32 @@ export default {
 		Check,
 		Close,
 	},
+
 	props: {
 		daemon: {
 			type: Object,
 			required: true,
 			default: () => {},
 		},
+
 		show: {
 			type: Boolean,
 			required: true,
 			default: false,
 		},
+
 		isDefault: {
 			type: Boolean,
 			required: true,
-			default: () => false,
+			default: false,
 		},
+
 		getAllDaemons: {
 			type: Function,
 			required: true,
 		},
 	},
+
 	data() {
 		return {
 			addingRegistry: false,
@@ -182,29 +187,35 @@ export default {
 			},
 		}
 	},
+
 	computed: {
 		daemonName() {
 			return `Daemon: ${this.daemon.display_name} (${this.daemon.name})`
 		},
+
 		registries() {
 			return this.daemon.deploy_config?.registries || []
 		},
+
 		registryMappingFromValid() {
 			return this.dockerRegistry.from
 				&& this.dockerRegistry.from !== 'local'
 				&& this.dockerRegistry.from !== this.dockerRegistry.to
 				&& this.registries?.findIndex((registry) => registry.from === this.dockerRegistry.from) === -1
 		},
+
 		registryMappingToValid() {
 			return this.dockerRegistry.to
 				&& this.dockerRegistry.from !== 'local'
 				&& this.dockerRegistry.from !== this.dockerRegistry.to
 		},
+
 		newRegistryMappingValid() {
 			return this.registryMappingFromValid
 				&& this.registryMappingToValid
 				&& this.dockerRegistry.from !== this.dockerRegistry.to
 		},
+
 		registryMappingFromValidationError() {
 			if (!this.dockerRegistry.from) {
 				return t('app_api', 'Please enter a registry domain')
@@ -217,12 +228,14 @@ export default {
 			}
 			return ''
 		},
+
 		registryMappingToValidationError() {
 			if (!this.dockerRegistry.to) {
 				return t('app_api', 'Please enter a registry domain')
 			}
 			return ''
 		},
+
 		registryMappingValidationError() {
 			if (this.dockerRegistry.from && this.dockerRegistry.to && this.dockerRegistry.from === this.dockerRegistry.to) {
 				return t('app_api', '"From" and "To" cannot be the same')
@@ -230,10 +243,12 @@ export default {
 			return ''
 		},
 	},
+
 	methods: {
 		closeModal() {
 			this.$emit('update:show', false)
 		},
+
 		startAdding() {
 			this.addingRegistry = true
 			this.dockerRegistry = {
@@ -244,6 +259,7 @@ export default {
 				this.$refs.dockerRegistryInput.focus()
 			})
 		},
+
 		addDockerRegistry() {
 			this.addingLoading = true
 			confirmPassword().then(() => {
@@ -271,6 +287,7 @@ export default {
 				showError(t('app_api', 'Password confirmation failed'))
 			})
 		},
+
 		removeDockerRegistry(registry) {
 			this.removingRegistryLoading = true
 			confirmPassword().then(() => {

@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { DAEMON_TEMPLATES, DAEMON_COMPUTE_DEVICES } from './daemonTemplates.js'
+import { DAEMON_COMPUTE_DEVICES, DAEMON_TEMPLATES } from './daemonTemplates.js'
 
 describe('DAEMON_TEMPLATES', () => {
 	it('has 8 templates', () => {
@@ -21,7 +21,7 @@ describe('DAEMON_TEMPLATES', () => {
 	})
 
 	it('each template has a unique name', () => {
-		const names = DAEMON_TEMPLATES.map(t => t.name)
+		const names = DAEMON_TEMPLATES.map((t) => t.name)
 		expect(new Set(names).size).toBe(names.length)
 	})
 
@@ -63,7 +63,7 @@ describe('DAEMON_COMPUTE_DEVICES', () => {
 	})
 
 	it('includes cpu, cuda, and rocm', () => {
-		const ids = DAEMON_COMPUTE_DEVICES.map(d => d.id)
+		const ids = DAEMON_COMPUTE_DEVICES.map((d) => d.id)
 		expect(ids).toContain('cpu')
 		expect(ids).toContain('cuda')
 		expect(ids).toContain('rocm')

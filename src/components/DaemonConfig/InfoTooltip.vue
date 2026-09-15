@@ -15,8 +15,8 @@
 		<NcDialog v-model:open="showDialog"
 			:name="t('app_api', 'More information')"
 			:message="text"
-			:close-on-click-outside="true"
-			:out-transition="false"
+			:closeOnClickOutside="true"
+			:outTransition="false"
 			:container="null" />
 	</div>
 </template>
@@ -36,25 +36,30 @@ export default {
 		Information,
 		Warning,
 	},
+
 	props: {
 		text: {
 			type: String,
 			required: true,
 		},
+
 		placement: {
 			type: String,
 			default: 'top',
 		},
+
 		type: {
 			type: String,
 			default: 'info',
 		},
 	},
+
 	data() {
 		return {
 			showDialog: false,
 		}
 	},
+
 	computed: {
 		iconComponent() {
 			return this.type === 'warning' ? Warning : Information

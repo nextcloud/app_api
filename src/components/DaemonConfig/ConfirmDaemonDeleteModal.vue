@@ -52,32 +52,38 @@ export default {
 		Delete,
 		NcButton,
 	},
+
 	props: {
 		show: {
 			type: Boolean,
 			required: true,
 			default: false,
 		},
+
 		deleteDaemonConfig: {
 			type: Function,
 			required: true,
 		},
+
 		deleting: {
 			type: Boolean,
 			required: true,
 			default: false,
 		},
+
 		daemon: {
 			type: Object,
 			required: true,
 			default: () => {},
 		},
 	},
+
 	data() {
 		return {
 			removeExAppsOnDaemonDelete: false,
 		}
 	},
+
 	methods: {
 		closeModal() {
 			this.removeExAppsOnDaemonDelete = false

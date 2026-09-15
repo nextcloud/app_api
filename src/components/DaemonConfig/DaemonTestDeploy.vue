@@ -131,22 +131,26 @@ export default {
 		TrayArrowDown,
 		TrashCanOutline,
 	},
+
 	props: {
 		show: {
 			type: Boolean,
 			required: true,
 			default: false,
 		},
+
 		daemon: {
 			type: Object,
 			required: true,
 			default: () => null,
 		},
+
 		getAllDaemons: {
 			type: Function,
 			required: true,
 		},
 	},
+
 	data() {
 		return {
 			startingTest: false,
@@ -165,6 +169,7 @@ export default {
 					error_message: '',
 					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#register',
 				},
+
 				image_pull: {
 					id: 'image_pull',
 					title: t('app_api', 'Image pull'),
@@ -176,6 +181,7 @@ export default {
 					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#image-pull',
 					progress: null,
 				},
+
 				container_started: {
 					id: 'container_started',
 					title: t('app_api', 'Container started'),
@@ -186,6 +192,7 @@ export default {
 					error_message: '',
 					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#container-started',
 				},
+
 				heartbeat: {
 					id: 'heartbeat',
 					title: t('app_api', 'Heartbeat'),
@@ -197,6 +204,7 @@ export default {
 					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#heartbeat',
 					heartbeat_count: null,
 				},
+
 				init: {
 					id: 'init',
 					title: t('app_api', 'Init step'),
@@ -208,6 +216,7 @@ export default {
 					help_url: 'https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/TestDeploy.html#init',
 					progress: null,
 				},
+
 				enabled: {
 					id: 'enabled',
 					title: t('app_api', 'Enabled'),
@@ -221,38 +230,47 @@ export default {
 			},
 		}
 	},
+
 	computed: {
 		heartbeatCountHeadingProgress() {
 			return `${this.statusChecks.heartbeat.title} (heartbeat_count: ${this.statusChecks.heartbeat.heartbeat_count || 0})`
 		},
+
 		imagePullHeadingProgress() {
 			return `${this.statusChecks.image_pull.title} (${this.statusChecks.image_pull.progress}%)`
 		},
+
 		initHeadingProgress() {
 			return `${this.statusChecks.init.title} (${this.statusChecks.init.progress}%)`
 		},
+
 		downloadLogsTooltip() {
 			if (!this.canDownloadLogs) {
 				return t('app_api', 'Only if ExApp container is preset')
 			}
 			return null
 		},
+
 		hasTestDeployResults() {
-			return Object.values(this.statusChecks).some(statusCheck => statusCheck.passed || statusCheck.error)
+			return Object.values(this.statusChecks).some((statusCheck) => statusCheck.passed || statusCheck.error)
 		},
 	},
+
 	beforeMount() {
 		this.fetchTestDeployStatus()
 	},
+
 	beforeUnmount() {
 		clearInterval(this.polling)
 	},
+
 	methods: {
 		closeModal() {
 			this.$emit('update:show', false)
 		},
+
 		_cleanupStatusChecks() {
-			Object.values(this.statusChecks).forEach(statusCheck => {
+			Object.values(this.statusChecks).forEach((statusCheck) => {
 				statusCheck.loading = false
 				statusCheck.passed = false
 				statusCheck.error = false
@@ -265,6 +283,7 @@ export default {
 				}
 			})
 		},
+
 		startDeployTest() {
 			this.canDownloadLogs = false
 			this.startingTest = true
@@ -284,34 +303,39 @@ export default {
 				this.startingTest = false
 			})
 		},
+
 		_startDeployTest() {
 			return axios.post(generateUrl(`/apps/app_api/daemons/${this.daemon.name}/test_deploy`))
-				.then(res => {
+				.then((res) => {
 					this.startDeployTestPolling()
 					return res
 				}).finally(() => {
 					this.getAllDaemons()
 				})
 		},
+
 		startDeployTestPolling() {
 			this.polling = setInterval(() => {
 				this.fetchTestDeployStatus()
 			}, 1000)
 		},
+
 		removeTestExApp() {
 			this._stopDeployTest().then(() => {
 				this.canDownloadLogs = false
 				this._cleanupStatusChecks()
 			})
 		},
+
 		stopDeployTest() {
 			this._stopDeployTest().then(() => {
-				Object.values(this.statusChecks).forEach(statusCheck => {
+				Object.values(this.statusChecks).forEach((statusCheck) => {
 					statusCheck.loading = false
 				})
 				this.clearTestRunning()
 			})
 		},
+
 		_stopDeployTest() {
 			this.stoppingTest = true
 			return axios.delete(generateUrl(`/apps/app_api/daemons/${this.daemon.name}/test_deploy`)).then(() => {
@@ -321,17 +345,19 @@ export default {
 				this.getAllDaemons()
 			})
 		},
+
 		fetchTestDeployStatus() {
 			return axios.get(generateUrl(`/apps/app_api/daemons/${this.daemon.name}/test_deploy/status`))
-				.then(res => {
+				.then((res) => {
 					this.handleTestDeployStatus(res.data)
-				}).catch(err => {
+				}).catch((err) => {
 					// test-deploy app is not registered, test is not running
 					if (err.status === 404) {
 						this.clearTestRunning()
 					}
 				})
 		},
+
 		handleTestDeployStatus(status) {
 			const currentStep = this._detectCurrentStep(status)
 			if (currentStep !== null && status.error === '') {
@@ -340,7 +366,7 @@ export default {
 					this.startDeployTestPolling()
 				}
 			}
-			Object.keys(this.statusChecks).forEach(step => {
+			Object.keys(this.statusChecks).forEach((step) => {
 				const statusCheck = this.statusChecks[step]
 				statusCheck.loading = step === currentStep
 				if (statusCheck.id === 'image_pull' && statusCheck.loading) {
@@ -353,40 +379,40 @@ export default {
 					statusCheck.heartbeat_count = status.heartbeat_count
 				}
 				switch (step) {
-				case 'register':
-					statusCheck.passed = true // at this point we're reading app status, so it's already registered
-					break
-				case 'image_pull':
-					statusCheck.passed = status.deploy >= 94
-					break
-				case 'container_started':
-					statusCheck.passed = status.deploy >= 98
-					this.canDownloadLogs = true // at status.deploy = 97  container is already created
-					break
-				case 'heartbeat':
-					statusCheck.passed = status.deploy === 100
-					// update later 'image_pull' progress as well
-					this.statusChecks.image_pull.progress = status.deploy
-					this.canDownloadLogs = true
-					break
-				case 'init':
-					statusCheck.passed = status.init === 100
-					// update later 'image_pull' and 'init' progress as well
-					this.statusChecks.image_pull.progress = status.deploy
-					this.statusChecks.init.progress = status.init
-					this.canDownloadLogs = true
-					break
-				case 'enabled':
-					statusCheck.passed = status.init === 100 && status.deploy === 100 && status.action === '' && status.error === ''
-					// update later 'image_pull' and 'init' progress as well
-					this.statusChecks.image_pull.progress = status.deploy
-					this.statusChecks.init.progress = status.init
-					if (statusCheck.passed) {
-						showSuccess(t('app_api', 'Deploy test passed successfully!'))
-						this.clearTestRunning()
-						statusCheck.loading = false
-					}
-					break
+					case 'register':
+						statusCheck.passed = true // at this point we're reading app status, so it's already registered
+						break
+					case 'image_pull':
+						statusCheck.passed = status.deploy >= 94
+						break
+					case 'container_started':
+						statusCheck.passed = status.deploy >= 98
+						this.canDownloadLogs = true // at status.deploy = 97  container is already created
+						break
+					case 'heartbeat':
+						statusCheck.passed = status.deploy === 100
+						// update later 'image_pull' progress as well
+						this.statusChecks.image_pull.progress = status.deploy
+						this.canDownloadLogs = true
+						break
+					case 'init':
+						statusCheck.passed = status.init === 100
+						// update later 'image_pull' and 'init' progress as well
+						this.statusChecks.image_pull.progress = status.deploy
+						this.statusChecks.init.progress = status.init
+						this.canDownloadLogs = true
+						break
+					case 'enabled':
+						statusCheck.passed = status.init === 100 && status.deploy === 100 && status.action === '' && status.error === ''
+						// update later 'image_pull' and 'init' progress as well
+						this.statusChecks.image_pull.progress = status.deploy
+						this.statusChecks.init.progress = status.init
+						if (statusCheck.passed) {
+							showSuccess(t('app_api', 'Deploy test passed successfully!'))
+							this.clearTestRunning()
+							statusCheck.loading = false
+						}
+						break
 				}
 				if (status.error && step === currentStep) {
 					statusCheck.error = true
@@ -400,6 +426,7 @@ export default {
 				this.clearTestRunning()
 			}
 		},
+
 		_detectCurrentStep(status) {
 			if (status.action === '' && status.deploy === 0 && status.init === 0) {
 				return 'register'
@@ -426,6 +453,7 @@ export default {
 			}
 			return null
 		},
+
 		getStatusCheckType(statusCheck) {
 			if (statusCheck.error || statusCheck.error_message !== '') {
 				return 'error'
@@ -435,6 +463,7 @@ export default {
 			}
 			return 'info'
 		},
+
 		getStatusCheckTitle(statusCheck) {
 			if (statusCheck.id === 'heartbeat' && this.statusChecks.heartbeat.heartbeat_count) {
 				return this.heartbeatCountHeadingProgress
@@ -447,11 +476,13 @@ export default {
 			}
 			return statusCheck.title
 		},
+
 		clearTestRunning() {
 			this.testRunning = false
 			clearInterval(this.polling)
 			this.polling = null
 		},
+
 		getDownloadLogsUrl() {
 			if (!this.canDownloadLogs) {
 				return null
