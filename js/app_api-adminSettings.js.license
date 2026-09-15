@@ -79,16 +79,16 @@ This file is generated from multiple sources. Included packages:
 	- version: 6.6.4
 	- license: MIT
 - @vue/reactivity
-	- version: 3.5.27
+	- version: 3.5.41
 	- license: MIT
 - @vue/runtime-core
-	- version: 3.5.27
+	- version: 3.5.41
 	- license: MIT
 - @vue/runtime-dom
-	- version: 3.5.27
+	- version: 3.5.41
 	- license: MIT
 - @vue/shared
-	- version: 3.5.27
+	- version: 3.5.41
 	- license: MIT
 - @vueuse/core
 	- version: 14.1.0
@@ -145,7 +145,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 4.0.0-beta.6
 	- license: MIT
 - vue
-	- version: 3.5.27
+	- version: 3.5.41
 	- license: MIT
 - webpack
 	- version: 5.108.4
