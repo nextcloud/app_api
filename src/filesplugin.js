@@ -73,9 +73,9 @@ export function themeInlineSvg(svg) {
 export function mimeMatches(nodeMime, configuredMime) {
 	// configuredMime may be e.g. "video" or "image/jpeg" or "image/jpeg, image/png"
 	return configuredMime.split(',')
-		.map(m => m.trim())
+		.map((m) => m.trim())
 		.filter(Boolean)
-		.some(m => nodeMime.includes(m))
+		.some((m) => nodeMime.includes(m))
 }
 
 export function generateAppAPIProxyUrl(appId, route) {
@@ -121,7 +121,7 @@ export function registerFileAction33(fileAction, iconProvider) {
 				const response = await axios.post(handlerUrl, { files: nodes.map(buildNodeInfo) })
 				if (typeof response.data === 'object' && response.data && 'redirect_handler' in response.data) {
 					const redirectPage = generateExAppUIPageUrl(fileAction.appid, response.data.redirect_handler)
-					const fileIds = nodes.map(n => n.fileid).join(',')
+					const fileIds = nodes.map((n) => n.fileid).join(',')
 					window.location.assign(`${redirectPage}?fileIds=${fileIds}`)
 				}
 				return nodes.map(() => true)
@@ -143,7 +143,9 @@ export function registerFileAction33(fileAction, iconProvider) {
 		order: Number(fileAction.order),
 
 		enabled: ({ nodes }) => {
-			if (!nodes || nodes.length === 0) return false
+			if (!nodes || nodes.length === 0) {
+				return false
+			}
 			return nodes.every((node) => mimeMatches(node.mime, fileAction.mime))
 		},
 
@@ -191,7 +193,9 @@ function init() {
 		// Then attempt to upgrade icon asynchronously
 		if (fileAction.icon) {
 			loadExAppInlineSvgIcon(fileAction.appid, fileAction.icon).then((svg) => {
-				if (!svg) return
+				if (!svg) {
+					return
+				}
 				const themed = themeInlineSvg(svg)
 				if (themed) {
 					icon = themed

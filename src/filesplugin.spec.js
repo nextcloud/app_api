@@ -547,9 +547,7 @@ describe('registerFileAction33', () => {
 
 			await action.exec({ nodes: [mockNode] })
 
-			expect(window.location.assign).toHaveBeenCalledWith(
-				'/nextcloud/apps/app_api/embedded/testapp/results/page?fileIds=42',
-			)
+			expect(window.location.assign).toHaveBeenCalledWith('/nextcloud/apps/app_api/embedded/testapp/results/page?fileIds=42')
 		})
 
 		it('does not redirect when response has no redirect_handler', async () => {
@@ -610,9 +608,7 @@ describe('registerFileAction33', () => {
 
 			await action.execBatch({ nodes: [mockNode, mockNode2] })
 
-			expect(window.location.assign).toHaveBeenCalledWith(
-				'/nextcloud/apps/app_api/embedded/testapp/results/page?fileIds=42,43',
-			)
+			expect(window.location.assign).toHaveBeenCalledWith('/nextcloud/apps/app_api/embedded/testapp/results/page?fileIds=42,43')
 		})
 
 		it('returns array of false on error', async () => {

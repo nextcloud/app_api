@@ -91,7 +91,7 @@
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-import { showSuccess, showError } from '@nextcloud/dialogs'
+import { showError, showSuccess } from '@nextcloud/dialogs'
 
 import NcModal from '@nextcloud/vue/components/NcModal'
 import NcButton from '@nextcloud/vue/components/NcButton'
@@ -109,41 +109,48 @@ export default {
 		NcLoadingIcon,
 		Connection,
 	},
+
 	props: {
 		daemon: {
 			type: Object,
 			required: true,
 			default: () => {},
 		},
+
 		show: {
 			type: Boolean,
 			required: true,
 			default: false,
 		},
+
 		isDefault: {
 			type: Boolean,
 			required: true,
-			default: () => false,
+			default: false,
 		},
 	},
+
 	data() {
 		return {
 			verifying: false,
 		}
 	},
+
 	computed: {
 		isDeprecatedDirectDocker() {
 			return this.daemon.accepts_deploy_id === 'docker-install' && !this.daemon.deploy_config?.harp
 		},
 	},
+
 	methods: {
 		closeModal() {
 			this.$emit('update:show', false)
 		},
+
 		verifyConnection() {
 			this.verifying = true
 			axios.post(generateUrl(`/apps/app_api/daemons/${this.daemon.name}/check`))
-				.then(res => {
+				.then((res) => {
 					if (res.data.success) {
 						showSuccess(t('app_api', 'Daemon connection successful'))
 					} else {
@@ -151,12 +158,13 @@ export default {
 					}
 					this.verifying = false
 				})
-				.catch(err => {
+				.catch((err) => {
 					this.verifying = false
 					showError(t('app_api', 'Failed to check connection to the daemon. Check the logs'))
 					console.debug(err)
 				})
 		},
+
 		formatMemoryLimit(memoryBytes) {
 			if (!memoryBytes) {
 				return t('app_api', 'Unlimited')
@@ -168,6 +176,7 @@ export default {
 			}
 			return t('app_api', '{size} MiB', { size: Math.round(memoryMiB) })
 		},
+
 		formatCpuLimit(nanoCpus) {
 			if (!nanoCpus) {
 				return t('app_api', 'Unlimited')
