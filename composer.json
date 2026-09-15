@@ -21,7 +21,8 @@
 		"nextcloud/coding-standard": "^1.1",
 		"nextcloud/ocp": "dev-master",
 		"psalm/phar": "6.16.1",
-		"roave/security-advisories": "dev-latest"
+		"roave/security-advisories": "dev-latest",
+		"symfony/console": "^7.4"
 	},
 	"scripts": {
 		"lint": "find . -name \\*.php -not -path './vendor/*' -not -path './vendor-bin/*' -print0 | xargs -0 -n1 php -l",
