@@ -196,7 +196,7 @@ readonly class DaemonConfigService {
 				return ['error' => 'The source and target registry cannot be empty'];
 			}
 
-			$deployConfig['registries'][] = $registryMap;
+			$deployConfig['registries'] = [...array_values($deployConfig['registries']), $registryMap];
 			$daemonConfig->setDeployConfig($deployConfig);
 
 			return $this->mapper->update($daemonConfig);
@@ -213,9 +213,9 @@ readonly class DaemonConfigService {
 			if (!in_array($registryMap, $deployConfig['registries'])) {
 				return ['error' => 'This Docker registry map does not exist'];
 			}
-			$deployConfig['registries'] = array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
+			$deployConfig['registries'] = array_values(array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
 				return !($registry['from'] === $registryMap['from'] && $registry['to'] === $registryMap['to']);
-			});
+			}));
 			$daemonConfig->setDeployConfig($deployConfig);
 
 			return $this->mapper->update($daemonConfig);
