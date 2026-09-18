@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
@@ -41,6 +42,7 @@ class DaemonConfigController extends ApiController {
 		private readonly IAppConfig $appConfig,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions $dockerActions,
+		private readonly KubernetesActions $kubernetesActions,
 		private readonly AppAPIService $service,
 		private readonly ExAppService $exAppService,
 		private readonly IL10N $l10n,
@@ -171,10 +173,8 @@ class DaemonConfigController extends ApiController {
 	 */
 	public function verifyDaemonConnection(string $name): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
-		$this->dockerActions->initGuzzleClient($daemonConfig);
-		$dockerDaemonAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 		return new JSONResponse([
-			'success' => $dockerDaemonAccessible,
+			'success' => $this->daemonAccessible($daemonConfig),
 		]);
 	}
 
@@ -219,11 +219,18 @@ class DaemonConfigController extends ApiController {
 			'host' => $daemonParams['host'],
 			'deploy_config' => $daemonParams['deploy_config'],
 		]);
-		$this->dockerActions->initGuzzleClient($daemonConfig);
-		$dockerDaemonAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 		return new JSONResponse([
-			'success' => $dockerDaemonAccessible,
+			'success' => $this->daemonAccessible($daemonConfig),
 		]);
+	}
+
+	private function daemonAccessible(DaemonConfig $daemonConfig): bool {
+		if ($daemonConfig->getAcceptsDeployId() === KubernetesActions::DEPLOY_ID) {
+			$this->kubernetesActions->initGuzzleClient($daemonConfig);
+			return $this->kubernetesActions->ping($daemonConfig) === '';
+		}
+		$this->dockerActions->initGuzzleClient($daemonConfig);
+		return $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 	}
 
 	/**
