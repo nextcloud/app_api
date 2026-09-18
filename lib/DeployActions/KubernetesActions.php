@@ -16,6 +16,7 @@ use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
+use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
@@ -85,13 +86,13 @@ class KubernetesActions implements IDeployActions {
 		$roles = $params['k8s_service_roles'] ?? [];
 
 		if (empty($roles)) {
-			return $this->deploySingleExApp($exApp, $harpUrl, $params);
+			return $this->deploySingleExApp($exApp, $daemonConfig, $harpUrl, $params);
 		}
 
-		return $this->deployMultiRoleExApp($exApp, $harpUrl, $params, $roles);
+		return $this->deployMultiRoleExApp($exApp, $daemonConfig, $harpUrl, $params, $roles);
 	}
 
-	private function deploySingleExApp(ExApp $exApp, string $harpUrl, array $params): string {
+	private function deploySingleExApp(ExApp $exApp, DaemonConfig $daemonConfig, string $harpUrl, array $params): string {
 		$exAppName = $params['container_params']['name'];
 		$instanceId = '';
 
@@ -112,7 +113,7 @@ class KubernetesActions implements IDeployActions {
 
 		$this->exAppService->setAppDeployProgress($exApp, 50);
 
-		$error = $this->createExApp($harpUrl, $exAppName, $instanceId, $params);
+		$error = $this->createExApp($daemonConfig, $harpUrl, $exAppName, $instanceId, $params);
 		if ($error) {
 			return $error;
 		}
@@ -146,7 +147,7 @@ class KubernetesActions implements IDeployActions {
 	 *
 	 * @param array $roles Array of role definitions from k8s-service-roles
 	 */
-	private function deployMultiRoleExApp(ExApp $exApp, string $harpUrl, array $params, array $roles): string {
+	private function deployMultiRoleExApp(ExApp $exApp, DaemonConfig $daemonConfig, string $harpUrl, array $params, array $roles): string {
 		$exAppName = $params['container_params']['name'];
 		$instanceId = '';
 		$totalRoles = count($roles);
@@ -184,7 +185,7 @@ class KubernetesActions implements IDeployActions {
 
 			$this->logger->info(sprintf('Creating K8s deployment for ExApp "%s" role "%s" (%d/%d).', $exAppName, $roleSuffix, $roleIndex + 1, $totalRoles));
 
-			$error = $this->createExApp($harpUrl, $exAppName, $instanceId, $roleParams, $roleSuffix);
+			$error = $this->createExApp($daemonConfig, $harpUrl, $exAppName, $instanceId, $roleParams, $roleSuffix);
 			if ($error) {
 				$this->rollbackDeployedRoles($harpUrl, $exAppName, $deployedRoles);
 				return $error;
@@ -342,14 +343,14 @@ class KubernetesActions implements IDeployActions {
 		}
 	}
 
-	private function createExApp(string $harpUrl, string $exAppName, string $instanceId, array $params, string $roleSuffix = ''): string {
+	private function createExApp(DaemonConfig $daemonConfig, string $harpUrl, string $exAppName, string $instanceId, array $params, string $roleSuffix = ''): string {
 		$computeDevice = 'cpu';
 		if (isset($params['container_params']['computeDevice']['id'])) {
 			$computeDevice = $params['container_params']['computeDevice']['id'];
 		}
 
 		$createPayload = $this->buildNamePayload($exAppName, $instanceId, $roleSuffix);
-		$createPayload['image'] = $this->buildImageName($params['image_params']);
+		$createPayload['image'] = $this->buildImageName($params['image_params'], $daemonConfig);
 		$createPayload['environment_variables'] = $params['container_params']['env'] ?? [];
 		$createPayload['compute_device'] = $computeDevice;
 
@@ -767,8 +768,9 @@ class KubernetesActions implements IDeployActions {
 		return rtrim($url, '/') . '/exapps/app_api/k8s';
 	}
 
-	private function buildImageName(array $imageParams): string {
-		return $imageParams['image_src'] . '/' . $imageParams['image_name'] . ':' . $imageParams['image_tag'];
+	public function buildImageName(array $imageParams, DaemonConfig $daemonConfig): string {
+		return DaemonConfigService::resolveImageRegistry($daemonConfig->getDeployConfig(), $imageParams['image_src']) . '/'
+			. $imageParams['image_name'] . ':' . $imageParams['image_tag'];
 	}
 
 	public function initGuzzleClient(DaemonConfig $daemonConfig): void {
