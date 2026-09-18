@@ -4,9 +4,9 @@ name: Tests - ExApp Integration
 
 on:
   pull_request:
-    branches: [main]
+    branches: [stable35]
   push:
-    branches: [main]
+    branches: [stable35]
   workflow_dispatch:
 
 permissions:
@@ -52,7 +52,7 @@ jobs:
           persist-credentials: false
           submodules: true
           repository: nextcloud/server
-          ref: master
+          ref: stable35
 
       - name: Checkout AppAPI
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
