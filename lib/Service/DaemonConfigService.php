@@ -224,4 +224,25 @@ readonly class DaemonConfigService {
 			return null;
 		}
 	}
+
+	/**
+	 * Registry to take an ExApp image from, after the registry mappings of the daemon are applied.
+	 *
+	 * The first mapping of the registry with a target other than "local" wins, entries without a usable target
+	 * are ignored. "local" never renames the image: Docker daemons skip the pull for it, on Kubernetes it changes
+	 * nothing and the kubelet pulls the image if the node does not have it.
+	 */
+	public static function resolveImageRegistry(array $deployConfig, string $imageRegistry): string {
+		foreach ($deployConfig['registries'] ?? [] as $registry) {
+			$target = $registry['to'] ?? null;
+			if (($registry['from'] ?? null) !== $imageRegistry || !is_string($target) || $target === 'local') {
+				continue;
+			}
+			$target = rtrim($target, '/');
+			if ($target !== '') {
+				return $target;
+			}
+		}
+		return $imageRegistry;
+	}
 }
