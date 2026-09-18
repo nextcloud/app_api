@@ -9,9 +9,14 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Tests\php\Service;
 
+use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Db\DaemonConfigMapper;
 use OCA\AppAPI\Service\DaemonConfigService;
+use OCA\AppAPI\Service\ExAppService;
+use OCP\Security\ICrypto;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class DaemonConfigServiceTest extends TestCase {
 
@@ -57,5 +62,39 @@ class DaemonConfigServiceTest extends TestCase {
 	#[DataProvider('resolveImageRegistryProvider')]
 	public function testResolveImageRegistry(array $deployConfig, string $imageRegistry, string $expected): void {
 		self::assertSame($expected, DaemonConfigService::resolveImageRegistry($deployConfig, $imageRegistry));
+	}
+
+	private function createService(): DaemonConfigService {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->method('update')->willReturnArgument(0);
+		return new DaemonConfigService(
+			$this->createMock(LoggerInterface::class),
+			$mapper,
+			$this->createMock(ExAppService::class),
+			$this->createMock(ICrypto::class),
+		);
+	}
+
+	public function testAddDockerRegistryKeepsAList(): void {
+		$stored = ['from' => 'docker.io', 'to' => 'hub.example.com'];
+		$added = ['from' => 'ghcr.io', 'to' => 'registry.example.com'];
+		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => [1 => $stored]]]);
+
+		$result = $this->createService()->addDockerRegistry($daemonConfig, $added);
+
+		self::assertInstanceOf(DaemonConfig::class, $result);
+		self::assertSame([$stored, $added], $result->getDeployConfig()['registries']);
+	}
+
+	public function testRemoveDockerRegistryKeepsAList(): void {
+		$service = $this->createService();
+		$first = ['from' => 'docker.io', 'to' => 'hub.example.com'];
+		$second = ['from' => 'ghcr.io', 'to' => 'registry.example.com'];
+		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => [$first, $second]]]);
+
+		$result = $service->removeDockerRegistry($daemonConfig, $first);
+
+		self::assertInstanceOf(DaemonConfig::class, $result);
+		self::assertSame([$second], $result->getDeployConfig()['registries']);
 	}
 }
