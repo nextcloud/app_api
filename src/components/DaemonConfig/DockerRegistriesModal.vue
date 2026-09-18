@@ -24,7 +24,7 @@
 					:name="`${registry.from} -> ${registry.to}`"
 					:forceDisplayActions="true">
 					<template v-if="registry.to === 'local'" #details>
-						<span style="color: var(--color-warning);">{{ t('app_api', 'Image pull will be skipped') }}</span>
+						<span style="color: var(--color-warning-text);">{{ t('app_api', 'Image pull will be skipped') }}</span>
 					</template>
 					<template #actions>
 						<NcActionButton
@@ -194,7 +194,8 @@ export default {
 		},
 
 		registries() {
-			return this.daemon.deploy_config?.registries || []
+			// A list that lost an entry may come back from the server as an object keyed by index
+			return Object.values(this.daemon.deploy_config?.registries || [])
 		},
 
 		registryMappingFromValid() {
