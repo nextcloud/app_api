@@ -64,9 +64,9 @@ class DaemonConfigServiceTest extends TestCase {
 		self::assertSame($expected, DaemonConfigService::resolveImageRegistry($deployConfig, $imageRegistry));
 	}
 
-	private function createService(): DaemonConfigService {
+	private function createService(bool $expectUpdate = true): DaemonConfigService {
 		$mapper = $this->createMock(DaemonConfigMapper::class);
-		$mapper->method('update')->willReturnArgument(0);
+		$mapper->expects($expectUpdate ? self::once() : self::never())->method('update')->willReturnArgument(0);
 		return new DaemonConfigService(
 			$this->createMock(LoggerInterface::class),
 			$mapper,
@@ -84,6 +84,47 @@ class DaemonConfigServiceTest extends TestCase {
 
 		self::assertInstanceOf(DaemonConfig::class, $result);
 		self::assertSame([$stored, $added], $result->getDeployConfig()['registries']);
+	}
+
+	public static function unusableRegistryMapProvider(): array {
+		return [
+			'no source' => [['to' => 'registry.example.com']],
+			'no target' => [['from' => 'ghcr.io']],
+			'empty source' => [['from' => '', 'to' => 'registry.example.com']],
+			'empty target' => [['from' => 'ghcr.io', 'to' => '']],
+			'target of slashes only' => [['from' => 'ghcr.io', 'to' => '//']],
+			'target is not a string' => [['from' => 'ghcr.io', 'to' => 5000]],
+			'source is not a string' => [['from' => ['ghcr.io'], 'to' => 'registry.example.com']],
+		];
+	}
+
+	#[DataProvider('unusableRegistryMapProvider')]
+	public function testAddDockerRegistryRejectsAnUnusableMap(array $registryMap): void {
+		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => []]]);
+
+		$result = $this->createService(expectUpdate: false)->addDockerRegistry($daemonConfig, $registryMap);
+
+		self::assertSame(['error' => 'The source and target registry cannot be empty'], $result);
+		self::assertSame([], $daemonConfig->getDeployConfig()['registries']);
+	}
+
+	public function testAddDockerRegistryRejectsADuplicateSource(): void {
+		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => ['junk', ['from' => 'ghcr.io', 'to' => 'local']]]]);
+
+		$result = $this->createService(expectUpdate: false)
+			->addDockerRegistry($daemonConfig, ['from' => 'ghcr.io', 'to' => 'registry.example.com']);
+
+		self::assertSame(['error' => 'This Docker registry map from "ghcr.io" already exists'], $result);
+	}
+
+	public function testAddDockerRegistryStoresOnlySourceAndTarget(): void {
+		$daemonConfig = new DaemonConfig(['deploy_config' => []]);
+
+		$result = $this->createService()
+			->addDockerRegistry($daemonConfig, ['from' => 'ghcr.io', 'to' => 'registry.example.com/', 'extra' => 'x']);
+
+		self::assertInstanceOf(DaemonConfig::class, $result);
+		self::assertSame([['from' => 'ghcr.io', 'to' => 'registry.example.com/']], $result->getDeployConfig()['registries']);
 	}
 
 	public function testRemoveDockerRegistryKeepsAList(): void {

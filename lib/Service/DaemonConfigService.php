@@ -173,6 +173,12 @@ readonly class DaemonConfigService {
 
 	public function addDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
 		try {
+			$from = $registryMap['from'] ?? null;
+			$to = $registryMap['to'] ?? null;
+			if (!is_string($from) || !is_string($to) || $from === '' || rtrim($to, '/') === '') {
+				return ['error' => 'The source and target registry cannot be empty'];
+			}
+
 			$deployConfig = $daemonConfig->getDeployConfig();
 
 			if (!isset($deployConfig['registries'])) {
@@ -181,22 +187,19 @@ readonly class DaemonConfigService {
 
 			$fromExists = false;
 			foreach ($deployConfig['registries'] as $registry) {
-				if ($registry['from'] === $registryMap['from']) {
+				if (($registry['from'] ?? null) === $from) {
 					$fromExists = true;
 					break;
 				}
 			}
 			if ($fromExists) {
-				return ['error' => sprintf('This Docker registry map from "%s" already exists', $registryMap['from'])];
+				return ['error' => sprintf('This Docker registry map from "%s" already exists', $from)];
 			}
-			if ($registryMap['from'] === $registryMap['to']) {
+			if ($from === $to) {
 				return ['error' => 'The source and target registry cannot be the same'];
 			}
-			if (empty($registryMap['from']) || empty($registryMap['to'])) {
-				return ['error' => 'The source and target registry cannot be empty'];
-			}
 
-			$deployConfig['registries'] = [...array_values($deployConfig['registries']), $registryMap];
+			$deployConfig['registries'] = [...array_values($deployConfig['registries']), ['from' => $from, 'to' => $to]];
 			$daemonConfig->setDeployConfig($deployConfig);
 
 			return $this->mapper->update($daemonConfig);
