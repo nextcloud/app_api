@@ -106,7 +106,9 @@ npm test                 # vitest (JS unit tests)
 - `js-test.yml`: vitest on `src/**` changes.
 - `openapi.yml`: runs `composer openapi` and **fails if the committed `openapi*.json` (and, if applicable,
   `src/types/openapi/*.ts`) are stale**. Regenerate and commit them whenever you touch controllers/routes.
-- `node.yml`: `npm run build` and **fails if compiled `js/` assets are not committed**.
+- `node.yml`: `npm run build` and **fails if compiled `js/` assets are not committed**. On a failed run of
+  it, `auto-compile.yml` rebuilds and pushes the assets of pull requests opened by `dependabot` and
+  `nextcloud-command`; on your own pull requests, comment `/compile` (`command-compile.yml`).
 - `reuse.yml`: every file needs SPDX licensing info, via a file header or a `REUSE.toml` annotation.
 - `tests-deploy*.yml`: end-to-end daemon lifecycle across Docker / HaRP / DSP and the four K8s expose types;
   `tests.yml` runs nc_py_api integration (PgSQL/MySQL/APcu). CI targets the server `master` line.

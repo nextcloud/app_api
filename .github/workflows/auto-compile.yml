@@ -1,0 +1,258 @@
+# SPDX-FileCopyrightText: 2026 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+name: Auto compile
+
+on:
+  workflow_run:
+    workflows: ['Node']
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      pull-request:
+        description: Number of the pull request to recompile
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auto-compile-${{ github.event.workflow_run.head_branch || inputs.pull-request }}
+  cancel-in-progress: false
+
+jobs:
+  init:
+    runs-on: ubuntu-latest-low
+
+    # `Node` only runs on pull requests. Dependabot cannot recompile its own branch: workflow runs
+    # it triggers get a read-only token and no secrets, while `workflow_run` runs get both.
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'failure') }}
+
+    permissions:
+      contents: read
+      pull-requests: read
+
+    outputs:
+      head_ref: ${{ steps.pull-request.outputs.head_ref }}
+      head_sha: ${{ steps.pull-request.outputs.head_sha }}
+      compile: ${{ steps.pull-request.outputs.compile }}
+
+    steps:
+      - name: Find the pull request to recompile
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        id: pull-request
+        env:
+          PR_NUMBER: ${{ inputs.pull-request }}
+        with:
+          script: |
+            const { owner, repo } = context.repo
+            const manual = context.eventName === 'workflow_dispatch'
+            let pull
+
+            if (manual) {
+              pull = (await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: Number(process.env.PR_NUMBER),
+              })).data
+            } else {
+              const run = context.payload.workflow_run
+              const { data: pulls } = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: 'open',
+                head: `${run.head_repository.owner.login}:${run.head_branch}`,
+              })
+              pull = pulls.find(candidate => candidate.head.sha === run.head_sha) ?? pulls[0]
+            }
+
+            const skip = (reason) => {
+              core.notice(`Not recompiling: ${reason}`)
+              core.setOutput('compile', 'false')
+            }
+
+            if (!pull || pull.state !== 'open') {
+              return skip('there is no open pull request for this branch')
+            }
+            if (pull.head.repo.full_name !== `${owner}/${repo}`) {
+              return skip(`#${pull.number} is built from a fork`)
+            }
+            if (pull.draft) {
+              return skip(`#${pull.number} is a draft`)
+            }
+
+            core.setOutput('head_ref', pull.head.ref)
+            core.setOutput('head_sha', pull.head.sha)
+
+            if (!manual) {
+              // Only for the bots that cannot compile their own assets, everyone else keeps
+              // using `/compile`.
+              const bots = ['dependabot[bot]', 'nextcloud-command']
+              if (!bots.includes(pull.user.login)) {
+                return skip(`#${pull.number} was opened by ${pull.user.login}`)
+              }
+              // And only once per push of theirs, so a build that keeps failing cannot loop.
+              // Dependabot commits through the API and gets `GitHub` as the committer.
+              const { data: head } = await github.rest.repos.getCommit({
+                owner,
+                repo,
+                ref: pull.head.sha,
+              })
+              if (head.commit.committer.name === 'nextcloud-command') {
+                return skip(`#${pull.number} was recompiled already`)
+              }
+            }
+
+            core.notice(`Recompiling the assets of #${pull.number} (${pull.head.ref})`)
+            core.setOutput('compile', 'true')
+
+  compile:
+    runs-on: ubuntu-latest
+    needs: init
+
+    if: needs.init.outputs.compile == 'true'
+
+    outputs:
+      changed: ${{ steps.assets.outputs.changed }}
+
+    steps:
+      - name: Checkout ${{ needs.init.outputs.head_sha }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ needs.init.outputs.head_sha }}
+
+      - name: Read package.json node and npm engines version
+        uses: skjnldsv/read-package-engines-version-actions@06d6baf7d8f41934ab630e97d9e6c0bc9c9ac5e4 # v3
+        id: versions
+        with:
+          fallbackNode: '^24'
+          fallbackNpm: '^11.3'
+
+      - name: Set up node ${{ steps.versions.outputs.nodeVersion }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ steps.versions.outputs.nodeVersion }}
+          cache: npm
+
+      - name: Set up npm ${{ steps.versions.outputs.npmVersion }}
+        run: npm i -g 'npm@${{ steps.versions.outputs.npmVersion }}'
+
+      - name: Install dependencies & build
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+          PUPPETEER_SKIP_DOWNLOAD: true
+        run: |
+          npm ci
+          npm run build --if-present
+
+      - name: Check for changes
+        id: assets
+        run: |
+          # `mappings` are not reproducible across build environments, `Node` ignores the source
+          # maps for that reason. They are worth committing next to the code they belong to, but
+          # never on their own.
+          if [ -z "$(git status --porcelain -- . ':(exclude)js/*.js.map')" ]; then
+            echo 'The compiled assets are up to date, Node failed for another reason'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git status --short
+          outside="$(git status --porcelain -- . ':(exclude)js/')"
+          if [ -n "$outside" ]; then
+            echo "::warning::The build touched files outside js/, they are left uncommitted"
+          fi
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Pack the assets
+        if: steps.assets.outputs.changed == 'true'
+        # `js/*.js.map.license` are symbolic links and an artifact upload resolves them, tar keeps them
+        run: tar -cf js.tar js
+
+      - name: Upload the assets
+        if: steps.assets.outputs.changed == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: compiled-assets
+          path: js.tar
+          retention-days: 1
+          if-no-files-found: error
+
+  push:
+    runs-on: ubuntu-latest-low
+    needs: [init, compile]
+
+    if: needs.compile.outputs.changed == 'true'
+
+    steps:
+      # Deliberately a second job: the dependencies of the pull request are never installed in
+      # the job that holds the token, so their install scripts cannot reach it through the
+      # workspace, a git hook or the git configuration
+      - name: Checkout ${{ needs.init.outputs.head_ref }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # A shallow clone is enough to build but not to push from
+          fetch-depth: 0
+          ref: ${{ needs.init.outputs.head_ref }}
+
+      - name: Check that the branch did not move
+        id: tip
+        env:
+          HEAD_SHA: ${{ needs.init.outputs.head_sha }}
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$HEAD_SHA" ]; then
+            echo 'current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$HEAD_SHA is no longer the tip of the branch, leaving it to the run of the new one"
+            echo 'current=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download the assets
+        if: steps.tip.outputs.current == 'true'
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: compiled-assets
+
+      # The archive comes from the job that ran the install scripts of the pull request, so it is
+      # untrusted input: `tar -xf` would happily write a `.git/hooks/pre-commit`. Unpacking and
+      # committing stay free of the token as well, only the push itself gets it
+      - name: Unpack the assets
+        if: steps.tip.outputs.current == 'true'
+        run: |
+          python3 - <<'PY'
+          import shutil
+          import sys
+          import tarfile
+
+          with tarfile.open('js.tar') as archive:
+              for member in archive.getmembers():
+                  parts = member.name.split('/')
+                  if parts[0] != 'js' or '..' in parts or member.name.startswith('/'):
+                      sys.exit(f'refusing {member.name!r}: outside js/')
+                  if not (member.isfile() or member.isdir() or member.issym()):
+                      sys.exit(f'refusing {member.name!r}: unsupported type')
+                  if member.issym() and (member.linkname.startswith('/') or '..' in member.linkname.split('/')):
+                      sys.exit(f'refusing {member.name!r}: links out of js/')
+              shutil.rmtree('js', ignore_errors=True)
+              archive.extractall('.', filter='data')
+          PY
+          rm js.tar
+
+      - name: Commit the assets
+        if: steps.tip.outputs.current == 'true'
+        run: |
+          git config user.email 'nextcloud-command@users.noreply.github.com'
+          git config user.name 'nextcloud-command'
+          git add --all -- js
+          git commit --signoff -m 'chore(assets): Recompile assets'
+
+      - name: Push
+        if: steps.tip.outputs.current == 'true'
+        env:
+          HEAD_REF: ${{ needs.init.outputs.head_ref }}
+          # A push made with GITHUB_TOKEN would not start the checks again
+          TOKEN: ${{ secrets.COMMAND_BOT_PAT }}
+        run: git push "https://x-access-token:$TOKEN@github.com/$GITHUB_REPOSITORY.git" "HEAD:refs/heads/$HEAD_REF"
