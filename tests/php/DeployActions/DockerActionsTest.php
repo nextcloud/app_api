@@ -153,6 +153,10 @@ class DockerActionsTest extends TestCase {
 			'mapped to local' => [[$local], false],
 			'local mapping of another registry' => [[['from' => 'docker.io', 'to' => 'local']], true],
 			'malformed entries are ignored' => [['ghcr.io', ['from' => 'ghcr.io'], ['to' => 'local'], $local], false],
+			'legacy duplicate source: the mirror is used, so it is pulled' => [
+				[$local, ['from' => 'ghcr.io', 'to' => 'registry.example.com']],
+				true,
+			],
 		];
 	}
 
