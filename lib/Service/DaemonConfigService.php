@@ -218,7 +218,7 @@ readonly class DaemonConfigService {
 				return ['error' => 'This Docker registry map does not exist'];
 			}
 			$deployConfig['registries'] = array_values(array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
-				return !($registry['from'] === $registryMap['from'] && $registry['to'] === $registryMap['to']);
+				return !(($registry['from'] ?? null) === $registryMap['from'] && ($registry['to'] ?? null) === $registryMap['to']);
 			}));
 			$daemonConfig->setDeployConfig($deployConfig);
 

@@ -138,4 +138,15 @@ class DaemonConfigServiceTest extends TestCase {
 		self::assertInstanceOf(DaemonConfig::class, $result);
 		self::assertSame([$second], $result->getDeployConfig()['registries']);
 	}
+
+	public function testRemoveDockerRegistryToleratesMalformedEntries(): void {
+		$first = ['from' => 'docker.io', 'to' => 'hub.example.com'];
+		$second = ['from' => 'ghcr.io', 'to' => 'registry.example.com'];
+		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => ['junk', ['from' => 'quay.io'], $first, $second]]]);
+
+		$result = $this->createService()->removeDockerRegistry($daemonConfig, $first);
+
+		self::assertInstanceOf(DaemonConfig::class, $result);
+		self::assertSame(['junk', ['from' => 'quay.io'], $second], $result->getDeployConfig()['registries']);
+	}
 }
