@@ -62,7 +62,7 @@
 		"@nextcloud/browserslist-config": "^3.0.1",
 		"@nextcloud/eslint-config": "^8.4.1",
 		"@nextcloud/stylelint-config": "^3.0.1",
-		"@nextcloud/webpack-vue-config": "^7.0.1",
+		"@nextcloud/webpack-vue-config": "^7.0.4",
 		"eslint-webpack-plugin": "^5.0.2",
 		"stylelint-webpack-plugin": "^5.0.1",
 		"terser-webpack-plugin": "^5.3.11"
