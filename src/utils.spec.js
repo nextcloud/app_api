@@ -4,7 +4,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { Timer, delay } from './utils.js'
+import { delay, Timer } from './utils.js'
 
 describe('Timer', () => {
 	beforeEach(() => {
@@ -17,7 +17,7 @@ describe('Timer', () => {
 
 	it('calls the callback after the specified delay', () => {
 		const callback = vi.fn()
-		new Timer(callback, 1000) // eslint-disable-line no-new
+		new Timer(callback, 1000)
 
 		expect(callback).not.toHaveBeenCalled()
 		vi.advanceTimersByTime(1000)

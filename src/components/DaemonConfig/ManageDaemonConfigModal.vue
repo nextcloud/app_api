@@ -17,7 +17,7 @@
 						id="daemon-template"
 						v-model="configurationTab"
 						class="ncselect"
-						:input-label="t('app_api', 'Daemon configuration template')"
+						:inputLabel="t('app_api', 'Daemon configuration template')"
 						:options="configurationTemplateOptions"
 						:placeholder="t('app_api', 'Select a daemon configuration template')" />
 				</div>
@@ -31,7 +31,7 @@
 							:placeholder="t('app_api', 'Unique deploy daemon name')"
 							:aria-label="t('app_api', 'Unique deploy Daemon name')"
 							:error="isDaemonNameInvalid === true"
-							:helper-text="isDaemonNameValidHelperText" />
+							:helperText="isDaemonNameValidHelperText" />
 						<InfoTooltip :text="t('app_api', 'Unique deploy daemon name')" />
 					</div>
 					<div class="row" :aria-label="t('app_api', 'Display name')">
@@ -47,7 +47,7 @@
 							id="daemon-deploy-id"
 							v-model="acceptsDeployId"
 							class="ncselect"
-							:input-label="t('app_api', 'Deployment method')"
+							:inputLabel="t('app_api', 'Deployment method')"
 							:disabled="isEdit"
 							:options="deployMethods"
 							:placeholder="t('app_api', 'Select the daemon deploy method')" />
@@ -73,7 +73,7 @@
 							:disabled="isEdit && isK8s"
 							:placeholder="haProxyPasswordHelperText"
 							:aria-label="haProxyPasswordHelperText"
-							:helper-text="!isHaProxyPasswordValid ? t('app_api', 'The password must be at least 12 characters long') : ''"
+							:helperText="!isHaProxyPasswordValid ? t('app_api', 'The password must be at least 12 characters long') : ''"
 							autocomplete="off" />
 						<InfoTooltip :text="haProxyPasswordHelperText" />
 					</div>
@@ -83,8 +83,8 @@
 							v-model="nextcloud_url"
 							:label="t('app_api', 'Nextcloud URL')"
 							:readonly="isEdit && isK8s"
-							:helper-text="getNextcloudUrlHelperText"
-							:input-class="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
+							:helperText="getNextcloudUrlHelperText"
+							:inputClass="getNextcloudUrlHelperText !== '' ? 'text-warning' : ''"
 							:placeholder="t('app_api', 'Nextcloud URL')"
 							:aria-label="t('app_api', 'Nextcloud URL')" />
 					</div>
@@ -96,7 +96,7 @@
 						</NcFormBoxSwitch>
 						<NcFormBoxSwitch v-if="!isHarp"
 							v-model="httpsEnabled"
-							@update:model-value="onProtocolChange">
+							@update:modelValue="onProtocolChange">
 							{{ t('app_api', 'Enable HTTPS') }}
 						</NcFormBoxSwitch>
 					</NcFormBox>
@@ -114,7 +114,7 @@
 						<NcFormBoxSwitch
 							v-if="!isK8s || !isEdit"
 							v-model="isHarp"
-							@update:model-value="toggleHarp">
+							@update:modelValue="toggleHarp">
 							{{ t('app_api', 'Enable HaRP') }}
 						</NcFormBoxSwitch>
 						<div v-if="isHarp" class="harp-options">
@@ -157,10 +157,10 @@
 									:placeholder="t('app_api', 'Docker network')"
 									:readonly="isEdit && isK8s"
 									:aria-label="t('app_api', 'Docker network')"
-									:show-trailing-button="isEditDifferentNetwork"
+									:showTrailingButton="isEditDifferentNetwork"
 									:error="isHarp && !deployConfig.net"
-									:helper-text="(isHarp && !deployConfig.net) ? t('app_api', 'Docker network for ex-app deployment must be defined') : ''"
-									@trailing-button-click="deployConfig.net = daemon.deploy_config.net">
+									:helperText="(isHarp && !deployConfig.net) ? t('app_api', 'Docker network for ex-app deployment must be defined') : ''"
+									@trailingButtonClick="deployConfig.net = daemon.deploy_config.net">
 									<template #trailing-button-icon>
 										<Replay :size="20" />
 									</template>
@@ -174,7 +174,7 @@
 									v-model="deployConfig.computeDevice"
 									class="ncselect"
 									:disabled="isEdit && isK8s"
-									:input-label="t('app_api', 'Compute device')"
+									:inputLabel="t('app_api', 'Compute device')"
 									:aria-label-combobox="t('app_api', 'Computation device')"
 									:options="computeDevices" />
 								<InfoTooltip v-if="getComputeDeviceHelperText !== ''"
@@ -191,7 +191,7 @@
 									:readonly="isEdit && isK8s"
 									:aria-label="t('app_api', 'Memory limit (in MiB)')"
 									:error="isMemoryLimitValid === false"
-									:helper-text="isMemoryLimitValid === false ? t('app_api', 'Must be a positive integer') : ''" />
+									:helperText="isMemoryLimitValid === false ? t('app_api', 'Must be a positive integer') : ''" />
 								<InfoTooltip :text="t('app_api', 'Maximum amount of memory that the ExApp container can use in mebibytes')" />
 							</div>
 							<div class="row" :aria-label="t('app_api', 'CPU limit')">
@@ -204,7 +204,7 @@
 									:readonly="isEdit && isK8s"
 									:aria-label="t('app_api', 'CPU limit')"
 									:error="isCpuLimitValid === false"
-									:helper-text="isCpuLimitValid === false ? t('app_api', 'Must be a positive number') : ''" />
+									:helperText="isCpuLimitValid === false ? t('app_api', 'Must be a positive number') : ''" />
 								<InfoTooltip :text="t('app_api', 'Maximum number of CPU cores that the ExApp container can use (e.g. 0.5 for half a core, 2 for two cores)')" />
 							</div>
 							<div v-if="isK8s && isEdit && deployConfig.kubernetes" class="k8s-info">
@@ -269,7 +269,7 @@
 											:label="t('app_api', 'Option key (unique)')"
 											:placeholder="t('app_api', 'Option key (unique, e.g. my_key)')"
 											:error="additionalOption.key.trim() === ''"
-											:helper-text="additionalOption.key.trim() === '' ? t('app_api', 'Option key is required') : ''"
+											:helperText="additionalOption.key.trim() === '' ? t('app_api', 'Option key is required') : ''"
 											style="margin: 0 5px 0 0;" />
 										<NcInputField
 											id="additional-option-value"
@@ -277,7 +277,7 @@
 											:label="t('app_api', 'Option value')"
 											:placeholder="t('app_api', 'Option value')"
 											:error="additionalOption.value.trim() === ''"
-											:helper-text="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
+											:helperText="additionalOption.value.trim() === '' ? t('app_api', 'Option value is required') : ''"
 											style="margin: 0 5px 0 0;" />
 										<NcButton
 											variant="tertiary"
@@ -373,32 +373,38 @@ export default {
 		Close,
 		Replay,
 	},
+
 	props: {
 		show: {
 			type: Boolean,
 			required: true,
 			default: false,
 		},
+
 		daemons: {
 			type: Array,
 			required: true,
 			default: () => [],
 		},
+
 		getAllDaemons: {
 			type: Function,
 			required: true,
 		},
+
 		daemon: {
 			type: Object,
 			required: false,
 			default: () => null,
 		},
+
 		isDefaultDaemon: {
 			type: Boolean,
 			required: false,
-			default: () => false,
+			default: false,
 		},
 	},
+
 	data() {
 		const data = {
 			...JSON.parse(JSON.stringify(DAEMON_TEMPLATES[0])),
@@ -408,11 +414,12 @@ export default {
 			registeringDaemon: false,
 			configurationTab: { id: DAEMON_TEMPLATES[0].name, label: DAEMON_TEMPLATES[0].displayName },
 			configurationTemplateOptions: [
-				...DAEMON_TEMPLATES.map(template => ({
+				...DAEMON_TEMPLATES.map((template) => ({
 					id: template.name,
 					label: template.deprecated ? `${template.displayName} (deprecated)` : template.displayName,
 				})),
 			],
+
 			verifyingDaemonConnection: false,
 			computeDevices: DAEMON_COMPUTE_DEVICES,
 			addingAdditionalOption: false,
@@ -420,6 +427,7 @@ export default {
 				key: '',
 				value: '',
 			},
+
 			additionalOptions: [],
 		}
 
@@ -461,6 +469,7 @@ export default {
 
 		return data
 	},
+
 	computed: {
 		daemonHostHelperText() {
 			if (['http', 'https'].includes(this.daemonProtocol)) {
@@ -474,41 +483,55 @@ export default {
 			}
 			return t('app_api', 'The hostname (and port) or path at which the {name} is available. This does not need to be a public host, just a host accessible by the Nextcloud server. It can also be the path to the Docker socket. (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
 		},
+
 		daemonProtocol() {
 			return this.httpsEnabled ? 'https' : 'http'
 		},
+
 		memoryLimit: {
 			get() {
 				return this.deployConfig.resourceLimits.memoryMiB || ''
 			},
+
 			set(value) {
 				this.deployConfig.resourceLimits.memoryMiB = value === '' ? null : value
 			},
 		},
+
 		cpuLimit: {
 			get() {
 				return this.deployConfig.resourceLimits.cpus || ''
 			},
+
 			set(value) {
 				this.deployConfig.resourceLimits.cpus = value === '' ? null : value
 			},
 		},
+
 		isMemoryLimitValid() {
-			if (this.memoryLimit === '' || this.memoryLimit === null) return true
+			if (this.memoryLimit === '' || this.memoryLimit === null) {
+				return true
+			}
 			const str = String(this.memoryLimit).trim()
 			return /^[1-9]\d*$/.test(str)
 		},
+
 		isCpuLimitValid() {
-			if (this.cpuLimit === '' || this.cpuLimit === null) return true
+			if (this.cpuLimit === '' || this.cpuLimit === null) {
+				return true
+			}
 			const str = String(this.cpuLimit).trim()
 			return /^\d*\.?\d+$/.test(str)
 		},
+
 		isDaemonNameInvalid() {
-			return this.daemons.some(daemon => daemon.name === this.name && daemon.name !== this.daemon?.name)
+			return this.daemons.some((daemon) => daemon.name === this.name && daemon.name !== this.daemon?.name)
 		},
+
 		isDaemonNameValidHelperText() {
 			return this.isDaemonNameInvalid === true ? t('app_api', 'A daemon with this name already exists') : ''
 		},
+
 		isHaProxyPasswordValid() {
 			if (this.daemonProtocol === 'https' || this.isHarp) {
 				return this.deployConfig.haproxy_password !== null && this.deployConfig.haproxy_password.length >= 12
@@ -516,24 +539,30 @@ export default {
 			// HaProxy password required only for https
 			return true
 		},
+
 		haProxyPasswordHelperText() {
 			return this.isHarp ? t('app_api', 'The secret key for the HaRP container communication (HP_SHARED_KEY).') : t('app_api', 'AppAPI Docker Socket Proxy authentication password')
 		},
+
 		isEditDifferentNetwork() {
 			return this.isEdit && this.deployConfig.net !== this.daemon.deploy_config.net
 		},
+
 		getNetworkHelperText() {
 			if (this.isEditDifferentNetwork) {
 				return t('app_api', 'Changes are only effective for newly installed ExApps. For existing ExApps, the Docker containers should be recreated to apply the new settings values.')
 			}
 			return t('app_api', 'The Docker network that the deployed ExApps will use.')
 		},
+
 		cannotRegister() {
 			return this.isDaemonNameInvalid === true || this.isHaProxyPasswordValid === false || (this.isHarp && !this.deployConfig.net) || this.isMemoryLimitValid === false || this.isCpuLimitValid === false
 		},
+
 		isAdditionalOptionValid() {
 			return this.additionalOption.key.trim() !== '' && this.additionalOption.value.trim() !== ''
 		},
+
 		getNextcloudUrlHelperText() {
 			if (!/^https?:\/\//.test(this.nextcloud_url)) {
 				return t('app_api', 'The URL should start with http:// or https://')
@@ -549,6 +578,7 @@ export default {
 
 			return ''
 		},
+
 		getComputeDeviceHelperText() {
 			if (this.isEdit && this.deployConfig.computeDevice.id !== this.daemon.deploy_config.computeDevice.id) {
 				return t('app_api', 'Changes are only effective for newly installed ExApps. For existing ExApps, the Docker containers should be recreated to apply the new settings values.')
@@ -560,25 +590,32 @@ export default {
 
 			return ''
 		},
+
 		isEdit() {
 			return this.daemon !== null
 		},
+
 		isHarp() {
 			return this.deployConfig.harp !== null
 		},
+
 		isHarpAio() {
 			return this.configurationTab?.id === 'harp_aio'
 		},
+
 		isPureManual() {
 			return this.acceptsDeployId === 'manual-install' && !this.isHarp
 		},
+
 		isK8s() {
 			return this.acceptsDeployId === 'kubernetes-install'
 		},
+
 		isDeprecatedDirectDocker() {
 			return this.acceptsDeployId === 'docker-install' && !this.isHarp
 		},
 	},
+
 	watch: {
 		configurationTab(newConfigurationTab) {
 			if (this.isEdit) {
@@ -586,20 +623,24 @@ export default {
 			}
 			this.setupFormConfiguration(newConfigurationTab)
 		},
+
 		httpsEnabled(newHttpsEnabled) {
 			this.prevNet = this.deployConfig.net
 			this.deployConfig.net = newHttpsEnabled ? 'host' : this.prevNet
 		},
+
 		show(newShow) {
 			if (newShow === true) {
 				this.resetData()
 			}
 		},
 	},
+
 	methods: {
 		resetData() {
 			Object.assign(this.$data, this.$options.data.apply(this))
 		},
+
 		registerDaemon() {
 			this.registeringDaemon = true
 
@@ -608,7 +649,7 @@ export default {
 					daemonConfigParams: this._buildDaemonParams(),
 					defaultDaemon: this.acceptsDeployId === 'docker-install' ? this.defaultDaemon : false,
 				})
-					.then(res => {
+					.then((res) => {
 						this.registeringDaemon = false
 						if (res.data.success) {
 							showSuccess(t('app_api', 'DaemonConfig successfully registered'))
@@ -618,7 +659,7 @@ export default {
 							showError(t('app_api', 'Failed to register DaemonConfig. Check the logs'))
 						}
 					})
-					.catch(err => {
+					.catch((err) => {
 						this.registeringDaemon = false
 						console.debug(err)
 						showError(t('app_api', 'Failed to register DaemonConfig. Check the logs'))
@@ -628,6 +669,7 @@ export default {
 				showError(t('app_api', 'Password confirmation failed'))
 			})
 		},
+
 		updateDaemon() {
 			if (this.isEdit) {
 				console.debug('Logic error. Cannot update daemon if it\'s not set')
@@ -639,7 +681,7 @@ export default {
 				axios.put(generateUrl(`/apps/app_api/daemons/${this.daemon.name}`), {
 					daemonConfigParams: this._buildDaemonParams(),
 				})
-					.then(res => {
+					.then((res) => {
 						this.registeringDaemon = false
 						if (res.data.success) {
 							showSuccess(t('app_api', 'DaemonConfig successfully updated'))
@@ -649,7 +691,7 @@ export default {
 							showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
 						}
 					})
-					.catch(err => {
+					.catch((err) => {
 						this.registeringDaemon = false
 						console.debug(err)
 						showError(t('app_api', 'Failed to update DaemonConfig. Check the logs'))
@@ -659,12 +701,13 @@ export default {
 				showError(t('app_api', 'Password confirmation failed'))
 			})
 		},
+
 		verifyDaemonConnection() {
 			this.verifyingDaemonConnection = true
 			axios.post(generateUrl('/apps/app_api/daemons/verify_connection'), {
 				daemonParams: this._buildDaemonParams(),
 			})
-				.then(res => {
+				.then((res) => {
 					if (res.data.success) {
 						showSuccess(t('app_api', 'Daemon connection successful'))
 					} else {
@@ -672,12 +715,13 @@ export default {
 					}
 					this.verifyingDaemonConnection = false
 				})
-				.catch(err => {
+				.catch((err) => {
 					this.verifyingDaemonConnection = false
 					showError(t('app_api', 'Failed to check connection to Daemon. Check the logs'))
 					console.debug(err)
 				})
 		},
+
 		_buildDaemonParams() {
 			const params = {
 				name: this.name,
@@ -714,8 +758,9 @@ export default {
 			}
 			return params
 		},
+
 		setupFormConfiguration(templateName) {
-			const template = Object.assign({}, DAEMON_TEMPLATES.find(template => template.name === templateName.id))
+			const template = { ...DAEMON_TEMPLATES.find((template) => template.name === templateName.id) }
 			if (Object.keys(template).length === 0) {
 				return
 			}
@@ -729,39 +774,46 @@ export default {
 			this.deployConfig = JSON.parse(JSON.stringify(template.deployConfig))
 			this.defaultDaemon = template.defaultDaemon
 		},
+
 		onProtocolChange() {
 			// Prefill default value
 			if (this.daemonProtocol === 'unix-socket') {
 				this.host = '/var/run/docker.sock'
 			} else {
-				this.host = DAEMON_TEMPLATES.find(template => template.name === this.configurationTab.id).host || ''
+				this.host = DAEMON_TEMPLATES.find((template) => template.name === this.configurationTab.id).host || ''
 			}
 		},
+
 		addAdditionalOption() {
 			this.addingAdditionalOption = true
 			this.$nextTick(() => {
 				this.$refs.additionalOptionKey.focus()
 			})
 		},
+
 		removeAdditionalOption(option, index) {
 			this.additionalOptions.splice(index, 1)
 		},
+
 		confirmAddingAdditionalOption() {
 			this.additionalOptions.push({ key: this.additionalOption.key, value: this.additionalOption.value })
 			this.addingAdditionalOption = false
 			this.additionalOption = { key: '', value: '' }
 		},
+
 		cancelAddingAdditionalOption() {
 			this.addingAdditionalOption = false
 			this.additionalOption = { key: '', value: '' }
 		},
+
 		closeModal() {
 			this.$emit('update:show', false)
 		},
+
 		toggleHarp(value) {
 			if (value) {
 				const toFind = this.configurationTab.id.includes('harp') ? this.configurationTab.id : 'harp_proxy_host'
-				const harpDeployTempl = DAEMON_TEMPLATES.find(template => template.name === toFind)
+				const harpDeployTempl = DAEMON_TEMPLATES.find((template) => template.name === toFind)
 				this.deployConfig.harp = { ...harpDeployTempl.deployConfig.harp }
 			} else {
 				this.deployConfig.harp = null
