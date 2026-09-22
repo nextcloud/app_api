@@ -18,10 +18,11 @@
 	"require-dev": {
 		"bamarni/composer-bin-plugin": "^1.9",
 		"friendsofphp/php-cs-fixer": "3.95.25",
-		"nextcloud/coding-standard": "^1.1",
+		"nextcloud/coding-standard": "^1.5",
 		"nextcloud/ocp": "dev-master",
 		"psalm/phar": "6.16.1",
-		"roave/security-advisories": "dev-latest"
+		"roave/security-advisories": "dev-latest",
+		"symfony/console": "^7.4"
 	},
 	"scripts": {
 		"lint": "find . -name \\*.php -not -path './vendor/*' -not -path './vendor-bin/*' -print0 | xargs -0 -n1 php -l",
