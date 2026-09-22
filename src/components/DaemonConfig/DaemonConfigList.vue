@@ -10,10 +10,10 @@
 					v-for="daemon in daemons"
 					:key="daemon.id"
 					:daemon="daemon"
-					:is-default="defaultDaemon === daemon.name"
-					:save-options="saveOptions"
+					:isDefault="defaultDaemon === daemon.name"
+					:saveOptions="saveOptions"
 					:daemons="daemons"
-					:get-all-daemons="getAllDaemons" />
+					:getAllDaemons="getAllDaemons" />
 			</ul>
 			<NcEmptyContent
 				v-else
@@ -34,7 +34,7 @@
 		<ManageDaemonConfigModal
 			v-model:show="showRegisterModal"
 			:daemons="daemons"
-			:get-all-daemons="getAllDaemons" />
+			:getAllDaemons="getAllDaemons" />
 	</div>
 </template>
 
@@ -63,21 +63,25 @@ export default {
 		ManageDaemonConfigModal,
 		NcEmptyContent,
 	},
+
 	props: {
 		daemons: {
 			type: Array,
 			required: true,
 			default: () => [],
 		},
+
 		defaultDaemon: {
 			type: String,
 			required: true,
 		},
+
 		saveOptions: {
 			type: Function,
 			required: true,
 		},
 	},
+
 	data() {
 		return {
 			showRegisterModal: false,
@@ -85,13 +89,15 @@ export default {
 			registeringDefaultDaemonConfig: false,
 		}
 	},
+
 	methods: {
 		showRegister() {
 			this.showRegisterModal = true
 		},
+
 		getAllDaemons() {
 			return axios.get(generateUrl('/apps/app_api/daemons'))
-				.then(res => {
+				.then((res) => {
 					this.$emit('update:daemons', res.data.daemons)
 					this.$emit('update:defaultDaemon', res.data.default_daemon_config)
 				})

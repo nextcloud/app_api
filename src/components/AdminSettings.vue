@@ -15,14 +15,14 @@
 			:name="t('app_api', 'Deploy daemons')"
 			:description="t('app_api', 'A deploy daemon (DaemonConfig) is an ExApps orchestration daemon.')"
 			:aria-label="t('app_api', 'Deploy daemons. A deploy daemon (DaemonConfig) is an ExApps orchestration daemon.')"
-			doc-url="https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon">
+			docUrl="https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon">
 			<NcNoteCard v-if="state.default_daemon_config !== '' && !state?.daemon_config_accessible" type="error">
 				<p>{{ t('app_api', 'Default deploy daemon is not accessible. Please check its configuration') }}</p>
 			</NcNoteCard>
 			<DaemonConfigList
 				v-model:daemons="daemons"
-				v-model:default-daemon="default_daemon_config"
-				:save-options="saveOptions" />
+				v-model:defaultDaemon="default_daemon_config"
+				:saveOptions="saveOptions" />
 		</NcSettingsSection>
 		<NcSettingsSection
 			:name="t('app_api', 'ExApp init timeout (minutes)')"
@@ -32,7 +32,7 @@
 				class="setting"
 				type="number"
 				:placeholder="t('app_api', 'ExApp init timeout')"
-				@update:model-value="onInput" />
+				@update:modelValue="onInput" />
 		</NcSettingsSection>
 		<NcSettingsSection
 			:name="t('app_api', 'ExApp container restart policy')"
@@ -47,7 +47,7 @@
 				:placeholder="t('app_api', 'ExApp container restart policy')"
 				:aria-label="t('app_api', 'ExApp container restart policy')"
 				:aria-label-combobox="t('app_api', 'ExApp container restart policy')"
-				@update:model-value="onInput" />
+				@update:modelValue="onInput" />
 		</NcSettingsSection>
 	</div>
 </template>
@@ -57,7 +57,7 @@ import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { loadState } from '@nextcloud/initial-state'
 import { delay } from '../utils.js'
-import { showSuccess, showError } from '@nextcloud/dialogs'
+import { showError, showSuccess } from '@nextcloud/dialogs'
 
 import NcSettingsSection from '@nextcloud/vue/components/NcSettingsSection'
 import NcInputField from '@nextcloud/vue/components/NcInputField'
@@ -77,6 +77,7 @@ export default {
 		NcInputField,
 		NcSelect,
 	},
+
 	data() {
 		return {
 			state: loadState('app_api', 'admin-initial-data'),
@@ -84,20 +85,24 @@ export default {
 			default_daemon_config: '',
 		}
 	},
+
 	computed: {
 		exAppsManagementButtonText() {
 			return this.state.updates_count > 0 ? t('app_api', 'External Apps management') + ` (${this.state.updates_count})` : t('app_api', 'External Apps management')
 		},
 	},
+
 	mounted() {
 		this.loadInitialState()
 	},
+
 	methods: {
 		loadInitialState() {
 			const state = loadState('app_api', 'admin-initial-data')
 			this.daemons = state.daemons
 			this.default_daemon_config = state.default_daemon_config
 		},
+
 		onInput() {
 			delay(() => {
 				this.saveOptions({
@@ -106,25 +111,26 @@ export default {
 				})
 			}, 2000)()
 		},
+
 		saveOptions(values) {
 			const req = {
 				values,
 			}
 			const url = generateUrl('/apps/app_api/admin-config')
-			return axios.put(url, req).then((response) => {
+			return axios.put(url, req).then(() => {
 				showSuccess(t('app_api', 'Admin options saved'))
 			}).catch((error) => {
-				showError(
-					t('app_api', 'Failed to save admin options')
-					+ ': ' + (error.response?.request?.responseText ?? ''),
-				)
+				showError(t('app_api', 'Failed to save admin options')
+					+ ': ' + (error.response?.request?.responseText ?? ''))
 				console.error(error)
 			})
 		},
+
 		onCheckboxChanged(newValue, key) {
 			this.state[key] = newValue
 			this.saveOptions({ [key]: this.state[key] ? '1' : '0' })
 		},
+
 		linkToExAppsManagement() {
 			return generateUrl('/apps/app_api/apps')
 		},
