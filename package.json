@@ -65,7 +65,7 @@
 		"@nextcloud/browserslist-config": "^3.0.1",
 		"@nextcloud/eslint-config": "^8.4.1",
 		"@nextcloud/stylelint-config": "^3.0.1",
-		"@nextcloud/webpack-vue-config": "^7.0.1",
+		"@nextcloud/webpack-vue-config": "^7.0.4",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@vitejs/plugin-vue": "^6.0.4",
 		"@vitest/coverage-istanbul": "^4.0.18",
