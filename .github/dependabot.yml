@@ -45,11 +45,9 @@ updates:
     target-branch: stable35
     open-pull-requests-limit: 5
     ignore:
-      # major updates are breaking changes and never belong on a stable branch;
-      # minors have to stay allowed, otherwise dependabot cannot keep package-lock.json
-      # consistent when a patch update pulls in a newer transitive dependency
+      # do not do breaking changes on stable branches
       - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -62,11 +60,9 @@ updates:
     target-branch: stable34
     open-pull-requests-limit: 5
     ignore:
-      # major updates are breaking changes and never belong on a stable branch;
-      # minors have to stay allowed, otherwise dependabot cannot keep package-lock.json
-      # consistent when a patch update pulls in a newer transitive dependency
+      # do not do breaking changes on stable branches
       - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -79,11 +75,9 @@ updates:
     target-branch: stable33
     open-pull-requests-limit: 5
     ignore:
-      # major updates are breaking changes and never belong on a stable branch;
-      # minors have to stay allowed, otherwise dependabot cannot keep package-lock.json
-      # consistent when a patch update pulls in a newer transitive dependency
+      # do not do breaking changes on stable branches
       - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -96,8 +90,6 @@ updates:
     target-branch: stable32
     open-pull-requests-limit: 5
     ignore:
-      # major updates are breaking changes and never belong on a stable branch;
-      # minors have to stay allowed, otherwise dependabot cannot keep package-lock.json
-      # consistent when a patch update pulls in a newer transitive dependency
+      # do not do breaking changes on stable branches
       - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
