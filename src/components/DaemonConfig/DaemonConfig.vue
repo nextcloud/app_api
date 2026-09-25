@@ -29,7 +29,7 @@
 						<TestTube :size="20" />
 					</template>
 				</NcActionButton>
-				<NcActionButton v-if="daemon.accepts_deploy_id === 'docker-install'" :closeAfterClick="true" @click="_showOverrideDockerRegistriesModal()">
+				<NcActionButton v-if="['docker-install', 'kubernetes-install'].includes(daemon.accepts_deploy_id)" :closeAfterClick="true" @click="_showOverrideDockerRegistriesModal()">
 					{{ t('app_api', 'Docker registries') }}
 					<template #icon>
 						<Docker :size="20" />
