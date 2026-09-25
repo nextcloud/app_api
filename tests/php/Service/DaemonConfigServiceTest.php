@@ -80,6 +80,7 @@ class DaemonConfigServiceTest extends TestCase {
 			'local' => [['registries' => [$local]], 'local'],
 			'local with a trailing slash' => [['registries' => [['from' => 'ghcr.io', 'to' => 'local/']]], 'local'],
 			'first usable entry wins' => [['registries' => [$local, $mirror]], 'local'],
+			'first usable entry wins, mirror first' => [['registries' => [$mirror, $local]], 'registry.example.com'],
 			'unusable entries are skipped' => [
 				['registries' => ['ghcr.io', ['from' => 'ghcr.io'], ['from' => 'ghcr.io', 'to' => 5000], ['from' => 'ghcr.io', 'to' => '/'], $mirror]],
 				'registry.example.com',
@@ -122,6 +123,7 @@ class DaemonConfigServiceTest extends TestCase {
 			'empty source' => [['from' => '', 'to' => 'registry.example.com']],
 			'empty target' => [['from' => 'ghcr.io', 'to' => '']],
 			'target of slashes only' => [['from' => 'ghcr.io', 'to' => '//']],
+			'whitespace only' => [['from' => ' ', 'to' => "\t"]],
 			'target is not a string' => [['from' => 'ghcr.io', 'to' => 5000]],
 			'source is not a string' => [['from' => ['ghcr.io'], 'to' => 'registry.example.com']],
 		];
@@ -146,14 +148,44 @@ class DaemonConfigServiceTest extends TestCase {
 		self::assertSame(['error' => 'This Docker registry map from "ghcr.io" already exists'], $result);
 	}
 
-	public function testAddDockerRegistryStoresOnlySourceAndTarget(): void {
+	public function testAddDockerRegistryIgnoresAnUnusableStoredEntryOfTheSameSource(): void {
+		$unusable = ['from' => 'ghcr.io', 'to' => '/'];
+		$added = ['from' => 'ghcr.io', 'to' => 'registry.example.com'];
+		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => [$unusable]]]);
+
+		$result = $this->createService()->addDockerRegistry($daemonConfig, $added);
+
+		self::assertInstanceOf(DaemonConfig::class, $result);
+		self::assertSame([$unusable, $added], $result->getDeployConfig()['registries']);
+		self::assertSame('registry.example.com', DaemonConfigService::resolveImageRegistry($result->getDeployConfig(), 'ghcr.io'));
+	}
+
+	public function testAddDockerRegistryStoresNormalisedSourceAndTarget(): void {
 		$daemonConfig = new DaemonConfig(['deploy_config' => []]);
 
 		$result = $this->createService()
-			->addDockerRegistry($daemonConfig, ['from' => 'ghcr.io', 'to' => 'registry.example.com/', 'extra' => 'x']);
+			->addDockerRegistry($daemonConfig, ['from' => ' ghcr.io/ ', 'to' => 'registry.example.com//', 'extra' => 'x']);
 
 		self::assertInstanceOf(DaemonConfig::class, $result);
-		self::assertSame([['from' => 'ghcr.io', 'to' => 'registry.example.com/']], $result->getDeployConfig()['registries']);
+		self::assertSame([['from' => 'ghcr.io', 'to' => 'registry.example.com']], $result->getDeployConfig()['registries']);
+	}
+
+	public function testAddDockerRegistryStoresLocalWithoutATrailingSlash(): void {
+		$daemonConfig = new DaemonConfig(['deploy_config' => []]);
+
+		$result = $this->createService()->addDockerRegistry($daemonConfig, ['from' => 'ghcr.io', 'to' => 'local/']);
+
+		self::assertInstanceOf(DaemonConfig::class, $result);
+		self::assertSame([['from' => 'ghcr.io', 'to' => 'local']], $result->getDeployConfig()['registries']);
+	}
+
+	public function testRemoveDockerRegistryWithoutAnyMapping(): void {
+		$daemonConfig = new DaemonConfig(['deploy_config' => ['net' => 'host']]);
+
+		$result = $this->createService(expectUpdate: false)
+			->removeDockerRegistry($daemonConfig, ['from' => 'ghcr.io', 'to' => 'registry.example.com']);
+
+		self::assertSame(['error' => 'This Docker registry map does not exist'], $result);
 	}
 
 	public function testRemoveDockerRegistryKeepsAList(): void {
