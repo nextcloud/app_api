@@ -100,6 +100,21 @@ class KubernetesActionsTest extends TestCase {
 		self::assertArrayNotHasKey('role_suffix', $createPayloads[0]);
 	}
 
+	public function testDeployExAppNeverPullsForALocalMapping(): void {
+		$createPayloads = $this->deployWithMappedRegistry([], [['from' => 'ghcr.io', 'to' => 'local']]);
+
+		self::assertSame('ghcr.io/nextcloud/test-deploy:release', $createPayloads[0]['image']);
+		self::assertSame('Never', $createPayloads[0]['image_pull_policy']);
+	}
+
+	public function testDeployExAppLeavesThePullPolicyToHarpWithoutALocalMapping(): void {
+		foreach ([[], [['from' => 'ghcr.io', 'to' => 'registry.example.com']]] as $registries) {
+			$createPayloads = $this->deployWithMappedRegistry([], $registries);
+
+			self::assertArrayNotHasKey('image_pull_policy', $createPayloads[0]);
+		}
+	}
+
 	public function testDeployExAppSendsTheMappedImageForEveryRole(): void {
 		$createPayloads = $this->deployWithMappedRegistry([
 			['name' => 'web', 'env' => 'ROLE=web', 'expose' => true],
@@ -115,7 +130,7 @@ class KubernetesActionsTest extends TestCase {
 	/**
 	 * Runs deployExApp() against queued HaRP responses and returns the payloads of the /exapp/create requests.
 	 */
-	private function deployWithMappedRegistry(array $roles): array {
+	private function deployWithMappedRegistry(array $roles, ?array $registries = null): array {
 		$deployments = max(1, count($roles));
 		$responses = [new Response(200, [], json_encode(['kubernetes' => ['enabled' => true, 'reachable' => true]]))];
 		for ($i = 0; $i < $deployments; $i++) {
@@ -156,7 +171,7 @@ class KubernetesActionsTest extends TestCase {
 			'accepts_deploy_id' => KubernetesActions::DEPLOY_ID,
 			'protocol' => 'http',
 			'host' => 'harp:8780',
-			'deploy_config' => ['registries' => [['from' => 'ghcr.io', 'to' => 'registry.example.com']]],
+			'deploy_config' => ['registries' => $registries ?? [['from' => 'ghcr.io', 'to' => 'registry.example.com']]],
 		]);
 		$params = [
 			'image_params' => self::IMAGE_PARAMS,
