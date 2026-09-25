@@ -351,6 +351,9 @@ class KubernetesActions implements IDeployActions {
 
 		$createPayload = $this->buildNamePayload($exAppName, $instanceId, $roleSuffix);
 		$createPayload['image'] = $this->buildImageName($params['image_params'], $daemonConfig);
+		if (DaemonConfigService::resolveRegistryTarget($daemonConfig->getDeployConfig(), $params['image_params']['image_src']) === DaemonConfigService::LOCAL_REGISTRY) {
+			$createPayload['image_pull_policy'] = 'Never'; // HaRP without support for this field keeps IfNotPresent
+		}
 		$createPayload['environment_variables'] = $params['container_params']['env'] ?? [];
 		$createPayload['compute_device'] = $computeDevice;
 
