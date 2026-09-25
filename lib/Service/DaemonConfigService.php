@@ -178,7 +178,12 @@ readonly class DaemonConfigService {
 		try {
 			$from = $registryMap['from'] ?? null;
 			$to = $registryMap['to'] ?? null;
-			if (!is_string($from) || !is_string($to) || $from === '' || rtrim($to, '/') === '') {
+			if (!is_string($from) || !is_string($to)) {
+				return ['error' => 'The source and target registry cannot be empty'];
+			}
+			$from = rtrim(trim($from), '/');
+			$to = rtrim(trim($to), '/');
+			if ($from === '' || $to === '') {
 				return ['error' => 'The source and target registry cannot be empty'];
 			}
 
@@ -188,14 +193,7 @@ readonly class DaemonConfigService {
 				$deployConfig['registries'] = [];
 			}
 
-			$fromExists = false;
-			foreach ($deployConfig['registries'] as $registry) {
-				if (($registry['from'] ?? null) === $from) {
-					$fromExists = true;
-					break;
-				}
-			}
-			if ($fromExists) {
+			if (self::resolveRegistryTarget($deployConfig, $from) !== null) {
 				return ['error' => sprintf('This Docker registry map from "%s" already exists', $from)];
 			}
 			if ($from === $to) {
@@ -216,11 +214,11 @@ readonly class DaemonConfigService {
 		try {
 			$deployConfig = $daemonConfig->getDeployConfig();
 
-			if (!in_array($registryMap, $deployConfig['registries'])) {
+			if (!in_array($registryMap, $deployConfig['registries'] ?? [])) {
 				return ['error' => 'This Docker registry map does not exist'];
 			}
 			$deployConfig['registries'] = array_values(array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
-				return !(($registry['from'] ?? null) === $registryMap['from'] && ($registry['to'] ?? null) === $registryMap['to']);
+				return !(($registry['from'] ?? null) === ($registryMap['from'] ?? null) && ($registry['to'] ?? null) === ($registryMap['to'] ?? null));
 			}));
 			$daemonConfig->setDeployConfig($deployConfig);
 
