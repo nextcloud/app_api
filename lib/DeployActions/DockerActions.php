@@ -17,6 +17,7 @@ use OCA\AppAPI\Db\DaemonConfig;
 
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPICommonService;
+use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
@@ -433,16 +434,7 @@ class DockerActions implements IDeployActions {
 	}
 
 	public function buildBaseImageName(array $imageParams, DaemonConfig $daemonConfig): string {
-		$deployConfig = $daemonConfig->getDeployConfig();
-		if (isset($deployConfig['registries'])) { // custom Docker registry, overrides ExApp's image_src
-			foreach ($deployConfig['registries'] as $registry) {
-				if ($registry['from'] === $imageParams['image_src'] && $registry['to'] !== 'local') { // local target skips image pull, imageId should be unchanged
-					$imageParams['image_src'] = rtrim($registry['to'], '/');
-					break;
-				}
-			}
-		}
-		return $imageParams['image_src'] . '/'
+		return DaemonConfigService::resolveImageRegistry($daemonConfig->getDeployConfig(), $imageParams['image_src']) . '/'
 			. $imageParams['image_name'] . ':' . $imageParams['image_tag'];
 	}
 
@@ -451,28 +443,13 @@ class DockerActions implements IDeployActions {
 		if (empty($deployConfig['computeDevice']['id'])) {
 			return null;
 		}
-		if (isset($deployConfig['registries'])) { // custom Docker registry, overrides ExApp's image_src
-			foreach ($deployConfig['registries'] as $registry) {
-				if ($registry['from'] === $imageParams['image_src'] && $registry['to'] !== 'local') { // local target skips image pull, imageId should be unchanged
-					$imageParams['image_src'] = rtrim($registry['to'], '/');
-					break;
-				}
-			}
-		}
-		return $imageParams['image_src'] . '/'
-			. $imageParams['image_name'] . ':' . $imageParams['image_tag'] . '-' . $daemonConfig->getDeployConfig()['computeDevice']['id'];
+		return DaemonConfigService::resolveImageRegistry($deployConfig, $imageParams['image_src']) . '/'
+			. $imageParams['image_name'] . ':' . $imageParams['image_tag'] . '-' . $deployConfig['computeDevice']['id'];
 	}
 
 	private function shouldPullImage(array $imageParams, DaemonConfig $daemonConfig): bool {
-		$deployConfig = $daemonConfig->getDeployConfig();
-		if (isset($deployConfig['registries'])) { // custom Docker registry, overrides ExApp's image_src
-			foreach ($deployConfig['registries'] as $registry) {
-				if ($registry['from'] === $imageParams['image_src'] && $registry['to'] === 'local') { // local target skips image pull, imageId should be unchanged
-					return false;
-				}
-			}
-		}
-		return true;
+		return DaemonConfigService::resolveRegistryTarget($daemonConfig->getDeployConfig(), $imageParams['image_src'])
+			!== DaemonConfigService::LOCAL_REGISTRY;
 	}
 
 	public function imageExists(string $dockerUrl, string $imageId): bool {
