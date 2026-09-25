@@ -107,12 +107,18 @@ class KubernetesActionsTest extends TestCase {
 		self::assertSame('Never', $createPayloads[0]['image_pull_policy']);
 	}
 
-	public function testDeployExAppLeavesThePullPolicyToHarpWithoutALocalMapping(): void {
-		foreach ([[], [['from' => 'ghcr.io', 'to' => 'registry.example.com']]] as $registries) {
-			$createPayloads = $this->deployWithMappedRegistry([], $registries);
+	public static function nonLocalRegistriesProvider(): array {
+		return [
+			'no mapping' => [[]],
+			'mirror mapping' => [[['from' => 'ghcr.io', 'to' => 'registry.example.com']]],
+		];
+	}
 
-			self::assertArrayNotHasKey('image_pull_policy', $createPayloads[0]);
-		}
+	#[DataProvider('nonLocalRegistriesProvider')]
+	public function testDeployExAppLeavesThePullPolicyToHarpWithoutALocalMapping(array $registries): void {
+		$createPayloads = $this->deployWithMappedRegistry([], $registries);
+
+		self::assertArrayNotHasKey('image_pull_policy', $createPayloads[0]);
 	}
 
 	public function testDeployExAppSendsTheMappedImageForEveryRole(): void {
@@ -190,6 +196,7 @@ class KubernetesActionsTest extends TestCase {
 				$createPayloads[] = json_decode((string)$transaction['request']->getBody(), true);
 			}
 		}
+		self::assertCount($deployments, $createPayloads);
 		return $createPayloads;
 	}
 }

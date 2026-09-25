@@ -158,6 +158,10 @@ class DockerActionsTest extends TestCase {
 				false,
 			],
 			'local with a trailing slash' => [[['from' => 'ghcr.io', 'to' => 'local/']], false],
+			'legacy duplicate source, mirror first: the mirror is pulled' => [
+				[['from' => 'ghcr.io', 'to' => 'registry.example.com'], $local],
+				true,
+			],
 		];
 	}
 
