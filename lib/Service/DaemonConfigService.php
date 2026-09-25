@@ -25,6 +25,9 @@ use Psr\Log\LoggerInterface;
  * Daemon configuration (daemons)
  */
 readonly class DaemonConfigService {
+	/** Registry mapping target that keeps the image name and tells the daemon not to pull the image. */
+	public const LOCAL_REGISTRY = 'local';
+
 	public function __construct(
 		private LoggerInterface $logger,
 		private DaemonConfigMapper $mapper,
@@ -230,16 +233,16 @@ readonly class DaemonConfigService {
 	}
 
 	/**
-	 * Registry to take an ExApp image from, after the registry mappings of the daemon are applied.
+	 * Effective target of the daemon's registry mappings for the registry an ExApp image comes from:
+	 * the registry to take the image from instead, LOCAL_REGISTRY, or null when no usable mapping exists.
 	 *
-	 * The first mapping of the registry with a target other than "local" wins, entries without a usable target
-	 * are ignored. "local" never renames the image: Docker daemons skip the pull for it, on Kubernetes it changes
-	 * nothing and the kubelet pulls the image if the node does not have it.
+	 * The first mapping of the registry with a usable target wins. A target is usable when it is a non-empty
+	 * string once trailing slashes are dropped, so "local/" is LOCAL_REGISTRY as well.
 	 */
-	public static function resolveImageRegistry(array $deployConfig, string $imageRegistry): string {
+	public static function resolveRegistryTarget(array $deployConfig, string $imageRegistry): ?string {
 		foreach ($deployConfig['registries'] ?? [] as $registry) {
 			$target = $registry['to'] ?? null;
-			if (($registry['from'] ?? null) !== $imageRegistry || !is_string($target) || $target === 'local') {
+			if (($registry['from'] ?? null) !== $imageRegistry || !is_string($target)) {
 				continue;
 			}
 			$target = rtrim($target, '/');
@@ -247,6 +250,14 @@ readonly class DaemonConfigService {
 				return $target;
 			}
 		}
-		return $imageRegistry;
+		return null;
+	}
+
+	/**
+	 * Registry to take an ExApp image from, after the registry mappings of the daemon are applied.
+	 */
+	public static function resolveImageRegistry(array $deployConfig, string $imageRegistry): string {
+		$target = self::resolveRegistryTarget($deployConfig, $imageRegistry);
+		return $target === null || $target === self::LOCAL_REGISTRY ? $imageRegistry : $target;
 	}
 }

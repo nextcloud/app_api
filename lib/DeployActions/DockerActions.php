@@ -448,18 +448,8 @@ class DockerActions implements IDeployActions {
 	}
 
 	private function shouldPullImage(array $imageParams, DaemonConfig $daemonConfig): bool {
-		$deployConfig = $daemonConfig->getDeployConfig();
-		if (DaemonConfigService::resolveImageRegistry($deployConfig, $imageParams['image_src']) !== $imageParams['image_src']) {
-			return true; // the image is taken from a mapped registry
-		}
-		if (isset($deployConfig['registries'])) { // custom Docker registry, overrides ExApp's image_src
-			foreach ($deployConfig['registries'] as $registry) {
-				if (($registry['from'] ?? null) === $imageParams['image_src'] && ($registry['to'] ?? null) === 'local') { // local target skips image pull, imageId should be unchanged
-					return false;
-				}
-			}
-		}
-		return true;
+		return DaemonConfigService::resolveRegistryTarget($daemonConfig->getDeployConfig(), $imageParams['image_src'])
+			!== DaemonConfigService::LOCAL_REGISTRY;
 	}
 
 	public function imageExists(string $dockerUrl, string $imageId): bool {

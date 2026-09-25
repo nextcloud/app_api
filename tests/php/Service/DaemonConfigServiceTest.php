@@ -43,10 +43,15 @@ class DaemonConfigServiceTest extends TestCase {
 				'registry.example.com:5000/mirror/ghcr',
 			],
 			'local keeps the registry' => [['registries' => [['from' => 'ghcr.io', 'to' => 'local']]], 'ghcr.io', 'ghcr.io'],
-			'legacy duplicate source: the local entry is skipped' => [
+			'legacy duplicate source: the first entry wins' => [
 				['registries' => [['from' => 'ghcr.io', 'to' => 'local'], $mirror]],
 				'ghcr.io',
-				'registry.example.com',
+				'ghcr.io',
+			],
+			'local with a trailing slash keeps the registry' => [
+				['registries' => [['from' => 'ghcr.io', 'to' => 'local/']]],
+				'ghcr.io',
+				'ghcr.io',
 			],
 			'malformed entries are ignored' => [
 				['registries' => ['ghcr.io', ['from' => 'ghcr.io'], ['from' => 'ghcr.io', 'to' => 5000], ['from' => 'ghcr.io', 'to' => '/'], $mirror]],
@@ -62,6 +67,30 @@ class DaemonConfigServiceTest extends TestCase {
 	#[DataProvider('resolveImageRegistryProvider')]
 	public function testResolveImageRegistry(array $deployConfig, string $imageRegistry, string $expected): void {
 		self::assertSame($expected, DaemonConfigService::resolveImageRegistry($deployConfig, $imageRegistry));
+	}
+
+	public static function resolveRegistryTargetProvider(): array {
+		$mirror = ['from' => 'ghcr.io', 'to' => 'registry.example.com'];
+		$local = ['from' => 'ghcr.io', 'to' => 'local'];
+		return [
+			'no registries key' => [[], null],
+			'no mapping of the registry' => [['registries' => [['from' => 'docker.io', 'to' => 'local']]], null],
+			'mirror' => [['registries' => [$mirror]], 'registry.example.com'],
+			'mirror with trailing slashes' => [['registries' => [['from' => 'ghcr.io', 'to' => 'registry.example.com//']]], 'registry.example.com'],
+			'local' => [['registries' => [$local]], 'local'],
+			'local with a trailing slash' => [['registries' => [['from' => 'ghcr.io', 'to' => 'local/']]], 'local'],
+			'first usable entry wins' => [['registries' => [$local, $mirror]], 'local'],
+			'unusable entries are skipped' => [
+				['registries' => ['ghcr.io', ['from' => 'ghcr.io'], ['from' => 'ghcr.io', 'to' => 5000], ['from' => 'ghcr.io', 'to' => '/'], $mirror]],
+				'registry.example.com',
+			],
+			'only unusable entries' => [['registries' => [['from' => 'ghcr.io', 'to' => '//']]], null],
+		];
+	}
+
+	#[DataProvider('resolveRegistryTargetProvider')]
+	public function testResolveRegistryTarget(array $deployConfig, ?string $expected): void {
+		self::assertSame($expected, DaemonConfigService::resolveRegistryTarget($deployConfig, 'ghcr.io'));
 	}
 
 	private function createService(bool $expectUpdate = true): DaemonConfigService {
