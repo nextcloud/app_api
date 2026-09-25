@@ -24,6 +24,9 @@ use Psr\Log\LoggerInterface;
  * Daemon configuration (daemons)
  */
 readonly class DaemonConfigService {
+	/** Registry mapping target that keeps the image name and tells the daemon not to pull the image. */
+	public const LOCAL_REGISTRY = 'local';
+
 	public function __construct(
 		private LoggerInterface $logger,
 		private DaemonConfigMapper $mapper,
@@ -173,30 +176,31 @@ readonly class DaemonConfigService {
 
 	public function addDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
 		try {
+			$from = $registryMap['from'] ?? null;
+			$to = $registryMap['to'] ?? null;
+			if (!is_string($from) || !is_string($to)) {
+				return ['error' => 'The source and target registry cannot be empty'];
+			}
+			$from = rtrim(trim($from), '/');
+			$to = rtrim(trim($to), '/');
+			if ($from === '' || $to === '') {
+				return ['error' => 'The source and target registry cannot be empty'];
+			}
+
 			$deployConfig = $daemonConfig->getDeployConfig();
 
 			if (!isset($deployConfig['registries'])) {
 				$deployConfig['registries'] = [];
 			}
 
-			$fromExists = false;
-			foreach ($deployConfig['registries'] as $registry) {
-				if ($registry['from'] === $registryMap['from']) {
-					$fromExists = true;
-					break;
-				}
+			if (self::resolveRegistryTarget($deployConfig, $from) !== null) {
+				return ['error' => sprintf('This Docker registry map from "%s" already exists', $from)];
 			}
-			if ($fromExists) {
-				return ['error' => sprintf('This Docker registry map from "%s" already exists', $registryMap['from'])];
-			}
-			if ($registryMap['from'] === $registryMap['to']) {
+			if ($from === $to) {
 				return ['error' => 'The source and target registry cannot be the same'];
 			}
-			if (empty($registryMap['from']) || empty($registryMap['to'])) {
-				return ['error' => 'The source and target registry cannot be empty'];
-			}
 
-			$deployConfig['registries'][] = $registryMap;
+			$deployConfig['registries'] = [...array_values($deployConfig['registries']), ['from' => $from, 'to' => $to]];
 			$daemonConfig->setDeployConfig($deployConfig);
 
 			return $this->mapper->update($daemonConfig);
@@ -210,12 +214,12 @@ readonly class DaemonConfigService {
 		try {
 			$deployConfig = $daemonConfig->getDeployConfig();
 
-			if (!in_array($registryMap, $deployConfig['registries'])) {
+			if (!in_array($registryMap, $deployConfig['registries'] ?? [])) {
 				return ['error' => 'This Docker registry map does not exist'];
 			}
-			$deployConfig['registries'] = array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
-				return !($registry['from'] === $registryMap['from'] && $registry['to'] === $registryMap['to']);
-			});
+			$deployConfig['registries'] = array_values(array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
+				return !(($registry['from'] ?? null) === ($registryMap['from'] ?? null) && ($registry['to'] ?? null) === ($registryMap['to'] ?? null));
+			}));
 			$daemonConfig->setDeployConfig($deployConfig);
 
 			return $this->mapper->update($daemonConfig);
@@ -223,5 +227,34 @@ readonly class DaemonConfigService {
 			$this->logger->error('Failed to remove registry from DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+	}
+
+	/**
+	 * Effective target of the daemon's registry mappings for the registry an ExApp image comes from:
+	 * the registry to take the image from instead, LOCAL_REGISTRY, or null when no usable mapping exists.
+	 *
+	 * The first mapping of the registry with a usable target wins. A target is usable when it is a non-empty
+	 * string once surrounding whitespace and trailing slashes are dropped, so "local/" is LOCAL_REGISTRY as well.
+	 */
+	public static function resolveRegistryTarget(array $deployConfig, string $imageRegistry): ?string {
+		foreach ($deployConfig['registries'] ?? [] as $registry) {
+			$target = $registry['to'] ?? null;
+			if (($registry['from'] ?? null) !== $imageRegistry || !is_string($target)) {
+				continue;
+			}
+			$target = rtrim(trim($target), '/');
+			if ($target !== '') {
+				return $target;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Registry to take an ExApp image from, after the registry mappings of the daemon are applied.
+	 */
+	public static function resolveImageRegistry(array $deployConfig, string $imageRegistry): string {
+		$target = self::resolveRegistryTarget($deployConfig, $imageRegistry);
+		return $target === null || $target === self::LOCAL_REGISTRY ? $imageRegistry : $target;
 	}
 }
