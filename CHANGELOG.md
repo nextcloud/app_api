@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `POST /ocs/v2.php/apps/app_api/api/v1/notification` now answers `404` when the `notifications` app is not enabled, instead of `200` for a notification that nobody delivers.
 
+### Fixed
+
+- Registry mappings of a deploy daemon (`occ app_api:daemon:registry:add`) are applied by the Kubernetes backend too; before, ExApp images were always taken from the registry in `info.xml`. A `local` mapping sets `imagePullPolicy: Never` with HaRP newer than 0.4.5, so the image must be present on every node. #1046
+
 ## [34.0.0]
 
 ### Deprecated
