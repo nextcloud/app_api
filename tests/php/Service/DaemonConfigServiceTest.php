@@ -86,6 +86,8 @@ class DaemonConfigServiceTest extends TestCase {
 				'registry.example.com',
 			],
 			'only unusable entries' => [['registries' => [['from' => 'ghcr.io', 'to' => '//']]], null],
+			'whitespace-only target is unusable' => [['registries' => [['from' => 'ghcr.io', 'to' => '   ']]], null],
+			'stored target with surrounding whitespace' => [['registries' => [['from' => 'ghcr.io', 'to' => ' registry.example.com ']]], 'registry.example.com'],
 		];
 	}
 

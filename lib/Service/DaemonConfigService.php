@@ -234,7 +234,7 @@ readonly class DaemonConfigService {
 	 * the registry to take the image from instead, LOCAL_REGISTRY, or null when no usable mapping exists.
 	 *
 	 * The first mapping of the registry with a usable target wins. A target is usable when it is a non-empty
-	 * string once trailing slashes are dropped, so "local/" is LOCAL_REGISTRY as well.
+	 * string once surrounding whitespace and trailing slashes are dropped, so "local/" is LOCAL_REGISTRY as well.
 	 */
 	public static function resolveRegistryTarget(array $deployConfig, string $imageRegistry): ?string {
 		foreach ($deployConfig['registries'] ?? [] as $registry) {
@@ -242,7 +242,7 @@ readonly class DaemonConfigService {
 			if (($registry['from'] ?? null) !== $imageRegistry || !is_string($target)) {
 				continue;
 			}
-			$target = rtrim($target, '/');
+			$target = rtrim(trim($target), '/');
 			if ($target !== '') {
 				return $target;
 			}
