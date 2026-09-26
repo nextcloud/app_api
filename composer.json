@@ -20,7 +20,7 @@
 		"friendsofphp/php-cs-fixer": "3.95.25",
 		"nextcloud/coding-standard": "^1.5",
 		"nextcloud/ocp": "dev-master",
-		"psalm/phar": "6.17.1",
+		"psalm/phar": "6.17.2",
 		"roave/security-advisories": "dev-latest",
 		"symfony/console": "^7.4"
 	},
