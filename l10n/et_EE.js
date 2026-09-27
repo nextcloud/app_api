@@ -27,6 +27,8 @@ OC.L10N.register(
     "Protocol" : "Protokoll",
     "Host" : "Host",
     "Kubernetes settings" : "Kubernetese seadistused",
+    "External traffic policy" : "Välise liikluse reeglid",
+    "Node address type" : "Sõlme aadressi tüüp",
     "Deploy options" : "Kasutuselevõtmise valikud",
     "Docker network" : "Dockeri võrk",
     "Nextcloud URL" : "Nextcloudi võrguaadress",
