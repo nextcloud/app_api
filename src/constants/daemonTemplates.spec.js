@@ -43,6 +43,12 @@ describe('DAEMON_TEMPLATES', () => {
 		}
 	})
 
+	it('does not prefill the HaRP shared key or HaProxy password', () => {
+		for (const template of DAEMON_TEMPLATES) {
+			expect(template.deployConfig.haproxy_password, `template "${template.name}" prefills a key`).toBe('')
+		}
+	})
+
 	it('matches snapshot', () => {
 		expect(DAEMON_TEMPLATES).toMatchSnapshot()
 	})

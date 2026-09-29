@@ -69,7 +69,7 @@
 							id="deploy-config-haproxy-password"
 							v-model="deployConfig.haproxy_password"
 							:label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')"
-							:error="isHaProxyPasswordValid === false"
+							:error="!!deployConfig.haproxy_password && isHaProxyPasswordValid === false"
 							:disabled="isEdit && isK8s"
 							:placeholder="haProxyPasswordHelperText"
 							:aria-label="haProxyPasswordHelperText"
