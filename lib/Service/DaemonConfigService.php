@@ -28,7 +28,7 @@ readonly class DaemonConfigService {
 	public const LOCAL_REGISTRY = 'local';
 	/** Minimum length of the HaRP shared key, and of the HaProxy password of an HTTPS daemon. */
 	public const MIN_SECRET_LENGTH = 12;
-	/** Example secrets from the documentation and the daemon templates. */
+	/** Example secrets from the documentation and from older daemon templates. */
 	private const EXAMPLE_SECRETS = ['some_very_secure_password', 'some_secure_password', 'enter_haproxy_password'];
 
 	public function __construct(
