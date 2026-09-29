@@ -13,7 +13,7 @@ export const DAEMON_TEMPLATES = [
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',
-			haproxy_password: 'some_very_secure_password',
+			haproxy_password: '',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',
@@ -41,7 +41,7 @@ export const DAEMON_TEMPLATES = [
 		nextcloud_url: null,
 		deployConfig: {
 			net: '',
-			haproxy_password: 'some_very_secure_password',
+			haproxy_password: '',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',
@@ -69,7 +69,7 @@ export const DAEMON_TEMPLATES = [
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'nextcloud-aio',
-			haproxy_password: 'some_very_secure_password',
+			haproxy_password: '',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',
@@ -97,7 +97,7 @@ export const DAEMON_TEMPLATES = [
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',
-			haproxy_password: 'some_very_secure_password',
+			haproxy_password: '',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',
@@ -126,7 +126,7 @@ export const DAEMON_TEMPLATES = [
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',
-			haproxy_password: 'enter_haproxy_password',
+			haproxy_password: '',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',
@@ -151,7 +151,7 @@ export const DAEMON_TEMPLATES = [
 		nextcloud_url: null,
 		deployConfig: {
 			net: 'host',
-			haproxy_password: 'some_secure_password',
+			haproxy_password: '',
 			gpu: false,
 			computeDevice: {
 				id: 'cpu',

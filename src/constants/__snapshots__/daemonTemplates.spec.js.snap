@@ -11,7 +11,7 @@ exports[`DAEMON_TEMPLATES > matches snapshot 1`] = `
         "label": "CPU",
       },
       "gpu": false,
-      "haproxy_password": "some_very_secure_password",
+      "haproxy_password": "",
       "harp": {
         "docker_socket_port": 24000,
         "exapp_direct": false,
@@ -39,7 +39,7 @@ exports[`DAEMON_TEMPLATES > matches snapshot 1`] = `
         "label": "CPU",
       },
       "gpu": false,
-      "haproxy_password": "some_very_secure_password",
+      "haproxy_password": "",
       "harp": {
         "docker_socket_port": 24000,
         "exapp_direct": false,
@@ -67,7 +67,7 @@ exports[`DAEMON_TEMPLATES > matches snapshot 1`] = `
         "label": "CPU",
       },
       "gpu": false,
-      "haproxy_password": "some_very_secure_password",
+      "haproxy_password": "",
       "harp": {
         "docker_socket_port": 24000,
         "exapp_direct": true,
@@ -95,7 +95,7 @@ exports[`DAEMON_TEMPLATES > matches snapshot 1`] = `
         "label": "CPU",
       },
       "gpu": false,
-      "haproxy_password": "some_very_secure_password",
+      "haproxy_password": "",
       "harp": {
         "docker_socket_port": 24000,
         "exapp_direct": false,
@@ -123,7 +123,7 @@ exports[`DAEMON_TEMPLATES > matches snapshot 1`] = `
         "label": "CPU",
       },
       "gpu": false,
-      "haproxy_password": "enter_haproxy_password",
+      "haproxy_password": "",
       "harp": null,
       "net": "host",
       "resourceLimits": {
@@ -148,7 +148,7 @@ exports[`DAEMON_TEMPLATES > matches snapshot 1`] = `
         "label": "CPU",
       },
       "gpu": false,
-      "haproxy_password": "some_secure_password",
+      "haproxy_password": "",
       "harp": null,
       "net": "host",
       "resourceLimits": {
