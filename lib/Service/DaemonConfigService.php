@@ -26,6 +26,10 @@ use Psr\Log\LoggerInterface;
 readonly class DaemonConfigService {
 	/** Registry mapping target that keeps the image name and tells the daemon not to pull the image. */
 	public const LOCAL_REGISTRY = 'local';
+	/** Minimum length of the HaRP shared key, and of the HaProxy password of an HTTPS daemon. */
+	public const MIN_SECRET_LENGTH = 12;
+	/** Example secrets from the documentation and the daemon templates. */
+	private const EXAMPLE_SECRETS = ['some_very_secure_password', 'some_secure_password', 'enter_haproxy_password'];
 
 	public function __construct(
 		private LoggerInterface $logger,
@@ -41,6 +45,45 @@ readonly class DaemonConfigService {
 	 */
 	private function containsControlCharacters(string $value): bool {
 		return preg_match('/[\x00-\x1F\x7F]/', $value) === 1;
+	}
+
+	/**
+	 * Check a secret that is about to be stored for a daemon. HaRP daemons and HTTPS daemons need one of at least
+	 * MIN_SECRET_LENGTH characters, as the registration form requires; other daemons may have none.
+	 * An example secret from the documentation is accepted with a warning in the log.
+	 *
+	 * @return string|null why the secret cannot be used, null if it can
+	 */
+	public function validateNewSecret(array $params, string $secret): ?string {
+		$name = (string)($params['name'] ?? '');
+		if (self::isSecretRequired($params) && mb_strlen($secret) < self::MIN_SECRET_LENGTH) {
+			$error = sprintf('The %s must be at least %d characters long.', self::secretLabel($params), self::MIN_SECRET_LENGTH);
+			$this->logger->error(sprintf('Daemon "%s": %s', $name, $error));
+			return $error;
+		}
+		if (self::isExampleSecret($secret)) {
+			$this->logger->warning(sprintf('Daemon "%s": %s', $name, self::exampleSecretWarning($params)));
+		}
+		return null;
+	}
+
+	public static function isSecretRequired(array $params): bool {
+		return !empty($params['deploy_config']['harp']) || ($params['protocol'] ?? '') === 'https';
+	}
+
+	public static function isExampleSecret(string $secret): bool {
+		return in_array($secret, self::EXAMPLE_SECRETS, true);
+	}
+
+	public static function exampleSecretWarning(array $params): string {
+		return sprintf(
+			'The %s is an example value from the documentation. Generate your own, for example with `openssl rand -hex 32`, and set it on both sides.',
+			self::secretLabel($params),
+		);
+	}
+
+	private static function secretLabel(array $params): string {
+		return empty($params['deploy_config']['harp']) ? 'HaProxy password' : 'HaRP shared key';
 	}
 
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
