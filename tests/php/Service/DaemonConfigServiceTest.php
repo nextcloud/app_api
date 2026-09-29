@@ -212,4 +212,73 @@ class DaemonConfigServiceTest extends TestCase {
 		self::assertInstanceOf(DaemonConfig::class, $result);
 		self::assertSame(['junk', ['from' => 'quay.io'], $second], $result->getDeployConfig()['registries']);
 	}
+
+	private function createServiceWithLogger(LoggerInterface $logger): DaemonConfigService {
+		return new DaemonConfigService(
+			$logger,
+			$this->createMock(DaemonConfigMapper::class),
+			$this->createMock(ExAppService::class),
+			$this->createMock(ICrypto::class),
+		);
+	}
+
+	private static function daemonParams(string $protocol, bool $isHarp): array {
+		return [
+			'name' => 'test_daemon',
+			'protocol' => $protocol,
+			'deploy_config' => ['harp' => $isHarp ? ['frp_address' => 'appapi-harp:8782'] : null],
+		];
+	}
+
+	public static function isSecretRequiredProvider(): array {
+		return [
+			'HaRP' => ['http', true, true],
+			'HaRP over HTTPS' => ['https', true, true],
+			'HTTPS Docker Socket Proxy' => ['https', false, true],
+			'HTTP Docker Socket Proxy' => ['http', false, false],
+		];
+	}
+
+	#[DataProvider('isSecretRequiredProvider')]
+	public function testIsSecretRequired(string $protocol, bool $isHarp, bool $expected): void {
+		self::assertSame($expected, DaemonConfigService::isSecretRequired(self::daemonParams($protocol, $isHarp)));
+	}
+
+	public static function validateNewSecretProvider(): array {
+		$harpError = 'The HaRP shared key must be at least 12 characters long.';
+		return [
+			'HaRP with a short key' => ['http', true, 'eleven_char', $harpError],
+			'HaRP without a key' => ['http', true, '', $harpError],
+			'HaRP with a 12 character key' => ['http', true, 'twelve_chars', null],
+			'HaRP key length counts characters, not bytes' => ['http', true, 'ключ_ключ', $harpError],
+			'HTTPS Docker Socket Proxy with a short password' => ['https', false, 'short', 'The HaProxy password must be at least 12 characters long.'],
+			'HTTP Docker Socket Proxy with a short password' => ['http', false, 'short', null],
+			'HTTP Docker Socket Proxy without a password' => ['http', false, '', null],
+		];
+	}
+
+	#[DataProvider('validateNewSecretProvider')]
+	public function testValidateNewSecret(string $protocol, bool $isHarp, string $secret, ?string $expected): void {
+		$service = $this->createServiceWithLogger($this->createMock(LoggerInterface::class));
+		self::assertSame($expected, $service->validateNewSecret(self::daemonParams($protocol, $isHarp), $secret));
+	}
+
+	public function testValidateNewSecretAcceptsAnExampleSecretWithAWarning(): void {
+		$logger = $this->createMock(LoggerInterface::class);
+		$logger->expects(self::once())->method('warning')
+			->with(self::stringContains('The HaRP shared key is an example value from the documentation.'));
+
+		$result = $this->createServiceWithLogger($logger)->validateNewSecret(self::daemonParams('http', true), 'some_very_secure_password');
+
+		self::assertNull($result);
+	}
+
+	public function testValidateNewSecretDoesNotWarnAboutAGeneratedSecret(): void {
+		$logger = $this->createMock(LoggerInterface::class);
+		$logger->expects(self::never())->method('warning');
+
+		$result = $this->createServiceWithLogger($logger)->validateNewSecret(self::daemonParams('http', true), bin2hex(random_bytes(16)));
+
+		self::assertNull($result);
+	}
 }

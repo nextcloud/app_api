@@ -67,9 +67,9 @@ class RegisterDaemon extends Command {
 		$this->addUsage('local_docker "Docker Local" "docker-install" "http" "/var/run/docker.sock" "http://nextcloud.local" --net=nextcloud --set-default --compute_device=cuda');
 
 		// Kubernetes usage examples
-		$this->addUsage('k8s_daemon "Kubernetes HaRP" "kubernetes-install" "http" "harp.nextcloud.svc:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --k8s');
-		$this->addUsage('k8s_daemon_nodeport "K8s NodePort" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --k8s --k8s_expose_type=nodeport --k8s_upstream_host="k8s-node.example.com"');
-		$this->addUsage('k8s_daemon_lb "K8s LoadBalancer" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "secret" --k8s --k8s_expose_type=loadbalancer');
+		$this->addUsage('k8s_daemon "Kubernetes HaRP" "kubernetes-install" "http" "harp.nextcloud.svc:8780" "http://nextcloud.local" --harp --harp_shared_key "some_very_secure_password" --k8s');
+		$this->addUsage('k8s_daemon_nodeport "K8s NodePort" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "some_very_secure_password" --k8s --k8s_expose_type=nodeport --k8s_upstream_host="k8s-node.example.com"');
+		$this->addUsage('k8s_daemon_lb "K8s LoadBalancer" "kubernetes-install" "http" "harp.example.com:8780" "http://nextcloud.local" --harp --harp_shared_key "some_very_secure_password" --k8s --k8s_expose_type=loadbalancer');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -201,14 +201,24 @@ class RegisterDaemon extends Command {
 			];
 		}
 
-		$daemonConfig = $this->daemonConfigService->registerDaemonConfig([
+		$daemonParams = [
 			'name' => $name,
 			'display_name' => $displayName,
 			'accepts_deploy_id' => $acceptsDeployId,
 			'protocol' => $protocol,
 			'host' => $host,
 			'deploy_config' => $deployConfig,
-		]);
+		];
+		$secretError = $this->daemonConfigService->validateNewSecret($daemonParams, (string)$secret);
+		if ($secretError !== null) {
+			$output->writeln('Value error: ' . $secretError);
+			return 1;
+		}
+		if (DaemonConfigService::isExampleSecret((string)$secret)) {
+			$output->writeln('<comment>Warning: ' . DaemonConfigService::exampleSecretWarning($daemonParams) . '</comment>');
+		}
+
+		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonParams);
 
 		if ($daemonConfig === null) {
 			$output->writeln('Failed to register the daemon config.');

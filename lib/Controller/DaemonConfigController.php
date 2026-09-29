@@ -77,6 +77,13 @@ class DaemonConfigController extends ApiController {
 	 */
 	#[PasswordConfirmationRequired]
 	public function registerDaemonConfig(array $daemonConfigParams, bool $defaultDaemon = false): Response {
+		$secret = (string)($daemonConfigParams['deploy_config']['haproxy_password'] ?? '');
+		if ($this->daemonConfigService->validateNewSecret($daemonConfigParams, $secret) !== null) {
+			return new JSONResponse([
+				'success' => false,
+				'daemonConfig' => null,
+			]);
+		}
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
 		if ($daemonConfig !== null && $defaultDaemon) {
 			$this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true);
@@ -100,9 +107,31 @@ class DaemonConfigController extends ApiController {
 	#[PasswordConfirmationRequired]
 	public function updateDaemonConfig(string $name, array $daemonConfigParams): Response {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
+		if ($daemonConfig === null) {
+			return new JSONResponse([
+				'success' => false,
+				'daemonConfig' => null,
+			]);
+		}
 
 		// Safely check if "haproxy_password" exists before accessing it
 		$haproxyPassword = $daemonConfigParams['deploy_config']['haproxy_password'] ?? null;
+
+		if ($haproxyPassword !== 'dummySecret123') {
+			$secretToCheck = (string)($haproxyPassword ?? '');
+		} elseif (!DaemonConfigService::isSecretRequired(['protocol' => $daemonConfig->getProtocol(), 'deploy_config' => $daemonConfig->getDeployConfig()])
+			&& DaemonConfigService::isSecretRequired($daemonConfigParams)) {
+			// The stored secret is kept, but the daemon starts to need one (HaRP or HTTPS), so it must pass the same check
+			$secretToCheck = $this->decryptStoredSecret($daemonConfig);
+		} else {
+			$secretToCheck = null;
+		}
+		if ($secretToCheck !== null && $this->daemonConfigService->validateNewSecret($daemonConfigParams, $secretToCheck) !== null) {
+			return new JSONResponse([
+				'success' => false,
+				'daemonConfig' => null,
+			]);
+		}
 
 		// Restore the original password if "dummySecret123" is provided
 		if ($haproxyPassword === 'dummySecret123') {
@@ -222,6 +251,18 @@ class DaemonConfigController extends ApiController {
 		return new JSONResponse([
 			'success' => $this->daemonAccessible($daemonConfig),
 		]);
+	}
+
+	private function decryptStoredSecret(DaemonConfig $daemonConfig): string {
+		$storedSecret = (string)($daemonConfig->getDeployConfig()['haproxy_password'] ?? '');
+		if ($storedSecret === '') {
+			return '';
+		}
+		try {
+			return $this->crypto->decrypt($storedSecret);
+		} catch (\Exception) {
+			return '';
+		}
 	}
 
 	private function daemonAccessible(DaemonConfig $daemonConfig): bool {
