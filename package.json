@@ -50,7 +50,7 @@
 		"@nextcloud/password-confirmation": "^6.0.2",
 		"@nextcloud/router": "^3.0.1",
 		"@nextcloud/vue": "^9.2.0",
-		"dompurify": "^3.4.15",
+		"dompurify": "^3.4.16",
 		"vue": "^3.5.43",
 		"vue-material-design-icons": "^5.3.0"
 	},
