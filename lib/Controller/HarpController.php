@@ -57,7 +57,7 @@ class HarpController extends Controller {
 		}
 
 		$headerHarpKey = $this->request->getHeader('HARP-SHARED-KEY');
-		if ($headerHarpKey === '' || $headerHarpKey !== $harpKey) {
+		if ($headerHarpKey === '' || !hash_equals($harpKey, $headerHarpKey)) {
 			$this->logger->error('Harp shared key is not valid');
 			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
 				'appid' => $exApp->getAppid(),
