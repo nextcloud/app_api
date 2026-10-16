@@ -56,4 +56,22 @@ readonly class AppAPICommonService {
 		}
 		return '127.0.0.1';  # fallback to loop-back adapter
 	}
+
+	/**
+	 * Docker takes the memory and CPU limits as whole numbers, but the admin settings compute them from decimal
+	 * input (`Number(cpus) * 1000000000`), which can store a value such as 1070000000.0000001.
+	 */
+	public static function buildResourceLimits(array $deployConfig): array {
+		$resourceLimits = $deployConfig['resourceLimits'] ?? [];
+		if (!is_array($resourceLimits)) {
+			return [];
+		}
+		foreach (['memory', 'nanoCPUs'] as $limit) {
+			$value = $resourceLimits[$limit] ?? null;
+			if (is_float($value) && abs($value) < PHP_INT_MAX) {
+				$resourceLimits[$limit] = (int)round($value);
+			}
+		}
+		return $resourceLimits;
+	}
 }
