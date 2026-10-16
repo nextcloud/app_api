@@ -173,4 +173,17 @@ class DockerActionsTest extends TestCase {
 		$shouldPullImage = new ReflectionMethod($this->dockerActions, 'shouldPullImage');
 		self::assertSame($expected, $shouldPullImage->invoke($this->dockerActions, $imageParams, $daemonConfig));
 	}
+
+	public function testBuildDeployParamsRoundsTheResourceLimits(): void {
+		// What the admin settings store for a CPU limit of 1.07.
+		$daemonConfig = new DaemonConfig(['deploy_config' => [
+			'computeDevice' => ['id' => 'cpu'],
+			'resourceLimits' => ['nanoCPUs' => 1.07 * 1000000000],
+		]]);
+		$appInfo = ['id' => 'test-deploy', 'name' => 'Test Deploy', 'version' => '1.0.0', 'port' => 23000, 'secret' => 'secret', 'external-app' => []];
+
+		$params = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
+
+		self::assertSame(['nanoCPUs' => 1070000000], $params['container_params']['resourceLimits']);
+	}
 }

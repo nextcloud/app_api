@@ -1125,7 +1125,7 @@ class DockerActions implements IDeployActions {
 			'devices' => $devices,
 			'deviceRequests' => $deviceRequests,
 			'mounts' => $appInfo['external-app']['mounts'] ?? [],
-			'resourceLimits' => $deployConfig['resourceLimits'] ?? []
+			'resourceLimits' => AppAPICommonService::buildResourceLimits($deployConfig)
 		];
 
 		return [

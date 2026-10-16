@@ -133,6 +133,19 @@ class KubernetesActionsTest extends TestCase {
 		}
 	}
 
+	public function testBuildDeployParamsRoundsTheResourceLimits(): void {
+		// What the admin settings store for a CPU limit of 1.07.
+		$daemonConfig = new DaemonConfig([
+			'accepts_deploy_id' => KubernetesActions::DEPLOY_ID,
+			'deploy_config' => ['resourceLimits' => ['nanoCPUs' => 1.07 * 1000000000]],
+		]);
+		$appInfo = ['id' => 'test-deploy', 'name' => 'Test Deploy', 'version' => '1.0.0', 'port' => 23000, 'secret' => 'secret', 'external-app' => []];
+
+		$params = $this->kubernetesActions->buildDeployParams($daemonConfig, $appInfo);
+
+		self::assertSame(['nanoCPUs' => 1070000000], $params['container_params']['resourceLimits']);
+	}
+
 	/**
 	 * Runs deployExApp() against queued HaRP responses and returns the payloads of the /exapp/create requests.
 	 */
