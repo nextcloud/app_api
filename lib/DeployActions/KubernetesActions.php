@@ -666,7 +666,7 @@ class KubernetesActions implements IDeployActions {
 			'net' => 'bridge',
 			'env' => $envs,
 			'computeDevice' => $deployConfig['computeDevice'] ?? null,
-			'resourceLimits' => $deployConfig['resourceLimits'] ?? []
+			'resourceLimits' => AppAPICommonService::buildResourceLimits($deployConfig)
 		];
 
 		$result = [
