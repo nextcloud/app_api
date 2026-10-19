@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
@@ -53,6 +55,7 @@ class AppAPIService {
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 		private readonly HarpService $harpService,
+		private readonly AuditLogger $auditLogger,
 	) {
 		$this->client = $clientService->newClient();
 		$this->exAppService->setAppAPIService($this);
@@ -704,6 +707,9 @@ class AppAPIService {
 		}
 
 		$this->harpService->harpExAppUpdate($daemonConfig, $exApp, true);
+		$this->auditLogger->log(Operation::ExAppEnabled, 'ExApp %s was enabled', [
+			'appId' => $exApp->getAppid(),
+		]);
 		return true;
 	}
 
@@ -754,7 +760,12 @@ class AppAPIService {
 				}
 			}
 		}
-		$this->exAppService->disableExAppInternal($exApp);
+		// The ExApp is disabled even when it could not be told about it
+		if ($this->exAppService->disableExAppInternal($exApp)) {
+			$this->auditLogger->log(Operation::ExAppDisabled, 'ExApp %s was disabled', [
+				'appId' => $exApp->getAppid(),
+			]);
+		}
 
 		if ($result) {
 			$this->harpService->harpExAppUpdate($daemonConfig, $exApp, false);
@@ -803,10 +814,13 @@ class AppAPIService {
 				if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
 					if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-						$this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
+						$dataDeleted = $this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true) === '';
 					} else {
 						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
-						$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));
+						$dataDeleted = isset($this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()))['success']);
+					}
+					if ($dataDeleted) {
+						$this->exAppService->logExAppDataDeleted($exApp);
 					}
 				}
 				$this->exAppService->unregisterExApp($exApp->getAppid());

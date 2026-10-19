@@ -16,6 +16,14 @@ namespace OCA\AppAPI\AuditLog;
  * so changing one is a breaking change for them. Case names may be renamed.
  */
 enum Operation: string {
+	// ExApps
+	case ExAppRegistered = 'app_api.ex_app.registered';
+	case ExAppUpdated = 'app_api.ex_app.updated';
+	case ExAppEnabled = 'app_api.ex_app.enabled';
+	case ExAppDisabled = 'app_api.ex_app.disabled';
+	case ExAppUnregistered = 'app_api.ex_app.unregistered';
+	case ExAppDataDeleted = 'app_api.ex_app_data.deleted';
+
 	// Deploy daemons
 	case DaemonRegistered = 'app_api.daemon.registered';
 	case DaemonUpdated = 'app_api.daemon.updated';
@@ -28,6 +36,12 @@ enum Operation: string {
 	 */
 	public function description(): string {
 		return match ($this) {
+			self::ExAppRegistered => 'An ExApp was registered and given its secret to authenticate to Nextcloud, before its deployment',
+			self::ExAppUpdated => 'An ExApp was switched to a new version, before the deployment of that version',
+			self::ExAppEnabled => 'An ExApp was enabled and started',
+			self::ExAppDisabled => 'An ExApp was disabled',
+			self::ExAppUnregistered => 'An ExApp was removed together with everything it had registered',
+			self::ExAppDataDeleted => 'The data volume of an ExApp was deleted on its deploy daemon',
 			self::DaemonRegistered => 'A deploy daemon that ExApps can be installed on was registered',
 			self::DaemonUpdated => 'The configuration of a deploy daemon was changed',
 			self::DaemonUnregistered => 'A deploy daemon was unregistered',

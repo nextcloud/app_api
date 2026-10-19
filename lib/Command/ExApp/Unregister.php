@@ -112,6 +112,9 @@ class Unregister extends Command {
 							return 1;
 						}
 					} else {
+						if ($rmData) {
+							$this->exAppService->logExAppDataDeleted($exApp);
+						}
 						if (!$silent) {
 							$output->writeln(sprintf('ExApp %s successfully removed', $appId));
 						}
@@ -137,6 +140,9 @@ class Unregister extends Command {
 						$removeVolumeResult = $this->dockerActions->removeVolume(
 							$this->dockerActions->buildDockerUrl($daemonConfig), $volumeName
 						);
+						if (!isset($removeVolumeResult['error'])) {
+							$this->exAppService->logExAppDataDeleted($exApp);
+						}
 						if (!$silent) {
 							if (isset($removeVolumeResult['error'])) {
 								$output->writeln(sprintf('Failed to remove ExApp %s volume: %s', $appId, $volumeName));
@@ -171,8 +177,13 @@ class Unregister extends Command {
 					if (!$force) {
 						return 1;
 					}
-				} elseif (!$silent) {
-					$output->writeln(sprintf('ExApp %s K8s resources successfully removed', $appId));
+				} else {
+					if ($rmData) {
+						$this->exAppService->logExAppDataDeleted($exApp);
+					}
+					if (!$silent) {
+						$output->writeln(sprintf('ExApp %s K8s resources successfully removed', $appId));
+					}
 				}
 			}
 		}
