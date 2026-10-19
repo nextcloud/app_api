@@ -290,17 +290,20 @@ class AppAPIService {
 		$exApp = $this->exAppService->getExApp($exAppId);
 		if ($exApp === null) {
 			$this->logger->error(sprintf('ExApp with appId %s not found.', $request->getHeader('EX-APP-ID')));
+			$userId = explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
 				'appid' => $request->getHeader('EX-APP-ID'),
-				'userid' => explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 2)[0],
+				'userid' => $userId,
 			]);
+			$this->logAuthenticationFailure($exAppId, $userId, 'unknown_ex_app');
 			return false;
 		}
 
 		$authorization = base64_decode($request->getHeader('AUTHORIZATION-APP-API'));
 		if ($authorization === false) {
 			$this->logger->error('Failed to parse AUTHORIZATION-APP-API');
+			$this->logAuthenticationFailure($exAppId, '', 'malformed_authorization');
 			return false;
 		}
 		$userId = explode(':', $authorization, 2)[0];
@@ -328,10 +331,22 @@ class AppAPIService {
 				'appid' => $request->getHeader('EX-APP-ID'),
 				'userid' => $userId,
 			]);
+			$this->logAuthenticationFailure($exApp->getAppid(), $userId, 'invalid_secret');
 		}
 
 		$this->logger->error(sprintf('ExApp %s request to NC validation failed.', $exApp->getAppid()));
 		return false;
+	}
+
+	/**
+	 * @param string $userId the user the request claims to act for, as sent by the client
+	 */
+	private function logAuthenticationFailure(string $exAppId, string $userId, string $reason): void {
+		$this->auditLogger->log(Operation::ExAppAuthFailed, 'Failed AppAPI authentication of ExApp %s for user %s', [
+			'exAppId' => $exAppId,
+			'userId' => $userId,
+			'reason' => $reason,
+		]);
 	}
 
 	/**

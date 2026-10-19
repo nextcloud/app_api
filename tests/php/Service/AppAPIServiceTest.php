@@ -278,6 +278,7 @@ class AppAPIServiceTest extends TestCase {
 
 		$this->exAppService->method('getExApp')->with('test_app')->willReturn($exApp);
 		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::never())->method('log');
 
 		self::assertFalse($this->service->validateExAppRequestToNC($request));
 	}
@@ -292,6 +293,7 @@ class AppAPIServiceTest extends TestCase {
 
 		$this->exAppService->method('getExApp')->with('test_app')->willReturn($exApp);
 		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::never())->method('log');
 
 		self::assertTrue($this->service->validateExAppRequestToNC($request));
 	}
@@ -306,6 +308,11 @@ class AppAPIServiceTest extends TestCase {
 
 		$this->exAppService->method('getExApp')->with('test_app')->willReturn($exApp);
 		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::ExAppAuthFailed,
+			'Failed AppAPI authentication of ExApp %s for user %s',
+			['exAppId' => 'test_app', 'userId' => '', 'reason' => 'invalid_secret'],
+		);
 
 		self::assertFalse($this->service->validateExAppRequestToNC($request));
 	}
@@ -419,5 +426,50 @@ class AppAPIServiceTest extends TestCase {
 		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('test_app');
 
 		$this->service->removeExAppsByDaemonConfigName($daemonConfig);
+	}
+
+	private function createRequestForUser(string $appId, string $userId, string $secret): MockObject&\OCP\IRequest {
+		$request = $this->createMock(\OCP\IRequest::class);
+		$request->method('getRemoteAddress')->willReturn('127.0.0.1');
+		$request->method('getHeader')->willReturnCallback(static fn (string $name): string => match ($name) {
+			'EX-APP-ID' => $appId,
+			'EX-APP-VERSION' => '1.0.0',
+			'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $secret),
+			default => '',
+		});
+		$request->method('getPathInfo')->willReturn('/ocs/v1.php/apps/app_api/api/v1/log');
+		return $request;
+	}
+
+	public function testValidateLogsAWrongSecretWithTheClaimedUser(): void {
+		$this->exAppService->method('getExApp')->with('test_app')->willReturn($this->createExApp());
+		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::ExAppAuthFailed,
+			'Failed AppAPI authentication of ExApp %s for user %s',
+			['exAppId' => 'test_app', 'userId' => 'alice', 'reason' => 'invalid_secret'],
+		);
+
+		self::assertFalse($this->service->validateExAppRequestToNC($this->createRequestForUser('test_app', 'alice', 'wrong_secret')));
+	}
+
+	public function testValidateLogsAnUnknownExApp(): void {
+		$this->exAppService->method('getExApp')->with('unknown_app')->willReturn(null);
+		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->throttler->expects(self::once())->method('registerAttempt');
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::ExAppAuthFailed,
+			'Failed AppAPI authentication of ExApp %s for user %s',
+			['exAppId' => 'unknown_app', 'userId' => 'alice', 'reason' => 'unknown_ex_app'],
+		);
+
+		self::assertFalse($this->service->validateExAppRequestToNC($this->createRequestForUser('unknown_app', 'alice', 'any_secret')));
+	}
+
+	public function testValidateDoesNotLogARequestWithoutAnExAppId(): void {
+		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::never())->method('log');
+
+		self::assertFalse($this->service->validateExAppRequestToNC($this->createRequestForUser('', 'alice', 'any_secret')));
 	}
 }

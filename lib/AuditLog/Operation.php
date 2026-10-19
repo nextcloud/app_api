@@ -23,6 +23,7 @@ enum Operation: string {
 	case ExAppDisabled = 'app_api.ex_app.disabled';
 	case ExAppUnregistered = 'app_api.ex_app.unregistered';
 	case ExAppDataDeleted = 'app_api.ex_app_data.deleted';
+	case ExAppAuthFailed = 'app_api.ex_app_auth.failed';
 
 	// Deploy daemons
 	case DaemonRegistered = 'app_api.daemon.registered';
@@ -45,6 +46,7 @@ enum Operation: string {
 			self::ExAppDisabled => 'An ExApp was disabled',
 			self::ExAppUnregistered => 'An ExApp was removed together with everything it had registered',
 			self::ExAppDataDeleted => 'The data volume of an ExApp was deleted on its deploy daemon',
+			self::ExAppAuthFailed => 'A request with AppAPI authentication was rejected for an unknown ExApp or a wrong secret',
 			self::DaemonRegistered => 'A deploy daemon that ExApps can be installed on was registered',
 			self::DaemonUpdated => 'The configuration of a deploy daemon was changed',
 			self::DaemonUnregistered => 'A deploy daemon was unregistered',
