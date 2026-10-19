@@ -119,12 +119,13 @@ class DaemonConfigControllerTest extends TestCase {
 
 	public function testUpdateEncryptsAValidNewSecret(): void {
 		$params = self::harpDaemonParams('a_long_enough_key');
+		$storedDaemon = self::storedDaemon('encrypted:stored_secret_1', true);
 		$this->daemonConfigService->method('getDaemonConfigByName')
-			->willReturn(self::storedDaemon('encrypted:stored_secret_1', true));
+			->willReturn($storedDaemon);
 		$this->daemonConfigService->expects(self::once())->method('validateNewSecret')->willReturn(null);
 		$this->daemonConfigService->expects(self::once())->method('updateDaemonConfig')
 			->with(self::callback(static fn (DaemonConfig $daemonConfig): bool
-				=> $daemonConfig->getDeployConfig()['haproxy_password'] === 'encrypted:a_long_enough_key'))
+				=> $daemonConfig->getDeployConfig()['haproxy_password'] === 'encrypted:a_long_enough_key'), self::identicalTo($storedDaemon))
 			->willReturnArgument(0);
 
 		$response = $this->controller->updateDaemonConfig('harp_proxy_host', $params);
