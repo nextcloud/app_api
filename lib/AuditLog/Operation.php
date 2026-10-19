@@ -31,6 +31,9 @@ enum Operation: string {
 	case DaemonRegistryAdded = 'app_api.daemon_registry.added';
 	case DaemonRegistryRemoved = 'app_api.daemon_registry.removed';
 
+	// Settings
+	case AdminConfigUpdated = 'app_api.admin_config.updated';
+
 	/**
 	 * Short description of when the operation is logged, used for the documentation
 	 */
@@ -47,6 +50,7 @@ enum Operation: string {
 			self::DaemonUnregistered => 'A deploy daemon was unregistered',
 			self::DaemonRegistryAdded => 'A deploy daemon was set to pull the images of a Docker registry from another registry',
 			self::DaemonRegistryRemoved => 'A Docker registry mapping was removed from a deploy daemon',
+			self::AdminConfigUpdated => 'An AppAPI admin setting, such as the default deploy daemon, was changed',
 		};
 	}
 }
