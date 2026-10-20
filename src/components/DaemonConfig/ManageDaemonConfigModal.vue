@@ -78,7 +78,7 @@
 							id="deploy-config-haproxy-password"
 							class="ex-input-field"
 							:value.sync="deployConfig.haproxy_password"
-							:error="isHaProxyPasswordValid === false"
+							:error="!!deployConfig.haproxy_password && isHaProxyPasswordValid === false"
 							:placeholder="haProxyPasswordHelperText"
 							:aria-label="haProxyPasswordHelperText"
 							:helper-text="!isHaProxyPasswordValid ? t('app_api', 'Password must be at least 12 characters long') : ''"
