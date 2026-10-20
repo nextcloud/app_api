@@ -119,6 +119,7 @@ class HarpService {
 			'routes' => array_map(function ($route) {
 				return [
 					'url' => $route['url'],
+					'verb' => $route['verb'],
 					'access_level' => $route['access_level'],
 					'bruteforce_protection' => ExAppMapper::parseJsonList($route['bruteforce_protection'] ?? null),
 				];
