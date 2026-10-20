@@ -122,6 +122,7 @@ class HarpService {
 				}
 				return [
 					'url' => $route['url'],
+					'verb' => $route['verb'],
 					'access_level' => $route['access_level'],
 					'bruteforce_protection' => $bruteforceList,
 				];
