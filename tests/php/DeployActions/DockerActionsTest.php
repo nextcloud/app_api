@@ -27,6 +27,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use ReflectionMethod;
+use ReflectionProperty;
 
 class DockerActionsTest extends TestCase {
 	private DockerActions $dockerActions;
@@ -185,5 +186,20 @@ class DockerActionsTest extends TestCase {
 		$params = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
 
 		self::assertSame(['nanoCPUs' => 1070000000], $params['container_params']['resourceLimits']);
+	}
+
+	public function testInitGuzzleClientForHarpWithoutKey(): void {
+		// What "Check connection" sends for a HaRP daemon before a key is typed.
+		$daemonConfig = new DaemonConfig([
+			'protocol' => 'http',
+			'host' => 'localhost:8780',
+			'deploy_config' => ['haproxy_password' => '', 'harp' => ['docker_socket_port' => 24000]],
+		]);
+
+		$this->dockerActions->initGuzzleClient($daemonConfig);
+
+		$guzzleClient = (new ReflectionProperty($this->dockerActions, 'guzzleClient'))->getValue($this->dockerActions);
+		self::assertNull($guzzleClient->getConfig('auth'));
+		self::assertSame('', $guzzleClient->getConfig('headers')['harp-shared-key']);
 	}
 }
