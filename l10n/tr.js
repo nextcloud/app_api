@@ -138,7 +138,7 @@ OC.L10N.register(
     "Override Docker registries" : "Docker kayıtlarını değiştir",
     "Configure Docker registry override mappings for the selected daemon." : "Seçilmiş arka plan işlemi için Docker kaydı değişikliğini yapılandırın.",
     "The matching source registry in ExApp info.xml will be overwritten during deployment (image pull step)." : "Dağıtım sırasında, ExApp info.xml içinde eşleşen kaynak kayıtları değiştirilecek (kalıp çekme adımı).",
-    "This is useful if you want to use a custom Docker registry, for example, to use a private Docker registry, or to use a different Docker registry for testing." : "Bu seçenek, bir kişisel Docker kaydı kullanmak veya sınama için farklı bir Docker kaydı kullanmak gibi durumlarda özel bir Docker kaydı kullanmak için yararlıdır.",
+    "This is useful if you want to use a custom Docker registry, for example, to use a private Docker registry, or to use a different Docker registry for testing." : "Bu seçenek, bir kişisel Docker kaydı kullanmak veya sınama için farklı bir Docker kaydı kullanmak gibi durumlarda bir kişisel Docker kaydı kullanmak için yararlıdır.",
     "Image pull will be skipped" : "Kalıp çekme atlanacak",
     "Remove" : "Kaldır",
     "No custom Docker registries are registered" : "Özel bir Docker kaydı kaydedilmemiş",
