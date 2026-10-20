@@ -1309,7 +1309,7 @@ class DockerActions implements IDeployActions {
 		}
 		if (boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
 			$guzzleParams['headers'] = [
-				'harp-shared-key' => $guzzleParams['auth'][1],
+				'harp-shared-key' => $guzzleParams['auth'][1] ?? '',
 				'docker-engine-port' => $daemonConfig->getDeployConfig()['harp']['docker_socket_port'],
 			];
 		}
