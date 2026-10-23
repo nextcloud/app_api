@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Tests\php\SetupChecks;
 
+use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\HarpService;
@@ -33,7 +34,8 @@ class HarpVersionCheckTest extends TestCase {
 		$harpService->method('getHarpVersion')->willReturn($harpVersion);
 		$cache = $this->createMock(ICache::class);
 		$cache->method('get')->willReturn(null);
-		$cache->expects(self::once())->method('set')->with(self::anything(), $harpVersion, $expectedCacheTtl);
+		// The minimum is part of the key, so a version cached by an older AppAPI is not reused after an upgrade.
+		$cache->expects(self::once())->method('set')->with(self::stringEndsWith('_' . Application::MINIMUM_HARP_VERSION), $harpVersion, $expectedCacheTtl);
 		$cacheFactory = $this->createMock(ICacheFactory::class);
 		$cacheFactory->method('isAvailable')->willReturn(true);
 		$cacheFactory->method('createDistributed')->willReturn($cache);
