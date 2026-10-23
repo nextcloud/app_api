@@ -91,12 +91,13 @@ class HarpVersionCheck implements ISetupCheck {
 	}
 
 	private function getHarpVersion(DaemonConfig $daemonConfig): ?string {
-		$cacheKey = $daemonConfig->getName() . '_' . (string)crc32(json_encode($daemonConfig));
+		// With the minimum in the key, a version cached against an older minimum is asked again.
+		$cacheKey = $daemonConfig->getName() . '_' . (string)crc32(json_encode($daemonConfig)) . '_' . Application::MINIMUM_HARP_VERSION;
 		$version = $this->cache?->get($cacheKey);
 		if ($version === null) {
 			$version = $this->harpService->getHarpVersion($daemonConfig);
-			$oneWeek = 60 * 60 * 24 * 7;
-			$this->cache?->set($cacheKey, $version, $oneWeek);
+			// Asked again after an hour, so the result follows a HaRP update or rollback soon.
+			$this->cache?->set($cacheKey, $version, 60 * 60);
 		}
 		return $version;
 	}
