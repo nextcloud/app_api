@@ -60,6 +60,16 @@ class ExAppProxyControllerTest extends TestCase {
 		self::assertSame([], $this->routeFor('PUT', 'settings', self::SAME_URL, 'admin', true));
 	}
 
+	public function testAccessDeniedDoesNotFallThroughToLaterRoutes(): void {
+		// An admin route listed before a broader user route, as some ExApps declare their setup pages.
+		$adminFirst = [
+			['url' => '^/setup$', 'verb' => 'GET,POST', 'access_level' => 2],
+			['url' => '^/.*', 'verb' => 'GET,POST', 'access_level' => 1],
+		];
+		self::assertSame([], $this->routeFor('GET', 'setup', $adminFirst, 'alice'));
+		self::assertSame('^/.*', $this->routeFor('GET', 'other', $adminFirst, 'alice')['url']);
+	}
+
 	public function testHeadIsAcceptedWhereGetIs(): void {
 		// Nextcloud routes HEAD to the proxy's GET action, and HaRP accepts HEAD on GET routes too.
 		self::assertSame('GET', $this->routeFor('HEAD', 'settings', self::SAME_URL)['verb']);
