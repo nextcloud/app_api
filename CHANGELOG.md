@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The daemon templates in the admin settings no longer prefill the HaRP shared key or HaProxy password. #1083
 - HaRP receives the verb of each ExApp route, so HaRP 0.4.8 and newer check the HTTP method of a request as the ExApp proxy does. #1138
 - The ExApp proxy accepts `HEAD` on routes that list `GET` and reads a route's verb as a list of methods, as HaRP does. #1144
+- The HaRP version check in the admin overview warns about HaRP older than 0.4.8, which checks the HTTP method of requests to ExApps. #1149
 
 ### Fixed
 
