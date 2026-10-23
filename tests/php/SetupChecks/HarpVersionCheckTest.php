@@ -22,7 +22,7 @@ use Psr\Log\LoggerInterface;
 
 class HarpVersionCheckTest extends TestCase {
 
-	private function runCheck(?string $harpVersion, int $expectedCacheTtl): SetupResult {
+	private function runCheck(?string $harpVersion): SetupResult {
 		$l10n = $this->createMock(IL10N::class);
 		$l10n->method('t')->willReturnCallback(fn (string $text, array $parameters = []) => vsprintf($text, $parameters));
 		$daemonConfigService = $this->createMock(DaemonConfigService::class);
@@ -33,7 +33,7 @@ class HarpVersionCheckTest extends TestCase {
 		$harpService->method('getHarpVersion')->willReturn($harpVersion);
 		$cache = $this->createMock(ICache::class);
 		$cache->method('get')->willReturn(null);
-		$cache->expects(self::once())->method('set')->with(self::anything(), $harpVersion, $expectedCacheTtl);
+		$cache->expects(self::once())->method('set')->with(self::anything(), $harpVersion, 60 * 60);
 		$cacheFactory = $this->createMock(ICacheFactory::class);
 		$cacheFactory->method('isAvailable')->willReturn(true);
 		$cacheFactory->method('createDistributed')->willReturn($cache);
@@ -43,20 +43,19 @@ class HarpVersionCheckTest extends TestCase {
 	}
 
 	public function testHarpWithoutRouteVerbChecksIsTooOld(): void {
-		// Asked again after an hour, so the warning goes away soon after HaRP is updated.
-		$result = $this->runCheck('0.4.7', 60 * 60);
+		$result = $this->runCheck('0.4.7');
 		self::assertSame(SetupResult::WARNING, $result->getSeverity());
 		self::assertStringContainsString('"0.4.7", which is too old. The minimum required version is "0.4.8"', $result->getDescription());
 	}
 
 	public function testUnreachableHarpIsReported(): void {
-		$result = $this->runCheck(null, 60 * 60);
+		$result = $this->runCheck(null);
 		self::assertSame(SetupResult::WARNING, $result->getSeverity());
 		self::assertStringContainsString('Could not retrieve HaRP version from daemon "harp_proxy"', $result->getDescription());
 	}
 
 	public function testCurrentHarpPasses(): void {
-		$result = $this->runCheck('0.4.8', 60 * 60 * 24 * 7);
+		$result = $this->runCheck('0.4.8');
 		self::assertSame(SetupResult::SUCCESS, $result->getSeverity());
 	}
 }
