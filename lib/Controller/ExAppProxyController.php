@@ -320,6 +320,7 @@ class ExAppProxyController extends Controller {
 	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): array {
 		// Route URL is a regex matched against the request path including its leading slash, mirroring HaRP's target_path semantics.
 		$canonicalSubject = '/' . $exAppRoute;
+		$method = strtoupper($this->request->getMethod());
 		foreach ($exApp->getRoutes() as $route) {
 			$pattern = '~^(?:' . str_replace('~', '\\~', $route['url']) . ')~i';
 			$matched = preg_match($pattern, $canonicalSubject) === 1;
@@ -331,14 +332,20 @@ class ExAppProxyController extends Controller {
 				));
 				$matched = true;
 			}
-			if ($matched
-				&& str_contains(strtolower($route['verb']), strtolower($this->request->getMethod()))
-			) {
+			if ($matched && self::routeAcceptsMethod($route['verb'], $method)) {
 				// First match by path+verb wins. Apply its access level without falling through to broader routes.
 				return $this->passesExAppProxyRouteAccessLevelCheck($route['access_level']) ? $route : [];
 			}
 		}
 		return [];
+	}
+
+	/**
+	 * As in HaRP: the verb lists methods separated by commas or whitespace, and HEAD is accepted wherever GET is.
+	 */
+	private static function routeAcceptsMethod(string $verb, string $method): bool {
+		$methods = array_map('strtoupper', preg_split('/[\s,]+/', $verb, -1, PREG_SPLIT_NO_EMPTY) ?: []);
+		return in_array($method, $methods, true) || ($method === 'HEAD' && in_array('GET', $methods, true));
 	}
 
 	private function passesExAppProxyRouteAccessLevelCheck(int $accessLevel): bool {
