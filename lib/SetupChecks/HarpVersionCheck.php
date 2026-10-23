@@ -96,9 +96,8 @@ class HarpVersionCheck implements ISetupCheck {
 		$version = $this->cache?->get($cacheKey);
 		if ($version === null) {
 			$version = $this->harpService->getHarpVersion($daemonConfig);
-			// A version that is too old is asked again after an hour, so the warning goes away soon after HaRP is updated.
-			$ttl = $version !== null && $this->fulfillsMinimumVersionRequirement($version) ? 60 * 60 * 24 * 7 : 60 * 60;
-			$this->cache?->set($cacheKey, $version, $ttl);
+			// Asked again after an hour, so the result follows a HaRP update or rollback soon.
+			$this->cache?->set($cacheKey, $version, 60 * 60);
 		}
 		return $version;
 	}
