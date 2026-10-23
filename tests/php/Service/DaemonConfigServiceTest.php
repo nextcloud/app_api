@@ -9,16 +9,27 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Tests\php\Service;
 
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\DaemonConfigMapper;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
+use OCP\DB\Exception;
 use OCP\Security\ICrypto;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 class DaemonConfigServiceTest extends TestCase {
+
+	private AuditLogger&MockObject $auditLogger;
+
+	protected function setUp(): void {
+		parent::setUp();
+		$this->auditLogger = $this->createMock(AuditLogger::class);
+	}
 
 	public static function resolveImageRegistryProvider(): array {
 		$mirror = ['from' => 'ghcr.io', 'to' => 'registry.example.com'];
@@ -104,6 +115,7 @@ class DaemonConfigServiceTest extends TestCase {
 			$mapper,
 			$this->createMock(ExAppService::class),
 			$this->createMock(ICrypto::class),
+			$this->auditLogger,
 		);
 	}
 
@@ -133,6 +145,7 @@ class DaemonConfigServiceTest extends TestCase {
 
 	#[DataProvider('unusableRegistryMapProvider')]
 	public function testAddDockerRegistryRejectsAnUnusableMap(array $registryMap): void {
+		$this->auditLogger->expects(self::never())->method('log');
 		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => []]]);
 
 		$result = $this->createService(expectUpdate: false)->addDockerRegistry($daemonConfig, $registryMap);
@@ -142,6 +155,7 @@ class DaemonConfigServiceTest extends TestCase {
 	}
 
 	public function testAddDockerRegistryRejectsADuplicateSource(): void {
+		$this->auditLogger->expects(self::never())->method('log');
 		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => ['junk', ['from' => 'ghcr.io', 'to' => 'local']]]]);
 
 		$result = $this->createService(expectUpdate: false)
@@ -163,7 +177,12 @@ class DaemonConfigServiceTest extends TestCase {
 	}
 
 	public function testAddDockerRegistryStoresNormalisedSourceAndTarget(): void {
-		$daemonConfig = new DaemonConfig(['deploy_config' => []]);
+		$daemonConfig = new DaemonConfig(['name' => 'harp_proxy', 'deploy_config' => []]);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::DaemonRegistryAdded,
+			'Docker registry mapping was added to deploy daemon %s: %s to %s',
+			['daemonName' => 'harp_proxy', 'from' => 'ghcr.io', 'to' => 'registry.example.com'],
+		);
 
 		$result = $this->createService()
 			->addDockerRegistry($daemonConfig, ['from' => ' ghcr.io/ ', 'to' => 'registry.example.com//', 'extra' => 'x']);
@@ -182,6 +201,7 @@ class DaemonConfigServiceTest extends TestCase {
 	}
 
 	public function testRemoveDockerRegistryWithoutAnyMapping(): void {
+		$this->auditLogger->expects(self::never())->method('log');
 		$daemonConfig = new DaemonConfig(['deploy_config' => ['net' => 'host']]);
 
 		$result = $this->createService(expectUpdate: false)
@@ -194,7 +214,12 @@ class DaemonConfigServiceTest extends TestCase {
 		$service = $this->createService();
 		$first = ['from' => 'docker.io', 'to' => 'hub.example.com'];
 		$second = ['from' => 'ghcr.io', 'to' => 'registry.example.com'];
-		$daemonConfig = new DaemonConfig(['deploy_config' => ['registries' => [$first, $second]]]);
+		$daemonConfig = new DaemonConfig(['name' => 'harp_proxy', 'deploy_config' => ['registries' => [$first, $second]]]);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::DaemonRegistryRemoved,
+			'Docker registry mapping was removed from deploy daemon %s: %s to %s',
+			['daemonName' => 'harp_proxy', 'from' => 'docker.io', 'to' => 'hub.example.com'],
+		);
 
 		$result = $service->removeDockerRegistry($daemonConfig, $first);
 
@@ -219,6 +244,7 @@ class DaemonConfigServiceTest extends TestCase {
 			$this->createMock(DaemonConfigMapper::class),
 			$this->createMock(ExAppService::class),
 			$this->createMock(ICrypto::class),
+			$this->auditLogger,
 		);
 	}
 
@@ -280,5 +306,119 @@ class DaemonConfigServiceTest extends TestCase {
 		$result = $this->createServiceWithLogger($logger)->validateNewSecret(self::daemonParams('http', true), bin2hex(random_bytes(16)));
 
 		self::assertNull($result);
+	}
+
+	private function createServiceWithMapper(DaemonConfigMapper $mapper): DaemonConfigService {
+		$crypto = $this->createMock(ICrypto::class);
+		$crypto->method('encrypt')->willReturnCallback(static fn (string $value): string => 'encrypted:' . $value);
+		return new DaemonConfigService(
+			$this->createMock(LoggerInterface::class),
+			$mapper,
+			$this->createMock(ExAppService::class),
+			$crypto,
+			$this->auditLogger,
+		);
+	}
+
+	private static function harpRegisterParams(): array {
+		return [
+			'name' => 'harp_proxy',
+			'display_name' => 'HaRP Proxy',
+			'accepts_deploy_id' => 'docker-install',
+			'protocol' => 'http',
+			'host' => 'appapi-harp:8780',
+			'deploy_config' => [
+				'net' => 'host',
+				'nextcloud_url' => 'http://nextcloud.local/',
+				'haproxy_password' => 'a_secret_shared_key',
+				'harp' => ['frp_address' => 'appapi-harp:8782'],
+			],
+		];
+	}
+
+	public function testRegisterDaemonConfigLogsTheDaemonWithoutTheSecret(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->expects(self::once())->method('insert')->willReturnArgument(0);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::DaemonRegistered,
+			'Deploy daemon %s was registered',
+			['daemonName' => 'harp_proxy', 'acceptsDeployId' => 'docker-install', 'host' => 'appapi-harp:8780'],
+		);
+
+		$result = $this->createServiceWithMapper($mapper)->registerDaemonConfig(self::harpRegisterParams());
+
+		self::assertInstanceOf(DaemonConfig::class, $result);
+	}
+
+	public function testRegisterDaemonConfigDoesNotLogAnInvalidDaemon(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->expects(self::never())->method('insert');
+		$this->auditLogger->expects(self::never())->method('log');
+
+		$params = self::harpRegisterParams();
+		$params['host'] = 'http://appapi-harp:8780';
+
+		self::assertNull($this->createServiceWithMapper($mapper)->registerDaemonConfig($params));
+	}
+
+	public function testRegisterDaemonConfigDoesNotLogADatabaseError(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->method('insert')->willThrowException(new Exception('duplicate name'));
+		$this->auditLogger->expects(self::never())->method('log');
+
+		self::assertNull($this->createServiceWithMapper($mapper)->registerDaemonConfig(self::harpRegisterParams()));
+	}
+
+	public function testUnregisterDaemonConfigLogsTheDaemon(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->expects(self::once())->method('delete')->willReturnArgument(0);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::DaemonUnregistered,
+			'Deploy daemon %s was unregistered',
+			['daemonName' => 'harp_proxy'],
+		);
+
+		$this->createServiceWithMapper($mapper)->unregisterDaemonConfig(new DaemonConfig(['name' => 'harp_proxy']));
+	}
+
+	public function testUnregisterDaemonConfigDoesNotLogADatabaseError(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->method('delete')->willThrowException(new Exception('database is gone'));
+		$this->auditLogger->expects(self::never())->method('log');
+
+		self::assertNull($this->createServiceWithMapper($mapper)->unregisterDaemonConfig(new DaemonConfig(['name' => 'harp_proxy'])));
+	}
+
+	public static function updateDaemonConfigSecretProvider(): array {
+		return [
+			'stored secret kept' => ['encrypted:old_secret', 'encrypted:old_secret', false],
+			'new secret set' => ['encrypted:old_secret', 'encrypted:new_secret', true],
+			'secret removed' => ['encrypted:old_secret', '', true],
+			'no secret before or after' => [null, '', false],
+		];
+	}
+
+	#[DataProvider('updateDaemonConfigSecretProvider')]
+	public function testUpdateDaemonConfigLogsOnlyWhetherTheSecretChanged(?string $storedSecret, string $newSecret, bool $secretChanged): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->expects(self::once())->method('update')->willReturnArgument(0);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::DaemonUpdated,
+			'Deploy daemon %s was updated',
+			['daemonName' => 'harp_proxy', 'host' => 'appapi-harp:8780', 'secretChanged' => $secretChanged],
+		);
+		$previous = new DaemonConfig(['name' => 'harp_proxy', 'host' => 'appapi-harp:8780', 'deploy_config' => $storedSecret === null ? [] : ['haproxy_password' => $storedSecret]]);
+		$updated = new DaemonConfig(['name' => 'harp_proxy', 'host' => 'appapi-harp:8780', 'deploy_config' => ['haproxy_password' => $newSecret]]);
+
+		$this->createServiceWithMapper($mapper)->updateDaemonConfig($updated, $previous);
+	}
+
+	public function testUpdateDaemonConfigDoesNotLogADatabaseError(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->method('update')->willThrowException(new Exception('database is gone'));
+		$this->auditLogger->expects(self::never())->method('log');
+		$daemonConfig = new DaemonConfig(['name' => 'harp_proxy', 'deploy_config' => []]);
+
+		self::assertNull($this->createServiceWithMapper($mapper)->updateDaemonConfig($daemonConfig, clone $daemonConfig));
 	}
 }

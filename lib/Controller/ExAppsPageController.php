@@ -491,12 +491,18 @@ class ExAppsPageController extends Controller {
 			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 				$this->dockerActions->initGuzzleClient($daemonConfig);
 				if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-					$this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $removeData);
+					$removeError = $this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $removeData);
+					if ($removeData && $removeError === '') {
+						$this->exAppService->logExAppDataDeleted($exApp);
+					}
 				} else {
 					if ($removeContainer) {
 						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
 						if ($removeData) {
-							$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
+							$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
+							if (isset($removeVolumeResult['success'])) {
+								$this->exAppService->logExAppDataDeleted($exApp);
+							}
 						}
 					}
 				}

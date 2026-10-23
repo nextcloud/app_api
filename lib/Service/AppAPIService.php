@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
@@ -53,6 +55,7 @@ class AppAPIService {
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 		private readonly HarpService $harpService,
+		private readonly AuditLogger $auditLogger,
 	) {
 		$this->client = $clientService->newClient();
 		$this->exAppService->setAppAPIService($this);
@@ -287,17 +290,20 @@ class AppAPIService {
 		$exApp = $this->exAppService->getExApp($exAppId);
 		if ($exApp === null) {
 			$this->logger->error(sprintf('ExApp with appId %s not found.', $request->getHeader('EX-APP-ID')));
+			$userId = explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
 				'appid' => $request->getHeader('EX-APP-ID'),
-				'userid' => explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 2)[0],
+				'userid' => $userId,
 			]);
+			$this->logAuthenticationFailure($exAppId, $userId, 'unknown_ex_app');
 			return false;
 		}
 
 		$authorization = base64_decode($request->getHeader('AUTHORIZATION-APP-API'));
 		if ($authorization === false) {
 			$this->logger->error('Failed to parse AUTHORIZATION-APP-API');
+			$this->logAuthenticationFailure($exAppId, '', 'malformed_authorization');
 			return false;
 		}
 		$userId = explode(':', $authorization, 2)[0];
@@ -325,10 +331,22 @@ class AppAPIService {
 				'appid' => $request->getHeader('EX-APP-ID'),
 				'userid' => $userId,
 			]);
+			$this->logAuthenticationFailure($exApp->getAppid(), $userId, 'invalid_secret');
 		}
 
 		$this->logger->error(sprintf('ExApp %s request to NC validation failed.', $exApp->getAppid()));
 		return false;
+	}
+
+	/**
+	 * @param string $userId the user the request claims to act for, as sent by the client
+	 */
+	private function logAuthenticationFailure(string $exAppId, string $userId, string $reason): void {
+		$this->auditLogger->log(Operation::ExAppAuthFailed, 'Failed AppAPI authentication of ExApp %s for user %s', [
+			'exAppId' => $exAppId,
+			'userId' => $userId,
+			'reason' => $reason,
+		]);
 	}
 
 	/**
@@ -704,6 +722,9 @@ class AppAPIService {
 		}
 
 		$this->harpService->harpExAppUpdate($daemonConfig, $exApp, true);
+		$this->auditLogger->log(Operation::ExAppEnabled, 'ExApp %s was enabled', [
+			'appId' => $exApp->getAppid(),
+		]);
 		return true;
 	}
 
@@ -754,7 +775,12 @@ class AppAPIService {
 				}
 			}
 		}
-		$this->exAppService->disableExAppInternal($exApp);
+		// The ExApp is disabled even when it could not be told about it
+		if ($this->exAppService->disableExAppInternal($exApp)) {
+			$this->auditLogger->log(Operation::ExAppDisabled, 'ExApp %s was disabled', [
+				'appId' => $exApp->getAppid(),
+			]);
+		}
 
 		if ($result) {
 			$this->harpService->harpExAppUpdate($daemonConfig, $exApp, false);
@@ -803,10 +829,13 @@ class AppAPIService {
 				if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
 					if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-						$this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
+						$dataDeleted = $this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true) === '';
 					} else {
 						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
-						$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));
+						$dataDeleted = isset($this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()))['success']);
+					}
+					if ($dataDeleted) {
+						$this->exAppService->logExAppDataDeleted($exApp);
 					}
 				}
 				$this->exAppService->unregisterExApp($exApp->getAppid());

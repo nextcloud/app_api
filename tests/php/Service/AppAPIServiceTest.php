@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Tests\php\Service;
 
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
+use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\KubernetesActions;
@@ -21,12 +24,14 @@ use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
+use OCP\Http\Client\IResponse;
 use OCP\IConfig;
 use OCP\ISession;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\L10N\IFactory;
 use OCP\Security\Bruteforce\IThrottler;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -48,6 +53,8 @@ class AppAPIServiceTest extends TestCase {
 	private IUserSession&MockObject $userSession;
 	private ISession&MockObject $session;
 	private IUserManager&MockObject $userManager;
+	private DaemonConfigService&MockObject $daemonConfigService;
+	private AuditLogger&MockObject $auditLogger;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -68,7 +75,8 @@ class AppAPIServiceTest extends TestCase {
 		$this->kubernetesActions = $this->createMock(KubernetesActions::class);
 		$this->manualActions = $this->createMock(ManualActions::class);
 		$this->commonService = $this->createMock(AppAPICommonService::class);
-		$daemonConfigService = $this->createMock(DaemonConfigService::class);
+		$this->daemonConfigService = $this->createMock(DaemonConfigService::class);
+		$this->auditLogger = $this->createMock(AuditLogger::class);
 		$exAppDeployOptionsService = $this->createMock(ExAppDeployOptionsService::class);
 		$harpService = $this->createMock(HarpService::class);
 
@@ -87,9 +95,10 @@ class AppAPIServiceTest extends TestCase {
 			$this->kubernetesActions,
 			$this->manualActions,
 			$this->commonService,
-			$daemonConfigService,
+			$this->daemonConfigService,
 			$exAppDeployOptionsService,
 			$harpService,
+			$this->auditLogger,
 		);
 	}
 
@@ -269,6 +278,7 @@ class AppAPIServiceTest extends TestCase {
 
 		$this->exAppService->method('getExApp')->with('test_app')->willReturn($exApp);
 		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::never())->method('log');
 
 		self::assertFalse($this->service->validateExAppRequestToNC($request));
 	}
@@ -283,6 +293,7 @@ class AppAPIServiceTest extends TestCase {
 
 		$this->exAppService->method('getExApp')->with('test_app')->willReturn($exApp);
 		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::never())->method('log');
 
 		self::assertTrue($this->service->validateExAppRequestToNC($request));
 	}
@@ -297,7 +308,168 @@ class AppAPIServiceTest extends TestCase {
 
 		$this->exAppService->method('getExApp')->with('test_app')->willReturn($exApp);
 		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::ExAppAuthFailed,
+			'Failed AppAPI authentication of ExApp %s for user %s',
+			['exAppId' => 'test_app', 'userId' => '', 'reason' => 'invalid_secret'],
+		);
 
 		self::assertFalse($this->service->validateExAppRequestToNC($request));
+	}
+
+	private function createResponse(string $body, int $statusCode = 200): IResponse&MockObject {
+		$response = $this->createMock(IResponse::class);
+		$response->method('getStatusCode')->willReturn($statusCode);
+		$response->method('getBody')->willReturn($body);
+		return $response;
+	}
+
+	private function setupReachableManualExApp(ExApp $exApp, string $enabledResponseBody): void {
+		$this->setupExAppUrlMocks();
+		$this->daemonConfigService->method('getDaemonConfigByName')->willReturn(new DaemonConfig(['name' => 'test_daemon']));
+		$this->exAppService->method('getExApp')->willReturn($exApp);
+		$this->commonService->method('buildAppAPIAuthHeaders')->willReturn([]);
+		$this->client->method('get')->willReturn($this->createResponse('{"status":"ok"}'));
+		$this->client->method('put')->willReturn($this->createResponse($enabledResponseBody));
+	}
+
+	public function testEnableExAppLogsTheExApp(): void {
+		$exApp = $this->createExApp(enabled: false);
+		$this->setupReachableManualExApp($exApp, '{}');
+		$this->exAppService->method('enableExAppInternal')->willReturn(true);
+		$this->auditLogger->expects(self::once())->method('log')
+			->with(Operation::ExAppEnabled, 'ExApp %s was enabled', ['appId' => 'test_app']);
+
+		self::assertTrue($this->service->enableExApp($exApp));
+	}
+
+	public function testEnableExAppDoesNotLogWhenTheExAppRefuses(): void {
+		$exApp = $this->createExApp(enabled: false);
+		$this->setupReachableManualExApp($exApp, '{"error":"missing configuration"}');
+		$this->exAppService->method('enableExAppInternal')->willReturn(true);
+		$this->exAppService->expects(self::once())->method('disableExAppInternal')->with($exApp);
+		$this->auditLogger->expects(self::never())->method('log');
+
+		self::assertFalse($this->service->enableExApp($exApp));
+	}
+
+	public function testEnableExAppDoesNotLogWhenItCannotBeStored(): void {
+		$exApp = $this->createExApp(enabled: false);
+		$this->exAppService->method('enableExAppInternal')->willReturn(false);
+		$this->auditLogger->expects(self::never())->method('log');
+
+		self::assertFalse($this->service->enableExApp($exApp));
+	}
+
+	public function testDisableExAppLogsTheExApp(): void {
+		$exApp = $this->createExApp();
+		$this->setupReachableManualExApp($exApp, '{}');
+		$this->exAppService->method('disableExAppInternal')->willReturn(true);
+		$this->auditLogger->expects(self::once())->method('log')
+			->with(Operation::ExAppDisabled, 'ExApp %s was disabled', ['appId' => 'test_app']);
+
+		self::assertTrue($this->service->disableExApp($exApp));
+	}
+
+	public function testDisableExAppLogsAnExAppThatCouldNotBeToldAboutIt(): void {
+		$exApp = $this->createExApp();
+		$this->setupReachableManualExApp($exApp, '{"error":"busy"}');
+		$this->exAppService->expects(self::once())->method('disableExAppInternal')->with($exApp)->willReturn(true);
+		$this->auditLogger->expects(self::once())->method('log')
+			->with(Operation::ExAppDisabled, 'ExApp %s was disabled', ['appId' => 'test_app']);
+
+		self::assertFalse($this->service->disableExApp($exApp));
+	}
+
+	public function testDisableExAppDoesNotLogWhenItCannotBeStored(): void {
+		$exApp = $this->createExApp();
+		$this->setupReachableManualExApp($exApp, '{}');
+		$this->exAppService->method('disableExAppInternal')->willReturn(false);
+		$this->auditLogger->expects(self::never())->method('log');
+
+		$this->service->disableExApp($exApp);
+	}
+
+	public function testDisableExAppDoesNotLogWithoutItsDaemon(): void {
+		$exApp = $this->createExApp();
+		$this->setupExAppUrlMocks();
+		$this->commonService->method('buildAppAPIAuthHeaders')->willReturn([]);
+		$this->client->method('put')->willReturn($this->createResponse('{}'));
+		$this->daemonConfigService->method('getDaemonConfigByName')->willReturn(null);
+		$this->exAppService->expects(self::never())->method('disableExAppInternal');
+		$this->auditLogger->expects(self::never())->method('log');
+
+		self::assertFalse($this->service->disableExApp($exApp));
+	}
+
+	public static function removeExAppsByDaemonProvider(): array {
+		return [
+			'HaRP, removed' => [true, '', null, true],
+			'HaRP, failed' => [true, 'Failed to remove ExApp', null, false],
+			'Docker Socket Proxy, volume removed' => [false, '', ['success' => true], true],
+			'Docker Socket Proxy, volume not removed' => [false, '', ['error' => 'Volume is in use.'], false],
+		];
+	}
+
+	#[DataProvider('removeExAppsByDaemonProvider')]
+	public function testRemoveExAppsByDaemonConfigNameLogsTheDeletedData(bool $isHarp, string $removeExAppError, ?array $removeVolumeResult, bool $logged): void {
+		$exApp = $this->createExApp();
+		$exApp->setAcceptsDeployId('docker-install');
+		$exApp->setDeployConfig($isHarp ? ['harp' => ['frp_address' => 'appapi-harp:8782']] : []);
+		$daemonConfig = new DaemonConfig(['name' => 'test_daemon', 'accepts_deploy_id' => 'docker-install']);
+		$this->setupReachableManualExApp($exApp, '{}');
+		$this->exAppService->method('getExAppsByDaemonName')->with('test_daemon')->willReturn([$exApp]);
+		$this->exAppService->method('disableExAppInternal')->willReturn(true);
+		$this->dockerActions->method('removeExApp')->willReturn($removeExAppError);
+		$this->dockerActions->method('removeVolume')->willReturn($removeVolumeResult ?? []);
+		$this->exAppService->expects($logged ? self::once() : self::never())->method('logExAppDataDeleted')->with($exApp);
+		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('test_app');
+
+		$this->service->removeExAppsByDaemonConfigName($daemonConfig);
+	}
+
+	private function createRequestForUser(string $appId, string $userId, string $secret): MockObject&\OCP\IRequest {
+		$request = $this->createMock(\OCP\IRequest::class);
+		$request->method('getRemoteAddress')->willReturn('127.0.0.1');
+		$request->method('getHeader')->willReturnCallback(static fn (string $name): string => match ($name) {
+			'EX-APP-ID' => $appId,
+			'EX-APP-VERSION' => '1.0.0',
+			'AUTHORIZATION-APP-API' => base64_encode($userId . ':' . $secret),
+			default => '',
+		});
+		$request->method('getPathInfo')->willReturn('/ocs/v1.php/apps/app_api/api/v1/log');
+		return $request;
+	}
+
+	public function testValidateLogsAWrongSecretWithTheClaimedUser(): void {
+		$this->exAppService->method('getExApp')->with('test_app')->willReturn($this->createExApp());
+		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::ExAppAuthFailed,
+			'Failed AppAPI authentication of ExApp %s for user %s',
+			['exAppId' => 'test_app', 'userId' => 'alice', 'reason' => 'invalid_secret'],
+		);
+
+		self::assertFalse($this->service->validateExAppRequestToNC($this->createRequestForUser('test_app', 'alice', 'wrong_secret')));
+	}
+
+	public function testValidateLogsAnUnknownExApp(): void {
+		$this->exAppService->method('getExApp')->with('unknown_app')->willReturn(null);
+		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->throttler->expects(self::once())->method('registerAttempt');
+		$this->auditLogger->expects(self::once())->method('log')->with(
+			Operation::ExAppAuthFailed,
+			'Failed AppAPI authentication of ExApp %s for user %s',
+			['exAppId' => 'unknown_app', 'userId' => 'alice', 'reason' => 'unknown_ex_app'],
+		);
+
+		self::assertFalse($this->service->validateExAppRequestToNC($this->createRequestForUser('unknown_app', 'alice', 'any_secret')));
+	}
+
+	public function testValidateDoesNotLogARequestWithoutAnExAppId(): void {
+		$this->throttler->method('sleepDelayOrThrowOnMax')->willReturn(0);
+		$this->auditLogger->expects(self::never())->method('log');
+
+		self::assertFalse($this->service->validateExAppRequestToNC($this->createRequestForUser('', 'alice', 'any_secret')));
 	}
 }
