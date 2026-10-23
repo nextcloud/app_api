@@ -22,7 +22,7 @@ use Psr\Log\LoggerInterface;
 
 class HarpVersionCheckTest extends TestCase {
 
-	private function runCheck(string $harpVersion, int $expectedCacheTtl): SetupResult {
+	private function runCheck(?string $harpVersion, int $expectedCacheTtl): SetupResult {
 		$l10n = $this->createMock(IL10N::class);
 		$l10n->method('t')->willReturnCallback(fn (string $text, array $parameters = []) => vsprintf($text, $parameters));
 		$daemonConfigService = $this->createMock(DaemonConfigService::class);
@@ -46,6 +46,12 @@ class HarpVersionCheckTest extends TestCase {
 		$result = $this->runCheck('0.4.7', 60 * 60);
 		self::assertSame(SetupResult::WARNING, $result->getSeverity());
 		self::assertStringContainsString('"0.4.7", which is too old. The minimum required version is "0.4.8"', $result->getDescription());
+	}
+
+	public function testUnreachableHarpIsReported(): void {
+		$result = $this->runCheck(null, 60 * 60);
+		self::assertSame(SetupResult::WARNING, $result->getSeverity());
+		self::assertStringContainsString('Could not retrieve HaRP version from daemon "harp_proxy"', $result->getDescription());
 	}
 
 	public function testCurrentHarpPasses(): void {
