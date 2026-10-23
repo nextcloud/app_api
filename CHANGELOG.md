@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `POST /ocs/v2.php/apps/app_api/api/v1/notification` now answers `404` when the `notifications` app is not enabled, instead of `200` for a notification that nobody delivers.
 - `occ app_api:daemon:register` and the admin settings refuse a HaRP or HTTPS daemon key shorter than 12 characters. #1082
 - The daemon templates in the admin settings no longer prefill the HaRP shared key or HaProxy password. #1083
+- HaRP receives the verb of each ExApp route, so HaRP 0.4.8 and newer check the HTTP method of a request as the ExApp proxy does. #1138
+- The ExApp proxy accepts `HEAD` on routes that list `GET` and reads a route's verb as a list of methods, as HaRP does. #1144
 
 ### Fixed
 
