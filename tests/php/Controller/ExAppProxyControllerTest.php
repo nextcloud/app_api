@@ -90,6 +90,31 @@ class ExAppProxyControllerTest extends TestCase {
 		self::assertSame('^/.*', $this->routeFor('GET', 'other', $adminFirst, 'alice')['url']);
 	}
 
+	public static function internalEndpointProvider(): array {
+		return [
+			'heartbeat' => ['heartbeat'],
+			'init' => ['init'],
+			'enabled' => ['enabled'],
+			'trailing slash' => ['init/'],
+			'other case' => ['Enabled'],
+			'encoded leading slash' => ['%2Fheartbeat'],
+			'percent-encoded' => ['%65nabled'],
+			'followed by a decoded "?"' => ['enabled?enabled=0'],
+			'followed by a decoded "#"' => ['init#x'],
+			'followed by a newline' => ["heartbeat\n"],
+		];
+	}
+
+	#[DataProvider('internalEndpointProvider')]
+	public function testInternalEndpointIsRefused(string $path): void {
+		self::assertFalse($this->isForwarded($path));
+	}
+
+	public function testPathsNearInternalEndpointsAreForwarded(): void {
+		self::assertTrue($this->isForwarded('heartbeats'));
+		self::assertTrue($this->isForwarded('api/enabled'));
+	}
+
 	public function testHeadIsAcceptedWhereGetIs(): void {
 		// Nextcloud routes HEAD to the proxy's GET action, and HaRP accepts HEAD on GET routes too.
 		self::assertSame('GET', $this->routeFor('HEAD', 'settings', self::SAME_URL)['verb']);
