@@ -243,6 +243,14 @@ class ExAppProxyController extends Controller {
 			);
 			return null;
 		}
+		// As the ExApp may read it: cut at "?" or "#", decoded once, any case, surrounding slashes and newlines.
+		$target = rawurldecode(substr($other, 0, strcspn($other, '?#')));
+		if (in_array(strtolower(trim($target, "/\n")), ['heartbeat', 'init', 'enabled'], true)) {
+			$this->logger->debug(
+				sprintf('Returning status 404 for "%s": only AppAPI calls this ExApp endpoint.', $other)
+			);
+			return null;
+		}
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp === null) {
 			$this->logger->debug(
