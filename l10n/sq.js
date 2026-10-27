@@ -11,6 +11,7 @@ OC.L10N.register(
     "Enabled" : "E aktivizuar",
     "Remove" : "Hiqe",
     "Add" : "Shto ",
+    "Display name" : "Emri në ekran",
     "Confirm" : "Konfirmo",
     "Save" : "Ruaje",
     "Register" : "Regjistrohu",
