@@ -144,7 +144,7 @@ class DaemonConfigController extends ApiController {
 		// Create and update DaemonConfig instance
 		$updatedDaemonConfig = new DaemonConfig($daemonConfigParams);
 		$updatedDaemonConfig->setId($daemonConfig->getId());
-		$updatedDaemonConfig = $this->daemonConfigService->updateDaemonConfig($updatedDaemonConfig);
+		$updatedDaemonConfig = $this->daemonConfigService->updateDaemonConfig($updatedDaemonConfig, $daemonConfig);
 
 		// Check if update was successful before proceeding
 		if ($updatedDaemonConfig === null) {
