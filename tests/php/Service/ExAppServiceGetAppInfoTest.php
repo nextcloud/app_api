@@ -21,6 +21,7 @@ use OCA\AppAPI\Service\TalkBotsService;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
 use OCA\AppAPI\Service\UI\ScriptsService;
+use OCA\AppAPI\Service\UI\ReferenceProviderService;
 use OCA\AppAPI\Service\UI\SettingsService;
 use OCA\AppAPI\Service\UI\StylesService;
 use OCA\AppAPI\Service\UI\TopMenuService;
@@ -65,6 +66,7 @@ class ExAppServiceGetAppInfoTest extends TestCase {
 			$this->createMock(ExAppDeployOptionsService::class),
 			$this->createMock(ExAppSetupCheckService::class),
 			$this->createMock(IConfig::class),
+			$this->createMock(ReferenceProviderService::class),
 		);
 	}
 

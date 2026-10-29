@@ -80,6 +80,18 @@ namespace OCA\AppAPI;
  *     admin_required: int,
  * }
  *
+ * @psalm-type AppAPIReferenceProvider = array{
+ *     id: int,
+ *     appid: string,
+ *     provider_id: string,
+ *     title: string,
+ *     icon_url: string,
+ *     order: int,
+ *     search_providers_ids: list<string>,
+ *     match_patterns: list<string>,
+ *     script_path: string,
+ * }
+ *
  * @psalm-type AppAPIInitialState = array{
  *     id: int,
  *     appid: string,

@@ -17,6 +17,7 @@ use OCA\AppAPI\Listener\DeclarativeSettings\SetValueListener;
 use OCA\AppAPI\Listener\GetTaskProcessingProvidersListener;
 use OCA\AppAPI\Listener\LoadFilesPluginListener;
 use OCA\AppAPI\Listener\LoadMenuEntriesListener;
+use OCA\AppAPI\Listener\RenderReferenceListener;
 use OCA\AppAPI\Listener\SabrePluginAuthInitListener;
 use OCA\AppAPI\Middleware\AppAPIAuthMiddleware;
 use OCA\AppAPI\Middleware\ExAppUIL10NMiddleware;
@@ -24,6 +25,7 @@ use OCA\AppAPI\Middleware\ExAppUiMiddleware;
 use OCA\AppAPI\Middleware\MaintenanceModeMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
+use OCA\AppAPI\Service\UI\ReferenceProviderService;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
 use OCA\AppAPI\SetupChecks\ExAppsErrorSetupCheck;
 use OCA\AppAPI\SetupChecks\ExAppsWarningSetupCheck;
@@ -35,12 +37,15 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Collaboration\Reference\RenderReferenceEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Navigation\Events\LoadAdditionalEntriesEvent;
 use OCP\Settings\Events\DeclarativeSettingsGetValueEvent;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 use OCP\Settings\Events\DeclarativeSettingsSetValueEvent;
 use OCP\TaskProcessing\Events\GetTaskProcessingProvidersEvent;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Log\LoggerInterface;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'app_api';
@@ -78,9 +83,25 @@ class Application extends App implements IBootstrap {
 		$context->registerSetupCheck(HarpVersionCheck::class);
 		$context->registerSetupCheck(ExAppsErrorSetupCheck::class);
 		$context->registerSetupCheck(ExAppsWarningSetupCheck::class);
+
+		$context->registerEventListener(RenderReferenceEvent::class, RenderReferenceListener::class);
+		$this->registerExAppReferenceProviders($context);
 	}
 
 	public function boot(IBootContext $context): void {
+	}
+
+	/**
+	 * The server has no event to collect reference providers, so they are registered here,
+	 * one synthetic class per ExApp provider (read from the distributed cache when available).
+	 */
+	private function registerExAppReferenceProviders(IRegistrationContext $context): void {
+		$container = $this->getContainer();
+		try {
+			$container->get(ReferenceProviderService::class)->registerExAppReferenceProviders($context);
+		} catch (ContainerExceptionInterface $e) {
+			$container->get(LoggerInterface::class)->debug('Could not register ExApp reference providers', ['exception' => $e]);
+		}
 	}
 
 	public function registerDavAuth(): void {

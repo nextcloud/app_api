@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- ExApps can register reference providers with `POST /ocs/v2.php/apps/app_api/api/v1/ui/reference-provider`. A provider adds an entry to the Smart Picker, optionally with a picker script from the ExApp, and resolves the links that match its patterns into rich previews through `POST /reference/resolve` on the ExApp. The script path and a relative icon path must stay inside the ExApp: no `..` segments, schemes, backslashes or percent-encoding. #1099
+
 ### Changed
 
 - `POST /ocs/v2.php/apps/app_api/api/v1/notification` now answers `404` when the `notifications` app is not enabled, instead of `200` for a notification that nobody delivers.

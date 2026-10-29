@@ -347,6 +347,57 @@
                     }
                 }
             },
+            "ReferenceProvider": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "appid",
+                    "provider_id",
+                    "title",
+                    "icon_url",
+                    "order",
+                    "search_providers_ids",
+                    "match_patterns",
+                    "script_path"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "appid": {
+                        "type": "string"
+                    },
+                    "provider_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "icon_url": {
+                        "type": "string"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "search_providers_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "match_patterns": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "script_path": {
+                        "type": "string"
+                    }
+                }
+            },
             "Script": {
                 "type": "object",
                 "required": [
@@ -3499,6 +3550,364 @@
                     },
                     "404": {
                         "description": "Top menu entry not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ocs/v2.php/apps/app_api/api/v1/ui/reference-provider": {
+            "post": {
+                "operationId": "ocs_ui-register-ex-app-reference-provider",
+                "summary": "Register a reference provider for the calling ExApp",
+                "description": "The provider appears in the Smart Picker and resolves matching links into rich previews. A link that matches one of `matchPatterns` is resolved with `POST /reference/resolve` on the ExApp.",
+                "tags": [
+                    "ocs_ui"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "providerId",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "providerId": {
+                                        "type": "string",
+                                        "description": "Unique ID of the provider; the picker script registers its custom element under this ID"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "description": "Title in the Smart Picker"
+                                    },
+                                    "iconUrl": {
+                                        "type": "string",
+                                        "default": "",
+                                        "description": "Icon path inside the ExApp, or an absolute URL"
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "default": 0,
+                                        "description": "Position in the Smart Picker; lower comes first"
+                                    },
+                                    "searchProvidersIds": {
+                                        "type": "array",
+                                        "default": [],
+                                        "description": "Unified search providers that the picker can use for this provider",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "matchPatterns": {
+                                        "type": "array",
+                                        "default": [],
+                                        "description": "PCRE patterns of links that this provider resolves",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "scriptPath": {
+                                        "type": "string",
+                                        "default": "",
+                                        "description": "Path of the picker script inside the ExApp; empty for no custom picker element"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "ex-app-id",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "OCS-APIRequest",
+                        "in": "header",
+                        "description": "Required to be true for the API request to pass",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reference provider registered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input, or the provider could not be registered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "ocs_ui-unregister-ex-app-reference-provider",
+                "summary": "Unregister a reference provider of the calling ExApp",
+                "tags": [
+                    "ocs_ui"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "providerId",
+                        "in": "query",
+                        "description": "ID of the provider to remove",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ex-app-id",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "OCS-APIRequest",
+                        "in": "header",
+                        "description": "Required to be true for the API request to pass",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reference provider unregistered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Reference provider not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "operationId": "ocs_ui-get-ex-app-reference-provider",
+                "summary": "Get a reference provider of the calling ExApp",
+                "tags": [
+                    "ocs_ui"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "providerId",
+                        "in": "query",
+                        "description": "ID of the provider",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ex-app-id",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "OCS-APIRequest",
+                        "in": "header",
+                        "description": "Required to be true for the API request to pass",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reference provider returned",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {
+                                                    "$ref": "#/components/schemas/ReferenceProvider"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Reference provider not found",
                         "content": {
                             "application/json": {
                                 "schema": {
