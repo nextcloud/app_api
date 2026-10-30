@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updating a deploy daemon that does not exist answers `success: false` instead of a server error. #1082
 - The ExApp proxy also refuses `.` path segments and `..` segments followed by `;`, `%3F` or `%23`. #1163
 - The ExApp proxy refuses requests to the `/heartbeat`, `/init` and `/enabled` endpoints of ExApps, as HaRP does. #1168
+- The ExApp proxy also applies a stricter route that matches the path as an ExApp may read it, as HaRP 0.4.8 does. #1182
 
 ## [34.0.0]
 
