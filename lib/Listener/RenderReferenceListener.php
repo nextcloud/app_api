@@ -26,6 +26,10 @@ use OCP\Util;
  * The scripts must be on the page when the picker opens: the picker hides a provider that has neither
  * a search provider nor a registered custom element.
  *
+ * The scripts load for every user on these pages and run with that user's session, the same trust given to
+ * scripts registered through {@see \OCA\AppAPI\Service\UI\ScriptsService}. An admin who installs an ExApp
+ * trusts its frontend code as much as a PHP app's.
+ *
  * @template-implements IEventListener<RenderReferenceEvent>
  */
 class RenderReferenceListener implements IEventListener {
@@ -52,7 +56,9 @@ class RenderReferenceListener implements IEventListener {
 			if ($exApp === null) {
 				continue;
 			}
-			$baseUrl = $this->getExAppBaseUrl($provider->getAppid(), HarpService::isHarp($exApp->getDeployConfig()));
+			$baseUrl = ReferenceProviderService::getExAppBaseUrl(
+				$this->urlGenerator, $provider->getAppid(), HarpService::isHarp($exApp->getDeployConfig())
+			);
 			$pickers[] = [
 				'appid' => $provider->getAppid(),
 				'provider_id' => $provider->getProviderId(),
@@ -66,16 +72,5 @@ class RenderReferenceListener implements IEventListener {
 		}
 		$this->initialState->provideInitialState('ex_reference_pickers', $pickers);
 		Util::addScript(Application::APP_ID, Application::APP_ID . '-reference');
-	}
-
-	/**
-	 * Base URL the browser uses to reach the ExApp: HaRP serves `/exapps/<appid>` directly,
-	 * otherwise the request goes through the AppAPI PHP proxy.
-	 */
-	private function getExAppBaseUrl(string $appId, bool $isHarp): string {
-		if ($isHarp) {
-			return rtrim($this->urlGenerator->getWebroot(), '/') . '/exapps/' . $appId;
-		}
-		return rtrim($this->urlGenerator->linkToRoute('app_api.ExAppProxy.ExAppGet', ['appId' => $appId, 'other' => '']), '/');
 	}
 }

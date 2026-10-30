@@ -3583,7 +3583,7 @@
             "post": {
                 "operationId": "ocs_ui-register-ex-app-reference-provider",
                 "summary": "Register a reference provider for the calling ExApp",
-                "description": "The provider appears in the Smart Picker and resolves matching links into rich previews. A link that matches one of `matchPatterns` is resolved with `POST /reference/resolve` on the ExApp.",
+                "description": "The provider appears in the Smart Picker and resolves matching links into rich previews. A link that matches one of `matchPatterns` is resolved with `POST /reference/resolve` on the ExApp. Every link a user pastes or renders that matches the patterns is sent to the ExApp, with the user's ID, so the patterns must name the ExApp's own hosts.",
                 "tags": [
                     "ocs_ui"
                 ],
@@ -3618,7 +3618,7 @@
                                     "iconUrl": {
                                         "type": "string",
                                         "default": "",
-                                        "description": "Icon path inside the ExApp, or an absolute URL"
+                                        "description": "Icon path inside the ExApp, served through HaRP or the AppAPI proxy"
                                     },
                                     "order": {
                                         "type": "integer",
@@ -3629,7 +3629,7 @@
                                     "searchProvidersIds": {
                                         "type": "array",
                                         "default": [],
-                                        "description": "Unified search providers that the picker can use for this provider",
+                                        "description": "Unified search providers that the picker can use for this provider, at most 10",
                                         "items": {
                                             "type": "string"
                                         }
@@ -3637,7 +3637,7 @@
                                     "matchPatterns": {
                                         "type": "array",
                                         "default": [],
-                                        "description": "PCRE patterns of links that this provider resolves",
+                                        "description": "PCRE patterns of links that this provider resolves, at most 10 of up to 256 characters. Each must start with `^https://` (or `^https?://`) and a literal host, like `#^https://example\\.com/item/\\d+$#`",
                                         "items": {
                                             "type": "string"
                                         }

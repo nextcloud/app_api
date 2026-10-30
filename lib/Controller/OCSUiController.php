@@ -238,13 +238,15 @@ class OCSUiController extends OCSController {
 	 *
 	 * The provider appears in the Smart Picker and resolves matching links into rich previews.
 	 * A link that matches one of `matchPatterns` is resolved with `POST /reference/resolve` on the ExApp.
+	 * Every link a user pastes or renders that matches the patterns is sent to the ExApp, with the user's ID,
+	 * so the patterns must name the ExApp's own hosts.
 	 *
 	 * @param string $providerId Unique ID of the provider; the picker script registers its custom element under this ID
 	 * @param string $title Title in the Smart Picker
-	 * @param string $iconUrl Icon path inside the ExApp, or an absolute URL
+	 * @param string $iconUrl Icon path inside the ExApp, served through HaRP or the AppAPI proxy
 	 * @param int $order Position in the Smart Picker; lower comes first
-	 * @param list<string> $searchProvidersIds Unified search providers that the picker can use for this provider
-	 * @param list<string> $matchPatterns PCRE patterns of links that this provider resolves
+	 * @param list<string> $searchProvidersIds Unified search providers that the picker can use for this provider, at most 10
+	 * @param list<string> $matchPatterns PCRE patterns of links that this provider resolves, at most 10 of up to 256 characters. Each must start with `^https://` (or `^https?://`) and a literal host, like `#^https://example\.com/item/\d+$#`
 	 * @param string $scriptPath Path of the picker script inside the ExApp; empty for no custom picker element
 	 *
 	 * @return DataResponse<Http::STATUS_OK, list<empty>, array{}>

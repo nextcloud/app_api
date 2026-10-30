@@ -119,13 +119,69 @@ class ReferenceProviderServiceTest extends TestCase {
 	}
 
 	#[\PHPUnit\Framework\Attributes\DataProvider('escapingPaths')]
-	public function testRelativeIconUrlEscapingTheExAppIsRejected(string $path): void {
-		if (str_starts_with($path, 'https://')) {
-			self::assertNotNull($this->service->registerReferenceProvider(self::APP_A, 'phpunit_rp_bad', 'Ok', $path, 0, [], [], ''));
-			return; // absolute http(s) icons are allowed
-		}
+	public function testIconUrlOutsideTheExAppIsRejected(string $path): void {
+		// Absolute URLs included: an outside icon would make every user's browser contact a third party.
 		$this->expectException(\InvalidArgumentException::class);
 		$this->service->registerReferenceProvider(self::APP_A, 'phpunit_rp_bad', 'Bad', $path, 0, [], [], '');
+	}
+
+	/**
+	 * Patterns that would let a provider see links to hosts it does not name, or that are not anchored at all.
+	 */
+	public static function unanchoredPatterns(): array {
+		return [
+			'match everything' => ['/.*/'],
+			'any https host' => ['#^https://.*$#'],
+			'not anchored' => ['#https://example\.com/#'],
+			'host as a class' => ['#^https://[a-z]+\.com/#'],
+			'unescaped dot' => ['#^https://exam.le\.com/#'],
+			'host then any suffix' => ['#^https://example\.com.evil\.net/#'],
+			'no scheme' => ['#^example\.com/#'],
+		];
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider('unanchoredPatterns')]
+	public function testPatternNotAnchoredToAHostIsRejected(string $pattern): void {
+		$this->expectException(\InvalidArgumentException::class);
+		$this->service->registerReferenceProvider(self::APP_A, 'phpunit_rp_bad', 'Bad', '', 0, [], [$pattern], '');
+	}
+
+	public function testHostAnchoredPatternsAreAccepted(): void {
+		$patterns = [
+			'#^https://i\.imgflip\.com/[0-9a-z]+\.(jpg|png)$#',
+			'#^https?://example\.co\.uk(?:/|$)#',
+			'~^https://example\.com:8443/x~',
+		];
+		$row = $this->service->registerReferenceProvider(self::APP_A, 'phpunit_rp_a', 'Ok', '', 0, [], $patterns, '');
+		self::assertSame($patterns, $row->getMatchPatternsList());
+	}
+
+	public function testPatternCountAndLengthAreCapped(): void {
+		$ok = '#^https://example\.com/#';
+		try {
+			$this->service->registerReferenceProvider(self::APP_A, 'phpunit_rp_bad', 'Bad', '', 0, [], array_fill(0, 11, $ok), '');
+			self::fail('11 patterns accepted');
+		} catch (\InvalidArgumentException) {
+		}
+		$this->expectException(\InvalidArgumentException::class);
+		$this->service->registerReferenceProvider(
+			self::APP_A, 'phpunit_rp_bad', 'Bad', '', 0, [], ['#^https://example\.com/' . str_repeat('a', 250) . '#'], '');
+	}
+
+	public function testTooLongIconPathIsRejectedWithAClearError(): void {
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionMessage('iconUrl');
+		$this->service->registerReferenceProvider(self::APP_A, 'phpunit_rp_bad', 'Bad', 'img/' . str_repeat('a', 252) . '.svg', 0, [], [], '');
+	}
+
+	public function testCachePrefixIsNamespacedPerProvider(): void {
+		$pattern = '#^https://shared\.test/#';
+		$this->register(self::APP_A, 'phpunit_rp_a', [$pattern]);
+		$this->register(self::APP_B, 'phpunit_rp_b', [$pattern]);
+		$a = $this->service->getAnonymousReferenceProvider($this->service->getReferenceProvider(self::APP_A, 'phpunit_rp_a'));
+		$b = $this->service->getAnonymousReferenceProvider($this->service->getReferenceProvider(self::APP_B, 'phpunit_rp_b'));
+
+		self::assertNotSame($a->getCachePrefix('https://shared.test/1'), $b->getCachePrefix('https://shared.test/1'));
 	}
 
 	public function testScriptPathInsideTheExAppIsAccepted(): void {
