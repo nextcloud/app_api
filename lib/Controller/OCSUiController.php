@@ -14,6 +14,7 @@ use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
+use OCA\AppAPI\Service\UI\ReferenceProviderService;
 use OCA\AppAPI\Service\UI\ScriptsService;
 use OCA\AppAPI\Service\UI\StylesService;
 use OCA\AppAPI\Service\UI\TopMenuService;
@@ -32,6 +33,7 @@ use OCP\IRequest;
  * @psalm-import-type AppAPIInitialState from ResponseDefinitions
  * @psalm-import-type AppAPIScript from ResponseDefinitions
  * @psalm-import-type AppAPIStyle from ResponseDefinitions
+ * @psalm-import-type AppAPIReferenceProvider from ResponseDefinitions
  */
 class OCSUiController extends OCSController {
 	protected $request;
@@ -43,6 +45,7 @@ class OCSUiController extends OCSController {
 		private readonly InitialStateService $initialStateService,
 		private readonly ScriptsService $scriptsService,
 		private readonly StylesService $stylesService,
+		private readonly ReferenceProviderService $referenceProviderService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -226,6 +229,89 @@ class OCSUiController extends OCSController {
 			$this->request->getHeader('ex-app-id'), $name);
 		if (!$result) {
 			throw new OCSNotFoundException('No such Top Menu entry');
+		}
+		return new DataResponse($result->jsonSerialize(), Http::STATUS_OK);
+	}
+
+	/**
+	 * Register a reference provider for the calling ExApp
+	 *
+	 * The provider appears in the Smart Picker and resolves matching links into rich previews.
+	 * A link that matches one of `matchPatterns` is resolved with `POST /reference/resolve` on the ExApp.
+	 * Every link a user pastes or renders that matches the patterns is sent to the ExApp, with the user's ID,
+	 * so the patterns must name the ExApp's own hosts.
+	 *
+	 * @param string $providerId Unique ID of the provider; the picker script registers its custom element under this ID
+	 * @param string $title Title in the Smart Picker
+	 * @param string $iconUrl Icon path inside the ExApp, served through HaRP or the AppAPI proxy
+	 * @param int $order Position in the Smart Picker; lower comes first
+	 * @param list<string> $searchProvidersIds Unified search providers that the picker can use for this provider, at most 10
+	 * @param list<string> $matchPatterns PCRE patterns of links that this provider resolves, at most 10 of up to 256 characters. Each must start with `^https://` (or `^https?://`) and a literal host, like `#^https://example\.com/item/\d+$#`
+	 * @param string $scriptPath Path of the picker script inside the ExApp; empty for no custom picker element
+	 *
+	 * @return DataResponse<Http::STATUS_OK, list<empty>, array{}>
+	 * @throws OCSBadRequestException Invalid input, or the provider could not be registered
+	 *
+	 * 200: Reference provider registered
+	 */
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function registerExAppReferenceProvider(
+		string $providerId, string $title, string $iconUrl = '', int $order = 0,
+		array $searchProvidersIds = [], array $matchPatterns = [], string $scriptPath = ''): DataResponse {
+		try {
+			$result = $this->referenceProviderService->registerReferenceProvider(
+				$this->request->getHeader('ex-app-id'), $providerId, $title, $iconUrl, $order,
+				$searchProvidersIds, $matchPatterns, $scriptPath);
+		} catch (\InvalidArgumentException $e) {
+			throw new OCSBadRequestException($e->getMessage());
+		}
+		if (!$result) {
+			throw new OCSBadRequestException('Reference provider could not be registered');
+		}
+		return new DataResponse();
+	}
+
+	/**
+	 * Unregister a reference provider of the calling ExApp
+	 *
+	 * @param string $providerId ID of the provider to remove
+	 *
+	 * @return DataResponse<Http::STATUS_OK, list<empty>, array{}>
+	 * @throws OCSNotFoundException Reference provider not found
+	 *
+	 * 200: Reference provider unregistered
+	 */
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function unregisterExAppReferenceProvider(string $providerId): DataResponse {
+		if (!$this->referenceProviderService->unregisterReferenceProvider(
+			$this->request->getHeader('ex-app-id'), $providerId)) {
+			throw new OCSNotFoundException('No such reference provider');
+		}
+		return new DataResponse();
+	}
+
+	/**
+	 * Get a reference provider of the calling ExApp
+	 *
+	 * @param string $providerId ID of the provider
+	 *
+	 * @return DataResponse<Http::STATUS_OK, AppAPIReferenceProvider, array{}>
+	 * @throws OCSNotFoundException Reference provider not found
+	 *
+	 * 200: Reference provider returned
+	 */
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function getExAppReferenceProvider(string $providerId): DataResponse {
+		$result = $this->referenceProviderService->getReferenceProvider(
+			$this->request->getHeader('ex-app-id'), $providerId);
+		if (!$result) {
+			throw new OCSNotFoundException('No such reference provider');
 		}
 		return new DataResponse($result->jsonSerialize(), Http::STATUS_OK);
 	}
