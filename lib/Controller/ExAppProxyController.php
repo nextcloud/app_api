@@ -237,16 +237,16 @@ class ExAppProxyController extends Controller {
 		string $appId, string $other, array &$route, array &$bruteforceProtection, int &$delay,
 	): ?ExApp {
 		$delay = 0;
-		// The forwarded path ends at "?" or "#", curl resolves dot segments, Tomcat drops ";" parameters first.
-		if (preg_match('#(?:^|/|%2[fF])(?:\.|%2[eE]){1,2}(?:[/;?\#]|%2[fF]|$)#', $other) === 1) {
+		// A dot segment curl resolves, also before ";" (Tomcat drops parameters), "?" or "#" (they end the path), raw or as an escape a proxy or wrapper ExApp decodes.
+		if (preg_match('#(?:^|/|%2[fF])(?:\.|%2[eE]){1,2}(?:[/;?\#]|%2[fF]|%3[bBfF]|%23|$)#', $other) === 1) {
 			$this->logger->debug(
 				sprintf('Returning status 404 for "%s": path contains a dot segment.', $other)
 			);
 			return null;
 		}
-		// As the ExApp may read it: cut at "?" or "#", decoded once, any case, surrounding slashes and newlines.
-		$target = rawurldecode(substr($other, 0, strcspn($other, '?#')));
-		if (in_array(strtolower(trim($target, "/\n")), ['heartbeat', 'init', 'enabled'], true)) {
+		// In any reading of the path, any case, without surrounding slashes and newlines.
+		$targets = array_map(static fn (string $path): string => strtolower(trim($path, "/\n")), self::exAppPathReadings($other));
+		if (array_intersect($targets, ['heartbeat', 'init', 'enabled']) !== []) {
 			$this->logger->debug(
 				sprintf('Returning status 404 for "%s": only AppAPI calls this ExApp endpoint.', $other)
 			);
@@ -325,13 +325,31 @@ class ExAppProxyController extends Controller {
 	}
 
 	private function passesExAppProxyRoutesChecks(ExApp $exApp, string $exAppRoute): array {
+		$readings = self::exAppPathReadings($exAppRoute);
+		$route = $this->firstExAppRoute($exApp, $readings[0], 'i');
+		if ($route === [] || !$this->passesExAppProxyRouteAccessLevelCheck($route['access_level'])) {
+			return [];
+		}
+		// As in HaRP, the route of another reading of the path or another letter case can only raise the access level.
+		foreach ($readings as $path) {
+			foreach (['', 'i'] as $flags) {
+				$candidate = $this->firstExAppRoute($exApp, $path, $flags);
+				if ($candidate !== [] && $candidate['access_level'] > $route['access_level']) {
+					$route = $candidate;
+				}
+			}
+		}
+		// Apply the access level of the decided route without falling through to broader routes.
+		return $this->passesExAppProxyRouteAccessLevelCheck($route['access_level']) ? $route : [];
+	}
+
+	private function firstExAppRoute(ExApp $exApp, string $canonicalSubject, string $flags): array {
 		// Route URL is a regex matched against the request path including its leading slash, mirroring HaRP's target_path semantics.
-		$canonicalSubject = '/' . $exAppRoute;
 		$method = strtoupper($this->request->getMethod());
 		foreach ($exApp->getRoutes() as $route) {
-			$pattern = '~^(?:' . str_replace('~', '\\~', $route['url']) . ')~i';
+			$pattern = '~^(?:' . str_replace('~', '\\~', $route['url']) . ')~' . $flags;
 			$matched = preg_match($pattern, $canonicalSubject) === 1;
-			if (!$matched && preg_match($pattern, $exAppRoute) === 1) {
+			if (!$matched && preg_match($pattern, substr($canonicalSubject, 1)) === 1) {
 				// TODO(deprecation): remove this bare-path fallback once known ExApps have migrated their info.xml route URLs to the canonical `^/path$` form. Tracked by the AppAPI / context_chat_backend coordination effort.
 				$this->logger->debug(sprintf(
 					'ExApp "%s" matched route "%s" via legacy bare-path fallback. Update the info.xml route URL to start with "/" or "^/" so it matches against "%s".',
@@ -340,11 +358,41 @@ class ExAppProxyController extends Controller {
 				$matched = true;
 			}
 			if ($matched && self::routeAcceptsMethod($route['verb'], $method)) {
-				// First match by path+verb wins. Apply its access level without falling through to broader routes.
-				return $this->passesExAppProxyRouteAccessLevelCheck($route['access_level']) ? $route : [];
+				return $route;
 			}
 		}
 		return [];
+	}
+
+	/**
+	 * The path as checked, then as ExApp servers read the forwarded one, like HaRP's exapp_paths.
+	 */
+	private static function exAppPathReadings(string $other): array {
+		$path = '/' . $other;
+		$sent = substr($path, 0, strcspn($path, '?#')); // the forwarded path ends at "?" or "#"
+		$decoded = rawurldecode($sent);
+		$resent = substr($decoded, 0, strcspn($decoded, '?#')); // a wrapper ExApp re-sending the decoded path cuts it there
+		$readings = [
+			$path,
+			$sent,
+			$decoded, // most servers decode the path before routing
+			preg_replace('#//+#', '/', $decoded),
+			rawurldecode(str_ireplace('%2F', '%252F', $sent)), // Express, aiohttp and Go keep "%2F" in its segment
+			preg_replace('#//+#', '/', rawurldecode(str_ireplace('%2F', '%252F', $sent))), // the same with "//" merged, as HaRP reads it
+			preg_replace('#//+#', '/', rawurldecode(preg_replace('#;[^/]*#', '', $sent))), // Tomcat drops ";" parameters first
+			preg_replace('#//+#', '/', preg_replace('#;[^/]*#', '', $decoded)), // Tomcat behind a proxy that decodes the path, such as nginx with a URI in proxy_pass
+			$resent,
+			preg_replace('#//+#', '/', $resent), // nginx and Go behind such a wrapper merge "//"
+			preg_replace('#//+#', '/', preg_replace('#;[^/]*#', '', $resent)), // Tomcat behind such a wrapper
+			rawurldecode(preg_replace('#^//+[^/]*(?:/|$)#', '/', $sent)), // WHATWG and Python URL parsers read a leading "//x" as a host
+			rawurldecode(preg_replace('#^//+[^/]*(?:/|$)#', '/', str_ireplace('%2F', '%252F', $sent))), // and keep "%2F" in its segment
+		];
+		foreach ($readings as $reading) {
+			if (strlen($reading) > 1 && str_ends_with($reading, '/')) {
+				$readings[] = substr($reading, 0, -1); // Express and Spring 5 ignore a trailing slash
+			}
+		}
+		return array_unique($readings);
 	}
 
 	/**
