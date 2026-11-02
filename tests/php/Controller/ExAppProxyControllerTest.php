@@ -102,6 +102,8 @@ class ExAppProxyControllerTest extends TestCase {
 			'followed by a decoded "?"' => ['enabled?enabled=0'],
 			'followed by a decoded "#"' => ['init#x'],
 			'followed by a newline' => ["heartbeat\n"],
+			'with a ";" parameter, dropped by Tomcat' => ['heartbeat;x'],
+			'followed by an escaped "?", where a wrapper ExApp cuts the decoded path' => ['enabled%3Fenabled=0'],
 		];
 	}
 
@@ -113,6 +115,53 @@ class ExAppProxyControllerTest extends TestCase {
 	public function testPathsNearInternalEndpointsAreForwarded(): void {
 		self::assertTrue($this->isForwarded('heartbeats'));
 		self::assertTrue($this->isForwarded('api/enabled'));
+	}
+
+	public static function stricterReadingProvider(): array {
+		// The path, and the stricter route that only the ExApp's reading of it matches.
+		return [
+			'";" parameter, dropped by Tomcat' => ['admin;x/a.txt', '^/admin/.*'],
+			'";" parameter, dropped by Tomcat before it decodes' => ['admin;x%3F/a.txt', '^/admin/.*'],
+			'escaped ";" and "?", decoded by nginx with a URI in proxy_pass and dropped by Tomcat' => ['%3Bx%3Fy/admin', '^/admin$'],
+			'decoded "?", where the forwarded path ends' => ['admin?x', '^/admin$'],
+			'decoded "#", where the forwarded path ends' => ['admin#x', '^/admin$'],
+			'escape, decoded by the ExApp' => ['%61dmin', '^/admin$'],
+			'escaped "?", kept in the name by Starlette' => ['%66iles/a%3F.txt', '^/files/.+\.txt$'],
+			'"//", merged by Tomcat, nginx and Go' => ['admin//x', '^/admin/x$'],
+			'"//" with a ";" and an escaped "?" in the name, merged by nginx' => ['files//a;b%3F.txt', '^/files/[^/]+\.txt$'],
+			'leading "//x" with an escaped "/", read as a host by Python\'s urlsplit before it decodes' => ['/x%2Fy/admin%2Fx', '^/admin/x$'],
+			'leading "//x", with "%2F" kept in its segment by URL parsers' => ['/x/files/a%2Fb', '^/files/[^/]+$'],
+			'escaped "/", kept in its segment by aiohttp and Go' => ['%61dmin/a%2Fb', '^/admin/[^/]+$'],
+			'escaped "/" kept in its segment, with "//" merged' => ['//files/a.txt%2Fa.txt', '^/files/[^/]+\.txt$'],
+			'trailing slash, ignored by Express' => ['admin/', '^/admin$'],
+			'trailing slash and another letter case, both ignored by Express' => ['Admin/', '^/admin$'],
+			'escaped "?", where a wrapper ExApp cuts the decoded path it re-sends' => ['admin%3Fx', '^/admin$'],
+			'escaped "?" after a ";", where a wrapper ExApp cuts the decoded path it re-sends' => ['files/a;b.txt%3Fz', '^/files/.+\.txt$'],
+			'escaped "/" and "?" after a ";", where a wrapper ExApp re-sends the decoded path to nginx' => ['files/%2Fa;b.txt%3Fz', '^/files/[^/]+\.txt$'],
+			'escaped ";", which a wrapper ExApp re-sends to Tomcat' => ['admin%3Bx/a.txt', '^/admin/.*'],
+			'decoded "?", with a route URL without a leading slash' => ['admin?x', '^admin$'],
+		];
+	}
+
+	#[DataProvider('stricterReadingProvider')]
+	public function testStricterRouteOfAnotherReadingApplies(string $path, string $adminUrl): void {
+		$routes = [
+			['url' => $adminUrl, 'verb' => 'GET', 'access_level' => 2],
+			['url' => '.*', 'verb' => 'GET', 'access_level' => 0],
+		];
+		self::assertSame([], $this->routeFor('GET', $path, $routes));
+		self::assertSame($adminUrl, $this->routeFor('GET', $path, $routes, 'admin', true)['url']);
+	}
+
+	public function testRouteOfAnotherLetterCaseCanOnlyRaiseTheAccessLevel(): void {
+		// A case-sensitive ExApp serves "/PUB/x" with its user route.
+		$routes = [
+			['url' => '^/pub/.*', 'verb' => 'GET', 'access_level' => 0],
+			['url' => '.*', 'verb' => 'GET', 'access_level' => 1],
+		];
+		self::assertSame([], $this->routeFor('GET', 'PUB/x', $routes));
+		self::assertSame('.*', $this->routeFor('GET', 'PUB/x', $routes, 'alice')['url']);
+		self::assertSame('^/pub/.*', $this->routeFor('GET', 'PUB/x', [$routes[0]])['url']);
 	}
 
 	public function testHeadIsAcceptedWhereGetIs(): void {
@@ -139,8 +188,11 @@ class ExAppProxyControllerTest extends TestCase {
 			'with an empty parameter at the end' => ['a/..;'],
 			'with a parameter in the middle' => ['a/..;x=1/b'],
 			'with a parameter at the end' => ['a/..;x=1'],
+			'with an escaped parameter, which a proxy decodes' => ['a/..%3Bx/b'],
 			'followed by a decoded "?"' => ['a/..?/b'],
 			'followed by a decoded "#"' => ['a/..#x'],
+			'followed by an escaped "?", where a wrapper ExApp cuts the decoded path' => ['a/..%3Fx'],
+			'followed by an escaped "#", where a wrapper ExApp cuts the decoded path' => ['a/..%23x'],
 			'current directory in the middle' => ['a/./b'],
 			'current directory at the start' => ['./a'],
 			'current directory with a parameter' => ['a/.;/b'],
