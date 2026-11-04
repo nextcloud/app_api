@@ -136,7 +136,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 17.4.2
 	- license: MIT
 - vue-material-design-icons
-	- version: 5.3.1
+	- version: 5.3.2
 	- license: MIT
 - vue-router
 	- version: 4.6.4
