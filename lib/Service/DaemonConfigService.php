@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Service;
 
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\DaemonConfigMapper;
 use OCA\AppAPI\DeployActions\DockerActions;
@@ -36,6 +38,7 @@ readonly class DaemonConfigService {
 		private DaemonConfigMapper $mapper,
 		private ExAppService $exAppService,
 		private ICrypto $crypto,
+		private AuditLogger $auditLogger,
 	) {
 	}
 
@@ -134,7 +137,7 @@ readonly class DaemonConfigService {
 			if (isset($params['deploy_config']['haproxy_password']) && $params['deploy_config']['haproxy_password'] !== '') {
 				$params['deploy_config']['haproxy_password'] = $this->crypto->encrypt($params['deploy_config']['haproxy_password']);
 			}
-			return $this->mapper->insert(new DaemonConfig([
+			$daemonConfig = $this->mapper->insert(new DaemonConfig([
 				'name' => $params['name'],
 				'display_name' => $params['display_name'],
 				'accepts_deploy_id' => $params['accepts_deploy_id'],
@@ -146,15 +149,25 @@ readonly class DaemonConfigService {
 			$this->logger->error('Failed to register daemon config. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->auditLogger->log(Operation::DaemonRegistered, 'Deploy daemon %s was registered', [
+			'daemonName' => $daemonConfig->getName(),
+			'acceptsDeployId' => $daemonConfig->getAcceptsDeployId(),
+			'host' => $daemonConfig->getHost(),
+		]);
+		return $daemonConfig;
 	}
 
 	public function unregisterDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
 		try {
-			return $this->mapper->delete($daemonConfig);
+			$daemonConfig = $this->mapper->delete($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to unregister daemon config. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->auditLogger->log(Operation::DaemonUnregistered, 'Deploy daemon %s was unregistered', [
+			'daemonName' => $daemonConfig->getName(),
+		]);
+		return $daemonConfig;
 	}
 
 	/**
@@ -202,7 +215,10 @@ readonly class DaemonConfigService {
 		}
 	}
 
-	public function updateDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
+	/**
+	 * @param DaemonConfig $previousDaemonConfig the stored configuration before the update
+	 */
+	public function updateDaemonConfig(DaemonConfig $daemonConfig, DaemonConfig $previousDaemonConfig): ?DaemonConfig {
 		$name = $daemonConfig->getName() ?? '';
 		if ($name === '' || $this->containsControlCharacters($name)) {
 			$this->logger->error('Failed to update daemon configuration: `name` contains invalid characters or is empty.');
@@ -210,11 +226,20 @@ readonly class DaemonConfigService {
 		}
 
 		try {
-			return $this->mapper->update($daemonConfig);
+			$daemonConfig = $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to update DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		// Only whether the secret changed is logged, never the secret itself
+		$secretChanged = ($daemonConfig->getDeployConfig()['haproxy_password'] ?? '')
+			!== ($previousDaemonConfig->getDeployConfig()['haproxy_password'] ?? '');
+		$this->auditLogger->log(Operation::DaemonUpdated, 'Deploy daemon %s was updated', [
+			'daemonName' => $daemonConfig->getName(),
+			'host' => $daemonConfig->getHost(),
+			'secretChanged' => $secretChanged,
+		]);
+		return $daemonConfig;
 	}
 
 	public function addDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
@@ -246,11 +271,17 @@ readonly class DaemonConfigService {
 			$deployConfig['registries'] = [...array_values($deployConfig['registries']), ['from' => $from, 'to' => $to]];
 			$daemonConfig->setDeployConfig($deployConfig);
 
-			return $this->mapper->update($daemonConfig);
+			$daemonConfig = $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to add registry to DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->auditLogger->log(Operation::DaemonRegistryAdded, 'Docker registry mapping was added to deploy daemon %s: %s to %s', [
+			'daemonName' => $daemonConfig->getName(),
+			'from' => $from,
+			'to' => $to,
+		]);
+		return $daemonConfig;
 	}
 
 	public function removeDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
@@ -265,11 +296,17 @@ readonly class DaemonConfigService {
 			}));
 			$daemonConfig->setDeployConfig($deployConfig);
 
-			return $this->mapper->update($daemonConfig);
+			$daemonConfig = $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to remove registry from DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->auditLogger->log(Operation::DaemonRegistryRemoved, 'Docker registry mapping was removed from deploy daemon %s: %s to %s', [
+			'daemonName' => $daemonConfig->getName(),
+			'from' => $registryMap['from'] ?? null,
+			'to' => $registryMap['to'] ?? null,
+		]);
+		return $daemonConfig;
 	}
 
 	/**

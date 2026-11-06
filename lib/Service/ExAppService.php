@@ -11,6 +11,8 @@ namespace OCA\AppAPI\Service;
 
 use InvalidArgumentException;
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Db\ExAppMapper;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
@@ -58,6 +60,7 @@ class ExAppService {
 		private readonly ExAppDeployOptionsService $deployOptionsService,
 		private readonly ExAppSetupCheckService $setupCheckService,
 		private readonly IConfig $config,
+		private readonly AuditLogger $auditLogger,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$distributedCacheClass = ltrim($config->getSystemValueString('memcache.distributed', ''), '\\');
@@ -100,6 +103,12 @@ class ExAppService {
 			if (isset($appInfo['external-app']['routes'])) {
 				$exApp->setRoutes($this->registerExAppRoutes($exApp, $appInfo['external-app']['routes'])->getRoutes() ?? []);
 			}
+			$this->auditLogger->log(Operation::ExAppRegistered, 'ExApp %s (version %s) was registered on deploy daemon %s', [
+				'appId' => $exApp->getAppid(),
+				'version' => $exApp->getVersion(),
+				'daemonName' => $exApp->getDaemonConfigName(),
+				'port' => $exApp->getPort(),
+			]);
 			return $exApp;
 		} catch (Exception|MultipleObjectsReturnedException|DoesNotExistException $e) {
 			$this->logger->error(sprintf('Error while registering ExApp %s: %s', $appInfo['id'], $e->getMessage()));
@@ -128,6 +137,10 @@ class ExAppService {
 		$r = $this->exAppMapper->deleteExApp($appId);
 		if ($r !== 1) {
 			$this->logger->error(sprintf('Error while unregistering %s ExApp from the database.', $appId));
+		} else {
+			$this->auditLogger->log(Operation::ExAppUnregistered, 'ExApp %s was unregistered', [
+				'appId' => $appId,
+			]);
 		}
 		$rmRoutes = $this->removeExAppRoutes($exApp);
 		if ($rmRoutes === null) {
@@ -158,9 +171,19 @@ class ExAppService {
 		return $this->updateExApp($exApp, ['enabled', 'status']);
 	}
 
-	public function disableExAppInternal(ExApp $exApp): void {
+	public function disableExAppInternal(ExApp $exApp): bool {
 		$exApp->setEnabled(0);
-		$this->updateExApp($exApp, ['enabled']);
+		return $this->updateExApp($exApp, ['enabled']);
+	}
+
+	/**
+	 * Logs the deletion of the data volume of an ExApp on its deploy daemon
+	 */
+	public function logExAppDataDeleted(ExApp $exApp): void {
+		$this->auditLogger->log(Operation::ExAppDataDeleted, 'Data of ExApp %s was deleted from deploy daemon %s', [
+			'appId' => $exApp->getAppid(),
+			'daemonName' => $exApp->getDaemonConfigName(),
+		]);
 	}
 
 	public function getExAppsByDaemonName(string $daemonName): array {
@@ -203,11 +226,17 @@ class ExAppService {
 	}
 
 	public function updateExAppInfo(ExApp $exApp, array $appInfo): bool {
+		$oldVersion = $exApp->getVersion();
 		$exApp->setVersion($appInfo['version']);
 		$exApp->setName($appInfo['name']);
 		if (!$this->updateExApp($exApp, ['version', 'name'])) {
 			return false;
 		}
+		$this->auditLogger->log(Operation::ExAppUpdated, 'ExApp %s was updated from version %s to %s', [
+			'appId' => $exApp->getAppid(),
+			'oldVersion' => $oldVersion,
+			'newVersion' => $exApp->getVersion(),
+		]);
 		return true;
 	}
 
