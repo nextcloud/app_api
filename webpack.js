@@ -29,6 +29,7 @@ const appId = 'app_api'
 webpackConfig.entry = {
 	adminSettings: { import: path.join(__dirname, 'src', 'adminSettings.js'), filename: appId + '-adminSettings.js' },
 	filesplugin: { import: path.join(__dirname, 'src', 'filesplugin.js'), filename: appId + '-filesplugin.js' },
+	reference: { import: path.join(__dirname, 'src', 'reference.js'), filename: appId + '-reference.js' },
 }
 
 webpackConfig.plugins.push(

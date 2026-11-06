@@ -18,6 +18,7 @@ use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\ProvidersAI\TaskProcessingService;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
+use OCA\AppAPI\Service\UI\ReferenceProviderService;
 use OCA\AppAPI\Service\UI\ScriptsService;
 use OCA\AppAPI\Service\UI\SettingsService;
 use OCA\AppAPI\Service\UI\StylesService;
@@ -58,6 +59,7 @@ class ExAppService {
 		private readonly ExAppDeployOptionsService $deployOptionsService,
 		private readonly ExAppSetupCheckService $setupCheckService,
 		private readonly IConfig $config,
+		private readonly ReferenceProviderService $referenceProviderService,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$distributedCacheClass = ltrim($config->getSystemValueString('memcache.distributed', ''), '\\');
@@ -115,6 +117,7 @@ class ExAppService {
 		$this->talkBotsService->unregisterExAppTalkBots($exApp); // TODO: Think about internal Events for clean and flexible unregister ExApp callbacks
 		$this->filesActionsMenuService->unregisterExAppFileActions($appId);
 		$this->topMenuService->unregisterExAppMenuEntries($appId);
+		$this->referenceProviderService->unregisterExAppReferenceProviders($appId);
 		$this->initialStateService->deleteExAppInitialStates($appId);
 		$this->scriptsService->deleteExAppScripts($appId);
 		$this->stylesService->deleteExAppStyles($appId);
@@ -245,6 +248,7 @@ class ExAppService {
 
 	private function resetCaches(): void {
 		$this->topMenuService->resetCacheEnabled();
+		$this->referenceProviderService->resetCacheEnabled();
 		$this->filesActionsMenuService->resetCacheEnabled();
 		$this->settingsService->resetCacheEnabled();
 		$this->occService->resetCacheEnabled();

@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Tests\php\Controller;
 use OCA\AppAPI\Controller\OCSUiController;
 use OCA\AppAPI\Service\UI\FilesActionsMenuService;
 use OCA\AppAPI\Service\UI\InitialStateService;
+use OCA\AppAPI\Service\UI\ReferenceProviderService;
 use OCA\AppAPI\Service\UI\ScriptsService;
 use OCA\AppAPI\Service\UI\StylesService;
 use OCA\AppAPI\Service\UI\TopMenuService;
@@ -66,6 +67,7 @@ class OCSUiControllerTest extends TestCase {
 			$this->initialStateService,
 			$this->scriptsService,
 			$this->stylesService,
+			Server::get(ReferenceProviderService::class),
 		);
 
 		$this->cleanupTestRows();
@@ -85,6 +87,7 @@ class OCSUiControllerTest extends TestCase {
 		foreach (['ui_action_v1', 'ui_action_v2'] as $name) {
 			$this->filesActionsService->unregisterFileActionMenu(self::TEST_APP_ID, $name);
 		}
+		Server::get(ReferenceProviderService::class)->unregisterReferenceProvider(self::TEST_APP_ID, 'phpunit_ocs_ref');
 		foreach ([
 			['top_menu', 'page_a', 'state_a'],
 			['top_menu', 'page_a', 'state_b'],
@@ -161,6 +164,35 @@ class OCSUiControllerTest extends TestCase {
 		$data = self::asArray($this->controller->getExAppMenuEntry('main_menu')->getData());
 		self::assertSame('Second', $data['display_name']);
 		self::assertSame(1, $data['admin_required']);
+	}
+
+	public function testReferenceProviderRegisterGetUnregister(): void {
+		$this->controller->registerExAppReferenceProvider(
+			providerId: 'phpunit_ocs_ref', title: 'Ref', iconUrl: '/img/icon.svg', order: 3,
+			searchProvidersIds: ['s1'], matchPatterns: ['#^https://x\.test/#'], scriptPath: '/js/picker.js',
+		);
+
+		$data = self::asArray($this->controller->getExAppReferenceProvider('phpunit_ocs_ref')->getData());
+		self::assertSame(self::TEST_APP_ID, $data['appid']);
+		self::assertSame('Ref', $data['title']);
+		self::assertSame(3, $data['order']);
+		self::assertSame(['s1'], $data['search_providers_ids']);
+		self::assertSame(['#^https://x\.test/#'], $data['match_patterns']);
+		self::assertSame('js/picker.js', $data['script_path'], 'leading slash should be stripped');
+
+		$this->controller->unregisterExAppReferenceProvider('phpunit_ocs_ref');
+		$this->expectException(OCSNotFoundException::class);
+		$this->controller->getExAppReferenceProvider('phpunit_ocs_ref');
+	}
+
+	public function testReferenceProviderInvalidPatternIsBadRequest(): void {
+		$this->expectException(OCSBadRequestException::class);
+		$this->controller->registerExAppReferenceProvider(providerId: 'phpunit_ocs_ref', title: 'Ref', matchPatterns: ['/(']);
+	}
+
+	public function testReferenceProviderUnregisterMissingThrowsNotFound(): void {
+		$this->expectException(OCSNotFoundException::class);
+		$this->controller->unregisterExAppReferenceProvider('does_not_exist');
 	}
 
 	public function testFileActionsV1RegisterGetUnregister(): void {

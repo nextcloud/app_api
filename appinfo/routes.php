@@ -125,6 +125,11 @@ return [
 		['name' => 'OCSUi#unregisterExAppMenuEntry', 'url' => '/api/v1/ui/top-menu', 'verb' => 'DELETE'],
 		['name' => 'OCSUi#getExAppMenuEntry', 'url' => '/api/v1/ui/top-menu', 'verb' => 'GET'],
 
+		// Reference providers (Smart Picker entries and link previews)
+		['name' => 'OCSUi#registerExAppReferenceProvider', 'url' => '/api/v1/ui/reference-provider', 'verb' => 'POST'],
+		['name' => 'OCSUi#unregisterExAppReferenceProvider', 'url' => '/api/v1/ui/reference-provider', 'verb' => 'DELETE'],
+		['name' => 'OCSUi#getExAppReferenceProvider', 'url' => '/api/v1/ui/reference-provider', 'verb' => 'GET'],
+
 		// Common UI
 		['name' => 'OCSUi#setExAppInitialState', 'url' => '/api/v1/ui/initial-state', 'verb' => 'POST'],
 		['name' => 'OCSUi#deleteExAppInitialState', 'url' => '/api/v1/ui/initial-state', 'verb' => 'DELETE'],
