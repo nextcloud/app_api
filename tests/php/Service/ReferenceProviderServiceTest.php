@@ -217,6 +217,32 @@ class ReferenceProviderServiceTest extends TestCase {
 		self::assertFalse($provider->matchReference('https://other.test/item/42'));
 	}
 
+	/**
+	 * Valid PCREs whose anchor names a.test, but whose remainder can match a link on another host.
+	 *
+	 * @return array<string, array{string, string, string}>
+	 */
+	public static function patternsThatEscapeTheirHost(): array {
+		return [
+			'top-level alternative' => ['#^https://a\.test/|.*#', 'https://evil.test/x', 'https://a.test/x'],
+			'empty alternative' => ['#^https://a\.test/|#', 'https://evil.test/x', 'https://a.test/x'],
+			'alternative hidden in \Q...\E' => ['#^https://a\.test/\Q(\E|.*#', 'https://evil.test/x', 'https://a.test/x'],
+			'multiline anchor' => ['#^https://a\.test/$|^.*#m', 'https://evil.test/x', 'https://a.test/'],
+			'user info before the real host' => ['#^https://a\.test:.*#', 'https://a.test:x@evil.test/x', 'https://a.test:8443/x'],
+			'other scheme' => ['#^https://a\.test/|^http://.*#', 'http://a.test/x', 'https://a.test/x'],
+		];
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider('patternsThatEscapeTheirHost')]
+	public function testPatternMatchesOnlyLinksOnItsDeclaredHost(string $pattern, string $foreignLink, string $ownLink): void {
+		$this->register(self::APP_A, 'phpunit_rp_a', [$pattern]);
+		$provider = $this->service->getAnonymousReferenceProvider(
+			$this->service->getReferenceProvider(self::APP_A, 'phpunit_rp_a'));
+
+		self::assertFalse($provider->matchReference($foreignLink));
+		self::assertTrue($provider->matchReference($ownLink));
+	}
+
 	public function testProviderWithoutPatternsMatchesNothingAndResolvesNothing(): void {
 		$this->register(self::APP_A, 'phpunit_rp_a');
 		$provider = $this->service->getAnonymousReferenceProvider(

@@ -60,9 +60,10 @@ class ReferenceProviderService {
 	private const MAX_SCRIPT_PATH_LENGTH = 255;
 	private const MAX_SEARCH_PROVIDER_ID_LENGTH = 64;
 
-	// The pattern body must start with `^https://` (or `^https?://`) and a literal host, so a provider only
-	// ever sees links to hosts it names. `/.*/` would otherwise send every link a user pastes to the ExApp.
-	private const HOST_ANCHOR = '~^\^https\??://((?:[a-z0-9-]+\\\.)+[a-z]{2,63})(?:$|/|\\/|:|\(|\$)~i';
+	// The pattern body must start with `^https://` (or `^https?://`) and a literal host. That host is the only
+	// one the pattern may match: matchReference() checks the parsed link against it before running the pattern,
+	// because the rest of a PCRE (`|.*`, `\Q…\E`, `:.*@`) can reach any host.
+	private const HOST_ANCHOR = '~^\^(https\??)://((?:[a-z0-9-]+\\\.)+[a-z]{2,63})(?:$|/|\\/|:|\(|\$)~i';
 
 	private ?ICache $cache = null;
 	private int $cacheTtl = self::CACHE_TTL;
@@ -88,7 +89,8 @@ class ReferenceProviderService {
 	private static function isProcessLocalCache(IConfig $config): bool {
 		$distributed = ltrim($config->getSystemValueString('memcache.distributed', ''), '\\');
 		$local = ltrim($config->getSystemValueString('memcache.local', ''), '\\');
-		return ($distributed === '' ? $local : $distributed) === \OC\Memcache\APCu::class;
+		// The class name as a string: \OC\Memcache\APCu is private to the server.
+		return ($distributed === '' ? $local : $distributed) === 'OC\Memcache\APCu';
 	}
 
 	/**
@@ -220,6 +222,7 @@ class ReferenceProviderService {
 	 *
 	 * Every pattern of every provider runs on each link a user pastes, and a matching link is sent to the
 	 * ExApp, so a pattern that matches any host would hand the ExApp links to anything, share links included.
+	 * The anchor only declares the host; matchReference() enforces it.
 	 *
 	 * @throws \InvalidArgumentException
 	 */
@@ -230,12 +233,41 @@ class ReferenceProviderService {
 		if (@preg_match($pattern, '') === false) {
 			throw new \InvalidArgumentException(sprintf('Invalid match pattern: %s', $pattern));
 		}
-		$body = self::patternBody($pattern);
-		if ($body === null || preg_match(self::HOST_ANCHOR, $body) !== 1) {
+		if (self::patternTarget($pattern) === null) {
 			throw new \InvalidArgumentException(sprintf(
 				'Match pattern must start with ^https:// and a literal host with escaped dots, like #^https://example\.com/#: %s', $pattern
 			));
 		}
+	}
+
+	/**
+	 * The schemes and lower-case host that a pattern declares in its `^https?://host` anchor, or null.
+	 *
+	 * @return array{schemes: list<string>, host: string}|null
+	 */
+	public static function patternTarget(string $pattern): ?array {
+		$body = self::patternBody($pattern);
+		if ($body === null || preg_match(self::HOST_ANCHOR, $body, $m) !== 1) {
+			return null;
+		}
+		return [
+			'schemes' => strlen($m[1]) === 5 ? ['https'] : ['http', 'https'],
+			'host' => strtolower(str_replace('\\.', '.', $m[2])),
+		];
+	}
+
+	/**
+	 * True if the link is on the scheme and host that the pattern declares, and the pattern matches it.
+	 */
+	public static function patternMatches(string $pattern, string $link): bool {
+		$target = self::patternTarget($pattern);
+		$parts = parse_url($link);
+		if ($target === null || !is_array($parts) || !isset($parts['scheme'], $parts['host'])
+			|| !in_array(strtolower($parts['scheme']), $target['schemes'], true)
+			|| strtolower($parts['host']) !== $target['host']) {
+			return false;
+		}
+		return @preg_match($pattern, $link) === 1;
 	}
 
 	/**
@@ -363,7 +395,7 @@ class ReferenceProviderService {
 
 			public function matchReference(string $referenceText): bool {
 				foreach ($this->row->getMatchPatternsList() as $pattern) {
-					if (@preg_match($pattern, $referenceText) === 1) {
+					if (ReferenceProviderService::patternMatches($pattern, $referenceText)) {
 						return true;
 					}
 				}

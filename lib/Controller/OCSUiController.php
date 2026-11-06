@@ -246,7 +246,7 @@ class OCSUiController extends OCSController {
 	 * @param string $iconUrl Icon path inside the ExApp, served through HaRP or the AppAPI proxy
 	 * @param int $order Position in the Smart Picker; lower comes first
 	 * @param list<string> $searchProvidersIds Unified search providers that the picker can use for this provider, at most 10
-	 * @param list<string> $matchPatterns PCRE patterns of links that this provider resolves, at most 10 of up to 256 characters. Each must start with `^https://` (or `^https?://`) and a literal host, like `#^https://example\.com/item/\d+$#`
+	 * @param list<string> $matchPatterns PCRE patterns of links that this provider resolves, at most 10 of up to 256 characters. Each must start with `^https://` (or `^https?://`) and a literal host, like `#^https://example\.com/item/\d+$#`. A pattern only matches links on that scheme and host
 	 * @param string $scriptPath Path of the picker script inside the ExApp; empty for no custom picker element
 	 *
 	 * @return DataResponse<Http::STATUS_OK, list<empty>, array{}>

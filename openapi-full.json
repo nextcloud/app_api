@@ -7486,7 +7486,7 @@
                                     "matchPatterns": {
                                         "type": "array",
                                         "default": [],
-                                        "description": "PCRE patterns of links that this provider resolves, at most 10 of up to 256 characters. Each must start with `^https://` (or `^https?://`) and a literal host, like `#^https://example\\.com/item/\\d+$#`",
+                                        "description": "PCRE patterns of links that this provider resolves, at most 10 of up to 256 characters. Each must start with `^https://` (or `^https?://`) and a literal host, like `#^https://example\\.com/item/\\d+$#`. A pattern only matches links on that scheme and host",
                                         "items": {
                                             "type": "string"
                                         }
