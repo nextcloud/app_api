@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The ExApp proxy also refuses `.` path segments and `..` segments followed by `;`, `%3F` or `%23`. #1163
 - The ExApp proxy refuses requests to the `/heartbeat`, `/init` and `/enabled` endpoints of ExApps, as HaRP does. #1168
 - The ExApp proxy also applies a stricter route that matches the path as an ExApp may read it, as HaRP 0.4.8 does. #1182
+- The ExApp proxy returns an ExApp's redirect to the browser instead of following it, as HaRP does. #1195
 
 ## [34.0.0]
 
