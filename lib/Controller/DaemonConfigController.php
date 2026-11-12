@@ -85,8 +85,9 @@ class DaemonConfigController extends ApiController {
 			]);
 		}
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
-		if ($daemonConfig !== null && $defaultDaemon) {
-			$this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true);
+		if ($daemonConfig !== null && $defaultDaemon
+			&& $this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true)) {
+			$this->daemonConfigService->logDefaultDaemonConfigChanged($daemonConfig->getName());
 		}
 		return new JSONResponse([
 			'success' => $daemonConfig !== null,
@@ -144,7 +145,7 @@ class DaemonConfigController extends ApiController {
 		// Create and update DaemonConfig instance
 		$updatedDaemonConfig = new DaemonConfig($daemonConfigParams);
 		$updatedDaemonConfig->setId($daemonConfig->getId());
-		$updatedDaemonConfig = $this->daemonConfigService->updateDaemonConfig($updatedDaemonConfig);
+		$updatedDaemonConfig = $this->daemonConfigService->updateDaemonConfig($updatedDaemonConfig, $daemonConfig);
 
 		// Check if update was successful before proceeding
 		if ($updatedDaemonConfig === null) {
@@ -183,6 +184,7 @@ class DaemonConfigController extends ApiController {
 		$this->service->removeExAppsByDaemonConfigName($daemonConfig);
 		if ($daemonConfig->getName() === $defaultDaemonConfig) {
 			$this->appConfig->deleteKey(Application::APP_ID, 'default_daemon_config');
+			$this->daemonConfigService->logDefaultDaemonConfigChanged('');
 		}
 		$daemonConfig = $this->daemonConfigService->unregisterDaemonConfig($daemonConfig);
 		return new JSONResponse([
@@ -300,6 +302,7 @@ class DaemonConfigController extends ApiController {
 			Application::TEST_DEPLOY_INFO_XML,
 			'--test-deploy-mode',
 		];
+		$this->exAppService->logExAppInstallRequested(Application::TEST_DEPLOY_APPID, $daemonConfig->getName());
 		if (!$this->service->runOccCommand($commandParts)) {
 			return new JSONResponse(['error' => $this->l10n->t('Error starting install of ExApp')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
@@ -338,6 +341,7 @@ class DaemonConfigController extends ApiController {
 				'--force',
 				Application::TEST_DEPLOY_APPID,
 			];
+			$this->exAppService->logExAppUninstallRequested($exApp);
 			$this->service->runOccCommand($commandParts);
 			$elapsedTime = 0;
 			while ($elapsedTime < 5000000 && $this->exAppService->getExApp(Application::TEST_DEPLOY_APPID) !== null) {

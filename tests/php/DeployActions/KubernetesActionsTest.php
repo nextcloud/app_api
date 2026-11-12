@@ -212,4 +212,29 @@ class KubernetesActionsTest extends TestCase {
 		self::assertCount($deployments, $createPayloads);
 		return $createPayloads;
 	}
+
+	public static function removeGoneDeploymentProvider(): array {
+		return [
+			'data removed' => [true, 1],
+			'data kept' => [false, 0],
+		];
+	}
+
+	#[DataProvider('removeGoneDeploymentProvider')]
+	public function testRemoveExAppRemovesTheDataOfAGoneDeployment(bool $removeData, int $removeRequests): void {
+		$requests = [];
+		$mockHandler = new MockHandler([new Response(200, [], json_encode(['exists' => false])), new Response(204)]);
+		$handlerStack = HandlerStack::create($mockHandler);
+		$handlerStack->push(Middleware::history($requests));
+		(new ReflectionProperty(KubernetesActions::class, 'guzzleClient'))
+			->setValue($this->kubernetesActions, new Client(['handler' => $handlerStack]));
+
+		self::assertSame('', $this->kubernetesActions->removeExApp('http://harp:8780/exapps/app_api/k8s', 'test-deploy', removeData: $removeData));
+
+		$removes = array_values(array_filter($requests, static fn (array $entry): bool => str_ends_with($entry['request']->getUri()->getPath(), '/exapp/remove')));
+		self::assertCount($removeRequests, $removes);
+		if ($removeData) {
+			self::assertTrue(json_decode((string)$removes[0]['request']->getBody(), true)['remove_data']);
+		}
+	}
 }

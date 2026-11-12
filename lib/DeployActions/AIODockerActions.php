@@ -73,8 +73,9 @@ class AIODockerActions {
 		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
-		if ($daemonConfig !== null) {
-			$this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true);
+		if ($daemonConfig !== null
+			&& $this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true)) {
+			$this->daemonConfigService->logDefaultDaemonConfigChanged($daemonConfig->getName());
 		}
 		return $daemonConfig;
 	}
@@ -145,8 +146,9 @@ class AIODockerActions {
 		];
 
 		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
-		if ($daemonConfig !== null) {
-			$this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true);
+		if ($daemonConfig !== null
+			&& $this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true)) {
+			$this->daemonConfigService->logDefaultDaemonConfigChanged($daemonConfig->getName());
 		}
 		return $daemonConfig;
 	}

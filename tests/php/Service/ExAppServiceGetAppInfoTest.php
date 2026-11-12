@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Tests\php\Service;
 
+use OCA\AppAPI\AuditLog\AuditLogger;
 use OCA\AppAPI\Db\ExAppMapper;
 use OCA\AppAPI\Fetcher\ExAppArchiveFetcher;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
@@ -65,6 +66,7 @@ class ExAppServiceGetAppInfoTest extends TestCase {
 			$this->createMock(ExAppDeployOptionsService::class),
 			$this->createMock(ExAppSetupCheckService::class),
 			$this->createMock(IConfig::class),
+			$this->createMock(AuditLogger::class),
 		);
 	}
 

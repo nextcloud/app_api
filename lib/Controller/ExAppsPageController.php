@@ -351,11 +351,14 @@ class ExAppsPageController extends Controller {
 		}
 
 		$mountOptions = $deployOptions['mounts'] ?? [];
+		$mounts = [];
 		$mountArgs = [];
 		foreach ($mountOptions as $mountOption) {
 			$readonlyModifier = $mountOption['readonly'] ? 'ro' : 'rw';
+			$mount = sprintf('%s:%s:%s', $mountOption['hostPath'], $mountOption['containerPath'], $readonlyModifier);
+			$mounts[] = $mount;
 			$mountArgs[] = '--mount';
-			$mountArgs[] = sprintf('%s:%s:%s', $mountOption['hostPath'], $mountOption['containerPath'], $readonlyModifier);
+			$mountArgs[] = $mount;
 		}
 
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
@@ -370,6 +373,7 @@ class ExAppsPageController extends Controller {
 				$envArgs,
 				$mountArgs
 			);
+			$this->exAppService->logExAppInstallRequested($appId, $daemonId, $envOptions, $mounts);
 			if (!$this->service->runOccCommand($commandParts)) {
 				return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting install of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
@@ -443,12 +447,14 @@ class ExAppsPageController extends Controller {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Could not update ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
-		$exAppOldVersion = $this->exAppService->getExApp($appId)->getVersion();
+		$exApp = $this->exAppService->getExApp($appId);
+		$exAppOldVersion = $exApp->getVersion();
 		$commandParts = [
 			'app_api:app:update',
 			'--silent',
 			$appId,
 		];
+		$this->exAppService->logExAppUpdateRequested($exApp);
 		if (!$this->service->runOccCommand($commandParts)) {
 			return new JSONResponse(['data' => ['message' => $this->l10n->t('Error starting update of ExApp')]], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
@@ -491,12 +497,18 @@ class ExAppsPageController extends Controller {
 			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 				$this->dockerActions->initGuzzleClient($daemonConfig);
 				if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-					$this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $removeData);
+					$removeError = $this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $removeData);
+					if ($removeData && $removeError === '') {
+						$this->exAppService->logExAppDataDeleted($exApp);
+					}
 				} else {
 					if ($removeContainer) {
 						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
 						if ($removeData) {
-							$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
+							$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
+							if (isset($removeVolumeResult['success'])) {
+								$this->exAppService->logExAppDataDeleted($exApp);
+							}
 						}
 					}
 				}

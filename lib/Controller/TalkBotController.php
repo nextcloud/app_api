@@ -11,6 +11,8 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
@@ -41,6 +43,7 @@ class TalkBotController extends OCSController {
 		private readonly TalkBotsService $talkBotsService,
 		private readonly LoggerInterface $logger,
 		private readonly IThrottler $throttler,
+		private readonly AuditLogger $auditLogger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -133,6 +136,10 @@ class TalkBotController extends OCSController {
 						['proxyTalkMessage' => $appId, 'route' => $route, 'reason' => 'invalid hash']
 					);
 					$this->logger->error(sprintf('Invalid ExApp TalkBot hash provided: %s:%s.', $appId, $route));
+					$this->auditLogger->log(Operation::TalkBotAuthFailed, 'Failed Talk bot authentication for ExApp %s', [
+						'appId' => $appId,
+						'route' => $route,
+					]);
 					return new DataResponse([], Http::STATUS_NOT_FOUND);
 				}
 				$this->throttler->resetDelay(

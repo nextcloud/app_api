@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- ExApp, deploy daemon and AppAPI settings changes and failed ExApp, HaRP or Talk bot authentication are written to the admin audit log. #1130
+
 ### Changed
 
 - `POST /ocs/v2.php/apps/app_api/api/v1/notification` now answers `404` when the `notifications` app is not enabled, instead of `200` for a notification that nobody delivers.
@@ -19,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - HaRP receives the verb of each ExApp route, so HaRP 0.4.8 and newer check the HTTP method of a request as the ExApp proxy does. #1138
 - The ExApp proxy accepts `HEAD` on routes that list `GET` and reads a route's verb as a list of methods, as HaRP does. #1144
 - The HaRP version check in the admin overview warns about HaRP older than 0.4.8, which checks the HTTP method of requests to ExApps. #1149
+- Failed HaRP shared key checks answer 429 after too many attempts. #1130
 
 ### Fixed
 
@@ -28,6 +33,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The ExApp proxy refuses requests to the `/heartbeat`, `/init` and `/enabled` endpoints of ExApps, as HaRP does. #1168
 - The ExApp proxy also applies a stricter route that matches the path as an ExApp may read it, as HaRP 0.4.8 does. #1182
 - The ExApp proxy returns an ExApp's redirect to the browser instead of following it, as HaRP does. #1195
+- `occ app_api:app:unregister --rm-data` also removes the volume of a Kubernetes ExApp whose deployment is already gone. #1130
 
 ## [34.0.0]
 
