@@ -9,19 +9,16 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Service\ProvidersAI;
 
-use JsonException;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Db\TaskProcessing\TaskProcessingProvider;
 use OCA\AppAPI\Db\TaskProcessing\TaskProcessingProviderMapper;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
-use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\IServerContainer;
 use OCP\TaskProcessing\EShapeType;
 use OCP\TaskProcessing\IProvider;
 use OCP\TaskProcessing\ITaskType;
@@ -238,36 +235,6 @@ class TaskProcessingService {
 			$this->logger->error(sprintf('Failed to unregister ExApp %s TaskProcessingProvider %s. Error: %s', $appId, $name, $e->getMessage()), ['exception' => $e]);
 		}
 		return null;
-	}
-
-	/**
-	 * Register dynamically ExApps TaskProcessing providers with ID using anonymous classes.
-	 *
-	 * @param IRegistrationContext $context
-	 * @param IServerContainer $serverContainer
-	 *
-	 * @return void
-	 */
-	public function registerExAppTaskProcessingProviders(IRegistrationContext $context, IServerContainer $serverContainer): void {
-		$exAppsProviders = $this->getRegisteredTaskProcessingProviders();
-		foreach ($exAppsProviders as $exAppProvider) {
-			/** @var class-string<IProvider> $className */
-			$className = '\\OCA\\AppAPI\\' . $exAppProvider->getAppId() . '\\' . $exAppProvider->getName();
-
-			try {
-				$provider = $this->getAnonymousExAppProvider(json_decode($exAppProvider->getProvider(), true, flags: JSON_THROW_ON_ERROR), $exAppProvider->getAppId());
-			} catch (JsonException $e) {
-				$this->logger->debug('Failed to register ExApp TaskProcessing provider', ['exAppId' => $exAppProvider->getAppId(), 'taskType' => $exAppProvider->getName(), 'exception' => $e]);
-				continue;
-			} catch (\Throwable) {
-				continue;
-			}
-
-			$context->registerService($className, function () use ($provider) {
-				return $provider;
-			});
-			$context->registerTaskProcessingProvider($className);
-		}
 	}
 
 	/**

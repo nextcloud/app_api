@@ -561,7 +561,8 @@ class KubernetesActions implements IDeployActions {
 			}
 
 			$logName = $this->logName($exAppName, $roleSuffix);
-			if (!$exists) {
+			// HaRP also removes the volume and the Service of a deployment that is gone
+			if (!$exists && !$removeData) {
 				$this->logger->info(sprintf('K8s ExApp "%s" does not exist. No removal needed.', $logName));
 				return '';
 			}

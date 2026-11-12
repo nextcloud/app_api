@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Service;
 
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\DaemonConfigMapper;
 use OCA\AppAPI\DeployActions\DockerActions;
@@ -36,6 +38,7 @@ readonly class DaemonConfigService {
 		private DaemonConfigMapper $mapper,
 		private ExAppService $exAppService,
 		private ICrypto $crypto,
+		private AuditLogger $auditLogger,
 	) {
 	}
 
@@ -134,7 +137,7 @@ readonly class DaemonConfigService {
 			if (isset($params['deploy_config']['haproxy_password']) && $params['deploy_config']['haproxy_password'] !== '') {
 				$params['deploy_config']['haproxy_password'] = $this->crypto->encrypt($params['deploy_config']['haproxy_password']);
 			}
-			return $this->mapper->insert(new DaemonConfig([
+			$daemonConfig = $this->mapper->insert(new DaemonConfig([
 				'name' => $params['name'],
 				'display_name' => $params['display_name'],
 				'accepts_deploy_id' => $params['accepts_deploy_id'],
@@ -146,15 +149,36 @@ readonly class DaemonConfigService {
 			$this->logger->error('Failed to register daemon config. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->auditLogger->log(Operation::DaemonRegistered, 'Deploy daemon %s was registered', [
+			'daemonName' => $daemonConfig->getName(),
+			'acceptsDeployId' => $daemonConfig->getAcceptsDeployId(),
+			'host' => $daemonConfig->getHost(),
+		]);
+		return $daemonConfig;
+	}
+
+	/**
+	 * Logs a change of the default deploy daemon made by registering or removing a daemon, '' when it was unset
+	 */
+	public function logDefaultDaemonConfigChanged(string $daemonName): void {
+		if ($daemonName === '') {
+			$this->auditLogger->log(Operation::AdminConfigUpdated, 'AppAPI setting %s was deleted', ['key' => 'default_daemon_config']);
+			return;
+		}
+		$this->auditLogger->log(Operation::AdminConfigUpdated, 'AppAPI setting %s was changed to %s', ['key' => 'default_daemon_config', 'value' => $daemonName]);
 	}
 
 	public function unregisterDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
 		try {
-			return $this->mapper->delete($daemonConfig);
+			$daemonConfig = $this->mapper->delete($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to unregister daemon config. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->auditLogger->log(Operation::DaemonUnregistered, 'Deploy daemon %s was unregistered', [
+			'daemonName' => $daemonConfig->getName(),
+		]);
+		return $daemonConfig;
 	}
 
 	/**
@@ -202,7 +226,10 @@ readonly class DaemonConfigService {
 		}
 	}
 
-	public function updateDaemonConfig(DaemonConfig $daemonConfig): ?DaemonConfig {
+	/**
+	 * @param DaemonConfig $previousDaemonConfig the stored configuration before the update
+	 */
+	public function updateDaemonConfig(DaemonConfig $daemonConfig, DaemonConfig $previousDaemonConfig): ?DaemonConfig {
 		$name = $daemonConfig->getName() ?? '';
 		if ($name === '' || $this->containsControlCharacters($name)) {
 			$this->logger->error('Failed to update daemon configuration: `name` contains invalid characters or is empty.');
@@ -210,10 +237,81 @@ readonly class DaemonConfigService {
 		}
 
 		try {
-			return $this->mapper->update($daemonConfig);
+			$daemonConfig = $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to update DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
+		}
+		$changedSettings = $this->getChangedSettings($previousDaemonConfig, $daemonConfig);
+		if ($changedSettings !== []) {
+			$parameters = [
+				'daemonName' => $daemonConfig->getName(),
+				'changedSettings' => implode(', ', $changedSettings),
+			];
+			if (in_array('name', $changedSettings, true)) {
+				$parameters['previousName'] = $previousDaemonConfig->getName();
+			}
+			$this->auditLogger->log(Operation::DaemonUpdated, 'Deploy daemon %s was updated', $parameters);
+		}
+		return $daemonConfig;
+	}
+
+	/**
+	 * Names of the settings that the update changed, the secret by name only
+	 *
+	 * @return list<string>
+	 */
+	private function getChangedSettings(DaemonConfig $previous, DaemonConfig $updated): array {
+		$changed = [];
+		$updatedFields = $updated->getUpdatedFields();
+		foreach (array_keys($updatedFields) as $property) {
+			if ($property === 'id' || $property === 'deployConfig') {
+				continue;
+			}
+			$getter = 'get' . ucfirst($property);
+			if ($previous->$getter() !== $updated->$getter()) {
+				$changed[] = $updated->propertyToColumn($property);
+			}
+		}
+		if (isset($updatedFields['deployConfig'])) {
+			$previousDeployConfig = $previous->getDeployConfig() ?? [];
+			$updatedDeployConfig = $updated->getDeployConfig() ?? [];
+			foreach (array_unique([...array_keys($previousDeployConfig), ...array_keys($updatedDeployConfig)]) as $key) {
+				$differs = $key === 'haproxy_password'
+					? $this->decryptSecret($previousDeployConfig[$key] ?? '') !== $this->decryptSecret($updatedDeployConfig[$key] ?? '')
+					: self::normalizeSetting($previousDeployConfig[$key] ?? null) !== self::normalizeSetting($updatedDeployConfig[$key] ?? null);
+				if ($differs) {
+					$changed[] = 'deploy_config.' . $key;
+				}
+			}
+		}
+		return $changed;
+	}
+
+	/**
+	 * Numbers and strings as strings and maps sorted by key, so a value resent as `"24000"` or `24000` compares equal
+	 */
+	private static function normalizeSetting(mixed $value): mixed {
+		if (is_array($value)) {
+			$value = array_map(self::normalizeSetting(...), $value);
+			ksort($value);
+			return $value;
+		}
+		return is_int($value) || is_float($value) ? (string)$value : $value;
+	}
+
+	/**
+	 * The stored secret is encrypted with a random IV, so two encryptions of the same secret differ
+	 */
+	private function decryptSecret(mixed $secret): string {
+		$secret = (string)$secret;
+		if ($secret === '') {
+			return '';
+		}
+		try {
+			return $this->crypto->decrypt($secret);
+		} catch (\Exception) {
+			return $secret;
 		}
 	}
 
@@ -246,11 +344,17 @@ readonly class DaemonConfigService {
 			$deployConfig['registries'] = [...array_values($deployConfig['registries']), ['from' => $from, 'to' => $to]];
 			$daemonConfig->setDeployConfig($deployConfig);
 
-			return $this->mapper->update($daemonConfig);
+			$daemonConfig = $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to add registry to DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->auditLogger->log(Operation::DaemonRegistryAdded, 'Docker registry mapping was added to deploy daemon %s: %s to %s', [
+			'daemonName' => $daemonConfig->getName(),
+			'from' => $from,
+			'to' => $to,
+		]);
+		return $daemonConfig;
 	}
 
 	public function removeDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
@@ -260,16 +364,26 @@ readonly class DaemonConfigService {
 			if (!in_array($registryMap, $deployConfig['registries'] ?? [])) {
 				return ['error' => 'This Docker registry map does not exist'];
 			}
-			$deployConfig['registries'] = array_values(array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
+			$registries = array_values(array_filter($deployConfig['registries'], function ($registry) use ($registryMap) {
 				return !(($registry['from'] ?? null) === ($registryMap['from'] ?? null) && ($registry['to'] ?? null) === ($registryMap['to'] ?? null));
 			}));
+			if (count($registries) === count($deployConfig['registries'])) {
+				return ['error' => 'This Docker registry map does not exist'];
+			}
+			$deployConfig['registries'] = $registries;
 			$daemonConfig->setDeployConfig($deployConfig);
 
-			return $this->mapper->update($daemonConfig);
+			$daemonConfig = $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to remove registry from DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->auditLogger->log(Operation::DaemonRegistryRemoved, 'Docker registry mapping was removed from deploy daemon %s: %s to %s', [
+			'daemonName' => $daemonConfig->getName(),
+			'from' => $registryMap['from'] ?? null,
+			'to' => $registryMap['to'] ?? null,
+		]);
+		return $daemonConfig;
 	}
 
 	/**

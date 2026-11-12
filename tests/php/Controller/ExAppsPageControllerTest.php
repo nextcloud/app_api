@@ -11,6 +11,8 @@ namespace OCA\AppAPI\Tests\php\Controller;
 
 use OC\App\AppStore\Fetcher\CategoryFetcher;
 use OCA\AppAPI\Controller\ExAppsPageController;
+use OCA\AppAPI\Db\DaemonConfig;
+use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
@@ -23,6 +25,7 @@ use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\L10N\IFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -36,15 +39,17 @@ class ExAppsPageControllerTest extends TestCase {
 	private DaemonConfigService&MockObject $daemonConfigService;
 	private IConfig&MockObject $config;
 	private IAppManager&MockObject $appManager;
+	private DockerActions&MockObject $dockerActions;
+	private AppAPIService&MockObject $service;
 
 	protected function setUp(): void {
 		parent::setUp();
 
 		$request = $this->createMock(IRequest::class);
 		$this->config = $this->createMock(IConfig::class);
-		$service = $this->createMock(AppAPIService::class);
+		$this->service = $this->createMock(AppAPIService::class);
 		$this->daemonConfigService = $this->createMock(DaemonConfigService::class);
-		$dockerActions = $this->createMock(DockerActions::class);
+		$this->dockerActions = $this->createMock(DockerActions::class);
 		$categoryFetcher = $this->createMock(CategoryFetcher::class);
 		$this->l10nFactory = $this->createMock(IFactory::class);
 		$this->exAppFetcher = $this->createMock(ExAppFetcher::class);
@@ -57,9 +62,9 @@ class ExAppsPageControllerTest extends TestCase {
 		$this->controller = new ExAppsPageController(
 			$request,
 			$this->config,
-			$service,
+			$this->service,
 			$this->daemonConfigService,
-			$dockerActions,
+			$this->dockerActions,
 			$categoryFetcher,
 			$this->l10nFactory,
 			$this->exAppFetcher,
@@ -227,5 +232,65 @@ class ExAppsPageControllerTest extends TestCase {
 			->with('app_install_overwrite', ['my_exapp']);
 
 		self::assertInstanceOf(JSONResponse::class, $this->controller->force('my_exapp'));
+	}
+
+	public static function uninstallDataProvider(): array {
+		return [
+			'HaRP, data removed' => [true, true, '', null, true],
+			'HaRP, data kept' => [true, false, '', null, false],
+			'HaRP, removal failed' => [true, true, 'Failed to remove ExApp', null, false],
+			'Docker Socket Proxy, volume removed' => [false, true, '', ['success' => true], true],
+			'Docker Socket Proxy, volume not removed' => [false, true, '', ['error' => 'Volume is in use.'], false],
+			'Docker Socket Proxy, data kept' => [false, false, '', null, false],
+		];
+	}
+
+	#[DataProvider('uninstallDataProvider')]
+	public function testUninstallAppLogsTheDeletedData(bool $isHarp, bool $removeData, string $removeExAppError, ?array $removeVolumeResult, bool $logged): void {
+		$exApp = new ExApp([
+			'appid' => 'fake_app',
+			'daemon_config_name' => 'docker_daemon',
+			'enabled' => 0,
+		]);
+		$exApp->setDeployConfig($isHarp ? ['harp' => ['frp_address' => 'appapi-harp:8782']] : []);
+		$this->exAppService->method('getExApp')->with('fake_app')->willReturn($exApp);
+		$this->daemonConfigService->method('getDaemonConfigByName')
+			->willReturn(new DaemonConfig(['name' => 'docker_daemon', 'accepts_deploy_id' => 'docker-install']));
+		$this->dockerActions->method('getAcceptsDeployId')->willReturn('docker-install');
+		$this->dockerActions->method('removeExApp')->willReturn($removeExAppError);
+		$this->dockerActions->expects($removeData && !$isHarp ? self::once() : self::never())
+			->method('removeVolume')->willReturn($removeVolumeResult ?? []);
+		$this->exAppService->expects($logged ? self::once() : self::never())->method('logExAppDataDeleted')->with($exApp);
+		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('fake_app');
+
+		$this->controller->uninstallApp('fake_app', true, $removeData);
+	}
+
+	public function testEnableAppLogsTheInstallationWithoutTheValuesOfTheEnvironmentVariables(): void {
+		$this->exAppService->method('getExApp')->with('fake_app')->willReturn(null);
+		$this->exAppService->expects(self::once())->method('logExAppInstallRequested')
+			->with('fake_app', 'harp_proxy', ['API_TOKEN', 'MODE'], ['/srv/models:/models:ro', '/srv/cache:/cache:rw']);
+		$this->service->expects(self::once())->method('runOccCommand')
+			->with(['app_api:app:register', '--silent', 'fake_app', 'harp_proxy', '--env', 'API_TOKEN=secret', '--env', 'MODE=fast',
+				'--mount', '/srv/models:/models:ro', '--mount', '/srv/cache:/cache:rw'])
+			->willReturn(false);
+
+		$this->controller->enableApp('fake_app', 'harp_proxy', [
+			'environment_variables' => ['API_TOKEN' => 'secret', 'MODE' => 'fast'],
+			'mounts' => [
+				['hostPath' => '/srv/models', 'containerPath' => '/models', 'readonly' => true],
+				['hostPath' => '/srv/cache', 'containerPath' => '/cache', 'readonly' => false],
+			],
+		]);
+	}
+
+	public function testUpdateAppLogsTheUpdate(): void {
+		$exApp = new ExApp(['appid' => 'fake_app', 'version' => '1.0.0']);
+		$this->exAppFetcher->method('getExAppsWithUpdates')->willReturn([['id' => 'fake_app']]);
+		$this->exAppService->method('getExApp')->with('fake_app')->willReturn($exApp);
+		$this->exAppService->expects(self::once())->method('logExAppUpdateRequested')->with($exApp);
+		$this->service->expects(self::once())->method('runOccCommand')->willReturn(false);
+
+		$this->controller->updateApp('fake_app');
 	}
 }

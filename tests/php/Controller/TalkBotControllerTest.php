@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Tests\php\Controller;
 
+use OCA\AppAPI\AuditLog\AuditLogger;
 use OCA\AppAPI\Controller\TalkBotController;
 use OCA\AppAPI\Db\TalkBot;
 use OCA\AppAPI\Db\TalkBotMapper;
@@ -77,6 +78,7 @@ class TalkBotControllerTest extends TestCase {
 			$this->talkBotsService,
 			Server::get(LoggerInterface::class),
 			Server::get(IThrottler::class),
+			Server::get(AuditLogger::class),
 		);
 
 		$this->safeUnregisterBot();

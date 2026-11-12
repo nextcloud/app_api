@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace OCA\AppAPI\Service;
 
 use OCA\AppAPI\AppInfo\Application;
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
@@ -34,6 +36,7 @@ use Psr\Log\LoggerInterface;
 class AppAPIService {
 
 	private IClient $client;
+	private bool $authenticationFailureLogged = false;
 
 	public function __construct(
 		private readonly LoggerInterface $logger,
@@ -53,6 +56,7 @@ class AppAPIService {
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 		private readonly HarpService $harpService,
+		private readonly AuditLogger $auditLogger,
 	) {
 		$this->client = $clientService->newClient();
 		$this->exAppService->setAppAPIService($this);
@@ -287,11 +291,13 @@ class AppAPIService {
 		$exApp = $this->exAppService->getExApp($exAppId);
 		if ($exApp === null) {
 			$this->logger->error(sprintf('ExApp with appId %s not found.', $request->getHeader('EX-APP-ID')));
+			$userId = explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 2)[0];
 			// Protection for guessing installed ExApps list
 			$this->throttler->registerAttempt(Application::APP_ID, $request->getRemoteAddress(), [
 				'appid' => $request->getHeader('EX-APP-ID'),
-				'userid' => explode(':', base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 2)[0],
+				'userid' => $userId,
 			]);
+			$this->logAuthenticationFailure($exAppId, (string)base64_decode($request->getHeader('AUTHORIZATION-APP-API')), 'unknown_ex_app');
 			return false;
 		}
 
@@ -301,7 +307,7 @@ class AppAPIService {
 			return false;
 		}
 		$userId = explode(':', $authorization, 2)[0];
-		$authorizationSecret = explode(':', $authorization, 2)[1];
+		$authorizationSecret = explode(':', $authorization, 2)[1] ?? null;
 		$authValid = $authorizationSecret === $exApp->getSecret();
 
 		if ($authValid) {
@@ -325,10 +331,30 @@ class AppAPIService {
 				'appid' => $request->getHeader('EX-APP-ID'),
 				'userid' => $userId,
 			]);
+			$this->logAuthenticationFailure($exApp->getAppid(), $authorization, 'invalid_secret');
 		}
 
 		$this->logger->error(sprintf('ExApp %s request to NC validation failed.', $exApp->getAppid()));
 		return false;
+	}
+
+	/**
+	 * Values sent by the client stay out of the message, as the logger replaces `{placeholders}` in it
+	 *
+	 * @param string $authorization the decoded AUTHORIZATION-APP-API header
+	 */
+	private function logAuthenticationFailure(string $exAppId, string $authorization, string $reason): void {
+		// The login and the AppAPIAuth middleware both validate a request
+		if ($this->authenticationFailureLogged) {
+			return;
+		}
+		$this->authenticationFailureLogged = true;
+		$message = $reason === 'unknown_ex_app' ? 'Failed AppAPI authentication of an unknown ExApp' : 'Failed AppAPI authentication of ExApp %s';
+		$this->auditLogger->log(Operation::ExAppAuthFailed, $message, [
+			'appId' => $exAppId,
+			'userId' => str_contains($authorization, ':') ? explode(':', $authorization, 2)[0] : '',
+			'reason' => $reason,
+		]);
 	}
 
 	/**
@@ -410,10 +436,17 @@ class AppAPIService {
 			return false;
 		}
 		if (version_compare($requestExAppVersion, $exApp->getVersion(), '>')) {
+			$oldVersion = $exApp->getVersion();
 			$exApp->setVersion($requestExAppVersion);
 			if (!$this->exAppService->updateExApp($exApp, ['version'])) {
 				return false;
 			}
+			// The version is sent by the ExApp, so it stays out of the message
+			$this->auditLogger->log(Operation::ExAppUpdated, 'ExApp %s reported a newer version', [
+				'appId' => $exApp->getAppid(),
+				'oldVersion' => $oldVersion,
+				'newVersion' => $requestExAppVersion,
+			]);
 		}
 		return true;
 	}
@@ -621,6 +654,7 @@ class AppAPIService {
 	 * Removes ExApp from cache.
 	 */
 	public function enableExApp(ExApp $exApp): bool {
+		$wasEnabled = (bool)$exApp->getEnabled();
 		if (!$this->exAppService->enableExAppInternal($exApp)) {
 			return false;
 		}
@@ -694,16 +728,19 @@ class AppAPIService {
 			$response = json_decode($exAppEnabled->getBody(), true);
 			if (!empty($response['error'])) {
 				$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $response['error']));
-				$this->exAppService->disableExAppInternal($exApp);
+				$this->revertEnable($exApp, $wasEnabled);
 				return false;
 			}
 		} elseif (isset($exAppEnabled['error'])) {
 			$this->logger->error(sprintf('Failed to enable ExApp %s. Error: %s', $exApp->getAppid(), $exAppEnabled['error']));
-			$this->exAppService->disableExAppInternal($exApp);
+			$this->revertEnable($exApp, $wasEnabled);
 			return false;
 		}
 
 		$this->harpService->harpExAppUpdate($daemonConfig, $exApp, true);
+		$this->auditLogger->log(Operation::ExAppEnabled, 'ExApp %s was enabled', [
+			'appId' => $exApp->getAppid(),
+		]);
 		return true;
 	}
 
@@ -712,6 +749,7 @@ class AppAPIService {
 	 * If request fails, disables ExApp in database, cache.
 	 */
 	public function disableExApp(ExApp $exApp): bool {
+		$wasEnabled = (bool)$exApp->getEnabled();
 		$result = true;
 		$exAppDisabled = $this->requestToExApp($exApp, '/enabled?enabled=0', null, 'PUT', options: ['timeout' => 60]);
 		if ($exAppDisabled instanceof IResponse) {
@@ -754,12 +792,30 @@ class AppAPIService {
 				}
 			}
 		}
-		$this->exAppService->disableExAppInternal($exApp);
+		// The ExApp is disabled even when it could not be told about it
+		if ($this->exAppService->disableExAppInternal($exApp) && $wasEnabled) {
+			$this->logExAppDisabled($exApp);
+		}
 
 		if ($result) {
 			$this->harpService->harpExAppUpdate($daemonConfig, $exApp, false);
 		}
 		return $result;
+	}
+
+	/**
+	 * Disables an ExApp that refused to be enabled, an entry only when it was enabled before
+	 */
+	private function revertEnable(ExApp $exApp, bool $wasEnabled): void {
+		if ($this->exAppService->disableExAppInternal($exApp) && $wasEnabled) {
+			$this->logExAppDisabled($exApp);
+		}
+	}
+
+	private function logExAppDisabled(ExApp $exApp): void {
+		$this->auditLogger->log(Operation::ExAppDisabled, 'ExApp %s was disabled', [
+			'appId' => $exApp->getAppid(),
+		]);
 	}
 
 	public function setAppInitProgress(ExApp $exApp, int $progress, string $error = ''): void {
@@ -803,10 +859,13 @@ class AppAPIService {
 				if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
 					if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-						$this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
+						$dataDeleted = $this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true) === '';
 					} else {
 						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
-						$this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()));
+						$dataDeleted = isset($this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()))['success']);
+					}
+					if ($dataDeleted) {
+						$this->exAppService->logExAppDataDeleted($exApp);
 					}
 				}
 				$this->exAppService->unregisterExApp($exApp->getAppid());

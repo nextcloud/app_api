@@ -11,6 +11,8 @@ namespace OCA\AppAPI\Controller;
 
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\MaintenanceModeAvailable;
+use OCA\AppAPI\AuditLog\AuditLogger;
+use OCA\AppAPI\AuditLog\Operation;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\ExAppService;
 use OCA\AppAPI\Service\HarpService;
@@ -41,6 +43,7 @@ class HarpController extends Controller {
 		private readonly ICrypto $crypto,
 		private readonly ?string $userId,
 		private readonly HarpService $harpService,
+		private readonly AuditLogger $auditLogger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -64,6 +67,10 @@ class HarpController extends Controller {
 			$this->logger->error('Harp shared key is not valid');
 			$this->throttler->registerAttempt(Application::APP_ID, $this->request->getRemoteAddress(), [
 				'appid' => $exApp->getAppid(),
+			]);
+			$this->throttler->sleepDelayOrThrowOnMax($this->request->getRemoteAddress(), Application::APP_ID);
+			$this->auditLogger->log(Operation::HarpAuthFailed, 'Failed HaRP authentication for ExApp %s', [
+				'appId' => $exApp->getAppid(),
 			]);
 			return false;
 		}
