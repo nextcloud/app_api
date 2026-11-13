@@ -13,7 +13,6 @@ use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
-use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -29,7 +28,6 @@ class Unregister extends Command {
 		private readonly DockerActions $dockerActions,
 		private readonly KubernetesActions $kubernetesActions,
 		private readonly ExAppService $exAppService,
-		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
 	) {
 		parent::__construct();
 	}
@@ -153,22 +151,7 @@ class Unregister extends Command {
 					}
 				}
 			} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
-				$this->kubernetesActions->initGuzzleClient($daemonConfig);
-				$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
-
-				// Check for stored multi-role configuration
-				$rolesOption = $this->exAppDeployOptionsService->getDeployOption($exApp->getAppid(), 'k8s_service_roles');
-				$roles = $rolesOption !== null ? $rolesOption->getValue() : [];
-
-				if (!empty($roles) && is_array($roles)) {
-					$removeResult = $this->kubernetesActions->removeAllRoles(
-						$harpK8sUrl, $exApp->getAppid(), $roles, removeData: $rmData
-					);
-				} else {
-					$removeResult = $this->kubernetesActions->removeExApp(
-						$harpK8sUrl, $exApp->getAppid(), removeData: $rmData
-					);
-				}
+				$removeResult = $this->kubernetesActions->removeExAppResources($daemonConfig, $exApp->getAppid(), removeData: $rmData);
 				if ($removeResult) {
 					if (!$silent) {
 						$output->writeln(sprintf('Failed to remove K8s ExApp %s: %s', $appId, $removeResult));

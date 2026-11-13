@@ -16,7 +16,6 @@ use OCA\AppAPI\DeployActions\DockerActions;
 use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
-use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -47,7 +46,6 @@ class UnregisterTest extends TestCase {
 			$this->dockerActions,
 			$this->kubernetesActions,
 			$this->exAppService,
-			$this->createMock(ExAppDeployOptionsService::class),
 		));
 	}
 
@@ -118,7 +116,8 @@ class UnregisterTest extends TestCase {
 	#[DataProvider('kubernetesProvider')]
 	public function testKubernetesExAppDataDeletionIsLogged(bool $rmData, string $removeError, bool $logged): void {
 		$exApp = $this->registerExApp('kubernetes-install', true);
-		$this->kubernetesActions->method('removeExApp')->willReturn($removeError);
+		$this->kubernetesActions->expects(self::once())->method('removeExAppResources')
+			->with(self::isInstanceOf(DaemonConfig::class), 'test_app', $rmData)->willReturn($removeError);
 		$this->exAppService->expects($logged ? self::once() : self::never())->method('logExAppDataDeleted')->with($exApp);
 
 		$this->commandTester->execute(['appid' => 'test_app', '--rm-data' => $rmData, '--force' => true, '--silent' => true]);

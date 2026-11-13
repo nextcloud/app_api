@@ -17,6 +17,7 @@ use OC\App\DependencyAnalyzer;
 use OC\App\Platform;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\ResponseDefinitions;
 use OCA\AppAPI\Service\AppAPIService;
@@ -52,6 +53,7 @@ class ExAppsPageController extends Controller {
 		private readonly AppAPIService $service,
 		private readonly DaemonConfigService $daemonConfigService,
 		private readonly DockerActions $dockerActions,
+		private readonly KubernetesActions $kubernetesActions,
 		private readonly CategoryFetcher $categoryFetcher,
 		private readonly IFactory $l10nFactory,
 		private readonly ExAppFetcher $exAppFetcher,
@@ -511,6 +513,11 @@ class ExAppsPageController extends Controller {
 							}
 						}
 					}
+				}
+			} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
+				$removeError = $this->kubernetesActions->removeExAppResources($daemonConfig, $exApp->getAppid(), removeData: $removeData);
+				if ($removeData && $removeError === '') {
+					$this->exAppService->logExAppDataDeleted($exApp);
 				}
 			}
 			$this->exAppService->unregisterExApp($appId);

@@ -478,6 +478,20 @@ class AppAPIServiceTest extends TestCase {
 		$this->service->removeExAppsByDaemonConfigName($daemonConfig);
 	}
 
+	public function testRemoveExAppsByDaemonConfigNameRemovesTheKubernetesResources(): void {
+		$exApp = $this->createExApp();
+		$exApp->setAcceptsDeployId('kubernetes-install');
+		$daemonConfig = new DaemonConfig(['name' => 'test_daemon', 'accepts_deploy_id' => 'kubernetes-install', 'deploy_config' => ['harp' => ['exapp_direct' => true]]]);
+		$this->setupReachableManualExApp($exApp, '{}');
+		$this->exAppService->method('getExAppsByDaemonName')->with('test_daemon')->willReturn([$exApp]);
+		$this->exAppService->method('disableExAppInternal')->willReturn(true);
+		$this->kubernetesActions->expects(self::once())->method('removeExAppResources')->with($daemonConfig, 'test_app', true)->willReturn('');
+		$this->exAppService->expects(self::once())->method('logExAppDataDeleted')->with($exApp);
+		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('test_app');
+
+		$this->service->removeExAppsByDaemonConfigName($daemonConfig);
+	}
+
 	private function createRequestForUser(string $appId, string $userId, string $secret): MockObject&\OCP\IRequest {
 		$request = $this->createMock(\OCP\IRequest::class);
 		$request->method('getRemoteAddress')->willReturn('127.0.0.1');
