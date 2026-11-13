@@ -212,4 +212,19 @@ class DaemonConfigServiceTest extends TestCase {
 		self::assertInstanceOf(DaemonConfig::class, $result);
 		self::assertSame(['junk', ['from' => 'quay.io'], $second], $result->getDeployConfig()['registries']);
 	}
+
+	public function testUpdateDaemonConfigResetsTheExAppsCache(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->method('update')->willReturnArgument(0);
+		$exAppService = $this->createMock(ExAppService::class);
+		$exAppService->expects(self::once())->method('resetExAppsCache');
+		$service = new DaemonConfigService(
+			$this->createMock(LoggerInterface::class),
+			$mapper,
+			$exAppService,
+			$this->createMock(ICrypto::class),
+		);
+
+		$service->updateDaemonConfig(new DaemonConfig(['name' => 'harp_proxy', 'deploy_config' => ['haproxy_password' => 'new_secret']]));
+	}
 }
