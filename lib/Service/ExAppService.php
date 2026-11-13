@@ -411,6 +411,13 @@ class ExAppService {
 		}
 	}
 
+	/**
+	 * Drop the cached list of ExApps, which also holds the settings of their deploy daemons
+	 */
+	public function resetExAppsCache(): void {
+		$this->cache?->remove('/ex_apps');
+	}
+
 	public function registerExAppRoutes(ExApp $exApp, array $routes): ?ExApp {
 		try {
 			$this->exAppMapper->registerExAppRoutes($exApp, $routes);

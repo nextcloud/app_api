@@ -167,11 +167,13 @@ readonly class DaemonConfigService {
 		}
 
 		try {
-			return $this->mapper->update($daemonConfig);
+			$daemonConfig = $this->mapper->update($daemonConfig);
 		} catch (Exception $e) {
 			$this->logger->error('Failed to update DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->exAppService->resetExAppsCache();
+		return $daemonConfig;
 	}
 
 	public function addDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
