@@ -41,7 +41,7 @@ readonly class DockerSocketProxyCheck implements ISetupCheck {
 		}
 		return SetupResult::error(
 			$this->l10n->t('Docker Socket Proxy daemons are no longer supported: %s. Uninstall their ExApps keeping the data, install them on a HaRP daemon on the same Docker host, then remove these daemons.', [implode(', ', $dockerSocketProxyDaemons)]),
-			'https://github.com/nextcloud/HaRP#nextcloud-32-migrating-existing-exapps-from-dsp-to-harp',
+			'https://github.com/nextcloud/HaRP#migrating-exapps-from-docker-socket-proxy-to-harp',
 		);
 	}
 }

@@ -75,7 +75,7 @@ readonly class DaemonCheck implements ISetupCheck {
 		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
 			return SetupResult::error(
 				$this->l10n->t('The default deploy daemon uses Docker Socket Proxy, which is no longer supported. Set a HaRP daemon as the default.'),
-				'https://github.com/nextcloud/HaRP#nextcloud-32-migrating-existing-exapps-from-dsp-to-harp',
+				'https://github.com/nextcloud/HaRP#migrating-exapps-from-docker-socket-proxy-to-harp',
 			);
 		}
 
