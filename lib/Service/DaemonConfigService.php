@@ -242,6 +242,7 @@ readonly class DaemonConfigService {
 			$this->logger->error('Failed to update DaemonConfig. Error: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
 		}
+		$this->exAppService->resetExAppsCache();
 		$changedSettings = $this->getChangedSettings($previousDaemonConfig, $daemonConfig);
 		if ($changedSettings !== []) {
 			$parameters = [
