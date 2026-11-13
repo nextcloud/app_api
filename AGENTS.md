@@ -39,9 +39,9 @@ permissions and the web UI.
 - **Deploy Daemon**: the external service Nextcloud talks to in order to install, start/stop and reach ExApps.
   Without a configured Deploy Daemon, AppAPI cannot deploy anything, and Nextcloud shows the admin warning
   "AppAPI default deploy daemon is not set".
-- **HaRP** (`nextcloud/HaRP`): the recommended daemon (NC32+), a high-performance reverse proxy that proxies
-  the Docker Engine, routes requests straight to ExApps (bypassing PHP, enabling WebSockets), and uses FRP
-  tunnels so ExApps need not expose host ports.
+- **HaRP** (`nextcloud/HaRP`): the daemon for Docker and Kubernetes deployments, a high-performance reverse
+  proxy that proxies the Docker Engine, routes requests straight to ExApps (bypassing PHP, enabling WebSockets),
+  and uses FRP tunnels so ExApps need not expose host ports.
 - **nc_py_api**: the Python framework used to write ExApps that call back into Nextcloud through AppAPI.
 
 ExApps are **trusted, first-class apps**, comparable to PHP apps running inside Nextcloud: they authenticate
@@ -110,7 +110,7 @@ npm test                 # vitest (JS unit tests)
   it, `auto-compile.yml` rebuilds and pushes the assets of pull requests opened by `dependabot` and
   `nextcloud-command`; on your own pull requests, comment `/compile` (`command-compile.yml`).
 - `reuse.yml`: every file needs SPDX licensing info, via a file header or a `REUSE.toml` annotation.
-- `tests-deploy*.yml`: end-to-end daemon lifecycle across Docker / HaRP / DSP and the four K8s expose types;
+- `tests-deploy*.yml`: end-to-end daemon lifecycle on Docker with HaRP and the four K8s expose types;
   `tests.yml` runs nc_py_api integration (PgSQL/MySQL/APcu). CI targets the server `master` line.
 
 ### Contributing conventions
@@ -138,7 +138,7 @@ npm test                 # vitest (JS unit tests)
 | HaRP logic | `lib/Service/HarpService.php` |
 | Daemon config service | `lib/Service/DaemonConfigService.php` |
 | App Store fetchers | `lib/Fetcher/{AppAPIFetcher,ExAppFetcher,ExAppArchiveFetcher}.php` |
-| Setup checks | `lib/SetupChecks/` (`DaemonCheck`, `HarpVersionCheck`) |
+| Setup checks | `lib/SetupChecks/` (`DaemonCheck`, `DockerSocketProxyCheck`, `HarpVersionCheck`) |
 | Background jobs | `lib/BackgroundJob/` |
 | DB migrations / repair steps | `lib/Migration/` (`VersionXXXXXXDateYYYYYYYY.php` schema classes + repair steps) |
 | Frontend | `src/` (Vue), entries `src/adminSettings.js` + `src/filesplugin.js`, built into `js/` via `webpack.js` |
@@ -152,7 +152,6 @@ npm test                 # vitest (JS unit tests)
 - **nc_py_api** (build ExApps in Python): https://github.com/cloud-py-api/nc_py_api
 - **nextcloud-docker-dev** (development environment): https://github.com/nextcloud/nextcloud-docker-dev
 - **HaRP**: https://github.com/nextcloud/HaRP
-- **Docker Socket Proxy** (legacy): https://github.com/nextcloud/docker-socket-proxy
 - **Admin docs**: https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/
 - **Developer docs**: https://docs.nextcloud.com/server/latest/developer_manual/exapp_development/
 

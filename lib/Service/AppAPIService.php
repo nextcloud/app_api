@@ -665,23 +665,24 @@ class AppAPIService {
 			return false;
 		}
 
-		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
-			$this->dockerActions->initGuzzleClient($daemonConfig);
-			$containerName = $this->dockerActions->buildExAppContainerName($exApp->getAppid());
-			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-				$this->dockerActions->startExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
-				if (!$this->dockerActions->waitExAppStart($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid())) {
-					$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
-					return false;
-				}
-			} else {
-				$this->dockerActions->startContainer($this->dockerActions->buildDockerUrl($daemonConfig), $containerName);
-				if (!$this->dockerActions->waitTillContainerStart($containerName, $daemonConfig)) {
-					$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
-					return false;
-				}
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			$heartbeat = $this->requestToExApp($exApp, '/heartbeat', null, 'GET', options: ['timeout' => 10]);
+			if (!$heartbeat instanceof IResponse || $heartbeat->getStatusCode() !== 200
+				|| (json_decode((string)$heartbeat->getBody(), true)['status'] ?? null) !== 'ok') {
+				$error = sprintf('The ExApp does not answer the heartbeat, and its daemon uses Docker Socket Proxy, which is no longer supported. Start container %s by hand, or uninstall the ExApp keeping its data and install it on a HaRP daemon on the same Docker host.', $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
+				$this->logger->error(sprintf('ExApp %s: %s', $exApp->getAppid(), $error));
+				$this->revertEnable($exApp, $wasEnabled);
+				$this->exAppService->setStatusError($exApp, $error);
+				return false;
 			}
-			if (!$this->dockerActions->healthcheckContainer($containerName, $daemonConfig, true)) {
+		} elseif ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			$this->dockerActions->initGuzzleClient($daemonConfig);
+			$this->dockerActions->startExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
+			if (!$this->dockerActions->waitExAppStart($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid())) {
+				$this->logger->error(sprintf('ExApp %s container startup failed.', $exApp->getAppid()));
+				return false;
+			}
+			if (!$this->dockerActions->healthcheckContainer($this->dockerActions->buildExAppContainerName($exApp->getAppid()), $daemonConfig, true)) {
 				$this->logger->error(sprintf('ExApp %s container healthcheck failed.', $exApp->getAppid()));
 				return false;
 			}
@@ -716,11 +717,13 @@ class AppAPIService {
 			}
 		}
 
-		$auth = [];
-		$exAppRootUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
-		if (!$this->heartbeatExApp($exAppRootUrl, $auth, $exApp->getAppid())) {
-			$this->logger->error(sprintf('ExApp %s heartbeat failed.', $exApp->getAppid()));
-			return false;
+		if (!DockerActions::isDockerSocketProxy($daemonConfig)) {
+			$auth = [];
+			$exAppRootUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
+			if (!$this->heartbeatExApp($exAppRootUrl, $auth, $exApp->getAppid())) {
+				$this->logger->error(sprintf('ExApp %s heartbeat failed.', $exApp->getAppid()));
+				return false;
+			}
 		}
 
 		$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 60]);
@@ -767,13 +770,11 @@ class AppAPIService {
 			$this->logger->error(sprintf('DaemonConfig %s not found.', $exApp->getDaemonConfigName()));
 			return false;
 		}
-		if ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			$this->logger->warning(sprintf('Daemon "%s" uses Docker Socket Proxy, which is no longer supported, so container %s is not stopped.', $daemonConfig->getName(), $this->dockerActions->buildExAppContainerName($exApp->getAppid())));
+		} elseif ($exApp->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$this->dockerActions->initGuzzleClient($daemonConfig);
-			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-				$this->dockerActions->stopExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
-			} else {
-				$this->dockerActions->stopContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
-			}
+			$this->dockerActions->stopExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true);
 		} elseif ($exApp->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
 			$this->kubernetesActions->initGuzzleClient($daemonConfig);
 			$harpK8sUrl = $this->kubernetesActions->buildHarpK8sUrl($daemonConfig);
@@ -856,15 +857,11 @@ class AppAPIService {
 			}
 			foreach ($targetDaemonExApps as $exApp) {
 				$this->disableExApp($exApp);
-				if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+				if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+					$this->logger->warning(sprintf('Daemon "%s" uses Docker Socket Proxy, which is no longer supported, so container %s and its data volume are kept. Install the ExApp on a HaRP daemon on the same Docker host to reuse the data, or remove the container by hand.', $daemonConfig->getName(), $this->dockerActions->buildExAppContainerName($exApp->getAppid())));
+				} elseif ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
-					if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-						$dataDeleted = $this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true) === '';
-					} else {
-						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($exApp->getAppid()));
-						$dataDeleted = isset($this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($exApp->getAppid()))['success']);
-					}
-					if ($dataDeleted) {
+					if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), true) === '') {
 						$this->exAppService->logExAppDataDeleted($exApp);
 					}
 				}

@@ -20,6 +20,7 @@ use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\App\IAppManager;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IConfig;
 use OCP\IL10N;
@@ -54,6 +55,7 @@ class ExAppsPageControllerTest extends TestCase {
 		$this->l10nFactory = $this->createMock(IFactory::class);
 		$this->exAppFetcher = $this->createMock(ExAppFetcher::class);
 		$l10n = $this->createMock(IL10N::class);
+		$l10n->method('t')->willReturnArgument(0);
 		$logger = $this->createMock(LoggerInterface::class);
 		$this->appManager = $this->createMock(IAppManager::class);
 		$this->exAppService = $this->createMock(ExAppService::class);
@@ -234,36 +236,47 @@ class ExAppsPageControllerTest extends TestCase {
 		self::assertInstanceOf(JSONResponse::class, $this->controller->force('my_exapp'));
 	}
 
-	public static function uninstallDataProvider(): array {
-		return [
-			'HaRP, data removed' => [true, true, '', null, true],
-			'HaRP, data kept' => [true, false, '', null, false],
-			'HaRP, removal failed' => [true, true, 'Failed to remove ExApp', null, false],
-			'Docker Socket Proxy, volume removed' => [false, true, '', ['success' => true], true],
-			'Docker Socket Proxy, volume not removed' => [false, true, '', ['error' => 'Volume is in use.'], false],
-			'Docker Socket Proxy, data kept' => [false, false, '', null, false],
-		];
-	}
-
-	#[DataProvider('uninstallDataProvider')]
-	public function testUninstallAppLogsTheDeletedData(bool $isHarp, bool $removeData, string $removeExAppError, ?array $removeVolumeResult, bool $logged): void {
+	private function registerDockerExApp(bool $isHarp): ExApp {
+		$deployConfig = $isHarp ? ['harp' => ['frp_address' => 'appapi-harp:8782']] : [];
 		$exApp = new ExApp([
 			'appid' => 'fake_app',
 			'daemon_config_name' => 'docker_daemon',
 			'enabled' => 0,
+			'version' => '1.0.0',
 		]);
-		$exApp->setDeployConfig($isHarp ? ['harp' => ['frp_address' => 'appapi-harp:8782']] : []);
+		$exApp->setDeployConfig($deployConfig);
 		$this->exAppService->method('getExApp')->with('fake_app')->willReturn($exApp);
 		$this->daemonConfigService->method('getDaemonConfigByName')
-			->willReturn(new DaemonConfig(['name' => 'docker_daemon', 'accepts_deploy_id' => 'docker-install']));
+			->willReturn(new DaemonConfig(['name' => 'docker_daemon', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => $deployConfig]));
 		$this->dockerActions->method('getAcceptsDeployId')->willReturn('docker-install');
+		return $exApp;
+	}
+
+	public static function uninstallDataProvider(): array {
+		return [
+			'data removed' => [true, '', true],
+			'data kept' => [false, '', false],
+			'removal failed' => [true, 'Failed to remove ExApp', false],
+		];
+	}
+
+	#[DataProvider('uninstallDataProvider')]
+	public function testUninstallAppLogsTheDeletedData(bool $removeData, string $removeExAppError, bool $logged): void {
+		$exApp = $this->registerDockerExApp(true);
 		$this->dockerActions->method('removeExApp')->willReturn($removeExAppError);
-		$this->dockerActions->expects($removeData && !$isHarp ? self::once() : self::never())
-			->method('removeVolume')->willReturn($removeVolumeResult ?? []);
 		$this->exAppService->expects($logged ? self::once() : self::never())->method('logExAppDataDeleted')->with($exApp);
 		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('fake_app');
 
-		$this->controller->uninstallApp('fake_app', true, $removeData);
+		$this->controller->uninstallApp('fake_app', $removeData);
+	}
+
+	public function testUninstallAppKeepsTheContainerOfADockerSocketProxyExApp(): void {
+		$this->registerDockerExApp(false);
+		$this->dockerActions->expects(self::never())->method('removeExApp');
+		$this->exAppService->expects(self::never())->method('logExAppDataDeleted');
+		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('fake_app');
+
+		$this->controller->uninstallApp('fake_app', true);
 	}
 
 	public function testEnableAppLogsTheInstallationWithoutTheValuesOfTheEnvironmentVariables(): void {
@@ -285,12 +298,46 @@ class ExAppsPageControllerTest extends TestCase {
 	}
 
 	public function testUpdateAppLogsTheUpdate(): void {
-		$exApp = new ExApp(['appid' => 'fake_app', 'version' => '1.0.0']);
+		$exApp = $this->registerDockerExApp(true);
 		$this->exAppFetcher->method('getExAppsWithUpdates')->willReturn([['id' => 'fake_app']]);
-		$this->exAppService->method('getExApp')->with('fake_app')->willReturn($exApp);
 		$this->exAppService->expects(self::once())->method('logExAppUpdateRequested')->with($exApp);
 		$this->service->expects(self::once())->method('runOccCommand')->willReturn(false);
 
 		$this->controller->updateApp('fake_app');
+	}
+
+	public function testUpdateAppRefusesADockerSocketProxyExApp(): void {
+		$this->registerDockerExApp(false);
+		$this->exAppFetcher->method('getExAppsWithUpdates')->willReturn([['id' => 'fake_app']]);
+		$this->exAppService->expects(self::never())->method('logExAppUpdateRequested');
+		$this->service->expects(self::never())->method('runOccCommand');
+
+		$response = $this->controller->updateApp('fake_app');
+		self::assertSame(Http::STATUS_INTERNAL_SERVER_ERROR, $response->getStatus());
+	}
+
+	public function testGetAppLogsOfADockerSocketProxyExAppAnswersThatItIsNotSupported(): void {
+		$this->registerDockerExApp(false);
+		$this->dockerActions->expects(self::never())->method('initGuzzleClient');
+		$this->dockerActions->expects(self::never())->method('getContainerLogs');
+
+		$response = $this->controller->getAppLogs('fake_app');
+
+		self::assertSame(
+			json_encode(['error' => 'Docker Socket Proxy daemons are no longer supported. To move the ExApp, uninstall it keeping its data and install it on a HaRP daemon on the same Docker host.']),
+			$response->render(),
+		);
+	}
+
+	public function testEnableAppRefusesToInstallOnADockerSocketProxyDaemon(): void {
+		$this->exAppService->method('getExApp')->with('fake_app')->willReturn(null);
+		$this->daemonConfigService->method('getDaemonConfigByName')->with('dsp_daemon')
+			->willReturn(new DaemonConfig(['name' => 'dsp_daemon', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => []]));
+		$this->dockerActions->method('getAcceptsDeployId')->willReturn('docker-install');
+		$this->exAppService->expects(self::never())->method('logExAppInstallRequested');
+		$this->service->expects(self::never())->method('runOccCommand');
+
+		$response = $this->controller->enableApp('fake_app', 'dsp_daemon');
+		self::assertSame(Http::STATUS_INTERNAL_SERVER_ERROR, $response->getStatus());
 	}
 }

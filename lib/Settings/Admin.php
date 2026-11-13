@@ -51,6 +51,8 @@ readonly class Admin implements ISettings {
 					if (!$daemonConfigAccessible) {
 						$this->logger->error(sprintf('Deploy daemon "%s" is not accessible by Nextcloud: %s', $daemonConfig->getName(), $pingError));
 					}
+				} elseif (DockerActions::isDockerSocketProxy($daemonConfig)) {
+					$adminInitialData['daemon_config_accessible'] = false;
 				} else {
 					$this->dockerActions->initGuzzleClient($daemonConfig);
 					$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));

@@ -130,6 +130,14 @@ class Register extends Command {
 			return 2;
 		}
 
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			$this->logger->error(sprintf('Daemon config %s: %s', $daemonConfig->getName(), DockerActions::DOCKER_SOCKET_PROXY_ERROR));
+			if ($outputConsole) {
+				$output->writeln(sprintf('Daemon config %s: %s', $daemonConfig->getName(), DockerActions::DOCKER_SOCKET_PROXY_ERROR));
+			}
+			return 2;
+		}
+
 		$actionsDeployIds = [
 			$this->dockerActions->getAcceptsDeployId(),
 			$this->manualActions->getAcceptsDeployId(),
@@ -172,11 +180,7 @@ class Register extends Command {
 		$k8sRoles = [];
 		if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 			$deployParams = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
-			if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-				$deployResult = $this->dockerActions->deployExAppHarp($exApp, $daemonConfig, $deployParams);
-			} else {
-				$deployResult = $this->dockerActions->deployExApp($exApp, $daemonConfig, $deployParams);
-			}
+			$deployResult = $this->dockerActions->deployExApp($exApp, $daemonConfig, $deployParams);
 			if ($deployResult) {
 				$this->logger->error(sprintf('ExApp %s deployment failed. Error: %s', $appId, $deployResult));
 				if ($outputConsole) {

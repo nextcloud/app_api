@@ -52,16 +52,15 @@ readonly class DaemonCheck implements ISetupCheck {
 
 	public function run(): SetupResult {
 		$serverVer = explode('.', $this->config->getSystemValueString('version', 'latest'))[0];
+		$docsUrl = "https://docs.nextcloud.com/server/$serverVer/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon";
 
 		$daemonConfig = $this->getDefaultDaemonConfig();
 		if ($daemonConfig === null) {
 			return SetupResult::info(
 				$this->l10n->t('AppAPI default deploy daemon is not set. Please register a default deploy daemon in the settings to install External Apps (Ex-Apps).'),
-				"https://docs.nextcloud.com/server/$serverVer/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon",
+				$docsUrl,
 			);
 		}
-
-		$docsUrl = "https://docs.nextcloud.com/server/$serverVer/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon";
 
 		if ($daemonConfig->getAcceptsDeployId() === KubernetesActions::DEPLOY_ID) {
 			$this->kubernetesActions->initGuzzleClient($daemonConfig);
@@ -71,6 +70,13 @@ readonly class DaemonCheck implements ISetupCheck {
 				return SetupResult::error($pingError, $docsUrl);
 			}
 			return SetupResult::success();
+		}
+
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			return SetupResult::error(
+				$this->l10n->t('The default deploy daemon uses Docker Socket Proxy, which is no longer supported. Set a HaRP daemon as the default.'),
+				'https://github.com/nextcloud/HaRP#migrating-exapps-from-docker-socket-proxy-to-harp',
+			);
 		}
 
 		$this->dockerActions->initGuzzleClient($daemonConfig);
@@ -83,15 +89,6 @@ readonly class DaemonCheck implements ISetupCheck {
 			);
 		}
 
-		if (!boolval($daemonConfig->getDeployConfig()['harp'] ?? false)) {
-			return SetupResult::warning(
-				$this->l10n->t('The AppAPI default deploy daemon is not using HaRP. Please consider switching to HaRP for better performance.'),
-				// todo: update link
-				'https://github.com/nextcloud/HaRP/',
-			);
-		}
-
-		// HaRP is accessible since ping is already successful
 		return SetupResult::success();
 	}
 }

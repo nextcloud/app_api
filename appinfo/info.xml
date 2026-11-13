@@ -30,10 +30,7 @@ You can either disable AppAPI, or configure a Deploy Daemon (see below).
 
 A **Deploy Daemon** is the service Nextcloud talks to in order to install, start, stop and reach ExApps.
 
-Two options are available:
-
-- **HaRP** (recommended for Nextcloud 32+) — a high-performance reverse proxy with FRP tunneling
-- **Docker Socket Proxy** (legacy) — scheduled for removal in Nextcloud 35
+Docker deployments use **HaRP**, a high-performance reverse proxy with FRP tunneling.
 
 See the [admin documentation](https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/DeployConfigurations.html) for setup instructions.
 	]]></description>

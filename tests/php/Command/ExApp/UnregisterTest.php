@@ -21,6 +21,7 @@ use OCA\AppAPI\Service\ExAppService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class UnregisterTest extends TestCase {
@@ -28,6 +29,7 @@ class UnregisterTest extends TestCase {
 	private DockerActions&MockObject $dockerActions;
 	private KubernetesActions&MockObject $kubernetesActions;
 	private ExAppService&MockObject $exAppService;
+	private LoggerInterface&MockObject $logger;
 	private CommandTester $commandTester;
 
 	protected function setUp(): void {
@@ -36,10 +38,12 @@ class UnregisterTest extends TestCase {
 		$this->daemonConfigService = $this->createMock(DaemonConfigService::class);
 		$this->dockerActions = $this->createMock(DockerActions::class);
 		$this->dockerActions->method('getAcceptsDeployId')->willReturn('docker-install');
+		$this->dockerActions->method('buildExAppContainerName')->willReturnCallback(static fn (string $appId): string => 'nc_app_' . $appId);
 		$this->kubernetesActions = $this->createMock(KubernetesActions::class);
 		$this->kubernetesActions->method('getAcceptsDeployId')->willReturn('kubernetes-install');
 		$this->exAppService = $this->createMock(ExAppService::class);
 		$this->exAppService->method('unregisterExApp')->willReturn(true);
+		$this->logger = $this->createMock(LoggerInterface::class);
 
 		$this->commandTester = new CommandTester(new Unregister(
 			$this->createMock(AppAPIService::class),
@@ -48,6 +52,7 @@ class UnregisterTest extends TestCase {
 			$this->kubernetesActions,
 			$this->exAppService,
 			$this->createMock(ExAppDeployOptionsService::class),
+			$this->logger,
 		));
 	}
 
@@ -57,10 +62,11 @@ class UnregisterTest extends TestCase {
 			'daemon_config_name' => 'test_daemon',
 			'enabled' => 0,
 		]);
-		$exApp->setDeployConfig($isHarp ? ['harp' => ['frp_address' => 'appapi-harp:8782']] : []);
+		$deployConfig = $isHarp ? ['harp' => ['frp_address' => 'appapi-harp:8782']] : [];
+		$exApp->setDeployConfig($deployConfig);
 		$this->exAppService->method('getExApp')->with('test_app')->willReturn($exApp);
 		$this->daemonConfigService->method('getDaemonConfigByName')
-			->willReturn(new DaemonConfig(['name' => 'test_daemon', 'accepts_deploy_id' => $acceptsDeployId]));
+			->willReturn(new DaemonConfig(['name' => 'test_daemon', 'accepts_deploy_id' => $acceptsDeployId, 'deploy_config' => $deployConfig]));
 		return $exApp;
 	}
 
@@ -81,30 +87,17 @@ class UnregisterTest extends TestCase {
 		$this->commandTester->execute(['appid' => 'test_app', '--rm-data' => $rmData, '--force' => true, '--silent' => true]);
 	}
 
-	public static function dockerSocketProxyProvider(): array {
-		return [
-			'volume removed' => [['success' => true], true],
-			'volume not removed' => [['error' => 'Volume is in use.'], false],
-		];
-	}
-
-	#[DataProvider('dockerSocketProxyProvider')]
-	public function testDockerSocketProxyExAppDataDeletionIsLogged(array $removeVolumeResult, bool $logged): void {
-		$exApp = $this->registerExApp('docker-install', false);
-		$this->dockerActions->method('removeContainer')->willReturn('');
-		$this->dockerActions->method('removeVolume')->willReturn($removeVolumeResult);
-		$this->exAppService->expects($logged ? self::once() : self::never())->method('logExAppDataDeleted')->with($exApp);
-
-		$this->commandTester->execute(['appid' => 'test_app', '--rm-data' => true, '--silent' => true]);
-	}
-
-	public function testDockerSocketProxyExAppDataIsKeptByDefault(): void {
+	public function testDockerSocketProxyExAppIsUnregisteredWithoutItsContainer(): void {
 		$this->registerExApp('docker-install', false);
-		$this->dockerActions->method('removeContainer')->willReturn('');
-		$this->dockerActions->expects(self::never())->method('removeVolume');
+		$this->dockerActions->expects(self::never())->method('initGuzzleClient');
+		$this->dockerActions->expects(self::never())->method('removeExApp');
 		$this->exAppService->expects(self::never())->method('logExAppDataDeleted');
+		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('test_app');
+		$message = 'Daemon "test_daemon" uses Docker Socket Proxy, which is no longer supported, so container nc_app_test_app and its data volume are kept. Install the ExApp on a HaRP daemon on the same Docker host to reuse the data, or remove the container by hand.';
+		$this->logger->expects(self::once())->method('warning')->with($message);
 
-		$this->commandTester->execute(['appid' => 'test_app', '--silent' => true]);
+		self::assertSame(0, $this->commandTester->execute(['appid' => 'test_app', '--rm-data' => true, '--silent' => true]));
+		self::assertSame('', $this->commandTester->getDisplay());
 	}
 
 	public static function kubernetesProvider(): array {
