@@ -149,12 +149,6 @@
       <code><![CDATA[$output]]></code>
     </NullableReturnStatement>
   </file>
-  <file src="lib/Command/ExApp/Unregister.php">
-    <RedundantCondition>
-      <code><![CDATA[!empty($roles) && is_array($roles)]]></code>
-      <code><![CDATA[is_array($roles)]]></code>
-    </RedundantCondition>
-  </file>
   <file src="lib/Service/ExAppService.php">
     <UndefinedClass>
       <code><![CDATA[\OC\Memcache\APCu]]></code>
