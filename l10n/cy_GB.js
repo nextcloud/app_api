@@ -5,6 +5,8 @@ OC.L10N.register(
     "Delete" : "Dileu",
     "Edit" : "Golygu",
     "Name" : "Enw",
+    "From" : "o",
+    "To" : "at",
     "Confirm" : "Cadarnhau",
     "Save" : "Cadw",
     "Register" : "Cofrestru",
