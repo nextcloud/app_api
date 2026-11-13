@@ -85,6 +85,7 @@ class ExAppProxyController extends Controller {
 
 		$proxyResponse = new ProxyResponse($response->getStatusCode(), $responseHeaders, $content);
 		if ($cache && !$isHTML && empty($response->getHeader('cache-control'))
+			&& !in_array($response->getStatusCode(), [301, 302, 303, 307, 308], true)
 			&& $response->getHeader('Content-Type') !== 'application/json'
 			&& $response->getHeader('Content-Type') !== 'application/x-tar') {
 			$proxyResponse->cacheFor(3600);
@@ -111,6 +112,7 @@ class ExAppProxyController extends Controller {
 				RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 				RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 				RequestOptions::TIMEOUT => 0,
+				'allow_redirects' => false, // the browser follows redirects, so each target passes the route check
 			],
 			request: $this->request,
 		);
@@ -140,6 +142,7 @@ class ExAppProxyController extends Controller {
 			RequestOptions::COOKIES => $this->buildProxyCookiesJar($_COOKIE, $this->service->getExAppDomain($exApp)),
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
+			'allow_redirects' => false,
 		];
 		if (str_starts_with($this->request->getHeader('Content-Type'), 'multipart/form-data') || count($_FILES) > 0) {
 			unset($options['headers']['Content-Type']);
@@ -185,6 +188,7 @@ class ExAppProxyController extends Controller {
 			RequestOptions::BODY => $stream,
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
+			'allow_redirects' => false,
 		];
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'PUT',
@@ -219,6 +223,7 @@ class ExAppProxyController extends Controller {
 			RequestOptions::BODY => $stream,
 			RequestOptions::HEADERS => $this->buildHeadersWithExclude($route, getallheaders()),
 			RequestOptions::TIMEOUT => 0,
+			'allow_redirects' => false,
 		];
 		$response = $this->service->requestToExApp2(
 			$exApp, '/' . $other, $this->userId, 'DELETE',
