@@ -226,6 +226,22 @@ class DaemonConfigControllerTest extends TestCase {
 		self::assertSame(Http::STATUS_INTERNAL_SERVER_ERROR, $this->controller->startTestDeploy('dsp')->getStatus());
 	}
 
+	public function testRegistryMappingErrorsAreAnswered(): void {
+		$daemonConfig = new DaemonConfig(['name' => 'dsp', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => []]);
+		$this->daemonConfigService->method('getDaemonConfigByName')->willReturn($daemonConfig);
+		$error = ['error' => 'Docker Socket Proxy daemons are no longer supported and can only be removed.'];
+		$this->daemonConfigService->method('addDockerRegistry')->willReturn($error);
+		$this->daemonConfigService->method('removeDockerRegistry')->willReturn($error);
+
+		foreach ([
+			$this->controller->addDaemonDockerRegistry('dsp', ['from' => 'ghcr.io', 'to' => 'local']),
+			$this->controller->removeDaemonDockerRegistry('dsp', ['from' => 'ghcr.io', 'to' => 'local']),
+		] as $response) {
+			self::assertSame(Http::STATUS_INTERNAL_SERVER_ERROR, $response->getStatus());
+			self::assertSame($error, $response->getData());
+		}
+	}
+
 	public function testDockerSocketProxyDaemonIsNotAccessible(): void {
 		$this->daemonConfigService->method('getDaemonConfigByName')
 			->willReturn(new DaemonConfig(['name' => 'dsp', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => []]));

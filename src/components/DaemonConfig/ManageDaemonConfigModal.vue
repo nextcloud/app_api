@@ -85,11 +85,14 @@
 							:placeholder="t('app_api', 'Nextcloud URL')"
 							:aria-label="t('app_api', 'Nextcloud URL')" />
 					</div>
-					<NcFormBox v-if="!isEdit && acceptsDeployId === 'docker-install'" class="formbox">
-						<NcFormBoxSwitch
+					<NcFormBox v-if="acceptsDeployId === 'docker-install'" class="formbox">
+						<NcFormBoxSwitch v-if="!isEdit"
 							v-model="defaultDaemon"
 							:title="t('app_api', 'Set this daemon as the default one')">
 							{{ t('app_api', 'Set as the default daemon') }}
+						</NcFormBoxSwitch>
+						<NcFormBoxSwitch v-model="httpsEnabled">
+							{{ t('app_api', 'Enable HTTPS') }}
 						</NcFormBoxSwitch>
 					</NcFormBox>
 					<NcButton

@@ -369,7 +369,12 @@ class AppAPIServiceTest extends TestCase {
 		$exApp = $this->createExApp(enabled: false);
 		$exApp->setAcceptsDeployId('docker-install');
 		$this->dockerActions->method('resolveExAppUrl')->willReturn('http://test_app:23000');
-		$this->setupReachableManualExApp($exApp, '{}', $this->dockerSocketProxyDaemon());
+		$this->setupExAppUrlMocks();
+		$this->daemonConfigService->method('getDaemonConfigByName')->willReturn($this->dockerSocketProxyDaemon());
+		$this->exAppService->method('getExApp')->willReturn($exApp);
+		$this->commonService->method('buildAppAPIAuthHeaders')->willReturn([]);
+		$this->client->expects(self::once())->method('get')->willReturn($this->createResponse('{"status":"ok"}'));
+		$this->client->method('put')->willReturn($this->createResponse('{}'));
 		$this->exAppService->method('enableExAppInternal')->willReturn(true);
 		$this->dockerActions->expects(self::never())->method('startExApp');
 		$this->exAppService->expects(self::never())->method('disableExAppInternal');

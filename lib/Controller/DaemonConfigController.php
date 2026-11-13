@@ -398,6 +398,9 @@ class DaemonConfigController extends ApiController {
 			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
 		}
 		$daemonConfig = $this->daemonConfigService->addDockerRegistry($daemonConfig, $registryMap);
+		if (is_array($daemonConfig)) {
+			return new JSONResponse(['error' => $daemonConfig['error']], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
 		if ($daemonConfig === null) {
 			return new JSONResponse(['error' => $this->l10n->t('Error adding Docker registry')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
@@ -423,6 +426,9 @@ class DaemonConfigController extends ApiController {
 			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
 		}
 		$daemonConfig = $this->daemonConfigService->removeDockerRegistry($daemonConfig, $registryMap);
+		if (is_array($daemonConfig)) {
+			return new JSONResponse(['error' => $daemonConfig['error']], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
 		if ($daemonConfig === null) {
 			return new JSONResponse(['error' => $this->l10n->t('Error removing Docker registry')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}

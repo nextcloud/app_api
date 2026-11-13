@@ -717,11 +717,13 @@ class AppAPIService {
 			}
 		}
 
-		$auth = [];
-		$exAppRootUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
-		if (!$this->heartbeatExApp($exAppRootUrl, $auth, $exApp->getAppid())) {
-			$this->logger->error(sprintf('ExApp %s heartbeat failed.', $exApp->getAppid()));
-			return false;
+		if (!DockerActions::isDockerSocketProxy($daemonConfig)) {
+			$auth = [];
+			$exAppRootUrl = $this->getExAppUrl($exApp, $exApp->getPort(), $auth);
+			if (!$this->heartbeatExApp($exAppRootUrl, $auth, $exApp->getAppid())) {
+				$this->logger->error(sprintf('ExApp %s heartbeat failed.', $exApp->getAppid()));
+				return false;
+			}
 		}
 
 		$exAppEnabled = $this->requestToExApp($exApp, '/enabled?enabled=1', null, 'PUT', options: ['timeout' => 60]);
