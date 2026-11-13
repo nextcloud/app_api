@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The ExApp proxy also applies a stricter route that matches the path as an ExApp may read it, as HaRP 0.4.8 does. #1182
 - The ExApp proxy returns an ExApp's redirect to the browser instead of following it, as HaRP does. #1195
 - `occ app_api:app:unregister --rm-data` also removes the volume of a Kubernetes ExApp whose deployment is already gone. #1130
+- ExApps use the changed settings of their deploy daemon, such as a new HaRP shared key, right away instead of cached old ones. #1205
 
 ## [34.0.0]
 

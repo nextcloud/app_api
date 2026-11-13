@@ -317,7 +317,7 @@ class DaemonConfigServiceTest extends TestCase {
 		self::assertNull($result);
 	}
 
-	private function createServiceWithMapper(DaemonConfigMapper $mapper): DaemonConfigService {
+	private function createServiceWithMapper(DaemonConfigMapper $mapper, ?ExAppService $exAppService = null): DaemonConfigService {
 		$crypto = $this->createMock(ICrypto::class);
 		$crypto->method('encrypt')->willReturnCallback(static fn (string $value): string => 'encrypted:' . $value);
 		// Ciphertexts in these tests are `encrypted:<iv>:<secret>`, so the same secret can have different ciphertexts
@@ -325,7 +325,7 @@ class DaemonConfigServiceTest extends TestCase {
 		return new DaemonConfigService(
 			$this->createMock(LoggerInterface::class),
 			$mapper,
-			$this->createMock(ExAppService::class),
+			$exAppService ?? $this->createMock(ExAppService::class),
 			$crypto,
 			$this->auditLogger,
 		);
@@ -445,6 +445,17 @@ class DaemonConfigServiceTest extends TestCase {
 		$daemonConfig = new DaemonConfig(['name' => 'harp_proxy', 'deploy_config' => []]);
 
 		self::assertNull($this->createServiceWithMapper($mapper)->updateDaemonConfig($daemonConfig, clone $daemonConfig));
+	}
+
+	public function testUpdateDaemonConfigResetsTheExAppsCache(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->method('update')->willReturnArgument(0);
+		$exAppService = $this->createMock(ExAppService::class);
+		$exAppService->expects(self::once())->method('resetExAppsCache');
+		$daemonConfig = new DaemonConfig(['name' => 'harp_proxy', 'deploy_config' => ['haproxy_password' => 'encrypted:iv2:new_secret']]);
+		$previous = new DaemonConfig(['name' => 'harp_proxy', 'deploy_config' => ['haproxy_password' => 'encrypted:iv1:old_secret']]);
+
+		$this->createServiceWithMapper($mapper, $exAppService)->updateDaemonConfig($daemonConfig, $previous);
 	}
 
 	public static function defaultDaemonProvider(): array {
