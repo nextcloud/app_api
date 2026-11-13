@@ -15,6 +15,7 @@ use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\Files\IMimeTypeDetector;
+use OCP\Http\Client\IResponse;
 use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\Security\Bruteforce\IThrottler;
@@ -30,7 +31,7 @@ class ExAppProxyControllerTest extends TestCase {
 		['url' => '^/settings$', 'verb' => 'POST', 'access_level' => 2],
 	];
 
-	private function controller(string $method, ?string $userId = null, bool $isAdmin = false, ?ExApp $exApp = null): ExAppProxyController {
+	private function controller(string $method, ?string $userId = null, bool $isAdmin = false, ?ExApp $exApp = null, ?AppAPIService $service = null): ExAppProxyController {
 		$request = $this->createMock(IRequest::class);
 		$request->method('getMethod')->willReturn($method);
 		$exAppService = $this->createMock(ExAppService::class);
@@ -39,7 +40,7 @@ class ExAppProxyControllerTest extends TestCase {
 		$groupManager->method('isAdmin')->willReturn($isAdmin);
 		return new ExAppProxyController(
 			$request,
-			$this->createMock(AppAPIService::class),
+			$service ?? $this->createMock(AppAPIService::class),
 			$exAppService,
 			$this->createMock(IMimeTypeDetector::class),
 			$this->createMock(ContentSecurityPolicyNonceManager::class),
@@ -217,5 +218,39 @@ class ExAppProxyControllerTest extends TestCase {
 	#[DataProvider('forwardedPathProvider')]
 	public function testPathIsForwarded(string $path): void {
 		self::assertTrue($this->isForwarded($path));
+	}
+
+	public static function proxyActionProvider(): array {
+		return [
+			'GET' => ['ExAppGet', 'GET'],
+			'POST' => ['ExAppPost', 'POST'],
+			'PUT' => ['ExAppPut', 'PUT'],
+			'DELETE' => ['ExAppDelete', 'DELETE'],
+			'GET of a cached file, not modified' => ['ExAppGet', 'GET', 304],
+		];
+	}
+
+	#[DataProvider('proxyActionProvider')]
+	public function testRedirectIsReturnedNotFollowed(string $action, string $method, int $status = 302): void {
+		// The browser follows an ExApp redirect itself, so the target passes the route check.
+		$exAppResponse = $this->createMock(IResponse::class);
+		$exAppResponse->method('getStatusCode')->willReturn($status);
+		$exAppResponse->method('getHeaders')->willReturn(['Location' => ['/admin']]);
+		$sentOptions = [];
+		$service = $this->createMock(AppAPIService::class);
+		$service->method('requestToExApp2')->willReturnCallback(
+			function (ExApp $exApp, string $route, ?string $userId, string $method, array $queryParams, array $bodyParams, array $options) use (&$sentOptions, $exAppResponse) {
+				$sentOptions = $options;
+				return $exAppResponse;
+			}
+		);
+		$exApp = new ExApp(['appid' => 'test-proxy', 'enabled' => 1, 'routes' => [['url' => '.*', 'verb' => $method, 'access_level' => 0]]]);
+		$response = $this->controller($method, exApp: $exApp, service: $service)->$action('test-proxy', 'login');
+
+		self::assertFalse($sentOptions['allow_redirects']);
+		self::assertSame($status, $response->getStatus());
+		self::assertSame('/admin', $response->getHeaders()['Location']);
+		// Only a 304 keeps the cache time, as it refreshes a cached file.
+		self::assertSame($status === 304, str_contains($response->getHeaders()['Cache-Control'], 'max-age'));
 	}
 }
