@@ -17,6 +17,7 @@ use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppService;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IL10N;
@@ -34,6 +35,7 @@ class DaemonConfigControllerTest extends TestCase {
 	private AppAPIService&MockObject $service;
 	private ExAppService&MockObject $exAppService;
 	private IAppConfig&MockObject $appConfig;
+	private DockerActions&MockObject $dockerActions;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -45,12 +47,13 @@ class DaemonConfigControllerTest extends TestCase {
 		$this->service = $this->createMock(AppAPIService::class);
 		$this->exAppService = $this->createMock(ExAppService::class);
 		$this->appConfig = $this->createMock(IAppConfig::class);
+		$this->dockerActions = $this->createMock(DockerActions::class);
 
 		$this->controller = new DaemonConfigController(
 			$this->createMock(IRequest::class),
 			$this->appConfig,
 			$this->daemonConfigService,
-			$this->createMock(DockerActions::class),
+			$this->dockerActions,
 			$this->createMock(KubernetesActions::class),
 			$this->service,
 			$this->exAppService,
@@ -212,6 +215,24 @@ class DaemonConfigControllerTest extends TestCase {
 		$this->service->expects(self::once())->method('runOccCommand')->willReturn(false);
 
 		$this->controller->startTestDeploy('harp_proxy_host');
+	}
+
+	public function testStartTestDeployRefusesADockerSocketProxyDaemon(): void {
+		$this->daemonConfigService->method('getDaemonConfigByName')
+			->willReturn(new DaemonConfig(['name' => 'dsp', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => []]));
+		$this->exAppService->expects(self::never())->method('logExAppInstallRequested');
+		$this->service->expects(self::never())->method('runOccCommand');
+
+		self::assertSame(Http::STATUS_INTERNAL_SERVER_ERROR, $this->controller->startTestDeploy('dsp')->getStatus());
+	}
+
+	public function testDockerSocketProxyDaemonIsNotAccessible(): void {
+		$this->daemonConfigService->method('getDaemonConfigByName')
+			->willReturn(new DaemonConfig(['name' => 'dsp', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => []]));
+		$this->dockerActions->expects(self::never())->method('initGuzzleClient');
+		$this->dockerActions->expects(self::never())->method('ping');
+
+		self::assertSame(['success' => false], $this->controller->verifyDaemonConnection('dsp')->getData());
 	}
 
 	public static function registerDefaultDaemonProvider(): array {

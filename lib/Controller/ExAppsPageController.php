@@ -363,6 +363,10 @@ class ExAppsPageController extends Controller {
 
 		// If ExApp is not registered - then it's a "Deploy and Enable" action.
 		if (!$exApp) {
+			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($daemonId);
+			if ($daemonConfig !== null && DockerActions::isDockerSocketProxy($daemonConfig)) {
+				return new JSONResponse(['data' => ['message' => $this->l10n->t('Docker Socket Proxy daemons are no longer supported, use a HaRP daemon.')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+			}
 			$commandParts = array_merge(
 				[
 					'app_api:app:register',
@@ -448,6 +452,10 @@ class ExAppsPageController extends Controller {
 		}
 
 		$exApp = $this->exAppService->getExApp($appId);
+		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		if ($daemonConfig !== null && DockerActions::isDockerSocketProxy($daemonConfig)) {
+			return new JSONResponse(['data' => ['message' => $this->l10n->t('Docker Socket Proxy daemons are no longer supported. To move the ExApp, uninstall it keeping its data and install it on a HaRP daemon on the same Docker host.')]], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
 		$exAppOldVersion = $exApp->getVersion();
 		$commandParts = [
 			'app_api:app:update',
@@ -475,10 +483,9 @@ class ExAppsPageController extends Controller {
 	}
 
 	/**
-	 * Unregister an ExApp and optionally remove its container and data
+	 * Unregister an ExApp and remove its HaRP container, optionally with its data volume
 	 *
 	 * @param string $appId ID of the ExApp
-	 * @param bool $removeContainer Whether to remove the ExApp container
 	 * @param bool $removeData Whether to remove the ExApp data volume
 	 *
 	 * @return JSONResponse<Http::STATUS_OK, list<empty>, array{}>
@@ -486,7 +493,7 @@ class ExAppsPageController extends Controller {
 	 * 200: ExApp uninstalled
 	 */
 	#[PasswordConfirmationRequired]
-	public function uninstallApp(string $appId, bool $removeContainer = true, bool $removeData = false): JSONResponse {
+	public function uninstallApp(string $appId, bool $removeData = false): JSONResponse {
 		$exApp = $this->exAppService->getExApp($appId);
 		if ($exApp) {
 			if ($exApp->getEnabled()) {
@@ -494,23 +501,13 @@ class ExAppsPageController extends Controller {
 			}
 
 			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
-			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+				$this->logger->warning(sprintf('Daemon "%s" uses Docker Socket Proxy, which is no longer supported, so container %s and its data volume are kept. Install the ExApp on a HaRP daemon on the same Docker host to reuse the data, or remove the container by hand.', $daemonConfig->getName(), $this->dockerActions->buildExAppContainerName($appId)));
+			} elseif ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 				$this->dockerActions->initGuzzleClient($daemonConfig);
-				if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-					$removeError = $this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $removeData);
-					if ($removeData && $removeError === '') {
-						$this->exAppService->logExAppDataDeleted($exApp);
-					}
-				} else {
-					if ($removeContainer) {
-						$this->dockerActions->removeContainer($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppContainerName($appId));
-						if ($removeData) {
-							$removeVolumeResult = $this->dockerActions->removeVolume($this->dockerActions->buildDockerUrl($daemonConfig), $this->dockerActions->buildExAppVolumeName($appId));
-							if (isset($removeVolumeResult['success'])) {
-								$this->exAppService->logExAppDataDeleted($exApp);
-							}
-						}
-					}
+				$removeError = $this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $removeData);
+				if ($removeData && $removeError === '') {
+					$this->exAppService->logExAppDataDeleted($exApp);
 				}
 			}
 			$this->exAppService->unregisterExApp($appId);
@@ -597,6 +594,13 @@ class ExAppsPageController extends Controller {
 			);
 		}
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($exApp->getDaemonConfigName());
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			return new DataDownloadResponse(
+				json_encode(['error' => $this->l10n->t('Docker Socket Proxy daemons are no longer supported. To move the ExApp, uninstall it keeping its data and install it on a HaRP daemon on the same Docker host.')]),
+				$this->dockerActions->buildExAppContainerName($appId) . '_logs.txt',
+				'text/plain'
+			);
+		}
 		$this->dockerActions->initGuzzleClient($daemonConfig);
 		try {
 			$logs = $this->dockerActions->getContainerLogs(

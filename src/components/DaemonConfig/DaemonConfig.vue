@@ -16,26 +16,26 @@
 				{{ daemon.accepts_deploy_id }}
 			</template>
 			<template #actions>
-				<NcActionButton :disabled="isDefault || settingDefault || daemon.accepts_deploy_id === 'manual-install'" @click="setDaemonDefault(daemon)">
+				<NcActionButton :disabled="isDefault || settingDefault || daemon.accepts_deploy_id === 'manual-install' || isDockerSocketProxy" @click="setDaemonDefault(daemon)">
 					<template #icon>
 						<CheckBold v-if="!settingDefault" :size="20" />
 						<NcLoadingIcon v-else :size="20" />
 					</template>
 					{{ !isDefault ? t('app_api', 'Set as default') : t('app_api', 'Default') }}
 				</NcActionButton>
-				<NcActionButton v-if="daemon.accepts_deploy_id !== 'manual-install'" :closeAfterClick="true" @click="showTestDeployModal()">
+				<NcActionButton v-if="daemon.accepts_deploy_id !== 'manual-install' && !isDockerSocketProxy" :closeAfterClick="true" @click="showTestDeployModal()">
 					{{ t('app_api', 'Test deploy') }}
 					<template #icon>
 						<TestTube :size="20" />
 					</template>
 				</NcActionButton>
-				<NcActionButton v-if="['docker-install', 'kubernetes-install'].includes(daemon.accepts_deploy_id)" :closeAfterClick="true" @click="_showOverrideDockerRegistriesModal()">
+				<NcActionButton v-if="['docker-install', 'kubernetes-install'].includes(daemon.accepts_deploy_id) && !isDockerSocketProxy" :closeAfterClick="true" @click="_showOverrideDockerRegistriesModal()">
 					{{ t('app_api', 'Docker registries') }}
 					<template #icon>
 						<Docker :size="20" />
 					</template>
 				</NcActionButton>
-				<NcActionButton :closeAfterClick="true" @click="showEditModal()">
+				<NcActionButton v-if="!isDockerSocketProxy" :closeAfterClick="true" @click="showEditModal()">
 					{{ t('app_api', 'Edit') }}
 					<template #icon>
 						<PencilOutline :size="20" />
@@ -165,6 +165,10 @@ export default {
 	computed: {
 		itemTitle() {
 			return this.daemon.name + ' - ' + this.daemon.display_name
+		},
+
+		isDockerSocketProxy() {
+			return this.daemon.accepts_deploy_id === 'docker-install' && !this.daemon.deploy_config?.harp
 		},
 	},
 

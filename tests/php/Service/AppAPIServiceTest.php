@@ -347,9 +347,9 @@ class AppAPIServiceTest extends TestCase {
 		return $response;
 	}
 
-	private function setupReachableManualExApp(ExApp $exApp, string|\Exception $enabledResponse): void {
+	private function setupReachableManualExApp(ExApp $exApp, string|\Exception $enabledResponse, ?DaemonConfig $daemonConfig = null): void {
 		$this->setupExAppUrlMocks();
-		$this->daemonConfigService->method('getDaemonConfigByName')->willReturn(new DaemonConfig(['name' => 'test_daemon']));
+		$this->daemonConfigService->method('getDaemonConfigByName')->willReturn($daemonConfig ?? new DaemonConfig(['name' => 'test_daemon']));
 		$this->exAppService->method('getExApp')->willReturn($exApp);
 		$this->commonService->method('buildAppAPIAuthHeaders')->willReturn([]);
 		$this->client->method('get')->willReturn($this->createResponse('{"status":"ok"}'));
@@ -358,6 +358,78 @@ class AppAPIServiceTest extends TestCase {
 		} else {
 			$this->client->method('put')->willReturn($this->createResponse($enabledResponse));
 		}
+	}
+
+	private function dockerSocketProxyDaemon(): DaemonConfig {
+		$this->dockerActions->method('buildExAppContainerName')->willReturnCallback(static fn (string $appId): string => 'nc_app_' . $appId);
+		return new DaemonConfig(['name' => 'test_daemon', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => []]);
+	}
+
+	public function testEnableExAppDoesNotStartTheContainerOfADockerSocketProxyExApp(): void {
+		$exApp = $this->createExApp(enabled: false);
+		$exApp->setAcceptsDeployId('docker-install');
+		$this->dockerActions->method('resolveExAppUrl')->willReturn('http://test_app:23000');
+		$this->setupReachableManualExApp($exApp, '{}', $this->dockerSocketProxyDaemon());
+		$this->exAppService->method('enableExAppInternal')->willReturn(true);
+		$this->dockerActions->expects(self::never())->method('startExApp');
+		$this->exAppService->expects(self::never())->method('disableExAppInternal');
+
+		self::assertTrue($this->service->enableExApp($exApp));
+	}
+
+	public static function unansweredDockerSocketProxyHeartbeatProvider(): array {
+		return [
+			'container stopped' => [new \Exception('Connection refused'), false],
+			'container answers an error' => ['503', false],
+			'something else answers' => ['200', false],
+			'enabled ExApp, container stopped' => [new \Exception('Connection refused'), true],
+		];
+	}
+
+	#[DataProvider('unansweredDockerSocketProxyHeartbeatProvider')]
+	public function testEnableExAppOfADockerSocketProxyExAppThatDoesNotAnswerFailsAtOnce(\Exception|string $heartbeat, bool $wasEnabled): void {
+		$exApp = $this->createExApp(enabled: $wasEnabled);
+		$exApp->setAcceptsDeployId('docker-install');
+		$this->dockerActions->method('resolveExAppUrl')->willReturn('http://test_app:23000');
+		$this->dockerActions->expects(self::never())->method('startExApp');
+		$this->setupExAppUrlMocks();
+		$this->daemonConfigService->method('getDaemonConfigByName')->willReturn($this->dockerSocketProxyDaemon());
+		$this->exAppService->method('getExApp')->willReturn($exApp);
+		$this->commonService->method('buildAppAPIAuthHeaders')->willReturn([]);
+		if ($heartbeat instanceof \Exception) {
+			$this->client->expects(self::once())->method('get')
+				->with(self::anything(), self::callback(static fn (array $options): bool => $options['timeout'] === 10))
+				->willThrowException($heartbeat);
+		} else {
+			$this->client->expects(self::once())->method('get')
+				->with(self::anything(), self::callback(static fn (array $options): bool => $options['timeout'] === 10))
+				->willReturn($this->createResponse('{"status":"busy"}', (int)$heartbeat));
+		}
+		$this->exAppService->method('enableExAppInternal')->willReturn(true);
+		$this->exAppService->expects(self::once())->method('disableExAppInternal')->with($exApp)->willReturn(true);
+		$error = 'The ExApp does not answer the heartbeat, and its daemon uses Docker Socket Proxy, which is no longer supported. Start container nc_app_test_app by hand, or uninstall the ExApp keeping its data and install it on a HaRP daemon on the same Docker host.';
+		$this->exAppService->expects(self::once())->method('setStatusError')->with($exApp, $error);
+		$this->logger->expects(self::once())->method('error')->with('ExApp test_app: ' . $error);
+		if ($wasEnabled) {
+			$this->auditLogger->expects(self::once())->method('log')->with(Operation::ExAppDisabled, 'ExApp %s was disabled', ['appId' => 'test_app']);
+		} else {
+			$this->auditLogger->expects(self::never())->method('log');
+		}
+
+		self::assertFalse($this->service->enableExApp($exApp));
+	}
+
+	public function testDisableExAppDoesNotStopTheContainerOfADockerSocketProxyExApp(): void {
+		$exApp = $this->createExApp();
+		$exApp->setAcceptsDeployId('docker-install');
+		$this->dockerActions->method('resolveExAppUrl')->willReturn('http://test_app:23000');
+		$this->setupReachableManualExApp($exApp, '{}', $this->dockerSocketProxyDaemon());
+		$this->exAppService->method('disableExAppInternal')->willReturn(true);
+		$this->dockerActions->expects(self::never())->method('stopExApp');
+		$this->logger->expects(self::once())->method('warning')
+			->with('Daemon "test_daemon" uses Docker Socket Proxy, which is no longer supported, so container nc_app_test_app is not stopped.');
+
+		self::assertTrue($this->service->disableExApp($exApp));
 	}
 
 	public function testEnableExAppLogsTheExApp(): void {
@@ -454,28 +526,40 @@ class AppAPIServiceTest extends TestCase {
 
 	public static function removeExAppsByDaemonProvider(): array {
 		return [
-			'HaRP, removed' => [true, '', null, true],
-			'HaRP, failed' => [true, 'Failed to remove ExApp', null, false],
-			'Docker Socket Proxy, volume removed' => [false, '', ['success' => true], true],
-			'Docker Socket Proxy, volume not removed' => [false, '', ['error' => 'Volume is in use.'], false],
+			'removed' => ['', true],
+			'failed' => ['Failed to remove ExApp', false],
 		];
 	}
 
 	#[DataProvider('removeExAppsByDaemonProvider')]
-	public function testRemoveExAppsByDaemonConfigNameLogsTheDeletedData(bool $isHarp, string $removeExAppError, ?array $removeVolumeResult, bool $logged): void {
+	public function testRemoveExAppsByDaemonConfigNameLogsTheDeletedData(string $removeExAppError, bool $logged): void {
 		$exApp = $this->createExApp();
 		$exApp->setAcceptsDeployId('docker-install');
-		$exApp->setDeployConfig($isHarp ? ['harp' => ['frp_address' => 'appapi-harp:8782']] : []);
-		$daemonConfig = new DaemonConfig(['name' => 'test_daemon', 'accepts_deploy_id' => 'docker-install']);
+		$deployConfig = ['harp' => ['frp_address' => 'appapi-harp:8782']];
+		$exApp->setDeployConfig($deployConfig);
+		$daemonConfig = new DaemonConfig(['name' => 'test_daemon', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => $deployConfig]);
 		$this->setupReachableManualExApp($exApp, '{}');
 		$this->exAppService->method('getExAppsByDaemonName')->with('test_daemon')->willReturn([$exApp]);
 		$this->exAppService->method('disableExAppInternal')->willReturn(true);
+		$this->dockerActions->method('getAcceptsDeployId')->willReturn('docker-install');
 		$this->dockerActions->method('removeExApp')->willReturn($removeExAppError);
-		$this->dockerActions->method('removeVolume')->willReturn($removeVolumeResult ?? []);
 		$this->exAppService->expects($logged ? self::once() : self::never())->method('logExAppDataDeleted')->with($exApp);
 		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('test_app');
 
 		$this->service->removeExAppsByDaemonConfigName($daemonConfig);
+	}
+
+	public function testRemoveExAppsByDaemonConfigNameKeepsTheContainersOfADockerSocketProxyDaemon(): void {
+		$exApp = $this->createExApp();
+		$exApp->setAcceptsDeployId('docker-install');
+		$this->setupReachableManualExApp($exApp, '{}');
+		$this->exAppService->method('getExAppsByDaemonName')->with('test_daemon')->willReturn([$exApp]);
+		$this->exAppService->method('disableExAppInternal')->willReturn(true);
+		$this->dockerActions->expects(self::never())->method('removeExApp');
+		$this->exAppService->expects(self::never())->method('logExAppDataDeleted');
+		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('test_app');
+
+		$this->service->removeExAppsByDaemonConfigName($this->dockerSocketProxyDaemon());
 	}
 
 	private function createRequestForUser(string $appId, string $userId, string $secret): MockObject&\OCP\IRequest {

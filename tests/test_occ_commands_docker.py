@@ -8,12 +8,21 @@ from subprocess import run, DEVNULL, PIPE
 SKELETON_XML_URL = (
     "https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml"
 )
+# HaRP and nginx in the host network, as the "Create HaRP container" step of tests-deploy.yml starts them
+DAEMON_NAME = "harp_occ_test"
+HARP_HOST = "127.0.0.1:8780"
+HARP_FRP_ADDRESS = "127.0.0.1:8782"
+HARP_SHARED_KEY = "some_very_secure_password"
+NEXTCLOUD_URL = "http://127.0.0.1"
 
 
 def register_daemon(nextcloud_url: str):
     run(
-        "php occ app_api:daemon:register docker_local_sock "
-        f"Docker docker-install http /var/run/docker.sock {nextcloud_url}".split(),
+        [
+            "php", "occ", "app_api:daemon:register", DAEMON_NAME, "HaRP", "docker-install", "http", HARP_HOST,
+            nextcloud_url, "--net", "host", "--harp", "--harp_frp_address", HARP_FRP_ADDRESS,
+            "--harp_shared_key", HARP_SHARED_KEY,
+        ],
         stderr=DEVNULL,
         stdout=DEVNULL,
         check=True,
@@ -22,7 +31,7 @@ def register_daemon(nextcloud_url: str):
 
 def unregister_daemon():
     run(
-        "php occ app_api:daemon:unregister docker_local_sock".split(),
+        f"php occ app_api:daemon:unregister {DAEMON_NAME}".split(),
         stderr=DEVNULL,
         stdout=DEVNULL,
         check=True,
@@ -31,29 +40,44 @@ def unregister_daemon():
 
 def deploy_register():
     run(
-        f"php occ app_api:app:register app-skeleton-python docker_local_sock --info-xml {SKELETON_XML_URL}".split(),
+        f"php occ app_api:app:register app-skeleton-python {DAEMON_NAME} --info-xml {SKELETON_XML_URL}".split(),
         stderr=DEVNULL,
         stdout=DEVNULL,
         check=True,
     )
 
 
-if __name__ == "__main__":
-    # nextcloud_url should be without slash at the end
-    register_daemon("http://127.0.0.1:8080/")
+def daemon_list() -> str:
     r = run("php occ --no-warnings app_api:daemon:list".split(), stdout=PIPE, stderr=PIPE, check=True)
     assert not r.stderr.decode("UTF-8")
-    r_output = r.stdout.decode("UTF-8")
-    assert r_output.find("http://127.0.0.1:8080/") == -1
-    assert r_output.find("http://127.0.0.1:8080") != -1
+    return r.stdout.decode("UTF-8")
+
+
+if __name__ == "__main__":
+    # docker-install without HaRP (Docker Socket Proxy or the Docker socket) is refused
+    for direct_host in ("nextcloud-appapi-dsp:2375", "/var/run/docker.sock"):
+        r = run(
+            [
+                "php", "occ", "--no-warnings", "app_api:daemon:register", "direct_docker", "Docker",
+                "docker-install", "http", direct_host, NEXTCLOUD_URL,
+            ],
+            stdout=PIPE,
+            stderr=PIPE,
+        )
+        assert r.returncode == 1, f"docker-install without --harp was accepted for {direct_host}: {r.stdout.decode()}"
+        assert "requires --harp" in r.stdout.decode("UTF-8")
+        assert daemon_list().find("direct_docker") == -1
+    # nextcloud_url should be without slash at the end
+    register_daemon(NEXTCLOUD_URL + "/")
+    r_output = daemon_list()
+    assert r_output.find(NEXTCLOUD_URL + "/") == -1
+    assert r_output.find(NEXTCLOUD_URL) != -1
     unregister_daemon()
     # nextcloud_url should be without slash at the end but with "index.php"
-    register_daemon("http://127.0.0.1:8080/index.php/")
-    r = run("php occ --no-warnings app_api:daemon:list".split(), stdout=PIPE, stderr=PIPE, check=True)
-    assert not r.stderr.decode("UTF-8")
-    r_output = r.stdout.decode("UTF-8")
-    assert r_output.find("http://127.0.0.1:8080/index.php/") == -1
-    assert r_output.find("http://127.0.0.1:8080/index.php") != -1
+    register_daemon(NEXTCLOUD_URL + "/index.php/")
+    r_output = daemon_list()
+    assert r_output.find(NEXTCLOUD_URL + "/index.php/") == -1
+    assert r_output.find(NEXTCLOUD_URL + "/index.php") != -1
     # silent should not fail, as there are not such ExApp
     r = run("php occ --no-warnings app_api:app:unregister app-skeleton-python --silent".split(), stdout=PIPE, stderr=PIPE, check=True)
     assert not r.stderr.decode("UTF-8")
@@ -81,3 +105,4 @@ if __name__ == "__main__":
     r = run("php occ --no-warnings app_api:app:unregister app-skeleton-python --silent".split())
     assert r.returncode
     run("php occ --no-warnings app_api:app:unregister app-skeleton-python --force".split(), check=True)
+    unregister_daemon()

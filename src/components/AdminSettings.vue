@@ -16,7 +16,10 @@
 			:description="t('app_api', 'A deploy daemon (DaemonConfig) is an ExApps orchestration daemon.')"
 			:aria-label="t('app_api', 'Deploy daemons. A deploy daemon (DaemonConfig) is an ExApps orchestration daemon.')"
 			docUrl="https://docs.nextcloud.com/server/latest/admin_manual/exapps_management/AppAPIAndExternalApps.html#setup-deploy-daemon">
-			<NcNoteCard v-if="state.default_daemon_config !== '' && !state?.daemon_config_accessible" type="error">
+			<NcNoteCard v-if="isDefaultDaemonDockerSocketProxy" type="error">
+				<p>{{ t('app_api', 'The default deploy daemon uses Docker Socket Proxy, which is no longer supported. Set a HaRP daemon as the default.') }}</p>
+			</NcNoteCard>
+			<NcNoteCard v-else-if="state.default_daemon_config !== '' && state.default_daemon_config === default_daemon_config && !state?.daemon_config_accessible" type="error">
 				<p>{{ t('app_api', 'Default deploy daemon is not accessible. Please check its configuration') }}</p>
 			</NcNoteCard>
 			<DaemonConfigList
@@ -79,30 +82,26 @@ export default {
 	},
 
 	data() {
+		const state = loadState('app_api', 'admin-initial-data')
 		return {
-			state: loadState('app_api', 'admin-initial-data'),
-			daemons: [],
-			default_daemon_config: '',
+			state,
+			daemons: state.daemons,
+			default_daemon_config: state.default_daemon_config,
 		}
 	},
 
 	computed: {
+		isDefaultDaemonDockerSocketProxy() {
+			const daemon = this.daemons.find((daemon) => daemon.name === this.default_daemon_config)
+			return daemon?.accepts_deploy_id === 'docker-install' && !daemon.deploy_config?.harp
+		},
+
 		exAppsManagementButtonText() {
 			return this.state.updates_count > 0 ? t('app_api', 'External Apps management') + ` (${this.state.updates_count})` : t('app_api', 'External Apps management')
 		},
 	},
 
-	mounted() {
-		this.loadInitialState()
-	},
-
 	methods: {
-		loadInitialState() {
-			const state = loadState('app_api', 'admin-initial-data')
-			this.daemons = state.daemons
-			this.default_daemon_config = state.default_daemon_config
-		},
-
 		onInput() {
 			delay(() => {
 				this.saveOptions({

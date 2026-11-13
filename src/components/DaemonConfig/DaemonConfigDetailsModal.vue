@@ -10,7 +10,7 @@
 			<div class="daemon-config-modal-details" :aria-label="t('app_api', 'Deploy daemon configuration details')">
 				<h2>{{ t('app_api', 'Deploy daemon') }} - {{ daemon.display_name }}</h2>
 
-				<NcNoteCard v-if="isDefault" type="success">
+				<NcNoteCard v-if="isDefault && !isDockerSocketProxy" type="success">
 					{{ t('app_api', 'Default daemon. ExApps will be installed on it') }}
 				</NcNoteCard>
 
@@ -18,8 +18,8 @@
 					{{ t('app_api', 'The "Manual install" daemon is usually used for development. It cannot be set as the default daemon.') }}
 				</NcNoteCard>
 
-				<NcNoteCard v-if="isDeprecatedDirectDocker" type="warning">
-					{{ t('app_api', 'Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.') }}
+				<NcNoteCard v-if="isDockerSocketProxy" type="error">
+					{{ t('app_api', 'Docker Socket Proxy daemons are no longer supported. To move an ExApp of this daemon, uninstall it keeping its data and install it on a HaRP daemon on the same Docker host, then remove this daemon.') }}
 				</NcNoteCard>
 
 				<NcNoteCard v-if="daemon.accepts_deploy_id === 'kubernetes-install'" type="info">
@@ -56,7 +56,9 @@
 				<h3>{{ t('app_api', 'Deploy options') }}</h3>
 				<p><b>{{ t('app_api', 'Docker network') }}: </b>{{ daemon.deploy_config.net }}</p>
 				<p><b>{{ t('app_api', 'Nextcloud URL') }}: </b>{{ daemon.deploy_config.nextcloud_url }}</p>
-				<p><b>{{ t('app_api', 'HaProxy password') }}: </b>{{ daemon.deploy_config?.haproxy_password ? '**************' : t('app_api', '(not set)') }}</p>
+				<p v-if="daemon.deploy_config.harp">
+					<b>{{ t('app_api', 'HaRP shared key') }}: </b>{{ daemon.deploy_config?.haproxy_password ? '**************' : t('app_api', '(not set)') }}
+				</p>
 				<p>
 					<b>{{ t('app_api', 'GPU support') }}:</b> {{ daemon.deploy_config.computeDevice && daemon.deploy_config?.computeDevice?.id !== 'cpu' || false }}
 				</p>
@@ -75,7 +77,7 @@
 				</div>
 
 				<div class="actions">
-					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install'" @click="verifyConnection">
+					<NcButton v-if="daemon.accepts_deploy_id !== 'manual-install' && !isDockerSocketProxy" @click="verifyConnection">
 						{{ t('app_api', 'Check connection') }}
 						<template #icon>
 							<NcLoadingIcon v-if="verifying" :size="20" />
@@ -137,7 +139,7 @@ export default {
 	},
 
 	computed: {
-		isDeprecatedDirectDocker() {
+		isDockerSocketProxy() {
 			return this.daemon.accepts_deploy_id === 'docker-install' && !this.daemon.deploy_config?.harp
 		},
 	},
