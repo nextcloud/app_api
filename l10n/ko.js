@@ -173,7 +173,7 @@ OC.L10N.register(
     "Active apps" : "활성화된 앱",
     "Disabled apps" : "비활성화된 앱",
     "Updates" : "업데이트",
-    "Featured apps" : "추천 앱 - ",
+    "Featured apps" : "추천 앱",
     "Supported apps" : "지원하는 앱",
     "manual-install apps cannot be updated" : "수동 설치 앱은 업데이트 할 수 없음",
     "{progress}% Deploying" : "배포 중 {progress}%",
