@@ -15,6 +15,7 @@ use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
 use OCA\AppAPI\Service\ExAppService;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,6 +31,7 @@ class Unregister extends Command {
 		private readonly KubernetesActions $kubernetesActions,
 		private readonly ExAppService $exAppService,
 		private readonly ExAppDeployOptionsService $exAppDeployOptionsService,
+		private readonly LoggerInterface $logger,
 	) {
 		parent::__construct();
 	}
@@ -99,57 +101,28 @@ class Unregister extends Command {
 			}
 		}
 		if ($daemonConfig !== null) {
-			if ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
+			if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+				$message = sprintf('Daemon "%s" uses Docker Socket Proxy, which is no longer supported, so container %s and its data volume are kept. Install the ExApp on a HaRP daemon on the same Docker host to reuse the data, or remove the container by hand.', $daemonConfig->getName(), $this->dockerActions->buildExAppContainerName($appId));
+				$this->logger->warning($message);
+				if (!$silent) {
+					$output->writeln($message);
+				}
+			} elseif ($daemonConfig->getAcceptsDeployId() === $this->dockerActions->getAcceptsDeployId()) {
 				$this->dockerActions->initGuzzleClient($daemonConfig);
-
-				if (boolval($exApp->getDeployConfig()['harp'] ?? false)) {
-					if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $rmData)) {
-						if (!$silent) {
-							$output->writeln(sprintf('Failed to remove ExApp %s', $appId));
-							$output->writeln('Hint: If the container was already removed manually, you can use the --force option to fully remove it from AppAPI.');
-						}
-						if (!$force) {
-							return 1;
-						}
-					} else {
-						if ($rmData) {
-							$this->exAppService->logExAppDataDeleted($exApp);
-						}
-						if (!$silent) {
-							$output->writeln(sprintf('ExApp %s successfully removed', $appId));
-						}
+				if ($this->dockerActions->removeExApp($this->dockerActions->buildDockerUrl($daemonConfig), $exApp->getAppid(), removeData: $rmData)) {
+					if (!$silent) {
+						$output->writeln(sprintf('Failed to remove ExApp %s', $appId));
+						$output->writeln('Hint: If the container was already removed manually, you can use the --force option to fully remove it from AppAPI.');
+					}
+					if (!$force) {
+						return 1;
 					}
 				} else {
-					$containerName = $this->dockerActions->buildExAppContainerName($appId);
-					$removeResult = $this->dockerActions->removeContainer(
-						$this->dockerActions->buildDockerUrl($daemonConfig), $containerName
-					);
-					if ($removeResult) {
-						if (!$silent) {
-							$output->writeln(sprintf('Failed to remove ExApp %s container', $appId));
-							$output->writeln(sprintf('Hint: If the container "%s" was already removed manually, you can use the --force option to fully remove it from AppAPI.', $containerName));
-						}
-						if (!$force) {
-							return 1;
-						}
-					} elseif (!$silent) {
-						$output->writeln(sprintf('ExApp %s container successfully removed', $appId));
-					}
 					if ($rmData) {
-						$volumeName = $this->dockerActions->buildExAppVolumeName($appId);
-						$removeVolumeResult = $this->dockerActions->removeVolume(
-							$this->dockerActions->buildDockerUrl($daemonConfig), $volumeName
-						);
-						if (!isset($removeVolumeResult['error'])) {
-							$this->exAppService->logExAppDataDeleted($exApp);
-						}
-						if (!$silent) {
-							if (isset($removeVolumeResult['error'])) {
-								$output->writeln(sprintf('Failed to remove ExApp %s volume: %s', $appId, $volumeName));
-							} else {
-								$output->writeln(sprintf('ExApp %s data volume successfully removed', $appId));
-							}
-						}
+						$this->exAppService->logExAppDataDeleted($exApp);
+					}
+					if (!$silent) {
+						$output->writeln(sprintf('ExApp %s successfully removed', $appId));
 					}
 				}
 			} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {

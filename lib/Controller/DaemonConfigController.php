@@ -120,9 +120,9 @@ class DaemonConfigController extends ApiController {
 
 		if ($haproxyPassword !== 'dummySecret123') {
 			$secretToCheck = (string)($haproxyPassword ?? '');
-		} elseif (!DaemonConfigService::isSecretRequired(['protocol' => $daemonConfig->getProtocol(), 'deploy_config' => $daemonConfig->getDeployConfig()])
+		} elseif (!DaemonConfigService::isSecretRequired(['deploy_config' => $daemonConfig->getDeployConfig()])
 			&& DaemonConfigService::isSecretRequired($daemonConfigParams)) {
-			// The stored secret is kept, but the daemon starts to need one (HaRP or HTTPS), so it must pass the same check
+			// The stored secret is kept, but the daemon starts to need one (HaRP), so it must pass the same check
 			$secretToCheck = $this->decryptStoredSecret($daemonConfig);
 		} else {
 			$secretToCheck = null;
@@ -268,6 +268,9 @@ class DaemonConfigController extends ApiController {
 	}
 
 	private function daemonAccessible(DaemonConfig $daemonConfig): bool {
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			return false;
+		}
 		if ($daemonConfig->getAcceptsDeployId() === KubernetesActions::DEPLOY_ID) {
 			$this->kubernetesActions->initGuzzleClient($daemonConfig);
 			return $this->kubernetesActions->ping($daemonConfig) === '';
@@ -291,6 +294,9 @@ class DaemonConfigController extends ApiController {
 		$daemonConfig = $this->daemonConfigService->getDaemonConfigByName($name);
 		if (!$daemonConfig) {
 			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
+		}
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			return new JSONResponse(['error' => $this->l10n->t('Docker Socket Proxy daemons are no longer supported, use a HaRP daemon.')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
 		$commandParts = [
@@ -392,6 +398,9 @@ class DaemonConfigController extends ApiController {
 			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
 		}
 		$daemonConfig = $this->daemonConfigService->addDockerRegistry($daemonConfig, $registryMap);
+		if (is_array($daemonConfig)) {
+			return new JSONResponse(['error' => $daemonConfig['error']], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
 		if ($daemonConfig === null) {
 			return new JSONResponse(['error' => $this->l10n->t('Error adding Docker registry')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
@@ -417,6 +426,9 @@ class DaemonConfigController extends ApiController {
 			return new JSONResponse(['error' => $this->l10n->t('Daemon config not found')], Http::STATUS_NOT_FOUND);
 		}
 		$daemonConfig = $this->daemonConfigService->removeDockerRegistry($daemonConfig, $registryMap);
+		if (is_array($daemonConfig)) {
+			return new JSONResponse(['error' => $daemonConfig['error']], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
 		if ($daemonConfig === null) {
 			return new JSONResponse(['error' => $this->l10n->t('Error removing Docker registry')], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}

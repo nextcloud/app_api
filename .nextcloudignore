@@ -24,7 +24,6 @@
 /src
 /vendor/bin
 /jest.config.js
-/Makefile
 /krankerl.toml
 /package-lock.json
 /package.json

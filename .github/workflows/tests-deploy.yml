@@ -17,599 +17,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  nc-host-app-docker:
-    runs-on: ubuntu-22.04
-    name: NC In Host
-
-    services:
-      postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
-        ports:
-          - 4444:5432/tcp
-        env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: rootpassword
-          POSTGRES_DB: nextcloud
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
-
-    steps:
-      - name: Set app env
-        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
-      - name: Checkout server
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          submodules: true
-          repository: nextcloud/server
-          ref: master
-
-      - name: Checkout AppAPI
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          path: apps/${{ env.APP_NAME }}
-
-      - name: Set up php
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
-        with:
-          php-version: '8.3'
-          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql
-          coverage: none
-          ini-file: development
-          ini-values:
-            apc.enabled=on, apc.enable_cli=on, disable_functions=
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check composer file existence
-        id: check_composer
-        uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # v2
-        with:
-          files: apps/${{ env.APP_NAME }}/composer.json
-
-      - name: Set up dependencies
-        if: steps.check_composer.outputs.files_exists == 'true'
-        working-directory: apps/${{ env.APP_NAME }}
-        run: composer i
-
-      - name: Set up Nextcloud
-        env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
-            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
-            --admin-user admin --admin-pass admin
-          ./occ config:system:set loglevel --value=0 --type=integer
-          ./occ config:system:set debug --value=true --type=boolean
-          ./occ app:enable --force ${{ env.APP_NAME }}
-
-      - name: Test deploy
-        run: |
-          PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_api:app:register app-skeleton-python docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          ./occ app_api:app:enable app-skeleton-python
-          ./occ app_api:app:disable app-skeleton-python
-
-      - name: Check logs
-        run: |
-          grep -q 'Hello from app-skeleton-python :)' data/nextcloud.log || error
-          grep -q 'Bye bye from app-skeleton-python :(' data/nextcloud.log || error
-
-      - name: Save container info & logs
-        if: always()
-        run: |
-          docker inspect nc_app_app-skeleton-python | json_pp > container.json
-          docker logs nc_app_app-skeleton-python > container.log 2>&1
-
-      - name: Unregister Skeleton & Daemon
-        run: |
-          ./occ app_api:app:unregister app-skeleton-python
-          ./occ app_api:daemon:unregister docker_local_sock
-
-      - name: Test OCC commands(docker)
-        run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
-
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: nc_host_app_docker_container.json
-          path: container.json
-          if-no-files-found: warn
-
-      - name: Upload Container logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: nc_host_app_docker_container.log
-          path: container.log
-          if-no-files-found: warn
-
-      - name: Upload NC logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: nc_host_app_docker_nextcloud.log
-          path: data/nextcloud.log
-          if-no-files-found: warn
-
-  nc-docker-app-docker:
-    runs-on: ubuntu-22.04
-    name: NC In Julius Docker
-    env:
-      docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
-
-    steps:
-      - name: Set app env
-        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
-      - name: Create container
-        run: |
-          docker network create master_bridge
-          docker run --net master_bridge --name nextcloud --rm -d -v /var/run/docker.sock:/var/run/docker.sock ${{ env.docker-image }}
-          sudo chmod 766 /var/run/docker.sock
-
-      - name: Wait for Nextcloud bootstrap
-        run: |
-          for i in $(seq 1 60); do
-            if docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
-              echo "Nextcloud installed after ${i}0s"
-              break
-            fi
-            echo "Waiting for Nextcloud bootstrap... ($i/60)"
-            sleep 10
-          done
-          docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
-
-      - name: Install AppAPI
-        run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_local_sock Docker docker-install http /var/run/docker.sock http://nextcloud/index.php \
-            --net=master_bridge
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-
-      - name: Registering and enabling Skeleton ExApp
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
-
-      - name: Docker inspect output
-        if: always()
-        run: docker inspect nc_app_app-skeleton-python
-
-      - name: Disable ExApp
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
-
-      - name: Copy NC log to host
-        if: always()
-        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
-
-      - name: Check logs
-        run: |
-          grep -q 'Hello from app-skeleton-python :)' nextcloud.log || error
-          grep -q 'Bye bye from app-skeleton-python :(' nextcloud.log || error
-
-      - name: Save container info & logs
-        if: always()
-        run: |
-          docker inspect app-skeleton-python | json_pp > container.json
-          docker logs nc_app_app-skeleton-python > container.log 2>&1
-
-      - name: Unregister Skeleton & Daemon
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister app-skeleton-python
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_local_sock
-
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: nc_docker_app_docker_container.json
-          path: container.json
-          if-no-files-found: warn
-
-      - name: Upload Container logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: nc_docker_app_docker_container.log
-          path: container.log
-          if-no-files-found: warn
-
-      - name: Upload NC logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: nc_docker_app_docker_nextcloud.log
-          path: nextcloud.log
-          if-no-files-found: warn
-
-  nc-docker-dsp-http:
-    runs-on: ubuntu-22.04
-    name: NC In Julius Docker(DSP-HTTP)
-    env:
-      docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
-
-    steps:
-      - name: Set app env
-        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
-      - name: Create containers
-        run: |
-          docker network create master_bridge
-          docker run -v /var/run/docker.sock:/var/run/docker.sock \
-            -e NC_HAPROXY_PASSWORD="some_secure_password" \
-            --net master_bridge --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
-            --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-
-      - name: Wait for Nextcloud bootstrap
-        run: |
-          for i in $(seq 1 60); do
-            if docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
-              echo "Nextcloud installed after ${i}0s"
-              break
-            fi
-            echo "Waiting for Nextcloud bootstrap... ($i/60)"
-            sleep 10
-          done
-          docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
-
-      - name: Install AppAPI
-        run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install http nextcloud-appapi-dsp:2375 http://nextcloud/index.php \
-            --net=master_bridge --haproxy_password=some_secure_password
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          docker exec nextcloud ping -c 1 nextcloud-appapi-dsp
-
-      - name: Registering and enabling Skeleton ExApp
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_by_port \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
-
-      - name: Docker inspect output
-        if: always()
-        run: docker inspect nc_app_app-skeleton-python
-
-      - name: Disable ExApp
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
-
-      - name: Copy NC log to host
-        if: always()
-        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
-
-      - name: Check logs
-        run: |
-          grep -q 'Hello from app-skeleton-python :)' nextcloud.log || error
-          grep -q 'Bye bye from app-skeleton-python :(' nextcloud.log || error
-
-      - name: Save container info & logs
-        if: always()
-        run: |
-          docker inspect nc_app_app-skeleton-python | json_pp > container.json
-          docker logs nc_app_app-skeleton-python > container.log 2>&1
-
-      - name: Unregister Skeleton & Daemon
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister app-skeleton-python
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
-
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_http_container.json
-          path: container.json
-          if-no-files-found: warn
-
-      - name: Upload Container logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_http_container.log
-          path: container.log
-          if-no-files-found: warn
-
-      - name: Upload NC logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_http_nextcloud.log
-          path: nextcloud.log
-          if-no-files-found: warn
-
-  nc-docker-dsp-https-bridge:
-    runs-on: ubuntu-22.04
-    name: NC In Julius Docker(DSP-HTTPS-BRIDGE)
-    env:
-      docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
-
-    steps:
-      - name: Set app env
-        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
-      - name: Create certificates
-        run: |
-          mkdir certs
-          openssl req -nodes -new -x509 -subj '/CN=host.docker.internal' -sha256 -keyout certs/privkey.pem -out certs/fullchain.pem -days 365000 > /dev/null 2>&1
-          cat certs/fullchain.pem certs/privkey.pem | tee certs/cert.pem > /dev/null 2>&1
-
-      - name: Create containers
-        run: |
-          docker network create master_bridge
-          docker run -v /var/run/docker.sock:/var/run/docker.sock \
-            -v `pwd`/certs/cert.pem:/certs/cert.pem \
-            -e NC_HAPROXY_PASSWORD="some_secure_password" \
-            -e BIND_ADDRESS="172.18.0.1" \
-            -e EX_APPS_NET="ipv4@localhost" \
-            --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
-            --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net master_bridge --name nextcloud --rm -d ${{ env.docker-image }}
-
-      - name: Wait for Nextcloud bootstrap
-        run: |
-          for i in $(seq 1 60); do
-            if docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
-              echo "Nextcloud installed after ${i}0s"
-              break
-            fi
-            echo "Waiting for Nextcloud bootstrap... ($i/60)"
-            sleep 10
-          done
-          docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
-
-      - name: Debug information
-        run: |
-          echo "hostname -I:"
-          hostname -I
-          echo ""
-          echo "DSP networks:"
-          docker exec nextcloud-appapi-dsp ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
-          echo ""
-          echo "Open ports:"
-          netstat -lntu
-
-      - name: Install AppAPI
-        run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker cp ./certs/cert.pem nextcloud:/
-          docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install https host.docker.internal:2375 http://nextcloud/index.php \
-            --net=master_bridge --haproxy_password=some_secure_password
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          docker exec nextcloud ping -c 1 host.docker.internal
-
-      - name: Registering and enabling Skeleton ExApp
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_by_port \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
-
-      - name: Docker inspect output
-        if: always()
-        run: docker inspect nc_app_app-skeleton-python
-
-      - name: Checking if ExApp container can access HTTPS DSP
-        run: |
-          docker exec nc_app_app-skeleton-python apt update
-          docker exec nc_app_app-skeleton-python apt install curl -y
-          docker exec nc_app_app-skeleton-python curl --resolve host.docker.internal:2375:172.18.0.1 https://host.docker.internal:2375
-
-      - name: Disable ExApp
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
-
-      - name: Copy NC log to host
-        if: always()
-        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
-
-      - name: Check logs
-        run: |
-          grep -q 'Hello from app-skeleton-python :)' nextcloud.log || error
-          grep -q 'Bye bye from app-skeleton-python :(' nextcloud.log || error
-
-      - name: Save HaProxy logs
-        if: always()
-        run: docker logs nextcloud-appapi-dsp > haproxy.log 2>&1
-
-      - name: Save container info & logs
-        if: always()
-        run: |
-          docker inspect nc_app_app-skeleton-python | json_pp > container.json
-          docker logs nc_app_app-skeleton-python > container.log 2>&1
-
-      - name: Unregister Skeleton & Daemon
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister app-skeleton-python
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
-
-      - name: Upload HaProxy logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_https_bridge_haproxy.log
-          path: haproxy.log
-          if-no-files-found: warn
-
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_https_bridge_container.json
-          path: container.json
-          if-no-files-found: warn
-
-      - name: Upload Container logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_https_bridge_container.log
-          path: container.log
-          if-no-files-found: warn
-
-      - name: Upload NC logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_https_bridge_nextcloud.log
-          path: nextcloud.log
-          if-no-files-found: warn
-
-  nc-docker-dsp-https:
-    runs-on: ubuntu-22.04
-    name: NC In Julius Docker(DSP-HTTPS)
-    env:
-      docker-image: ghcr.io/juliusknorr/nextcloud-dev-php83:master
-
-    steps:
-      - name: Set app env
-        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
-      - name: Create certificates
-        run: |
-          mkdir certs
-          openssl req -nodes -new -x509 -subj '/CN=host.docker.internal' -sha256 -keyout certs/privkey.pem -out certs/fullchain.pem -days 365000 > /dev/null 2>&1
-          cat certs/fullchain.pem certs/privkey.pem | tee certs/cert.pem > /dev/null 2>&1
-
-      - name: Create containers
-        run: |
-          docker run -v /var/run/docker.sock:/var/run/docker.sock \
-            -v `pwd`/certs/cert.pem:/certs/cert.pem \
-            -e NC_HAPROXY_PASSWORD="some_secure_password" \
-            -e BIND_ADDRESS="172.17.0.1" \
-            -e EX_APPS_NET="ipv4@localhost" \
-            --net host --name nextcloud-appapi-dsp -h nextcloud-appapi-dsp \
-            --privileged -d ghcr.io/nextcloud/nextcloud-appapi-dsp:latest
-          docker run --net=bridge --name=nextcloud -p 8080:80 --rm -d ${{ env.docker-image }}
-
-      - name: Wait for Nextcloud bootstrap
-        run: |
-          for i in $(seq 1 60); do
-            if docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true'; then
-              echo "Nextcloud installed after ${i}0s"
-              break
-            fi
-            echo "Waiting for Nextcloud bootstrap... ($i/60)"
-            sleep 10
-          done
-          docker exec nextcloud sudo -u www-data php occ status --output=json 2>/dev/null | grep -q '"installed":true' || (echo "Bootstrap timed out: Nextcloud is not installed" && exit 1)
-
-      - name: Debug information
-        run: |
-          echo "Hostname:"
-          hostname -I
-          echo "DSP networks:"
-          docker exec nextcloud-appapi-dsp ip addr show | grep inet | awk '{print $2}' | cut -d/ -f1
-          echo "Open ports:"
-          netstat -lntu
-
-      - name: Install AppAPI
-        run: |
-          docker exec -w /var/www/html/apps nextcloud git clone https://github.com/nextcloud/${{ env.APP_NAME }}.git
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git fetch origin $GITHUB_REF
-          docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud git checkout FETCH_HEAD
-          docker exec nextcloud sudo -u www-data php occ app:enable app_api
-          docker cp ./certs/cert.pem nextcloud:/
-          docker exec nextcloud sudo -u www-data php occ security:certificates:import /cert.pem
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:register \
-            docker_by_port Docker docker-install https host.docker.internal:2375 http://localhost:8080/index.php \
-            --net=host --haproxy_password=some_secure_password
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:list
-          docker exec nextcloud ping -c 1 host.docker.internal
-
-      - name: Registering and enabling Skeleton ExApp
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:register app-skeleton-python docker_by_port \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          docker exec nextcloud sudo -u www-data php occ app_api:app:enable app-skeleton-python
-
-      - name: Checking if ExApp container can access HTTPS DSP
-        run: |
-          docker exec nc_app_app-skeleton-python apt update
-          docker exec nc_app_app-skeleton-python apt install curl -y
-          docker exec nc_app_app-skeleton-python curl --resolve host.docker.internal:2375:172.17.0.1 https://host.docker.internal:2375
-
-      - name: Disable ExApp
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:disable app-skeleton-python
-
-      - name: Copy NC log to host
-        if: always()
-        run: docker cp nextcloud:/var/www/html/data/nextcloud.log nextcloud.log
-
-      - name: Check logs
-        run: |
-          grep -q 'Hello from app-skeleton-python :)' nextcloud.log || error
-          grep -q 'Bye bye from app-skeleton-python :(' nextcloud.log || error
-
-      - name: Save HaProxy logs
-        if: always()
-        run: docker logs nextcloud-appapi-dsp > haproxy.log 2>&1
-
-      - name: Save container info & logs
-        if: always()
-        run: |
-          docker inspect nc_app_app-skeleton-python | json_pp > container.json
-          docker logs nc_app_app-skeleton-python > container.log 2>&1
-
-      - name: Unregister Skeleton & Daemon
-        run: |
-          docker exec nextcloud sudo -u www-data php occ app_api:app:unregister app-skeleton-python
-          docker exec nextcloud sudo -u www-data php occ app_api:daemon:unregister docker_by_port
-
-      - name: Upload HaProxy logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_https_haproxy.log
-          path: haproxy.log
-          if-no-files-found: warn
-
-      - name: Upload Container info
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_https_container.json
-          path: container.json
-          if-no-files-found: warn
-
-      - name: Upload Container logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_https_container.log
-          path: container.log
-          if-no-files-found: warn
-
-      - name: Upload NC logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dsp_https_nextcloud.log
-          path: nextcloud.log
-          if-no-files-found: warn
-
   nc-host-app-docker-redis:
     runs-on: ubuntu-22.04
     name: NC In Host(Redis)
@@ -693,15 +100,37 @@ jobs:
           ./occ config:system:set redis host --value ${{ env.REDIS_HOST }}
           ./occ config:system:set redis port --value ${{ env.REDIS_PORT }}
 
+          ./occ config:system:set overwrite.cli.url --value http://127.0.0.1 --type=string
+
           ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Create HaRP container
+        run: |
+          cat apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf
+          docker run \
+            -e HP_SHARED_KEY="some_very_secure_password" \
+            -e NC_INSTANCE_URL="http://127.0.0.1" \
+            -e HP_LOG_LEVEL="debug" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            --net host --name appapi-harp \
+            --restart unless-stopped \
+            -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+          docker run --net host --name nextcloud --rm \
+            -v "$(pwd)/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro" \
+            -d nginx
 
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register \
+            harp_proxy "HaRP Proxy" "docker-install" "http" "127.0.0.1:8780" "http://127.0.0.1" \
+            --harp --harp_frp_address "127.0.0.1:8782" --harp_shared_key "some_very_secure_password" \
+            --net host
           ./occ app_api:daemon:list
-          ./occ app_api:app:register app-skeleton-python docker_local_sock \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
+          ./occ app_api:app:register app-skeleton-python harp_proxy \
+            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
+            --wait-finish
+          ./occ app_api:app:disable app-skeleton-python
           ./occ app_api:app:enable app-skeleton-python
           ./occ app_api:app:disable app-skeleton-python
 
@@ -713,13 +142,14 @@ jobs:
       - name: Save container info & logs
         if: always()
         run: |
+          docker logs appapi-harp > harp_container.log 2>&1
           docker inspect nc_app_app-skeleton-python | json_pp > container.json
           docker logs nc_app_app-skeleton-python > container.log 2>&1
 
       - name: Unregister Skeleton & Daemon
         run: |
           ./occ app_api:app:unregister app-skeleton-python
-          ./occ app_api:daemon:unregister docker_local_sock
+          ./occ app_api:daemon:unregister harp_proxy
 
       - name: Test OCC commands(docker)
         run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
@@ -750,6 +180,14 @@ jobs:
         with:
           name: nc_host_app_docker_redis_nextcloud.log
           path: data/nextcloud.log
+          if-no-files-found: warn
+
+      - name: Upload HaRP logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: nc_host_app_docker_redis_harp.log
+          path: harp_container.log
           if-no-files-found: warn
 
   nc-host-app-docker-redis-deploy-options:
@@ -835,20 +273,40 @@ jobs:
           ./occ config:system:set redis host --value ${{ env.REDIS_HOST }}
           ./occ config:system:set redis port --value ${{ env.REDIS_PORT }}
 
+          ./occ config:system:set overwrite.cli.url --value http://127.0.0.1 --type=string
+
           ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Create HaRP container
+        run: |
+          cat apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf
+          docker run \
+            -e HP_SHARED_KEY="some_very_secure_password" \
+            -e NC_INSTANCE_URL="http://127.0.0.1" \
+            -e HP_LOG_LEVEL="debug" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            --net host --name appapi-harp \
+            --restart unless-stopped \
+            -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+          docker run --net host --name nextcloud --rm \
+            -v "$(pwd)/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro" \
+            -d nginx
 
       - name: Test deploy
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
+          ./occ app_api:daemon:register \
+            harp_proxy "HaRP Proxy" "docker-install" "http" "127.0.0.1:8780" "http://127.0.0.1" \
+            --harp --harp_frp_address "127.0.0.1:8782" --harp_shared_key "some_very_secure_password" \
+            --net host
           ./occ app_api:daemon:list
           mkdir -p ./test_mount
           TEST_MOUNT_ABS_PATH=$(pwd)/test_mount
-          ./occ app_api:app:register app-skeleton-python docker_local_sock \
+          ./occ app_api:app:register app-skeleton-python harp_proxy \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
             --env='TEST_ENV_2=2' \
-            --mount "$TEST_MOUNT_ABS_PATH:/test_mount:rw"
-          ./occ app_api:app:enable app-skeleton-python
+            --mount "$TEST_MOUNT_ABS_PATH:/test_mount:rw" \
+            --wait-finish
           ./occ app_api:app:disable app-skeleton-python
 
       - name: Check logs
@@ -873,18 +331,20 @@ jobs:
 
       - name: Check docker inspect TEST_MOUNT
         run: |
+          TEST_MOUNT_ABS_PATH=$(pwd)/test_mount
           docker inspect --format '{{ json .Mounts }}' nc_app_app-skeleton-python | grep -q "Source\":\"$(printf '%s' "$TEST_MOUNT_ABS_PATH" | sed 's/[][\.*^$]/\\&/g')" || { echo "Error: TEST_MOUNT_ABS_PATH not found"; exit 1; }
 
       - name: Save container info & logs
         if: always()
         run: |
+          docker logs appapi-harp > harp_container.log 2>&1
           docker inspect nc_app_app-skeleton-python | json_pp > container.json
           docker logs nc_app_app-skeleton-python > container.log 2>&1
 
       - name: Unregister Skeleton & Daemon
         run: |
           ./occ app_api:app:unregister app-skeleton-python
-          ./occ app_api:daemon:unregister docker_local_sock
+          ./occ app_api:daemon:unregister harp_proxy
 
       - name: Test OCC commands(docker)
         run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
@@ -917,126 +377,12 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
-  nc-host-network-host:
-    runs-on: ubuntu-22.04
-    name: NC In Host(network=host)
-
-    services:
-      postgres:
-        image: ghcr.io/nextcloud/continuous-integration-postgres-14:latest # zizmor: ignore[unpinned-images]
-        ports:
-          - 4444:5432/tcp
-        env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: rootpassword
-          POSTGRES_DB: nextcloud
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 2s --health-retries 5
-
-    steps:
-      - name: Set app env
-        run: echo "APP_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
-      - name: Checkout server
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          submodules: true
-          repository: nextcloud/server
-          ref: master
-
-      - name: Checkout AppAPI
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          path: apps/${{ env.APP_NAME }}
-
-      - name: Set up php 8.3
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
-        with:
-          php-version: 8.3
-          extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, pgsql, pdo_pgsql, redis
-          coverage: none
-          ini-file: development
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check composer file existence
-        id: check_composer
-        uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # v2
-        with:
-          files: apps/${{ env.APP_NAME }}/composer.json
-
-      - name: Set up dependencies
-        if: steps.check_composer.outputs.files_exists == 'true'
-        working-directory: apps/${{ env.APP_NAME }}
-        run: composer i
-
-      - name: Set up Nextcloud
-        env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          ./occ maintenance:install --verbose --database=pgsql --database-name=nextcloud --database-host=127.0.0.1 \
-            --database-port=$DB_PORT --database-user=root --database-pass=rootpassword \
-            --admin-user admin --admin-pass admin
-          ./occ config:system:set loglevel --value=0 --type=integer
-          ./occ config:system:set debug --value=true --type=boolean
-          ./occ config:system:set overwrite.cli.url --value http://127.0.0.1:8080 --type=string
-          ./occ app:enable --force ${{ env.APP_NAME }}
-
-      - name: Test deploy
-        run: |
-          PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register \
-            docker_socket_local Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php \
-            --net=host --set-default
-          ./occ app_api:daemon:list
-          ./occ app_api:app:register app-skeleton-python \
-            --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml
-          ./occ app_api:app:enable app-skeleton-python
-          ./occ app_api:app:disable app-skeleton-python
-
-      - name: Check logs
-        run: |
-          grep -q 'Hello from app-skeleton-python :)' data/nextcloud.log || error
-          grep -q 'Bye bye from app-skeleton-python :(' data/nextcloud.log || error
-
-      - name: Save container info & logs
-        if: always()
-        run: |
-          docker inspect nc_app_app-skeleton-python | json_pp > container.json
-          docker logs nc_app_app-skeleton-python > container.log 2>&1
-
-      - name: Unregister Skeleton & Daemon
-        run: |
-          ./occ app_api:app:unregister app-skeleton-python
-          ./occ app_api:daemon:unregister docker_socket_local
-
-      - name: Test OCC commands(docker)
-        run: python3 apps/${{ env.APP_NAME }}/tests/test_occ_commands_docker.py
-
-      - name: Upload Container info
+      - name: Upload HaRP logs
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: nc_host_network_host_container.json
-          path: container.json
-          if-no-files-found: warn
-
-      - name: Upload Container logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: nc_host_network_host_container.log
-          path: container.log
-          if-no-files-found: warn
-
-      - name: Upload NC logs
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: nc_host_network_host_nextcloud.log
-          path: data/nextcloud.log
+          name: nc_host_app_docker_redis_deploy_options_harp.log
+          path: harp_container.log
           if-no-files-found: warn
 
   nc-docker-harp-bridge:
@@ -1094,7 +440,7 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git checkout FETCH_HEAD
           docker exec nextcloud-docker sudo -u www-data php occ app:enable app_api
           docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:register \
-            harp_proxy "Harp Proxy with DSP" "docker-install" "http" "appapi-harp:8780" "http://nextcloud" \
+            harp_proxy "HaRP Proxy" "docker-install" "http" "appapi-harp:8780" "http://nextcloud" \
             --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" \
             --net=master_bridge --set-default
           docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:list
@@ -1199,7 +545,7 @@ jobs:
           docker exec -w /var/www/html/apps/${{ env.APP_NAME }} nextcloud-docker git checkout FETCH_HEAD
           docker exec nextcloud-docker sudo -u www-data php occ app:enable app_api
           docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:register \
-            harp_proxy "Harp Proxy with DSP" "docker-install" "http" "appapi-harp:8780" "http://nextcloud" \
+            harp_proxy "HaRP Proxy" "docker-install" "http" "appapi-harp:8780" "http://nextcloud" \
             --harp --harp_frp_address "appapi-harp:8782" --harp_shared_key "some_very_secure_password" \
             --net=master_bridge --set-default
           docker exec nextcloud-docker sudo -u www-data php occ app_api:daemon:list
@@ -1332,12 +678,13 @@ jobs:
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
           ./occ app_api:daemon:register \
-            harp_proxy "Harp Proxy with DSP" "docker-install" "http" "127.0.0.1:8780" "http://127.0.0.1" \
+            harp_proxy "HaRP Proxy" "docker-install" "http" "127.0.0.1:8780" "http://127.0.0.1" \
             --harp --harp_frp_address "127.0.0.1:8782" --harp_shared_key "some_very_secure_password" \
             --net host --set-default
           ./occ app_api:daemon:list
 
-          ./occ app_api:app:register app-skeleton-python harp_proxy \
+          # no daemon argument: the default daemon is used
+          ./occ app_api:app:register app-skeleton-python \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
             --wait-finish
           ./occ app_api:app:disable app-skeleton-python
@@ -1568,7 +915,7 @@ jobs:
 
   nc-update-preserves-deploy-options:
     runs-on: ubuntu-22.04
-    name: Update preserves deploy options (Docker)
+    name: Update preserves deploy options (HaRP)
     # Regression test for https://github.com/nextcloud/app_api/issues/808
     # When two or more ExApps have rows in `ex_deploy_options`, the update flow
     # used to drop the target app's env vars because it read the unfiltered
@@ -1638,15 +985,35 @@ jobs:
             --admin-user admin --admin-pass admin
           ./occ config:system:set loglevel --value=0 --type=integer
           ./occ config:system:set debug --value=true --type=boolean
+          ./occ config:system:set overwrite.cli.url --value http://127.0.0.1 --type=string
           ./occ app:enable --force ${{ env.APP_NAME }}
+
+      - name: Create HaRP container
+        run: |
+          cat apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf
+          docker run \
+            -e HP_SHARED_KEY="some_very_secure_password" \
+            -e NC_INSTANCE_URL="http://127.0.0.1" \
+            -e HP_LOG_LEVEL="debug" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            --net host --name appapi-harp \
+            --restart unless-stopped \
+            -d ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+          docker run --net host --name nextcloud --rm \
+            -v "$(pwd)/apps/${{ env.APP_NAME }}/tests/simple-nginx-NOT-FOR-PRODUCTION.conf:/etc/nginx/conf.d/default.conf:ro" \
+            -d nginx
 
       - name: Register daemon & Skeleton v1 with user env vars
         run: |
           PHP_CLI_SERVER_WORKERS=2 php -S 127.0.0.1:8080 &
-          ./occ app_api:daemon:register docker_local_sock Docker docker-install http /var/run/docker.sock http://127.0.0.1:8080/index.php
-          ./occ app_api:app:register app-skeleton-python docker_local_sock \
+          ./occ app_api:daemon:register \
+            harp_proxy "HaRP Proxy" "docker-install" "http" "127.0.0.1:8780" "http://127.0.0.1" \
+            --harp --harp_frp_address "127.0.0.1:8782" --harp_shared_key "some_very_secure_password" \
+            --net host
+          ./occ app_api:app:register app-skeleton-python harp_proxy \
             --info-xml https://raw.githubusercontent.com/nextcloud/app-skeleton-python/main/appinfo/info.xml \
-            --env='TEST_ENV_2=user_provided_value'
+            --env='TEST_ENV_2=user_provided_value' \
+            --wait-finish
 
       - name: Verify env vars on the freshly registered container
         run: |
@@ -1690,13 +1057,14 @@ jobs:
       - name: Save container info & logs
         if: always()
         run: |
+          docker logs appapi-harp > harp_container.log 2>&1
           docker inspect nc_app_app-skeleton-python | json_pp > container.json
           docker logs nc_app_app-skeleton-python > container.log 2>&1
 
       - name: Unregister Skeleton & Daemon
         run: |
           ./occ app_api:app:unregister app-skeleton-python
-          ./occ app_api:daemon:unregister docker_local_sock
+          ./occ app_api:daemon:unregister harp_proxy
 
       - name: Upload Container info
         if: always()
@@ -1722,12 +1090,19 @@ jobs:
           path: data/nextcloud.log
           if-no-files-found: warn
 
+      - name: Upload HaRP logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: nc_update_preserves_deploy_options_harp.log
+          path: harp_container.log
+          if-no-files-found: warn
+
   tests-deploy-success:
     permissions:
       contents: none
     runs-on: ubuntu-22.04
-    needs: [nc-host-app-docker, nc-docker-app-docker, nc-docker-dsp-http,
-            nc-docker-dsp-https, nc-host-app-docker-redis, nc-host-network-host,
+    needs: [nc-host-app-docker-redis, nc-host-app-docker-redis-deploy-options,
             nc-docker-harp-bridge, nc-docker-harp-bridge-no-tls, nc-host-harp-host,
             nc-host-manual-harp-host, nc-update-preserves-deploy-options]
     name: Tests-Deploy-OK

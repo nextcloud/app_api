@@ -269,8 +269,8 @@ class DaemonConfigServiceTest extends TestCase {
 		return [
 			'HaRP' => ['http', true, true],
 			'HaRP over HTTPS' => ['https', true, true],
-			'HTTPS Docker Socket Proxy' => ['https', false, true],
-			'HTTP Docker Socket Proxy' => ['http', false, false],
+			'HTTPS without HaRP' => ['https', false, false],
+			'HTTP without HaRP' => ['http', false, false],
 		];
 	}
 
@@ -286,9 +286,8 @@ class DaemonConfigServiceTest extends TestCase {
 			'HaRP without a key' => ['http', true, '', $harpError],
 			'HaRP with a 12 character key' => ['http', true, 'twelve_chars', null],
 			'HaRP key length counts characters, not bytes' => ['http', true, 'ключ_ключ', $harpError],
-			'HTTPS Docker Socket Proxy with a short password' => ['https', false, 'short', 'The HaProxy password must be at least 12 characters long.'],
-			'HTTP Docker Socket Proxy with a short password' => ['http', false, 'short', null],
-			'HTTP Docker Socket Proxy without a password' => ['http', false, '', null],
+			'HTTPS without HaRP and without a secret' => ['https', false, '', null],
+			'HTTP without HaRP and without a secret' => ['http', false, '', null],
 		];
 	}
 
@@ -372,6 +371,18 @@ class DaemonConfigServiceTest extends TestCase {
 		self::assertNull($this->createServiceWithMapper($mapper)->registerDaemonConfig($params));
 	}
 
+	public function testRegisterDaemonConfigRefusesADockerSocketProxy(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->expects(self::never())->method('insert');
+		$this->auditLogger->expects(self::never())->method('log');
+
+		$params = self::harpRegisterParams();
+		$params['host'] = 'nextcloud-appapi-dsp:2375';
+		$params['deploy_config']['harp'] = null;
+
+		self::assertNull($this->createServiceWithMapper($mapper)->registerDaemonConfig($params));
+	}
+
 	public function testRegisterDaemonConfigDoesNotLogADatabaseError(): void {
 		$mapper = $this->createMock(DaemonConfigMapper::class);
 		$mapper->method('insert')->willThrowException(new Exception('duplicate name'));
@@ -436,6 +447,43 @@ class DaemonConfigServiceTest extends TestCase {
 		$updated = new DaemonConfig($updatedParams + ['name' => 'harp_proxy']);
 
 		$this->createServiceWithMapper($mapper)->updateDaemonConfig($updated, $previous);
+	}
+
+	public static function updateToDockerSocketProxyProvider(): array {
+		$harp = ['accepts_deploy_id' => 'docker-install', 'deploy_config' => ['harp' => ['frp_address' => 'appapi-harp:8782']]];
+		$dockerSocketProxy = ['accepts_deploy_id' => 'docker-install', 'deploy_config' => ['harp' => null]];
+		return [
+			'HaRP daemon loses HaRP' => [$harp, $dockerSocketProxy, false],
+			'manual install daemon becomes a Docker daemon without HaRP' => [['accepts_deploy_id' => 'manual-install', 'deploy_config' => []], $dockerSocketProxy, false],
+			'HaRP daemon loses HaRP in a partial update' => [$harp, ['deploy_config' => ['harp' => null]], false],
+			'Docker Socket Proxy daemon edited' => [$dockerSocketProxy, ['display_name' => 'Old DSP'] + $dockerSocketProxy, false],
+			'Docker Socket Proxy daemon moved to HaRP' => [$dockerSocketProxy, $harp, false],
+			'HaRP daemon edited' => [$harp, ['display_name' => 'HaRP'] + $harp, true],
+		];
+	}
+
+	#[DataProvider('updateToDockerSocketProxyProvider')]
+	public function testUpdateDaemonConfigRefusesADockerSocketProxy(array $previousParams, array $updatedParams, bool $updated): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->expects($updated ? self::once() : self::never())->method('update')->willReturnArgument(0);
+		$previous = new DaemonConfig(['name' => 'harp_proxy'] + $previousParams);
+		$daemonConfig = new DaemonConfig(['name' => 'harp_proxy'] + $updatedParams);
+
+		$result = $this->createServiceWithMapper($mapper)->updateDaemonConfig($daemonConfig, $previous);
+
+		self::assertSame($updated, $result !== null);
+	}
+
+	public function testDockerSocketProxyDaemonsGetNoRegistryMappings(): void {
+		$mapper = $this->createMock(DaemonConfigMapper::class);
+		$mapper->expects(self::never())->method('update');
+		$this->auditLogger->expects(self::never())->method('log');
+		$service = $this->createServiceWithMapper($mapper);
+		$daemonConfig = new DaemonConfig(['name' => 'dsp', 'accepts_deploy_id' => 'docker-install', 'deploy_config' => ['registries' => [['from' => 'ghcr.io', 'to' => 'local']]]]);
+		$error = ['error' => 'Docker Socket Proxy daemons are no longer supported and can only be removed.'];
+
+		self::assertSame($error, $service->addDockerRegistry($daemonConfig, ['from' => 'docker.io', 'to' => 'local']));
+		self::assertSame($error, $service->removeDockerRegistry($daemonConfig, ['from' => 'ghcr.io', 'to' => 'local']));
 	}
 
 	public function testUpdateDaemonConfigDoesNotLogADatabaseError(): void {

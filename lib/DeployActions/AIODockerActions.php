@@ -18,10 +18,6 @@ use OCP\IAppConfig;
  * Class with utils methods for AIO setup
  */
 class AIODockerActions {
-	/** @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 35. Use AIO_HARP_DAEMON_CONFIG_NAME instead. */
-	public const AIO_DAEMON_CONFIG_NAME = 'docker_aio';
-	/** @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 35. Use AIO_HARP_HOST instead. */
-	public const AIO_DOCKER_SOCKET_PROXY_HOST = 'nextcloud-aio-docker-socket-proxy:2375';
 	public const AIO_HARP_DAEMON_CONFIG_NAME = 'harp_aio';
 	public const AIO_HARP_HOST = 'nextcloud-aio-harp:8780';
 
@@ -39,48 +35,6 @@ class AIODockerActions {
 	}
 
 	/**
-	 * Registers DaemonConfig with default params to use AIO Docker Socket Proxy.
-	 *
-	 * @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 35.
-	 *             Use {@see registerAIOHarpDaemonConfig()} instead.
-	 */
-	public function registerAIODaemonConfig(): ?DaemonConfig {
-		$defaultDaemonConfig = $this->appConfig->getValueString(Application::APP_ID, 'default_daemon_config', lazy: true);
-		if ($defaultDaemonConfig !== '') {
-			$daemonConfig = $this->daemonConfigService->getDaemonConfigByName(self::AIO_DAEMON_CONFIG_NAME);
-			if ($daemonConfig !== null) {
-				return null;
-			}
-		}
-
-		$deployConfig = [
-			'net' => 'nextcloud-aio', // using the same host as default network for Nextcloud AIO containers
-			'nextcloud_url' => 'https://' . getenv('NC_DOMAIN'),
-			'haproxy_password' => null,
-			'computeDevice' => [
-				'id' => 'cpu',
-				'label' => 'CPU',
-			],
-		];
-
-		$daemonConfigParams = [
-			'name' => self::AIO_DAEMON_CONFIG_NAME,
-			'display_name' => 'AIO Docker Socket Proxy',
-			'accepts_deploy_id' => 'docker-install',
-			'protocol' => 'http',
-			'host' => self::AIO_DOCKER_SOCKET_PROXY_HOST,
-			'deploy_config' => $deployConfig,
-		];
-
-		$daemonConfig = $this->daemonConfigService->registerDaemonConfig($daemonConfigParams);
-		if ($daemonConfig !== null
-			&& $this->appConfig->setValueString(Application::APP_ID, 'default_daemon_config', $daemonConfig->getName(), lazy: true)) {
-			$this->daemonConfigService->logDefaultDaemonConfigChanged($daemonConfig->getName());
-		}
-		return $daemonConfig;
-	}
-
-	/**
 	 * Check if HaRP is enabled in AIO
 	 */
 	public function isHarpEnabled(): bool {
@@ -89,10 +43,7 @@ class AIODockerActions {
 	}
 
 	/**
-	 * Check if Docker Socket Proxy is enabled in AIO.
-	 *
-	 * @deprecated since AppAPI 34.0.0, scheduled for removal in Nextcloud 35.
-	 *             The Docker Socket Proxy deployment mode is being replaced by HaRP.
+	 * Check if Docker Socket Proxy is enabled in AIO
 	 */
 	public function isDockerSocketProxyEnabled(): bool {
 		$dspEnabled = getenv('DOCKER_SOCKET_PROXY_ENABLED');

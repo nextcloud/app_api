@@ -28,7 +28,7 @@ use Psr\Log\LoggerInterface;
 readonly class DaemonConfigService {
 	/** Registry mapping target that keeps the image name and tells the daemon not to pull the image. */
 	public const LOCAL_REGISTRY = 'local';
-	/** Minimum length of the HaRP shared key, and of the HaProxy password of an HTTPS daemon. */
+	/** Minimum length of the HaRP shared key. */
 	public const MIN_SECRET_LENGTH = 12;
 	/** Example secrets from the documentation and from older daemon templates. */
 	private const EXAMPLE_SECRETS = ['some_very_secure_password', 'some_secure_password', 'enter_haproxy_password'];
@@ -51,7 +51,7 @@ readonly class DaemonConfigService {
 	}
 
 	/**
-	 * Check a secret that is about to be stored for a daemon. HaRP daemons and HTTPS daemons need one of at least
+	 * Check a secret that is about to be stored for a daemon. HaRP daemons need one of at least
 	 * MIN_SECRET_LENGTH characters, as the registration form requires; other daemons may have none.
 	 * An example secret from the documentation is accepted with a warning in the log.
 	 *
@@ -60,33 +60,26 @@ readonly class DaemonConfigService {
 	public function validateNewSecret(array $params, string $secret): ?string {
 		$name = (string)($params['name'] ?? '');
 		if (self::isSecretRequired($params) && mb_strlen($secret) < self::MIN_SECRET_LENGTH) {
-			$error = sprintf('The %s must be at least %d characters long.', self::secretLabel($params), self::MIN_SECRET_LENGTH);
+			$error = sprintf('The HaRP shared key must be at least %d characters long.', self::MIN_SECRET_LENGTH);
 			$this->logger->error(sprintf('Daemon "%s": %s', $name, $error));
 			return $error;
 		}
 		if (self::isExampleSecret($secret)) {
-			$this->logger->warning(sprintf('Daemon "%s": %s', $name, self::exampleSecretWarning($params)));
+			$this->logger->warning(sprintf('Daemon "%s": %s', $name, self::exampleSecretWarning()));
 		}
 		return null;
 	}
 
 	public static function isSecretRequired(array $params): bool {
-		return !empty($params['deploy_config']['harp']) || ($params['protocol'] ?? '') === 'https';
+		return !empty($params['deploy_config']['harp']);
 	}
 
 	public static function isExampleSecret(string $secret): bool {
 		return in_array($secret, self::EXAMPLE_SECRETS, true);
 	}
 
-	public static function exampleSecretWarning(array $params): string {
-		return sprintf(
-			'The %s is an example value from the documentation. Generate your own, for example with `openssl rand -hex 32`, and set it on both sides.',
-			self::secretLabel($params),
-		);
-	}
-
-	private static function secretLabel(array $params): string {
-		return empty($params['deploy_config']['harp']) ? 'HaProxy password' : 'HaRP shared key';
+	public static function exampleSecretWarning(): string {
+		return 'The HaRP shared key is an example value from the documentation. Generate your own, for example with `openssl rand -hex 32`, and set it on both sides.';
 	}
 
 	public function registerDaemonConfig(array $params): ?DaemonConfig {
@@ -127,10 +120,8 @@ readonly class DaemonConfigService {
 			return null;
 		}
 		if ($params['accepts_deploy_id'] === DockerActions::DEPLOY_ID && empty($params['deploy_config']['harp'])) {
-			$this->logger->warning(sprintf(
-				'Daemon "%s" uses direct Docker access (Docker Socket Proxy). This deployment method is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.',
-				$params['name'],
-			));
+			$this->logger->error('Failed to register daemon configuration: Docker Socket Proxy is no longer supported, a `docker-install` daemon requires HaRP.');
+			return null;
 		}
 		$params['deploy_config']['nextcloud_url'] = rtrim($params['deploy_config']['nextcloud_url'], '/');
 		try {
@@ -235,6 +226,18 @@ readonly class DaemonConfigService {
 			$this->logger->error('Failed to update daemon configuration: `name` contains invalid characters or is empty.');
 			return null;
 		}
+		if (DockerActions::isDockerSocketProxy($previousDaemonConfig)) {
+			$this->logger->error('Failed to update daemon configuration: Docker Socket Proxy daemons are no longer supported and can only be removed.');
+			return null;
+		}
+		$updatedDaemonConfig = new DaemonConfig([
+			'accepts_deploy_id' => $daemonConfig->getAcceptsDeployId() ?? $previousDaemonConfig->getAcceptsDeployId(),
+			'deploy_config' => $daemonConfig->getDeployConfig() ?? $previousDaemonConfig->getDeployConfig(),
+		]);
+		if (DockerActions::isDockerSocketProxy($updatedDaemonConfig)) {
+			$this->logger->error('Failed to update daemon configuration: Docker Socket Proxy is no longer supported, a `docker-install` daemon requires HaRP.');
+			return null;
+		}
 
 		try {
 			$daemonConfig = $this->mapper->update($daemonConfig);
@@ -317,6 +320,9 @@ readonly class DaemonConfigService {
 	}
 
 	public function addDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			return ['error' => 'Docker Socket Proxy daemons are no longer supported and can only be removed.'];
+		}
 		try {
 			$from = $registryMap['from'] ?? null;
 			$to = $registryMap['to'] ?? null;
@@ -359,6 +365,9 @@ readonly class DaemonConfigService {
 	}
 
 	public function removeDockerRegistry(DaemonConfig $daemonConfig, array $registryMap): DaemonConfig|array|null {
+		if (DockerActions::isDockerSocketProxy($daemonConfig)) {
+			return ['error' => 'Docker Socket Proxy daemons are no longer supported and can only be removed.'];
+		}
 		try {
 			$deployConfig = $daemonConfig->getDeployConfig();
 

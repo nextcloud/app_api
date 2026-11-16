@@ -1780,7 +1780,7 @@
         "/index.php/apps/uninstall/{appId}": {
             "get": {
                 "operationId": "ex_apps_page-uninstall-app",
-                "summary": "Unregister an ExApp and optionally remove its container and data",
+                "summary": "Unregister an ExApp and remove its HaRP container, optionally with its data volume",
                 "description": "This endpoint requires admin access\nThis endpoint requires password confirmation",
                 "tags": [
                     "ex_apps_page"
@@ -1801,15 +1801,6 @@
                         "required": true,
                         "schema": {
                             "type": "string"
-                        }
-                    },
-                    {
-                        "name": "removeContainer",
-                        "in": "query",
-                        "description": "Whether to remove the ExApp container",
-                        "schema": {
-                            "type": "boolean",
-                            "default": true
                         }
                     },
                     {

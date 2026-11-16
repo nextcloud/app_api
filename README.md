@@ -47,9 +47,9 @@ You have two valid options:
 
 ## Deploy Daemon options
 
-### HaRP (recommended for Nextcloud 32+)
+### HaRP
 
-**HaRP** (High-performance AppAPI Reverse Proxy) is the newer and recommended Deploy Daemon.
+**HaRP** (High-performance AppAPI Reverse Proxy) is the Deploy Daemon for Docker and Kubernetes.
 It is a reverse proxy system designed specifically for ExApps:
 
 - Proxies access to the Docker Engine used to create ExApp containers
@@ -58,23 +58,12 @@ It is a reverse proxy system designed specifically for ExApps:
 
 Repository: https://github.com/nextcloud/HaRP
 
-### Docker Socket Proxy (DSP) — legacy
-
-**Docker Socket Proxy** (often shortened as **DSP**) is the classic Deploy Daemon implementation.
-It is a security-hardened proxy in front of the Docker Engine socket/API and is protected by basic
-authentication and brute-force protection.
-
-> **Note:** DSP is being deprecated in favor of HaRP and is scheduled for removal in Nextcloud 35.
-> New installations should use HaRP.
-
-Repository: https://github.com/nextcloud/docker-socket-proxy
-
 ## Security notes (for administrators)
 
 Configuring a Deploy Daemon means allowing Nextcloud to orchestrate application containers. Keep these points in mind:
 
-- Run HaRP/DSP in a trusted network and do not expose it to the public internet.
-- Use strong secrets (`HP_SHARED_KEY` for HaRP, `NC_HAPROXY_PASSWORD` for DSP).
+- Run HaRP in a trusted network and do not expose it to the public internet.
+- Use a strong `HP_SHARED_KEY` for HaRP.
 - For remote setups or untrusted networks, use TLS where supported and restrict access with firewall rules.
 - Only deploy ExApps you trust, and keep their images up to date.
 

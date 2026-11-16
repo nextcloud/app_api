@@ -19,7 +19,6 @@ use OCP\App\IAppManager;
 use OCP\IAppConfig;
 use OCP\ICertificateManager;
 use OCP\IConfig;
-use OCP\ITempManager;
 use OCP\IURLGenerator;
 use OCP\Security\ICrypto;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -37,6 +36,8 @@ class DockerActionsTest extends TestCase {
 		parent::setUp();
 
 		$this->appConfig = $this->createMock(IAppConfig::class);
+		$crypto = $this->createMock(ICrypto::class);
+		$crypto->method('decrypt')->willReturnCallback(static fn (string $value): string => substr($value, strlen('encrypted:')));
 
 		$this->dockerActions = new DockerActions(
 			$this->createMock(LoggerInterface::class),
@@ -47,8 +48,7 @@ class DockerActionsTest extends TestCase {
 			$this->createMock(IURLGenerator::class),
 			$this->createMock(AppAPICommonService::class),
 			$this->createMock(ExAppService::class),
-			$this->createMock(ITempManager::class),
-			$this->createMock(ICrypto::class),
+			$crypto,
 			$this->createMock(ExAppDeployOptionsService::class),
 		);
 	}
@@ -186,6 +186,39 @@ class DockerActionsTest extends TestCase {
 		$params = $this->dockerActions->buildDeployParams($daemonConfig, $appInfo);
 
 		self::assertSame(['nanoCPUs' => 1070000000], $params['container_params']['resourceLimits']);
+	}
+
+	public static function dockerSocketProxyProvider(): array {
+		return [
+			'Docker without HaRP' => ['docker-install', [], true],
+			'Docker with HaRP' => ['docker-install', ['harp' => ['frp_address' => 'appapi-harp:8782']], false],
+			'manual install without HaRP' => ['manual-install', [], false],
+			'Kubernetes' => ['kubernetes-install', ['harp' => ['exapp_direct' => true]], false],
+		];
+	}
+
+	#[DataProvider('dockerSocketProxyProvider')]
+	public function testIsDockerSocketProxy(string $acceptsDeployId, array $deployConfig, bool $expected): void {
+		$daemonConfig = new DaemonConfig(['accepts_deploy_id' => $acceptsDeployId, 'deploy_config' => $deployConfig]);
+
+		self::assertSame($expected, DockerActions::isDockerSocketProxy($daemonConfig));
+	}
+
+	public static function dockerSocketProxyExAppUrlProvider(): array {
+		return [
+			'host network' => ['http', 'dsp:2375', ['net' => 'host'], 'http://localhost:23000', []],
+			'Docker network' => ['http', 'dsp:2375', ['net' => 'nextcloud'], 'http://test-deploy:23000', []],
+			'remote over HTTPS' => ['https', 'dsp.example.com:2375', ['net' => 'host', 'haproxy_password' => 'encrypted:a_password'], 'https://dsp.example.com:23000', [DockerActions::APP_API_HAPROXY_USER, 'a_password']],
+			'overridden host' => ['http', 'dsp:2375', ['net' => 'host', 'additional_options' => ['OVERRIDE_APP_HOST' => '10.0.0.5']], 'http://10.0.0.5:23000', []],
+		];
+	}
+
+	#[DataProvider('dockerSocketProxyExAppUrlProvider')]
+	public function testResolveExAppUrlReachesADockerSocketProxyExAppDirectly(string $protocol, string $host, array $deployConfig, string $expectedUrl, array $expectedAuth): void {
+		$auth = [];
+
+		self::assertSame($expectedUrl, $this->dockerActions->resolveExAppUrl('test-deploy', $protocol, $host, $deployConfig, 23000, $auth));
+		self::assertSame($expectedAuth, $auth);
 	}
 
 	public function testInitGuzzleClientForHarpWithoutKey(): void {

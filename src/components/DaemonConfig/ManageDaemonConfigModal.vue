@@ -9,9 +9,6 @@
 			@close="closeModal">
 			<div class="register-daemon-config-body">
 				<h2>{{ isEdit ? t('app_api', 'Edit the deploy daemon') : t('app_api', 'Register a new deploy daemon') }}</h2>
-				<NcNoteCard v-if="isDeprecatedDirectDocker" type="warning">
-					{{ t('app_api', 'Direct Docker access (Docker Socket Proxy) is deprecated and will be removed in Nextcloud 35. Please migrate to a HaRP-based daemon.') }}
-				</NcNoteCard>
 				<div v-if="!isEdit" class="templates">
 					<NcSelect
 						id="daemon-template"
@@ -62,18 +59,18 @@
 							:aria-label="daemonHostHelperText" />
 						<InfoTooltip :text="daemonHostHelperText" />
 					</div>
-					<div v-if="['http', 'https'].includes(daemonProtocol) && !isPureManual"
+					<div v-if="!isPureManual"
 						class="row"
-						:aria-label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')">
+						:aria-label="t('app_api', 'HaRP shared key')">
 						<NcPasswordField
 							id="deploy-config-haproxy-password"
 							v-model="deployConfig.haproxy_password"
-							:label="isHarp ? t('app_api', 'HaRP shared key') : t('app_api', 'HaProxy password')"
+							:label="t('app_api', 'HaRP shared key')"
 							:error="!!deployConfig.haproxy_password && isHaProxyPasswordValid === false"
 							:disabled="isEdit && isK8s"
 							:placeholder="haProxyPasswordHelperText"
 							:aria-label="haProxyPasswordHelperText"
-							:helperText="!isHaProxyPasswordValid ? t('app_api', 'The password must be at least 12 characters long') : ''"
+							:helperText="!isHaProxyPasswordValid ? t('app_api', 'The HaRP shared key must be at least 12 characters long') : ''"
 							autocomplete="off" />
 						<InfoTooltip :text="haProxyPasswordHelperText" />
 					</div>
@@ -88,15 +85,13 @@
 							:placeholder="t('app_api', 'Nextcloud URL')"
 							:aria-label="t('app_api', 'Nextcloud URL')" />
 					</div>
-					<NcFormBox class="formbox">
-						<NcFormBoxSwitch v-if="!isEdit && acceptsDeployId === 'docker-install'"
+					<NcFormBox v-if="acceptsDeployId === 'docker-install'" class="formbox">
+						<NcFormBoxSwitch v-if="!isEdit"
 							v-model="defaultDaemon"
 							:title="t('app_api', 'Set this daemon as the default one')">
 							{{ t('app_api', 'Set as the default daemon') }}
 						</NcFormBoxSwitch>
-						<NcFormBoxSwitch v-if="!isHarp"
-							v-model="httpsEnabled"
-							@update:modelValue="onProtocolChange">
+						<NcFormBoxSwitch v-model="httpsEnabled">
 							{{ t('app_api', 'Enable HTTPS') }}
 						</NcFormBoxSwitch>
 					</NcFormBox>
@@ -112,7 +107,7 @@
 					</NcButton>
 					<div v-show="deployConfigSettingsOpened" class="deploy-config" :aria-label="t('app_api', 'Deploy options')">
 						<NcFormBoxSwitch
-							v-if="!isK8s || !isEdit"
+							v-if="acceptsDeployId === 'manual-install'"
 							v-model="isHarp"
 							@update:modelValue="toggleHarp">
 							{{ t('app_api', 'Enable HaRP') }}
@@ -335,7 +330,6 @@ import { generateUrl } from '@nextcloud/router'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcInputField from '@nextcloud/vue/components/NcInputField'
 import NcModal from '@nextcloud/vue/components/NcModal'
-import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
 import NcPasswordField from '@nextcloud/vue/components/NcPasswordField'
 import NcSelect from '@nextcloud/vue/components/NcSelect'
 import NcFormBoxSwitch from '@nextcloud/vue/components/NcFormBoxSwitch'
@@ -358,7 +352,6 @@ export default {
 		NcLoadingIcon,
 		NcModal,
 		NcInputField,
-		NcNoteCard,
 		NcPasswordField,
 		UnfoldLessHorizontal,
 		UnfoldMoreHorizontal,
@@ -416,7 +409,7 @@ export default {
 			configurationTemplateOptions: [
 				...DAEMON_TEMPLATES.map((template) => ({
 					id: template.name,
-					label: template.deprecated ? `${template.displayName} (deprecated)` : template.displayName,
+					label: template.displayName,
 				})),
 			],
 
@@ -472,16 +465,13 @@ export default {
 
 	computed: {
 		daemonHostHelperText() {
-			if (['http', 'https'].includes(this.daemonProtocol)) {
-				if (this.acceptsDeployId === 'manual-install' && !this.isHarp) {
-					return t('app_api', 'Hostname used by Nextcloud to access the ExApps')
-				}
-				return t('app_api', 'The hostname (and port) at which the {name} is available. This does not need to be a public host, just a host accessible by the Nextcloud server, e.g. {host}.', {
-					name: this.isHarp ? 'HaRP proxy' : 'Docker Socket Proxy',
-					host: this.isHarp ? 'appapi-harp:8780' : 'nextcloud-appapi-dsp:2375',
-				})
+			if (this.isPureManual) {
+				return t('app_api', 'Hostname used by Nextcloud to access the ExApps')
 			}
-			return t('app_api', 'The hostname (and port) or path at which the {name} is available. This does not need to be a public host, just a host accessible by the Nextcloud server. It can also be the path to the Docker socket. (e.g. nextcloud-appapi-dsp:2375, /var/run/docker.sock)')
+			return t('app_api', 'The hostname (and port) at which the {name} is available. This does not need to be a public host, just a host accessible by the Nextcloud server, e.g. {host}.', {
+				name: 'HaRP proxy',
+				host: 'appapi-harp:8780',
+			})
 		},
 
 		daemonProtocol() {
@@ -533,15 +523,14 @@ export default {
 		},
 
 		isHaProxyPasswordValid() {
-			if (this.daemonProtocol === 'https' || this.isHarp) {
+			if (this.isHarp) {
 				return this.deployConfig.haproxy_password !== null && this.deployConfig.haproxy_password.length >= 12
 			}
-			// HaProxy password required only for https
 			return true
 		},
 
 		haProxyPasswordHelperText() {
-			return this.isHarp ? t('app_api', 'The secret key for the HaRP container communication (HP_SHARED_KEY).') : t('app_api', 'AppAPI Docker Socket Proxy authentication password')
+			return t('app_api', 'The secret key for the HaRP container communication (HP_SHARED_KEY).')
 		},
 
 		isEditDifferentNetwork() {
@@ -610,10 +599,6 @@ export default {
 		isK8s() {
 			return this.acceptsDeployId === 'kubernetes-install'
 		},
-
-		isDeprecatedDirectDocker() {
-			return this.acceptsDeployId === 'docker-install' && !this.isHarp
-		},
 	},
 
 	watch: {
@@ -624,9 +609,10 @@ export default {
 			this.setupFormConfiguration(newConfigurationTab)
 		},
 
-		httpsEnabled(newHttpsEnabled) {
-			this.prevNet = this.deployConfig.net
-			this.deployConfig.net = newHttpsEnabled ? 'host' : this.prevNet
+		acceptsDeployId(newAcceptsDeployId) {
+			if (newAcceptsDeployId === 'docker-install' && !this.isHarp) {
+				this.toggleHarp(true)
+			}
 		},
 
 		show(newShow) {
@@ -773,15 +759,6 @@ export default {
 			this.deployConfigSettingsOpened = template.deployConfigSettingsOpened
 			this.deployConfig = JSON.parse(JSON.stringify(template.deployConfig))
 			this.defaultDaemon = template.defaultDaemon
-		},
-
-		onProtocolChange() {
-			// Prefill default value
-			if (this.daemonProtocol === 'unix-socket') {
-				this.host = '/var/run/docker.sock'
-			} else {
-				this.host = DAEMON_TEMPLATES.find((template) => template.name === this.configurationTab.id).host || ''
-			}
 		},
 
 		addAdditionalOption() {

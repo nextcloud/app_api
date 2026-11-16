@@ -59,7 +59,7 @@ readonly class ExAppsPageService {
 						if (!$daemonConfigAccessible) {
 							$this->logger->warning(sprintf('Deploy daemon "%s" is not accessible by Nextcloud: %s', $daemonConfig->getName(), $pingError));
 						}
-					} else {
+					} elseif (!DockerActions::isDockerSocketProxy($daemonConfig)) {
 						$this->dockerActions->initGuzzleClient($daemonConfig);
 						$daemonConfigAccessible = $this->dockerActions->ping($this->dockerActions->buildDockerUrl($daemonConfig));
 						if (!$daemonConfigAccessible) {

@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest'
 import { DAEMON_COMPUTE_DEVICES, DAEMON_TEMPLATES } from './daemonTemplates.js'
 
 describe('DAEMON_TEMPLATES', () => {
-	it('has 8 templates', () => {
-		expect(DAEMON_TEMPLATES).toHaveLength(8)
+	it('has 5 templates', () => {
+		expect(DAEMON_TEMPLATES).toHaveLength(5)
 	})
 
 	it('each template has required fields', () => {
@@ -43,7 +43,7 @@ describe('DAEMON_TEMPLATES', () => {
 		}
 	})
 
-	it('does not prefill the HaRP shared key or HaProxy password', () => {
+	it('does not prefill the HaRP shared key', () => {
 		for (const template of DAEMON_TEMPLATES) {
 			expect(template.deployConfig.haproxy_password, `template "${template.name}" prefills a key`).toBe('')
 		}

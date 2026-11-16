@@ -25,6 +25,7 @@ use OCA\AppAPI\Middleware\MaintenanceModeMiddleware;
 use OCA\AppAPI\Notifications\ExAppNotifier;
 use OCA\AppAPI\PublicCapabilities;
 use OCA\AppAPI\SetupChecks\DaemonCheck;
+use OCA\AppAPI\SetupChecks\DockerSocketProxyCheck;
 use OCA\AppAPI\SetupChecks\ExAppsErrorSetupCheck;
 use OCA\AppAPI\SetupChecks\ExAppsWarningSetupCheck;
 use OCA\AppAPI\SetupChecks\HarpVersionCheck;
@@ -75,6 +76,7 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(DeclarativeSettingsSetValueEvent::class, SetValueListener::class);
 
 		$context->registerSetupCheck(DaemonCheck::class);
+		$context->registerSetupCheck(DockerSocketProxyCheck::class);
 		$context->registerSetupCheck(HarpVersionCheck::class);
 		$context->registerSetupCheck(ExAppsErrorSetupCheck::class);
 		$context->registerSetupCheck(ExAppsWarningSetupCheck::class);
