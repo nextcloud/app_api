@@ -16,6 +16,7 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
+use OCA\AppAPI\Db\ExAppDeployOption;
 use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Service\AppAPICommonService;
 use OCA\AppAPI\Service\ExAppDeployOptionsService;
@@ -236,5 +237,71 @@ class KubernetesActionsTest extends TestCase {
 		if ($removeData) {
 			self::assertTrue(json_decode((string)$removes[0]['request']->getBody(), true)['remove_data']);
 		}
+	}
+
+	public static function removeExAppResourcesProvider(): array {
+		return [
+			'single deployment' => [null, ['']],
+			'multi-role ExApp' => [[['name' => 'web'], ['name' => 'worker']], ['web', 'worker']],
+		];
+	}
+
+	#[DataProvider('removeExAppResourcesProvider')]
+	public function testRemoveExAppResourcesRemovesEveryDeploymentOfTheExApp(?array $roles, array $roleSuffixes): void {
+		$exAppDeployOptionsService = $this->createMock(ExAppDeployOptionsService::class);
+		$exAppDeployOptionsService->method('getDeployOption')->with('test-deploy', 'k8s_service_roles')
+			->willReturn($roles === null ? null : new ExAppDeployOption(['appid' => 'test-deploy', 'type' => 'k8s_service_roles', 'value' => $roles]));
+		$kubernetesActions = $this->getMockBuilder(KubernetesActions::class)
+			->setConstructorArgs([
+				$this->createMock(LoggerInterface::class),
+				$this->createMock(IConfig::class),
+				$this->createMock(ICertificateManager::class),
+				$this->createMock(IAppManager::class),
+				$this->createMock(IURLGenerator::class),
+				$this->createMock(AppAPICommonService::class),
+				$this->createMock(ExAppService::class),
+				$this->createMock(ICrypto::class),
+				$exAppDeployOptionsService,
+			])
+			->onlyMethods(['initGuzzleClient', 'removeExApp'])
+			->getMock();
+		$removed = [];
+		$kubernetesActions->expects(self::exactly(count($roleSuffixes)))->method('removeExApp')
+			->willReturnCallback(static function (string $harpUrl, string $exAppName, bool $removeData, string $roleSuffix = '') use (&$removed): string {
+				$removed[] = [$exAppName, $removeData, $roleSuffix];
+				return '';
+			});
+		$daemonConfig = new DaemonConfig(['accepts_deploy_id' => KubernetesActions::DEPLOY_ID, 'protocol' => 'http', 'host' => 'harp:8780', 'deploy_config' => []]);
+
+		self::assertSame('', $kubernetesActions->removeExAppResources($daemonConfig, 'test-deploy', removeData: true));
+		self::assertSame(array_map(static fn (string $roleSuffix): array => ['test-deploy', true, $roleSuffix], $roleSuffixes), $removed);
+	}
+
+	public function testRemoveAllRolesRemovesTheOtherRolesAfterAFailure(): void {
+		$kubernetesActions = $this->getMockBuilder(KubernetesActions::class)
+			->setConstructorArgs([
+				$this->createMock(LoggerInterface::class),
+				$this->createMock(IConfig::class),
+				$this->createMock(ICertificateManager::class),
+				$this->createMock(IAppManager::class),
+				$this->createMock(IURLGenerator::class),
+				$this->createMock(AppAPICommonService::class),
+				$this->createMock(ExAppService::class),
+				$this->createMock(ICrypto::class),
+				$this->createMock(ExAppDeployOptionsService::class),
+			])
+			->onlyMethods(['removeExApp'])
+			->getMock();
+		$removed = [];
+		$kubernetesActions->method('removeExApp')
+			->willReturnCallback(static function (string $harpUrl, string $exAppName, bool $removeData, string $roleSuffix = '') use (&$removed): string {
+				$removed[] = $roleSuffix;
+				return $roleSuffix === 'worker' ? '' : sprintf('Failed to remove role %s', $roleSuffix);
+			});
+
+		$error = $kubernetesActions->removeAllRoles('http://harp:8780/exapps/app_api/k8s', 'test-deploy', [['name' => 'api'], ['name' => 'worker'], ['name' => 'cron']]);
+
+		self::assertSame('Failed to remove role api', $error);
+		self::assertSame(['api', 'worker', 'cron'], $removed);
 	}
 }
