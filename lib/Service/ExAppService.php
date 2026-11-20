@@ -349,6 +349,10 @@ class ExAppService {
 				}
 			}
 			$appInfo = json_decode(json_encode((array)$xmlAppInfo), true);
+			if (is_array($appInfo['name'] ?? null)) {
+				$defaultNames = $xmlAppInfo->xpath('name[not(@lang) or @lang="en"]');
+				$appInfo['name'] = (string)($defaultNames[0] ?? $xmlAppInfo->name);
+			}
 			if (isset($appInfo['external-app']['routes']['route'])) {
 				if (isset($appInfo['external-app']['routes']['route'][0])) {
 					$appInfo['external-app']['routes'] = $appInfo['external-app']['routes']['route'];
