@@ -2,6 +2,7 @@
   - SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
+
 # Change Log
 
 All notable changes to this project will be documented in this file.
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The ExApp proxy accepts `HEAD` on routes that list `GET` and reads a route's verb as a list of methods, as HaRP does. #1144
 - The HaRP version check in the admin overview warns about HaRP older than 0.4.8, which checks the HTTP method of requests to ExApps. #1149
 - Failed HaRP shared key checks answer 429 after too many attempts. #1130
+- `POST /ocs/v2.php/apps/app_api/api/v1/ui/settings` returns `400` if the form fails schema validation or reuses a field ID from another form already registered by the same ExApp. #1218
 
 ### Fixed
 
@@ -35,6 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The ExApp proxy returns an ExApp's redirect to the browser instead of following it, as HaRP does. #1195
 - `occ app_api:app:unregister --rm-data` also removes the volume of a Kubernetes ExApp whose deployment is already gone. #1130
 - ExApps use the changed settings of their deploy daemon, such as a new HaRP shared key, right away instead of cached old ones. #1205
+- A stored ExApp settings form that Nextcloud cannot display no longer breaks the admin and personal settings pages: AppAPI skips that form and logs the ExApp, the form and the reason. #1218
 
 ## [34.0.0]
 
@@ -42,7 +45,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Direct Docker access via Docker Socket Proxy is deprecated and scheduled for removal in Nextcloud 35. Migrate `docker-install` daemons to HaRP.
 - AIO Docker Socket Proxy auto-registration (`AIODockerActions::registerAIODaemonConfig`) is deprecated in favor of the HaRP-based AIO daemon.
-
 
 ## [3.2.0 - 2024-09-10]
 
@@ -68,10 +70,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - ApiScopes are deprecated and removed. #373
 
-
 ## [3.1.0 - 2024-08-15]
 
-**Breaking change**: Task processing API for NC30 AI API. (llm2 and translate2 apps) 
+**Breaking change**: Task processing API for NC30 AI API. (llm2 and translate2 apps)
 
 ### Added
 
@@ -125,7 +126,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - ExAppProxy: preserve original `Authentication` passed to ExApp via Docker Socket Proxy. #334
 - ExAppProxy: send all headers and raw data to ExApp. #330
 
-
 ## [2.7.0 - 2024-07-01]
 
 ### Fixed
@@ -134,7 +134,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fix ExApp proxy to preserve the url params. #296
 - Added missing pass through of cookies in ExApp proxy. #296
 - Added missing multipart/form-data support for ExApp proxy. #296
-- Fixed HTTP caching issue for application/json requests in ExApp proxy. #296 
+- Fixed HTTP caching issue for application/json requests in ExApp proxy. #296
 - Fixed TopMenu API to allow using iframes. #311
 
 ## [2.6.0 - 2024-05-10]
@@ -165,7 +165,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Different compute device configuration for Daemon (NVIDIA, AMD, CPU). #267
-- Ability to add optional parameters when registering a daemon, for example *OVERRIDE_APP_HOST*. #269
+- Ability to add optional parameters when registering a daemon, for example _OVERRIDE_APP_HOST_. #269
 - API for registering OCC commands. #272
 - Correct support of the Docker `HEALTHCHECK` instruction. #273
 - Support of pulling "custom" images for the selected compute device. #274
@@ -203,7 +203,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.3.1 - 2024-03-18]
 
-## Added 
+## Added
 
 - `TEXT_PROCESSING` and `MACHINE_TRANSLATION` API scopes. #249
 
@@ -353,7 +353,7 @@ Maintenance update of npm packages to support NC28
 ### Changed
 
 - Changed AIO auto-created daemon with gpu enabled to separate one (#134)
-- Changed AIO detection to use new env (#150) 
+- Changed AIO detection to use new env (#150)
 
 ## [1.4.1 - 2023-12-07]
 
@@ -376,7 +376,6 @@ This release contains breaking changes, all ExApps should be updated accordingly
 - Correct cleaning of ExApp stuff upon deletion.
 - Oracle DB fixes and adjustments with additional tests.
 - Tons of other bugfixes, adjustments and CI tests.
-
 
 ## [1.4.0 - 2023-12-06]
 
@@ -402,7 +401,7 @@ This release contains breaking changes, all ExApps should be updated accordingly
 
 ### Changed
 
-- Reworked: algorithm  of `app:register` and occ cli command, "/init" endpoint now is optional. #128
+- Reworked: algorithm of `app:register` and occ cli command, "/init" endpoint now is optional. #128
 - Reworked: `app_api:app:unregister` occ cli command, make it much robust. #127
 
 ### Fixed
@@ -444,8 +443,8 @@ This release contains breaking changes, all ExApps should be updated accordingly
 
 ### Fixed
 
-- Fixed incorrect error message in admin settings (https://github.com/cloud-py-api/app_api/issues/100)
-- Fixed database schema for MySQL (https://github.com/cloud-py-api/app_api/issues/94)
+- Fixed incorrect error message in admin settings (<https://github.com/cloud-py-api/app_api/issues/100>)
+- Fixed database schema for MySQL (<https://github.com/cloud-py-api/app_api/issues/94>)
 
 ## [1.0.1 - 2023-10-06]
 
