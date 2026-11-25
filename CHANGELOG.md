@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The ExApp proxy accepts `HEAD` on routes that list `GET` and reads a route's verb as a list of methods, as HaRP does. #1144
 - The HaRP version check in the admin overview warns about HaRP older than 0.4.8, which checks the HTTP method of requests to ExApps. #1149
 - Failed HaRP shared key checks answer 429 after too many attempts. #1130
-- `POST /ocs/v2.php/apps/app_api/api/v1/ui/settings` answers `400` instead of `200` for a settings form that Nextcloud cannot display or that reuses a field ID of another form of the same ExApp. #1218
+- `POST /ocs/v2.php/apps/app_api/api/v1/ui/settings` returns `400` if the form fails schema validation or reuses a field ID from another form already registered by the same ExApp. #1218
 
 ### Fixed
 
