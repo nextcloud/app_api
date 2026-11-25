@@ -9,10 +9,12 @@ declare(strict_types=1);
 
 namespace OCA\AppAPI\Listener\DeclarativeSettings;
 
+use OCA\AppAPI\Service\UI\SettingsFormValidator;
 use OCA\AppAPI\Service\UI\SettingsService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
+use Psr\Log\LoggerInterface;
 
 /**
  * @template-implements IEventListener<Event>
@@ -20,6 +22,8 @@ use OCP\Settings\Events\DeclarativeSettingsRegisterFormEvent;
 readonly class RegisterDeclarativeSettingsListener implements IEventListener {
 	public function __construct(
 		private SettingsService $service,
+		private LoggerInterface $logger,
+		private SettingsFormValidator $validator,
 	) {
 	}
 
@@ -29,7 +33,21 @@ readonly class RegisterDeclarativeSettingsListener implements IEventListener {
 		}
 
 		foreach ($this->service->getRegisteredForms() as $form) {
-			$event->registerSchema($form->getAppid(), $form->getScheme());
+			try {
+				$schema = $form->getScheme();
+				$reason = $this->validator->validate($schema);
+				if ($reason === null) {
+					$event->registerSchema($form->getAppid(), $schema);
+					continue;
+				}
+			} catch (\Exception|\TypeError $e) {
+				$reason = $e->getMessage();
+			}
+			$this->logger->warning('Skipping settings form {formId} from ExApp {appId}: {reason}', [
+				'formId' => $form->getFormid(),
+				'appId' => $form->getAppid(),
+				'reason' => $reason,
+			]);
 		}
 	}
 }

@@ -17,6 +17,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\DB\Exception;
 use OCP\ICache;
 use OCP\ICacheFactory;
+use OCP\Settings\DeclarativeSettingsTypes;
 use Psr\Log\LoggerInterface;
 
 class SettingsService {
@@ -26,6 +27,7 @@ class SettingsService {
 		ICacheFactory $cacheFactory,
 		private readonly SettingsFormMapper $mapper,
 		private readonly LoggerInterface $logger,
+		private readonly SettingsFormValidator $validator,
 	) {
 		if ($cacheFactory->isAvailable()) {
 			$this->cache = $cacheFactory->createDistributed(Application::APP_ID . '/ex_settings_forms');
@@ -36,21 +38,37 @@ class SettingsService {
 		string $appId,
 		array $formScheme,
 	): ?SettingsForm {
-		$formId = $formScheme['id'];
-		$formScheme['storage_type'] = 'external';  // DeclarativeSettingsTypes::STORAGE_TYPE_EXTERNAL;
-		try {
-			$settingsForm = $this->mapper->findByAppidFormId($appId, $formId);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|Exception) {
-			$settingsForm = null;
+		$formScheme['storage_type'] = DeclarativeSettingsTypes::STORAGE_TYPE_EXTERNAL;
+		$error = $this->validator->validate($formScheme);
+		if ($error !== null) {
+			$this->logger->warning('Rejected settings form {formId} from ExApp {appId}: {reason}', [
+				'formId' => is_string($formScheme['id'] ?? null) ? $formScheme['id'] : '(unknown)',
+				'appId' => $appId,
+				'reason' => $error,
+			]);
+			return null;
 		}
+		$formId = $formScheme['id'];
 		try {
+			$storedForms = $this->mapper->findByAppId($appId);
+			$conflict = $this->findFieldIdConflict($storedForms, $formId, array_column($formScheme['fields'], 'id'));
+			if ($conflict !== null) {
+				$this->logger->warning('Rejected settings form {formId} from ExApp {appId}: field {fieldId} already belongs to form {otherFormId}', [
+					'appId' => $appId,
+					'formId' => $formId,
+				] + $conflict);
+				return null;
+			}
 			$newSettingsForm = new SettingsForm([
 				'appid' => $appId,
 				'formid' => $formId,
 				'scheme' => $formScheme,
 			]);
-			if ($settingsForm !== null) {
-				$newSettingsForm->setId($settingsForm->getId());
+			foreach ($storedForms as $stored) {
+				if ($stored->getFormid() === $formId) {
+					$newSettingsForm->setId($stored->getId());
+					break;
+				}
 			}
 			$settingsForm = $this->mapper->insertOrUpdate($newSettingsForm);
 			$this->resetCacheEnabled();
@@ -61,6 +79,30 @@ class SettingsService {
 			return null;
 		}
 		return $settingsForm;
+	}
+
+	/**
+	 * @param list<SettingsForm> $storedForms
+	 * @param list<string> $fieldIds
+	 * @return array{fieldId: string, otherFormId: string}|null
+	 */
+	private function findFieldIdConflict(array $storedForms, string $formId, array $fieldIds): ?array {
+		$ids = array_fill_keys($fieldIds, true);
+		foreach ($storedForms as $stored) {
+			if ($stored->getFormid() === $formId) {
+				continue;
+			}
+			$fields = $stored->getScheme()['fields'] ?? null;
+			if (!is_array($fields)) {
+				continue;
+			}
+			foreach (array_column($fields, 'id') as $fieldId) {
+				if (is_string($fieldId) && isset($ids[$fieldId])) {
+					return ['fieldId' => $fieldId, 'otherFormId' => $stored->getFormid()];
+				}
+			}
+		}
+		return null;
 	}
 
 	public function unregisterForm(string $appId, string $formId): ?SettingsForm {

@@ -58,6 +58,16 @@ class SettingsFormMapper extends QBMapper {
 	}
 
 	/**
+	 * @return list<SettingsForm>
+	 * @throws Exception
+	 */
+	public function findByAppId(string $appId): array {
+		$qb = $this->db->getQueryBuilder();
+		return $this->findEntities($qb->select('*')->from($this->tableName)
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter($appId))));
+	}
+
+	/**
 	 * @throws Exception
 	 */
 	public function removeAllByAppId(string $appId): int {
