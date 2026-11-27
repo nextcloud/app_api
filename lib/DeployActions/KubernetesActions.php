@@ -287,14 +287,35 @@ class KubernetesActions implements IDeployActions {
 		return '';
 	}
 
+	/**
+	 * Remove the deployment of every role, also after a failed one
+	 *
+	 * @return string the first error, empty on success
+	 */
 	public function removeAllRoles(string $harpUrl, string $exAppName, array $roles, bool $removeData = false): string {
+		$firstError = '';
 		foreach ($roles as $role) {
 			$error = $this->removeExApp($harpUrl, $exAppName, removeData: $removeData, roleSuffix: $role['name']);
-			if ($error) {
-				return $error;
+			if ($firstError === '') {
+				$firstError = $error;
 			}
 		}
-		return '';
+		return $firstError;
+	}
+
+	/**
+	 * Remove the Kubernetes resources of an ExApp, of every role for a multi-role ExApp
+	 *
+	 * @return string the error, empty on success
+	 */
+	public function removeExAppResources(DaemonConfig $daemonConfig, string $exAppName, bool $removeData = false): string {
+		$this->initGuzzleClient($daemonConfig);
+		$harpK8sUrl = $this->buildHarpK8sUrl($daemonConfig);
+		$roles = $this->exAppDeployOptionsService->getDeployOption($exAppName, 'k8s_service_roles')?->getValue() ?? [];
+		if ($roles !== []) {
+			return $this->removeAllRoles($harpK8sUrl, $exAppName, $roles, removeData: $removeData);
+		}
+		return $this->removeExApp($harpK8sUrl, $exAppName, removeData: $removeData);
 	}
 
 	private function buildNamePayload(string $exAppName, string $instanceId = '', string $roleSuffix = ''): array {

@@ -14,6 +14,7 @@ use OCA\AppAPI\Controller\ExAppsPageController;
 use OCA\AppAPI\Db\DaemonConfig;
 use OCA\AppAPI\Db\ExApp;
 use OCA\AppAPI\DeployActions\DockerActions;
+use OCA\AppAPI\DeployActions\KubernetesActions;
 use OCA\AppAPI\Fetcher\ExAppFetcher;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\DaemonConfigService;
@@ -40,6 +41,7 @@ class ExAppsPageControllerTest extends TestCase {
 	private IConfig&MockObject $config;
 	private IAppManager&MockObject $appManager;
 	private DockerActions&MockObject $dockerActions;
+	private KubernetesActions&MockObject $kubernetesActions;
 	private AppAPIService&MockObject $service;
 
 	protected function setUp(): void {
@@ -50,6 +52,8 @@ class ExAppsPageControllerTest extends TestCase {
 		$this->service = $this->createMock(AppAPIService::class);
 		$this->daemonConfigService = $this->createMock(DaemonConfigService::class);
 		$this->dockerActions = $this->createMock(DockerActions::class);
+		$this->kubernetesActions = $this->createMock(KubernetesActions::class);
+		$this->kubernetesActions->method('getAcceptsDeployId')->willReturn('kubernetes-install');
 		$categoryFetcher = $this->createMock(CategoryFetcher::class);
 		$this->l10nFactory = $this->createMock(IFactory::class);
 		$this->exAppFetcher = $this->createMock(ExAppFetcher::class);
@@ -65,6 +69,7 @@ class ExAppsPageControllerTest extends TestCase {
 			$this->service,
 			$this->daemonConfigService,
 			$this->dockerActions,
+			$this->kubernetesActions,
 			$categoryFetcher,
 			$this->l10nFactory,
 			$this->exAppFetcher,
@@ -260,6 +265,30 @@ class ExAppsPageControllerTest extends TestCase {
 		$this->dockerActions->method('removeExApp')->willReturn($removeExAppError);
 		$this->dockerActions->expects($removeData && !$isHarp ? self::once() : self::never())
 			->method('removeVolume')->willReturn($removeVolumeResult ?? []);
+		$this->exAppService->expects($logged ? self::once() : self::never())->method('logExAppDataDeleted')->with($exApp);
+		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('fake_app');
+
+		$this->controller->uninstallApp('fake_app', true, $removeData);
+	}
+
+	public static function uninstallKubernetesProvider(): array {
+		return [
+			'data removed' => [true, '', true],
+			'data kept' => [false, '', false],
+			'removal failed' => [true, 'Failed to remove K8s ExApp', false],
+		];
+	}
+
+	#[DataProvider('uninstallKubernetesProvider')]
+	public function testUninstallAppRemovesTheKubernetesResources(bool $removeData, string $removeError, bool $logged): void {
+		$exApp = new ExApp(['appid' => 'fake_app', 'daemon_config_name' => 'k8s_daemon', 'enabled' => 0]);
+		$daemonConfig = new DaemonConfig(['name' => 'k8s_daemon', 'accepts_deploy_id' => 'kubernetes-install', 'deploy_config' => ['harp' => ['exapp_direct' => true]]]);
+		$this->exAppService->method('getExApp')->with('fake_app')->willReturn($exApp);
+		$this->daemonConfigService->method('getDaemonConfigByName')->willReturn($daemonConfig);
+		$this->dockerActions->method('getAcceptsDeployId')->willReturn('docker-install');
+		$this->dockerActions->expects(self::never())->method('removeExApp');
+		$this->kubernetesActions->expects(self::once())->method('removeExAppResources')
+			->with($daemonConfig, 'fake_app', $removeData)->willReturn($removeError);
 		$this->exAppService->expects($logged ? self::once() : self::never())->method('logExAppDataDeleted')->with($exApp);
 		$this->exAppService->expects(self::once())->method('unregisterExApp')->with('fake_app');
 

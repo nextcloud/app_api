@@ -867,6 +867,10 @@ class AppAPIService {
 					if ($dataDeleted) {
 						$this->exAppService->logExAppDataDeleted($exApp);
 					}
+				} elseif ($daemonConfig->getAcceptsDeployId() === $this->kubernetesActions->getAcceptsDeployId()) {
+					if ($this->kubernetesActions->removeExAppResources($daemonConfig, $exApp->getAppid(), true) === '') {
+						$this->exAppService->logExAppDataDeleted($exApp);
+					}
 				}
 				$this->exAppService->unregisterExApp($exApp->getAppid());
 			}
