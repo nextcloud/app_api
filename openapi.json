@@ -621,6 +621,150 @@
                 }
             }
         },
+        "/ocs/v2.php/apps/app_api/api/v1/audit_log": {
+            "post": {
+                "operationId": "ocs_api-audit-log",
+                "summary": "Write an entry to the admin audit log on behalf of an ExApp",
+                "description": "The entry carries the ID of the ExApp as the `appId` parameter.",
+                "tags": [
+                    "ocs_api"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "operation",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "operation": {
+                                        "type": "string",
+                                        "description": "Stable identifier of the action in the form `<appId>.entity.action`, starting with the ID of the ExApp, e.g. `my_app.item.created`"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "description": "Message with a `%s` placeholder for each of the first parameters, in order"
+                                    },
+                                    "parameters": {
+                                        "type": "object",
+                                        "default": {},
+                                        "description": "Named values for the placeholders of the message, optionally followed by more context",
+                                        "additionalProperties": {
+                                            "nullable": true,
+                                            "anyOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "integer",
+                                                    "format": "int64"
+                                                },
+                                                {
+                                                    "type": "number",
+                                                    "format": "double"
+                                                },
+                                                {
+                                                    "type": "boolean"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "ex-app-id",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "OCS-APIRequest",
+                        "in": "header",
+                        "description": "Required to be true for the API request to pass",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Entry written to the audit log",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid operation, parameters or message",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ocs"
+                                    ],
+                                    "properties": {
+                                        "ocs": {
+                                            "type": "object",
+                                            "required": [
+                                                "meta",
+                                                "data"
+                                            ],
+                                            "properties": {
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/OCSMeta"
+                                                },
+                                                "data": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/ocs/v2.php/apps/app_api/api/v1/users": {
             "get": {
                 "operationId": "ocs_api-getnc-users-list",

@@ -12,6 +12,7 @@ namespace OCA\AppAPI\Controller;
 use OCA\AppAPI\AppInfo\Application;
 use OCA\AppAPI\Attribute\AppAPIAuth;
 use OCA\AppAPI\Attribute\MaintenanceModeAvailable;
+use OCA\AppAPI\AuditLog\AuditLogger;
 use OCA\AppAPI\Service\AppAPIService;
 use OCA\AppAPI\Service\ExAppService;
 use OCP\AppFramework\Http;
@@ -37,6 +38,7 @@ class OCSApiController extends OCSController {
 		private IConfig $config,
 		private readonly ExAppService $exAppService,
 		private readonly IURLGenerator $urlGenerator,
+		private readonly AuditLogger $auditLogger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -69,6 +71,32 @@ class OCSApiController extends OCSController {
 			$this->logger->error('Invalid log level');
 			throw new OCSBadRequestException('Invalid log level');
 		}
+	}
+
+	/**
+	 * Write an entry to the admin audit log on behalf of an ExApp
+	 *
+	 * The entry carries the ID of the ExApp as the `appId` parameter.
+	 *
+	 * @param string $operation Stable identifier of the action in the form `<appId>.entity.action`, starting with the ID of the ExApp, e.g. `my_app.item.created`
+	 * @param string $message Message with a `%s` placeholder for each of the first parameters, in order
+	 * @param array<string, string|int|float|bool|null> $parameters Named values for the placeholders of the message, optionally followed by more context
+	 *
+	 * @return DataResponse<Http::STATUS_OK, list<empty>, array{}>
+	 * @throws OCSBadRequestException Invalid operation, parameters or message
+	 *
+	 * 200: Entry written to the audit log
+	 */
+	#[AppAPIAuth]
+	#[PublicPage]
+	#[NoCSRFRequired]
+	public function auditLog(string $operation, string $message, array $parameters = []): DataResponse {
+		try {
+			$this->auditLogger->logForExApp($this->request->getHeader('ex-app-id'), $operation, $message, $parameters);
+		} catch (\InvalidArgumentException $e) {
+			throw new OCSBadRequestException($e->getMessage());
+		}
+		return new DataResponse();
 	}
 
 	/**

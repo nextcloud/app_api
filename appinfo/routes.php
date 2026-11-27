@@ -66,6 +66,7 @@ return [
 	'ocs' => [
 		// Logging
 		['name' => 'OCSApi#log', 'url' => '/api/v1/log', 'verb' => 'POST'],
+		['name' => 'OCSApi#auditLog', 'url' => '/api/v1/audit_log', 'verb' => 'POST'],
 
 		['name' => 'OCSApi#getNCUsersList', 'url' => '/api/v1/users', 'verb' => 'GET'],
 		['name' => 'OCSApi#setAppInitProgressDeprecated', 'url' => '/apps/status/{appId}', 'verb' => 'PUT'],
