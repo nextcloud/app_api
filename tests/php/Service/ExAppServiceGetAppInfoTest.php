@@ -28,6 +28,7 @@ use OCA\AppAPI\Service\UI\TopMenuService;
 use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IUserManager;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -77,12 +78,13 @@ class ExAppServiceGetAppInfoTest extends TestCase {
 		parent::tearDown();
 	}
 
-	private function writeInfoXml(string $environmentVariables): string {
+	private function writeInfoXml(string $environmentVariables, string $names = ''): string {
 		$this->infoXmlPath = tempnam(sys_get_temp_dir(), 'appapi-test-info-');
 		file_put_contents($this->infoXmlPath, <<<XML
 <?xml version="1.0"?>
 <info>
 	<id>test_app</id>
+$names
 	<external-app>
 		<environment-variables>
 $environmentVariables
@@ -91,6 +93,22 @@ $environmentVariables
 </info>
 XML);
 		return $this->infoXmlPath;
+	}
+
+	#[DataProvider('defaultNameElements')]
+	public function testLocalizedNamesUseTheDefaultFromInfoXml(string $defaultNameElement): void {
+		$infoXml = $this->writeInfoXml('', '<name lang="de">Deutscher Name</name>' . $defaultNameElement);
+
+		$appInfo = $this->service->getAppInfo('test_app', $infoXml, null);
+
+		self::assertSame('Default Name', $appInfo['name']);
+	}
+
+	public static function defaultNameElements(): array {
+		return [
+			'without language' => ['<name>Default Name</name>'],
+			'explicit English' => ['<name lang="en">Default Name</name>'],
+		];
 	}
 
 	public function testEmptyDefaultElementIsDroppedFromInfoXml(): void {
